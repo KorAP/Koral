@@ -1,0 +1,6 @@
+COSMAS:
+ - disjunctions with more than 2 arguments are parsed hiearchically by ANTLR grammar:
+   "A oder B oder C" becomes (simplified) "A|(B|C)" 
+ - distance operators are a little hard to process, using a stack of "distantTokenGroups" containing empty tokens to keep track of
+   the operators, insert the tokenGroups on top of this stack before second argument
+ - using stacks proves to be a good choice for tree processing  
