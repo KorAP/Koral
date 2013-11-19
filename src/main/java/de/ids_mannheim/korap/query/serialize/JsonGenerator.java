@@ -8,6 +8,9 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
+import de.ids_mannheim.korap.query.serialize.PoliqarpPlusTree;
+
 public class JsonGenerator {
 
 	ObjectMapper mapper;
@@ -19,9 +22,9 @@ public class JsonGenerator {
 
 	public void run(String outFile, String query, String queryLanguage) throws JsonGenerationException, JsonMappingException, IOException {
 		if (queryLanguage.equals("poliqarp")) {
-			ast = new PoliqarpTree(query);
-		} else if (queryLanguage.equals("cosmas")) {
-			ast = new CosmasTree(query);
+			ast = new PoliqarpPlusTree(query);
+//		} else if (queryLanguage.equals("cosmas")) {
+//			ast = new CosmasTree(query);
 		}
 		Map<String, Object> requestMap = ast.getRequestMap();
 		mapper.writeValue(new File(outFile), requestMap);
@@ -36,12 +39,17 @@ public class JsonGenerator {
 		 */
 		JsonGenerator jg = new JsonGenerator();
 		int i=0;
-		String[] queries = new String[] {
-				
+		String[] queries;
+		if (args.length==0) {
+			queries = new String[] {
 				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
 				"([base=foo]|[base=foo])[base=foobar]",
 				"[base=foo]([base=foo]|[base=foobar])",
 				};
+		} else {
+			queries = new String[] {args[0]};
+		}
+		
 		for (String q : queries) {
 			i++;
 			try {

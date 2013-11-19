@@ -4,8 +4,6 @@ import java.util.Map;
 
 public abstract class AbstractSyntaxTree {
 
-	String query;
-	
 	public abstract Map<String, Object> getRequestMap();
 
 	public abstract void process(String query);

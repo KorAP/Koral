@@ -19,8 +19,11 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import de.ids_mannheim.korap.query.poliqarp.PoliqarpLexer;
-import de.ids_mannheim.korap.query.poliqarp.PoliqarpParser;
+//import de.ids_mannheim.korap.query.poliqarp.PoliqarpLexer;
+//import de.ids_mannheim.korap.query.poliqarp.PoliqarpParser;
+import de.ids_mannheim.korap.query.PoliqarpLexer;
+import de.ids_mannheim.korap.query.PoliqarpParser;
+import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
 
 /**
  * Map representation of Poliqarp syntax tree as returned by ANTLR
@@ -81,7 +84,6 @@ public class PoliqarpTree extends AbstractSyntaxTree {
 	 * @param parser The ANTLR parser instance that generated the parse tree
 	 */
 	public PoliqarpTree(String query) {
-		this.query = query;
 		prepareContext();
 		process(query);
 		System.out.println(">>> "+requestMap+" <<<");
