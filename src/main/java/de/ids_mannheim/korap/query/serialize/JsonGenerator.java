@@ -20,11 +20,23 @@ public class JsonGenerator {
 		mapper = new ObjectMapper();
 	}
 
-	public void run(String outFile, String query, String queryLanguage) throws JsonGenerationException, JsonMappingException, IOException {
+	/**
+	 * Runs the JsonGenerator by initializing the relevant AbstractSyntaxTree implementation (depending on specified query language)
+	 * and transforms and writes the tree's requestMap to the specified output file.
+	 * @param outFile The file to which the serialization is written
+	 * @param query The query string
+	 * @param queryLanguage The query language. As of 13/11/20, this must be either 'poliqarp' or 'poliqarpplus'. Some extra maven stuff needs to done to support CosmasII ('cosmas') [that maven stuff would be to tell maven how to build the cosmas grammar and where to find the classes]
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+	public void run(String query, String queryLanguage, String outFile) throws JsonGenerationException, JsonMappingException, IOException {
 		if (queryLanguage.equals("poliqarp")) {
 			ast = new PoliqarpPlusTree(query);
 //		} else if (queryLanguage.equals("cosmas")) {
 //			ast = new CosmasTree(query);
+		} else if (queryLanguage.equals("poliqarpplus")) {
+			ast = new PoliqarpPlusTree(query);
 		}
 		Map<String, Object> requestMap = ast.getRequestMap();
 		mapper.writeValue(new File(outFile), requestMap);
