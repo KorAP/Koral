@@ -29,8 +29,8 @@
     </dependency>
     <dependency>
     	<groupId>org.antlr</groupId>
-    	<artifactId>antlr4-runtime</artifactId>
-    	<version>4.0</version>
+    	<artifactId>antlr4</artifactId>
+    	<version>4.1</version>
     	<classifier>complete</classifier>
     </dependency>
     <dependency>
