@@ -126,7 +126,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 
 	@Override
 	public Map<String, Object> getRequestMap() {
-		return this.requestMap;
+		return requestMap;
 	}
 	
 	@Override
@@ -362,7 +362,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		
 		if (nodeCat.equals("spanclass")) {
 			LinkedHashMap<String,Object> span = new LinkedHashMap<String,Object>();
-//			curObject = span;
 			objectStack.push(span);
 			ArrayList<Object> spanOperands = new ArrayList<Object>();
 			String id = "0";
@@ -370,7 +369,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			if (getNodeCat(node.getChild(1)).equals("spanclass_id")) {
 				id = node.getChild(1).getChild(0).toStringTree(poliqarpParser);
 				id = id.substring(0, id.length()-1); // remove trailing colon ':'
-				// only allow class ids up to 255
+				// only allow class id up to 255
 				if (Integer.parseInt(id)>255) {
 					id = "0";
 				}
@@ -381,15 +380,17 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			groupStack.push(spanOperands);
 			
 			// Step II: decide where to put the span
-			// add span to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the relevant info)
+			// add span to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the relevant info)
+			
 			if (node.getParent().getChildCount()>1) {
 				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.getFirst().get("operands");
 				topSequenceOperands.add(span);
 			} else if (openNodeCats.get(2).equals("query")) {
 				requestMap.put("query", span);	
 			} else if (groupStack.size()>1) {
-				groupStack.get(1).add(span);
+				groupStack.get(1).add(span); // second element because top element has been added here (spanOperands)
 			} 
+			objectStack.push(span);
 			
 		}
 		
@@ -417,8 +418,40 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			} 
 		}
 		
-		if (nodeCat.equals("shrink") || nodeCat.equals("split")) {
-			//TODO
+		if (nodeCat.equals("shrink")) {
+			LinkedHashMap<String,Object> shrinkGroup = new LinkedHashMap<String,Object>();
+			objectStack.push(shrinkGroup);
+			sequenceStack.push(shrinkGroup);
+			ArrayList<Object> shrinkOperands = new ArrayList<Object>();
+			// Step I: get info
+			String operandClass = "0";
+			String type = getNodeCat(node.getChild(0));
+			if (getNodeCat(node.getChild(2)).equals("spanclass_id")) {
+				operandClass = node.getChild(2).getChild(0).toStringTree(poliqarpParser);
+				operandClass = operandClass.substring(0, operandClass.length()-1); // remove trailing colon ':'
+				// only allow class id up to 255
+				if (Integer.parseInt(operandClass)>255) {
+					operandClass = "0";
+				}
+			}
+			
+			shrinkGroup.put("@type", "korap:group");
+			shrinkGroup.put(type, operandClass);
+			shrinkGroup.put("operands", shrinkOperands);
+			groupStack.push(shrinkOperands);
+			
+			// Step II: decide where to put the group
+			// add group to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the relevant info)
+			if (node.getParent().getChildCount()>1) {
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.getFirst().get("operands");
+				topSequenceOperands.add(shrinkGroup);
+			} else if (openNodeCats.get(2).equals("query")) {
+				requestMap.put("query", shrinkGroup);	
+			} else if (groupStack.size()>1) {
+				groupStack.get(1).add(shrinkGroup);
+			} 
+			
+			visited.add(node.getChild(0));
 		}
 		
 		// repetition of token group
@@ -500,6 +533,12 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			objectStack.pop();
 		}
 		
+		if (nodeCat.equals("shrink")) {
+			sequenceStack.pop();
+			objectStack.pop();
+		}
+		
+		
 		openNodeCats.pop();
 		
 	}
@@ -566,7 +605,11 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"{[base=foo]}[orth=bar]",
 //				"{[base=foo]}{[orth=bar]}",
 //				"{1:[base=foo]<np>}",
+				"{[base=foo]}[orth=bar]",
 				"shrink({[base=foo]}[orth=bar])",
+				"shrink(1:[base=Der]{1:[base=Mann]})",
+				"{[base=foo][orth=bar]}",
+//				"[base=der]shrink(1:[base=Der]{1:[base=Mann]})"
 //				"<np>",
 //				"startsWith({<sentence>},<np>)",
 //				"startsWith({<sentence>},[base=foo])",

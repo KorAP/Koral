@@ -37,6 +37,8 @@ public class JsonGenerator {
 //			ast = new CosmasTree(query);
 		} else if (queryLanguage.equals("poliqarpplus")) {
 			ast = new PoliqarpPlusTree(query);
+		} else {
+			throw new IllegalArgumentException(queryLanguage+ " is not a supported query language!");
 		}
 		Map<String, Object> requestMap = ast.getRequestMap();
 		mapper.writeValue(new File(outFile), requestMap);
@@ -54,9 +56,9 @@ public class JsonGenerator {
 		String[] queries;
 		if (args.length==0) {
 			queries = new String[] {
-				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
-				"([base=foo]|[base=foo])[base=foobar]",
-				"[base=foo]([base=foo]|[base=foobar])",
+					"shrink({[base=foo]})",
+					"shrink({[base=foo]}[orth=bar])",
+					"shrink(1:[base=Der]{1:[base=Mann]})",
 				};
 		} else {
 			queries = new String[] {args[0]};
@@ -66,7 +68,8 @@ public class JsonGenerator {
 			i++;
 			try {
 				System.out.println(q);
-				jg.run(System.getProperty("user.home")+"/test"+i+".json", q, "poliqarp");
+				jg.run(q, "poliqarp", System.getProperty("user.home")+"/bsp"+i+".json");
+				System.out.println();
 			} catch (NullPointerException npe) {
 				npe.printStackTrace();
 				System.out.println("null\n");

@@ -118,7 +118,7 @@ public class PoliqarpTree extends AbstractSyntaxTree {
 
 	@Override
 	public Map<String, Object> getRequestMap() {
-		return this.requestMap;
+		return requestMap;
 	}
 	
 	@Override
