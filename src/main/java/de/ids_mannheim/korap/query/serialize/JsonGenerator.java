@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
 import de.ids_mannheim.korap.query.serialize.PoliqarpPlusTree;
@@ -30,7 +30,8 @@ public class JsonGenerator {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public void run(String query, String queryLanguage, String outFile) throws JsonGenerationException, JsonMappingException, IOException {
+	public void run(String query, String queryLanguage, String outFile)
+            throws JsonGenerationException, JsonMappingException, IOException {
 		if (queryLanguage.equals("poliqarp")) {
 			ast = new PoliqarpPlusTree(query);
 //		} else if (queryLanguage.equals("cosmas")) {
