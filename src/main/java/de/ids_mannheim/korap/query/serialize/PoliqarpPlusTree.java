@@ -19,8 +19,6 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-//import de.ids_mannheim.korap.query.poliqarpplus.PoliqarpPlusLexer;
-//import de.ids_mannheim.korap.query.poliqarpplus.PoliqarpPlusParser;
 import de.ids_mannheim.korap.query.PoliqarpPlusLexer;
 import de.ids_mannheim.korap.query.PoliqarpPlusParser;
 import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
@@ -49,6 +47,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 */
 	boolean ignoreCq_segment = false;
 	/**
+	 *  Flag that indicates whether a cq_segments element is quantified by an occ element.
+	 */
+	boolean cqHasOcc = false;
+	/**
 	 * Parser object deriving the ANTLR parse tree.
 	 */
 	static Parser poliqarpParser;
@@ -62,21 +64,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 */
 	LinkedList<ArrayList<Object>> fieldStack = new LinkedList<ArrayList<Object>>();
 	/**
-	 * Keeps track of active sequences.
-	 */
-	LinkedList<LinkedHashMap<String,Object>> sequenceStack = new LinkedList<LinkedHashMap<String,Object>>();
-	/**
 	 * Keeps track of active tokens.
 	 */
 	LinkedList<LinkedHashMap<String,Object>> tokenStack = new LinkedList<LinkedHashMap<String,Object>>();
-	/**
-	 * Keeps track of sequence/token/field groups.
-	 */
-	LinkedList<ArrayList<Object>> groupStack = new LinkedList<ArrayList<Object>>();
-	/**
-	 * Marks the currently active object (sequence/token/group...) in order to know where to add stuff like occurrence info etc.
-	 */
-//	LinkedHashMap<String,Object> curObject = new LinkedHashMap<String,Object>();
 	/**
 	 * Marks the currently active token in order to know where to add flags (might already have been taken away from token stack).
 	 */
@@ -84,9 +74,17 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	/**
 	 * Keeps track of active object.
 	 */
-	LinkedList<Object> objectStack = new LinkedList<Object>();
+	LinkedList<LinkedHashMap<String,Object>> objectStack = new LinkedList<LinkedHashMap<String,Object>>();
+	/**
+	 * Marks the object to which following occurrence information is to be added.
+	 */
+	LinkedHashMap<String,Object> curOccGroup = new LinkedHashMap<String,Object>();
 	
 	/**
+	 * Most centrally, this class maintains a set of nested maps and lists which represent the JSON tree, which is built by the JSON serialiser
+	 * on basis of the {@link #requestMap} at the root of the tree. 
+	 * <br/>
+	 * The class further maintains a set of stacks which effectively keep track of which objects to embed in which containing objects. 
 	 * 
 	 * @param tree The syntax tree as returned by ANTLR
 	 * @param parser The ANTLR parser instance that generated the parse tree
@@ -136,6 +134,15 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		processNode(tree);
 	}
 	
+	/**
+	 * Recursively calls itself with the children of the currently active node, traversing the tree nodes in a top-down, depth-first fashion. 
+	 * A list is maintained that contains all visited nodes 
+	 * in case they have been directly addressed by its (grand-/grand-grand-/...) parent node, such that some processing time is saved, as these node will
+	 * not be processed. This method is effectively a list of if-statements that are responsible for treating the different node types correctly and filling the
+	 * respective maps/lists.
+	 *
+	 * @param node The currently processed node. The process(String query) method calls this method with the root.
+	 */
 	@SuppressWarnings("unchecked")
 	private void processNode(ParseTree node) {
 		// Top-down processing
@@ -145,6 +152,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		String nodeCat = getNodeCat(node);
 		openNodeCats.push(nodeCat);
 		
+//		System.err.println(objectStack);
 //		System.out.println(openNodeCats);
 //		System.out.println(" "+requestMap.get("query")+"");
 		
@@ -161,40 +169,89 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 
 		// cq_segments/sq_segments: token group
 		if (nodeCat.equals("cq_segments") || nodeCat.equals("sq_segments")) {
+			cqHasOcc = false;
 			// disregard empty segments in simple queries (parsed by ANTLR as empty cq_segments) 
-			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position")));
-//			ignoreCq_segment = (node.getChildCount() == 1 && node.getChild(0).toStringTree(poliqarpParser).equals(" ") && getNodeCat(node.getChild(0)).equals("spanclass") );
+//			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position")));
+			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ")) );
 			if (!ignoreCq_segment) {
 				LinkedHashMap<String,Object> sequence = new LinkedHashMap<String,Object>();
 				objectStack.push(sequence);
+				// Step 0:  cq_segments has 'occ' child -> introduce group as super group to the sequence/token/group
+				// this requires creating a group and inserting it at a suitable place
+				if (getNodeCat(node.getChild(node.getChildCount()-1)).equals("occ")) {
+					cqHasOcc = true;
+					LinkedHashMap<String,Object> occGroup = new LinkedHashMap<String,Object>();
+					occGroup.put("@type", "korap:group");
+					ArrayList<Object> groupOperands = new ArrayList<Object>();
+					occGroup.put("operands", groupOperands);
+					curOccGroup = occGroup;
+					objectStack.push(occGroup);
+					if (openNodeCats.get(1).equals("query")) {
+						// top query node
+						if (node.getParent().getChildCount() == 1) {
+							requestMap.put("query", occGroup);
+						} else {
+							// create containing sequence and embed there
+							LinkedHashMap<String,Object> superSequence = new LinkedHashMap<String,Object>();
+							superSequence.put("@type", "korap:sequence");
+							ArrayList<Object> operands = new ArrayList<Object>();
+							operands.add(occGroup);
+							superSequence.put("operands", operands);
+							requestMap.put("query", superSequence);
+							objectStack.add(1, superSequence); // add at 2nd position to keep current cq_segment accessible
+						}
+					} else if (!objectStack.isEmpty()){
+						// embed in super sequence
+						ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+						topSequenceOperands.add(occGroup);
+					}
+				}
 				// Step I: decide type of element (one or more elements? -> token or sequence)
-				if (node.getChildCount()>1) {
+				// take into account a possible 'occ' child
+				int occExtraChild = cqHasOcc ? 1:0;
+				if (node.getChildCount()>1+occExtraChild) {
 					sequence.put("@type", "korap:sequence");
 					ArrayList<Object> sequenceOperands = new ArrayList<Object>();
 					sequence.put("operands", sequenceOperands);
 				} else {
-					if (openNodeCats.get(1).equals("position") || openNodeCats.get(1).equals("spanclass")) {
-						sequence.put("@type", "korap:group");
-					} else {
-						// if only child, make the sequence a mere korap:token
-						sequence.put("@type", "korap:token");
-					}
+					// if only child, make the sequence a mere korap:token
+					sequence.put("@type", "korap:token");
 					tokenStack.push(sequence);
 				}
-				// Step II: decide where to put this element (top query node or embedded in super sequence?)
-				if (openNodeCats.get(1).equals("query")) {
-					// top query node
-					requestMap.put("query", sequence);
-				} else if (!groupStack.isEmpty()) {
-					// embed in super group
-					ArrayList<Object> topGroupOperands = (ArrayList<Object>) groupStack.getFirst();
+				// Step II: decide where to put this element 
+				// check if this is an argument for a containing occurrence group (see step 0)
+				if (cqHasOcc) {
+					ArrayList<Object> topGroupOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
 					topGroupOperands.add(sequence);
-				} else if (!sequenceStack.isEmpty()){
-					// embed in super sequence
-					ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.getFirst().get("operands");
-					topSequenceOperands.add(sequence);
+				// ...if not modified by occurrence, put into suitable super structure
+				} else {
+					if (openNodeCats.get(1).equals("query")) {
+						// top query node
+						if (node.getParent().getChildCount()==1) {
+							// only child
+							requestMap.put("query", sequence);
+						} else {
+							// not an only child, need to create containing sequence
+							if (node.getParent().getChild(0).equals(node)) {
+								// if first child, create containing sequence and embed there
+								LinkedHashMap<String,Object> superSequence = new LinkedHashMap<String,Object>();
+								superSequence.put("@type", "korap:sequence");
+								ArrayList<Object> operands = new ArrayList<Object>();
+								superSequence.put("operands", operands);
+								requestMap.put("query", superSequence);
+								objectStack.add(1, superSequence); // add at 2nd position to keep current cq_segment accessible
+							} else {
+								// if not first child, add to previously created parent sequence
+								ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+								topSequenceOperands.add(sequence);
+							}
+						}
+					} else if (!objectStack.isEmpty()){
+						// embed in super sequence
+						ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+						topSequenceOperands.add(sequence);
+					}
 				}
-				sequenceStack.push(sequence);
 			}
 		}
 		
@@ -211,12 +268,13 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			}
 			curToken = token;
 			objectStack.push(token);
-			
 			// Step II: start filling object and add to containing sequence
 			token.put("@type", "korap:token");
 			// add token to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the values from "field")
-			if (node.getParent().getChildCount()>1) {
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.getFirst().get("operands");
+			// take into account a possible 'occ' child
+			int occExtraChild = cqHasOcc ? 1:0;
+			if (node.getParent().getChildCount()>1+occExtraChild) {
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1+occExtraChild).get("operands");
 				topSequenceOperands.add(token);
 			}
 		}
@@ -229,13 +287,12 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			disjunction.put("@type", "korap:group");
 			disjunction.put("relation", "or");
 			disjunction.put("operands", disjOperands);
-			groupStack.push(disjOperands);
-			
+			objectStack.push(disjunction);
 			// decide where to put the disjunction
 			if (openNodeCats.get(1).equals("query")) {
 				requestMap.put("query", disjunction);	
 			} else if (openNodeCats.get(1).equals("cq_segments")) {
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.getFirst().get("operands");
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 				topSequenceOperands.add(disjunction);
 			}
 		}
@@ -243,7 +300,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		// field element (outside meta)
 		if (nodeCat.equals("field")) {
 			LinkedHashMap<String,Object> fieldMap = new LinkedHashMap<String,Object>();
-
 			// Step I: extract info
 			String featureName = node.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (field_name base) (field_op !=) (re_query "bar*")
 			String relation = node.getChild(1).getChild(0).toStringTree(poliqarpParser);
@@ -259,7 +315,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			}
 			fieldMap.put("@value", featureName+":"+value);
 			fieldMap.put("relation", relation);
-
 			// Step II: decide where to put the field map (as the only value of a token or the meta filter or as a part of a group in case of coordinated fields)
 			if (fieldStack.isEmpty()) {
 				if (!inMeta) {
@@ -279,11 +334,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		if (nodeCat.equals("conj_field")) {
 			LinkedHashMap<String,Object> group = new LinkedHashMap<String,Object>(); 
 			ArrayList<Object> groupOperands = new ArrayList<Object>();
-			
 			group.put("@type", "korap:group");
 			group.put("operands", groupOperands);
 			fieldStack.push(groupOperands);
-			
 			// Step I: get operator (& or |)
 			ParseTree operatorNode = node.getChild(1).getChild(0);
 			String operator = getNodeCat(operatorNode);
@@ -292,7 +345,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			} else if (operator.equals("&")) {
 				group.put("relation", "and");
 			}
-			
 			// Step II: decide where to put the group (directly under token or in top meta filter section or embed in super group)
 			if (openNodeCats.get(1).equals("cq_segment")) {
 				tokenStack.getFirst().put("@value", group);
@@ -325,10 +377,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			token.put("@value", tokenValues);
 			tokenValues.put("orth", word);
 			tokenValues.put("relation", "=");
-			
 			// add token to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the values from "field")
 			if (node.getParent().getChildCount()>1) {
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.getFirst().get("operands");
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 				topSequenceOperands.add(token);
 			}
 		}
@@ -350,7 +401,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			elem.put("@value", value);
 			// add token to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the values from "field")
 			if (node.getParent().getChildCount()>1) {
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.getFirst().get("operands");
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 				topSequenceOperands.add(elem);
 			}
 		}
@@ -372,21 +423,20 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			span.put("@type", "korap:group");
 			span.put("class", id);
 			span.put("operands", spanOperands);
-			groupStack.push(spanOperands);
-			
 			// Step II: decide where to put the span
 			// add span to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the relevant info)
-			
-			if (node.getParent().getChildCount()>1) {
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.getFirst().get("operands");
-				topSequenceOperands.add(span);
-			} else if (openNodeCats.get(2).equals("query")) {
+//			if (node.getParent().getChildCount()>4) {
+//				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+//				topSequenceOperands.add(span);
+//			} else
+			if (openNodeCats.get(2).equals("query")) {
 				requestMap.put("query", span);	
-			} else if (groupStack.size()>1) {
-				groupStack.get(1).add(span); // second element because top element has been added here (spanOperands)
+			} else if (objectStack.size()>1) {
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+				topSequenceOperands.add(span); 
+				
 			} 
 			objectStack.push(span);
-			
 		}
 		
 		if (nodeCat.equals("position")) {
@@ -396,26 +446,24 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			// Step I: get info
 			String relation = getNodeCat(node.getChild(0));
 			positionGroup.put("@type", "korap:group");
-			positionGroup.put("relation", relation.toLowerCase());
+			positionGroup.put("relation", "position");
+			positionGroup.put("position", relation.toLowerCase());
 			positionGroup.put("operands", posOperands);
-			groupStack.push(posOperands);
-			
 			// Step II: decide where to put the group
 			// add group to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the relevant info)
 			if (node.getParent().getChildCount()>1) {
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.getFirst().get("operands");
-				topSequenceOperands.add(positionGroup);
+				
 			} else if (openNodeCats.get(2).equals("query")) {
 				requestMap.put("query", positionGroup);	
-			} else if (groupStack.size()>1) {
-				groupStack.get(1).add(positionGroup);
+			} else if (objectStack.size()>1) {
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+				topSequenceOperands.add(positionGroup); 
 			} 
 		}
 		
 		if (nodeCat.equals("shrink")) {
 			LinkedHashMap<String,Object> shrinkGroup = new LinkedHashMap<String,Object>();
 			objectStack.push(shrinkGroup);
-			sequenceStack.push(shrinkGroup);
 			ArrayList<Object> shrinkOperands = new ArrayList<Object>();
 			// Step I: get info
 			String operandClass = "0";
@@ -428,25 +476,32 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 					operandClass = "0";
 				}
 			}
-			
 			shrinkGroup.put("@type", "korap:group");
+			shrinkGroup.put("relation", "shrink");
 			shrinkGroup.put(type, operandClass);
 			shrinkGroup.put("operands", shrinkOperands);
-			groupStack.push(shrinkOperands);
-			
+			int i=1;
+			// check if sequence below this and, if so, insert
+			if (hasChild(node,"cq_segments")) {
+				i++;
+				LinkedHashMap<String,Object> subSequence = new LinkedHashMap<String,Object>();
+				subSequence.put("@type", "korap:sequence");
+				ArrayList<Object> subSequenceOperands = new ArrayList<Object>();
+				subSequence.put("operands", subSequenceOperands);
+				shrinkOperands.add(subSequence);
+				objectStack.push(subSequence);
+			}
 			// Step II: decide where to put the group
 			// add group to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the relevant info)
 			if (node.getParent().getChildCount()>1) {
-				System.err.println("WAAAAH");
-				System.err.println(sequenceStack);
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) sequenceStack.get(1).get("operands"); // this shrinkGroup is on top
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(i).get("operands"); // this shrinkGroup is on top
 				topSequenceOperands.add(shrinkGroup);
 			} else if (openNodeCats.get(2).equals("query")) {
 				requestMap.put("query", shrinkGroup);	
-			} else if (groupStack.size()>1) {
-				groupStack.get(1).add(shrinkGroup);
+			} else if (objectStack.size()>1) {
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(i).get("operands");
+				topSequenceOperands.add(shrinkGroup); 
 			} 
-			
 			visited.add(node.getChild(0));
 		}
 		
@@ -454,8 +509,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		if (nodeCat.equals("occ")) {
 			ParseTree occChild = node.getChild(0);
 			String repetition = occChild.toStringTree(poliqarpParser);
-			LinkedHashMap<String,Object> curObject = (LinkedHashMap<String, Object>) objectStack.getFirst();
-			curObject.put("repetition", repetition);
+			curOccGroup.put("relation", "repetition");
+			curOccGroup.put("quantifier", repetition);
 			visited.add(occChild);
 		}
 				
@@ -485,7 +540,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			visited.add(domainNode);
 		}
 		
-//		System.out.println(">>> "+requestMap.get("query")+" <<<");
 		/*
 		 ****************************************************************
 		 **************************************************************** 
@@ -501,15 +555,12 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		// Stuff that happens when leaving a node (taking it off the stack)
 		if (nodeCat.equals("cq_segments") || nodeCat.equals("sq_segments")) {
 			// exclude whitespaces analysed as empty cq_segments
-			if (!ignoreCq_segment && !sequenceStack.isEmpty()) {
-//			if (!ignoreCq_segment) {	
-				sequenceStack.pop();
+			if (!ignoreCq_segment && !objectStack.isEmpty()) {
 				objectStack.pop();
 			}
 		}
 		
 		if (nodeCat.equals("cq_disj_segments")) {
-			groupStack.pop();
 			objectStack.pop();
 		}
 		
@@ -523,22 +574,18 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		}
 		
 		if (nodeCat.equals("position") || nodeCat.equals("spanclass")) {
-			groupStack.pop();
 			objectStack.pop();
 		}
 		
 		if (nodeCat.equals("shrink")) {
-			sequenceStack.pop();
 			objectStack.pop();
 		}
 		
-		
 		openNodeCats.pop();
-		
 	}
 
 	/**
-	 * Returns the category (or 'label') of the root of a ParseTree.
+	 * Returns the category (or 'label') of the root of a (sub-)ParseTree.
 	 * @param node
 	 * @return
 	 */
@@ -550,6 +597,21 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			nodeCat = m.group(1);
 		} 
 		return nodeCat;
+	}
+	
+	/**
+	 * Tests whether a certain node has a child by a certain name
+	 * @param node The parent node.
+	 * @param childCat The category of the potential child.
+	 * @return true iff one or more children belong to the specified category
+	 */
+	private boolean hasChild(ParseTree node, String childCat) {
+		for (int i=0; i<node.getChildCount(); i++) {
+			if (getNodeCat(node.getChild(i)).equals(childCat)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private static ParserRuleContext parsePoliqarpQuery (String p) {
@@ -593,7 +655,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"[base=bar|base=foo]",
 //				"[base=bar]",
 //				"[base=foo][base=bar]",
-//				"[(base=bar|base=foo)&orth=wee]",
+				"[(base=bar|base=foo)&orth=wee]",
 //				"[base=foo/i][base=bar]{2,4}",
 //				"foo bar/i",
 //				"{[base=foo]}[orth=bar]",
@@ -603,7 +665,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				"shrink({[base=foo]})",
 				"shrink({[base=foo]})[orth=bar]",
 				"[orth=bar]shrink({[base=foo]})",
-//				"shrink(1:[base=Der]{1:[base=Mann]})",
+				"[base=foo]*[base=bar]",
+				"([base=foo][base=bar])*",
+				"shrink(1:[base=Der]{1:[base=Mann]})",
+//				"shrink(1:{[base=Der][base=Mann]})",
 //				"{[base=foo][orth=bar]}",
 //				"[base=der]shrink(1:[base=Der]{1:[base=Mann]})"
 //				"<np>",

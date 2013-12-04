@@ -60,6 +60,7 @@ public class JsonGenerator {
 					"shrink({[base=foo]})",
 					"shrink({[base=foo]}[orth=bar])",
 					"shrink(1:[base=Der]{1:[base=Mann]})",
+					"([base=foo][base=bar])*",
 				};
 		} else {
 			queries = new String[] {args[0]};
