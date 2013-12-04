@@ -51,6 +51,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 */
 	boolean cqHasOcc = false;
 	/**
+	 * Flag for negation of complete field
+	 */
+	boolean negField = false;
+	/**
 	 * Parser object deriving the ANTLR parse tree.
 	 */
 	static Parser poliqarpParser;
@@ -143,7 +147,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	@Override
 	public void process(String query) {
 		ParseTree tree = parsePoliqarpQuery(query);
-		System.out.println("Processing Poliqarp");
+		System.out.println("Processing PoliqarpPlus");
 		processNode(tree);
 	}
 	
@@ -168,7 +172,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		Integer stackedObjects = 0;
 		Integer stackedTokens= 0;
 		Integer stackedFields = 0;
-		
+//		
 //		System.err.println(objectStack);
 //		System.out.println(openNodeCats);
 //		System.out.println(" "+requestMap.get("query")+"");
@@ -230,7 +234,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 						}
 					} else if (!objectStack.isEmpty()){
 						// embed in super sequence
-						ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+						int occExtraChild = cqHasOcc ? 1:0;
+						ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1+occExtraChild).get("operands");
 						topSequenceOperands.add(occGroup);
 					}
 				}
@@ -294,13 +299,14 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				token = new LinkedHashMap<String, Object>();
 				tokenStack.push(token);
 				stackedTokens++;
+				// do this only if token is newly created, otherwise it'll be in objectStack twice
+				objectStack.push(token);
+				stackedObjects++;
 			} else {
 				// in case cq_segments has already added the token
 				token = tokenStack.getFirst();
 			}
 			curToken = token;
-			objectStack.push(token);
-			stackedObjects++;
 			// Step II: start filling object and add to containing sequence
 			token.put("@type", "korap:token");
 			// add token to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the values from "field")
@@ -336,6 +342,13 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			// Step I: extract info
 			String featureName = node.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (field_name base) (field_op !=) (re_query "bar*")
 			String relation = node.getChild(1).getChild(0).toStringTree(poliqarpParser);
+			if (negField) {
+				if (relation.startsWith("!")) {
+					relation = relation.substring(1);
+				} else {
+					relation = "!"+relation;
+				}
+			}
 			String value = "";
 			ParseTree valNode = node.getChild(2);
 			String valType = getNodeCat(valNode);
@@ -363,6 +376,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			visited.add(node.getChild(2));
 		}
 		
+		if (nodeCat.equals("neg_field") || nodeCat.equals("neg_field_group")) {
+			negField=!negField;
+		}
+		
 		// conj_field serves for both conjunctions and disjunctions
 		if (nodeCat.equals("conj_field")) {
 			LinkedHashMap<String,Object> group = new LinkedHashMap<String,Object>(); 
@@ -374,18 +391,20 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			// Step I: get operator (& or |)
 			ParseTree operatorNode = node.getChild(1).getChild(0);
 			String operator = getNodeCat(operatorNode);
-			if (operator.equals("|")) {
-				group.put("relation", "or");
-			} else if (operator.equals("&")) {
-				group.put("relation", "and");
+			String relation = operator.equals("&") ? "and" : "or";
+			if (negField) {
+				relation = relation.equals("or") ? "and": "or";
 			}
+			group.put("relation", relation);
 			// Step II: decide where to put the group (directly under token or in top meta filter section or embed in super group)
 			if (openNodeCats.get(1).equals("cq_segment")) {
 				tokenStack.getFirst().put("@value", group);
 			} else if (openNodeCats.get(1).equals("meta_field_group")) {
 				((HashMap<String, Object>) requestMap.get("meta")).put("@value", group);
-			} else {
+			} else if (openNodeCats.get(2).equals("conj_field")) {
 				fieldStack.get(1).add(group);
+			} else {
+				tokenStack.getFirst().put("@value", group);
 			}
 			// skip the operator
 			visited.add(node.getChild(1));
@@ -418,6 +437,30 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 				topSequenceOperands.add(token);
 			}
+		}
+		
+		if (nodeCat.equals("re_query")) {
+			LinkedHashMap<String,Object> reQuery = new LinkedHashMap<String,Object>();
+			reQuery.put("@subtype", "korap:regex");
+			String regex = node.getChild(0).toStringTree(poliqarpParser);
+			reQuery.put("@value", regex);
+			reQuery.put("relation", "=");
+			
+			if (!openNodeCats.get(1).equals("field")) {
+				LinkedHashMap<String,Object> token = new LinkedHashMap<String,Object>();
+				token.put("@type", "korap:token");
+				token.put("@value", reQuery);
+				reQuery.put("type", "korap:term");
+				
+				if (openNodeCats.get(1).equals("query")) {
+					requestMap.put("query", token);
+				} else {
+					ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+					topSequenceOperands.add(token);
+				}
+			} 
+//			ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
+//			topSequenceOperands.add(reQuery);
 		}
 		
 		if (nodeCat.equals("element")) {
@@ -594,6 +637,11 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			processNode(child);
 		}
 				
+		// set negField back 
+		if (nodeCat.equals("neg_field") || nodeCat.equals("neg_field_group")) {
+			negField = !negField;
+		}
+		
 		// Stuff that happens when leaving a node (taking items off the stacks)
 		for (int i=0; i<objectsToPop.get(0); i++) {
 			objectStack.pop();
@@ -607,36 +655,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			fieldStack.pop();
 		}
 		fieldsToPop.pop();
-		
-//		// Stuff that happens when leaving a node (taking it off the stack)
-//		if (nodeCat.equals("cq_segments") || nodeCat.equals("sq_segments")) {
-//			// exclude whitespaces analysed as empty cq_segments
-//			if (!ignoreCq_segment && !objectStack.isEmpty()) {
-//				objectStack.pop();
-//			}
-//		}
-//		
-//		if (nodeCat.equals("cq_disj_segments")) {
-//			objectStack.pop();
-//		}
-//		
-//		if (nodeCat.equals("cq_segment") || nodeCat.equals("sq_segment")){
-//			tokenStack.pop();
-//			objectStack.pop();
-//		}
-//		
-//		if (nodeCat.equals("conj_field")) {
-//			fieldStack.pop();
-//		}
-//		
-//		if (nodeCat.equals("position") || nodeCat.equals("spanclass")) {
-//			objectStack.pop();
-//		}
-//		
-//		if (nodeCat.equals("shrink")) {
-//			objectStack.pop();
-//		}
-		
 		openNodeCats.pop();
 	}
 
@@ -705,33 +723,45 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[] {
-//				"[base=foo]|([base=foo][base=bar])*",
-//				"([base=foo]|[base=bar])[base=foobar]",
-//				"[base=foo]([base=bar]|[base=foobar/i])",
-//				"[base=bar|base=foo]",
-//				"[base=bar]",
-//				"[base=foo][base=bar]",
+				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
+				"([base=foo]|[base=bar])[base=foobar]",
+				"shrink({[base=Mann]})",
+				"shrink({[base=foo]}[orth=bar])",
+				"shrink(1:[base=Der]{1:[base=Mann]})",
+				"[base=foo]|([base=foo][base=bar])*",
+				"([base=foo]|[base=bar])[base=foobar]",
+				"[base=foo]([base=bar]|[base=foobar/i])",
+				"[base=bar|base=foo]",
+				"[base=bar]",
+				"[base=foo][base=bar]",
 				"[(base=bar|base=foo)&orth=wee]",
-//				"[base=foo/i][base=bar]{2,4}",
-//				"foo bar/i",
-//				"{[base=foo]}[orth=bar]",
-//				"{[base=foo]}{[orth=bar]}",
-//				"{1:[base=foo]<np>}",
-//				"{[base=foo]}[orth=bar]",
+				"[base=foo/i][base=bar]{2,4}",
+				"foo bar/i",
+				"{[base=foo]}[orth=bar]",
+				"{[base=foo]}{[orth=bar]}",
+				"{1:[base=foo]<np>}",
+				"{[base=foo]}[orth=bar]",
 				"shrink({[base=foo]})",
 				"shrink({[base=foo]})[orth=bar]",
 				"[orth=bar]shrink({[base=foo]})",
 				"[base=foo]*[base=bar]",
 				"([base=foo][base=bar])*",
 				"shrink(1:[base=Der]{1:[base=Mann]})",
-//				"shrink(1:{[base=Der][base=Mann]})",
-//				"{[base=foo][orth=bar]}",
-//				"[base=der]shrink(1:[base=Der]{1:[base=Mann]})"
-//				"<np>",
+				"[base=foo]<np>",
+				"[base!=foo]",
+				"[base=foo&orth=bar]",
+				"[!(base=foo&orth=bar)]",
+				"'vers{2,3}uch'",
+				"[orth='vers*ch']",
+				"shrink(1:{[base=Der][base=Mann]})",
+				"{[base=foo][orth=bar]}",
+				"[base=der]shrink(1:[base=Der]{1:[base=Mann]})",
+				"<np>",
 //				"startsWith({<sentence>},<np>)",
 //				"startsWith({<sentence>},[base=foo])",
-//				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
-//				"([base=foo][base=bar])*",
+				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
+				"([base=foo][base=bar])*",
+				"[(base=bar|base=foo)&orth=foobar]",
 				};
 		for (String q : queries) {
 			try {

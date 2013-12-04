@@ -57,10 +57,31 @@ public class JsonGenerator {
 		String[] queries;
 		if (args.length==0) {
 			queries = new String[] {
-					"shrink({[base=foo]})",
+					/*
+					 * negation
+					 * elemente
+					 * within
+					 * regex
+					 * & field_group
+					 */
+					"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
+					"([base=foo]|[base=bar])[base=foobar]",
+					"shrink({[base=Mann]})",
 					"shrink({[base=foo]}[orth=bar])",
 					"shrink(1:[base=Der]{1:[base=Mann]})",
-					"([base=foo][base=bar])*",
+					
+					"[base=Katze]",
+					"[base!=Katze]",
+					"[!base=Katze]",
+					"[base=Katze&orth=Katzen]",
+					"[base=Katze][orth=und][orth=Hunde]",
+					"[!(base=Katze&orth=Katzen)]",
+					"contains(<np>,[base=Mann])",
+					"startswith(<np>,[!pos=Det])",
+					"'vers{2,3}uch'",
+					"[orth='vers.*ch']",
+					"[(base=bar|base=foo)&orth=foobar]",
+					
 				};
 		} else {
 			queries = new String[] {args[0]};
