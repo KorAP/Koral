@@ -611,7 +611,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			metaFilter.put("@type", "korap:meta");
 		}
 		
-		if (nodeCat.equals("within")) {
+		if (nodeCat.equals("within") && !getNodeCat(node.getParent()).equals("position")) {
 			ParseTree domainNode = node.getChild(2);
 			String domain = getNodeCat(domainNode);
 			LinkedHashMap<String,Object> curObject = (LinkedHashMap<String, Object>) objectStack.getFirst();
@@ -762,6 +762,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
 				"([base=foo][base=bar])*",
 				"[(base=bar|base=foo)&orth=foobar]",
+				"contains(<np>,[base=foo])",
+//				"[base=foo] within s",
+				"within(<np>,[base=foo])"
 				};
 		for (String q : queries) {
 			try {
