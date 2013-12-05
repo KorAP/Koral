@@ -65,7 +65,7 @@ public class MetaQuerySerializer {
     // only handles AND relation between query attributes and values!
     // value pair : pubdate=<date>, pubPlace=<place>, etc.
     public List serializeQueries(Map<String, String> queries, TYPE type) {
-        boolean extend, single = true;
+        boolean extend, single = true; //single = true;
         boolean multypes = queries.keySet().size() > 1;
         List<Map> metavalue;
         String def_key = null;
@@ -150,7 +150,6 @@ public class MetaQuerySerializer {
 
 
         // todo: missing: - takes only one resource, but resources can be chained!
-        // only filters, no extension
         if (single) {
             if (extend)
                 metavalue = Arrays.asList(types.createMetaExtend((Map) value.get(0)));

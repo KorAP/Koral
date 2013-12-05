@@ -31,7 +31,7 @@ public class MetaTypes {
         Map kgroup = new LinkedHashMap<>();
         kgroup.put("@type", "korap:group");
         if (field != null)
-            kgroup.put("field", "korap:field#" + field);
+            kgroup.put("@field", "korap:field#" + field);
         kgroup.put("relation", relation);
         kgroup.put("operands", terms);
         return kgroup;
@@ -43,9 +43,9 @@ public class MetaTypes {
             type = "korap:term";
         term.put("@type", type);
         if (field != null)
-            term.put("field", "korap:field#" + field);
+            term.put("@field", "korap:field#" + field);
         if (subtype != null)
-            term.put("subtype", "korap:value#" + subtype);
+            term.put("@subtype", "korap:value#" + subtype);
         term.put("@value", value);
         return term;
     }
