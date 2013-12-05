@@ -54,9 +54,28 @@ public class MetaQuerySerializationTest {
     public void testDates() throws IOException {
         Map<String, String> queries = new LinkedHashMap<>();
         queries.put("<pubDate", String.valueOf(new DateTime().getMillis()));
-        queries.put(">pubDate", String.valueOf(new DateTime().getMillis()+2));
+        queries.put(">pubDate", String.valueOf(new DateTime().getMillis() + 2));
         queries.put("author", "Goethe");
         String f = querySerializer.stringify(queries, MetaQuerySerializer.TYPE.FILTER);
-        System.out.println("value : "+ f);
+//        System.out.println("value : "+ f);
     }
+
+    @Test
+    public void testUntil() throws IOException {
+        Map<String, String> queries = new LinkedHashMap<>();
+        queries.put(">pubDate", String.valueOf(new DateTime().getMillis()));
+        queries.put("author", "Hesse");
+        String f = querySerializer.stringify(queries, MetaQuerySerializer.TYPE.FILTER);
+        System.out.println("value until : " + f);
+    }
+
+    @Test
+    public void testSince() throws IOException {
+        Map<String, String> queries = new LinkedHashMap<>();
+        queries.put("<pubDate", String.valueOf(new DateTime().getMillis()));
+        queries.put("author", "Kafka");
+        String f = querySerializer.stringify(queries, MetaQuerySerializer.TYPE.FILTER);
+        System.out.println("value since : " + f);
+    }
+
 }

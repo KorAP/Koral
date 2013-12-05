@@ -19,6 +19,39 @@ import java.util.*;
 public class MetaQuerySerializer {
 
 
+    private String metaString = "{\n" +
+            "    \"meta\": [\n" +
+            "        {\n" +
+            "            \"@type\": \"korap:meta-filter\",\n" +
+            "            \"@value\": {\n" +
+            "                \"@type\": \"korap:group\",\n" +
+            "                \"relation\": \"and\",\n" +
+            "                \"operands\": [\n" +
+            "                    {\n" +
+            "                        \"@type\": \"korap:term\",\n" +
+            "                        \"field\": \"korap:field#author\",\n" +
+            "                        \"@value\": \"Goethe\"\n" +
+            "                    },\n" +
+            "                    {\n" +
+            "                        \"@type\": \"korap:group\",\n" +
+            "                        \"field\": \"korap:field#pubDate\",\n" +
+            "                        \"relation\": \"between\",\n" +
+            "                        \"operands\": [\n" +
+            "                            {\n" +
+            "                                \"@type\": \"korap:date\",\n" +
+            "                                \"@value\": \"2013-12-5\"\n" +
+            "                            },\n" +
+            "                            {\n" +
+            "                                \"@type\": \"korap:date\",\n" +
+            "                                \"@value\": \"2013-12-5\"\n" +
+            "                            }\n" +
+            "                        ]\n" +
+            "                    }\n" +
+            "                ]\n" +
+            "            }\n" +
+            "        }\n" +
+            "    ]\n" +
+            "}";
     private ObjectMapper mapper;
     private MetaTypes types;
 
@@ -54,7 +87,6 @@ public class MetaQuerySerializer {
                 def_key = key;
             if (key.contains("~") | key.contains(">") |
                     key.contains("<")) {
-                System.out.println("values " + key);
                 dates.put(key, queries.get(key));
                 continue;
             }
@@ -91,18 +123,31 @@ public class MetaQuerySerializer {
         }
 
         String[] proc = processDates(dates);
-        int idx = 0;
+        int idx = 3;
         if (proc[0] != null && proc[0].equals("r")) {
             Map term1 = types.createTerm(proc[1], "korap:date");
             Map term2 = types.createTerm(proc[2], "korap:date");
             Map group = types.createGroup("between", "pubDate", Arrays.asList(term1, term2));
             value.add(group);
-            idx = 3;
         }
 
+        if (proc[1] != null) {
+            Map term1 = types.createTerm(proc[1], "korap:date");
+            Map group = types.createGroup("since", "pubDate", Arrays.asList(term1));
+            value.add(group);
+        }
+        if (proc[2] != null) {
+            Map term1 = types.createTerm(proc[2], "korap:date");
+            Map group = types.createGroup("until", "pubDate", Arrays.asList(term1));
+            value.add(group);
+        }
+
+
         for (int i = idx; i < proc.length; i++) {
-            Map term = types.createTerm("pubDate", null, proc[i], "korap:date");
-            value.add(term);
+            if (proc[i] != null) {
+                Map term = types.createTerm("pubDate", null, proc[i], "korap:date");
+                value.add(term);
+            }
         }
 
 
@@ -137,21 +182,22 @@ public class MetaQuerySerializer {
     //fixme: only allows for one until and since entry!!
     private String[] processDates(Map<String, String> dates) {
         if (dates.isEmpty())
-            return new String[1];
+            return new String[3];
         boolean until = false, since = false;
-        String[] el = new String[dates.keySet().size() + 1];
-        int idx = 1;
+        String[] el = new String[dates.keySet().size() + 3];
+        int idx = 3;
         for (String key : dates.keySet()) {
             if (key.contains("<")) {
                 since = true;
-                el[1] = dates.get(key);
-            }
-            if (key.contains(">")) {
+                el[1] = types.formatDate(Long.valueOf(dates.get(key)), MetaTypes.YMD);
+            } else if (key.contains(">")) {
                 until = true;
-                el[2] = dates.get(key);
-            } else
-                el[idx] = dates.get(key);
-            idx++;
+                el[2] = types.formatDate(Long.valueOf(dates.get(key)), MetaTypes.YMD);
+            } else {
+                el[idx] = types.formatDate(Long.valueOf(dates.get(key)), MetaTypes.YMD);
+                idx++;
+            }
+
         }
         if (since && until)
             el[0] = "r";
