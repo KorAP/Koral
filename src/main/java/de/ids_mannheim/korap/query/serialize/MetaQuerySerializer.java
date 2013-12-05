@@ -67,7 +67,7 @@ public class MetaQuerySerializer {
     public List serializeQueries(Map<String, String> queries, TYPE type) {
         boolean extend, single = true;
         boolean multypes = queries.keySet().size() > 1;
-        List metavalue;
+        List<Map> metavalue;
         String def_key = null;
         if (queries.size() > 1)
             single = false;
@@ -80,14 +80,14 @@ public class MetaQuerySerializer {
                 break;
         }
 
-        List value = new ArrayList<>();
-        Map<String, String> dates = new LinkedHashMap<>();
+        List value = new LinkedList();
+        List<String> dates = new LinkedList<>();
         for (String key : queries.keySet()) {
             if (!multypes)
                 def_key = key;
-            if (key.contains("~") | key.contains(">") |
-                    key.contains("<")) {
-                dates.put(key, queries.get(key));
+            if (queries.get(key).contains("~") | queries.get(key).contains(">") |
+                    queries.get(key).contains("<")) {
+                dates.add(queries.get(key));
                 continue;
             }
 
@@ -118,7 +118,7 @@ public class MetaQuerySerializer {
             if (multypes)
                 term = types.createTerm(key, null, queries.get(key).trim(), null);
             else
-                term = types.createTerm(queries.get(key).trim(), null);
+                term = types.createTerm(def_key, null, queries.get(key).trim(), null);
             value.add(term);
         }
 
@@ -129,14 +129,11 @@ public class MetaQuerySerializer {
             Map term2 = types.createTerm(proc[2], "korap:date");
             Map group = types.createGroup("between", "pubDate", Arrays.asList(term1, term2));
             value.add(group);
-        }
-
-        if (proc[1] != null) {
+        } else if (proc[1] != null) {
             Map term1 = types.createTerm(proc[1], "korap:date");
             Map group = types.createGroup("since", "pubDate", Arrays.asList(term1));
             value.add(group);
-        }
-        if (proc[2] != null) {
+        } else if (proc[2] != null) {
             Map term1 = types.createTerm(proc[2], "korap:date");
             Map group = types.createGroup("until", "pubDate", Arrays.asList(term1));
             value.add(group);
@@ -145,8 +142,9 @@ public class MetaQuerySerializer {
 
         for (int i = idx; i < proc.length; i++) {
             if (proc[i] != null) {
-                Map term = types.createTerm("pubDate", null, proc[i], "korap:date");
-                value.add(term);
+                Map term1 = types.createTerm(proc[i], "korap:date");
+                Map group = types.createGroup("until", "pubDate", Arrays.asList(term1));
+                value.add(group);
             }
         }
 
@@ -180,26 +178,31 @@ public class MetaQuerySerializer {
     }
 
     //fixme: only allows for one until and since entry!!
-    private String[] processDates(Map<String, String> dates) {
+    private String[] processDates(List<String> dates) {
         if (dates.isEmpty())
             return new String[3];
-        boolean until = false, since = false;
-        String[] el = new String[dates.keySet().size() + 3];
+        boolean range = false;
+        String[] el = new String[dates.size() + 3];
         int idx = 3;
-        for (String key : dates.keySet()) {
-            if (key.contains("<")) {
-                since = true;
-                el[1] = types.formatDate(Long.valueOf(dates.get(key)), MetaTypes.YMD);
-            } else if (key.contains(">")) {
-                until = true;
-                el[2] = types.formatDate(Long.valueOf(dates.get(key)), MetaTypes.YMD);
+        for (String value : dates) {
+            if (value.contains("<")) {
+                String[] sp = value.split("<");
+                el[1] = types.formatDate(Long.valueOf(sp[1]), MetaTypes.YMD);
+            } else if (value.contains(">")) {
+                String[] sp = value.split(">");
+                el[2] = types.formatDate(Long.valueOf(sp[1]), MetaTypes.YMD);
+            } else if (value.contains("~")) {
+                range = true;
+                String[] sp = value.split("~");
+                el[1] = types.formatDate(Long.valueOf(sp[0]), MetaTypes.YMD);
+                el[2] = types.formatDate(Long.valueOf(sp[1]), MetaTypes.YMD);
             } else {
-                el[idx] = types.formatDate(Long.valueOf(dates.get(key)), MetaTypes.YMD);
+                el[idx] = types.formatDate(Long.valueOf(value), MetaTypes.YMD);
                 idx++;
             }
 
         }
-        if (since && until)
+        if (range)
             el[0] = "r";
         return el;
     }

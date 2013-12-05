@@ -84,8 +84,7 @@ public class MetaCollectionSerializer {
         this.tester = tester();
     }
 
-    //resources must be ordered: 0 without parent, 1 has 0 as parent, etc.
-    // what about extend?! is that also part of the VC meta query?!
+    @Deprecated
     public String serialize(String resource) throws IOException {
         Map metas = new HashMap();
         Map<String, String> pa = getParents(resource);
@@ -97,6 +96,18 @@ public class MetaCollectionSerializer {
         metas.put("meta", parids);
         return mapper.writeValueAsString(metas);
     }
+    //resources must be ordered: 0 without parent, 1 has 0 as parent, etc.
+    public List<Map> serialize(List<String> r_queries) throws IOException {
+        Map metas = new HashMap();
+        List<Map> parids = new ArrayList<>();
+        for (String query : r_queries) {
+            Map re = types.mapify(query);
+            parids.add(re);
+        }
+//        metas.put("meta", parids);
+//        return mapper.writeValueAsString(metas);
+        return parids;
+    }
 
     private Map<String, String> getParents(String id) {
         Map<String, String> cursor = getResource(id);
@@ -106,7 +117,6 @@ public class MetaCollectionSerializer {
         if (cursor.get("parent") != null && !cursor.get("parent").isEmpty())
             parents.putAll(getParents(cursor.get("parent")));
         return parents;
-
     }
 
     //todo: connection to database module!
@@ -135,5 +145,7 @@ public class MetaCollectionSerializer {
         l.put("25", s3);
         return l;
     }
+
+
 
 }
