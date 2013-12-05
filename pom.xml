@@ -6,12 +6,12 @@
       <artifactId>KorAP-core-modules</artifactId>
       <version>1.0</version>
   </parent>
-
   
   <groupId>KorAP-modules</groupId>
   <artifactId>KorAP-querySerialization</artifactId>
   <version>0.0.1</version>
   <packaging>jar</packaging>
+
 
   <name>KorAP-querySerialization</name>
   <url>http://maven.apache.org</url>
@@ -21,12 +21,6 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
     	<groupId>org.antlr</groupId>
     	<artifactId>antlr4-runtime</artifactId>
@@ -38,17 +32,17 @@
     	<version>2.2.2</version>
     </dependency>
     <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-databind</artifactId>
-    	<version>2.2.2</version>
-    </dependency>
-    <dependency>
     	<groupId>KorAP-modules</groupId>
     	<artifactId>KorAP-PoliqarpParser</artifactId>
     	<version>0.05</version>
     </dependency>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.11</version>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
-
   <build>
     <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
     <outputDirectory>${basedir}/bin</outputDirectory>
