@@ -102,11 +102,9 @@ public class MetaCollectionSerializer {
         Map<String, String> cursor = getResource(id);
         Map<String, String> parents = new HashMap<>();
 
-        if (cursor.get("parent") != null && !cursor.get("parent").isEmpty()) {
-            parents.put(id, cursor.get("query"));
+        parents.put(id, cursor.get("query"));
+        if (cursor.get("parent") != null && !cursor.get("parent").isEmpty())
             parents.putAll(getParents(cursor.get("parent")));
-        } else
-            parents.put(id, cursor.get("query"));
         return parents;
 
     }
