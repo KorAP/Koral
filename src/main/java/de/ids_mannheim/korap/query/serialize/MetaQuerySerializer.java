@@ -18,6 +18,7 @@ import java.util.*;
  */
 public class MetaQuerySerializer {
 
+
     private ObjectMapper mapper;
     private MetaTypes types;
 
@@ -30,76 +31,141 @@ public class MetaQuerySerializer {
     //todo: how to handle regex types?
     // only handles AND relation between query attributes and values!
     // value pair : pubdate=<date>, pubPlace=<place>, etc.
-    public List serializeQueries(Map<String, String> queries) {
-        boolean single = true;
+    public List serializeQueries(Map<String, String> queries, TYPE type) {
+        boolean extend, single = true;
         boolean multypes = queries.keySet().size() > 1;
         List metavalue;
         String def_key = null;
         if (queries.size() > 1)
             single = false;
+        switch (type) {
+            case EXTEND:
+                extend = true;
+                break;
+            default:
+                extend = false;
+                break;
+        }
 
         List value = new ArrayList<>();
+        Map<String, String> dates = new LinkedHashMap<>();
         for (String key : queries.keySet()) {
             if (!multypes)
                 def_key = key;
-            String[] dr;
-            if (queries.get(key).contains("~")) {
-                dr = queries.get(key).split("~");
-                Map fd = types.createTerm(null, null, dr[0].trim(), "korap:date");
-                Map td = types.createTerm(null, null, dr[1].trim(), "korap:date");
-                Map dg = types.createGroup("between", key, Arrays.asList(fd, td));
-                value.add(dg);
-                continue;
-            } else if (queries.get(key).contains(">")) {
-                dr = queries.get(key).split(">");
-                Map fd = types.createTerm(null, null, dr[0].trim(), "korap:date");
-                Map td = types.createTerm(null, null, dr[1].trim(), "korap:date");
-                Map dg = types.createGroup("between", key, Arrays.asList(fd, td));
-                value.add(dg);
-                continue;
-            } else if (queries.get(key).contains("<")) {
-                dr = queries.get(key).split("<");
-                Map fd = types.createTerm(null, null, dr[0].trim(), "korap:date");
-                Map td = types.createTerm(null, null, dr[1].trim(), "korap:date");
-                Map dg = types.createGroup("between", key, Arrays.asList(fd, td));
-                value.add(dg);
+            if (key.contains("~") | key.contains(">") |
+                    key.contains("<")) {
+                System.out.println("values " + key);
+                dates.put(key, queries.get(key));
                 continue;
             }
+
+//            if (queries.get(key).contains("~")) {
+//                dr = queries.get(key).split("~");
+//                Map fd = types.createTerm(dr[0].trim(), "korap:date");
+//                Map td = types.createTerm(dr[1].trim(), "korap:date");
+//                Map dg = types.createGroup("between", key, Arrays.asList(fd, td));
+//                value.add(dg);
+//                continue;
+//            } else if (queries.get(key).contains(">")) {
+//                dr = queries.get(key).split(">");
+//                Map fd = types.createTerm(dr[0].trim(), "korap:date");
+//                Map td = types.createTerm(dr[1].trim(), "korap:date");
+//                Map dg = types.createGroup("between", key, Arrays.asList(fd, td));
+//                value.add(dg);
+//                continue;
+//            } else if (queries.get(key).contains("<")) {
+//                dr = queries.get(key).split("<");
+//                Map fd = types.createTerm(dr[0].trim(), "korap:date");
+//                Map td = types.createTerm(dr[1].trim(), "korap:date");
+//                Map dg = types.createGroup("between", key, Arrays.asList(fd, td));
+//                value.add(dg);
+//                continue;
+//            }
 
             Map term;
             if (multypes)
                 term = types.createTerm(key, null, queries.get(key).trim(), null);
             else
-                term = types.createTerm(null, null, queries.get(key).trim(), null);
+                term = types.createTerm(queries.get(key).trim(), null);
             value.add(term);
         }
 
+        String[] proc = processDates(dates);
+        int idx = 0;
+        if (proc[0] != null && proc[0].equals("r")) {
+            Map term1 = types.createTerm(proc[1], "korap:date");
+            Map term2 = types.createTerm(proc[2], "korap:date");
+            Map group = types.createGroup("between", "pubDate", Arrays.asList(term1, term2));
+            value.add(group);
+            idx = 3;
+        }
+
+        for (int i = idx; i < proc.length; i++) {
+            Map term = types.createTerm("pubDate", null, proc[i], "korap:date");
+            value.add(term);
+        }
+
+
         // todo: missing: - takes only one resource, but resources can be chained!
         // only filters, no extension
-//        metavalue.put("meta", Arrays.asList(types.createMetaFilter(resource, (Map) value.get(0))));
-        if (single)
-            metavalue = Arrays.asList(types.createMetaFilter((Map) value.get(0)));
-        else {
+        if (single) {
+            if (extend)
+                metavalue = Arrays.asList(types.createMetaExtend((Map) value.get(0)));
+            else
+                metavalue = Arrays.asList(types.createMetaFilter((Map) value.get(0)));
+        } else {
             Map group;
             if (!multypes)
                 group = types.createGroup("and", def_key, value);
             else
                 group = types.createGroup("and", null, value);
-//            metavalue.put("meta", Arrays.asList(types.createMetaFilter(resource, group)));
-            metavalue = Arrays.asList(types.createMetaFilter(group));
+            if (extend)
+                metavalue = Arrays.asList(types.createMetaExtend(group));
+            else
+                metavalue = Arrays.asList(types.createMetaFilter(group));
         }
         return metavalue;
     }
 
-    public String stringify(Map<String, String> queries) throws IOException {
+    //todo: resource id must be added!
+    public String stringify(Map<String, String> queries, TYPE type) throws IOException {
         Map f = new HashMap();
-        f.put("meta", serializeQueries(queries));
+        f.put("meta", serializeQueries(queries, type));
         return mapper.writeValueAsString(f);
     }
 
+    //fixme: only allows for one until and since entry!!
+    private String[] processDates(Map<String, String> dates) {
+        if (dates.isEmpty())
+            return new String[1];
+        boolean until = false, since = false;
+        String[] el = new String[dates.keySet().size() + 1];
+        int idx = 1;
+        for (String key : dates.keySet()) {
+            if (key.contains("<")) {
+                since = true;
+                el[1] = dates.get(key);
+            }
+            if (key.contains(">")) {
+                until = true;
+                el[2] = dates.get(key);
+            } else
+                el[idx] = dates.get(key);
+            idx++;
+        }
+        if (since && until)
+            el[0] = "r";
+        return el;
+    }
+
     public JsonNode jsonify(Map<String, String> queries) {
-        List s = serializeQueries(queries);
+        List s = serializeQueries(queries, TYPE.FILTER);
         return mapper.valueToTree(s);
+    }
+
+
+    public enum TYPE {
+        EXTEND, FILTER
     }
 
 

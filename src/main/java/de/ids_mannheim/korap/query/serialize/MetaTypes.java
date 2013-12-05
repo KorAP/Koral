@@ -2,6 +2,7 @@ package de.ids_mannheim.korap.query.serialize;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -14,6 +15,9 @@ import java.util.Map;
  */
 public class MetaTypes {
 
+    public static final String Y = "yyyy";
+    public static final String YM = "yyyy-mm";
+    public static final String YMD = "yyyy-mm-dd";
     private ObjectMapper mapper;
 
     public MetaTypes() {
@@ -39,11 +43,15 @@ public class MetaTypes {
             type = "korap:term";
         term.put("@type", type);
         if (field != null)
-            term.put("@field", "korap:field#" + field);
+            term.put("field", "korap:field#" + field);
         if (subtype != null)
             term.put("subtype", "korap:value#" + subtype);
         term.put("@value", value);
         return term;
+    }
+
+    public Map createTerm(String value, String type) {
+        return createTerm(null, null, value, type);
     }
 
     public Map createResourceFilter(String resource, Map value) {
@@ -80,8 +88,18 @@ public class MetaTypes {
         return meta;
     }
 
-    public String formatDate(String date) {
-        return "";
+    public String formatDate(long date, String format) {
+        DateTime time = new DateTime(date);
+        switch (format) {
+            case YM:
+                String s = time.getYear() + "-" + time.getMonthOfYear();
+                return s;
+            case YMD:
+                String s1 = time.getYear() + "-" + time.getMonthOfYear() + "-" + time.getDayOfMonth();
+                return s1;
+            default:
+                return String.valueOf(time.getYear());
+        }
     }
 
     public Map mapify(String s) throws IOException {

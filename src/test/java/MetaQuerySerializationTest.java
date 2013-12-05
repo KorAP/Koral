@@ -1,11 +1,13 @@
 import de.ids_mannheim.korap.query.serialize.MetaCollectionSerializer;
 import de.ids_mannheim.korap.query.serialize.MetaQuerySerializer;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -16,19 +18,21 @@ import java.util.Map;
 @RunWith(JUnit4.class)
 public class MetaQuerySerializationTest {
 
-    private MetaQuerySerializer serializer;
+    private MetaQuerySerializer querySerializer;
+    private MetaCollectionSerializer collSerializer;
 
     public MetaQuerySerializationTest() {
-        serializer = new MetaQuerySerializer();
+        querySerializer = new MetaQuerySerializer();
+        collSerializer = new MetaCollectionSerializer();
     }
 
     @Test
     public void test() throws IOException {
         Map<String, String> j = new HashMap();
         j.put("author", "Goethe");
-        j.put("pubPLace", "Erfurt");
+        j.put("pubPlace", "Erfurt");
         j.put("textClass", "wissenschaft");
-        String s = serializer.stringify(j);
+        String s = querySerializer.stringify(j, MetaQuerySerializer.TYPE.FILTER);
 //        System.out.println("value reference " + s);
     }
 
@@ -36,16 +40,23 @@ public class MetaQuerySerializationTest {
     public void testSingle() throws IOException {
         Map<String, String> j = new HashMap();
         j.put("textClass", "wissenschaft");
-        String s = serializer.stringify(j);
+        String s = querySerializer.stringify(j, MetaQuerySerializer.TYPE.FILTER);
 //        System.out.println("value reference test single " + s);
     }
 
     @Test
     public void testResourceMeta() throws IOException {
-        MetaCollectionSerializer ser = new MetaCollectionSerializer();
-        String s = ser.serialize("25");
-        System.out.println(" --- RESULT JSON " + s);
+        String s = collSerializer.serialize("25");
+//        System.out.println(" --- RESULT JSON " + s);
+    }
 
-
+    @Test
+    public void testDates() throws IOException {
+        Map<String, String> queries = new LinkedHashMap<>();
+        queries.put("<pubDate", String.valueOf(new DateTime().getMillis()));
+        queries.put(">pubDate", String.valueOf(new DateTime().getMillis()+2));
+        queries.put("author", "Goethe");
+        String f = querySerializer.stringify(queries, MetaQuerySerializer.TYPE.FILTER);
+        System.out.println("value : "+ f);
     }
 }

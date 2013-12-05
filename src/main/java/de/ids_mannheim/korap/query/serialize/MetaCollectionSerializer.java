@@ -112,7 +112,6 @@ public class MetaCollectionSerializer {
     //todo: connection to database module!
     public Map<String, String> getResource(String id) {
         return tester.get(id);
-
     }
 
     private Map<String, Map> tester() {
