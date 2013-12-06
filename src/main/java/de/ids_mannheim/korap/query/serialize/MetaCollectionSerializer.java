@@ -1,5 +1,8 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -12,6 +15,7 @@ import java.util.Map;
  * @author hanl
  * @date 04/12/2013
  */
+@Deprecated
 public class MetaCollectionSerializer {
 
     public String meta1 = "{\n" +
@@ -85,15 +89,19 @@ public class MetaCollectionSerializer {
     }
 
     //resources must be ordered: 0 without parent, 1 has 0 as parent, etc.
-    public List<ArrayList> serializeResource(List<String> r_queries) throws IOException {
+    public List<Map> serializeResource(List<String> r_queries) throws IOException {
+        JsonFactory factory = mapper.getFactory();
         List parids = new ArrayList<>();
         for (String query : r_queries) {
-            ArrayList m = mapper.readValue(query, ArrayList.class);
-            parids.add(m);
+            JsonParser jp = factory.createParser(query);
+            JsonNode m = jp.readValueAsTree();
+            for (JsonNode n : m)
+                parids.add(mapper.treeToValue(n, Map.class));
         }
         return parids;
     }
 
+    @Deprecated
     private Map<String, String> getParents(String id) {
         Map<String, String> cursor = getResource(id);
         Map<String, String> parents = new HashMap<>();

@@ -10,6 +10,7 @@ import java.util.*;
  * @author hanl
  * @date 05/12/2013
  */
+@Deprecated
 public class Serializer {
 
 
@@ -30,12 +31,19 @@ public class Serializer {
         return mapper.writeValueAsString(metas);
     }
 
-    public String stringify(List m_queries) throws JsonProcessingException {
-        return mapper.writeValueAsString(m_queries);
+    public String stringify(Object object) throws JsonProcessingException {
+        return mapper.writeValueAsString(object);
     }
 
-    public List<ArrayList> serializeResources(List<String> r_queries) throws IOException {
+    public List<Map> serializeResources(List<String> r_queries) throws IOException {
         return cs.serializeResource(r_queries);
+    }
+
+    public String queryToMeta(String s) throws IOException {
+        Map f = new HashMap();
+        List e = mapper.readValue(s, ArrayList.class);
+        f.put("meta", e);
+        return mapper.writeValueAsString(f);
     }
 
     public List<Map> serializeQueries(Map<String, String> queries, MetaQuerySerializer.TYPE type) {

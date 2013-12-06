@@ -16,6 +16,7 @@ import java.util.*;
  * Date: 11/14/13
  * Time: 2:03 PM
  */
+@Deprecated
 public class MetaQuerySerializer {
 
 
@@ -68,7 +69,7 @@ public class MetaQuerySerializer {
         //single is redundant!
         boolean extend, single = true; //single = true;
         boolean multypes = queries.keySet().size() > 1;
-        List<Map> metavalue;
+        List<Map> metavalue = new ArrayList<>();
         String def_key = null;
         if (queries.size() > 1)
             single = false;
@@ -150,21 +151,22 @@ public class MetaQuerySerializer {
         // todo: missing: - takes only one resource, but resources can be chained!
         if (single) {
             if (extend)
-                metavalue = Arrays.asList(types.createMetaExtend((Map) value.get(0)));
+                Collections.addAll(metavalue, types.createMetaExtend((Map) value.get(0)));
             else
-                metavalue = Arrays.asList(types.createMetaFilter((Map) value.get(0)));
+                Collections.addAll(metavalue, types.createMetaFilter((Map) value.get(0)));
         } else {
             Map group;
             if (!multypes)
                 group = types.createGroup("and", def_key, value);
             else
                 group = types.createGroup("and", null, value);
+            //                metavalue = Arrays.asList(types.createMetaExtend(group));
             if (extend)
-                metavalue = Arrays.asList(types.createMetaExtend(group));
+                Collections.addAll(metavalue, types.createMetaExtend(group));
             else
-                metavalue = Arrays.asList(types.createMetaFilter(group));
+                Collections.addAll(metavalue, types.createMetaFilter(group));
         }
-        return new ArrayList<>(metavalue);
+        return metavalue;
     }
 
     //fixme: only allows for one until and since entry!!

@@ -126,10 +126,7 @@ public class JsonGenerator {
         }
         Map<String, Object> requestMap = ast.getRequestMap();
         try {
-            List meta_re = serializer.serializeResources(parents);
-
-//            JsonNode node = mapper.valueToTree(parents);
-//            JsonNode arr = node.get("meta");
+            List<Map> meta_re = serializer.serializeResources(parents);
             requestMap.put("meta", meta_re);
             requestMap = serializer.addParameters(requestMap, page, num,
                     cli, cri, cls, crs);
