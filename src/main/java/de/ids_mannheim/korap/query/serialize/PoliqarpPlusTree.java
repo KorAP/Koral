@@ -446,11 +446,12 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			reQuery.put("@value", regex);
 			reQuery.put("relation", "=");
 			
+			// if in field, regex was already added there
 			if (!openNodeCats.get(1).equals("field")) {
 				LinkedHashMap<String,Object> token = new LinkedHashMap<String,Object>();
 				token.put("@type", "korap:token");
 				token.put("@value", reQuery);
-				reQuery.put("type", "korap:term");
+				reQuery.put("@type", "korap:term");
 				
 				if (openNodeCats.get(1).equals("query")) {
 					requestMap.put("query", token);
