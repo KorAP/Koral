@@ -1,10 +1,7 @@
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import de.ids_mannheim.korap.query.serialize.JsonGenerator;
-import de.ids_mannheim.korap.query.serialize.MetaCollectionSerializer;
-import de.ids_mannheim.korap.query.serialize.MetaQuerySerializer;
-import de.ids_mannheim.korap.query.serialize.Serializer;
+import de.ids_mannheim.korap.query.serialize.*;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,7 +78,7 @@ public class MetaQuerySerializationTest {
         System.out.println();
     }
 
-    //@Test
+    @Test
     public void testGenerator() {
                    /*
          * just for testing...
@@ -146,17 +143,85 @@ public class MetaQuerySerializationTest {
     public void testCollections() throws IOException {
         Map<String, String> query = new LinkedHashMap<>();
         Serializer ser = new Serializer();
-        query.put("corpusID", "WPD");
-
-        List<Map> p = ser.serializeQueries(query, MetaQuerySerializer.TYPE.FILTER);
-        String s = ser.stringify(p);
-
-        System.out.println("results " + s);
+        query.put("corpusID", "A00");
+        List<Map> l = ser.serializeQueries(query, MetaQuerySerializer.TYPE.FILTER);
+        query.clear();
+        query.put("corpusID", "A01");
+        List<Map> u = ser.serializeQueries(query, MetaQuerySerializer.TYPE.EXTEND);
+        l.addAll(u);
+        String val = ser.stringify(l);
+        System.out.println("results " + val);
         System.out.println();
-        List<String> l = new ArrayList<>();
-        l.add(s);
-        collSerializer.serializeResource(l);
 
+
+        String meta = ser.queryToMeta(val);
+
+        System.out.println("meta query " + meta);
+//        List<String> list = new ArrayList<>();
+//        list.add(val);
+//        List s = collSerializer.serializeResource(list);
+        System.out.println("printable list ");
+        System.out.println();
+
+    }
+
+    @Test
+    public void testResources() throws IOException {
+        String meta = "[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:term\",\"@field\":\"korap:field#corpusID\",\"@value\":\"WPD\"}}]";
+        List s = new ArrayList();
+        s.add(meta);
+        List fin = ser.serializeResources(s);
+
+        String string = ser.serializeToMeta(fin);
+        System.out.println("meta string " + string);
+
+    }
+
+    @Test
+    public void testA00() throws IOException {
+        Map<String, String> query = new LinkedHashMap<>();
+        Serializer ser = new Serializer();
+        query.put("corpusID", "A00");
+        List<Map> l = ser.serializeQueries(query, MetaQuerySerializer.TYPE.FILTER);
+        query.clear();
+        query.put("corpusID", "A01");
+        List<Map> u = ser.serializeQueries(query, MetaQuerySerializer.TYPE.EXTEND);
+        l.addAll(u);
+        String val = ser.stringify(l);
+        List s = new ArrayList();
+        s.add(val);
+
+        List fin = ser.serializeResources(s);
+        System.out.println("A00 meta: " + fin);
+
+    }
+
+
+    @Test
+    public void testnewMetaQuery() throws IOException {
+        Map<String, String> qu = new LinkedHashMap<>();
+        Serializer ser = new Serializer();
+        qu.put("corpusID", "A00");
+        List<Map> l = ser.serializeQueries(qu, MetaQuerySerializer.TYPE.FILTER);
+        qu.clear();
+        qu.put("corpusID", "A01");
+        List<Map> u = ser.serializeQueries(qu, MetaQuerySerializer.TYPE.EXTEND);
+        l.addAll(u);
+        String val = ser.stringify(l);
+        List s = new ArrayList();
+        s.add(val);
+
+        List fin = ser.serializeResources(s);
+
+
+        System.out.println("=======   METAQUERY TESTING BEGIN =======");
+
+        MetaQuery query = new MetaQuery();
+        query.addMetaFilter("textClass", "wissenschaft");
+        query.addResources(s);
+        System.out.println("query "+ query.toMeta());
+        System.out.println("string "+ query.stringify());
+        System.out.println("=======   METAQUERY TESTING END =======");
     }
 
 }
