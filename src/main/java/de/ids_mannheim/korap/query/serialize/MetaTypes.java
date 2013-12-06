@@ -88,17 +88,25 @@ public class MetaTypes {
         return meta;
     }
 
-    //fixme, two digits!
     public String formatDate(long date, String format) {
         DateTime time = new DateTime(date);
-        String year, month, day;
+        String month, day;
+
+        if (time.getDayOfMonth() < 10)
+            day = "0" + time.getDayOfMonth();
+        else
+            day = String.valueOf(time.getDayOfMonth());
+
+        if (time.getMonthOfYear() < 10)
+            month = "0" + time.getMonthOfYear();
+        else
+            month = String.valueOf(time.getMonthOfYear());
+
         switch (format) {
             case YM:
-                String s = time.getYear() + "-" + time.getDayOfMonth();
-                return s;
+                return time.getYear() + "-" + month;
             case YMD:
-                String s1 = time.getYear() + "-" + time.getMonthOfYear() + "-" + time.getDayOfMonth();
-                return s1;
+                return time.getYear() + "-" + month + "-" + day;
             default:
                 return String.valueOf(time.getYear());
         }
