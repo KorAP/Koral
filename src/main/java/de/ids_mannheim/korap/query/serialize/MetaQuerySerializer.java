@@ -64,7 +64,8 @@ public class MetaQuerySerializer {
     //todo: how to handle regex types?
     // only handles AND relation between query attributes and values!
     // value pair : pubdate=<date>, pubPlace=<place>, etc.
-    public List serializeQueries(Map<String, String> queries, TYPE type) {
+    public List<Map> serializeQueries(Map<String, String> queries, TYPE type) {
+        //single is redundant!
         boolean extend, single = true; //single = true;
         boolean multypes = queries.keySet().size() > 1;
         List<Map> metavalue;
@@ -80,8 +81,8 @@ public class MetaQuerySerializer {
                 break;
         }
 
-        List value = new LinkedList();
-        List<String> dates = new LinkedList<>();
+        List value = new ArrayList<>();
+        List<String> dates = new ArrayList<>();
         for (String key : queries.keySet()) {
             if (!multypes)
                 def_key = key;
@@ -115,10 +116,7 @@ public class MetaQuerySerializer {
 //            }
 
             Map term;
-            if (multypes)
-                term = types.createTerm(key, null, queries.get(key).trim(), null);
-            else
-                term = types.createTerm(def_key, null, queries.get(key).trim(), null);
+            term = types.createTerm(key, null, queries.get(key).trim(), null);
             value.add(term);
         }
 
@@ -166,7 +164,7 @@ public class MetaQuerySerializer {
             else
                 metavalue = Arrays.asList(types.createMetaFilter(group));
         }
-        return metavalue;
+        return new ArrayList<>(metavalue);
     }
 
     //todo: resource id must be added!

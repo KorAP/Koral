@@ -4,15 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author hanl
  * @date 05/12/2013
  */
-public class MetaSerializer {
+public class Serializer {
 
 
     private MetaQuerySerializer qs;
@@ -20,7 +18,7 @@ public class MetaSerializer {
     private ObjectMapper mapper;
 
 
-    public MetaSerializer() {
+    public Serializer() {
         this.qs = new MetaQuerySerializer();
         this.cs = new MetaCollectionSerializer();
         this.mapper = new ObjectMapper();
@@ -32,11 +30,32 @@ public class MetaSerializer {
         return mapper.writeValueAsString(metas);
     }
 
-    public List<Map> serialzeResources(List<String> r_queries) throws IOException {
+    public List<Map> serializeResources(List<String> r_queries) throws IOException {
         return cs.serialize(r_queries);
     }
 
     public List<Map> serializeQueries(Map<String, String> queries, MetaQuerySerializer.TYPE type) {
         return qs.serializeQueries(queries, type);
     }
+
+    public Map addParameters(Map request, int page, int num, String cli, String cri,
+                             int cls, int crs) {
+        Map ctx = new LinkedHashMap();
+        List left = new ArrayList();
+        left.add(cli);
+        left.add(cls);
+        List right = new ArrayList();
+        right.add(cri);
+        right.add(crs);
+        ctx.put("left", left);
+        ctx.put("right", right);
+
+        request.put("startPage", page);
+        request.put("count", num);
+        request.put("context", ctx);
+
+        return request;
+
+    }
+
 }
