@@ -125,9 +125,11 @@ public class JsonGenerator {
             throw new IllegalArgumentException(ql + " is not a supported query language!");
         }
         Map<String, Object> requestMap = ast.getRequestMap();
+        MetaQuery metaQuery = new MetaQuery();
+        metaQuery.addResources(parents);
+
         try {
-            List<Map> meta_re = serializer.serializeResources(parents);
-            requestMap.put("meta", meta_re);
+            requestMap.put("meta", metaQuery.raw());
             requestMap = serializer.addParameters(requestMap, page, num,
                     cli, cri, cls, crs);
             String res = mapper.writeValueAsString(requestMap);

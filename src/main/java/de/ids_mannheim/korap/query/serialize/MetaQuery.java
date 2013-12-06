@@ -35,21 +35,22 @@ public class MetaQuery {
         this.track = ArrayListMultimap.create();
     }
 
-    public MetaQuery addResource(String query) throws IOException {
-        JsonParser jp = factory.createParser(query);
-        JsonNode m = jp.readValueAsTree();
-        for (JsonNode n : m)
-            this.rq.add(serialzer.treeToValue(n, Map.class));
-        return this;
-    }
-
-    public MetaQuery addResources(List<String> queries) throws IOException {
-        for (String query : queries) {
+    public MetaQuery addResource(String query) {
+        try {
             JsonParser jp = factory.createParser(query);
             JsonNode m = jp.readValueAsTree();
             for (JsonNode n : m)
                 this.rq.add(serialzer.treeToValue(n, Map.class));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Conversion went wrong!");
         }
+        return this;
+    }
+
+    public MetaQuery addResources(List<String> queries) {
+        for (String query : queries)
+            addResource(query);
         return this;
     }
 
@@ -228,11 +229,12 @@ public class MetaQuery {
     public void clear() {
         this.rq.clear();
         this.mfil.clear();
+        this.track.clear();
     }
 
     @Deprecated
     //todo: ordering irrelevant
-    private List<Map> join() {
+    private List<Map> joinO() {
         List<Map> cursor = new ArrayList<>(this.rq);
         List<Map> copy = new ArrayList<>();
         if (!this.mext.isEmpty()) {
@@ -250,16 +252,26 @@ public class MetaQuery {
         return cursor;
     }
 
-    private List<Map> join2() {
+    private List<Map> join() {
         List<Map> cursor = new ArrayList<>(this.rq);
         cursor.addAll(this.mfil);
         cursor.addAll(this.mext);
         return cursor;
     }
 
+    private List<Map> getMetaOnly() {
+        List<Map> cursor = new ArrayList<>(this.mfil);
+        cursor.addAll(this.mext);
+        return cursor;
+    }
+
+    /**
+     * returns the meta query only and does not contain parent dependencies
+     * @return
+     */
     public String stringify() {
         try {
-            return serialzer.writeValueAsString(join2());
+            return serialzer.writeValueAsString(getMetaOnly());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return "";
@@ -267,12 +279,27 @@ public class MetaQuery {
     }
 
     public JsonNode jsonify() {
-        return serialzer.valueToTree(join2());
+        return serialzer.valueToTree(join());
     }
 
+    /**
+     * returns the List<Map> that contains all the meta queries and resource queries
+     * added to the meta query container
+     * @return
+     */
+    public List<Map> raw() {
+        return join();
+    }
+
+    /**
+     * returns a JSON String representation that contains all information
+     * (meta query and resource meta queries alike) in a root meta JSON node
+     *
+     * @return
+     */
     public String toMeta() {
         Map meta = new LinkedHashMap();
-        meta.put("meta", join2());
+        meta.put("meta", join());
 
         try {
             return serialzer.writeValueAsString(meta);
