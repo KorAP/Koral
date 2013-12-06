@@ -39,7 +39,7 @@ public class JsonGenerator {
         if (args.length == 0) {
             queries = new String[]{
                     /*
-					 * negation
+                     * negation
 					 * elemente
 					 * within
 					 * regex
@@ -126,9 +126,10 @@ public class JsonGenerator {
         }
         Map<String, Object> requestMap = ast.getRequestMap();
         try {
-            List<Map> meta_re = serializer.serializeResources(parents);
+            List meta_re = serializer.serializeResources(parents);
 
-
+//            JsonNode node = mapper.valueToTree(parents);
+//            JsonNode arr = node.get("meta");
             requestMap.put("meta", meta_re);
             requestMap = serializer.addParameters(requestMap, page, num,
                     cli, cri, cls, crs);

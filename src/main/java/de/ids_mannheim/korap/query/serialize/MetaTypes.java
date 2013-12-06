@@ -6,6 +6,7 @@ import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -114,6 +115,10 @@ public class MetaTypes {
 
     public Map mapify(String s) throws IOException {
         return mapper.readValue(s, Map.class);
+    }
+
+    public List listify(String s) throws IOException {
+        return mapper.readValue(s, LinkedList.class);
     }
 
     public String stringify(Map m) throws JsonProcessingException {

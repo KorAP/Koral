@@ -84,25 +84,12 @@ public class MetaCollectionSerializer {
         this.tester = tester();
     }
 
-    @Deprecated
-    public String serialize(String resource) throws IOException {
-        Map metas = new HashMap();
-        Map<String, String> pa = getParents(resource);
-        List<Map> parids = new ArrayList<>();
-        for (String key : pa.keySet()) {
-            Map re = types.mapify(pa.get(key));
-            parids.add(re);
-        }
-        metas.put("meta", parids);
-        return mapper.writeValueAsString(metas);
-    }
     //resources must be ordered: 0 without parent, 1 has 0 as parent, etc.
-    public List<Map> serialize(List<String> r_queries) throws IOException {
-        Map metas = new HashMap();
-        List<Map> parids = new ArrayList<>();
+    public List<ArrayList> serializeResource(List<String> r_queries) throws IOException {
+        List parids = new ArrayList<>();
         for (String query : r_queries) {
-            Map re = types.mapify(query);
-            parids.add(re);
+            ArrayList m = mapper.readValue(query, ArrayList.class);
+            parids.add(m);
         }
         return parids;
     }
@@ -143,7 +130,6 @@ public class MetaCollectionSerializer {
         l.put("25", s3);
         return l;
     }
-
 
 
 }

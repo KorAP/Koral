@@ -11,10 +11,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author hanl
@@ -50,12 +47,7 @@ public class MetaQuerySerializationTest {
         j.put("textClass", "wissenschaft");
         String s = querySerializer.stringify(j, MetaQuerySerializer.TYPE.FILTER);
         System.out.println("------ TEXT SINGLE " + s);
-    }
-
-    @Test
-    public void testResourceMeta() throws IOException {
-        String s = collSerializer.serialize("25");
-        System.out.println(" --- RESULT JSON " + s);
+        System.out.println();
     }
 
     @Test
@@ -66,6 +58,7 @@ public class MetaQuerySerializationTest {
         queries.put("author", "Goethe");
         String f = querySerializer.stringify(queries, MetaQuerySerializer.TYPE.FILTER);
         System.out.println("value until/since : " + f);
+        System.out.println();
     }
 
     @Test
@@ -75,6 +68,7 @@ public class MetaQuerySerializationTest {
         queries.put("author", "Hesse");
         String f = querySerializer.stringify(queries, MetaQuerySerializer.TYPE.FILTER);
         System.out.println("value until : " + f);
+        System.out.println();
     }
 
     @Test
@@ -84,6 +78,7 @@ public class MetaQuerySerializationTest {
         queries.put("author", "Kafka");
         String f = querySerializer.stringify(queries, MetaQuerySerializer.TYPE.FILTER);
         System.out.println("value since : " + f);
+        System.out.println();
     }
 
     //@Test
@@ -109,6 +104,7 @@ public class MetaQuerySerializationTest {
             } catch (NullPointerException npe) {
                 npe.printStackTrace();
                 System.out.println("null\n");
+                System.out.println();
             } catch (JsonGenerationException e) {
                 e.printStackTrace();
             } catch (JsonMappingException e) {
@@ -132,6 +128,8 @@ public class MetaQuerySerializationTest {
         List f = querySerializer.serializeQueries(queries, MetaQuerySerializer.TYPE.EXTEND);
         s.addAll(f);
         System.out.println("--- ALL " + s);
+        System.out.println();
+
     }
 
     @Test
@@ -140,7 +138,25 @@ public class MetaQuerySerializationTest {
         queries.put("pubDate", "<" + String.valueOf(new DateTime().getMillis()));
         queries.put("author", "Kafka");
         List s = querySerializer.serializeQueries(queries, MetaQuerySerializer.TYPE.FILTER);
-        System.out.println("array repres " + ser.serializeMeta(s));
+        System.out.println("array repres " + ser.serializeToMeta(s));
+        System.out.println();
+    }
+
+    @Test
+    public void testCollections() throws IOException {
+        Map<String, String> query = new LinkedHashMap<>();
+        Serializer ser = new Serializer();
+        query.put("corpusID", "WPD");
+
+        List<Map> p = ser.serializeQueries(query, MetaQuerySerializer.TYPE.FILTER);
+        String s = ser.stringify(p);
+
+        System.out.println("results " + s);
+        System.out.println();
+        List<String> l = new ArrayList<>();
+        l.add(s);
+        collSerializer.serializeResource(l);
+
     }
 
 }

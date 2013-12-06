@@ -167,13 +167,6 @@ public class MetaQuerySerializer {
         return new ArrayList<>(metavalue);
     }
 
-    //todo: resource id must be added!
-    public String stringify(Map<String, String> queries, TYPE type) throws IOException {
-        Map f = new HashMap();
-        f.put("meta", serializeQueries(queries, type));
-        return mapper.writeValueAsString(f);
-    }
-
     //fixme: only allows for one until and since entry!!
     private String[] processDates(List<String> dates) {
         if (dates.isEmpty())
@@ -197,7 +190,6 @@ public class MetaQuerySerializer {
                 el[idx] = types.formatDate(Long.valueOf(value), MetaTypes.YMD);
                 idx++;
             }
-
         }
         if (range)
             el[0] = "r";
@@ -207,6 +199,13 @@ public class MetaQuerySerializer {
     public JsonNode jsonify(Map<String, String> queries) {
         List s = serializeQueries(queries, TYPE.FILTER);
         return mapper.valueToTree(s);
+    }
+
+    //todo: resource id must be added!
+    public String stringify(Map<String, String> queries, TYPE type) throws IOException {
+        Map f = new HashMap();
+        f.put("meta", serializeQueries(queries, type));
+        return mapper.writeValueAsString(f);
     }
 
 

@@ -24,14 +24,18 @@ public class Serializer {
         this.mapper = new ObjectMapper();
     }
 
-    public String serializeMeta(List m_queries) throws JsonProcessingException {
-//        Map metas = new HashMap();
-//        metas.put("meta", m_queries);
+    public String serializeToMeta(List m_queries) throws JsonProcessingException {
+        Map metas = new HashMap();
+        metas.put("meta", m_queries);
+        return mapper.writeValueAsString(metas);
+    }
+
+    public String stringify(List m_queries) throws JsonProcessingException {
         return mapper.writeValueAsString(m_queries);
     }
 
-    public List<Map> serializeResources(List<String> r_queries) throws IOException {
-        return cs.serialize(r_queries);
+    public List<ArrayList> serializeResources(List<String> r_queries) throws IOException {
+        return cs.serializeResource(r_queries);
     }
 
     public List<Map> serializeQueries(Map<String, String> queries, MetaQuerySerializer.TYPE type) {
