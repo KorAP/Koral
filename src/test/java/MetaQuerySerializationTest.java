@@ -1,8 +1,10 @@
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import de.ids_mannheim.korap.query.serialize.JsonGenerator;
 import de.ids_mannheim.korap.query.serialize.MetaCollectionSerializer;
 import de.ids_mannheim.korap.query.serialize.MetaQuerySerializer;
+import de.ids_mannheim.korap.query.serialize.Serializer;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +13,7 @@ import org.junit.runners.JUnit4;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,10 +26,12 @@ public class MetaQuerySerializationTest {
 
     private MetaQuerySerializer querySerializer;
     private MetaCollectionSerializer collSerializer;
+    private Serializer ser;
 
     public MetaQuerySerializationTest() {
         querySerializer = new MetaQuerySerializer();
         collSerializer = new MetaCollectionSerializer();
+        ser = new Serializer();
     }
 
     @Test
@@ -112,6 +117,30 @@ public class MetaQuerySerializationTest {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Test
+    public void testLists() {
+        Map<String, String> queries = new LinkedHashMap<>();
+        queries.put("pubDate", "<" + String.valueOf(new DateTime().getMillis()));
+        queries.put("author", "Kafka");
+        List s = querySerializer.serializeQueries(queries, MetaQuerySerializer.TYPE.FILTER);
+
+        queries.clear();
+        queries.put("author", "Hesse");
+
+        List f = querySerializer.serializeQueries(queries, MetaQuerySerializer.TYPE.EXTEND);
+        s.addAll(f);
+        System.out.println("--- ALL " + s);
+    }
+
+    @Test
+    public void testJSONArray() throws JsonProcessingException {
+        Map<String, String> queries = new LinkedHashMap<>();
+        queries.put("pubDate", "<" + String.valueOf(new DateTime().getMillis()));
+        queries.put("author", "Kafka");
+        List s = querySerializer.serializeQueries(queries, MetaQuerySerializer.TYPE.FILTER);
+        System.out.println("array repres " + ser.serializeMeta(s));
     }
 
 }

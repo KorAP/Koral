@@ -104,8 +104,6 @@ public class MetaCollectionSerializer {
             Map re = types.mapify(query);
             parids.add(re);
         }
-//        metas.put("meta", parids);
-//        return mapper.writeValueAsString(metas);
         return parids;
     }
 

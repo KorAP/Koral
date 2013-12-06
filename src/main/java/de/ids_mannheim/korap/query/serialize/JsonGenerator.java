@@ -3,6 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,8 @@ public class JsonGenerator {
     ObjectMapper mapper;
     AbstractSyntaxTree ast;
     private Serializer serializer;
+    private org.slf4j.Logger log = LoggerFactory
+            .getLogger(JsonGenerator.class);
 
     public JsonGenerator() {
         mapper = new ObjectMapper();
@@ -35,7 +38,7 @@ public class JsonGenerator {
         String[] queries;
         if (args.length == 0) {
             queries = new String[]{
-					/*
+                    /*
 					 * negation
 					 * elemente
 					 * within
@@ -110,24 +113,27 @@ public class JsonGenerator {
         mapper.writeValue(new File(outFile), requestMap);
     }
 
-    public String run(String query, String ql, List<String> meta,
+    public String run(String query, String ql, List<String> parents,
                       String cli, String cri, int cls, int crs, int page, int num) {
-        if (ql.equals("poliqarp")) {
+        if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
 //		} else if (queryLanguage.equals("cosmas")) {
 //			ast = new CosmasTree(query);
-        } else if (ql.equals("poliqarpplus")) {
+        } else if (ql.toLowerCase().equals("poliqarpplus")) {
             ast = new PoliqarpPlusTree(query);
         } else {
             throw new IllegalArgumentException(ql + " is not a supported query language!");
         }
         Map<String, Object> requestMap = ast.getRequestMap();
         try {
-            List<Map> meta_re = serializer.serializeResources(meta);
+            List<Map> meta_re = serializer.serializeResources(parents);
+
+
             requestMap.put("meta", meta_re);
             requestMap = serializer.addParameters(requestMap, page, num,
                     cli, cri, cls, crs);
-            return mapper.writeValueAsString(requestMap);
+            String res = mapper.writeValueAsString(requestMap);
+            return res;
         } catch (IOException e) {
             e.printStackTrace();
             return null;

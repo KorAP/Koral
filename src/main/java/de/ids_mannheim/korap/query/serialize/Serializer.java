@@ -25,9 +25,9 @@ public class Serializer {
     }
 
     public String serializeMeta(List m_queries) throws JsonProcessingException {
-        Map metas = new HashMap();
-        metas.put("meta", m_queries);
-        return mapper.writeValueAsString(metas);
+//        Map metas = new HashMap();
+//        metas.put("meta", m_queries);
+        return mapper.writeValueAsString(m_queries);
     }
 
     public List<Map> serializeResources(List<String> r_queries) throws IOException {
