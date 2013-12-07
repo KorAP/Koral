@@ -340,7 +340,17 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		if (nodeCat.equals("field")) {
 			LinkedHashMap<String,Object> fieldMap = new LinkedHashMap<String,Object>();
 			// Step I: extract info
-			String featureName = node.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (field_name base) (field_op !=) (re_query "bar*")
+			String fieldName = "";
+			ParseTree fieldNameNode = node.getChild(0);
+			if (fieldNameNode.getChildCount() == 1) {
+				fieldName = fieldNameNode.getChild(0).toStringTree(poliqarpParser);   //e.g. (field_name base) (field_op !=) (re_query "bar*")
+			} else if (fieldNameNode.getChildCount() == 3) {
+				// layer is indicated, merge layer and field name (0th and 2nd children, 1st is "/")
+				String layer = fieldNameNode.getChild(0).toStringTree(poliqarpParser);
+				String layeredFieldName = fieldNameNode.getChild(2).toStringTree(poliqarpParser);
+				fieldName = layer+"/"+layeredFieldName;
+			}
+			
 			String relation = node.getChild(1).getChild(0).toStringTree(poliqarpParser);
 			if (negField) {
 				if (relation.startsWith("!")) {
@@ -359,7 +369,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				value = valNode.getChild(0).toStringTree(poliqarpParser); 				//e.g. (re_query "bar*")
 				fieldMap.put("@subtype", "korap:value#regex");
 			}
-			fieldMap.put("@value", featureName+":"+value);
+			fieldMap.put("@value", fieldName+":"+value);
 			fieldMap.put("relation", relation);
 			// Step II: decide where to put the field map (as the only value of a token or the meta filter or as a part of a group in case of coordinated fields)
 			if (fieldStack.isEmpty()) {
@@ -724,48 +734,49 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[] {
-				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
-				"([base=foo]|[base=bar])[base=foobar]",
-				"shrink({[base=Mann]})",
-				"shrink({[base=foo]}[orth=bar])",
-				"shrink(1:[base=Der]{1:[base=Mann]})",
-				"[base=foo]|([base=foo][base=bar])*",
-				"([base=foo]|[base=bar])[base=foobar]",
-				"[base=foo]([base=bar]|[base=foobar/i])",
-				"[base=bar|base=foo]",
-				"[base=bar]",
-				"[base=foo][base=bar]",
-				"[(base=bar|base=foo)&orth=wee]",
-				"[base=foo/i][base=bar]{2,4}",
-				"foo bar/i",
-				"{[base=foo]}[orth=bar]",
-				"{[base=foo]}{[orth=bar]}",
-				"{1:[base=foo]<np>}",
-				"{[base=foo]}[orth=bar]",
-				"shrink({[base=foo]})",
-				"shrink({[base=foo]})[orth=bar]",
-				"[orth=bar]shrink({[base=foo]})",
-				"[base=foo]*[base=bar]",
-				"([base=foo][base=bar])*",
-				"shrink(1:[base=Der]{1:[base=Mann]})",
-				"[base=foo]<np>",
-				"[base!=foo]",
-				"[base=foo&orth=bar]",
-				"[!(base=foo&orth=bar)]",
-				"'vers{2,3}uch'",
-				"[orth='vers*ch']",
-				"shrink(1:{[base=Der][base=Mann]})",
-				"{[base=foo][orth=bar]}",
-				"[base=der]shrink(1:[base=Der]{1:[base=Mann]})",
-				"<np>",
-//				"startsWith({<sentence>},<np>)",
-//				"startsWith({<sentence>},[base=foo])",
-				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
-				"([base=foo][base=bar])*",
-				"[(base=bar|base=foo)&orth=foobar]",
-				"contains(<np>,[base=foo])",
-//				"[base=foo] within s",
-				"within(<np>,[base=foo])"
+//				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
+//				"([base=foo]|[base=bar])[base=foobar]",
+//				"shrink({[base=Mann]})",
+//				"shrink({[base=foo]}[orth=bar])",
+//				"shrink(1:[base=Der]{1:[base=Mann]})",
+//				"[base=foo]|([base=foo][base=bar])*",
+//				"([base=foo]|[base=bar])[base=foobar]",
+//				"[base=foo]([base=bar]|[base=foobar/i])",
+//				"[base=bar|base=foo]",
+//				"[base=bar]",
+//				"[base=foo][base=bar]",
+//				"[(base=bar|base=foo)&orth=wee]",
+//				"[base=foo/i][base=bar]{2,4}",
+//				"foo bar/i",
+//				"{[base=foo]}[orth=bar]",
+//				"{[base=foo]}{[orth=bar]}",
+//				"{1:[base=foo]<np>}",
+//				"{[base=foo]}[orth=bar]",
+//				"shrink({[base=foo]})",
+//				"shrink({[base=foo]})[orth=bar]",
+//				"[orth=bar]shrink({[base=foo]})",
+//				"[base=foo]*[base=bar]",
+//				"([base=foo][base=bar])*",
+//				"shrink(1:[base=Der]{1:[base=Mann]})",
+//				"[base=foo]<np>",
+//				"[base!=foo]",
+//				"[base=foo&orth=bar]",
+//				"[!(base=foo&orth=bar)]",
+//				"'vers{2,3}uch'",
+//				"[orth='vers*ch']",
+//				"shrink(1:{[base=Der][base=Mann]})",
+//				"{[base=foo][orth=bar]}",
+//				"[base=der]shrink(1:[base=Der]{1:[base=Mann]})",
+//				"<np>",
+////				"startsWith({<sentence>},<np>)",
+////				"startsWith({<sentence>},[base=foo])",
+//				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
+//				"([base=foo][base=bar])*",
+//				"[(base=bar|base=foo)&orth=foobar]",
+//				"contains(<np>,[base=foo])",
+////				"[base=foo] within s",
+				"within(<np>,[base=foo])",
+				"[mate/p=ADJA]"
 				};
 		for (String q : queries) {
 			try {
