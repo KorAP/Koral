@@ -23,13 +23,17 @@ import de.ids_mannheim.korap.query.PoliqarpPlusLexer;
 import de.ids_mannheim.korap.query.PoliqarpPlusParser;
 import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Map representation of Poliqarp syntax tree as returned by ANTLR
  * @author joachim
  *
  */
 public class PoliqarpPlusTree extends AbstractSyntaxTree {
-	
+
+    Logger log = LoggerFactory.getLogger(PoliqarpPlusTree.class);
 	/**
 	 * Top-level map representing the whole request.
 	 */
@@ -103,13 +107,13 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 * <br/>
 	 * The class further maintains a set of stacks which effectively keep track of which objects to embed in which containing objects. 
 	 * 
-	 * @param tree The syntax tree as returned by ANTLR
-	 * @param parser The ANTLR parser instance that generated the parse tree
+	 * @param query The syntax tree as returned by ANTLR
 	 */
 	public PoliqarpPlusTree(String query) {
 		prepareContext();
 		process(query);
 		System.out.println(">>> "+requestMap.get("query")+" <<<");
+        log.info(">>> " + requestMap.get("query") + " <<<");
 	}
 
 	private void prepareContext() {

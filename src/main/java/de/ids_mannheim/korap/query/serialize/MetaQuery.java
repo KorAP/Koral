@@ -229,6 +229,7 @@ public class MetaQuery {
     public void clear() {
         this.rq.clear();
         this.mfil.clear();
+        this.mext.clear();
         this.track.clear();
     }
 
