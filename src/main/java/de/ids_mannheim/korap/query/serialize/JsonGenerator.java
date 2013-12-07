@@ -114,7 +114,8 @@ public class JsonGenerator {
     }
 
     public String run(String query, String ql, List<String> parents,
-                      String cli, String cri, int cls, int crs, int page, int num) {
+                      String cli, String cri, int cls, int crs, int page, int num)
+            throws IllegalArgumentException{
         if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
 //		} else if (queryLanguage.equals("cosmas")) {
