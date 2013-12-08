@@ -15,15 +15,13 @@ import java.util.Map;
  */
 public class JsonGenerator {
 
-    ObjectMapper mapper;
-    AbstractSyntaxTree ast;
-    private Serializer serializer;
+    private ObjectMapper mapper;
+    private AbstractSyntaxTree ast;
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(JsonGenerator.class);
 
     public JsonGenerator() {
         mapper = new ObjectMapper();
-        serializer = new Serializer();
     }
 
     /**
@@ -118,7 +116,7 @@ public class JsonGenerator {
             throws IllegalArgumentException{
         if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
-//		} else if (queryLanguage.equals("cosmas")) {
+//		} else if (ql.toLowerCase().equals("cosmas")) {
 //			ast = new CosmasTree(query);
         } else if (ql.toLowerCase().equals("poliqarpplus")) {
             ast = new PoliqarpPlusTree(query);
@@ -131,7 +129,7 @@ public class JsonGenerator {
 
         try {
             requestMap.put("meta", metaQuery.raw());
-            requestMap = serializer.addParameters(requestMap, page, num,
+            requestMap = MetaQuery.addParameters(requestMap, page, num,
                     cli, cri, cls, crs);
             String res = mapper.writeValueAsString(requestMap);
             return res;

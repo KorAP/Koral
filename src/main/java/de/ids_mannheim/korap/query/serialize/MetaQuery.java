@@ -23,7 +23,6 @@ public class MetaQuery {
     private List<Map> rq;
     private List<Map> mfil;
     private List<Map> mext;
-    private Multimap<Integer, Integer> track;
 
     public MetaQuery() {
         this.serialzer = new ObjectMapper();
@@ -32,7 +31,25 @@ public class MetaQuery {
         this.mext = new ArrayList<>();
         this.factory = serialzer.getFactory();
         this.types = new MetaTypes();
-        this.track = ArrayListMultimap.create();
+    }
+
+    public static Map addParameters(Map request, int page, int num, String cli, String cri,
+                                    int cls, int crs) {
+        Map ctx = new LinkedHashMap();
+        List left = new ArrayList();
+        left.add(cli);
+        left.add(cls);
+        List right = new ArrayList();
+        right.add(cri);
+        right.add(crs);
+        ctx.put("left", left);
+        ctx.put("right", right);
+
+        request.put("startPage", page);
+        request.put("count", num);
+        request.put("context", ctx);
+
+        return request;
     }
 
     public MetaQuery addResource(String query) {
@@ -54,6 +71,7 @@ public class MetaQuery {
         return this;
     }
 
+    // map can only have one key, value pair. thus, text class can only be added once. Multiple types are not possible!
     public MetaQuery addMetaFilter(Map<String, String> queries) {
         //single is redundant!
         boolean single = true;
@@ -162,7 +180,6 @@ public class MetaQuery {
             value.add(group);
         }
 
-
         for (int i = idx; i < proc.length; i++) {
             if (proc[i] != null) {
                 Map term1 = types.createTerm(proc[i], "korap:date");
@@ -181,8 +198,6 @@ public class MetaQuery {
                 group = types.createGroup("and", null, value);
             Collections.addAll(this.mext, types.createMetaExtend(group));
         }
-        track.put(this.mfil.size() - 1, this.mext.size() - 1);
-
         return this;
     }
 
@@ -230,27 +245,6 @@ public class MetaQuery {
         this.rq.clear();
         this.mfil.clear();
         this.mext.clear();
-        this.track.clear();
-    }
-
-    @Deprecated
-    //todo: ordering irrelevant
-    private List<Map> joinO() {
-        List<Map> cursor = new ArrayList<>(this.rq);
-        List<Map> copy = new ArrayList<>();
-        if (!this.mext.isEmpty()) {
-            for (int idx = 0; idx < this.mfil.size(); idx++) {
-                copy.add(idx, this.mfil.get(idx));
-                if (!this.track.get(idx).isEmpty()) {
-                    Collection<Integer> ext = this.track.get(idx);
-                    for (Integer i : ext)
-                        copy.add(this.mext.get(i));
-                }
-            }
-        } else
-            copy = this.mfil;
-        cursor.addAll(copy);
-        return cursor;
     }
 
     private List<Map> join() {
@@ -268,6 +262,7 @@ public class MetaQuery {
 
     /**
      * returns the meta query only and does not contain parent dependencies
+     *
      * @return
      */
     public String stringify() {
@@ -286,6 +281,7 @@ public class MetaQuery {
     /**
      * returns the List<Map> that contains all the meta queries and resource queries
      * added to the meta query container
+     *
      * @return
      */
     public List<Map> raw() {
@@ -308,6 +304,19 @@ public class MetaQuery {
             e.printStackTrace();
             return "";
         }
+    }
+
+    private Multimap resEq(String queries) {
+        Multimap qmap = ArrayListMultimap.create();
+        String[] spl = queries.split(" AND ");
+        for (String query : spl) {
+            String[] q = query.split(":");
+            String attr = q[0];
+            String val = q[1];
+            qmap.put(attr, val);
+        }
+        return qmap;
+
     }
 
 
