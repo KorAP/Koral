@@ -297,6 +297,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		
 		// cq_segment
 		if (nodeCat.equals("cq_segment")) {
+			int onTopOfObjectStack = 0;
 			// Step I: determine whether to create new token or get token from the stack (if added by cq_segments)
 			LinkedHashMap<String, Object> token;
 			if (tokenStack.isEmpty()) {
@@ -305,11 +306,13 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				stackedTokens++;
 				// do this only if token is newly created, otherwise it'll be in objectStack twice
 				objectStack.push(token);
+				onTopOfObjectStack = 1;
 				stackedObjects++;
 			} else {
 				// in case cq_segments has already added the token
 				token = tokenStack.getFirst();
 			}
+			
 			curToken = token;
 			// Step II: start filling object and add to containing sequence
 			token.put("@type", "korap:token");
@@ -317,7 +320,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			// take into account a possible 'occ' child
 			int occExtraChild = cqHasOcc ? 1:0;
 			if (node.getParent().getChildCount()>1+occExtraChild) {
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1+occExtraChild).get("operands");
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(onTopOfObjectStack+occExtraChild).get("operands");
 				topSequenceOperands.add(token);
 			}
 		}
@@ -525,7 +528,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 //				topSequenceOperands.add(span);
 //			} else
-			if (openNodeCats.get(2).equals("query")) {
+			if (openNodeCats.get(2).equals("query") && node.getParent().getChildCount() == 1) {
 				requestMap.put("query", span);	
 			} else if (objectStack.size()>1) {
 				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
@@ -780,7 +783,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"contains(<np>,[base=foo])",
 ////				"[base=foo] within s",
 				"within(<np>,[base=foo])",
-				"[mate/p=ADJA]"
+				"[mate/p=ADJA]",
+				"[mate_p=ADJA]{[mate_p=NN]}",
+				"within(<s>,[mate_p=ADJA][mate_p=NN])"
 				};
 		for (String q : queries) {
 			try {
