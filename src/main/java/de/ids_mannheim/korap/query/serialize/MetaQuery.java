@@ -33,6 +33,18 @@ public class MetaQuery {
         this.types = new MetaTypes();
     }
 
+    /**
+     * temporary solution, since there is no other place for this right now!
+     *
+     * @param request
+     * @param page
+     * @param num
+     * @param cli
+     * @param cri
+     * @param cls
+     * @param crs
+     * @return
+     */
     public static Map addParameters(Map request, int page, int num, String cli, String cri,
                                     int cls, int crs) {
         Map ctx = new LinkedHashMap();
@@ -71,59 +83,67 @@ public class MetaQuery {
         return this;
     }
 
-    // map can only have one key, value pair. thus, text class can only be added once. Multiple types are not possible!
-    public MetaQuery addMetaFilter(Map<String, String> queries) {
-        //single is redundant!
-        boolean single = true;
-        boolean multypes = queries.keySet().size() > 1;
-        String def_key = null;
-        if (queries.size() > 1)
-            single = false;
-
+    private List createValue(Multimap<String, String> map) {
         List value = new ArrayList<>();
-        List<String> dates = new ArrayList<>();
-        for (String key : queries.keySet()) {
-            if (!multypes)
-                def_key = key;
-            if (queries.get(key).contains("~") | queries.get(key).contains(">") |
-                    queries.get(key).contains("<")) {
-                dates.add(queries.get(key));
+        String[] dates = new String[3];
+        for (String key : map.keySet()) {
+            if (key.equals("pubDate")) {
+                dates = processDates((List<String>) map.get(key));
                 continue;
             }
 
-            Map term;
-            term = types.createTerm(key, null, queries.get(key).trim(), null);
-            value.add(term);
+            if (map.get(key).size() == 1) {
+                Map term = types.createTerm(key, null, map.get(key).toArray(new String[0])[0], null);
+                value.add(term);
+            } else {
+                List g = new ArrayList();
+                for (String v : map.get(key))
+                    g.add(types.createTerm(null, v, null));
+                Map group = types.createGroup("and", key, g);
+                value.add(group);
+            }
+
         }
 
-        String[] proc = processDates(dates);
         int idx = 3;
-        if (proc[0] != null && proc[0].equals("r")) {
-            Map term1 = types.createTerm(proc[1], "korap:date");
-            Map term2 = types.createTerm(proc[2], "korap:date");
+        if (dates[0] != null && dates[0].equals("r")) {
+            Map term1 = types.createTerm(null, dates[1], "korap:date");
+            Map term2 = types.createTerm(null, dates[2], "korap:date");
             Map group = types.createGroup("between", "pubDate", Arrays.asList(term1, term2));
             value.add(group);
-        } else if (proc[1] != null) {
-            Map term1 = types.createTerm(proc[1], "korap:date");
+        } else if (dates[1] != null) {
+            Map term1 = types.createTerm(null, dates[1], "korap:date");
             Map group = types.createGroup("since", "pubDate", Arrays.asList(term1));
             value.add(group);
-        } else if (proc[2] != null) {
-            Map term1 = types.createTerm(proc[2], "korap:date");
+        } else if (dates[2] != null) {
+            Map term1 = types.createTerm(null, dates[2], "korap:date");
             Map group = types.createGroup("until", "pubDate", Arrays.asList(term1));
             value.add(group);
         }
 
 
-        for (int i = idx; i < proc.length; i++) {
-            if (proc[i] != null) {
-                Map term1 = types.createTerm(proc[i], "korap:date");
-                Map group = types.createGroup("until", "pubDate", Arrays.asList(term1));
+        for (int i = idx; i < dates.length; i++) {
+            if (dates[i] != null) {
+                Map term1 = types.createTerm(dates[i], "korap:date");
+                Map group = types.createGroup("exact", "pubDate", Arrays.asList(term1));
                 value.add(group);
             }
         }
+        return value;
+    }
 
+    // map can only have one key, value pair. thus, text class can only be added once. Multiple types are not possible!
+    public MetaQuery addMetaFilter(String queries) {
+        Multimap<String, String> m = resEq(queries);
+        boolean multypes = m.keys().size() > 1;
+        String def_key = null;
+
+        if (!multypes)
+            def_key = m.keys().toArray(new String[0])[0];
+
+        List value = this.createValue(m);
         // todo: missing: - takes only one resource, but resources can be chained!
-        if (single)
+        if (m.values().size() == 1)
             Collections.addAll(this.mfil, types.createMetaFilter((Map) value.get(0)));
         else {
             Map group;
@@ -136,59 +156,17 @@ public class MetaQuery {
         return this;
     }
 
-    public MetaQuery addMetaExtend(Map<String, String> queries) {
-        //single is redundant!
-        boolean single = true;
-        boolean multypes = queries.keySet().size() > 1;
-
-        //!an extend to a non-existing filter is not possible
-        if (this.mfil.isEmpty())
-            throw new IllegalArgumentException("Extending Query " +
-                    "cannot be added before Filter!");
-
+    public MetaQuery addMetaExtend(String queries) {
+        Multimap<String, String> m = resEq(queries);
+        boolean multypes = m.keys().size() > 1;
         String def_key = null;
-        if (queries.size() > 1)
-            single = false;
 
-        List value = new ArrayList<>();
-        List<String> dates = new ArrayList<>();
-        for (String key : queries.keySet()) {
-            if (!multypes)
-                def_key = key;
-            if (queries.get(key).contains("~") | queries.get(key).contains(">") |
-                    queries.get(key).contains("<")) {
-                dates.add(queries.get(key));
-                continue;
-            }
-            value.add(types.createTerm(key, null, queries.get(key).trim(), null));
-        }
+        if (!multypes)
+            def_key = m.keys().toArray(new String[0])[0];
 
-        String[] proc = processDates(dates);
-        int idx = 3;
-        if (proc[0] != null && proc[0].equals("r")) {
-            Map term1 = types.createTerm(proc[1], "korap:date");
-            Map term2 = types.createTerm(proc[2], "korap:date");
-            Map group = types.createGroup("between", "pubDate", Arrays.asList(term1, term2));
-            value.add(group);
-        } else if (proc[1] != null) {
-            Map term1 = types.createTerm(proc[1], "korap:date");
-            Map group = types.createGroup("since", "pubDate", Arrays.asList(term1));
-            value.add(group);
-        } else if (proc[2] != null) {
-            Map term1 = types.createTerm(proc[2], "korap:date");
-            Map group = types.createGroup("until", "pubDate", Arrays.asList(term1));
-            value.add(group);
-        }
-
-        for (int i = idx; i < proc.length; i++) {
-            if (proc[i] != null) {
-                Map term1 = types.createTerm(proc[i], "korap:date");
-                Map group = types.createGroup("until", "pubDate", Arrays.asList(term1));
-                value.add(group);
-            }
-        }
+        List value = this.createValue(m);
         // todo: missing: - takes only one resource, but resources can be chained!
-        if (single)
+        if (m.values().size() == 1)
             Collections.addAll(this.mext, types.createMetaExtend((Map) value.get(0)));
         else {
             Map group;
@@ -202,15 +180,11 @@ public class MetaQuery {
     }
 
     public MetaQuery addMetaFilter(String attr, String val) {
-        Map y = new HashMap<>();
-        y.put(attr, val);
-        return addMetaFilter(y);
+        return addMetaFilter(attr + ":" + val);
     }
 
     public MetaQuery addMetaExtend(String attr, String val) {
-        Map y = new HashMap<>();
-        y.put(attr, val);
-        return addMetaExtend(y);
+        return addMetaExtend(attr + ":" + val);
     }
 
     private String[] processDates(List<String> dates) {
@@ -226,17 +200,12 @@ public class MetaQuery {
             } else if (value.contains(">")) {
                 String[] sp = value.split(">");
                 el[2] = types.formatDate(Long.valueOf(sp[1]), MetaTypes.YMD);
-            } else if (value.contains("~")) {
-                range = true;
-                String[] sp = value.split("~");
-                el[1] = types.formatDate(Long.valueOf(sp[0]), MetaTypes.YMD);
-                el[2] = types.formatDate(Long.valueOf(sp[1]), MetaTypes.YMD);
             } else {
                 el[idx] = types.formatDate(Long.valueOf(value), MetaTypes.YMD);
                 idx++;
             }
         }
-        if (range)
+        if (el[1] != null && el[2] != null)
             el[0] = "r";
         return el;
     }
@@ -266,8 +235,12 @@ public class MetaQuery {
      * @return
      */
     public String stringify() {
+        List meta = getMetaOnly();
+        if (meta.isEmpty())
+            return "";
+
         try {
-            return serialzer.writeValueAsString(getMetaOnly());
+            return serialzer.writeValueAsString(meta);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return "";
@@ -306,8 +279,13 @@ public class MetaQuery {
         }
     }
 
-    private Multimap resEq(String queries) {
-        Multimap qmap = ArrayListMultimap.create();
+    /**
+     * resolves all queries as equal (hierarchy) AND relations
+     * @param queries
+     * @return
+     */
+    private Multimap<String, String> resEq(String queries) {
+        Multimap<String, String> qmap = ArrayListMultimap.create();
         String[] spl = queries.split(" AND ");
         for (String query : spl) {
             String[] q = query.split(":");

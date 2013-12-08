@@ -51,8 +51,12 @@ public class MetaTypes {
         return term;
     }
 
-    public Map createTerm(String value, String type) {
-        return createTerm(null, null, value, type);
+    public Map createTerm(String field, String value, String type) {
+        return createTerm(field, null, value, type);
+    }
+
+    public Map createTerm(String field, String value) {
+        return createTerm(field, value,  null);
     }
 
     public Map createResourceFilter(String resource, Map value) {

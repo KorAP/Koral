@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import de.ids_mannheim.korap.query.serialize.JsonGenerator;
 import de.ids_mannheim.korap.query.serialize.MetaQuery;
 import org.joda.time.DateTime;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * @author hanl
@@ -24,53 +22,62 @@ public class MetaQuerySerializationTest {
 
     @Test
     public void test() throws IOException {
-        Map<String, String> j = new HashMap();
-        j.put("author", "Goethe");
-        j.put("pubPlace", "Erfurt");
-        j.put("textClass", "wissenschaft");
-        MetaQuery qu = new MetaQuery().addMetaFilter(j);
-        System.out.println("value reference " + qu.stringify());
-        System.out.println();
+        StringBuffer b = new StringBuffer();
+        b.append("author:Goethe");
+        b.append(" AND ");
+        b.append("pubPlace:Erfurt");
+        b.append(" AND ");
+        b.append("textClass:wissenschaft");
+        MetaQuery qu = new MetaQuery().addMetaFilter(b.toString());
+//        System.out.println("value reference " + qu.stringify());
+//        System.out.println();
     }
 
     @Test
     public void testSingle() throws IOException {
-        Map<String, String> j = new HashMap();
-        j.put("textClass", "wissenschaft");
         MetaQuery query = new MetaQuery().addMetaFilter("textClass", "wissenschaft");
-        System.out.println("------ TEXT SINGLE " + query.stringify());
+//        System.out.println("------ TEXT SINGLE " + query.stringify());
         System.out.println();
     }
 
     @Test
     public void testDates() throws IOException {
-        Map<String, String> queries = new LinkedHashMap<>();
-        queries.put("pubDate", String.valueOf(new DateTime().getMillis()) + "~"
-                + String.valueOf(new DateTime().getMillis() + 2));
-        queries.put("author", "Goethe");
-        MetaQuery query = new MetaQuery().addMetaFilter(queries);
-        System.out.println("value until/since : " + query.stringify());
-        System.out.println();
+        StringBuffer b = new StringBuffer();
+        b.append("pubDate:<" + String.valueOf(new DateTime().getMillis()));
+        b.append(" AND ");
+        b.append("pubDate:>" + String.valueOf(new DateTime().getMillis() + 2));
+        b.append(" AND ");
+        b.append("author:Goethe");
+        MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
+//        System.out.println("value until/since : " + query.stringify());
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Goethe\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"between\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-09\"},{\"@type\":\"korap:date\",\"@value\":\"2013-12-09\"}]}]}}]", query.stringify());
+//        System.out.println();
     }
 
     @Test
     public void testUntil() throws IOException {
-        Map<String, String> queries = new LinkedHashMap<>();
-        queries.put("pubDate", ">" + String.valueOf(new DateTime().getMillis()));
-        queries.put("author", "Hesse");
-        MetaQuery query = new MetaQuery().addMetaFilter(queries);
-        System.out.println("value until : " + query.stringify());
-        System.out.println();
+        StringBuffer b = new StringBuffer();
+        b.append("pubDate:>" + String.valueOf(new DateTime().getMillis()));
+        b.append(" AND ");
+        b.append("author:Hesse");
+        MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
+        System.out.println("Running date check (until) with additional attribute author");
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Hesse\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"until\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-09\"}]}]}}]", query.stringify());
+//        System.out.println("value until : " + query.stringify());
+//        System.out.println();
     }
 
     @Test
     public void testSince() throws IOException {
-        Map<String, String> queries = new LinkedHashMap<>();
-        queries.put("pubDate", "<" + String.valueOf(new DateTime().getMillis()));
-        queries.put("author", "Kafka");
-        MetaQuery query = new MetaQuery().addMetaFilter(queries);
-        System.out.println("value since : " + query.stringify());
-        System.out.println();
+        StringBuffer b = new StringBuffer();
+        b.append("pubDate:<" + String.valueOf(new DateTime().getMillis()));
+        b.append(" AND ");
+        b.append("author:Kafka");
+        MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
+//        System.out.println("value since : " + query.stringify());
+//        System.out.println();
+        System.out.println("Running date check (since) with additional attribute author");
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Kafka\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"since\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-09\"}]}]}}]", query.stringify());
     }
 
     @Test
@@ -109,26 +116,27 @@ public class MetaQuerySerializationTest {
 
     @Test
     public void testLists() {
-        Map<String, String> queries = new LinkedHashMap<>();
-        queries.put("pubDate", "<" + String.valueOf(new DateTime().getMillis()));
-        queries.put("author", "Kafka");
-        MetaQuery query = new MetaQuery().addMetaFilter(queries);
-
+        StringBuffer b = new StringBuffer();
+        b.append("pubDate:<" + String.valueOf(new DateTime().getMillis()));
+        b.append(" AND ");
+        b.append("author:Kafka");
+        MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
         query.addMetaExtend("author", "Hesse");
 
-        System.out.println("--- ALL " + query.stringify());
-        System.out.println();
+//        System.out.println("--- ALL " + query.stringify());
+//        System.out.println();
 
     }
 
     @Test
     public void testJSONArray() throws JsonProcessingException {
-        Map<String, String> queries = new LinkedHashMap<>();
-        queries.put("pubDate", "<" + String.valueOf(new DateTime().getMillis()));
-        queries.put("author", "Kafka");
-        MetaQuery q = new MetaQuery().addMetaExtend(queries);
-        System.out.println("array repres " + q.toMeta());
-        System.out.println();
+        StringBuffer b = new StringBuffer();
+        b.append("pubDate:<" + String.valueOf(new DateTime().getMillis()));
+        b.append(" AND ");
+        b.append("author:Kafka");
+        MetaQuery q = new MetaQuery().addMetaExtend(b.toString());
+//        System.out.println("array repres " + q.toMeta());
+//        System.out.println();
     }
 
     @Test
@@ -136,9 +144,9 @@ public class MetaQuerySerializationTest {
         MetaQuery q = new MetaQuery().addMetaFilter("corpusID", "A00");
         q.addMetaExtend("corpusID", "A01");
 
-        System.out.println("results stringified " + q.stringify());
-        System.out.println("results to meta" + q.toMeta());
-        System.out.println();
+//        System.out.println("results stringified " + q.stringify());
+//        System.out.println("results to meta" + q.toMeta());
+//        System.out.println();
     }
 
     /**
@@ -152,23 +160,25 @@ public class MetaQuerySerializationTest {
         String meta = "[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:term\",\"@field\":\"korap:field#corpusID\",\"@value\":\"WPD\"}}]";
         MetaQuery q = new MetaQuery().addResource(meta);
         org.junit.Assert.assertEquals("String should be empty", "", q.stringify());
-        System.out.println("meta string " + q.toMeta());
-        org.junit.Assert.assertEquals(meta, q.toMeta());
+//        System.out.println("meta string " + q.toMeta());
+        System.out.println("Testing Resource Meta data");
+        org.junit.Assert.assertEquals("{\"meta\":" + meta + "}", q.toMeta());
     }
 
     @Test
     public void testA00() throws IOException {
         MetaQuery q = new MetaQuery().addMetaExtend("corpusID", "A00").addMetaExtend("corpusID", "A01");
-        System.out.println("A meta: " + q.stringify());
-        System.out.println();
+//        System.out.println("A meta: " + q.stringify());
+//        System.out.println();
     }
 
     @Test
-    public void testnewMetaQuery() throws IOException {
+    public void testResources2() throws IOException {
         String meta = "[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:term\",\"@field\":\"korap:field#corpusID\",\"@value\":\"WPD\"}}]";
         MetaQuery q = new MetaQuery().addResource(meta);
         q.addMetaFilter("textClass", "wissenschaft");
-        System.out.println("meta string " + q.toMeta());
+//        System.out.println("stringified meta " + q.stringify());
+//        System.out.println("meta string " + q.toMeta());
     }
 
 }
