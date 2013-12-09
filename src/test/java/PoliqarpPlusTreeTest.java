@@ -110,6 +110,91 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree("[base=bar][base=foo]*");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(occ3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// ([base=bar][base=foo])*
+		String occ4 = 
+				"{@type=korap:group, operands=[" +	
+					"{@type=korap:sequence, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=base:bar, relation==}}," +
+						"{@type=korap:token, @value={@type=korap:term, @value=base:foo, relation==}}" +
+					"]}" +
+				"], relation=repetition, quantifier=* }" ;
+		ppt = new PoliqarpPlusTree("([base=bar][base=foo])*");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// <s>([base=bar][base=foo])*
+		String occ5 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:element, @value=s}," +
+					"{@type=korap:group, operands=[" +	
+						"{@type=korap:sequence, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:bar, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:foo, relation==}}" +
+						"]}" +
+					"], relation=repetition, quantifier=* }" +
+				"]}" ;
+		ppt = new PoliqarpPlusTree("<s>([base=bar][base=foo])*");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ5.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// <s><np>([base=bar][base=foo])*
+		// comment: embedded sequence shouldn't really be here, but does not really hurt, either. (?)
+		// really hard to get this behaviour out of the PQPlus grammar...
+		String occ6 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:sequence, operands=[" +
+						"{@type=korap:element, @value=s}," +
+						"{@type=korap:element, @value=np}" +
+					"]}," +
+					"{@type=korap:group, operands=[" +	
+						"{@type=korap:sequence, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:bar, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:foo, relation==}}" +
+						"]}" +
+					"], relation=repetition, quantifier=* }" +
+				"]}" ;
+		ppt = new PoliqarpPlusTree("<s><np>([base=bar][base=foo])*");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ6.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// <s><np>([base=bar][base=foo])*[p=NN]
+		// comment: embedded sequence shouldn't really be here, but does not really hurt, either. (?)
+		// really hard to get this behaviour out of the PQPlus grammar...
+		String occ7 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:sequence, operands=[" +
+						"{@type=korap:element, @value=s}," +
+						"{@type=korap:element, @value=np}" +
+					"]}," +
+					"{@type=korap:group, operands=[" +	
+						"{@type=korap:sequence, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:bar, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:foo, relation==}}" +
+						"]}" +
+					"], relation=repetition, quantifier=* }," +
+					"{@type=korap:token, @value={@type=korap:term, @value=p:NN, relation==}}" +
+				"]}" ;
+		ppt = new PoliqarpPlusTree("<s><np>([base=bar][base=foo])*[p=NN]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ7.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// ([base=bar][base=foo])*[p=NN]
+		// comment: embedded sequence shouldn't really be here, but does not really hurt, either. (?)
+		// really hard to get this behaviour out of the PQPlus grammar...
+		String occ8 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:group, operands=[" +	
+						"{@type=korap:sequence, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:bar, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:foo, relation==}}" +
+						"]}" +
+					"], relation=repetition, quantifier=* }," +
+					"{@type=korap:token, @value={@type=korap:term, @value=p:NN, relation==}}" +
+				"]}" ;
+		ppt = new PoliqarpPlusTree("([base=bar][base=foo])*[p=NN]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ8.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
