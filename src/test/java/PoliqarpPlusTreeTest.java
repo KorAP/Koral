@@ -79,6 +79,37 @@ public class PoliqarpPlusTreeTest {
 	
 	@Test
 	public void testOccurrence() {
+		// [base=foo]*
+		String occ1 = "{@type=korap:group, operands=[" +
+					     "{@type=korap:token, @value={@type=korap:term, @value=base:foo, relation==}}" +
+					  "], relation=repetition, quantifier=* }"; 
+		ppt = new PoliqarpPlusTree("[base=foo]*");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=foo]*[base=bar]
+		String occ2 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:group, operands=[" +
+					     "{@type=korap:token, @value={@type=korap:term, @value=base:foo, relation==}}" +
+					"], relation=repetition, quantifier=* }," +
+					"{@type=korap:token, @value={@type=korap:term, @value=base:bar, relation==}}" +
+				"]}"; 
+		ppt = new PoliqarpPlusTree("[base=foo]*[base=bar]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=bar][base=foo]*
+		String occ3 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:token, @value={@type=korap:term, @value=base:bar, relation==}}," +
+					"{@type=korap:group, operands=[" +
+					     "{@type=korap:token, @value={@type=korap:term, @value=base:foo, relation==}}" +
+					"], relation=repetition, quantifier=* }" +
+				"]}"; 
+		ppt = new PoliqarpPlusTree("[base=bar][base=foo]*");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ3.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
@@ -182,6 +213,19 @@ public class PoliqarpPlusTreeTest {
 						"{@type=korap:token, @value={@type=korap:term, @value=p:NN, relation==}}" +
 					  "]}";
 		assertTrue(equalsQueryContent(cls4, "{[base=Mann][orth=Frau]}[p=NN]"));
+
+		// {2:{1:[tt/p=ADJA]}[mate/p=NN]}"
+		String cls5 = "{@type=korap:group, class=2, operands=[" +
+						"{@type=korap:sequence, operands=[" +
+						   "{@type=korap:group, class=1, operands=[" +
+						     "{@type=korap:token, @value={@type=korap:term, @value=tt/p:ADJA, relation==}}" +
+						   "]}," +
+						   "{@type=korap:token, @value={@type=korap:term, @value=mate/p:NN, relation==}}" + 
+						"]}" +
+					  "]}";
+		ppt = new PoliqarpPlusTree("{2: {1:[tt/p=ADJA]}[mate/p=NN]}");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(cls5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
@@ -237,7 +281,7 @@ public class PoliqarpPlusTreeTest {
 					"{@type=korap:token, @value={@type=korap:term, @value=orth:Der, relation==}}" +
 				"]}" +
 			"]}";
-		ppt = new PoliqarpPlusTree("contains(<s>,startswith(<np>,[orth=Der]))");
+		ppt = new PoliqarpPlusTree("contains(<s>, startswith(<np>,[orth=Der]))");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(npos1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
@@ -302,13 +346,40 @@ public class PoliqarpPlusTreeTest {
 					"]}" +
 				"]}" +
 			"]}";
-		ppt = new PoliqarpPlusTree("shrink(1:startswith(<s>,{1:<np>}))");
+		ppt = new PoliqarpPlusTree("shrink(1: startswith(<s>,{1:<np>}))");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(shr4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// shrink(3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}})) 
+		String shr5 = 
+			"{@type=korap:group, relation=shrink, shrink=3, operands=[" +
+				"{@type=korap:group, relation=position, position=startswith, operands=[" +
+					"{@type=korap:element, @value=s}," +
+					"{@type=korap:group, class=3, operands=[" +
+						"{@type=korap:sequence, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:der, relation==}}," +
+							"{@type=korap:group, class=1, operands=[" +
+								"{@type=korap:sequence, operands=[" +
+									"{@type=korap:token, @value={@type=korap:term, @value=mate/p:ADJA, relation==}}," +
+									"{@type=korap:group, class=2, operands=[" +
+										"{@type=korap:token, @value={@type=korap:term, @value=tt/p:NN, relation==}}" +
+									"]}" + 
+								"]}" +
+							"]}" +
+						"]}" +
+					"]}" +
+				"]}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("shrink(3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}})) ");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(shr5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
 	public void testLayers() {
+		// [base=Mann]
+		String layer1 = "{@type=korap:token, @value={@type=korap:term, @value=tt/base:Mann, relation==}}";
+		assertTrue(equalsQueryContent(layer1, "[tt/base=Mann]"));
 		
 	}
 }

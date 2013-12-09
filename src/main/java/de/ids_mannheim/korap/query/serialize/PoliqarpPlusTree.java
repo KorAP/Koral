@@ -578,7 +578,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				topSequenceOperands.add(positionGroup); 
 			} else if (openNodeCats.get(2).equals("query")) {
 				requestMap.put("query", positionGroup);	
-			} 
+			} else {
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+				topSequenceOperands.add(positionGroup); 
+			}
 		}
 		
 		if (nodeCat.equals("shrink")) {
@@ -716,7 +719,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		return false;
 	}
 	
-	private static void checkUnbalancedPars(String q) {
+	private static void checkUnbalancedPars(String q) throws IllegalArgumentException {
 		int openingPars = StringUtils.countMatches(q, "(");
 		int closingPars = StringUtils.countMatches(q, ")");
 		int openingBrkts = StringUtils.countMatches(q, "[");
@@ -733,7 +736,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		
 	}
 	
-	private static ParserRuleContext parsePoliqarpQuery (String p) {
+	private static ParserRuleContext parsePoliqarpQuery (String p) throws IllegalArgumentException {
 		checkUnbalancedPars(p);
 		
 		Lexer poliqarpLexer = new PoliqarpPlusLexer((CharStream)null);
@@ -774,23 +777,13 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[] {
-				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
-				"within(<np>,[base=foo])",
-				"[mate/p=ADJA]",
-				"[mate_p=ADJA]{[mate_p=NN]}",
-				"within(<s>,[mate_p=ADJA][mate_p=NN])",
-				"within(<s>,{2:{1:[tt_p=ADJA]}[mate_p=NN]})",
-				"within(<p>, within(<s>, [mate_p=NN]))",
-				"within(<p>,within(<s>,<np>))",
-				"shrink(3:startswith(<s>,{3:[base=der]{1:[mate_p=ADJA]{2:[tt_p=NN]}}})) ",
-				"shrink(startswith(<s>,<s>))",
-				"shrink(3:startswith(<s>,<s>))",
-				"shrink(1:[base=foo]{[base=bar]})",
-				"[base=Auto]contains(<s>,[base=Mann])",
-				"shrink([orth=Der]{[orth=Mann]})",
-				"shrink([orth=Der]{[orth=Mann][orth=geht]})"
+				"shrink(startswith(<s>,{<np>}))",
+				"shrink(1: startswith(<s>,{1:<np>}))",
+				"contains(<p>, startswith(<s>,<np>))",
+				"[base=bar][base=foo]*"
+				
 		};
-//		PoliqarpPlusTree.verbose=true;
+		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);
