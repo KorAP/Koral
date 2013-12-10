@@ -33,37 +33,6 @@ public class MetaQuery {
         this.types = new MetaTypes();
     }
 
-    /**
-     * temporary solution, since there is no other place for this right now!
-     *
-     * @param request
-     * @param page
-     * @param num
-     * @param cli
-     * @param cri
-     * @param cls
-     * @param crs
-     * @return
-     */
-    public static Map addParameters(Map request, int page, int num, String cli, String cri,
-                                    int cls, int crs) {
-        Map ctx = new LinkedHashMap();
-        List left = new ArrayList();
-        left.add(cli);
-        left.add(cls);
-        List right = new ArrayList();
-        right.add(cri);
-        right.add(crs);
-        ctx.put("left", left);
-        ctx.put("right", right);
-
-        request.put("startPage", page);
-        request.put("count", num);
-        request.put("context", ctx);
-
-        return request;
-    }
-
     public MetaQuery addResource(String query) {
         try {
             JsonParser jp = factory.createParser(query);
@@ -196,12 +165,12 @@ public class MetaQuery {
         for (String value : dates) {
             if (value.contains("<")) {
                 String[] sp = value.split("<");
-                el[1] = types.formatDate(Long.valueOf(sp[1]), MetaTypes.YMD);
+                el[1] = sp[1];
             } else if (value.contains(">")) {
                 String[] sp = value.split(">");
-                el[2] = types.formatDate(Long.valueOf(sp[1]), MetaTypes.YMD);
+                el[2] = sp[1];
             } else {
-                el[idx] = types.formatDate(Long.valueOf(value), MetaTypes.YMD);
+                el[idx] = value;
                 idx++;
             }
         }

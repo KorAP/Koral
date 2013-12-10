@@ -1,7 +1,7 @@
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import de.ids_mannheim.korap.query.serialize.JsonGenerator;
+import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 import de.ids_mannheim.korap.query.serialize.MetaQuery;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -85,7 +85,7 @@ public class MetaQuerySerializationTest {
                    /*
          * just for testing...
 		 */
-        JsonGenerator jg = new JsonGenerator();
+        QuerySerializer jg = new QuerySerializer();
         int i = 0;
         String[] queries;
         queries = new String[]{

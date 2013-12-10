@@ -93,30 +93,6 @@ public class MetaTypes {
         return meta;
     }
 
-    public String formatDate(long date, String format) {
-        DateTime time = new DateTime(date);
-        String month, day;
-
-        if (time.getDayOfMonth() < 10)
-            day = "0" + time.getDayOfMonth();
-        else
-            day = String.valueOf(time.getDayOfMonth());
-
-        if (time.getMonthOfYear() < 10)
-            month = "0" + time.getMonthOfYear();
-        else
-            month = String.valueOf(time.getMonthOfYear());
-
-        switch (format) {
-            case YM:
-                return time.getYear() + "-" + month;
-            case YMD:
-                return time.getYear() + "-" + month + "-" + day;
-            default:
-                return String.valueOf(time.getYear());
-        }
-    }
-
     public Map mapify(String s) throws IOException {
         return mapper.readValue(s, Map.class);
     }

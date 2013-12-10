@@ -13,14 +13,14 @@ import java.util.Map;
 /**
  * @author bingel, hanl
  */
-public class JsonGenerator {
+public class QuerySerializer {
 
     private ObjectMapper mapper;
     private AbstractSyntaxTree ast;
     private org.slf4j.Logger log = LoggerFactory
-            .getLogger(JsonGenerator.class);
+            .getLogger(QuerySerializer.class);
 
-    public JsonGenerator() {
+    public QuerySerializer() {
         mapper = new ObjectMapper();
     }
 
@@ -31,7 +31,7 @@ public class JsonGenerator {
         /*
          * just for testing...
 		 */
-        JsonGenerator jg = new JsonGenerator();
+        QuerySerializer jg = new QuerySerializer();
         int i = 0;
         String[] queries;
         if (args.length == 0) {
@@ -86,7 +86,7 @@ public class JsonGenerator {
     }
 
     /**
-     * Runs the JsonGenerator by initializing the relevant AbstractSyntaxTree implementation (depending on specified query language)
+     * Runs the QuerySerializer by initializing the relevant AbstractSyntaxTree implementation (depending on specified query language)
      * and transforms and writes the tree's requestMap to the specified output file.
      *
      * @param outFile       The file to which the serialization is written
@@ -129,7 +129,7 @@ public class JsonGenerator {
 
         try {
             requestMap.put("meta", metaQuery.raw());
-            requestMap = MetaQuery.addParameters(requestMap, page, num,
+            requestMap = QueryUtils.addParameters(requestMap, page, num,
                     cli, cri, cls, crs);
             String res = mapper.writeValueAsString(requestMap);
             return res;
