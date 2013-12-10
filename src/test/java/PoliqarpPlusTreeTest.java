@@ -139,14 +139,10 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(occ5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		// <s><np>([base=bar][base=foo])*
-		// comment: embedded sequence shouldn't really be here, but does not really hurt, either. (?)
-		// really hard to get this behaviour out of the PQPlus grammar...
 		String occ6 = 
 				"{@type=korap:sequence, operands=[" +
-					"{@type=korap:sequence, operands=[" +
-						"{@type=korap:element, @value=s}," +
-						"{@type=korap:element, @value=np}" +
-					"]}," +
+					"{@type=korap:element, @value=s}," +
+					"{@type=korap:element, @value=np}," +
 					"{@type=korap:group, operands=[" +	
 						"{@type=korap:sequence, operands=[" +
 							"{@type=korap:token, @value={@type=korap:term, @value=base:bar, relation==}}," +
@@ -163,10 +159,8 @@ public class PoliqarpPlusTreeTest {
 		// really hard to get this behaviour out of the PQPlus grammar...
 		String occ7 = 
 				"{@type=korap:sequence, operands=[" +
-					"{@type=korap:sequence, operands=[" +
-						"{@type=korap:element, @value=s}," +
-						"{@type=korap:element, @value=np}" +
-					"]}," +
+					"{@type=korap:element, @value=s}," +
+					"{@type=korap:element, @value=np}," +
 					"{@type=korap:group, operands=[" +	
 						"{@type=korap:sequence, operands=[" +
 							"{@type=korap:token, @value={@type=korap:term, @value=base:bar, relation==}}," +
@@ -180,8 +174,6 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(occ7.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		// ([base=bar][base=foo])*[p=NN]
-		// comment: embedded sequence shouldn't really be here, but does not really hurt, either. (?)
-		// really hard to get this behaviour out of the PQPlus grammar...
 		String occ8 = 
 				"{@type=korap:sequence, operands=[" +
 					"{@type=korap:group, operands=[" +	
@@ -213,6 +205,35 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:token, @value={@type=korap:term, @value=p:NN, relation==}}" +
 				"]}";
 		assertTrue(equalsQueryContent(seq2, "[base=Mann][orth=Frau][p=NN]"));
+	}
+	
+	@Test
+	public void testDisjSegments() {
+		// ([base=der]|[base=das])[base=Schild]
+		String disj1 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:group, relation=or, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=base:der, relation==}}," +
+						"{@type=korap:token, @value={@type=korap:term, @value=base:das, relation==}}" +
+					"]}," +
+					"{@type=korap:token, @value={@type=korap:term, @value=base:Schild, relation==}}" +
+				"]}";
+		ppt = new PoliqarpPlusTree("([base=der]|[base=das])[base=Schild]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(disj1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=Schild]([base=der]|[base=das])
+		String disj2 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:token, @value={@type=korap:term, @value=base:Schild, relation==}}," +
+					"{@type=korap:group, relation=or, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=base:der, relation==}}," +
+						"{@type=korap:token, @value={@type=korap:term, @value=base:das, relation==}}" +
+					"]}" +
+				"]}";
+		ppt = new PoliqarpPlusTree("[base=Schild]([base=der]|[base=das])");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(disj2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test

@@ -54,7 +54,11 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	/**
 	 *  Flag that indicates whether a cq_segments element is quantified by an occ element.
 	 */
-	boolean cqHasOcc = false;
+	boolean cqHasOccSibling = false;
+	/**
+	 *  Flag that indicates whether a cq_segments' children are quantified by an occ element.
+	 */
+	boolean cqHasOccChild = false;
 	/**
 	 * Flag for negation of complete field
 	 */
@@ -101,6 +105,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 */
 	LinkedList<Integer> fieldsToPop = new LinkedList<Integer>();
 	public static boolean verbose = false;
+	int curChild = 0;
+	Integer stackedObjects = 0;
+	Integer stackedTokens= 0;
+	Integer stackedFields = 0;
 	
 	
 	/**
@@ -112,11 +120,11 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 * @param query The syntax tree as returned by ANTLR
 	 */
 	public PoliqarpPlusTree(String query) {
-		try {
+//		try {
 			process(query); 
-		} catch (NullPointerException e) {
-			throw new RuntimeException("Error handling query.");
-		}
+//		} catch (NullPointerException e) {
+//			throw new RuntimeException("Error handling query.");
+//		}
 		System.out.println(">>> "+requestMap.get("query")+" <<<");
         log.info(">>> " + requestMap.get("query") + " <<<");
 	}
@@ -184,9 +192,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		String nodeCat = getNodeCat(node);
 		openNodeCats.push(nodeCat);
 		
-		Integer stackedObjects = 0;
-		Integer stackedTokens= 0;
-		Integer stackedFields = 0;
+		stackedObjects = 0;
+		stackedTokens= 0;
+		stackedFields = 0;
 		
 		if (verbose ) {
 			System.err.println(" "+objectStack);
@@ -205,110 +213,79 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 
 		// cq_segments/sq_segments: token group
 		if (nodeCat.equals("cq_segments") || nodeCat.equals("sq_segments")) {
-			cqHasOcc = false;
+			cqHasOccSibling = false;
+			cqHasOccChild = false;
 			// disregard empty segments in simple queries (parsed by ANTLR as empty cq_segments) 
 			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position")));
 			if (!ignoreCq_segment) {
 				LinkedHashMap<String,Object> sequence = new LinkedHashMap<String,Object>();
-				objectStack.push(sequence);
-				stackedObjects++;
 				// Step 0:  cq_segments has 'occ' child -> introduce group as super group to the sequence/token/group
 				// this requires creating a group and inserting it at a suitable place
+				if (node.getParent().getChildCount()>curChild+2 && getNodeCat(node.getParent().getChild(curChild+2)).equals("occ")) {
+					cqHasOccSibling = true;
+					createOccGroup(node);
+				}
 				if (getNodeCat(node.getChild(node.getChildCount()-1)).equals("occ")) {
-					cqHasOcc = true;
-					LinkedHashMap<String,Object> occGroup = new LinkedHashMap<String,Object>();
-					occGroup.put("@type", "korap:group");
-					ArrayList<Object> groupOperands = new ArrayList<Object>();
-					occGroup.put("operands", groupOperands);
-					curOccGroup = occGroup;
-					objectStack.push(occGroup);
+					cqHasOccChild = true;
+				}
+				// Step I: decide type of element (one or more elements? -> token or sequence)
+				// take into account a possible 'occ' child with accompanying parantheses, therefore 3 extra children
+				int occExtraChildren = cqHasOccChild ? 3:0;
+				if (node.getChildCount()>1 + occExtraChildren) {
+					sequence.put("@type", "korap:sequence");
+					ArrayList<Object> sequenceOperands = new ArrayList<Object>();
+					sequence.put("operands", sequenceOperands);
+					objectStack.push(sequence);
 					stackedObjects++;
+				} else {
+					// if only child, make the sequence a mere korap:token...
+					// ... but only if it has a real token/element beneath it
+					if (getNodeCat(node.getChild(0)).equals("cq_segment")
+						|| getNodeCat(node.getChild(0)).equals("element")	) {
+						sequence.put("@type", "korap:token");
+						tokenStack.push(sequence);
+						stackedTokens++;
+						objectStack.push(sequence);
+						stackedObjects++;
+					// else, it's a group (with shrink()/spanclass/... as child)
+					} else {
+						sequence.put("@type", "korap:group");
+					}
+				}
+				// Step II: decide where to put this element 
+				// check if this is an argument for a containing occurrence group (see step 0)
+				if (cqHasOccSibling) {
+					ArrayList<Object> topGroupOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+					topGroupOperands.add(sequence);
+				// ...if not modified by occurrence, put into suitable super structure
+				} else {
 					if (openNodeCats.get(1).equals("query")) {
-						// top query node
-						if (node.getParent().getChildCount() == 1) {
+						// cq_segment is top query node
+						if (node.getParent().getChildCount()==1) {
 							// only child
-							requestMap.put("query", occGroup);
+							requestMap.put("query", sequence);
 						} else {
 							// not an only child, need to create containing sequence
-							if (node.getParent().getChild(0) == node) {
+							if (node.getParent().getChild(0).equals(node)) {
 								// if first child, create containing sequence and embed there
 								LinkedHashMap<String,Object> superSequence = new LinkedHashMap<String,Object>();
 								superSequence.put("@type", "korap:sequence");
 								ArrayList<Object> operands = new ArrayList<Object>();
-								operands.add(occGroup);
 								superSequence.put("operands", operands);
+								operands.add(sequence);
 								requestMap.put("query", superSequence);
-								objectStack.add(1, superSequence); // add at 2nd position to keep current cq_segment accessible
-								stackedObjects--;
+								objectStack.push(superSequence); // add at 2nd position to keep current cq_segment accessible
+								stackedObjects++;
 							} else {
 								// if not first child, add to previously created parent sequence
-								// parent sequence is at position 3 because of previously added groups
-								ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(3).get("operands");
-								topSequenceOperands.add(occGroup);
+								ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+								topSequenceOperands.add(sequence);
 							}
 						}
 					} else if (!objectStack.isEmpty()){
 						// embed in super sequence
-						int occExtraChild = cqHasOcc ? 1:0;
-						ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1+occExtraChild).get("operands");
-						topSequenceOperands.add(occGroup);
-					}
-				} else {
-					// Step I: decide type of element (one or more elements? -> token or sequence)
-					// take into account a possible 'occ' child
-					int occExtraChild = cqHasOcc ? 1:0;
-					if (node.getChildCount()>1+occExtraChild) {
-						sequence.put("@type", "korap:sequence");
-						ArrayList<Object> sequenceOperands = new ArrayList<Object>();
-						sequence.put("operands", sequenceOperands);
-					} else {
-						// if only child, make the sequence a mere korap:token...
-						// ... but only if it has a real token/element beneath it
-						if (getNodeCat(node.getChild(0)).equals("cq_segment")
-							|| getNodeCat(node.getChild(0)).equals("element")	) {
-							sequence.put("@type", "korap:token");
-							tokenStack.push(sequence);
-							stackedTokens++;
-						// else, it's a group (with shrink()/spanclass/... as child)
-						} else {
-							sequence.put("@type", "korap:group");
-						}
-					}
-					// Step II: decide where to put this element 
-					// check if this is an argument for a containing occurrence group (see step 0)
-					if (cqHasOcc) {
-						ArrayList<Object> topGroupOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
-						topGroupOperands.add(sequence);
-					// ...if not modified by occurrence, put into suitable super structure
-					} else {
-						if (openNodeCats.get(1).equals("query")) {
-							// cq_segment is top query node
-							if (node.getParent().getChildCount()==1) {
-								// only child
-								requestMap.put("query", sequence);
-							} else {
-								// not an only child, need to create containing sequence
-								if (node.getParent().getChild(0).equals(node)) {
-									// if first child, create containing sequence and embed there
-									LinkedHashMap<String,Object> superSequence = new LinkedHashMap<String,Object>();
-									superSequence.put("@type", "korap:sequence");
-									ArrayList<Object> operands = new ArrayList<Object>();
-									superSequence.put("operands", operands);
-									operands.add(sequence);
-									requestMap.put("query", superSequence);
-									objectStack.add(1, superSequence); // add at 2nd position to keep current cq_segment accessible
-									stackedObjects--;
-								} else {
-									// if not first child, add to previously created parent sequence
-									ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-									topSequenceOperands.add(sequence);
-								}
-							}
-						} else if (!objectStack.isEmpty()){
-							// embed in super sequence
-							ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-							topSequenceOperands.add(sequence);
-						}
+						ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+						topSequenceOperands.add(sequence);
 					}
 				}
 			}
@@ -331,15 +308,13 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				// in case cq_segments has already added the token
 				token = tokenStack.getFirst();
 			}
-			
 			curToken = token;
 			// Step II: start filling object and add to containing sequence
 			token.put("@type", "korap:token");
 			// add token to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the values from "field")
 			// take into account a possible 'occ' child
-			int occExtraChild = cqHasOcc ? 1:0;
-			if (node.getParent().getChildCount()>1+occExtraChild) {
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(onTopOfObjectStack+occExtraChild).get("operands");
+			if (node.getParent().getChildCount()>1) {				
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(onTopOfObjectStack).get("operands");
 				topSequenceOperands.add(token);
 			}
 		}
@@ -564,10 +539,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			span.put("operands", spanOperands);
 			// Step II: decide where to put the span
 			// add span to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the relevant info)
-//			if (node.getParent().getChildCount()>4) {
-//				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-//				topSequenceOperands.add(span);
-//			} else
 			if (openNodeCats.get(2).equals("query") && node.getParent().getChildCount() == 1) {
 				requestMap.put("query", span);	
 			} else if (objectStack.size()>1) {
@@ -687,6 +658,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		 */
 		for (int i=0; i<node.getChildCount(); i++) {
 			ParseTree child = node.getChild(i);
+			curChild = i;
 			processNode(child);
 		}
 				
@@ -709,6 +681,25 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		}
 		fieldsToPop.pop();
 		openNodeCats.pop();
+	}
+
+	@SuppressWarnings("unchecked")
+	private void createOccGroup(ParseTree node) {
+		LinkedHashMap<String,Object> occGroup = new LinkedHashMap<String,Object>();
+		occGroup.put("@type", "korap:group");
+		ArrayList<Object> groupOperands = new ArrayList<Object>();
+		occGroup.put("operands", groupOperands);
+		curOccGroup = occGroup;
+		objectStack.push(occGroup);
+		stackedObjects++;
+		// if only this group is on the object stack, add as top query element
+		if (objectStack.size()==1) {
+				requestMap.put("query", occGroup);
+		// embed in super sequence
+		} else {
+			ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+			topSequenceOperands.add(occGroup);
+		}		
 	}
 
 	/**
@@ -805,13 +796,14 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"[base=foo]*",
 //				"[base=foo]*[base=bar]",
 //				"[base=bar][base=foo]*",
-//				"([base=bar][base=foo])*",
-				"<s>([base=bar][base=foo])*",
+				"([base=bar][base=foo])*",
+//				"<s>([base=bar][base=foo])*",
+//				"<s>[orth=Mann]([base=bar][base=foo])*",
 //				"<s><np>([base=bar][base=foo])*"
 				
 				
 		};
-		PoliqarpPlusTree.verbose=true;
+//		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);

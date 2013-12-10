@@ -50,7 +50,7 @@ public class MetaQuerySerializationTest {
         b.append("author:Goethe");
         MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
 //        System.out.println("value until/since : " + query.stringify());
-        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Goethe\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"between\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-09\"},{\"@type\":\"korap:date\",\"@value\":\"2013-12-09\"}]}]}}]", query.stringify());
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Goethe\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"between\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"},{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.stringify());
 //        System.out.println();
     }
 
@@ -62,7 +62,7 @@ public class MetaQuerySerializationTest {
         b.append("author:Hesse");
         MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
         System.out.println("Running date check (until) with additional attribute author");
-        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Hesse\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"until\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-09\"}]}]}}]", query.stringify());
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Hesse\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"until\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.stringify());
 //        System.out.println("value until : " + query.stringify());
 //        System.out.println();
     }
@@ -77,7 +77,7 @@ public class MetaQuerySerializationTest {
 //        System.out.println("value since : " + query.stringify());
 //        System.out.println();
         System.out.println("Running date check (since) with additional attribute author");
-        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Kafka\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"since\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-09\"}]}]}}]", query.stringify());
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Kafka\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"since\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.stringify());
     }
 
     @Test
