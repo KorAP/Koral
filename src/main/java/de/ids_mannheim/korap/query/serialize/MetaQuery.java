@@ -254,7 +254,6 @@ public class MetaQuery {
      * @return
      */
     private Multimap<String, String> resEq(String queries) {
-	    System.out.println("======= ENTERED QUERIES " + queries + " =======");
 	    Multimap<String, String> qmap = ArrayListMultimap.create();
         String[] spl = queries.split(" AND ");
         for (String query : spl) {

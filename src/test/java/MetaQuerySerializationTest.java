@@ -43,21 +43,22 @@ public class MetaQuerySerializationTest {
     @Test
     public void testDates() throws IOException {
         StringBuffer b = new StringBuffer();
-        b.append("pubDate:<" + String.valueOf(new DateTime().getMillis()));
+        b.append("pubDate:>2013-04-01");
         b.append(" AND ");
-        b.append("pubDate:>" + String.valueOf(new DateTime().getMillis() + 2));
+        b.append("pubDate:<2012-04-01");
         b.append(" AND ");
         b.append("author:Goethe");
         MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
-//        System.out.println("value until/since : " + query.stringify());
-        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Goethe\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"between\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"},{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.stringify());
+        System.out.println("value until/since : " + query.stringify());
+        System.out.println("meta value until/since " + query.toMeta());
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Goethe\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"between\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2012-04-01\"},{\"@type\":\"korap:date\",\"@value\":\"2013-04-01\"}]}]}}]", query.stringify());
 //        System.out.println();
     }
 
     @Test
     public void testUntil() throws IOException {
         StringBuffer b = new StringBuffer();
-        b.append("pubDate:>" + String.valueOf(new DateTime().getMillis()));
+        b.append("pubDate:>2013-12-10");
         b.append(" AND ");
         b.append("author:Hesse");
         MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
@@ -70,11 +71,12 @@ public class MetaQuerySerializationTest {
     @Test
     public void testSince() throws IOException {
         StringBuffer b = new StringBuffer();
-        b.append("pubDate:<" + String.valueOf(new DateTime().getMillis()));
+        b.append("pubDate:<2013-12-10");
         b.append(" AND ");
         b.append("author:Kafka");
         MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
-//        System.out.println("value since : " + query.stringify());
+        System.out.println("value since : " + query.stringify());
+        System.out.println("meta value since " + query.toMeta());
 //        System.out.println();
         System.out.println("Running date check (since) with additional attribute author");
         Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Kafka\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"since\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.stringify());
@@ -117,7 +119,7 @@ public class MetaQuerySerializationTest {
     @Test
     public void testLists() {
         StringBuffer b = new StringBuffer();
-        b.append("pubDate:<" + String.valueOf(new DateTime().getMillis()));
+        b.append("pubDate:<2013-12-10");
         b.append(" AND ");
         b.append("author:Kafka");
         MetaQuery query = new MetaQuery().addMetaFilter(b.toString());
@@ -131,7 +133,7 @@ public class MetaQuerySerializationTest {
     @Test
     public void testJSONArray() throws JsonProcessingException {
         StringBuffer b = new StringBuffer();
-        b.append("pubDate:<" + String.valueOf(new DateTime().getMillis()));
+        b.append("pubDate:<2013-12-10");
         b.append(" AND ");
         b.append("author:Kafka");
         MetaQuery q = new MetaQuery().addMetaExtend(b.toString());
