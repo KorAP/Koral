@@ -104,8 +104,17 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 * Keeps track of how many objects there are to pop after every recursion of {@link #processNode(ParseTree)}
 	 */
 	LinkedList<Integer> fieldsToPop = new LinkedList<Integer>();
-	public static boolean verbose = false;
-	int curChild = 0;
+	/**
+	 * If true, print debug statements
+	 */
+	public static boolean debug = false;
+	/**
+	 * Index of the current child of its parent (needed for relating occ elements to their operands).
+	 */
+	int curChildIndex = 0;
+	/**
+	 * 
+	 */
 	Integer stackedObjects = 0;
 	Integer stackedTokens= 0;
 	Integer stackedFields = 0;
@@ -120,11 +129,17 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 * @param query The syntax tree as returned by ANTLR
 	 */
 	public PoliqarpPlusTree(String query) {
-//		try {
+		try {
 			process(query); 
-//		} catch (NullPointerException e) {
-//			throw new RuntimeException("Error handling query.");
-//		}
+		} catch (NullPointerException e) {
+			if (query.contains(" ")) {
+				System.err.println("Warning: It seems like your query contains illegal whitespace characters. Trying again with whitespaces removed...");
+				query = query.replaceAll(" ", "");
+				process(query);
+			} else {
+				throw new RuntimeException("Error handling query.");
+			}
+		}
 		System.out.println(">>> "+requestMap.get("query")+" <<<");
         log.info(">>> " + requestMap.get("query") + " <<<");
 	}
@@ -196,7 +211,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		stackedTokens= 0;
 		stackedFields = 0;
 		
-		if (verbose ) {
+		if (debug ) {
 			System.err.println(" "+objectStack);
 			System.err.println(" "+tokenStack);
 			System.out.println(openNodeCats);
@@ -221,7 +236,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				LinkedHashMap<String,Object> sequence = new LinkedHashMap<String,Object>();
 				// Step 0:  cq_segments has 'occ' child -> introduce group as super group to the sequence/token/group
 				// this requires creating a group and inserting it at a suitable place
-				if (node.getParent().getChildCount()>curChild+2 && getNodeCat(node.getParent().getChild(curChild+2)).equals("occ")) {
+				if (node.getParent().getChildCount()>curChildIndex+2 && getNodeCat(node.getParent().getChild(curChildIndex+2)).equals("occ")) {
 					cqHasOccSibling = true;
 					createOccGroup(node);
 				}
@@ -658,7 +673,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		 */
 		for (int i=0; i<node.getChildCount(); i++) {
 			ParseTree child = node.getChild(i);
-			curChild = i;
+			curChildIndex = i;
 			processNode(child);
 		}
 				
@@ -796,10 +811,16 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"[base=foo]*",
 //				"[base=foo]*[base=bar]",
 //				"[base=bar][base=foo]*",
-				"([base=bar][base=foo])*",
+//				"([base=bar][base=foo])*",
+//				"([base=bar][base  =  foo])*",
 //				"<s>([base=bar][base=foo])*",
 //				"<s>[orth=Mann]([base=bar][base=foo])*",
-//				"<s><np>([base=bar][base=foo])*"
+//				"<s><np>([base=bar][base=foo])*",
+				"shrink(1:contains(<s>,{1:<np>}))",
+				"contains(<s>,startswith(<np>,[p=Det]))",
+				"shrink(1: contains(<s>,{1:<np>}))",
+				"contains(<s>, startswith(<np>,[p=Det]))",
+				
 				
 				
 		};
@@ -807,7 +828,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		for (String q : queries) {
 			try {
 				System.out.println(q);
-				System.out.println(PoliqarpPlusTree.parsePoliqarpQuery(q).toStringTree(PoliqarpPlusTree.poliqarpParser));
+//				System.out.println(PoliqarpPlusTree.parsePoliqarpQuery(q).toStringTree(PoliqarpPlusTree.poliqarpParser));
 				@SuppressWarnings("unused")
 				PoliqarpPlusTree pt = new PoliqarpPlusTree(q);
 				System.out.println(q);
