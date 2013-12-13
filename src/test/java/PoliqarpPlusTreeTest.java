@@ -75,6 +75,12 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree("[base=Mann&(cas=N|cas=A)]");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(cof1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+
+
+		assertEquals(
+		    new PoliqarpPlusTree(" [ base=Mann & ( cas=N | cas=A)] ").getRequestMap().get("query").toString(),
+		    new PoliqarpPlusTree("[base=Mann &(cas=N|cas=A)]").getRequestMap().get("query").toString()
+	        );
 	}
 	
 	@Test
