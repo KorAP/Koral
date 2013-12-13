@@ -452,7 +452,7 @@ public class PoliqarpPlusTreeTest {
 					"]}" +
 				"]}" +
 			"]}";
-		ppt = new PoliqarpPlusTree("shrink(1: startswith(<s>,{1:<np>}))");
+		ppt = new PoliqarpPlusTree("shrink(1:startswith(<s>,{1:<np>}))");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(shr4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
@@ -476,7 +476,7 @@ public class PoliqarpPlusTreeTest {
 					"]}" +
 				"]}" +
 			"]}";
-		ppt = new PoliqarpPlusTree("shrink(3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}})) ");
+		ppt = new PoliqarpPlusTree("shrink(3:startswith(<s>,{3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}})) ");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(shr5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
