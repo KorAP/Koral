@@ -3,9 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import de.ids_mannheim.korap.util.QueryException;
-
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -29,7 +27,7 @@ public class QuerySerializer {
 
     /**
      * @param args
-     * @throws QueryException 
+     * @throws QueryException
      */
     public static void main(String[] args) {
         /*
@@ -86,8 +84,8 @@ public class QuerySerializer {
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (QueryException e) {
-				e.printStackTrace();
-			}
+                e.printStackTrace();
+            }
         }
     }
 
@@ -101,7 +99,7 @@ public class QuerySerializer {
      * @throws JsonGenerationException
      * @throws JsonMappingException
      * @throws IOException
-     * @throws QueryException 
+     * @throws QueryException
      */
     public void run(String query, String queryLanguage, String outFile)
             throws JsonGenerationException, JsonMappingException, IOException, QueryException {
@@ -120,7 +118,7 @@ public class QuerySerializer {
 
     public String run(String query, String ql, List<String> parents,
                       String cli, String cri, int cls, int crs, int page, int num)
-            throws QueryException{
+            throws QueryException {
         if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
 //		} else if (ql.toLowerCase().equals("cosmas")) {
@@ -137,7 +135,7 @@ public class QuerySerializer {
         try {
             requestMap.put("meta", metaQuery.raw());
             requestMap = QueryUtils.addParameters(requestMap, page, num,
-                    cli, cri, cls, crs);
+                    cli, cri, cls, crs, true);
             String res = mapper.writeValueAsString(requestMap);
             return res;
         } catch (IOException e) {

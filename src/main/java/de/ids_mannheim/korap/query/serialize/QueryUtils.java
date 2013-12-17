@@ -117,7 +117,7 @@ public class QueryUtils {
     }
 
     public static Map addParameters(Map request, int page, int num, String cli, String cri,
-                                    int cls, int crs) {
+                                    int cls, int crs, boolean cutoff) {
         Map ctx = new LinkedHashMap();
         List left = new ArrayList();
         left.add(cli);
@@ -131,6 +131,7 @@ public class QueryUtils {
         request.put("startPage", page);
         request.put("count", num);
         request.put("context", ctx);
+        request.put("cutOff", cutoff);
 
         return request;
     }

@@ -16,9 +16,6 @@ import java.util.Map;
  */
 public class MetaTypes {
 
-    public static final String Y = "yyyy";
-    public static final String YM = "yyyy-mm";
-    public static final String YMD = "yyyy-mm-dd";
     private ObjectMapper mapper;
 
     public MetaTypes() {
