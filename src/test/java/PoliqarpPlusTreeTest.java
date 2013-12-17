@@ -3,6 +3,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import de.ids_mannheim.korap.query.serialize.PoliqarpPlusTree;
+import de.ids_mannheim.korap.util.QueryException;
 
 public class PoliqarpPlusTreeTest {
 	
@@ -15,7 +16,7 @@ public class PoliqarpPlusTreeTest {
 		return str.equals(mapStr);
 	}
 	
-	private boolean equalsQueryContent(String res, String query) {
+	private boolean equalsQueryContent(String res, String query) throws QueryException {
 		res = res.replaceAll(" ", "");
 		ppt = new PoliqarpPlusTree(query);
 		String queryMap = ppt.getRequestMap().get("query").toString().replaceAll(" ", "");
@@ -23,14 +24,14 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testContext() {
+	public void testContext() throws QueryException {
 		String contextString = "{korap=http://korap.ids-mannheim.de/ns/query, @language=de, operands={@id=korap:operands, @container=@list}, relation={@id=korap:relation, @type=korap:relation#types}, class={@id=korap:class, @type=xsd:integer}, query=korap:query, filter=korap:filter, meta=korap:meta}";
 		ppt = new PoliqarpPlusTree("[base=test]");
 		assertTrue(equalsContent(contextString, ppt.getRequestMap().get("@context")));
 	}
 	
 	@Test
-	public void testSingleTokens() {
+	public void testSingleTokens() throws QueryException {
 		// [base=Mann]
 		String token1 = "{@type=korap:token, @value={@type=korap:term, @value=base:Mann, relation==}}";
 		assertTrue(equalsQueryContent(token1, "[base=Mann]"));
@@ -49,7 +50,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testElements() {
+	public void testElements() throws QueryException {
 		// <s>
 		String elem1 = "{@type=korap:element, @value=s}";
 		assertTrue(equalsQueryContent(elem1, "<s>"));
@@ -60,7 +61,7 @@ public class PoliqarpPlusTreeTest {
 	}
 
 	@Test
-	public void testCoordinatedFields() {
+	public void testCoordinatedFields() throws QueryException {
 		// [base=Mann&(cas=N|cas=A)]
 		String cof1 = 
 			"{@type=korap:token, @value=" +
@@ -84,7 +85,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testOccurrence() {
+	public void testOccurrence() throws QueryException {
 		// [base=foo]*
 		String occ1 = "{@type=korap:group, operands=[" +
 					     "{@type=korap:token, @value={@type=korap:term, @value=base:foo, relation==}}" +
@@ -196,7 +197,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testTokenSequence() {
+	public void testTokenSequence() throws QueryException {
 		// [base=Mann][orth=Frau]
 		String seq1 = "{@type=korap:sequence, operands=[" +
 				"{@type=korap:token, @value={@type=korap:term, @value=base:Mann, relation==}}, " +
@@ -214,7 +215,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testDisjSegments() {
+	public void testDisjSegments() throws QueryException {
 		// ([base=der]|[base=das])[base=Schild]
 		String disj1 = 
 				"{@type=korap:sequence, operands=[" +
@@ -243,7 +244,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testTokenElemSequence() {
+	public void testTokenElemSequence() throws QueryException {
 		// [base=Mann]<vp>
 		String seq1 = "{@type=korap:sequence, operands=[" +
 				"{@type=korap:token, @value={@type=korap:term, @value=base:Mann, relation==}}, " +
@@ -268,7 +269,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testElemSequence() {
+	public void testElemSequence() throws QueryException {
 		// <np><vp>
 		String seq1 = "{@type=korap:sequence, operands=[" +
 				"{@type=korap:element, @value=np}," +
@@ -286,7 +287,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test 
-	public void testClasses() {
+	public void testClasses() throws QueryException {
 		// {[base=Mann]}
 		String cls1 = "{@type=korap:group, class=0, operands=[" +
 				"{@type=korap:token, @value={@type=korap:term, @value=base:Mann, relation==}}" +
@@ -341,7 +342,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testPositions() {
+	public void testPositions() throws QueryException {
 		// contains(<s>,<np>)
 		String pos1 = "{@type=korap:group, relation=position, position=contains, operands=[" +
 				  "{@type=korap:element, @value=s}," +
@@ -383,7 +384,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testNestedPositions() {
+	public void testNestedPositions() throws QueryException {
 		// contains(<s>,startswith(<np>,[orth=Der]))
 		String npos1 = 
 			"{@type=korap:group, relation=position, position=contains, operands=[" +
@@ -399,7 +400,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testShrinkSplit() {
+	public void testShrinkSplit() throws QueryException {
 		// shrink([orth=Der]{[orth=Mann]})
 		String shr1 = 
 			"{@type=korap:group, relation=shrink, shrink=0, operands=[" +
@@ -488,10 +489,41 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testLayers() {
+	public void testLayers() throws QueryException {
 		// [base=Mann]
 		String layer1 = "{@type=korap:token, @value={@type=korap:term, @value=tt/base:Mann, relation==}}";
 		assertTrue(equalsQueryContent(layer1, "[tt/base=Mann]"));
+		
+	}
+	
+	@Test
+	public void testAlign() {
+		// [orth=der]^[orth=Mann]
+		String align1 = 
+				"{@type=korap:group, relation=align, align=1, operands=[" +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:der, relation==}}," +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:Mann, relation==}}" +
+				"]}";
+		ppt = new PoliqarpPlusTree("[orth=der]^[orth=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(align1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// "([base=a]^[base=b])|[base=c]",
+		String align2 = 
+				"{@type=korap:group, relation=or, operands=[" +
+						"{@type=korap:group, relation=align, align=1, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:a, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=base:b, relation==}}" +
+						"]}," +
+						"{@type=korap:token, @value={@type=korap:term, @value=base:c, relation==}}" +
+				"]}";
+		ppt = new PoliqarpPlusTree("([base=a]^[base=b])|[base=c]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(align2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
+	public void testSimpleQueries() {
 		
 	}
 }

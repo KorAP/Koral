@@ -3,6 +3,9 @@ package de.ids_mannheim.korap.query.serialize;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.ids_mannheim.korap.util.QueryException;
+
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -26,6 +29,7 @@ public class QuerySerializer {
 
     /**
      * @param args
+     * @throws QueryException 
      */
     public static void main(String[] args) {
         /*
@@ -81,7 +85,9 @@ public class QuerySerializer {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            } catch (QueryException e) {
+				e.printStackTrace();
+			}
         }
     }
 
@@ -95,9 +101,10 @@ public class QuerySerializer {
      * @throws JsonGenerationException
      * @throws JsonMappingException
      * @throws IOException
+     * @throws QueryException 
      */
     public void run(String query, String queryLanguage, String outFile)
-            throws JsonGenerationException, JsonMappingException, IOException {
+            throws JsonGenerationException, JsonMappingException, IOException, QueryException {
         if (queryLanguage.equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
 //		} else if (queryLanguage.equals("cosmas")) {
@@ -105,7 +112,7 @@ public class QuerySerializer {
         } else if (queryLanguage.equals("poliqarpplus")) {
             ast = new PoliqarpPlusTree(query);
         } else {
-            throw new IllegalArgumentException(queryLanguage + " is not a supported query language!");
+            throw new QueryException(queryLanguage + " is not a supported query language!");
         }
         Map<String, Object> requestMap = ast.getRequestMap();
         mapper.writeValue(new File(outFile), requestMap);
@@ -113,7 +120,7 @@ public class QuerySerializer {
 
     public String run(String query, String ql, List<String> parents,
                       String cli, String cri, int cls, int crs, int page, int num)
-            throws IllegalArgumentException{
+            throws QueryException{
         if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
 //		} else if (ql.toLowerCase().equals("cosmas")) {
@@ -121,7 +128,7 @@ public class QuerySerializer {
         } else if (ql.toLowerCase().equals("poliqarpplus")) {
             ast = new PoliqarpPlusTree(query);
         } else {
-            throw new IllegalArgumentException(ql + " is not a supported query language!");
+            throw new QueryException(ql + " is not a supported query language!");
         }
         Map<String, Object> requestMap = ast.getRequestMap();
         MetaQuery metaQuery = new MetaQuery();

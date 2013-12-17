@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import de.ids_mannheim.korap.query.PoliqarpPlusLexer;
 import de.ids_mannheim.korap.query.PoliqarpPlusParser;
 import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
+import de.ids_mannheim.korap.util.QueryException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,6 +128,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 * The class further maintains a set of stacks which effectively keep track of which objects to embed in which containing objects. 
 	 * 
 	 * @param query The syntax tree as returned by ANTLR
+	 * @throws QueryException 
 	 */
 	public PoliqarpPlusTree(String query) {
 		try {
@@ -137,7 +139,12 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				query = query.replaceAll(" ", "");
 				process(query);
 			} else {
-				throw new RuntimeException("Error handling query.");
+				try {
+					throw new QueryException("Error handling query.");
+				} catch (QueryException e1) {
+					e1.printStackTrace();
+					System.exit(1);
+				}
 			}
 		}
 		System.out.println(">>> "+requestMap.get("query")+" <<<");
@@ -178,11 +185,15 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	
 	@Override
 	public void process(String query) {
-		ParseTree tree;
+		ParseTree tree = null;
 		try {
 			tree = parsePoliqarpQuery(query);
-		} catch (IllegalArgumentException e) {
-			tree = parsePoliqarpQuery(query.replaceAll(" ", ""));
+		} catch (QueryException e) {
+			try {
+				tree = parsePoliqarpQuery(query.replaceAll(" ", ""));
+			} catch (QueryException e1) {
+				System.exit(1);
+			}
 		}
 		System.out.println("Processing PoliqarpPlus");
 		prepareContext();
@@ -262,7 +273,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 						stackedTokens++;
 						objectStack.push(sequence);
 						stackedObjects++;
-					// else, it's a group (with shrink()/spanclass/... as child)
+					// else, it's a group (with shrink()/spanclass/align... as child)
 					} else {
 						sequence.put("@type", "korap:group");
 					}
@@ -506,6 +517,36 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			} 
 		}
 		
+		if (nodeCat.equals("cq_seg_align")) {
+			LinkedHashMap<String,Object> alignGroup = new LinkedHashMap<String,Object>();
+			objectStack.push(alignGroup);
+			stackedObjects++;
+			// Step I: get info
+			// find position of ^ operator
+			Integer i;
+			for (i=0; i<node.getChildCount(); i++) {
+				if (node.getChild(i).toStringTree(poliqarpParser).startsWith("^")) {
+					break;
+				}
+			}
+			// fill group
+			alignGroup.put("@type", "korap:group");
+			alignGroup.put("relation", "align");
+			alignGroup.put("align", i);
+			alignGroup.put("operands", new ArrayList<Object>());
+			// Step II: decide where to put the group
+			// add group to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the relevant info)
+			if (node.getParent().getChildCount()>1) {
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+				topSequenceOperands.add(alignGroup); 
+			} else if (openNodeCats.get(2).equals("query")) {
+				requestMap.put("query", alignGroup);	
+			} else {
+				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+				topSequenceOperands.add(alignGroup); 
+			}
+		}
+		
 		if (nodeCat.equals("element")) {
 			// Step I: determine whether to create new token or get token from the stack (if added by cq_segments)
 			LinkedHashMap<String, Object> elem;
@@ -747,24 +788,23 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		return false;
 	}
 	
-	private static void checkUnbalancedPars(String q) throws IllegalArgumentException {
+	private static void checkUnbalancedPars(String q) throws QueryException {
 		int openingPars = StringUtils.countMatches(q, "(");
 		int closingPars = StringUtils.countMatches(q, ")");
 		int openingBrkts = StringUtils.countMatches(q, "[");
 		int closingBrkts = StringUtils.countMatches(q, "]");
 		int openingBrcs = StringUtils.countMatches(q, "{");
 		int closingBrcs = StringUtils.countMatches(q, "}");
-		// TODO change to Query Exception as soon as KorAP-lucene-index installs
-		if (openingPars != closingPars) throw new IllegalArgumentException(
+		if (openingPars != closingPars) throw new QueryException(
 				"Your query string contains an unbalanced number of parantheses.");
-		if (openingBrkts != closingBrkts) throw new IllegalArgumentException(
+		if (openingBrkts != closingBrkts) throw new QueryException(
 				"Your query string contains an unbalanced number of brackets.");
-		if (openingBrcs != closingBrcs) throw new IllegalArgumentException(
+		if (openingBrcs != closingBrcs) throw new QueryException(
 				"Your query string contains an unbalanced number of braces.");
 		
 	}
 	
-	private static ParserRuleContext parsePoliqarpQuery (String p) throws IllegalArgumentException {
+	private static ParserRuleContext parsePoliqarpQuery (String p) throws QueryException {
 		checkUnbalancedPars(p);
 		
 		Lexer poliqarpLexer = new PoliqarpPlusLexer((CharStream)null);
@@ -792,8 +832,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	      System.err.println( e.getMessage() );
 	    }
 	    
-	    // TODO change to Query Exception as soon as KorAP-lucene-index installs
-	    if (tree==null) throw new IllegalArgumentException(
+	    if (tree==null) throw new QueryException(
 	    		"The query you specified could not be processed. Please make sure it is well-formed.");
 	    
 	    // Return the generated tree
@@ -816,19 +855,20 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"<s>([base=bar][base=foo])*",
 //				"<s>[orth=Mann]([base=bar][base=foo])*",
 //				"<s><np>([base=bar][base=foo])*",
-				"shrink(1:contains(<s>,{1:<np>}))",
-				"contains(<s>,startswith(<np>,[p=Det]))",
-				"shrink(1: contains(<s>,{1:<np>}))",
-				"contains(<s>, startswith(<np>,[p=Det]))",
-				
-				
-				
+//				"shrink(1:contains(<s>,{1:<np>}))",
+//				"contains(<s>,startswith(<np>,[p=Det]))",
+//				"shrink(1: contains(<s>,{1:<np>}))",
+//				"contains(<s>, startswith(<np>,[p=Det]))",
+//				
+//				"[orth=der]^[orth=Mann]",
+//				"([base=bar][base=foo])*",
+				"([base=a]^[base=b])|[base=c]"
 		};
-//		PoliqarpPlusTree.verbose=true;
+		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);
-//				System.out.println(PoliqarpPlusTree.parsePoliqarpQuery(q).toStringTree(PoliqarpPlusTree.poliqarpParser));
+				System.out.println(PoliqarpPlusTree.parsePoliqarpQuery(q).toStringTree(PoliqarpPlusTree.poliqarpParser));
 				@SuppressWarnings("unused")
 				PoliqarpPlusTree pt = new PoliqarpPlusTree(q);
 				System.out.println(q);

@@ -3,6 +3,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 import de.ids_mannheim.korap.query.serialize.MetaQuery;
+import de.ids_mannheim.korap.util.QueryException;
+
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
@@ -83,7 +85,7 @@ public class MetaQuerySerializationTest {
     }
 
     @Test
-    public void testGenerator() {
+    public void testGenerator() throws QueryException {
                    /*
          * just for testing...
 		 */
