@@ -44,7 +44,7 @@
      <dependency>
     	<groupId>KorAP-modules</groupId>
     	<artifactId>KorAP-lucene-index</artifactId>
-    	<version>0.24</version>
+    	<version>LATEST</version>
      </dependency>
       <dependency>
           <groupId>junit</groupId>

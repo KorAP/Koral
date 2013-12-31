@@ -222,7 +222,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		stackedTokens= 0;
 		stackedFields = 0;
 		
-		if (debug ) {
+		if (debug) {
 			System.err.println(" "+objectStack);
 			System.err.println(" "+tokenStack);
 			System.out.println(openNodeCats);
@@ -242,7 +242,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			cqHasOccSibling = false;
 			cqHasOccChild = false;
 			// disregard empty segments in simple queries (parsed by ANTLR as empty cq_segments) 
-			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position")));
+			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position") || getNodeCat(node.getChild(0)).equals("position")));
 			if (!ignoreCq_segment) {
 				LinkedHashMap<String,Object> sequence = new LinkedHashMap<String,Object>();
 				// Step 0:  cq_segments has 'occ' child -> introduce group as super group to the sequence/token/group
@@ -517,22 +517,14 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			} 
 		}
 		
-		if (nodeCat.equals("cq_seg_align")) {
+		if (nodeCat.equals("align")) {
 			LinkedHashMap<String,Object> alignGroup = new LinkedHashMap<String,Object>();
 			objectStack.push(alignGroup);
-			stackedObjects++;
+//			stackedObjects++;
 			// Step I: get info
-			// find position of ^ operator
-			Integer i;
-			for (i=0; i<node.getChildCount(); i++) {
-				if (node.getChild(i).toStringTree(poliqarpParser).startsWith("^")) {
-					break;
-				}
-			}
 			// fill group
 			alignGroup.put("@type", "korap:group");
-			alignGroup.put("relation", "align");
-			alignGroup.put("align", i);
+			alignGroup.put("relation", "left-align");
 			alignGroup.put("operands", new ArrayList<Object>());
 			// Step II: decide where to put the group
 			// add group to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the relevant info)
@@ -779,7 +771,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 * @param childCat The category of the potential child.
 	 * @return true iff one or more children belong to the specified category
 	 */
-	private boolean hasChild(ParseTree node, String childCat) {
+	public boolean hasChild(ParseTree node, String childCat) {
 		for (int i=0; i<node.getChildCount(); i++) {
 			if (getNodeCat(node.getChild(i)).equals(childCat)) {
 				return true;
@@ -857,12 +849,11 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"<s><np>([base=bar][base=foo])*",
 //				"shrink(1:contains(<s>,{1:<np>}))",
 //				"contains(<s>,startswith(<np>,[p=Det]))",
-//				"shrink(1: contains(<s>,{1:<np>}))",
-//				"contains(<s>, startswith(<np>,[p=Det]))",
+//				"contains(<s>, startswith(<np>,[p=Det]))",base=c]",
 //				
-//				"[orth=der]^[orth=Mann]",
+				"[orth=der]^[orth=Mann]",
 //				"([base=bar][base=foo])*",
-				"([base=a]^[base=b])|[base=c]"
+				"([base=a]^[base=b])|[base=c]",
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {

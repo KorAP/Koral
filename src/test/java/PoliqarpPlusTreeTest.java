@@ -488,6 +488,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(shr5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
+	
 	@Test
 	public void testLayers() throws QueryException {
 		// [base=Mann]
@@ -500,9 +501,11 @@ public class PoliqarpPlusTreeTest {
 	public void testAlign() {
 		// [orth=der]^[orth=Mann]
 		String align1 = 
-				"{@type=korap:group, relation=align, align=1, operands=[" +
+				"{@type=korap:sequence, operands=[" +
 					"{@type=korap:token, @value={@type=korap:term, @value=orth:der, relation==}}," +
-					"{@type=korap:token, @value={@type=korap:term, @value=orth:Mann, relation==}}" +
+					"{@type=korap:group, relation=left-align, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:Mann, relation==}}" +
+					"]}" +
 				"]}";
 		ppt = new PoliqarpPlusTree("[orth=der]^[orth=Mann]");
 		map = ppt.getRequestMap().get("query").toString();
@@ -511,9 +514,11 @@ public class PoliqarpPlusTreeTest {
 		// "([base=a]^[base=b])|[base=c]",
 		String align2 = 
 				"{@type=korap:group, relation=or, operands=[" +
-						"{@type=korap:group, relation=align, align=1, operands=[" +
+						"{@type=korap:sequence, operands=[" +
 							"{@type=korap:token, @value={@type=korap:term, @value=base:a, relation==}}," +
-							"{@type=korap:token, @value={@type=korap:term, @value=base:b, relation==}}" +
+							"{@type=korap:group, relation=left-align, operands=[" +
+								"{@type=korap:token, @value={@type=korap:term, @value=base:b, relation==}}" +
+							"]}" +
 						"]}," +
 						"{@type=korap:token, @value={@type=korap:term, @value=base:c, relation==}}" +
 				"]}";
