@@ -65,6 +65,19 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 */
 	boolean negField = false;
 	/**
+	 * Flag that indicates whether subsequent element is to be aligned.
+	 */
+	boolean alignNext = false;
+	/**
+	 * Flag that indicates whether current element has been aligned.
+	 */
+	boolean isAligned = false;
+	/**
+	 * Indicates a sequence which has an align operator as its child. Needed for deciding
+	 * when to close the align group object.
+	 */
+//	ParseTree alignedSequence = null;
+	/**
 	 * Parser object deriving the ANTLR parse tree.
 	 */
 	static Parser poliqarpParser;
@@ -215,6 +228,11 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		if (visited.contains(node)) return;
 		else visited.add(node);
 		
+		if (alignNext) {
+			alignNext=false;
+			isAligned=true;
+		}
+		
 		String nodeCat = getNodeCat(node);
 		openNodeCats.push(nodeCat);
 		
@@ -242,7 +260,13 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			cqHasOccSibling = false;
 			cqHasOccChild = false;
 			// disregard empty segments in simple queries (parsed by ANTLR as empty cq_segments) 
-			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position") || getNodeCat(node.getChild(0)).equals("position")));
+			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position")));
+			// ignore this node if it only serves as an aligned sequence container
+			if (node.getChildCount()>1) {
+				if (getNodeCat(node.getChild(1)).equals("cq_segments") && hasChild(node.getChild(1), "align")) {
+					ignoreCq_segment = true;
+				}
+			}
 			if (!ignoreCq_segment) {
 				LinkedHashMap<String,Object> sequence = new LinkedHashMap<String,Object>();
 				// Step 0:  cq_segments has 'occ' child -> introduce group as super group to the sequence/token/group
@@ -267,6 +291,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 					// if only child, make the sequence a mere korap:token...
 					// ... but only if it has a real token/element beneath it
 					if (getNodeCat(node.getChild(0)).equals("cq_segment")
+						|| getNodeCat(node.getChild(0)).equals("sq_segment")
 						|| getNodeCat(node.getChild(0)).equals("element")	) {
 						sequence.put("@type", "korap:token");
 						tokenStack.push(sequence);
@@ -485,13 +510,15 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			String word = node.getChild(0).toStringTree(poliqarpParser);
 			LinkedHashMap<String,Object> tokenValues = new LinkedHashMap<String,Object>();
 			token.put("@value", tokenValues);
-			tokenValues.put("orth", word);
+			tokenValues.put("@type", "korap:term");
+			tokenValues.put("@value", "orth:"+word);
 			tokenValues.put("relation", "=");
 			// add token to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the values from "field")
 			if (node.getParent().getChildCount()>1) {
 				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 				topSequenceOperands.add(token);
 			}
+			visited.add(node.getChild(0));
 		}
 		
 		if (nodeCat.equals("re_query")) {
@@ -518,9 +545,13 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		}
 		
 		if (nodeCat.equals("align")) {
+			alignNext = true;
 			LinkedHashMap<String,Object> alignGroup = new LinkedHashMap<String,Object>();
+			// push but don't increase the stackedObjects counter in order to keep this
+			// group open until the mother cq_segments node will be closed, since the
+			// operands are siblings of this align node rather than children, i.e. the group
+			// would be removed from the stack before seeing its operands.
 			objectStack.push(alignGroup);
-//			stackedObjects++;
 			// Step I: get info
 			// fill group
 			alignGroup.put("@type", "korap:group");
@@ -537,6 +568,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 				topSequenceOperands.add(alignGroup); 
 			}
+			visited.add(node.getChild(0));
 		}
 		
 		if (nodeCat.equals("element")) {
@@ -715,6 +747,12 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			negField = !negField;
 		}
 		
+		// pop the align group that was introduced by previous 'align' but never closed
+		if (isAligned) {
+			isAligned=false;
+			objectStack.pop();
+		}
+		
 		// Stuff that happens when leaving a node (taking items off the stacks)
 		for (int i=0; i<objectsToPop.get(0); i++) {
 			objectStack.pop();
@@ -854,6 +892,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				"[orth=der]^[orth=Mann]",
 //				"([base=bar][base=foo])*",
 				"([base=a]^[base=b])|[base=c]",
+				"Baum | Stein"
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {
