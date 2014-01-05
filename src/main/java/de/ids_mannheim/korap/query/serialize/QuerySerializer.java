@@ -117,7 +117,7 @@ public class QuerySerializer {
     }
 
     public String run(String query, String ql, List<String> parents,
-                      String cli, String cri, int cls, int crs, int page, int num)
+                      String cli, String cri, int cls, int crs, int num, int page)
             throws QueryException {
         if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
