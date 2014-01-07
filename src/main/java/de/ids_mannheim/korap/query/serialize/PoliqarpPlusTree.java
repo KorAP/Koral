@@ -7,8 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -18,7 +16,6 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.commons.lang.StringUtils;
 
 import de.ids_mannheim.korap.query.PoliqarpPlusLexer;
 import de.ids_mannheim.korap.query.PoliqarpPlusParser;
@@ -233,7 +230,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			isAligned=true;
 		}
 		
-		String nodeCat = getNodeCat(node);
+		String nodeCat = QueryUtils.getNodeCat(node);
 		openNodeCats.push(nodeCat);
 		
 		stackedObjects = 0;
@@ -260,10 +257,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			cqHasOccSibling = false;
 			cqHasOccChild = false;
 			// disregard empty segments in simple queries (parsed by ANTLR as empty cq_segments) 
-			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position")));
+			ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(poliqarpParser).equals(" ") || QueryUtils.getNodeCat(node.getChild(0)).equals("spanclass") || QueryUtils.getNodeCat(node.getChild(0)).equals("position")));
 			// ignore this node if it only serves as an aligned sequence container
 			if (node.getChildCount()>1) {
-				if (getNodeCat(node.getChild(1)).equals("cq_segments") && hasChild(node.getChild(1), "align")) {
+				if (QueryUtils.getNodeCat(node.getChild(1)).equals("cq_segments") && QueryUtils.hasChild(node.getChild(1), "align")) {
 					ignoreCq_segment = true;
 				}
 			}
@@ -271,11 +268,11 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				LinkedHashMap<String,Object> sequence = new LinkedHashMap<String,Object>();
 				// Step 0:  cq_segments has 'occ' child -> introduce group as super group to the sequence/token/group
 				// this requires creating a group and inserting it at a suitable place
-				if (node.getParent().getChildCount()>curChildIndex+2 && getNodeCat(node.getParent().getChild(curChildIndex+2)).equals("occ")) {
+				if (node.getParent().getChildCount()>curChildIndex+2 && QueryUtils.getNodeCat(node.getParent().getChild(curChildIndex+2)).equals("occ")) {
 					cqHasOccSibling = true;
 					createOccGroup(node);
 				}
-				if (getNodeCat(node.getChild(node.getChildCount()-1)).equals("occ")) {
+				if (QueryUtils.getNodeCat(node.getChild(node.getChildCount()-1)).equals("occ")) {
 					cqHasOccChild = true;
 				}
 				// Step I: decide type of element (one or more elements? -> token or sequence)
@@ -290,9 +287,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				} else {
 					// if only child, make the sequence a mere korap:token...
 					// ... but only if it has a real token/element beneath it
-					if (getNodeCat(node.getChild(0)).equals("cq_segment")
-						|| getNodeCat(node.getChild(0)).equals("sq_segment")
-						|| getNodeCat(node.getChild(0)).equals("element")	) {
+					if (QueryUtils.getNodeCat(node.getChild(0)).equals("cq_segment")
+						|| QueryUtils.getNodeCat(node.getChild(0)).equals("sq_segment")
+						|| QueryUtils.getNodeCat(node.getChild(0)).equals("element")	) {
 						sequence.put("@type", "korap:token");
 						tokenStack.push(sequence);
 						stackedTokens++;
@@ -431,7 +428,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			}
 			String value = "";
 			ParseTree valNode = node.getChild(2);
-			String valType = getNodeCat(valNode);
+			String valType = QueryUtils.getNodeCat(valNode);
 			fieldMap.put("@type", "korap:term");
 			if (valType.equals("simple_query")) {
 				value = valNode.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (simple_query (sq_segment foo))
@@ -470,7 +467,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			stackedFields++;
 			// Step I: get operator (& or |)
 			ParseTree operatorNode = node.getChild(1).getChild(0);
-			String operator = getNodeCat(operatorNode);
+			String operator = QueryUtils.getNodeCat(operatorNode);
 			String relation = operator.equals("&") ? "and" : "or";
 			if (negField) {
 				relation = relation.equals("or") ? "and": "or";
@@ -605,7 +602,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			String id = "0";
 			// Step I: get info
 			boolean hasId = false;
-			if (getNodeCat(node.getChild(1)).equals("spanclass_id")) {
+			if (QueryUtils.getNodeCat(node.getChild(1)).equals("spanclass_id")) {
 				hasId = true;
 				id = node.getChild(1).getChild(0).toStringTree(poliqarpParser);
 				id = id.substring(0, id.length()-1); // remove trailing colon ':'
@@ -639,7 +636,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			stackedObjects++;
 			ArrayList<Object> posOperands = new ArrayList<Object>();
 			// Step I: get info
-			String relation = getNodeCat(node.getChild(0));
+			String relation = QueryUtils.getNodeCat(node.getChild(0));
 			positionGroup.put("@type", "korap:group");
 			positionGroup.put("relation", "position");
 			positionGroup.put("position", relation.toLowerCase());
@@ -664,8 +661,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			ArrayList<Object> shrinkOperands = new ArrayList<Object>();
 			// Step I: get info
 			String operandClass = "0";
-			String type = getNodeCat(node.getChild(0));
-			if (getNodeCat(node.getChild(2)).equals("spanclass_id")) {
+			String type = QueryUtils.getNodeCat(node.getChild(0));
+			if (QueryUtils.getNodeCat(node.getChild(2)).equals("spanclass_id")) {
 				operandClass = node.getChild(2).getChild(0).toStringTree(poliqarpParser);
 				operandClass = operandClass.substring(0, operandClass.length()-1); // remove trailing colon ':'
 				// only allow class id up to 255
@@ -703,7 +700,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				
 		// flags for case sensitivity and whole-word-matching
 		if (nodeCat.equals("flag")) {
-			String flag = getNodeCat(node.getChild(0)).substring(1); //substring removes leading slash '/'
+			String flag = QueryUtils.getNodeCat(node.getChild(0)).substring(1); //substring removes leading slash '/'
 			// add to current token's value
 			((HashMap<String, Object>) curToken.get("@value")).put("flag", flag);
 		}
@@ -715,9 +712,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			metaFilter.put("@type", "korap:meta");
 		}
 		
-		if (nodeCat.equals("within") && !getNodeCat(node.getParent()).equals("position")) {
+		if (nodeCat.equals("within") && !QueryUtils.getNodeCat(node.getParent()).equals("position")) {
 			ParseTree domainNode = node.getChild(2);
-			String domain = getNodeCat(domainNode);
+			String domain = QueryUtils.getNodeCat(domainNode);
 			LinkedHashMap<String,Object> curObject = (LinkedHashMap<String, Object>) objectStack.getFirst();
 			curObject.put("within", domain);
 			visited.add(node.getChild(0));
@@ -788,54 +785,11 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		}		
 	}
 
-	/**
-	 * Returns the category (or 'label') of the root of a (sub-)ParseTree.
-	 * @param node
-	 * @return
-	 */
-	public String getNodeCat(ParseTree node) {
-		String nodeCat = node.toStringTree(poliqarpParser);
-		Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
-		Matcher m = p.matcher(node.toStringTree(poliqarpParser));
-		if (m.find()) {
-			nodeCat = m.group(1);
-		} 
-		return nodeCat;
-	}
 	
-	/**
-	 * Tests whether a certain node has a child by a certain name
-	 * @param node The parent node.
-	 * @param childCat The category of the potential child.
-	 * @return true iff one or more children belong to the specified category
-	 */
-	public boolean hasChild(ParseTree node, String childCat) {
-		for (int i=0; i<node.getChildCount(); i++) {
-			if (getNodeCat(node.getChild(i)).equals(childCat)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private static void checkUnbalancedPars(String q) throws QueryException {
-		int openingPars = StringUtils.countMatches(q, "(");
-		int closingPars = StringUtils.countMatches(q, ")");
-		int openingBrkts = StringUtils.countMatches(q, "[");
-		int closingBrkts = StringUtils.countMatches(q, "]");
-		int openingBrcs = StringUtils.countMatches(q, "{");
-		int closingBrcs = StringUtils.countMatches(q, "}");
-		if (openingPars != closingPars) throw new QueryException(
-				"Your query string contains an unbalanced number of parantheses.");
-		if (openingBrkts != closingBrkts) throw new QueryException(
-				"Your query string contains an unbalanced number of brackets.");
-		if (openingBrcs != closingBrcs) throw new QueryException(
-				"Your query string contains an unbalanced number of braces.");
-		
-	}
+
 	
 	private static ParserRuleContext parsePoliqarpQuery (String p) throws QueryException {
-		checkUnbalancedPars(p);
+		QueryUtils.checkUnbalancedPars(p);
 		
 		Lexer poliqarpLexer = new PoliqarpPlusLexer((CharStream)null);
 	    ParserRuleContext tree = null;
