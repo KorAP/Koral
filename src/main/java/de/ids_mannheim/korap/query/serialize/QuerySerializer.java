@@ -117,7 +117,8 @@ public class QuerySerializer {
     }
 
     public String run(String query, String ql, List<String> parents,
-                      String cli, String cri, int cls, int crs, int num, int page)
+                      String cli, String cri, int cls, int crs,
+                      int num, int page, boolean cutoff)
             throws QueryException {
         if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
@@ -135,7 +136,7 @@ public class QuerySerializer {
         try {
             requestMap.put("meta", metaQuery.raw());
             requestMap = QueryUtils.addParameters(requestMap, page, num,
-                    cli, cri, cls, crs, true);
+                    cli, cri, cls, crs, cutoff);
             String res = mapper.writeValueAsString(requestMap);
             return res;
         } catch (IOException e) {
