@@ -101,19 +101,35 @@ public class CosmasTreeTest {
 	@Test
 	public void testOPIN() {
 		query="wegen #IN(L) <s>";
-		String disj1 = 
+		String opin1 = 
 					"{@type=korap:group, relation=in, position=L, operands=[" +
 						"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}," +
 						"{@type=korap:element, @value=s}" +
 					"]}";
 		ppt = new CosmasTree(query);
 		map = ppt.getRequestMap().get("query").toString();
-		assertEquals(disj1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(opin1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
 	public void testOPNOT() {
-		
+		query="Sonne nicht Mond";
+		String opnot1 = 
+					"{@type=korap:group, relation=not, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:Sonne, relation==}}," +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:Mond, relation==}}" +
+					"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(opnot1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
+	public void testBEG_END() {
+		// BEG and END operators
+		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/links.html
+		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/rechts.html
+		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/thematische-bsp/bsp-satzlaenge.html
 	}
 }
 

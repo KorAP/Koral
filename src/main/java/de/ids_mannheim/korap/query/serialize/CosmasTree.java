@@ -257,16 +257,36 @@ public class CosmasTree extends AbstractSyntaxTree {
 			}
 		}
 		
-		// negate every token that's under OPNOT > ARG2
-		if (nodeCat.equals("ARG2") && openNodeCats.get(1).equals("OPNOT")) {
-			negate = true;
+//		// negate every token that's under OPNOT > ARG2
+//		if (nodeCat.equals("ARG2") && openNodeCats.get(1).equals("OPNOT")) {
+//			negate = true;
+//		}
+		
+		if (nodeCat.equals("ARG1") || nodeCat.equals("ARG2")) {
+			if (node.getChildCount()>1) {
+				// Step I: create sequence
+				LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
+				sequence.put("@type", "korap:sequence");
+				sequence.put("operands", new ArrayList<Object>());
+				objectStack.push(sequence);
+				stackedObjects++;
+				// Step II: decide where to put sequence
+				if (objectStack.size()>1) {
+					ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+					topObjectOperands.add(sequence);
+				} else {
+					requestMap.put("query", sequence);
+				}
+			}
 		}
 		
-		if (nodeCat.equals("OPOR") || nodeCat.equals("OPAND")) {
+		if (nodeCat.equals("OPOR") || nodeCat.equals("OPAND") || nodeCat.equals("OPNOT")) {
 			// Step I: create group
 			LinkedHashMap<String, Object> disjunction = new LinkedHashMap<String, Object>();
 			disjunction.put("@type", "korap:group");
-			String relation = nodeCat.equals("OPOR") ? "or" : "and";
+			String relation = "or";
+			if (nodeCat.equals("OPAND")) relation = "and";
+			if (nodeCat.equals("OPNOT")) relation = "not";
 			disjunction.put("relation", relation);
 			disjunction.put("operands", new ArrayList<Object>());
 			objectStack.push(disjunction);
@@ -428,7 +448,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 				"Sonne nicht (Mond Stern)",
 				"Sonne /+w1:4 Mond",
 //				"wegen #IN(L) <s>"
-				"#BEG(<s>) /5w,s0 #END(<s>)"
+				"#BEG(<s>) /5w,s0 #END(<s>)",
+				
 				};
 		CosmasTree.debug=true;
 		for (String q : queries) {
