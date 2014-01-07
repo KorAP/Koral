@@ -116,9 +116,9 @@ public class QuerySerializer {
         mapper.writeValue(new File(outFile), requestMap);
     }
 
-    public String run(String query, String ql, List<String> parents,
-                      String cli, String cri, int cls, int crs,
-                      int num, int page, boolean cutoff)
+    public String buildQuery(String query, String ql, List<String> parents,
+                             String cli, String cri, int cls, int crs,
+                             int num, int page, boolean cutoff)
             throws QueryException {
         if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
