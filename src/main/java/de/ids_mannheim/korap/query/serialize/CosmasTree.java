@@ -327,32 +327,66 @@ public class CosmasTree extends AbstractSyntaxTree {
 		}
 		
 		if (nodeCat.equals("OPPROX")) {
-			// Step I: create group
-			LinkedHashMap<String, Object> proxGroup = new LinkedHashMap<String, Object>();
-			proxGroup.put("@type", "korap:group");
-			proxGroup.put("relation", "distance");
-
 			// collect info
 			Tree prox_opts = node.getChild(0);
 			Tree typ = prox_opts.getChild(0);
 			Tree dist_list = prox_opts.getChild(1);
-			String direction = dist_list.getChild(0).getChild(0).getChild(0).toStringTree();
-			String min = dist_list.getChild(0).getChild(1).getChild(0).toStringTree();
-			String max = dist_list.getChild(0).getChild(1).getChild(1).toStringTree();
-			String meas = dist_list.getChild(0).getChild(2).getChild(0).toStringTree();
-			
-			if (min.equals("VAL0")) {
-				min=max;
-			}
-			
-			String subtype = typ.getChild(0).toStringTree().equals("PROX") ? "incl" : "excl"; 
-			proxGroup.put("@subtype", subtype);
-			proxGroup.put("measure", meas);
-			proxGroup.put("min", min);
-			proxGroup.put("max", max);
-			proxGroup.put("operands", new ArrayList<Object>());
+			// Step I: create group
+			LinkedHashMap<String, Object> proxGroup = new LinkedHashMap<String, Object>();
+			proxGroup.put("@type", "korap:group");
+			proxGroup.put("relation", "distance");
 			objectStack.push(proxGroup);
 			stackedObjects++;
+			ArrayList<Object> constraints = new ArrayList<Object>();
+			String subtype = typ.getChild(0).toStringTree().equals("PROX") ? "incl" : "excl"; 
+			proxGroup.put("@subtype", subtype);
+			proxGroup.put("constraint", constraints);
+			proxGroup.put("operands", new ArrayList<Object>());
+			
+			// if only one dist_info, put directly into constraints
+			if (dist_list.getChildCount()==1) {
+				String direction = dist_list.getChild(0).getChild(0).getChild(0).toStringTree().toLowerCase();
+				String min = dist_list.getChild(0).getChild(1).getChild(0).toStringTree();
+				String max = dist_list.getChild(0).getChild(1).getChild(1).toStringTree();
+				String meas = dist_list.getChild(0).getChild(2).getChild(0).toStringTree();
+				if (min.equals("VAL0")) {
+					min=max;
+				}
+				LinkedHashMap<String, Object> distance = new LinkedHashMap<String, Object>();
+				distance.put("@type", "korap:distance");
+				distance.put("measure", meas);
+				distance.put("direction", direction);
+				distance.put("min", min);
+				distance.put("max", max);
+				constraints.add(distance);
+				
+			}
+			// otherwise, create group and add info there
+			else {
+				LinkedHashMap<String, Object> distanceGroup = new LinkedHashMap<String, Object>();
+				ArrayList<Object> groupOperands = new ArrayList<Object>();
+				distanceGroup.put("@type", "korap:group");
+				distanceGroup.put("relation", "and");
+				distanceGroup.put("operands", groupOperands);
+				constraints.add(distanceGroup);
+				for (int i=0; i<dist_list.getChildCount(); i++) {
+					String direction = dist_list.getChild(i).getChild(0).getChild(0).toStringTree().toLowerCase();
+					String min = dist_list.getChild(i).getChild(1).getChild(0).toStringTree();
+					String max = dist_list.getChild(i).getChild(1).getChild(1).toStringTree();
+					String meas = dist_list.getChild(i).getChild(2).getChild(0).toStringTree();
+					if (min.equals("VAL0")) {
+						min=max;
+					}
+					LinkedHashMap<String, Object> distance = new LinkedHashMap<String, Object>();
+					distance.put("@type", "korap:distance");
+					distance.put("measure", meas);
+					distance.put("direction", direction);
+					distance.put("min", min);
+					distance.put("max", max);
+					groupOperands.add(distance);
+				}
+			}
+			
 			
 			// Step II: decide where to put
 			if (objectStack.size()>1) {
@@ -384,6 +418,29 @@ public class CosmasTree extends AbstractSyntaxTree {
 				topObjectOperands.add(ingroup);
 			} else {
 				requestMap.put("query", ingroup);
+			}
+		}
+		
+		if (nodeCat.equals("OPALL") || nodeCat.equals("OPNHIT")) {
+			// Step I: create group
+			LinkedHashMap<String, Object> allgroup = new LinkedHashMap<String, Object>();
+			allgroup.put("@type", "korap:group");
+			String scope = nodeCat.equals("OPALL") ? "all" : "nhit";
+			allgroup.put("relation", scope);
+			// add optional position info, if present
+			if (QueryUtils.getNodeCat(node.getChild(0)).equals("POS")) {
+				allgroup.put("position", node.getChild(0).getChild(0).toStringTree());
+			}
+			allgroup.put("operands", new ArrayList<Object>());
+			objectStack.push(allgroup);
+			stackedObjects++;
+			
+			// Step II: decide where to put
+			if (objectStack.size()>1) {
+				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+				topObjectOperands.add(allgroup);
+			} else {
+				requestMap.put("query", allgroup);
 			}
 		}
 		
@@ -504,11 +561,15 @@ public class CosmasTree extends AbstractSyntaxTree {
 //				"Sonne oder Mond oder Sterne",
 //				"Mann #OV (der Mann)",
 //				"Mann #OV(L) der Mann"
-				"*tür",
-				"#BED(tür,sa)",
-				"das %w3 Haus",
-				"das /w3 Haus"
-				
+//				"*tür",
+//				"#BED(der, sa)",
+//				"das %w3 Haus",
+//				"das /w3 Haus"
+				"#ALL(gehen /w1:10 voran)",
+				"#NHIT(gehen /w1:10 voran)",
+				"das /w1:2,s0 Haus",
+				"das /w1:2 Haus und Hof",
+				"nicht Frau"
 				};
 		CosmasTree.debug=true;
 		for (String q : queries) {

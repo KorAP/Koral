@@ -169,13 +169,37 @@ public class CosmasTreeTest {
 	public void testOPPROX() {
 		query="Sonne /+w1:4 Mond";
 		String prox1 = 
-					"{@type=korap:group, relation=distance, @subtype=incl, measure=w, min=1, max=4, operands=[" +
-						"{@type=korap:token, @value={@type=korap:term, @value=orth:Sonne, relation==}}," +
-						"{@type=korap:token, @value={@type=korap:term, @value=orth:Mond, relation==}}" +
-					"]}";
+					"{@type=korap:group, relation=distance, @subtype=incl, " +
+						"constraint=[" +
+							"{@type=korap:distance, measure=w, direction=plus, min=1, max=4}" +
+						"], " +
+						"operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:Sonne, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:Mond, relation==}}" +
+						"]" +
+					"}";
 		ppt = new CosmasTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(prox1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="Sonne /+w1:4,s0,p1:3 Mond";
+		String prox2 = 
+					"{@type=korap:group, relation=distance, @subtype=incl, " +
+						"constraint=[" +
+							"{@type=korap:group, relation=and, operands=[" +
+								"{@type=korap:distance, measure=w, direction=plus, min=1, max=4}," +
+								"{@type=korap:distance, measure=s, direction=both, min=0, max=0}," +
+								"{@type=korap:distance, measure=p, direction=both, min=1, max=3}" +
+							"]}" +
+						"], " +
+						"operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:Sonne, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:Mond, relation==}}" +
+						"]" +
+					"}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(prox2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
@@ -248,32 +272,60 @@ public class CosmasTreeTest {
 		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/links.html
 		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/rechts.html
 		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/thematische-bsp/bsp-satzlaenge.html
+		query="";
 	}
 	
 
 	@Test
 	public void testELEM() {
 		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/elem.html
+		//XXX NOT WORKING IN ANTLR GRAMMAR! ELEM(S) returns (C2PQ (OPWF "ELEM") (OPWF "S"))
 	}
 	
 	@Test
 	public void testOPALL() {
-		
+		query="#ALL(gehen /w1:10 voran)";
+		String all1 = 
+				"{@type=korap:group, relation=all, operands=[" +
+					"{@type=korap:group, relation=distance, @subtype=incl, " +
+						"constraint=[" +
+							"{@type=korap:distance, measure=w, direction=both, min=1, max=10}" +
+						"], " +
+						"operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:gehen, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:voran, relation==}}" +
+						"]" +
+					"}" +
+				"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(all1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
 	public void testOPNHIT() {
-		
+		query="#NHIT(gehen /w1:10 voran)";
+		String nhit1 = 
+				"{@type=korap:group, relation=nhit, operands=[" +
+						"{@type=korap:group, relation=distance, @subtype=incl, " +
+							"constraint=[" +
+								"{@type=korap:distance, measure=w, direction=both, min=1, max=10}" +
+							"], " +
+							"operands=[" +
+								"{@type=korap:token, @value={@type=korap:term, @value=orth:gehen, relation==}}," +
+								"{@type=korap:token, @value={@type=korap:term, @value=orth:voran, relation==}}" +
+							"]" +
+						"}" +
+					"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(nhit1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
 	public void testOPBED() {
-		
+		//XXX NOT WORKING IN ANTLR GRAMMAR! #BED(der, sa) returns (C2PQ (OPBED (OPWF "der,") (OPWF "sa") (OPTS <mismatched token: [@3,12:12=')',<45>,1:12], resync=)>)))
 	}
 	
-	// TODO
-	/*
-	 * 
-	 */
 }
 
