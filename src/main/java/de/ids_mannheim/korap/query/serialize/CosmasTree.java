@@ -1,6 +1,7 @@
 package de.ids_mannheim.korap.query.serialize;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,19 +39,6 @@ public class CosmasTree extends AbstractSyntaxTree {
 	 */
 	String query;
 	LinkedHashMap<String,Object> requestMap = new LinkedHashMap<String,Object>();
-	LinkedHashMap<String,Object> queryMap = new LinkedHashMap<String,Object>();
-	LinkedHashMap<String,Object> tokenGroup = new LinkedHashMap<String,Object>();
-	ArrayList<Object> fieldGroup = new ArrayList<Object>(); 
-	LinkedHashMap<String,Object> fieldMap;
-	ArrayList<List<Object>> distantTokens;
-	/**
-	 * Keeps track of active tokens.
-	 */
-	LinkedList<LinkedHashMap<String,Object>> tokenStack = new LinkedList<LinkedHashMap<String,Object>>();
-	/**
-	 * Marks the currently active token in order to know where to add flags (might already have been taken away from token stack).
-	 */
-	LinkedHashMap<String,Object> curToken = new LinkedHashMap<String,Object>();
 	/**
 	 * Keeps track of active object.
 	 */
@@ -92,8 +80,16 @@ public class CosmasTree extends AbstractSyntaxTree {
 	Integer stackedObjects = 0;
 	
 	private static boolean debug = false;
-	  
-	
+	/**
+	 * A list of node categories that can be sequenced (i.e. which can be in a sequence with any number of other nodes in this list)
+	 */
+	private final List<String> sequentiableCats = Arrays.asList(new String[] {"OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND", "OPIN"});
+	/**
+	 * Keeps track of sequenced nodes, i.e. nodes that implicitly govern  a sequence, as in (C2PQ (OPWF der) (OPWF Mann)).
+	 * This is necessary in order to know when to take the sequence off the object stack, as the sequence is introduced by the
+	 * first child but cannot be closed after this first child in order not to lose its siblings
+	 */
+	private LinkedList<Tree> sequencedNodes = new LinkedList<Tree>();
 	/**
 	 * 
 	 * @param tree The syntax tree as returned by ANTLR
@@ -168,19 +164,50 @@ public class CosmasTree extends AbstractSyntaxTree {
 		/* ***************************************
 		 * Processing individual node categories *
 		 *****************************************/
+
+		
+		// Check for potential implicit sequences as in (C2PQ (OPWF der) (OPWF Mann)). The sequence is introduced
+		// by the first child if it (and its siblings) is sequentiable.
+		if (sequentiableCats.contains(nodeCat)) {
+			// for each node, check if parent has more than one child (-> could be implicit sequence)
+			if (node.getParent().getChildCount()>1) {
+				// if node is first child of parent...
+				if (node == node.getParent().getChild(0)) {
+					// Step I: create sequence
+					LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
+					sequence.put("@type", "korap:sequence");
+					sequence.put("operands", new ArrayList<Object>());
+					// push sequence on object stack but don't increment stackedObjects counter since
+					// we've got to wait until the parent node is processed - therefore, add the parent
+					// to the sequencedNodes list and remove the sequence from the stack when the parent
+					// has been processed
+					objectStack.push(sequence);
+					sequencedNodes.push(node.getParent());
+					// Step II: decide where to put sequence
+					if (objectStack.size()>1) {
+						ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+						topObjectOperands.add(sequence);
+					} else {
+						requestMap.put("query", sequence);
+					}
+					
+				}
+			}
+		}
+		
+		
 		// C2QP is tree root
 		if (nodeCat.equals("C2PQ")) {
-			if (node.getChildCount()>1) {
-				// Step I: create sequence
-				LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
-				sequence.put("@type", "korap:sequence");
-				sequence.put("operands", new ArrayList<Object>());
-				objectStack.push(sequence);
-				stackedObjects++;
-				// Step II: decide where to put sequence
-				requestMap.put("query", sequence);
-				
-			}
+//			if (node.getChildCount()>1) {
+//				// Step I: create sequence
+//				LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
+//				sequence.put("@type", "korap:sequence");
+//				sequence.put("operands", new ArrayList<Object>());
+//				objectStack.push(sequence);
+//				stackedObjects++;
+//				// Step II: decide where to put sequence
+//				requestMap.put("query", sequence);
+//			}
 		}
 		
 		// Nodes introducing tokens. Process all in the same manner, except for the fieldMap entry
@@ -189,27 +216,26 @@ public class CosmasTree extends AbstractSyntaxTree {
 			//Step I: get info
 			LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
 			token.put("@type", "korap:token");
-			tokenStack.push(token);
 			objectStack.push(token);
 			stackedObjects++;
 			// check if this token comes after a distant operator (like "/+w3:4") and if yes,
 			// insert the empty tokenGroups before the current token
-			if (openNodeCats.get(1).equals("ARG2")) {
-				if (openNodeCats.get(2).equals("OPPROX") && !distantTokensStack.isEmpty()) {
-					for (List<Object> distantTokenGroup : distantTokensStack.pop()) {
-//						if (tokenGroupsStack.isEmpty()) {
-//							queryMap.put("token"+tokenGroupCount+"_1", distantTokenGroup);
-//						} else {
-						tokenStack.getFirst().put("token", distantTokenGroup);
-//						}
-//						tokenGroupCount++;
-					}
-				}  
+//			if (openNodeCats.get(1).equals("ARG2")) {
+//				if (openNodeCats.get(2).equals("OPPROX") && !distantTokensStack.isEmpty()) {
+//					for (List<Object> distantTokenGroup : distantTokensStack.pop()) {
+////						if (tokenGroupsStack.isEmpty()) {
+////							queryMap.put("token"+tokenGroupCount+"_1", distantTokenGroup);
+////						} else {
+//						tokenStack.getFirst().put("token", distantTokenGroup);
+////						}
+////						tokenGroupCount++;
+//					}
+//				}  
 				// check negation of token by preceding OPNOT
 //				else if (openNodeCats.get(2).equals("OPNOT")) {
 //					negate = true;
 //				}
-			}
+//			}
 			LinkedHashMap<String, Object> fieldMap = new LinkedHashMap<String, Object>();
 			token.put("@value", fieldMap);
 			
@@ -233,7 +259,6 @@ public class CosmasTree extends AbstractSyntaxTree {
 			} else {
 				fieldMap.put("relation", "=");
 			}
-			
 			//Step II: decide where to put
 			if (objectStack.size()>1) {
 				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
@@ -262,23 +287,23 @@ public class CosmasTree extends AbstractSyntaxTree {
 //			negate = true;
 //		}
 		
-		if (nodeCat.equals("ARG1") || nodeCat.equals("ARG2")) {
-			if (node.getChildCount()>1) {
-				// Step I: create sequence
-				LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
-				sequence.put("@type", "korap:sequence");
-				sequence.put("operands", new ArrayList<Object>());
-				objectStack.push(sequence);
-				stackedObjects++;
-				// Step II: decide where to put sequence
-				if (objectStack.size()>1) {
-					ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-					topObjectOperands.add(sequence);
-				} else {
-					requestMap.put("query", sequence);
-				}
-			}
-		}
+//		if (nodeCat.equals("ARG1") || nodeCat.equals("ARG2")) {
+//			if (node.getChildCount()>1) {
+//				// Step I: create sequence
+//				LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
+//				sequence.put("@type", "korap:sequence");
+//				sequence.put("operands", new ArrayList<Object>());
+//				objectStack.push(sequence);
+//				stackedObjects++;
+//				// Step II: decide where to put sequence
+//				if (objectStack.size()>1) {
+//					ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+//					topObjectOperands.add(sequence);
+//				} else {
+//					requestMap.put("query", sequence);
+//				}
+//			}
+//		}
 		
 		if (nodeCat.equals("OPOR") || nodeCat.equals("OPAND") || nodeCat.equals("OPNOT")) {
 			// Step I: create group
@@ -291,13 +316,6 @@ public class CosmasTree extends AbstractSyntaxTree {
 			disjunction.put("operands", new ArrayList<Object>());
 			objectStack.push(disjunction);
 			stackedObjects++;
-			if (tokenStack.isEmpty()) {
-				queryMap.put("tokenGroup", tokenGroup);
-			} else {
-				tokenStack.getFirst().put("tokenGroup", tokenGroup);
-			}
-			tokenGroup.put("type", "disj");
-			tokenStack.push(tokenGroup);
 			
 			// Step II: decide where to put
 			if (objectStack.size()>1) {
@@ -327,7 +345,9 @@ public class CosmasTree extends AbstractSyntaxTree {
 				min=max;
 			}
 			
-			proxGroup.put("@subtype", meas);
+			String subtype = typ.getChild(0).toStringTree().equals("PROX") ? "incl" : "excl"; 
+			proxGroup.put("@subtype", subtype);
+			proxGroup.put("measure", meas);
 			proxGroup.put("min", min);
 			proxGroup.put("max", max);
 			proxGroup.put("operands", new ArrayList<Object>());
@@ -343,12 +363,37 @@ public class CosmasTree extends AbstractSyntaxTree {
 			}
 		}
 		
-		if (nodeCat.equals("OPIN")) {
+		// inlcusion or overlap
+		if (nodeCat.equals("OPIN") || nodeCat.equals("OPOV")) {
 			// Step I: create group
 			LinkedHashMap<String, Object> ingroup = new LinkedHashMap<String, Object>();
 			ingroup.put("@type", "korap:group");
-			ingroup.put("relation", "in");
-			ingroup.put("position", node.getChild(0).getChild(0).toStringTree());
+			String combination = nodeCat.equals("OPIN") ? "include" : "overlap";
+			ingroup.put("relation", combination);
+			// add optional position info, if present
+			if (QueryUtils.getNodeCat(node.getChild(0)).equals("POS")) {
+				ingroup.put("position", node.getChild(0).getChild(0).toStringTree());
+			}
+			ingroup.put("operands", new ArrayList<Object>());
+			objectStack.push(ingroup);
+			stackedObjects++;
+			
+			// Step II: decide where to put
+			if (objectStack.size()>1) {
+				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+				topObjectOperands.add(ingroup);
+			} else {
+				requestMap.put("query", ingroup);
+			}
+		}
+		
+		if (nodeCat.equals("OPEND") || nodeCat.equals("OPBEG")) {
+			// Step I: create group
+			LinkedHashMap<String, Object> ingroup = new LinkedHashMap<String, Object>();
+			ingroup.put("@type", "korap:group");
+			ingroup.put("relation", "reduction");
+			String reduction = nodeCat.equals("OPEND") ? "end" : "begin";
+			ingroup.put("reduction", reduction);
 			ingroup.put("operands", new ArrayList<Object>());
 			objectStack.push(ingroup);
 			stackedObjects++;
@@ -375,16 +420,18 @@ public class CosmasTree extends AbstractSyntaxTree {
 		}
 		objectsToPop.pop();
 		
+		// remove sequence from object stack if node is implicitly sequenced
+		if (sequencedNodes.size()>0) {
+			if (node == sequencedNodes.getFirst()) {
+				objectStack.pop();
+				sequencedNodes.pop();
+			}
+		}
+		
 		if (nodeCat.equals("ARG2") && openNodeCats.get(1).equals("OPNOT")) {
 			negate = false;
 		}
 
-		if (nodeCat.equals("OPAND") || nodeCat.equals("OPOR")) {
-			tokenStack.pop();
-//			tokenGroupCount--;
-//			tokenCount=0;
-		}
-		
 		openNodeCats.pop();
 		
 	}
@@ -443,12 +490,24 @@ public class CosmasTree extends AbstractSyntaxTree {
 //				"(sonne und (stern oder mond)) /+w2 luna???",
 //				"(Tag /+w2 $offenen) /+w1 Tür",
 //				"heißt /+w2 \"und\" ,"
-				"der",
-				"der Mann",
-				"Sonne nicht (Mond Stern)",
-				"Sonne /+w1:4 Mond",
-//				"wegen #IN(L) <s>"
+//				"der",
+//				"der Mann",
+//				"Sonne nicht (Mond Stern)",
+//				"Sonne /+w1:4 Mond",
+////				"wegen #IN(L) <s>"
 				"#BEG(<s>) /5w,s0 #END(<s>)",
+				"#RECHTS(ELEM(S))",
+				"#END(ELEM(S))",
+//				"der Mann",
+//				"Mond oder Sterne",
+//				"(Sonne scheint) oder Mond"
+//				"Sonne oder Mond oder Sterne",
+//				"Mann #OV (der Mann)",
+//				"Mann #OV(L) der Mann"
+				"*tür",
+				"#BED(tür,sa)",
+				"das %w3 Haus",
+				"das /w3 Haus"
 				
 				};
 		CosmasTree.debug=true;

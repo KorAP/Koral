@@ -69,6 +69,28 @@ public class CosmasTreeTest {
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(seq1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
+		query="der Mann schläft";
+		String seq2 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:der, relation==}}," +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:Mann, relation==}}," +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:schläft, relation==}}" +
+				"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(seq2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="der Mann schläft lang";
+		String seq3 = 
+				"{@type=korap:sequence, operands=[" +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:der, relation==}}," +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:Mann, relation==}}," +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:schläft, relation==}}," +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:lang, relation==}}" +
+				"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(seq3.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
@@ -83,13 +105,71 @@ public class CosmasTreeTest {
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(disj1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
+		query="(Sonne scheint) oder Mond";
+		String disj2 = 
+					"{@type=korap:group, relation=or, operands=[" +
+						"{@type=korap:sequence, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:Sonne, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:scheint, relation==}}" +
+						"]}," +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:Mond, relation==}}" +
+					"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(disj2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="(Sonne scheint) oder (Mond scheint)";
+		String disj3 = 
+				"{@type=korap:group, relation=or, operands=[" +
+						"{@type=korap:sequence, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:Sonne, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:scheint, relation==}}" +
+						"]}," +
+						"{@type=korap:sequence, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:Mond, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:scheint, relation==}}" +
+						"]}" +
+					"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(disj3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+	}
+	
+	@Test
+	public void testOPORAND() {
+		query="(Sonne oder Mond) und scheint";
+		String orand1 = 
+				"{@type=korap:group, relation=and, operands=[" +
+					"{@type=korap:group, relation=or, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:Sonne, relation==}}," +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:Mond, relation==}}" +
+					"]}," +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:scheint, relation==}}" +
+				"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(orand1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="scheint und (Sonne oder Mond)";
+		String orand2 = 
+				"{@type=korap:group, relation=and, operands=[" +
+					"{@type=korap:token, @value={@type=korap:term, @value=orth:scheint, relation==}}," +
+					"{@type=korap:group, relation=or, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:Sonne, relation==}}," +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:Mond, relation==}}" +
+					"]}" +
+				"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(orand2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
 	public void testOPPROX() {
 		query="Sonne /+w1:4 Mond";
 		String prox1 = 
-					"{@type=korap:group, relation=distance, @subtype=w, min=1, max=4, operands=[" +
+					"{@type=korap:group, relation=distance, @subtype=incl, measure=w, min=1, max=4, operands=[" +
 						"{@type=korap:token, @value={@type=korap:term, @value=orth:Sonne, relation==}}," +
 						"{@type=korap:token, @value={@type=korap:term, @value=orth:Mond, relation==}}" +
 					"]}";
@@ -102,7 +182,45 @@ public class CosmasTreeTest {
 	public void testOPIN() {
 		query="wegen #IN(L) <s>";
 		String opin1 = 
-					"{@type=korap:group, relation=in, position=L, operands=[" +
+					"{@type=korap:group, relation=include, position=L, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}," +
+						"{@type=korap:element, @value=s}" +
+					"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(opin1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// position argument is optional 
+		query="wegen #IN <s>";
+		String opin2 = 
+					"{@type=korap:group, relation=include, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}," +
+						"{@type=korap:element, @value=s}" +
+					"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(opin2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// parentheses around 'wegen mir' are optional
+		query="wegen #IN (wegen mir)";
+		String opin3 = 
+					"{@type=korap:group, relation=include, operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}," +
+						"{@type=korap:sequence, operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=orth:mir, relation==}}" +
+						"]}" +
+					"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(opin3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
+	public void testOPOV() {
+		query="wegen #OV <s>";
+		String opin1 = 
+					"{@type=korap:group, relation=overlap, operands=[" +
 						"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}," +
 						"{@type=korap:element, @value=s}" +
 					"]}";
@@ -131,5 +249,31 @@ public class CosmasTreeTest {
 		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/rechts.html
 		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/thematische-bsp/bsp-satzlaenge.html
 	}
+	
+
+	@Test
+	public void testELEM() {
+		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/elem.html
+	}
+	
+	@Test
+	public void testOPALL() {
+		
+	}
+	
+	@Test
+	public void testOPNHIT() {
+		
+	}
+	
+	@Test
+	public void testOPBED() {
+		
+	}
+	
+	// TODO
+	/*
+	 * 
+	 */
 }
 
