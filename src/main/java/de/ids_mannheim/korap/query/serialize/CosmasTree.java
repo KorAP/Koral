@@ -90,6 +90,16 @@ public class CosmasTree extends AbstractSyntaxTree {
 	 * first child but cannot be closed after this first child in order not to lose its siblings
 	 */
 	private LinkedList<Tree> sequencedNodes = new LinkedList<Tree>();
+
+	private boolean hasSequentiableSiblings;
+
+	private LinkedHashMap<String, Object> bedElem;
+	
+	/**
+	 * Keeps track of operands lists that are to be serialised in an inverted
+	 * order (e.g. the IN() operator) compared to their AST representation. 
+	 */
+	private LinkedList<ArrayList<Object>> invertedOperandsList = new LinkedList<ArrayList<Object>>();
 	/**
 	 * 
 	 * @param tree The syntax tree as returned by ANTLR
@@ -170,27 +180,35 @@ public class CosmasTree extends AbstractSyntaxTree {
 		// by the first child if it (and its siblings) is sequentiable.
 		if (sequentiableCats.contains(nodeCat)) {
 			// for each node, check if parent has more than one child (-> could be implicit sequence)
-			if (node.getParent().getChildCount()>1) {
+			Tree parent = node.getParent();
+			if (parent.getChildCount()>1) {
 				// if node is first child of parent...
-				if (node == node.getParent().getChild(0)) {
-					// Step I: create sequence
-					LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
-					sequence.put("@type", "korap:sequence");
-					sequence.put("operands", new ArrayList<Object>());
-					// push sequence on object stack but don't increment stackedObjects counter since
-					// we've got to wait until the parent node is processed - therefore, add the parent
-					// to the sequencedNodes list and remove the sequence from the stack when the parent
-					// has been processed
-					objectStack.push(sequence);
-					sequencedNodes.push(node.getParent());
-					// Step II: decide where to put sequence
-					if (objectStack.size()>1) {
-						ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-						topObjectOperands.add(sequence);
-					} else {
-						requestMap.put("query", sequence);
+				if (node == parent.getChild(0)) {
+					hasSequentiableSiblings = false;
+					for (int i=1; i<parent.getChildCount() ;i++) {
+						if (sequentiableCats.contains(QueryUtils.getNodeCat(parent.getChild(i)))) {
+							hasSequentiableSiblings = true;
+						}
 					}
-					
+					if (hasSequentiableSiblings) {
+						// Step I: create sequence
+						LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
+						sequence.put("@type", "korap:sequence");
+						sequence.put("operands", new ArrayList<Object>());
+						// push sequence on object stack but don't increment stackedObjects counter since
+						// we've got to wait until the parent node is processed - therefore, add the parent
+						// to the sequencedNodes list and remove the sequence from the stack when the parent
+						// has been processed
+						objectStack.push(sequence);
+						sequencedNodes.push(parent);
+						// Step II: decide where to put sequence
+						if (objectStack.size()>1) {
+							ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+							topObjectOperands.add(sequence);
+						} else {
+							requestMap.put("query", sequence);
+						}
+					}
 				}
 			}
 		}
@@ -268,10 +286,24 @@ public class CosmasTree extends AbstractSyntaxTree {
 			}
 		}
 		
+		if (nodeCat.equals("OPELEM")) {
+			// Step I: create element
+			LinkedHashMap<String, Object> elem = new LinkedHashMap<String, Object>();
+			elem.put("@type", "korap:elem");
+			elem.put("@value", node.getChild(0).getChild(0).toStringTree().toLowerCase());
+			//Step II: decide where to put
+			if (objectStack.size()>0) {
+				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
+				topObjectOperands.add(elem);
+			} else {
+				requestMap.put("query", elem);
+			}
+		}
+		
 		if (nodeCat.equals("OPLABEL")) {
 			// Step I: create element
 			LinkedHashMap<String, Object> elem = new LinkedHashMap<String, Object>();
-			elem.put("@type", "korap:element");
+			elem.put("@type", "korap:elem");
 			elem.put("@value", node.getChild(0).toStringTree().replaceAll("<|>", ""));
 			//Step II: decide where to put
 			if (objectStack.size()>0) {
@@ -400,24 +432,46 @@ public class CosmasTree extends AbstractSyntaxTree {
 		// inlcusion or overlap
 		if (nodeCat.equals("OPIN") || nodeCat.equals("OPOV")) {
 			// Step I: create group
-			LinkedHashMap<String, Object> ingroup = new LinkedHashMap<String, Object>();
-			ingroup.put("@type", "korap:group");
-			String combination = nodeCat.equals("OPIN") ? "include" : "overlap";
-			ingroup.put("relation", combination);
+			LinkedHashMap<String, Object> shrinkgroup = new LinkedHashMap<String, Object>();
+			shrinkgroup.put("@type", "korap:group");
+			shrinkgroup.put("relation", "shrink");
+			shrinkgroup.put("shrink", "1");
+			
+			LinkedHashMap<String, Object> posgroup = new LinkedHashMap<String, Object>();
+			shrinkgroup.put("operands", posgroup);
+			posgroup.put("@type", "korap:group");
+			String relation = nodeCat.equals("OPIN") ? "position" : "overlap";
+			posgroup.put("relation", relation);
+			String position = "";
+			
 			// add optional position info, if present
 			if (QueryUtils.getNodeCat(node.getChild(0)).equals("POS")) {
-				ingroup.put("position", node.getChild(0).getChild(0).toStringTree());
+				String posinfo = node.getChild(0).getChild(0).toStringTree();
+//				if (posinfo.startsWith("+")) {
+//					posinfo = posinfo.substring(1);
+//				} else if (posinfo.startsWith("-")) {
+//					negate=true;
+//				}
+				position = posinfo.equals("L") ? "startswith" : "endswith";
+//				switch (posinfo.substring(0, 1)) {
+//					case "L":
+//						position = "startswith";
+//					case "R":
+//						position = "endswith";
+//				}
 			}
-			ingroup.put("operands", new ArrayList<Object>());
-			objectStack.push(ingroup);
+			
+			posgroup.put("position", position);
+			posgroup.put("operands", new ArrayList<Object>());
+			objectStack.push(posgroup);
 			stackedObjects++;
 			
 			// Step II: decide where to put
 			if (objectStack.size()>1) {
 				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-				topObjectOperands.add(ingroup);
+				topObjectOperands.add(shrinkgroup);
 			} else {
-				requestMap.put("query", ingroup);
+				requestMap.put("query", shrinkgroup);
 			}
 		}
 		
@@ -464,6 +518,32 @@ public class CosmasTree extends AbstractSyntaxTree {
 			}
 		}
 		
+		if (nodeCat.equals("OPBED")) {
+			// Step I: create group
+			LinkedHashMap<String, Object> posgroup = new LinkedHashMap<String, Object>();
+			posgroup.put("@type", "korap:group");
+			posgroup.put("relation", "position");
+			int optsChild = node.getChildCount()-1;
+			String cond = node.getChild(optsChild).getChild(0).getChild(0).getText(); //(OPBED (OPWF "xyz") (OPTS (TPBEG se)))
+			String elem = cond.startsWith("+") ? cond.substring(1,2) : cond.substring(0,1);
+			bedElem = new LinkedHashMap<String, Object>();
+			bedElem.put("@type", "korap:elem");
+			bedElem.put("@value", elem);
+			String position = cond.substring(cond.length()-1).equals("a") ? "startswith" : "endswith";
+			posgroup.put("position", position);
+			posgroup.put("operands", new ArrayList<Object>());
+			objectStack.push(posgroup);
+			stackedObjects++;
+			
+			// Step II: decide where to put
+			if (objectStack.size()>1) {
+				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+				topObjectOperands.add(posgroup);
+			} else {
+				requestMap.put("query", posgroup);
+			}
+		}
+		
 		objectsToPop.push(stackedObjects);
 		
 		// recursion until 'query' node (root of tree) is processed
@@ -472,11 +552,6 @@ public class CosmasTree extends AbstractSyntaxTree {
 			processNode(child);
 		}
 		
-		for (int i=0; i<objectsToPop.get(0); i++) {
-			objectStack.pop();
-		}
-		objectsToPop.pop();
-		
 		// remove sequence from object stack if node is implicitly sequenced
 		if (sequencedNodes.size()>0) {
 			if (node == sequencedNodes.getFirst()) {
@@ -484,6 +559,23 @@ public class CosmasTree extends AbstractSyntaxTree {
 				sequencedNodes.pop();
 			}
 		}
+		
+		if (nodeCat.equals("OPBED")) {
+			System.err.println(objectStack);
+			ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
+			topObjectOperands.add(bedElem);
+		}
+		
+		for (int i=0; i<objectsToPop.get(0); i++) {
+			objectStack.pop();
+		}
+		objectsToPop.pop();
+		
+		
+		
+		
+		
+		
 		
 		if (nodeCat.equals("ARG2") && openNodeCats.get(1).equals("OPNOT")) {
 			negate = false;
@@ -552,9 +644,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 //				"Sonne nicht (Mond Stern)",
 //				"Sonne /+w1:4 Mond",
 ////				"wegen #IN(L) <s>"
-				"#BEG(<s>) /5w,s0 #END(<s>)",
-				"#RECHTS(ELEM(S))",
-				"#END(ELEM(S))",
+//				"#BEG(<s>) /5w,s0 #END(<s>)",
 //				"der Mann",
 //				"Mond oder Sterne",
 //				"(Sonne scheint) oder Mond"
@@ -565,11 +655,22 @@ public class CosmasTree extends AbstractSyntaxTree {
 //				"#BED(der, sa)",
 //				"das %w3 Haus",
 //				"das /w3 Haus"
-				"#ALL(gehen /w1:10 voran)",
-				"#NHIT(gehen /w1:10 voran)",
-				"das /w1:2,s0 Haus",
-				"das /w1:2 Haus und Hof",
-				"nicht Frau"
+//				"#ALL(gehen /w1:10 voran)",
+//				"#NHIT(gehen /w1:10 voran)",
+//				"das /w1:2,s0 Haus",
+//				"das /w1:2 Haus und Hof",
+//				"#ELEM(S)",
+//				"#BED(der , sa)",
+//				"#BED(der , se)",
+//				"#BED(der Mann , +pe)",
+//				"Mond nicht Sonne Sterne"
+				"wegen #IN(L) <s>"
+				/*
+				 * TODO
+				 * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/ARGUMENT_I.html
+				 * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/textpositionen.html#Kuerzel
+				 * 
+				 */
 				};
 		CosmasTree.debug=true;
 		for (String q : queries) {

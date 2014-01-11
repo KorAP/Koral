@@ -78,9 +78,9 @@
 	<configuration>
 	  <source>1.7</source>
 	  <target>1.7</target>
-	  <excludes>
+	  <!-- excludes>
           <exclude>**/CosmasTree.java</exclude>
-      </excludes>
+      </excludes -->
 	</configuration>
       </plugin>
     </plugins>
