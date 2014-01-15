@@ -444,7 +444,7 @@ public class PoliqarpTree extends AbstractSyntaxTree {
 //				"foo bar/i"
 				"[base=foo] meta author=Goethe&year=1885",
 				"[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
-				"[base=foo]*"
+				"[base=foo]*",
 				};
 		for (String q : queries) {
 			try {

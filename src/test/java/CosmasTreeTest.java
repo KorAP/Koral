@@ -204,19 +204,33 @@ public class CosmasTreeTest {
 	
 	@Test
 	public void testOPIN() {
-		query="wegen #IN(L) <s>";
+		query="wegen #IN <s>";
 		String opin1 = 
 					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
-						"{@type=korap:group, relation=position, position=startswith, operands=[" +
+						"{@type=korap:group, relation=position, position=contains, operands=[" +
 							"{@type=korap:elem, @value=s}," +
 							"{@type=korap:group, class=1, operands=[" +
-								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}," +
+								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
 							"]}" +
 						"]}" +
 					"]}";
 		ppt = new CosmasTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(opin1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="wegen #IN(L) <s>";
+		String opin2 = 
+					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
+						"{@type=korap:group, relation=position, position=startswith, operands=[" +
+							"{@type=korap:elem, @value=s}," +
+							"{@type=korap:group, class=1, operands=[" +
+								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
+							"]}" +
+						"]}" +
+					"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(opin2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 //		// position argument is optional 
 //		query="wegen #IN <s>";
@@ -247,14 +261,32 @@ public class CosmasTreeTest {
 	@Test
 	public void testOPOV() {
 		query="wegen #OV <s>";
-		String opin1 = 
-					"{@type=korap:group, relation=overlap, operands=[" +
-						"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}," +
-						"{@type=korap:elem, @value=s}" +
+		String opov1 = 
+					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
+						"{@type=korap:group, relation=overlap, position=full, operands=[" +
+							"{@type=korap:elem, @value=s}," +
+							"{@type=korap:group, class=1, operands=[" +
+								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
+							"]}" +
+						"]}" +
 					"]}";
 		ppt = new CosmasTree(query);
 		map = ppt.getRequestMap().get("query").toString();
-		assertEquals(opin1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(opov1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="wegen #OV(L) <s>";
+		String opov2 = 
+					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
+						"{@type=korap:group, relation=overlap, position=startswith, operands=[" +
+							"{@type=korap:elem, @value=s}," +
+							"{@type=korap:group, class=1, operands=[" +
+								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
+							"]}" +
+						"]}" +
+					"]}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(opov2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test

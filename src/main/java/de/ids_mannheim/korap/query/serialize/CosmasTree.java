@@ -99,7 +99,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 	 * Keeps track of operands lists that are to be serialised in an inverted
 	 * order (e.g. the IN() operator) compared to their AST representation. 
 	 */
-	private LinkedList<ArrayList<Object>> invertedOperandsList = new LinkedList<ArrayList<Object>>();
+	private LinkedList<ArrayList<Object>> invertedOperandsLists = new LinkedList<ArrayList<Object>>();
 	/**
 	 * 
 	 * @param tree The syntax tree as returned by ANTLR
@@ -151,7 +151,6 @@ public class CosmasTree extends AbstractSyntaxTree {
 		processNode(tree);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void processNode(Tree node) {
 		
 		// Top-down processing
@@ -202,12 +201,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 						objectStack.push(sequence);
 						sequencedNodes.push(parent);
 						// Step II: decide where to put sequence
-						if (objectStack.size()>1) {
-							ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-							topObjectOperands.add(sequence);
-						} else {
-							requestMap.put("query", sequence);
-						}
+						putIntoSuperObject(sequence, 1);
 					}
 				}
 			}
@@ -278,12 +272,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 				fieldMap.put("relation", "=");
 			}
 			//Step II: decide where to put
-			if (objectStack.size()>1) {
-				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-				topObjectOperands.add(token);
-			} else {
-				requestMap.put("query", token);
-			}
+			putIntoSuperObject(token, 1);
 		}
 		
 		if (nodeCat.equals("OPELEM")) {
@@ -292,13 +281,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 			elem.put("@type", "korap:elem");
 			elem.put("@value", node.getChild(0).getChild(0).toStringTree().toLowerCase());
 			//Step II: decide where to put
-			if (objectStack.size()>0) {
-				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
-				topObjectOperands.add(elem);
-			} else {
-				requestMap.put("query", elem);
-			}
-		}
+			putIntoSuperObject(elem);
+		}		
 		
 		if (nodeCat.equals("OPLABEL")) {
 			// Step I: create element
@@ -306,12 +290,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 			elem.put("@type", "korap:elem");
 			elem.put("@value", node.getChild(0).toStringTree().replaceAll("<|>", ""));
 			//Step II: decide where to put
-			if (objectStack.size()>0) {
-				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
-				topObjectOperands.add(elem);
-			} else {
-				requestMap.put("query", elem);
-			}
+			putIntoSuperObject(elem);
 		}
 		
 //		// negate every token that's under OPNOT > ARG2
@@ -348,14 +327,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 			disjunction.put("operands", new ArrayList<Object>());
 			objectStack.push(disjunction);
 			stackedObjects++;
-			
 			// Step II: decide where to put
-			if (objectStack.size()>1) {
-				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-				topObjectOperands.add(disjunction);
-			} else {
-				requestMap.put("query", disjunction);
-			}
+			putIntoSuperObject(disjunction, 1);
 		}
 		
 		if (nodeCat.equals("OPPROX")) {
@@ -391,7 +364,6 @@ public class CosmasTree extends AbstractSyntaxTree {
 				distance.put("min", min);
 				distance.put("max", max);
 				constraints.add(distance);
-				
 			}
 			// otherwise, create group and add info there
 			else {
@@ -418,15 +390,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 					groupOperands.add(distance);
 				}
 			}
-			
-			
 			// Step II: decide where to put
-			if (objectStack.size()>1) {
-				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-				topObjectOperands.add(proxGroup);
-			} else {
-				requestMap.put("query", proxGroup);
-			}
+			putIntoSuperObject(proxGroup, 1);
 		}
 		
 		// inlcusion or overlap
@@ -437,8 +402,10 @@ public class CosmasTree extends AbstractSyntaxTree {
 			shrinkgroup.put("relation", "shrink");
 			shrinkgroup.put("shrink", "1");
 			
+			ArrayList<Object> shrinkoperands = new ArrayList<Object>(); 
 			LinkedHashMap<String, Object> posgroup = new LinkedHashMap<String, Object>();
-			shrinkgroup.put("operands", posgroup);
+			shrinkgroup.put("operands", shrinkoperands);
+			shrinkoperands.add(posgroup);
 			posgroup.put("@type", "korap:group");
 			String relation = nodeCat.equals("OPIN") ? "position" : "overlap";
 			posgroup.put("relation", relation);
@@ -447,33 +414,35 @@ public class CosmasTree extends AbstractSyntaxTree {
 			// add optional position info, if present
 			if (QueryUtils.getNodeCat(node.getChild(0)).equals("POS")) {
 				String posinfo = node.getChild(0).getChild(0).toStringTree();
-//				if (posinfo.startsWith("+")) {
-//					posinfo = posinfo.substring(1);
-//				} else if (posinfo.startsWith("-")) {
-//					negate=true;
-//				}
 				position = posinfo.equals("L") ? "startswith" : "endswith";
-//				switch (posinfo.substring(0, 1)) {
-//					case "L":
-//						position = "startswith";
-//					case "R":
-//						position = "endswith";
-//				}
+			} else {
+				position = nodeCat.equals("OPIN") ? "contains" : "full";
 			}
-			
 			posgroup.put("position", position);
-			posgroup.put("operands", new ArrayList<Object>());
+			ArrayList<Object> posoperands = new ArrayList<Object>();
+			posgroup.put("operands", posoperands);
 			objectStack.push(posgroup);
+			// mark this an inverted list
+			invertedOperandsLists.push(posoperands);
 			stackedObjects++;
 			
 			// Step II: decide where to put
-			if (objectStack.size()>1) {
-				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-				topObjectOperands.add(shrinkgroup);
-			} else {
-				requestMap.put("query", shrinkgroup);
-			}
+			putIntoSuperObject(shrinkgroup, 1);
 		}
+		
+		// wrap the first argument of an #IN operator in a class group
+		if (nodeCat.equals("ARG1") && (openNodeCats.get(1).equals("OPIN") || openNodeCats.get(1).equals("OPOV"))) {
+			// Step I: create group
+			LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
+			classGroup.put("@type", "korap:group");
+			classGroup.put("class", "1");
+			classGroup.put("operands", new ArrayList<Object>());
+			objectStack.push(classGroup);
+			stackedObjects++;
+			// Step II: decide where to put
+			putIntoSuperObject(classGroup, 1);
+		}
+		
 		
 		if (nodeCat.equals("OPALL") || nodeCat.equals("OPNHIT")) {
 			// Step I: create group
@@ -490,32 +459,22 @@ public class CosmasTree extends AbstractSyntaxTree {
 			stackedObjects++;
 			
 			// Step II: decide where to put
-			if (objectStack.size()>1) {
-				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-				topObjectOperands.add(allgroup);
-			} else {
-				requestMap.put("query", allgroup);
-			}
+			putIntoSuperObject(allgroup, 1);
 		}
 		
 		if (nodeCat.equals("OPEND") || nodeCat.equals("OPBEG")) {
 			// Step I: create group
-			LinkedHashMap<String, Object> ingroup = new LinkedHashMap<String, Object>();
-			ingroup.put("@type", "korap:group");
-			ingroup.put("relation", "reduction");
+			LinkedHashMap<String, Object> bedgroup = new LinkedHashMap<String, Object>();
+			bedgroup.put("@type", "korap:group");
+			bedgroup.put("relation", "reduction");
 			String reduction = nodeCat.equals("OPEND") ? "end" : "begin";
-			ingroup.put("reduction", reduction);
-			ingroup.put("operands", new ArrayList<Object>());
-			objectStack.push(ingroup);
+			bedgroup.put("reduction", reduction);
+			bedgroup.put("operands", new ArrayList<Object>());
+			objectStack.push(bedgroup);
 			stackedObjects++;
 			
 			// Step II: decide where to put
-			if (objectStack.size()>1) {
-				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-				topObjectOperands.add(ingroup);
-			} else {
-				requestMap.put("query", ingroup);
-			}
+			putIntoSuperObject(bedgroup, 1);
 		}
 		
 		if (nodeCat.equals("OPBED")) {
@@ -536,13 +495,9 @@ public class CosmasTree extends AbstractSyntaxTree {
 			stackedObjects++;
 			
 			// Step II: decide where to put
-			if (objectStack.size()>1) {
-				ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-				topObjectOperands.add(posgroup);
-			} else {
-				requestMap.put("query", posgroup);
-			}
+			putIntoSuperObject(posgroup, 1);
 		}
+		
 		
 		objectsToPop.push(stackedObjects);
 		
@@ -562,6 +517,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		
 		if (nodeCat.equals("OPBED")) {
 			System.err.println(objectStack);
+			@SuppressWarnings("unchecked")
 			ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
 			topObjectOperands.add(bedElem);
 		}
@@ -585,6 +541,25 @@ public class CosmasTree extends AbstractSyntaxTree {
 		
 	}
 
+	@SuppressWarnings("unchecked")
+	private void putIntoSuperObject(LinkedHashMap<String, Object> object, int objStackPosition) {
+		if (objectStack.size()>objStackPosition) {
+			ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
+			System.out.println("XXX: "+invertedOperandsLists.contains(topObjectOperands));
+			if (!invertedOperandsLists.contains(topObjectOperands)) {
+				topObjectOperands.add(object);
+			} else {
+				topObjectOperands.add(0, object);
+			}
+			
+		} else {
+			requestMap.put("query", object);
+		}
+	}
+	
+	private void putIntoSuperObject(LinkedHashMap<String, Object> object) {
+		putIntoSuperObject(object, 0);
+	}
 	
 
 	private static Tree parseCosmasQuery(String p) {
@@ -659,12 +634,21 @@ public class CosmasTree extends AbstractSyntaxTree {
 //				"#NHIT(gehen /w1:10 voran)",
 //				"das /w1:2,s0 Haus",
 //				"das /w1:2 Haus und Hof",
+//				"nicht Frau",
+//				"#BED(der , sa)",
+//				"#ALL(gehen /w1:10 voran)",
+//				"#NHIT(gehen /w1:10 voran)",
+//				"das /w1:2,s0 Haus",
+//				"das /w1:2 Haus und Hof",
 //				"#ELEM(S)",
 //				"#BED(der , sa)",
 //				"#BED(der , se)",
 //				"#BED(der Mann , +pe)",
 //				"Mond nicht Sonne Sterne"
-				"wegen #IN(L) <s>"
+				"wegen #OV(L) #ELEM(S)",
+				"wegen #OV #ELEM(S)",
+				"wegen #IN #ELEM(S)",
+//				"Sonne oder Mond"
 				/*
 				 * TODO
 				 * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/ARGUMENT_I.html

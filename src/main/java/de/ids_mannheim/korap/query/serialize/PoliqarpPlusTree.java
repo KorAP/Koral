@@ -846,7 +846,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				"[orth=der]^[orth=Mann]",
 //				"([base=bar][base=foo])*",
 				"([base=a]^[base=b])|[base=c]",
-				"Baum | Stein"
+				"Baum | Stein",
+				"Haus/i"
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {
