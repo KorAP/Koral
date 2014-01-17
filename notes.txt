@@ -8,7 +8,9 @@ COSMAS:
    the query expresses a sequence of terms) and more in line with other QLs (e.g. Poliqarp)
  - distance operators allow to specify a minimal and maximal distance between their arguments, in the form "/wn:m" where n and m are integers. In case only one number
    is given (like "/w2"), Cosmas II interprets this as the maximal distance. Note that it is not possible to specify a minimal but possibly infinite distance between to
-   tokens - for obvious reasons. 
+   tokens - for obvious reasons.
+ - distance operator: flip arguments and change 'minus' to 'plus' 
  - operands of distance operators to be expressed via shrink/classes?
  - #BEG() and #END() are solved via shrink, with the shrink argument not being a class but a position (first/last) indicating the first or last word in the matched sequence  
-   
+ - #BED() with two conditions (like 'sa,-pa') can't be mapped to position group as implemented -> make two position groups and embed in 'and'-group
+ 

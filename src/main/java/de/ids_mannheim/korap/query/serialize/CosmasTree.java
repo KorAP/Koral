@@ -359,7 +359,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 			String subtype = typ.getChild(0).toStringTree().equals("PROX") ? "incl" : "excl"; 
 			proxGroup.put("@subtype", subtype);
 			proxGroup.put("constraint", constraints);
-			proxGroup.put("operands", new ArrayList<Object>());
+			ArrayList<Object> operands = new ArrayList<Object>(); 
+			proxGroup.put("operands", operands);
 			
 			// if only one dist_info, put directly into constraints
 			if (dist_list.getChildCount()==1) {
@@ -369,6 +370,10 @@ public class CosmasTree extends AbstractSyntaxTree {
 				String meas = dist_list.getChild(0).getChild(2).getChild(0).toStringTree();
 				if (min.equals("VAL0")) {
 					min="0";
+				}
+				if (direction.equals("minus")) {
+					direction = "plus";
+					invertedOperandsLists.add(operands);
 				}
 				LinkedHashMap<String, Object> distance = new LinkedHashMap<String, Object>();
 				distance.put("@type", "korap:distance");
@@ -462,38 +467,53 @@ public class CosmasTree extends AbstractSyntaxTree {
 		
 		if (nodeCat.equals("OPEND") || nodeCat.equals("OPBEG")) {
 			// Step I: create group
-			LinkedHashMap<String, Object> bedgroup = new LinkedHashMap<String, Object>();
-			bedgroup.put("@type", "korap:group");
-			bedgroup.put("relation", "shrink");
+			LinkedHashMap<String, Object> beggroup = new LinkedHashMap<String, Object>();
+			beggroup.put("@type", "korap:group");
+			beggroup.put("relation", "shrink");
 			String reduction = nodeCat.equals("OPBEG") ? "first" : "last";
-			bedgroup.put("shrink", reduction);
-			bedgroup.put("operands", new ArrayList<Object>());
-			objectStack.push(bedgroup);
+			beggroup.put("shrink", reduction);
+			beggroup.put("operands", new ArrayList<Object>());
+			objectStack.push(beggroup);
 			stackedObjects++;
 			
 			// Step II: decide where to put
-			putIntoSuperObject(bedgroup, 1);
+			putIntoSuperObject(beggroup, 1);
 		}
 		
 		if (nodeCat.equals("OPBED")) {
 			// Step I: create group
-			LinkedHashMap<String, Object> posgroup = new LinkedHashMap<String, Object>();
-			posgroup.put("@type", "korap:group");
-			posgroup.put("relation", "position");
 			int optsChild = node.getChildCount()-1;
-			String cond = node.getChild(optsChild).getChild(0).getChild(0).getText(); //(OPBED (OPWF "xyz") (OPTS (TPBEG se)))
-			String elem = cond.startsWith("+") ? cond.substring(1,2) : cond.substring(0,1);
-			bedElem = new LinkedHashMap<String, Object>();
-			bedElem.put("@type", "korap:elem");
-			bedElem.put("@value", elem);
-			String position = cond.substring(cond.length()-1).equals("a") ? "startswith" : "endswith";
-			posgroup.put("position", position);
-			posgroup.put("operands", new ArrayList<Object>());
-			objectStack.push(posgroup);
-			stackedObjects++;
-			
-			// Step II: decide where to put
-			putIntoSuperObject(posgroup, 1);
+			Tree conditions = node.getChild(optsChild);
+			if (conditions.getChildCount()==1) {
+				LinkedHashMap<String, Object> posgroup = new LinkedHashMap<String, Object>();
+				posgroup.put("@type", "korap:group");
+				posgroup.put("relation", "position");
+				String cond = conditions.getChild(0).getChild(0).getText(); //(OPBED (OPWF "xyz") (OPTS (TPBEG se)))
+				//TODO: minus
+				String elem = cond.startsWith("+") ? cond.substring(1,2) : cond.substring(0,1);
+				bedElem = new LinkedHashMap<String, Object>();
+				bedElem.put("@type", "korap:elem");
+				bedElem.put("@value", elem);
+				String position = cond.substring(cond.length()-1).equals("a") ? "startswith" : "endswith";
+				posgroup.put("position", position);
+				posgroup.put("operands", new ArrayList<Object>());
+				objectStack.push(posgroup);
+				stackedObjects++;
+				// Step II: decide where to put
+				putIntoSuperObject(posgroup, 1);
+			} else {
+				// node has several conditions (like 'sa, -pa')
+				// -> create 'and' group and embed all position groups there
+				LinkedHashMap<String, Object> conjunct = new LinkedHashMap<String, Object>();
+				conjunct.put("@type", "korap:group");
+				conjunct.put("relation", "and");
+				ArrayList<Object> operands = new ArrayList<Object>();
+				conjunct.put("operands", operands);
+				for (int i=0; i<conditions.getChildCount(); i++) {
+					// TODO for each condition, create a position group. problem: how to get argument into every operands list?
+				}
+			}
+
 		}
 		
 		
@@ -529,7 +549,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 			System.err.println(objectStack);
 			@SuppressWarnings("unchecked")
 			ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
-			topObjectOperands.add(bedElem);
+			topObjectOperands.add(0, bedElem);
 		}
 		
 		for (int i=0; i<objectsToPop.get(0); i++) {
@@ -758,7 +778,9 @@ public class CosmasTree extends AbstractSyntaxTree {
 				"wegen #IN(%, L) <s>",
 				"wegen #OV('FE,%,MIN') <s>",
 				"#BEG(der /+w1:2 Mann)",
-				"#BEG(der Mann /10w Mann)"
+				"#BEG(der Mann /10w Mann)",
+				"#BED(der Mann , sa,+pe)",
+//				"#BED(der Mann , +pe)"
 				/*
 				 * TODO
 				 * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/ARGUMENT_I.html
