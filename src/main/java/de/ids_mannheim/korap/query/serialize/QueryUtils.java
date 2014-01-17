@@ -65,6 +65,25 @@ public class QueryUtils {
 		return false;
 	}
 	
+	public static List<Tree> getChildrenWithCat(Tree node, String nodeCat) {
+		ArrayList<Tree> children = new ArrayList<Tree>();
+		for (int i=0; i<node.getChildCount(); i++) {
+			if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+				children.add(node.getChild(i));
+			}
+		}
+		return children;
+	}
+	
+	public static Tree getFirstChildWithCat(Tree node, String nodeCat) {
+		for (int i=0; i<node.getChildCount(); i++) {
+			if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+				return node.getChild(i);
+			}
+		}
+		return null;
+	}
+	
 	public static void checkUnbalancedPars(String q) throws QueryException {
 		int openingPars = StringUtils.countMatches(q, "(");
 		int closingPars = StringUtils.countMatches(q, ")");

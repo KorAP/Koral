@@ -362,8 +362,20 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			// add token to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the values from "field")
 			// take into account a possible 'occ' child
 			if (node.getParent().getChildCount()>1) {				
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(onTopOfObjectStack).get("operands");
-				topSequenceOperands.add(token);
+				if (node.getText().equals("[]")) {
+					LinkedHashMap<String, Object> sequence  = objectStack.get(onTopOfObjectStack);
+					String offsetStr = (String) sequence.get("offset");
+					if (offsetStr == null) {
+						sequence.put("offset", "1");
+					} else {
+						Integer offset = Integer.parseInt(offsetStr);
+						sequence.put("offset", offset+1);
+					}
+					
+				} else {
+					ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(onTopOfObjectStack).get("operands");
+					topSequenceOperands.add(token);
+				}
 			}
 		}
 		
@@ -503,18 +515,23 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			objectStack.push(token);
 			stackedObjects++;
 			// Step II: fill object (token values) and put into containing sequence
-			token.put("@type", "korap:token");
-			String word = node.getChild(0).toStringTree(poliqarpParser);
-			LinkedHashMap<String,Object> tokenValues = new LinkedHashMap<String,Object>();
-			token.put("@value", tokenValues);
-			tokenValues.put("@type", "korap:term");
-			tokenValues.put("@value", "orth:"+word);
-			tokenValues.put("relation", "=");
-			// add token to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the values from "field")
-			if (node.getParent().getChildCount()>1) {
-				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-				topSequenceOperands.add(token);
+			if (node.getText().equals("[]")) {
+				
+			} else {
+				token.put("@type", "korap:token");
+				String word = node.getChild(0).toStringTree(poliqarpParser);
+				LinkedHashMap<String,Object> tokenValues = new LinkedHashMap<String,Object>();
+				token.put("@value", tokenValues);
+				tokenValues.put("@type", "korap:term");
+				tokenValues.put("@value", "orth:"+word);
+				tokenValues.put("relation", "=");
+				// add token to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the values from "field")
+				if (node.getParent().getChildCount()>1) {
+					ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+					topSequenceOperands.add(token);
+				}
 			}
+			System.out.println(stackedObjects+" "+objectStack);
 			visited.add(node.getChild(0));
 		}
 		
@@ -847,7 +864,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"([base=bar][base=foo])*",
 				"([base=a]^[base=b])|[base=c]",
 				"Baum | Stein",
-				"Haus/i"
+				"Haus/i",
+				"startswith(<s>,[]+[base=der][base=Mann])",
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {

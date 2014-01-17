@@ -59,6 +59,75 @@ public class PoliqarpPlusTreeTest {
 		String elem2 = "{@type=korap:element, @value=vp}";
 		assertTrue(equalsQueryContent(elem2, "<vp>"));
 	}
+	
+	@Test
+	public void testEmptyTokens() throws QueryException {
+		// [base=der][][base=Mann]
+		String et1 = 
+			"{@type=korap:group, relation=distance, @subtype=incl, constraint=[" +
+				"{@type=korap:distance, measure=w, direction=plus, min=1, max=1}" +
+			"], " +
+			"operands=[" +
+				"{@type=korap:token, @value={@type=korap:term, @value=base:der, relation==}}," +
+				"{@type=korap:token, @value={@type=korap:term, @value=base:Mann, relation==}}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("[base=der][][base=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=der][][][base=Mann]
+		String et2 = 
+			"{@type=korap:group, relation=distance, @subtype=incl, constraint=[" +
+				"{@type=korap:distance, measure=w, direction=plus, min=2, max=2}" +
+			"], " +
+			"operands=[" +
+				"{@type=korap:token, @value={@type=korap:term, @value=base:der, relation==}}," +
+				"{@type=korap:token, @value={@type=korap:term, @value=base:Mann, relation==}}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("[base=der][][base=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=der][][]?[base=Mann]
+		String et3 = 
+			"{@type=korap:group, relation=distance, @subtype=incl, constraint=[" +
+				"{@type=korap:distance, measure=w, direction=plus, min=1, max=2}" +
+			"], " +
+			"operands=[" +
+				"{@type=korap:token, @value={@type=korap:term, @value=base:der, relation==}}," +
+				"{@type=korap:token, @value={@type=korap:term, @value=base:Mann, relation==}}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("[base=der][][]?[base=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=der][]*[base=Mann]
+		String et4 = 
+			"{@type=korap:group, relation=distance, @subtype=incl, constraint=[" +
+				"{@type=korap:distance, measure=w, direction=plus, min=0, max=INF}" +
+			"], " +
+			"operands=[" +
+				"{@type=korap:token, @value={@type=korap:term, @value=base:der, relation==}}," +
+				"{@type=korap:token, @value={@type=korap:term, @value=base:Mann, relation==}}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("[base=der][]*[base=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// startswith(<s>, [][base=Mann]
+		String et5 = 
+			"{@type=korap:group, relation=position, position=startswith, @subtype=incl, operands=[" +
+				"{@type=korap:token, @value={@type=korap:elem, @value=s}," +
+				"{@type=korap:sequence, offset=1, operands=[" +
+					"{@type=korap:token, @value={@type=korap:term, @value=base:Mann, relation==}}" +
+				"]}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("startswith(<s>, [][base=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et5.replaceAll(" ", ""), map.replaceAll(" ", ""));
+
+		
+	}
 
 	@Test
 	public void testCoordinatedFields() throws QueryException {
