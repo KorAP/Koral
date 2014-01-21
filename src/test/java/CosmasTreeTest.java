@@ -449,7 +449,7 @@ public class CosmasTreeTest {
 	@Test
 	public void testOPALL() throws QueryException {
 		query="#ALL(gehen /w1:10 voran)";
-		String all1 = 
+		String all1 =
 				"{@type=korap:group, relation=distance, match=all, @subtype=incl, " +
 					"constraint=[" +
 						"{@type=korap:distance, measure=w, direction=both, min=1, max=10}" +
@@ -487,7 +487,7 @@ public class CosmasTreeTest {
 		query = "#BED(der , sa)";
 		String bed1 = 
 				"{@type=korap:group, relation=position, position=startswith, operands=[" +
-						"{@type=korap:elem, @value=s}," +
+					"{@type=korap:elem, @value=s}," +
 					"{@type=korap:token, @value={@type=korap:term, @value=orth:der, relation==}}" +
 				"]}";
 		ppt = new CosmasTree(query);
