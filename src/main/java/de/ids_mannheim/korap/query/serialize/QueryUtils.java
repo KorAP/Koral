@@ -20,7 +20,7 @@ import de.ids_mannheim.korap.util.QueryException;
 public class QueryUtils {
 
 	/**
-	 * Returns the category (or 'label') of the root of a (sub-)ParseTree.
+	 * Returns the category (or 'label') of the root of a ParseTree (ANTLR 4).
 	 * @param node
 	 * @return
 	 */
@@ -35,7 +35,7 @@ public class QueryUtils {
 	}
 	
 	/**
-	 * Returns the category (or 'label') of the root of a ParseTree.
+	 * Returns the category (or 'label') of the root of a ParseTree (ANTLR 3).
 	 * @param node
 	 * @return
 	 */
@@ -65,6 +65,19 @@ public class QueryUtils {
 		return false;
 	}
 	
+	public static boolean hasDescendant(ParseTree node, String childCat) {
+		for (int i=0; i<node.getChildCount(); i++) {
+			ParseTree child = node.getChild(i);
+			if (getNodeCat(child).equals(childCat)) {
+				return true;
+			}
+			if (hasDescendant(child, childCat)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static List<Tree> getChildrenWithCat(Tree node, String nodeCat) {
 		ArrayList<Tree> children = new ArrayList<Tree>();
 		for (int i=0; i<node.getChildCount(); i++) {
@@ -75,7 +88,26 @@ public class QueryUtils {
 		return children;
 	}
 	
+	public static List<ParseTree> getChildrenWithCat(ParseTree node, String nodeCat) {
+		ArrayList<ParseTree> children = new ArrayList<ParseTree>();
+		for (int i=0; i<node.getChildCount(); i++) {
+			if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+				children.add(node.getChild(i));
+			}
+		}
+		return children;
+	}
+	
 	public static Tree getFirstChildWithCat(Tree node, String nodeCat) {
+		for (int i=0; i<node.getChildCount(); i++) {
+			if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+				return node.getChild(i);
+			}
+		}
+		return null;
+	}
+	
+	public static ParseTree getFirstChildWithCat(ParseTree node, String nodeCat) {
 		for (int i=0; i<node.getChildCount(); i++) {
 			if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
 				return node.getChild(i);
@@ -97,6 +129,13 @@ public class QueryUtils {
 				"Your query string contains an unbalanced number of brackets.");
 		if (openingBrcs != closingBrcs) throw new QueryException(
 				"Your query string contains an unbalanced number of braces.");
+	}
+	
+	public static List<String> parseMorph(String stringTree) {
+		
+		ArrayList<String> morph = new ArrayList<String>();
+		System.err.println(stringTree);
+		return morph;
 	}
 
 
@@ -221,6 +260,10 @@ public class QueryUtils {
 
         return request;
     }
+
+	
+
+	
 
 
 

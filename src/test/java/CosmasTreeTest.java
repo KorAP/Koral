@@ -56,6 +56,16 @@ public class CosmasTreeTest {
 		assertEquals(single3.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
+//	@Test
+	public void testMORPH() throws QueryException {
+		query="#MORPH(V)";
+		String morph1 = 
+					"{@type=korap:token, @value={@type=korap:term, @value=pos:v, relation==}}";
+		ppt = new CosmasTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(morph1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
 	@Test
 	public void testSequence() throws QueryException {
 		query="der Mann";
@@ -281,7 +291,7 @@ public class CosmasTreeTest {
 		String opin1 = 
 					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
 						"{@type=korap:group, relation=position, position=contains, operands=[" +
-							"{@type=korap:elem, @value=s}," +
+							"{@type=korap:element, @value=s}," +
 							"{@type=korap:group, class=1, operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
 							"]}" +
@@ -295,7 +305,7 @@ public class CosmasTreeTest {
 		String opin2 = 
 					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
 						"{@type=korap:group, relation=position, position=startswith, operands=[" +
-							"{@type=korap:elem, @value=s}," +
+							"{@type=korap:element, @value=s}," +
 							"{@type=korap:group, class=1, operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
 							"]}" +
@@ -309,7 +319,7 @@ public class CosmasTreeTest {
 		String opin3 = 
 					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
 						"{@type=korap:group, relation=position, position=startswith, @subtype=excl, operands=[" +
-							"{@type=korap:elem, @value=s}," +
+							"{@type=korap:element, @value=s}," +
 							"{@type=korap:group, class=1, operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
 							"]}" +
@@ -323,7 +333,7 @@ public class CosmasTreeTest {
 		String opin4 = 
 					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
 						"{@type=korap:group, relation=position, position=ident, range=all, @subtype=excl, grouping=false, operands=[" +
-							"{@type=korap:elem, @value=s}," +
+							"{@type=korap:element, @value=s}," +
 							"{@type=korap:group, class=1, operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
 							"]}" +
@@ -340,7 +350,7 @@ public class CosmasTreeTest {
 		String opov1 = 
 					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
 						"{@type=korap:group, relation=overlap, position=any, operands=[" +
-							"{@type=korap:elem, @value=s}," +
+							"{@type=korap:element, @value=s}," +
 							"{@type=korap:group, class=1, operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
 							"]}" +
@@ -354,7 +364,7 @@ public class CosmasTreeTest {
 		String opov2 = 
 					"{@type=korap:group, relation=shrink, shrink=1, operands=[" +
 						"{@type=korap:group, relation=overlap, position=startswith, operands=[" +
-							"{@type=korap:elem, @value=s}," +
+							"{@type=korap:element, @value=s}," +
 							"{@type=korap:group, class=1, operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=orth:wegen, relation==}}" +
 							"]}" +
@@ -440,7 +450,7 @@ public class CosmasTreeTest {
 	public void testELEM() throws QueryException {
 		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/elem.html
 		query="#ELEM(S)";
-		String elem1 = "{@type=korap:elem, @value=s}";
+		String elem1 = "{@type=korap:element, @value=s}";
 		ppt = new CosmasTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(elem1.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -487,7 +497,7 @@ public class CosmasTreeTest {
 		query = "#BED(der , sa)";
 		String bed1 = 
 				"{@type=korap:group, relation=position, position=startswith, operands=[" +
-					"{@type=korap:elem, @value=s}," +
+					"{@type=korap:element, @value=s}," +
 					"{@type=korap:token, @value={@type=korap:term, @value=orth:der, relation==}}" +
 				"]}";
 		ppt = new CosmasTree(query);
@@ -497,7 +507,7 @@ public class CosmasTreeTest {
 		query = "#BED(der Mann , +pe)";
 		String bed2 = 
 				"{@type=korap:group, relation=position, position=endswith, operands=[" +
-					"{@type=korap:elem, @value=p}," +
+					"{@type=korap:element, @value=p}," +
 					"{@type=korap:sequence, operands=[" +
 						"{@type=korap:token, @value={@type=korap:term, @value=orth:der, relation==}}," +
 						"{@type=korap:token, @value={@type=korap:term, @value=orth:Mann, relation==}}" +
@@ -511,14 +521,14 @@ public class CosmasTreeTest {
 		String bed3 = 
 				"{@type=korap:group, relation=and, operands=[" +
 					"{@type=korap:group, relation=position, position=startswith, operands=[" +
-						"{@type=korap:elem, @value=s}," +
+						"{@type=korap:element, @value=s}," +
 						"{@type=korap:sequence, operands=[" +
 							"{@type=korap:token, @value={@type=korap:term, @value=orth:der, relation==}}," +
 							"{@type=korap:token, @value={@type=korap:term, @value=orth:Mann, relation==}}" +
 						"]}" +
 					"]}," +
 					"{@type=korap:group, relation=position, position=startswith, @subtype=excl, operands=[" +
-						"{@type=korap:elem, @value=p}," +
+						"{@type=korap:element, @value=p}," +
 						"{@type=korap:sequence, operands=[" +
 							"{@type=korap:token, @value={@type=korap:term, @value=orth:der, relation==}}," +
 							"{@type=korap:token, @value={@type=korap:term, @value=orth:Mann, relation==}}" +

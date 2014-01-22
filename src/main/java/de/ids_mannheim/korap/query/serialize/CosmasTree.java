@@ -218,7 +218,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		}
 		
 		// Nodes introducing tokens. Process all in the same manner, except for the fieldMap entry
-		if (nodeCat.equals("OPWF") || nodeCat.equals("OPLEM") || nodeCat.equals("OPMORPH")) {
+		if (nodeCat.equals("OPWF") || nodeCat.equals("OPLEM")) {
 			
 			//Step I: get info
 			LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
@@ -230,18 +230,10 @@ public class CosmasTree extends AbstractSyntaxTree {
 			
 			fieldMap.put("@type", "korap:term");			
 			// make category-specific fieldMap entry
-			String value = "";
-			if (nodeCat.equals("OPWF")) {
-				value = "orth:"+node.getChild(0).toStringTree().replaceAll("\"", "");
-			}
-			if (nodeCat.equals("OPLEM")) {
-				value = "base:"+node.getChild(0).toStringTree().replaceAll("\"", "");
-			}
-			if (nodeCat.equals("OPMORPH")) {
-				value = "morph:"+node.toStringTree();
-				//TODO decompose morphology query
-			}
+			String attr = nodeCat.equals("OPWF") ? "orth:" : "base:";
+			String value = attr+node.getChild(0).toStringTree().replaceAll("\"", "");
 			fieldMap.put("@value", value);
+			
 			// negate field (see above)
 			if (negate) {
 				fieldMap.put("relation", "!=");
@@ -252,10 +244,57 @@ public class CosmasTree extends AbstractSyntaxTree {
 			putIntoSuperObject(token, 1);
 		}
 		
+		if (nodeCat.equals("OPMORPH")) {
+			//Step I: get info
+			LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
+			token.put("@type", "korap:token");
+			
+			List<String> morphValues = QueryUtils.parseMorph(node.getChild(0).toStringTree());
+			if (morphValues.size() == 1) {
+				LinkedHashMap<String, Object> fieldMap = new LinkedHashMap<String, Object>();
+				token.put("@value", fieldMap);
+				
+				fieldMap.put("@type", "korap:term");
+				fieldMap.put("@value", morphValues.get(0));
+				// make category-specific fieldMap entry
+				// negate field (see above)
+				if (negate) {
+					fieldMap.put("relation", "!=");
+				} else {
+					fieldMap.put("relation", "=");
+				}
+			} else {
+				LinkedHashMap<String, Object> conjGroup = new LinkedHashMap<String, Object>();
+				token.put("@value", conjGroup);
+				ArrayList<Object> conjOperands = new ArrayList<Object>();
+				conjGroup.put("@type", "korap:group");
+				conjGroup.put("relation", "and");
+				conjGroup.put("operands", conjOperands);
+				for (String value : morphValues) {
+					LinkedHashMap<String, Object> fieldMap = new LinkedHashMap<String, Object>();
+					token.put("@value", fieldMap);
+					
+					fieldMap.put("@type", "korap:term");
+					fieldMap.put("@value", value);
+					// make category-specific fieldMap entry
+					// negate field (see above)
+					if (negate) {
+						fieldMap.put("relation", "!=");
+					} else {
+						fieldMap.put("relation", "=");
+					}
+				}
+			}
+			
+			
+			//Step II: decide where to put
+			putIntoSuperObject(token, 0);
+		}
+		
 		if (nodeCat.equals("OPELEM")) {
 			// Step I: create element
 			LinkedHashMap<String, Object> elem = new LinkedHashMap<String, Object>();
-			elem.put("@type", "korap:elem");
+			elem.put("@type", "korap:element");
 			elem.put("@value", node.getChild(0).getChild(0).toStringTree().toLowerCase());
 			//Step II: decide where to put
 			putIntoSuperObject(elem);
@@ -264,7 +303,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		if (nodeCat.equals("OPLABEL")) {
 			// Step I: create element
 			LinkedHashMap<String, Object> elem = new LinkedHashMap<String, Object>();
-			elem.put("@type", "korap:elem");
+			elem.put("@type", "korap:element");
 			elem.put("@value", node.getChild(0).toStringTree().replaceAll("<|>", ""));
 			//Step II: decide where to put
 			putIntoSuperObject(elem);
@@ -440,7 +479,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 				posgroup.put("operands", operands);
 				LinkedHashMap<String, Object> bedElem = new LinkedHashMap<String, Object>();
 				operands.add(bedElem);
-				bedElem.put("@type", "korap:elem");
+				bedElem.put("@type", "korap:element");
 				bedElem.put("@value", c.elem);
 				objectStack.push(posgroup);
 				stackedObjects++;
@@ -474,7 +513,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 					posGroup.put("operands", posOperands);
 					LinkedHashMap<String, Object> bedElem = new LinkedHashMap<String, Object>();
 					posOperands.add(bedElem);
-					bedElem.put("@type", "korap:elem");
+					bedElem.put("@type", "korap:element");
 					bedElem.put("@value", c.elem);
 					
 					
@@ -528,6 +567,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 	}
 
 	
+	
+
 	private void parseOPINOptions(Tree node, LinkedHashMap<String, Object> posgroup) {
 		Tree posnode = QueryUtils.getFirstChildWithCat(node, "POS");
 		Tree rangenode = QueryUtils.getFirstChildWithCat(node, "RANGE");
@@ -683,6 +724,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		 */
 		String[] queries = new String[] {
 				/* COSMAS 2 */
+				"MORPH(V)"
 				};
 		CosmasTree.debug=true;
 		for (String q : queries) {

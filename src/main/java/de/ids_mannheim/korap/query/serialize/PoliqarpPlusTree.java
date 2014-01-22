@@ -277,13 +277,44 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				}
 				// Step I: decide type of element (one or more elements? -> token or sequence)
 				// take into account a possible 'occ' child with accompanying parantheses, therefore 3 extra children
+				// TODO analyse emptysegments
 				int occExtraChildren = cqHasOccChild ? 3:0;
 				if (node.getChildCount()>1 + occExtraChildren) {
-					sequence.put("@type", "korap:sequence");
-					ArrayList<Object> sequenceOperands = new ArrayList<Object>();
-					sequence.put("operands", sequenceOperands);
-					objectStack.push(sequence);
-					stackedObjects++;
+					ParseTree emptySegments = QueryUtils.getFirstChildWithCat(node, "empty_segments");
+					if (emptySegments != null && emptySegments != node.getChild(0)) {
+						String[] minmax = parseEmptySegments(emptySegments);
+						Integer min = Integer.parseInt(minmax[0]);
+						Integer max = Integer.parseInt(minmax[1]);
+						sequence.put("@type", "korap:group");
+						sequence.put("relation", "distance");
+						sequence.put("@subtype", "incl");
+						ArrayList<Object> constraint = new ArrayList<Object>(); 
+						sequence.put("constraint", constraint);
+						ArrayList<Object> sequenceOperands = new ArrayList<Object>();
+						sequence.put("operands", sequenceOperands);
+						objectStack.push(sequence);
+						stackedObjects++;
+						LinkedHashMap<String, Object> distMap = new LinkedHashMap<String, Object>();
+						constraint.add(distMap);
+						distMap.put("@type", "korap:distance");
+						distMap.put("measure", "w");
+						distMap.put("direction", "plus");
+						distMap.put("min", min);
+						distMap.put("max", max);
+					} else {
+						sequence.put("@type", "korap:sequence");
+						ArrayList<Object> sequenceOperands = new ArrayList<Object>();
+						if (emptySegments != null) {
+							String[] minmax = parseEmptySegments(emptySegments);
+							Integer min = Integer.parseInt(minmax[0]);
+							Integer max = Integer.parseInt(minmax[1]);
+							sequence.put("offset-min", min);
+							sequence.put("offset-max", max);
+						}
+						sequence.put("operands", sequenceOperands);
+						objectStack.push(sequence);
+						stackedObjects++;
+					}
 				} else {
 					// if only child, make the sequence a mere korap:token...
 					// ... but only if it has a real token/element beneath it
@@ -363,15 +394,15 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			// take into account a possible 'occ' child
 			if (node.getParent().getChildCount()>1) {				
 				if (node.getText().equals("[]")) {
-					LinkedHashMap<String, Object> sequence  = objectStack.get(onTopOfObjectStack);
-					String offsetStr = (String) sequence.get("offset");
-					if (offsetStr == null) {
-						sequence.put("offset", "1");
-					} else {
-						Integer offset = Integer.parseInt(offsetStr);
-						sequence.put("offset", offset+1);
-					}
-					
+//					LinkedHashMap<String, Object> sequence  = objectStack.get(onTopOfObjectStack);
+//					String offsetStr = (String) sequence.get("offset");
+//					if (offsetStr == null) {
+//						sequence.put("offset", "1");
+//					} else {
+//						Integer offset = Integer.parseInt(offsetStr);
+//						sequence.put("offset", offset+1);
+//					}
+//					
 				} else {
 					ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(onTopOfObjectStack).get("operands");
 					topSequenceOperands.add(token);
@@ -657,6 +688,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			positionGroup.put("@type", "korap:group");
 			positionGroup.put("relation", "position");
 			positionGroup.put("position", relation.toLowerCase());
+//			positionGroup.put("@subtype", "incl");
 			positionGroup.put("operands", posOperands);
 			// Step II: decide where to put the group
 			// add group to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the relevant info)
@@ -783,6 +815,47 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		openNodeCats.pop();
 	}
 
+	private String[] parseEmptySegments(ParseTree emptySegments) {
+		String[] minmax = new String[2];
+		Integer min = 0;
+		Integer max = 0;
+		ParseTree child;
+		for (int i=0; i<emptySegments.getChildCount()-1; i++) {
+			child = emptySegments.getChild(i);
+			ParseTree nextSibling = emptySegments.getChild(i+1);
+			String nextSiblingString = nextSibling.toStringTree(); 
+			System.err.println("FOO "+child.toStringTree());
+			System.out.println("FOO "+nextSiblingString);
+			if (child.toStringTree().equals("[]")) {
+				if (nextSiblingString.equals("?")) {
+					max++;
+				} else if (nextSiblingString.startsWith("{")) {
+					String occ = nextSiblingString.substring(1,nextSiblingString.length()-1);
+					System.out.println(occ);
+					if (occ.contains(",")) {
+						String[] minmaxOcc = occ.split(",");
+						min += Integer.parseInt(minmaxOcc[0]);
+						max += Integer.parseInt(minmaxOcc[1]);
+					} else {
+						min += Integer.parseInt(occ);
+						max += Integer.parseInt(occ);
+					}
+				} else {
+					min++;
+					max++;
+				}
+			}
+		}
+		child = emptySegments.getChild(emptySegments.getChildCount()-1);
+		if (child.toStringTree().equals("[]")) {
+			min++;
+			max++;
+		}
+		minmax[0] = min.toString();
+		minmax[1] = max.toString();
+		return minmax;
+	}
+
 	@SuppressWarnings("unchecked")
 	private void createOccGroup(ParseTree node) {
 		LinkedHashMap<String,Object> occGroup = new LinkedHashMap<String,Object>();
@@ -845,27 +918,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[] {
-//				"shrink(startswith(<s>,{<np>}))",
-//				"shrink(1: startswith(<s>,{1:<np>}))",
-//				"contains(<p>, startswith(<s>,<np>))",
-//				"[base=foo]*",
-//				"[base=foo]*[base=bar]",
-//				"[base=bar][base=foo]*",
-//				"([base=bar][base=foo])*",
-//				"([base=bar][base  =  foo])*",
-//				"<s>([base=bar][base=foo])*",
-//				"<s>[orth=Mann]([base=bar][base=foo])*",
-//				"<s><np>([base=bar][base=foo])*",
-//				"shrink(1:contains(<s>,{1:<np>}))",
-//				"contains(<s>,startswith(<np>,[p=Det]))",
-//				"contains(<s>, startswith(<np>,[p=Det]))",base=c]",
-//				
-				"[orth=der]^[orth=Mann]",
-//				"([base=bar][base=foo])*",
-				"([base=a]^[base=b])|[base=c]",
-				"Baum | Stein",
-				"Haus/i",
-				"startswith(<s>,[]+[base=der][base=Mann])",
+				"startswith(<s>,[][base=der][base=Mann])",
+//				"[][base=Mann]",
+				"[base=Hund][][base=Katze][][][base=Maus]",
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {
