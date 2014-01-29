@@ -14,3 +14,7 @@ COSMAS:
  - #BEG() and #END() are solved via shrink, with the shrink argument not being a class but a position (first/last) indicating the first or last word in the matched sequence  
  - #BED() with two conditions (like 'sa,-pa') can't be mapped to position group as implemented -> make two position groups and embed in 'and'-group
  
+ 
+ Poliqarp
+ - empty tokens as distance operators
+ 
