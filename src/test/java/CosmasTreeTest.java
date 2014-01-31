@@ -332,7 +332,7 @@ public class CosmasTreeTest {
 		query="wegen #IN('FE,ALL,%,MIN') <s>";
 		String opin4 = 
 					"{@type=korap:group, @relation=submatch, @classRef=1, @operands=[" +
-						"{@type=korap:group, @relation=position, @position=ident, range=all, @exclude=true, grouping=false, @operands=[" +
+						"{@type=korap:group, @relation=position, @position=matches, range=all, @exclude=true, grouping=false, @operands=[" +
 							"{@type=korap:span, @value=s}," +
 							"{@type=korap:group, class=1, @operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=wegen, @attr=orth, @relation==}}" +
@@ -349,7 +349,7 @@ public class CosmasTreeTest {
 		query="wegen #OV <s>";
 		String opov1 = 
 					"{@type=korap:group, @relation=submatch, @classRef=1, @operands=[" +
-						"{@type=korap:group, @relation=overlaps, @position=any, @operands=[" +
+						"{@type=korap:group, @relation=position, @position=overlaps, @operands=[" +
 							"{@type=korap:span, @value=s}," +
 							"{@type=korap:group, class=1, @operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=wegen, @attr=orth, @relation==}}" +
@@ -363,7 +363,7 @@ public class CosmasTreeTest {
 		query="wegen #OV(L) <s>";
 		String opov2 = 
 					"{@type=korap:group, @relation=submatch, @classRef=1, @operands=[" +
-						"{@type=korap:group, @relation=overlaps, @position=startswith, @operands=[" +
+						"{@type=korap:group, @relation=position, @position=overlaps-left, @operands=[" +
 							"{@type=korap:span, @value=s}," +
 							"{@type=korap:group, class=1, @operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=wegen, @attr=orth, @relation==}}" +

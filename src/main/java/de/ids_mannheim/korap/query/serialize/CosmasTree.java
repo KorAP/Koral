@@ -440,8 +440,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 			submatchgroup.put("@operands", submatchoperands);
 			submatchoperands.add(posgroup);
 			posgroup.put("@type", "korap:group");
-			String relation = nodeCat.equals("OPIN") ? "position" : "overlaps";
-			posgroup.put("@relation", relation);
+//			String relation = nodeCat.equals("OPIN") ? "position" : "overlaps";
+			posgroup.put("@relation", "position");
 			
 			if (nodeCat.equals("OPIN")) {
 				parseOPINOptions(node, posgroup);
@@ -616,7 +616,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		String position = "";
 		if (posnode != null) {
 			String value = posnode.getChild(0).toStringTree();
-			position = translateTextAreaArgument(value);
+			position = translateTextAreaArgument(value, "in");
 			if (value.equals("N")) {
 				negatePosition = !negatePosition;
 			}
@@ -656,12 +656,9 @@ public class CosmasTree extends AbstractSyntaxTree {
 		String position = "";
 		if (posnode != null) {
 			String value = posnode.getChild(0).toStringTree();
-			position = translateTextAreaArgument(value);
-		} else {
-			position = "any";
+			position = "-"+translateTextAreaArgument(value, "ov");
 		}
-		posgroup.put("@position", position);
-		position = openNodeCats.get(1).equals("OPIN") ? "contains" : "full";
+		posgroup.put("@position", "overlaps"+position);
 		
 		if (exclnode != null) {
 			if (exclnode.getChild(0).toStringTree().equals("YES")) {
@@ -681,22 +678,23 @@ public class CosmasTree extends AbstractSyntaxTree {
 	 * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/ARGUMENT_I.html or
 	 * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/ARGUMENT_O.html, respectively.
 	 * @param argument
+	 * @param mode 
 	 * @return
 	 */
-	private String translateTextAreaArgument(String argument) {
+	private String translateTextAreaArgument(String argument, String mode) {
 		String position = "";
 		switch (argument) {
 		case "L":
-			position = "startswith";
+			position = mode.equals("in") ? "startswith" : "left";
 			break;
 		case "R":
-			position = "endswith";
+			position = mode.equals("in") ? "endswith" : "right";
 			break;
 		case "F":
 			position = "leftrightmatch";
 			break;
 		case "FE":
-			position = "ident";
+			position = "matches";
 			break;
 		case "FI":
 			position = "leftrightmatch-noident";
@@ -767,7 +765,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 				"wegen #IN(%, L) <s>",
 				"wegen #IN(%) <s>",
 				"(Mann oder Frau) #IN <s>",
-				"#BEG(der /w3:5 Mann) /+w10 kommt"
+				"#BEG(der /w3:5 Mann) /+w10 kommt",
+				"&würde /w0 MORPH(V)"
 				};
 		CosmasTree.debug=true;
 		for (String q : queries) {

@@ -643,7 +643,7 @@ public class PoliqarpPlusTreeTest {
 		String align1 = 
 				"{@type=korap:sequence, @operands=[" +
 					"{@type=korap:token, @value={@type=korap:term, @value=der, @attr=orth, @relation==}}," +
-					"{@type=korap:group, @relation=left-align, @operands=[" +
+					"{@type=korap:group, @alignment=left, @operands=[" +
 						"{@type=korap:token, @value={@type=korap:term, @value=Mann, @attr=orth, @relation==}}" +
 					"]}" +
 				"]}";
@@ -651,12 +651,28 @@ public class PoliqarpPlusTreeTest {
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(align1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
+		// [orth=der]^[orth=große][orth=Mann]
+		String query = "[orth=der]^[orth=große][orth=Mann]";
+		String align1b = 
+				"{@type=korap:sequence, @operands=[" +
+					"{@type=korap:token, @value={@type=korap:term, @value=der, @attr=orth, @relation==}}," +
+					"{@type=korap:group, @alignment=left, @operands=[" +
+						"{@type=korap:sequence, @operands=[" +
+							"{@type=korap:token, @value={@type=korap:term, @value=große, @attr=orth, @relation==}}," +
+							"{@type=korap:token, @value={@type=korap:term, @value=Mann, @attr=orth, @relation==}}" +
+						"]}" +
+					"]}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(align1b.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
 		// "([base=a]^[base=b])|[base=c]",
 		String align2 = 
 				"{@type=korap:group, @relation=or, @operands=[" +
 						"{@type=korap:sequence, @operands=[" +
 							"{@type=korap:token, @value={@type=korap:term, @value=a, @attr=base, @relation==}}," +
-							"{@type=korap:group, @relation=left-align, @operands=[" +
+							"{@type=korap:group, @alignment=left, @operands=[" +
 								"{@type=korap:token, @value={@type=korap:term, @value=b, @attr=base, @relation==}}" +
 							"]}" +
 						"]}," +
@@ -671,10 +687,12 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:group, @relation=or, @operands=[" +
 						"{@type=korap:sequence, @operands=[" +
 							"{@type=korap:token, @value={@type=korap:term, @value=a, @attr=base, @relation==}}," +
-							"{@type=korap:group, @relation=left-align, @operands=[" +
-								"{@type=korap:token, @value={@type=korap:term, @value=b, @attr=base, @relation==}}" +
-							"]}," +
-							"{@type=korap:token, @value={@type=korap:term, @value=c, @attr=base, @relation==}}" +
+							"{@type=korap:group, @alignment=left, @operands=[" +
+								"{@type=korap:sequence, @operands=[" +
+									"{@type=korap:token, @value={@type=korap:term, @value=b, @attr=base, @relation==}}," +
+									"{@type=korap:token, @value={@type=korap:term, @value=c, @attr=base, @relation==}}" +
+								"]}" +
+							"]}" +
 						"]}," +
 						"{@type=korap:token, @value={@type=korap:term, @value=d, @attr=base, @relation==}}" +
 				"]}";
@@ -687,11 +705,13 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:group, @relation=or, @operands=[" +
 						"{@type=korap:sequence, @operands=[" +
 							"{@type=korap:token, @value={@type=korap:term, @value=a, @attr=base, @relation==}}," +
-							"{@type=korap:group, @relation=left-align, @operands=[" +
-								"{@type=korap:token, @value={@type=korap:term, @value=b, @attr=base, @relation==}}" +
-							"]}," +
-							"{@type=korap:group, @relation=left-align, @operands=[" +
-								"{@type=korap:token, @value={@type=korap:term, @value=c, @attr=base, @relation==}}" +
+							"{@type=korap:group, @alignment=left, @operands=[" +
+								"{@type=korap:sequence, @operands=[" +
+									"{@type=korap:token, @value={@type=korap:term, @value=b, @attr=base, @relation==}}," +
+									"{@type=korap:group, @alignment=left, @operands=[" +
+										"{@type=korap:token, @value={@type=korap:term, @value=c, @attr=base, @relation==}}" +
+									"]}" +
+								"]}" +
 							"]}" +
 						"]}," +
 						"{@type=korap:token, @value={@type=korap:term, @value=d, @attr=base, @relation==}}" +
@@ -742,6 +762,20 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree("Baum | Stein");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(simple4.replaceAll(" ", ""), map.replaceAll(" ", ""));		
+		
+		// Baum | Stein Haus
+		String query = "(Baum | Stein) Haus";
+		String simple5 = 
+				"{@type=korap:sequence, @operands=[" +
+					"{@type=korap:group, @relation=or, @operands=[" +
+						"{@type=korap:token, @value={@type=korap:term, @value=Baum, @attr=orth, @relation==}}, " +						
+						"{@type=korap:token, @value={@type=korap:term, @value=Stein, @attr=orth, @relation==}}" +
+					"]}," +
+					"{@type=korap:token, @value={@type=korap:term, @value=Haus, @attr=orth, @relation==}} " +			
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(simple5.replaceAll(" ", ""), map.replaceAll(" ", ""));		
 	}
 }
 
