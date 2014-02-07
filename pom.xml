@@ -44,7 +44,7 @@
     <dependency>
     	<groupId>KorAP-modules</groupId>
     	<artifactId>KorAP-Cosmas2Parser</artifactId>
-    	<version>0.01</version>
+    	<version>LATEST</version>
     </dependency>
      <dependency>
     	<groupId>KorAP-modules</groupId>

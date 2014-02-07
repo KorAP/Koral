@@ -140,7 +140,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 * @param query The syntax tree as returned by ANTLR
 	 * @throws QueryException 
 	 */
-	public PoliqarpPlusTree(String query) {
+	public PoliqarpPlusTree(String query) throws QueryException {
 		try {
 			process(query); 
 		} catch (NullPointerException e) {
@@ -194,7 +194,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	}
 	
 	@Override
-	public void process(String query) {
+	public void process(String query) throws QueryException {
 		ParseTree tree = null;
 		try {
 			tree = parsePoliqarpQuery(query);
@@ -218,9 +218,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 	 * respective maps/lists.
 	 *
 	 * @param node The currently processed node. The process(String query) method calls this method with the root.
+	 * @throws QueryException 
 	 */
 	@SuppressWarnings("unchecked")
-	private void processNode(ParseTree node) {
+	private void processNode(ParseTree node) throws QueryException {
 		// Top-down processing
 		if (visited.contains(node)) return;
 		else visited.add(node);
@@ -651,23 +652,26 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		
 		if (nodeCat.equals("spanclass")) {
 			LinkedHashMap<String,Object> span = new LinkedHashMap<String,Object>();
+			span.put("@type", "korap:group");
+			span.put("@relation", "class");
 			objectStack.push(span);
 			stackedObjects++;
 			ArrayList<Object> spanOperands = new ArrayList<Object>();
-			String id = "0";
 			// Step I: get info
-			boolean hasId = false;
+			int classId = 0;
 			if (QueryUtils.getNodeCat(node.getChild(1)).equals("spanclass_id")) {
-				hasId = true;
-				id = node.getChild(1).getChild(0).toStringTree(poliqarpParser);
-				id = id.substring(0, id.length()-1); // remove trailing colon ':'
+				String ref = node.getChild(1).getChild(0).toStringTree(poliqarpParser);
+				try {	
+					classId = Integer.parseInt(ref);
+				} catch (NumberFormatException e) {
+					throw new QueryException("The specified class reference in the shrink/split-Operator is not a number.");
+				}
 				// only allow class id up to 255
-				if (Integer.parseInt(id)>255) {
-					id = "0";
+				if (classId>255) {
+					classId = 0;
 				}
 			}
-			span.put("@type", "korap:group");
-			span.put("class", id);
+			span.put("class", classId);
 			span.put("@operands", spanOperands);
 			// Step II: decide where to put the span
 			// add span to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the relevant info)
@@ -680,7 +684,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			// ignore leading and trailing braces
 			visited.add(node.getChild(0));
 			visited.add(node.getChild(node.getChildCount()-1)); 
-			if (hasId) {
+			if (QueryUtils.getNodeCat(node.getChild(1)).equals("spanclass_id")) {
 				visited.add(node.getChild(1));
 			}
 		}
@@ -716,19 +720,38 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			stackedObjects++;
 			ArrayList<Object> shrinkOperands = new ArrayList<Object>();
 			// Step I: get info
-			String operandClass = "0";
-			String type = QueryUtils.getNodeCat(node.getChild(0));
+			System.out.println("WAAAAAAAHHHHHHHHHHHHHHHHHHHHHH "+node.getChild(2).toStringTree(poliqarpParser));
+			ArrayList<Integer> classRefs = new ArrayList<Integer>();
+			String classRefOp = null;
 			if (QueryUtils.getNodeCat(node.getChild(2)).equals("spanclass_id")) {
-				operandClass = node.getChild(2).getChild(0).toStringTree(poliqarpParser);
-				operandClass = operandClass.substring(0, operandClass.length()-1); // remove trailing colon ':'
-				// only allow class id up to 255
-				if (Integer.parseInt(operandClass)>255) {
-					operandClass = "0";
+				ParseTree spanNode = node.getChild(2);
+				for (int i=0; i<spanNode.getChildCount()-1; i++) {
+					String ref = spanNode.getChild(i).getText();
+					System.err.println("       "+ref);
+					if (ref.equals("|") || ref.equals("&")) {
+						classRefOp = ref.equals("|") ? "intersection" : "union";
+					} else {
+						try {
+							int classRef = Integer.parseInt(ref);
+							// only allow class id up to 255
+							if (classRef>255) {
+								classRef = 0;
+							}
+							classRefs.add(classRef);
+						} catch (NumberFormatException e) {
+							throw new QueryException("The specified class reference in the shrink/split-Operator is not a number.");
+						}
+					}
 				}
+			} else {
+				classRefs.add(0);
 			}
 			shrinkGroup.put("@type", "korap:group");
-			shrinkGroup.put("@relation", type);
-			shrinkGroup.put("classRef", operandClass);
+			shrinkGroup.put("@relation", node.getChild(0).toStringTree(poliqarpParser));
+			shrinkGroup.put("classRef", classRefs);
+			if (classRefOp != null) {
+				shrinkGroup.put("classRefOp", classRefOp);
+			}
 			shrinkGroup.put("@operands", shrinkOperands);
 			int i=1;
 			// Step II: decide where to put the group
@@ -938,9 +961,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		 * For testing
 		 */
 		
-		PoliqarpPlusTree pt1 = new PoliqarpPlusTree("[base=Hund] | [base=Katze][base=Maus]");
-		PoliqarpPlusTree pt2 = new PoliqarpPlusTree("[base=Hund] | [base=Katze] [base=Maus]");
-		System.err.println(pt1.getRequestMap().equals(pt2.getRequestMap()));
+//		PoliqarpPlusTree pt1 = new PoliqarpPlusTree("[base=Hund] | [base=Katze][base=Maus]");
+//		PoliqarpPlusTree pt2 = new PoliqarpPlusTree("[base=Hund] | [base=Katze] [base=Maus]");
+//		System.err.println(pt1.getRequestMap().equals(pt2.getRequestMap()));
 		
 		String[] queries = new String[] {
 //				"startswith(<s>,[][base=der][base=Mann])",
@@ -954,8 +977,12 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"Baum | Stein Haus",
 //				"^contains(<s>,<np>)",
 //				"([base=a]^[base=b][base=c])|[base=d]",
-				"[orth=der]^[orth=große][orth=Mann]",
-				"([base=a]^[base=b]^[base=c])|[base=d]"
+//				"[orth=der]^[orth=große][orth=Mann]",
+//				"([base=a]^[base=b]^[base=c])|[base=d]",
+				"shrink(1|2:{1:[base=der]}{2:[base=Mann]})",
+//				"[base=foo] meta (author=name&year=2000)",
+//				"[base=foo] meta year=2000",
+				"{[base=Mann]}"
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {

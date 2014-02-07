@@ -57,6 +57,11 @@ public class CosmasTreeTest {
 	}
 	
 	@Test
+	public void testCaseSensitivityFlag() throws QueryException {
+		//TODO ignorieroperator $ http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/ignorierung.html
+	}
+	
+	@Test
 	public void testMORPH() throws QueryException {
 		query="#MORPH(V)";
 		String morph1 = 
@@ -474,7 +479,7 @@ public class CosmasTreeTest {
 		assertEquals(all1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
-	@Test
+//	@Test
 	public void testOPNHIT() throws QueryException {
 		query="#NHIT(gehen /w1:10 voran)";
 		String nhit1 = 

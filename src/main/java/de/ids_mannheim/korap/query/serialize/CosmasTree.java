@@ -388,6 +388,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 				constraints.add(distance);
 				proxSequence.put("@inOrder", inOrder);
 			}
+			
 			// otherwise, create group and add info there
 			else {
 				LinkedHashMap<String, Object> distanceGroup = new LinkedHashMap<String, Object>();
@@ -421,7 +422,6 @@ public class CosmasTree extends AbstractSyntaxTree {
 					}
 				}
 				proxSequence.put("@inOrder", inOrder);
-				
 			}
 			// Step II: decide where to put
 			putIntoSuperObject(proxSequence, 1);
@@ -442,21 +442,17 @@ public class CosmasTree extends AbstractSyntaxTree {
 			posgroup.put("@type", "korap:group");
 //			String relation = nodeCat.equals("OPIN") ? "position" : "overlaps";
 			posgroup.put("@relation", "position");
-			
 			if (nodeCat.equals("OPIN")) {
 				parseOPINOptions(node, posgroup);
 			} else {
 				parseOPOVOptions(node, posgroup);
 			}
-			
-			
 			ArrayList<Object> posoperands = new ArrayList<Object>();
 			posgroup.put("@operands", posoperands);
 			objectStack.push(posgroup);
 			// mark this an inverted list
 			invertedOperandsLists.push(posoperands);
 			stackedObjects++;
-			
 			// Step II: decide where to put
 			putIntoSuperObject(submatchgroup, 1);
 		}
@@ -476,8 +472,21 @@ public class CosmasTree extends AbstractSyntaxTree {
 		}
 		
 		
-		if (nodeCat.equals("OPALL") || nodeCat.equals("OPNHIT")) {
-//			proxGroupMatching = nodeCat.equals("OPALL") ? "all" : "exlcude";
+		if (nodeCat.equals("OPNHIT")) {
+//			proxGroupMatching = nodeCat.equals("OPALL") ? "all" : "exclude";
+			LinkedHashMap<String, Object> exclGroup = new LinkedHashMap<String, Object>();
+			exclGroup.put("@type", "korap:group");
+			exclGroup.put("@relation", "shrink");
+			ArrayList<Integer> classRef = new ArrayList<Integer>();
+			classRef.add(1);
+			classRef.add(2);
+			exclGroup.put("classRef", classRef);
+			exclGroup.put("classRefOp", "intersection");
+			ArrayList<Object> operands = new ArrayList<Object>();
+			exclGroup.put("@operands", operands);
+			objectStack.push(exclGroup);
+			stackedObjects++;
+			putIntoSuperObject(exclGroup, 1);
 		}
 		
 		if (nodeCat.equals("OPEND") || nodeCat.equals("OPBEG")) {
@@ -760,13 +769,14 @@ public class CosmasTree extends AbstractSyntaxTree {
 		 */
 		String[] queries = new String[] {
 				/* COSMAS 2 */
-				"MORPH(V)",
-				"MORPH(V PRES)",
-				"wegen #IN(%, L) <s>",
-				"wegen #IN(%) <s>",
-				"(Mann oder Frau) #IN <s>",
-				"#BEG(der /w3:5 Mann) /+w10 kommt",
-				"&würde /w0 MORPH(V)"
+//				"MORPH(V)",
+//				"MORPH(V PRES)",
+//				"wegen #IN(%, L) <s>",
+//				"wegen #IN(%) <s>",
+//				"(Mann oder Frau) #IN <s>",
+//				"#BEG(der /w3:5 Mann) /+w10 kommt",
+//				"&würde /w0 MORPH(V)",
+				"#NHIT(gehen /w1:10 voran)"
 				};
 		CosmasTree.debug=true;
 		for (String q : queries) {
