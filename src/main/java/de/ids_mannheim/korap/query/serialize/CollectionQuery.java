@@ -18,7 +18,7 @@ import java.util.*;
 public class CollectionQuery {
 
     private JsonFactory factory;
-    private MetaTypes types;
+    private CollectionsTypes types;
     private ObjectMapper serialzer;
     private List<Map> rq;
     private List<Map> mfil;
@@ -30,7 +30,7 @@ public class CollectionQuery {
         this.mfil = new ArrayList<>();
         this.mext = new ArrayList<>();
         this.factory = serialzer.getFactory();
-        this.types = new MetaTypes();
+        this.types = new CollectionsTypes();
     }
 
     public CollectionQuery addResource(String query) {
@@ -203,20 +203,16 @@ public class CollectionQuery {
      * @return
      */
     public String stringify() {
-        List meta = getCollectionsOnly();
-        if (meta.isEmpty())
+        List collection = getCollectionsOnly();
+        if (collection.isEmpty())
             return "";
 
         try {
-            return serialzer.writeValueAsString(meta);
+            return serialzer.writeValueAsString(collection);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return "";
         }
-    }
-
-    public JsonNode jsonify() {
-        return serialzer.valueToTree(join());
     }
 
     /**
