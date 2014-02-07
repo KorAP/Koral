@@ -130,11 +130,11 @@ public class QuerySerializer {
             throw new QueryException(ql + " is not a supported query language!");
         }
         Map<String, Object> requestMap = ast.getRequestMap();
-        MetaQuery metaQuery = new MetaQuery();
-        metaQuery.addResources(parents);
+        CollectionQuery collectionQuery = new CollectionQuery();
+        collectionQuery.addResources(parents);
 
         try {
-            requestMap.put("meta", metaQuery.raw());
+            requestMap.put("meta", collectionQuery.raw());
             requestMap = QueryUtils.addParameters(requestMap, page, num,
                     cli, cri, cls, crs, cutoff);
             String res = mapper.writeValueAsString(requestMap);

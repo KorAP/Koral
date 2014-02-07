@@ -94,12 +94,4 @@ public class MetaTypes {
         return mapper.readValue(s, Map.class);
     }
 
-    public List listify(String s) throws IOException {
-        return mapper.readValue(s, LinkedList.class);
-    }
-
-    public String stringify(Map m) throws JsonProcessingException {
-        return mapper.writeValueAsString(m);
-    }
-
 }

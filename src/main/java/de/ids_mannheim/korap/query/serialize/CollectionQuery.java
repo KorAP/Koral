@@ -15,7 +15,7 @@ import java.util.*;
  * @author hanl
  * @date 06/12/2013
  */
-public class MetaQuery {
+public class CollectionQuery {
 
     private JsonFactory factory;
     private MetaTypes types;
@@ -24,7 +24,7 @@ public class MetaQuery {
     private List<Map> mfil;
     private List<Map> mext;
 
-    public MetaQuery() {
+    public CollectionQuery() {
         this.serialzer = new ObjectMapper();
         this.rq = new ArrayList<>();
         this.mfil = new ArrayList<>();
@@ -33,7 +33,7 @@ public class MetaQuery {
         this.types = new MetaTypes();
     }
 
-    public MetaQuery addResource(String query) {
+    public CollectionQuery addResource(String query) {
         try {
             JsonParser jp = factory.createParser(query);
             JsonNode m = jp.readValueAsTree();
@@ -46,7 +46,7 @@ public class MetaQuery {
         return this;
     }
 
-    public MetaQuery addResources(List<String> queries) {
+    public CollectionQuery addResources(List<String> queries) {
         for (String query : queries)
             addResource(query);
         return this;
@@ -90,7 +90,6 @@ public class MetaQuery {
             value.add(group);
         }
 
-
         for (int i = idx; i < dates.length; i++) {
             if (dates[i] != null) {
                 Map term1 = types.createTerm(dates[i], "korap:date");
@@ -101,8 +100,9 @@ public class MetaQuery {
         return value;
     }
 
-    // map can only have one key, value pair. thus, text class can only be added once. Multiple types are not possible!
-    public MetaQuery addMetaFilter(String queries) {
+    // fixme: map can only have one key/value pair. thus,
+    // text class can only be added once. Multiple types are not possible!
+    public CollectionQuery addMetaFilter(String queries) {
         Multimap<String, String> m = resEq(queries);
         boolean multypes = m.keys().size() > 1;
         String def_key = null;
@@ -125,7 +125,7 @@ public class MetaQuery {
         return this;
     }
 
-    public MetaQuery addMetaExtend(String queries) {
+    public CollectionQuery addMetaExtend(String queries) {
         Multimap<String, String> m = resEq(queries);
         boolean multypes = m.keys().size() > 1;
         String def_key = null;
@@ -148,18 +148,17 @@ public class MetaQuery {
         return this;
     }
 
-    public MetaQuery addMetaFilter(String attr, String val) {
+    public CollectionQuery addMetaFilter(String attr, String val) {
         return addMetaFilter(attr + ":" + val);
     }
 
-    public MetaQuery addMetaExtend(String attr, String val) {
+    public CollectionQuery addMetaExtend(String attr, String val) {
         return addMetaExtend(attr + ":" + val);
     }
 
     private String[] processDates(List<String> dates) {
         if (dates.isEmpty())
             return new String[3];
-        boolean range = false;
         String[] el = new String[dates.size() + 3];
         int idx = 3;
         for (String value : dates) {
@@ -192,7 +191,7 @@ public class MetaQuery {
         return cursor;
     }
 
-    private List<Map> getMetaOnly() {
+    private List<Map> getCollectionsOnly() {
         List<Map> cursor = new ArrayList<>(this.mfil);
         cursor.addAll(this.mext);
         return cursor;
@@ -204,7 +203,7 @@ public class MetaQuery {
      * @return
      */
     public String stringify() {
-        List meta = getMetaOnly();
+        List meta = getCollectionsOnly();
         if (meta.isEmpty())
             return "";
 
@@ -236,9 +235,9 @@ public class MetaQuery {
      *
      * @return
      */
-    public String toMeta() {
+    public String toCollections() {
         Map meta = new LinkedHashMap();
-        meta.put("meta", join());
+        meta.put("collections", join());
 
         try {
             return serialzer.writeValueAsString(meta);
@@ -250,11 +249,12 @@ public class MetaQuery {
 
     /**
      * resolves all queries as equal (hierarchy) AND relations
+     *
      * @param queries
      * @return
      */
     private Multimap<String, String> resEq(String queries) {
-	    Multimap<String, String> qmap = ArrayListMultimap.create();
+        Multimap<String, String> qmap = ArrayListMultimap.create();
         String[] spl = queries.split(" AND ");
         for (String query : spl) {
             String[] q = query.split(":");
@@ -263,7 +263,17 @@ public class MetaQuery {
             qmap.put(attr, val);
         }
         return qmap;
+    }
 
+
+    /**
+     * resolves query string with AND and OR relations alike!
+     *
+     * @param queries
+     * @return
+     */
+    private Multimap<String, String> resDep(String queries) {
+        return null;
     }
 
 

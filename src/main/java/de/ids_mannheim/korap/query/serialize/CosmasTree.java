@@ -27,7 +27,7 @@ import de.ids_mannheim.korap.util.QueryException;
  */
 public class CosmasTree extends AbstractSyntaxTree {
 	
-	Logger log = LoggerFactory.getLogger(CosmasTree.class);
+	private static Logger log = LoggerFactory.getLogger(CosmasTree.class);
 	
 	private static c2psParser cosmasParser;
 	/*
