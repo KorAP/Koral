@@ -45,23 +45,12 @@ public class QuerySerializer {
 					 * regex
 					 * & field_group
 					 */
-                    "[base=foo]|([base=foo][base=bar])* meta author=Goethe&year=1815",
-                    "([base=foo]|[base=bar])[base=foobar]",
-                    "shrink({[base=Mann]})",
-                    "shrink({[base=foo]}[orth=bar])",
-                    "shrink(1:[base=Der]{1:[base=Mann]})",
-
-                    "[base=Katze]",
-                    "[base!=Katze]",
-                    "[!base=Katze]",
-                    "[base=Katze&orth=Katzen]",
-                    "[base=Katze][orth=und][orth=Hunde]",
-                    "[!(base=Katze&orth=Katzen)]",
-                    "contains(<np>,[base=Mann])",
-                    "startswith(<np>,[!pos=Det])",
-                    "'vers{2,3}uch'",
-                    "[orth='vers.*ch']",
-                    "[(base=bar|base=foo)&orth=foobar]",
+                    "Der Mann",
+    				"Der /+w1:3 Mann",
+    				"Der /+w1:3,s1 Mann",
+    				"(Der /+w1:3,s1 Mann) /+w5 geht",
+    				"(Der /+w1:3,s1 Mann) /-w5 geht",
+    				"(Der /+w1:3,s1 Mann) /+w5 (geht weg)",
 
             };
         } else {
@@ -72,7 +61,7 @@ public class QuerySerializer {
             i++;
             try {
                 System.out.println(q);
-                jg.run(q, "poliqarp", System.getProperty("user.home") + "/bsp" + i + ".json");
+                jg.run(q, "cosmas", System.getProperty("user.home") + "/bsp" + i + ".json");
                 System.out.println();
             } catch (NullPointerException npe) {
                 npe.printStackTrace();
@@ -105,8 +94,8 @@ public class QuerySerializer {
             throws JsonGenerationException, JsonMappingException, IOException, QueryException {
         if (queryLanguage.equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
-//		} else if (queryLanguage.equals("cosmas")) {
-//			ast = new CosmasTree(query);
+		} else if (queryLanguage.equals("cosmas")) {
+			ast = new CosmasTree(query);
         } else if (queryLanguage.equals("poliqarpplus")) {
             ast = new PoliqarpPlusTree(query);
         } else {

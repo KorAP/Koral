@@ -260,6 +260,77 @@ public class QueryUtils {
 
         return request;
     }
+    
+    public static void prepareContext(LinkedHashMap<String, Object> requestMap) {
+		LinkedHashMap<String,Object> context = new LinkedHashMap<String,Object>();
+		
+		LinkedHashMap<String,Object> classMap = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> operands = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> operation = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> frame = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> classRef = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> spanRef = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> classRefOp = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> min = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> max = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> exclude = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> distances = new LinkedHashMap<String,Object>();
+		LinkedHashMap<String,Object> inOrder = new LinkedHashMap<String,Object>();
+		
+		operation.put("@id", "group:operation/");
+		operation.put("@type", "@id");
+		
+		classMap.put("@id", "group:class");
+		classMap.put("@type", "xsd:integer");
+		
+		operands.put("@id", "group:operands");
+		operands.put("@container", "@list");
+		
+		frame.put("@id", "group:frame/");
+		frame.put("@type", "@id");
+		
+		classRef.put("@id", "group:classRef");
+		classRef.put("@type", "xsd:integer");
+		
+		spanRef.put("@id", "group:spanRef");
+		spanRef.put("@type", "xsd:integer");
+		
+		classRefOp.put("@id", "group:classRefOp");
+		classRefOp.put("@type", "@id");
+		
+		min.put("@id", "boundary:min");
+		min.put("@type", "xsd:integer");
+		
+		max.put("@id", "boundary:max");
+		max.put("@type", "xsd:integer");
+		
+		exclude.put("@id", "group:exclude");
+		exclude.put("@type", "xsd:boolean");
+		
+		distances.put("@id", "group:distances");
+		distances.put("@container", "@list");
+		
+		inOrder.put("@id", "group:inOrder");
+		inOrder.put("@type", "xsd:boolean");
+		
+		context.put("korap", "http://korap.ids-mannheim.de/ns/KorAP/json-ld/v0.1/");
+		context.put("boundary", "korap:boundary/");
+		context.put("group", "korap:group/");
+		context.put("operation", operation);
+		context.put("class", classMap);
+		context.put("operands", operands);
+		context.put("frame", frame);
+		context.put("classRef", classRef);
+		context.put("spanRef", spanRef);
+		context.put("classRefOp", classRefOp);
+		context.put("min", min);
+		context.put("max", max);
+		context.put("exclude", exclude);
+		context.put("distances", distances);
+		context.put("inOrder", inOrder);
+		
+		requestMap.put("@context", context);		
+	}
 
 	
 

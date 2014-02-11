@@ -1,0 +1,6 @@
+bsp1.json: "Der Mann"
+bsp2.json: "Der /+w1:3 Mann"
+bsp3.json: "Der /+w1:3,s1 Mann"
+bsp4.json: "(Der /+w1:3,s1 Mann) /+w5 geht"
+bsp5.json: "(Der /+w1:3,s1 Mann) /-w5 geht"
+bsp6.json: "(Der /+w1:3,s1 Mann) /+w5 (geht weg)"
