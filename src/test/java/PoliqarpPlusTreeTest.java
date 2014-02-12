@@ -66,6 +66,15 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
+	public void testRegex() throws QueryException {
+		String query = "[orth=\"M(a|ä)nn(er)?\"]";
+		String re1 = "{@type=korap:token, wrap={@type=korap:term, @type=term:regex, key=M(a|ä)nn(er)?, layer=orth, match=eq}}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(re1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
 	public void testElements() throws QueryException {
 		// <s>
 		String elem1 = "{@type=korap:span, key=s}";

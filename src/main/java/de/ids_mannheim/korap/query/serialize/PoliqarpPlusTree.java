@@ -461,7 +461,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				value = valNode.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (simple_query (sq_segment foo))
 			} else if (valType.equals("re_query")) {
 				value = valNode.getChild(0).toStringTree(poliqarpParser); 				//e.g. (re_query "bar*")
-				fieldMap.put("@subtype", "value#regex");
+				fieldMap.put("@type", "term:regex");
+				value = value.substring(1,value.length()-1); //remove trailing quotes
 			}
 			fieldMap.put("key", value);
 			if (fieldName.contains("/")) {
