@@ -75,6 +75,26 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
+	public void testCaseSensitivityFlag() throws QueryException {
+		String query="[orth=deutscher/i]";
+		String cs1 = 
+				"{@type=korap:token, wrap={@type=korap:term, key=deutscher, layer=orth, match=match:eq, caseInsensitive=true}}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(cs1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="[orth=deutscher/i][orth=Bundestag]";
+		String cs2 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=deutscher, layer=orth, match=match:eq, caseInsensitive=true}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=Bundestag, layer=orth, match=match:eq}}" +
+					"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(cs2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
 	public void testElements() throws QueryException {
 		// <s>
 		String elem1 = "{@type=korap:span, key=s}";

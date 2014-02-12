@@ -4,3 +4,24 @@ bsp3.json: "Der /+w1:3,s1 Mann"
 bsp4.json: "(Der /+w1:3,s1 Mann) /+w5 geht"
 bsp5.json: "(Der /+w1:3,s1 Mann) /-w5 geht"
 bsp6.json: "(Der /+w1:3,s1 Mann) /+w5 (geht weg)"
+
+cosmas1.json:  "Buch"
+cosmas2.json:  "das Buch"						// to demonstrate token sequences
+cosmas3.json:  "das /+w1:3 Buch"				// word-distance constraint
+cosmas4.json:  "das /+w1:3,s1 Buch"  			// combined word-distance and sent-distance constraint
+cosmas5.json:  "(das /+w1:3,s1 Buch) /+w5 Tisch"	// complex distance constraint on sequences
+cosmas6.json:  "(das /+w1:3,s1 Buch) /-w5 Tisch"    // negative distance -> precedence
+cosmas7.json:  "(das /+w1:3,s1 Buch) /+w5 (auf dem Tisch)"
+cosmas8.json:  "Institut für Deutsche Sprache"	// spelling variations: deutsche/Deutsche
+cosmas9.json:  "Institut für deutsche Sprache"  
+cosmas10.json: "Institut für $deutsche Sprache" // finds both
+cosmas11.json: "Institut für &deutsch Sprache"  // finds both if base form (lemma) is annotated
+cosmas12.json: "Institut für /+w2 Sprache"  	// finds institutes for any language
+cosmas13.json: "Institut für %+w1 deutsche Sprach e"  // finds institutes for anything
+cosmas14.json: "Institut für MORPH(A) Sprache"	// finds institutes for any language
+cosmas15.json: "wegen #IN(L) <s>"				// finds 'wegen' at beginning of sentence
+cosmas16.json: "$wegen #IN(L) <s>"				// finds 'wegen' at beginning of sentence, also when capitalised
+cosmas17.json: "#BED($wegen , +sa)"				// equivalent to above
+cosmas18.json: "#BEG(#ELEM(S))" 				// finds every sentence-initial word
+cosmas19.json: "MORPH(V) #IN(L) #ELEM(S)"  		// e.g. questions
+cosmas20.json: "MORPH(V) #IN(R) #ELEM(S)"  		// e.g. subordinate clauses

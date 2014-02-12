@@ -3,6 +3,8 @@ package de.ids_mannheim.korap.query.serialize;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import de.ids_mannheim.korap.util.QueryException;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +25,7 @@ public class QuerySerializer {
 
     public QuerySerializer() {
         mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     /**
@@ -45,12 +48,29 @@ public class QuerySerializer {
 					 * regex
 					 * & field_group
 					 */
-                    "Der Mann",
-    				"Der /+w1:3 Mann",
-    				"Der /+w1:3,s1 Mann",
-    				"(Der /+w1:3,s1 Mann) /+w5 geht",
-    				"(Der /+w1:3,s1 Mann) /-w5 geht",
-    				"(Der /+w1:3,s1 Mann) /+w5 (geht weg)",
+                    "Buch",
+            		"das Buch",
+    				"das /+w1:3 Buch",
+    				"das /+w1:3,s1 Buch",
+    				"(das /+w1:3,s1 Buch) /+w5 Tisch",
+    				"(das /+w1:3,s1 Buch) /-w5 Tisch",
+    				"(das /+w1:3,s1 Buch) /+w5 (auf dem Tisch)",
+    				
+    				
+    				"Institut für Deutsche Sprache",
+    				"Institut für deutsche Sprache",
+    				"Institut für $deutsche Sprache",
+    				"Institut für &deutsch Sprache",
+    				"Institut für /+w2 Sprache",
+    				"Institut für %+w1 deutsche Sprache",
+    				"Institut für MORPH(A) Sprache",
+    				
+    				"wegen #IN(L) <s>",
+    				"$wegen #IN(L) <s>",
+    				"#BED($wegen , +sa)",
+    				"#BEG(#ELEM(S))",
+    				"MORPH(V) #IN(L) #ELEM(S)",
+    				"MORPH(V) #IN(R) #ELEM(S)",
 
             };
         } else {
@@ -61,7 +81,8 @@ public class QuerySerializer {
             i++;
             try {
                 System.out.println(q);
-                jg.run(q, "cosmas", System.getProperty("user.home") + "/bsp" + i + ".json");
+                String ql = "cosmas";
+                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + i + ".json");
                 System.out.println();
             } catch (NullPointerException npe) {
                 npe.printStackTrace();

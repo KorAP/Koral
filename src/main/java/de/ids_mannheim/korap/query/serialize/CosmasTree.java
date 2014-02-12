@@ -218,9 +218,9 @@ public class CosmasTree extends AbstractSyntaxTree {
 			
 			// negate field (see above)
 			if (negate) {
-				fieldMap.put("match", "match:"+"ne");
+				fieldMap.put("match", "match:ne");
 			} else {
-				fieldMap.put("match", "match:"+"eq");
+				fieldMap.put("match", "match:eq");
 			}
 			//Step II: decide where to put
 			putIntoSuperObject(token, 1);
@@ -235,13 +235,17 @@ public class CosmasTree extends AbstractSyntaxTree {
 			
 			fieldMap.put("@type", "korap:term");
 //			fieldMap.put("key", "morph:"+node.getChild(0).toString().replace(" ", "_"));
-			fieldMap.put("key", node.getChild(0).toString().replace(" ", "_"));
+			String[] morphValues = node.getChild(0).toString().split(" ");
+			String pos = morphValues[0];
+			
+			fieldMap.put("key", pos);
+			fieldMap.put("layer", "pos");
 			// make category-specific fieldMap entry
 			// negate field (see above)
 			if (negate) {
-				fieldMap.put("match", "match:"+"ne");
+				fieldMap.put("match", "match:ne");
 			} else {
-				fieldMap.put("match", "match:"+"eq");
+				fieldMap.put("match", "match:eq");
 			}
 //			List<String> morphValues = QueryUtils.parseMorph(node.getChild(0).toStringTree());
 //			System.err.println(morphValues);
@@ -768,7 +772,12 @@ public class CosmasTree extends AbstractSyntaxTree {
 				"(Der /+w1:3,s1 Mann) /+w5 geht",
 				"(Der /+w1:3,s1 Mann) /-w5 geht",
 				"(Der /+w1:3,s1 Mann) /+w5 (geht weg)",
-				"Tag der $offenen Tür"
+				"Tag der $offenen Tür",
+				"#BED($wegen , sa)",
+				"#BEG(#ELEM(S))",
+				"#BEG(<s>)",
+				"MORPH(V PRES)",
+				"Mond?"
 				};
 		CosmasTree.debug=true;
 		for (String q : queries) {

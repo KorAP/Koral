@@ -134,7 +134,6 @@ public class QueryUtils {
 	public static List<String> parseMorph(String stringTree) {
 		
 		ArrayList<String> morph = new ArrayList<String>();
-		System.err.println(stringTree);
 		return morph;
 	}
 

@@ -73,14 +73,29 @@ public class CosmasTreeTest {
 	
 	@Test
 	public void testCaseSensitivityFlag() throws QueryException {
-		//TODO ignorieroperator $ http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/ignorierung.html
+		query="$deutscher";
+		String cs1 = 
+				"{@type=korap:token, wrap={@type=korap:term, caseInsensitive=true, key=deutscher, layer=orth, match=match:eq}}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(cs1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="$deutscher Bundestag";
+		String cs2 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, caseInsensitive=true, key=deutscher, layer=orth, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=Bundestag, layer=orth, match=match:eq}}" +
+					"]}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(cs2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
 	public void testMORPH() throws QueryException {
 		query="#MORPH(V)";
 		String morph1 = 
-					"{@type=korap:token, wrap={@type=korap:term, key=V, match=match:eq}}";
+					"{@type=korap:token, wrap={@type=korap:term, key=V, layer=pos, match=match:eq}}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(morph1.replaceAll(" ", ""), map.replaceAll(" ", ""));
