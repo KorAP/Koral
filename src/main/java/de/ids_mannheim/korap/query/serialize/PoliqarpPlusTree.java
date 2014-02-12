@@ -461,7 +461,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				value = valNode.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (simple_query (sq_segment foo))
 			} else if (valType.equals("re_query")) {
 				value = valNode.getChild(0).toStringTree(poliqarpParser); 				//e.g. (re_query "bar*")
-				fieldMap.put("@type", "term:regex");
+				fieldMap.put("@subtype", "term:regex");
 				value = value.substring(1,value.length()-1); //remove trailing quotes
 			}
 			fieldMap.put("key", value);
@@ -473,7 +473,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				if (fieldName.equals("base")) fieldName = "lemma";
 				fieldMap.put("layer", fieldName);
 			}
-			fieldMap.put("match", relation);
+			fieldMap.put("match", "match:"+relation);
 			// Step II: decide where to put the field map (as the only value of a token or the meta filter or as a part of a group in case of coordinated fields)
 			if (fieldStack.isEmpty()) {
 				if (!inMeta) {
@@ -496,11 +496,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		// conj_field serves for both conjunctions and disjunctions
 		if (nodeCat.equals("conj_field")) {
 			LinkedHashMap<String,Object> group = new LinkedHashMap<String,Object>(); 
-			ArrayList<Object> groupOperands = new ArrayList<Object>();
-			group.put("@type", "korap:group");
-			group.put("operands", groupOperands);
-			fieldStack.push(groupOperands);
-			stackedFields++;
+			
+			group.put("@type", "korap:termGroup");
+			
 			// Step I: get operator (& or |)
 			ParseTree operatorNode = node.getChild(1).getChild(0);
 			String operator = QueryUtils.getNodeCat(operatorNode);
@@ -508,7 +506,11 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			if (negField) {
 				relation = relation.equals("or") ? "and": "or";
 			}
-			group.put("operation", "operation:"+relation);
+			group.put("relation", relation);
+			ArrayList<Object> groupOperands = new ArrayList<Object>();
+			group.put("operands", groupOperands);
+			fieldStack.push(groupOperands);
+			stackedFields++;
 			// Step II: decide where to put the group (directly under token or in top meta filter section or embed in super group)
 			if (openNodeCats.get(1).equals("cq_segment")) {
 				tokenStack.getFirst().put("wrap", group);
@@ -549,7 +551,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				tokenValues.put("@type", "korap:term");
 				tokenValues.put("key", word);
 				tokenValues.put("layer", "orth");
-				tokenValues.put("match", "eq");
+				tokenValues.put("match", "match:"+"eq");
 				// add token to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the values from "field")
 				if (node.getParent().getChildCount()>1) {
 					ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
@@ -561,10 +563,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		
 		if (nodeCat.equals("re_query")) {
 			LinkedHashMap<String,Object> reQuery = new LinkedHashMap<String,Object>();
-			reQuery.put("@subtype", "regex");
+			reQuery.put("@subtype", "term:regex");
 			String regex = node.getChild(0).toStringTree(poliqarpParser);
 			reQuery.put("key", regex);
-			reQuery.put("match", "eq");
+			reQuery.put("match", "match:"+"eq");
 			
 			// if in field, regex was already added there
 			if (!openNodeCats.get(1).equals("field")) {
@@ -770,7 +772,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		if (nodeCat.equals("flag")) {
 			String flag = QueryUtils.getNodeCat(node.getChild(0)).substring(1); //substring removes leading slash '/'
 			// add to current token's value
-			((HashMap<String, Object>) curToken.get("wrap")).put("flag", flag);
+			if (flag.contains("i")) ((HashMap<String, Object>) curToken.get("wrap")).put("caseInsensitive", true);
+			else if (flag.contains("I")) ((HashMap<String, Object>) curToken.get("wrap")).put("caseInsensitive", false);
+			else ((HashMap<String, Object>) curToken.get("wrap")).put("flag", flag);
 		}
 		
 		if (nodeCat.equals("meta")) {
@@ -955,7 +959,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"[base=foo] meta (author=name&year=2000)",
 //				"[base=foo] meta year=2000",
 				"{[base=Mann]}",
-				"shrink(1:[orth=Der]{1:[orth=Mann][orth=geht]})"
+				"shrink(1:[orth=Der]{1:[orth=Mann][orth=geht]})",
+				"[base=Mann/i]"
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {

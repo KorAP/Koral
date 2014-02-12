@@ -209,14 +209,18 @@ public class CosmasTree extends AbstractSyntaxTree {
 			// make category-specific fieldMap entry
 			String attr = nodeCat.equals("OPWF") ? "orth" : "lemma";
 			String value = node.getChild(0).toStringTree().replaceAll("\"", "");
+			if (value.startsWith("$")) {
+				value = value.substring(1);
+				fieldMap.put("caseInsensitive", true);
+			}
 			fieldMap.put("key", value);
 			fieldMap.put("layer", attr);
 			
 			// negate field (see above)
 			if (negate) {
-				fieldMap.put("match", "ne");
+				fieldMap.put("match", "match:"+"ne");
 			} else {
-				fieldMap.put("match", "eq");
+				fieldMap.put("match", "match:"+"eq");
 			}
 			//Step II: decide where to put
 			putIntoSuperObject(token, 1);
@@ -235,9 +239,9 @@ public class CosmasTree extends AbstractSyntaxTree {
 			// make category-specific fieldMap entry
 			// negate field (see above)
 			if (negate) {
-				fieldMap.put("match", "ne");
+				fieldMap.put("match", "match:"+"ne");
 			} else {
-				fieldMap.put("match", "eq");
+				fieldMap.put("match", "match:"+"eq");
 			}
 //			List<String> morphValues = QueryUtils.parseMorph(node.getChild(0).toStringTree());
 //			System.err.println(morphValues);
@@ -327,9 +331,9 @@ public class CosmasTree extends AbstractSyntaxTree {
 			proxSequence.put("operation", "operation:"+ "sequence");
 			objectStack.push(proxSequence);
 			stackedObjects++;
-//			if (openNodeCats.get(1).equals("OPALL")) proxSequence.put("match", "all");
-//			else if (openNodeCats.get(1).equals("OPNHIT")) proxSequence.put("match", "between");
-//			else proxSequence.put("match", "operands");
+//			if (openNodeCats.get(1).equals("OPALL")) proxSequence.put("match", "match:"+"all");
+//			else if (openNodeCats.get(1).equals("OPNHIT")) proxSequence.put("match", "match:"+"between");
+//			else proxSequence.put("match", "match:"+"operands");
 			ArrayList<Object> constraints = new ArrayList<Object>();
 			boolean exclusion = ! typ.getChild(0).toStringTree().equals("PROX"); 
 			
@@ -652,7 +656,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		
 		if (exclnode != null) {
 			if (exclnode.getChild(0).toStringTree().equals("YES")) {
-				posgroup.put("match", "ne");
+				posgroup.put("match", "match:"+"ne");
 			}
 		}
 		if (groupnode != null) {
@@ -764,6 +768,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 				"(Der /+w1:3,s1 Mann) /+w5 geht",
 				"(Der /+w1:3,s1 Mann) /-w5 geht",
 				"(Der /+w1:3,s1 Mann) /+w5 (geht weg)",
+				"Tag der $offenen Tür"
 				};
 		CosmasTree.debug=true;
 		for (String q : queries) {
