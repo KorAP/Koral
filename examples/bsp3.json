@@ -1,95 +1,43 @@
 {
-   "@context":{
-      "korap":"http://korap.ids-mannheim.de/ns/KorAP/json-ld/v0.1/",
-      "boundary":"korap:boundary/",
-      "group":"korap:group/",
-      "operation":{
-         "@id":"group:operation/",
-         "@type":"@id"
-      },
-      "class":{
-         "@id":"group:class",
-         "@type":"xsd:integer"
-      },
-      "operands":{
-         "@id":"group:operands",
-         "@container":"@list"
-      },
-      "frame":{
-         "@id":"group:frame/",
-         "@type":"@id"
-      },
-      "classRef":{
-         "@id":"group:classRef",
-         "@type":"xsd:integer"
-      },
-      "spanRef":{
-         "@id":"group:spanRef",
-         "@type":"xsd:integer"
-      },
-      "classRefOp":{
-         "@id":"group:classRefOp",
-         "@type":"@id"
-      },
-      "min":{
-         "@id":"boundary:min",
-         "@type":"xsd:integer"
-      },
-      "max":{
-         "@id":"boundary:max",
-         "@type":"xsd:integer"
-      },
-      "exclude":{
-         "@id":"group:exclude",
-         "@type":"xsd:boolean"
-      },
-      "distances":{
-         "@id":"group:distances",
-         "@container":"@list"
-      },
-      "inOrder":{
-         "@id":"group:inOrder",
-         "@type":"xsd:boolean"
-      }
-   },
+   "context":"http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld",
    "query":{
-      "type":"group",
-      "operation":"sequence",
-      "inOrder":"true",
+      "@type":"korap:group",
+      "operation":"operation:sequence",
+      "inOrder":true,
       "distances":[
          {
-            "type":"group",
-            "operation":"and",
+            "@type":"korap:group",
+            "operation":"operation:and",
             "operands":[
                {
-                  "type":"distance",
-                  "measure":"w",
-                  "min":"1",
-                  "max":"3"
+                  "@type":"korap:distance",
+                  "key":"w",
+                  "min":1,
+                  "max":3
                },
                {
-                  "type":"distance",
-                  "measure":"s",
-                  "min":"1",
-                  "max":"1"
+                  "@type":"korap:distance",
+                  "key":"s",
+                  "min":1,
+                  "max":1
                }
             ]
          }
       ],
       "operands":[
          {
-            "type":"token",
-            "key":{
-               "type":"term",
+            "@type":"korap:token",
+            "wrap":{
+               "@type":"korap:term",
                "key":"Der",
                "layer":"orth",
                "match":"eq"
             }
          },
          {
-            "type":"token",
-            "key":{
-               "type":"term",
+            "@type":"korap:token",
+            "wrap":{
+               "@type":"korap:term",
                "key":"Mann",
                "layer":"orth",
                "match":"eq"
