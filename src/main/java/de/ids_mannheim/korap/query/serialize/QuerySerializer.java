@@ -111,8 +111,8 @@ public class QuerySerializer {
             throws QueryException {
         if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
-//		} else if (ql.toLowerCase().equals("cosmas")) {
-//			ast = new CosmasTree(query);
+		} else if (ql.toLowerCase().equals("cosmas")) {
+			ast = new CosmasTree(query);
         } else if (ql.toLowerCase().equals("poliqarpplus")) {
             ast = new PoliqarpPlusTree(query);
         } else {
