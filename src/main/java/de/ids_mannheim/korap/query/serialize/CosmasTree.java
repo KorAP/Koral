@@ -382,7 +382,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 				distanceGroup.put("@type", "korap:group");
 				distanceGroup.put("operation", "operation:"+ "and");
 				distanceGroup.put("operands", groupOperands);
-				constraints.add(distanceGroup);
+//				constraints.add(distanceGroup);
 				for (int i=0; i<dist_list.getChildCount(); i++) {
 					String direction = dist_list.getChild(i).getChild(0).getChild(0).toStringTree().toLowerCase();
 					String min = dist_list.getChild(i).getChild(1).getChild(0).toStringTree();
@@ -399,7 +399,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 					if (exclusion) {
 						distance.put("exclude", exclusion);
 					}
-					groupOperands.add(distance);
+					constraints.add(distance);
 					if (direction.equals("plus")) {
 						inOrder=true;
 					} else if (direction.equals("minus")) {
@@ -489,7 +489,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 			} else {
 				spanRef.add(-1); spanRef.add(1);
 			}
-			beggroup.put("@spanRef", spanRef);
+			beggroup.put("spanRef", spanRef);
 			beggroup.put("operands", new ArrayList<Object>());
 			objectStack.push(beggroup);
 			stackedObjects++;
@@ -502,24 +502,48 @@ public class CosmasTree extends AbstractSyntaxTree {
 			// Step I: create group
 			int optsChild = node.getChildCount()-1;
 			Tree conditions = node.getChild(optsChild).getChild(0);
-			// Distinguish two cases. Normal case: query has just one condition, like #BED(XY, sa) ...
+			// Distinguish two cases. Normal case: query has just one condition, like #BED(X, sa) ...
 			if (conditions.getChildCount()==1) {
+				CosmasCondition c = new CosmasCondition(conditions.getChild(0));
+				 
+				// create a containing group expressing the submatch constraint on the first argument
+				LinkedHashMap<String, Object> submatchgroup = new LinkedHashMap<String, Object>();
+				submatchgroup.put("@type", "korap:group");
+				submatchgroup.put("operation", "operation:"+ "submatch");
+				ArrayList<Integer> spanRef = new ArrayList<Integer>();
+				spanRef.add(1);
+				submatchgroup.put("classRef", spanRef);
+				ArrayList<Object> submatchoperands = new ArrayList<Object>();
+				submatchgroup.put("operands", submatchoperands);
+				
+				// create the group expressing the position constraint
 				LinkedHashMap<String, Object> posgroup = new LinkedHashMap<String, Object>();
 				posgroup.put("@type", "korap:group");
 				posgroup.put("operation", "operation:"+ "position");
-				CosmasCondition c = new CosmasCondition(conditions.getChild(0));
+				
 				posgroup.put("frame", "frame:"+c.position);
-				if (c.negated) posgroup.put("operation", "operation:"+ "!=");
+				if (c.negated) posgroup.put("exclude", true);
 				ArrayList<Object> operands = new ArrayList<Object>();
 				posgroup.put("operands", operands);
+
+				// create span representing the element expressed in the condition
 				LinkedHashMap<String, Object> bedElem = new LinkedHashMap<String, Object>();
-				operands.add(bedElem);
 				bedElem.put("@type", "korap:span");
 				bedElem.put("key", c.elem);
-				objectStack.push(posgroup);
+				
+				// create a class group containing the argument, in order to submatch the arg.
+				LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
+				classGroup.put("@type", "korap:group");
+				classGroup.put("operation", "operation:class");
+				classGroup.put("class", 1);
+				classGroup.put("operands", new ArrayList<Object>());
+				objectStack.push(classGroup);
 				stackedObjects++;
+				operands.add(bedElem);
+				operands.add(classGroup);
 				// Step II: decide where to put
-				putIntoSuperObject(posgroup, 1);
+				submatchoperands.add(posgroup);
+				putIntoSuperObject(submatchgroup, 1);
 			// ... or the query has several conditions specified, like #BED(XY, sa,-pa). In that case,
 			//     create an 'and' group and embed the position groups in its operands
 			} else {
