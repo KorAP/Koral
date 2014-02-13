@@ -3,7 +3,7 @@
   "query" : {
     "@type" : "korap:group",
     "operation" : "operation:submatch",
-    "@spanRef" : [ 0, 1 ],
+    "spanRef" : [ 0, 1 ],
     "operands" : [ {
       "@type" : "korap:span",
       "key" : "s"
