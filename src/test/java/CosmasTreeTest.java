@@ -505,19 +505,25 @@ public class CosmasTreeTest {
 		assertEquals(all1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
-//	@Test
+	@Test
 	public void testOPNHIT() throws QueryException {
 		query="#NHIT(gehen /w1:10 voran)";
 		String nhit1 = 
-				"{@type=korap:group, operation=operation:sequence, inOrder=false, " +
-					"distances=[" +
-						"{@type=korap:distance, key=w, min=1, max=10}" +
-					"], " +
-					"operands=[" +
-						"{@type=korap:token, wrap={@type=korap:term, key=gehen, layer=orth, match=match:eq}}," +
-						"{@type=korap:token, wrap={@type=korap:term, key=voran, layer=orth, match=match:eq}}" +
-					"]" +
-				"}";
+				"{@type=korap:group, operation=operation:submatch, classRef=[1,2], classRefOp=classRefOp:intersection, operands=[" +
+					"{@type=korap:group, operation=operation:sequence, inOrder=false, " +
+						"distances=[" +
+							"{@type=korap:distance, key=w, min=1, max=10}" +
+						"], " +
+						"operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+								"{@type=korap:token, wrap={@type=korap:term, key=gehen, layer=orth, match=match:eq}}" +
+							"]}," +
+							"{@type=korap:group, operation=operation:class, class=2, operands=[" +
+								"{@type=korap:token, wrap={@type=korap:term, key=voran, layer=orth, match=match:eq}}" +
+							"]}" +
+						"]" +
+					"}" +
+				"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(nhit1.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -541,38 +547,50 @@ public class CosmasTreeTest {
 		
 		query = "#BED(der Mann , +pe)";
 		String bed2 = 
-				"{@type=korap:group, operation=operation:position, frame=frame:endswith, operands=[" +
-					"{@type=korap:span, key=p}," +
-					"{@type=korap:group, operation=operation:sequence, operands=[" +
-						"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
-						"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
-					"]}" +
-				"]}";
+				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands= [" +
+						"{@type=korap:group, operation=operation:position, frame=frame:endswith, operands=[" +
+							"{@type=korap:span, key=p}," +
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+								"{@type=korap:group, operation=operation:sequence, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
+									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
+								"]}" +
+							"]}" +
+						"]}" +
+					"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
-//		assertEquals(bed2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(bed2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "#BED(der Mann , sa,-pa)";
 		String bed3 = 
-				"{@type=korap:group, operation=operation:and, operands=[" +
-					"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +
-						"{@type=korap:span, key=s}," +
-						"{@type=korap:group, operation=operation:sequence, operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
-							"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
-						"]}" +
-					"]}," +
-					"{@type=korap:group, operation=operation:position, frame=frame:startswith, exclude=true, operands=[" +
-						"{@type=korap:span, key=p}," +
-						"{@type=korap:group, operation=operation:sequence, operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
-							"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
+				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+					"{@type=korap:group, operation=operation:sequence, distances=[" +
+						"{@type=korap:distance, key=w, min=0, max=0}" +
+					"], operands=[" +
+						"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +
+							"{@type=korap:span, key=s}," +
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+								"{@type=korap:group, operation=operation:sequence, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
+									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
+								"]}" +
+							"]}" +
+						"]}," +
+						"{@type=korap:group, operation=operation:position, frame=frame:startswith, exclude=true, operands=[" +
+							"{@type=korap:span, key=p}," +
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+								"{@type=korap:group, operation=operation:sequence, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
+									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
+								"]}" +
+							"]}" +
 						"]}" +
 					"]}" +
 				"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
-//		assertEquals(bed3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(bed3.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 }

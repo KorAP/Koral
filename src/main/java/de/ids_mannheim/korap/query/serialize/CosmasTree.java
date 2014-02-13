@@ -335,33 +335,24 @@ public class CosmasTree extends AbstractSyntaxTree {
 			proxSequence.put("operation", "operation:"+ "sequence");
 			objectStack.push(proxSequence);
 			stackedObjects++;
-//			if (openNodeCats.get(1).equals("OPALL")) proxSequence.put("match", "match:"+"all");
-//			else if (openNodeCats.get(1).equals("OPNHIT")) proxSequence.put("match", "match:"+"between");
-//			else proxSequence.put("match", "match:"+"operands");
 			ArrayList<Object> constraints = new ArrayList<Object>();
 			boolean exclusion = ! typ.getChild(0).toStringTree().equals("PROX"); 
 			
-			boolean inOrder = true;
+			boolean inOrder = false;
 			proxSequence.put("inOrder", inOrder);
 			proxSequence.put("distances", constraints);
 			
 			ArrayList<Object> operands = new ArrayList<Object>(); 
 			proxSequence.put("operands", operands);
-			
-			// if only one dist_info, put directly into constraints
-			if (dist_list.getChildCount()==1) {
-				String direction = dist_list.getChild(0).getChild(0).getChild(0).toStringTree().toLowerCase();
-				String min = dist_list.getChild(0).getChild(1).getChild(0).toStringTree();
-				String max = dist_list.getChild(0).getChild(1).getChild(1).toStringTree();
-				String meas = dist_list.getChild(0).getChild(2).getChild(0).toStringTree();
+		
+			// possibly several distance constraints
+			for (int i=0; i<dist_list.getChildCount(); i++) {
+				String direction = dist_list.getChild(i).getChild(0).getChild(0).toStringTree().toLowerCase();
+				String min = dist_list.getChild(i).getChild(1).getChild(0).toStringTree();
+				String max = dist_list.getChild(i).getChild(1).getChild(1).toStringTree();
+				String meas = dist_list.getChild(i).getChild(2).getChild(0).toStringTree();
 				if (min.equals("VAL0")) {
 					min="0";
-				}
-				if (direction.equals("minus")) {
-					direction = "plus";
-					invertedOperandsLists.add(operands);
-				} else if (direction.equals("both")) {
-					inOrder=false;
 				}
 				LinkedHashMap<String, Object> distance = new LinkedHashMap<String, Object>();
 				distance.put("@type", "korap:distance");
@@ -372,43 +363,14 @@ public class CosmasTree extends AbstractSyntaxTree {
 					distance.put("exclude", exclusion);
 				}
 				constraints.add(distance);
-				proxSequence.put("inOrder", inOrder);
-			}
-			
-			// otherwise, create group and add info there
-			else {
-				LinkedHashMap<String, Object> distanceGroup = new LinkedHashMap<String, Object>();
-				ArrayList<Object> groupOperands = new ArrayList<Object>();
-				distanceGroup.put("@type", "korap:group");
-				distanceGroup.put("operation", "operation:"+ "and");
-				distanceGroup.put("operands", groupOperands);
-//				constraints.add(distanceGroup);
-				for (int i=0; i<dist_list.getChildCount(); i++) {
-					String direction = dist_list.getChild(i).getChild(0).getChild(0).toStringTree().toLowerCase();
-					String min = dist_list.getChild(i).getChild(1).getChild(0).toStringTree();
-					String max = dist_list.getChild(i).getChild(1).getChild(1).toStringTree();
-					String meas = dist_list.getChild(i).getChild(2).getChild(0).toStringTree();
-					if (min.equals("VAL0")) {
-						min=max;
-					}
-					LinkedHashMap<String, Object> distance = new LinkedHashMap<String, Object>();
-					distance.put("@type", "korap:distance");
-					distance.put("key", meas);
-					distance.put("min", Integer.parseInt(min));
-					distance.put("max", Integer.parseInt(max));
-					if (exclusion) {
-						distance.put("exclude", exclusion);
-					}
-					constraints.add(distance);
-					if (direction.equals("plus")) {
-						inOrder=true;
-					} else if (direction.equals("minus")) {
-						inOrder=true;
-						invertedOperandsLists.add(operands);
-					}
+				if (direction.equals("plus")) {
+					inOrder=true;
+				} else if (direction.equals("minus")) {
+					inOrder=true;
+					invertedOperandsLists.add(operands);
 				}
-				proxSequence.put("inOrder", inOrder);
 			}
+			proxSequence.put("inOrder", inOrder);
 			// Step II: decide where to put
 			putIntoSuperObject(proxSequence, 1);
 		}
@@ -447,7 +409,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		
 		
 		// Wrap the first argument of an #IN operator in a class group
-		if (nodeCat.equals("ARG1") && (openNodeCats.get(1).equals("OPIN") || openNodeCats.get(1).equals("OPOV"))) {
+		if (nodeCat.equals("ARG1") && (openNodeCats.get(1).equals("OPIN") || openNodeCats.get(1).equals("OPOV") || openNodeCats.get(2).equals("OPNHIT"))) {
 			// Step I: create group
 			LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
 			classGroup.put("@type", "korap:group");
@@ -460,12 +422,25 @@ public class CosmasTree extends AbstractSyntaxTree {
 			putIntoSuperObject(classGroup, 1);
 		}
 		
+		// Wrap the 2nd argument of an #IN operator embedded in NHIT in a class group
+		if (nodeCat.equals("ARG2") && openNodeCats.get(2).equals("OPNHIT")) {
+			// Step I: create group
+			LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
+			classGroup.put("@type", "korap:group");
+			classGroup.put("operation", "operation:"+ "class");
+			classGroup.put("class", 2);
+			classGroup.put("operands", new ArrayList<Object>());
+			objectStack.push(classGroup);
+			stackedObjects++;
+			// Step II: decide where to put
+			putIntoSuperObject(classGroup, 1);
+		}
+		
 		
 		if (nodeCat.equals("OPNHIT")) {
-//			proxGroupMatching = nodeCat.equals("OPALL") ? "all" : "exclude";
 			LinkedHashMap<String, Object> exclGroup = new LinkedHashMap<String, Object>();
 			exclGroup.put("@type", "korap:group");
-			exclGroup.put("operation", "operation:"+ "shrink");
+			exclGroup.put("operation", "operation:"+ "submatch");
 			ArrayList<Integer> classRef = new ArrayList<Integer>();
 			classRef.add(1);
 			classRef.add(2);
@@ -502,19 +477,21 @@ public class CosmasTree extends AbstractSyntaxTree {
 			// Step I: create group
 			int optsChild = node.getChildCount()-1;
 			Tree conditions = node.getChild(optsChild).getChild(0);
+			
+			// create a containing group expressing the submatch constraint on the first argument
+			LinkedHashMap<String, Object> submatchgroup = new LinkedHashMap<String, Object>();
+			submatchgroup.put("@type", "korap:group");
+			submatchgroup.put("operation", "operation:"+ "submatch");
+			ArrayList<Integer> spanRef = new ArrayList<Integer>();
+			spanRef.add(1);
+			submatchgroup.put("classRef", spanRef);
+			ArrayList<Object> submatchoperands = new ArrayList<Object>();
+			submatchgroup.put("operands", submatchoperands);
+			putIntoSuperObject(submatchgroup, 1);
+			
 			// Distinguish two cases. Normal case: query has just one condition, like #BED(X, sa) ...
 			if (conditions.getChildCount()==1) {
 				CosmasCondition c = new CosmasCondition(conditions.getChild(0));
-				 
-				// create a containing group expressing the submatch constraint on the first argument
-				LinkedHashMap<String, Object> submatchgroup = new LinkedHashMap<String, Object>();
-				submatchgroup.put("@type", "korap:group");
-				submatchgroup.put("operation", "operation:"+ "submatch");
-				ArrayList<Integer> spanRef = new ArrayList<Integer>();
-				spanRef.add(1);
-				submatchgroup.put("classRef", spanRef);
-				ArrayList<Object> submatchoperands = new ArrayList<Object>();
-				submatchgroup.put("operands", submatchoperands);
 				
 				// create the group expressing the position constraint
 				LinkedHashMap<String, Object> posgroup = new LinkedHashMap<String, Object>();
@@ -543,47 +520,63 @@ public class CosmasTree extends AbstractSyntaxTree {
 				operands.add(classGroup);
 				// Step II: decide where to put
 				submatchoperands.add(posgroup);
-				putIntoSuperObject(submatchgroup, 1);
+				
 			// ... or the query has several conditions specified, like #BED(XY, sa,-pa). In that case,
 			//     create an 'and' group and embed the position groups in its operands
 			} else {
 				// node has several conditions (like 'sa, -pa')
-				// -> create 'and' group and embed all position groups there
+				// -> create zero-distance sequence group and embed all position groups there
 				LinkedHashMap<String, Object> conjunct = new LinkedHashMap<String, Object>();
 				conjunct.put("@type", "korap:group");
-				conjunct.put("operation", "operation:"+ "and");
+				conjunct.put("operation", "operation:"+ "sequence");
+				ArrayList<Object> distances = new ArrayList<Object>();
+				conjunct.put("distances", distances);
+				LinkedHashMap<String, Object> zerodistance = new LinkedHashMap<String, Object>();
+				zerodistance.put("@type", "korap:distance");
+				zerodistance.put("key", "w");
+				zerodistance.put("min", 0);
+				zerodistance.put("max", 0);
+				distances.add(zerodistance);
 				ArrayList<Object> operands = new ArrayList<Object>();
 				conjunct.put("operands", operands);
 				ArrayList<ArrayList<Object>> distributedOperands = new ArrayList<ArrayList<Object>>();
 				
 				for (int i=0; i<conditions.getChildCount(); i++) {
-					// for each condition, create a position group. problem: how to get argument into every operands list?
+					// for each condition, create a position group containing a class group. problem: how to get argument into every operands list?
 					// -> use distributedOperandsLists
 					LinkedHashMap<String, Object> posGroup = new LinkedHashMap<String, Object>();
 					operands.add(posGroup);
 					
+					// make position group
 					CosmasCondition c = new CosmasCondition(conditions.getChild(i));
 					posGroup.put("@type", "korap:group");
 					posGroup.put("operation", "operation:"+ "position");
 					posGroup.put("frame", "frame:"+c.position);
 					if (c.negated) posGroup.put("exclude", "true");
 					ArrayList<Object> posOperands = new ArrayList<Object>();
-					distributedOperands.add(posOperands);
+					
+					// make class group 
+					LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
+					classGroup.put("@type", "korap:group");
+					classGroup.put("operation", "operation:class");
+					classGroup.put("class", 1);
+					ArrayList<Object> classOperands = new ArrayList<Object>(); 
+					classGroup.put("operands", classOperands);
+					distributedOperands.add(classOperands);  // subtree to be put into every class group -> distribute
+					
+					// put the span and the class group into the position group
 					posGroup.put("operands", posOperands);
-					LinkedHashMap<String, Object> bedElem = new LinkedHashMap<String, Object>();
-					posOperands.add(bedElem);
-					bedElem.put("@type", "korap:span");
-					bedElem.put("key", c.elem);
-					
-					
+					LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
+					posOperands.add(span);
+					posOperands.add(classGroup);
+					span.put("@type", "korap:span");
+					span.put("key", c.elem);
 				}
-				putIntoSuperObject(conjunct, 0);
+				submatchoperands.add(conjunct);
 				distributedOperandsLists.push(distributedOperands);
 			}
-
+			
 		}
-		
-		
 		objectsToPop.push(stackedObjects);
 		
 		/*
@@ -695,7 +688,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 	}
 
 	/**
-	 * Translates the text area specifications (position option arguments) to terms used in serealisation.
+	 * Translates the text area specifications (position option arguments) to terms used in serialisation.
 	 * For the allowed argument types and their values for OPIN and OPOV, see
 	 * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/ARGUMENT_I.html or
 	 * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/ARGUMENT_O.html, respectively.
@@ -790,18 +783,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 //				"#BEG(der /w3:5 Mann) /+w10 kommt",
 //				"&würde /w0 MORPH(V)",
 				"#NHIT(gehen /w1:10 voran)",
-				"Der Mann",
-				"Der /+w1:3 Mann",
-				"Der /+w1:3,s1 Mann",
-				"(Der /+w1:3,s1 Mann) /+w5 geht",
-				"(Der /+w1:3,s1 Mann) /-w5 geht",
-				"(Der /+w1:3,s1 Mann) /+w5 (geht weg)",
-				"Tag der $offenen Tür",
-				"#BED($wegen , sa)",
-				"#BEG(#ELEM(S))",
-				"#BEG(<s>)",
-				"MORPH(V PRES)",
-				"Mond?"
+				"#BED(der Mann , sa,-pa)"
 				};
 		CosmasTree.debug=true;
 		for (String q : queries) {
