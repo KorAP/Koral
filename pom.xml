@@ -11,11 +11,8 @@
     <artifactId>KorAP-querySerialization</artifactId>
     <version>0.0.2</version>
     <packaging>jar</packaging>
-
-
     <name>KorAP-querySerialization</name>
     <url>http://maven.apache.org</url>
-
     <dependencies>
         <dependency>
             <groupId>org.antlr</groupId>

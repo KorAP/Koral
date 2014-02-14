@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import de.ids_mannheim.korap.util.QueryException;
 import org.slf4j.LoggerFactory;
 
@@ -49,28 +48,28 @@ public class QuerySerializer {
 					 * & field_group
 					 */
                     "Buch",
-            		"das Buch",
-    				"das /+w1:3 Buch",
-    				"das /+w1:3,s1 Buch",
-    				"(das /+w1:3,s1 Buch) /+w5 Tisch",
-    				"(das /+w1:3,s1 Buch) /-w5 Tisch",
-    				"(das /+w1:3,s1 Buch) /+w5 (auf dem Tisch)",
-    				
-    				
-    				"Institut für Deutsche Sprache",
-    				"Institut für deutsche Sprache",
-    				"Institut für $deutsche Sprache",
-    				"Institut für &deutsch Sprache",
-    				"Institut für /+w2 Sprache",
-    				"Institut für %+w1 deutsche Sprache",
-    				"Institut für MORPH(A) Sprache",
-    				
-    				"wegen #IN(L) <s>",
-    				"$wegen #IN(L) <s>",
-    				"#BED($wegen , +sa)",
-    				"#BEG(#ELEM(S))",
-    				"MORPH(V) #IN(L) #ELEM(S)",
-    				"MORPH(V) #IN(R) #ELEM(S)",
+                    "das Buch",
+                    "das /+w1:3 Buch",
+                    "das /+w1:3,s1 Buch",
+                    "(das /+w1:3,s1 Buch) /+w5 Tisch",
+                    "(das /+w1:3,s1 Buch) /-w5 Tisch",
+                    "(das /+w1:3,s1 Buch) /+w5 (auf dem Tisch)",
+
+
+                    "Institut für Deutsche Sprache",
+                    "Institut für deutsche Sprache",
+                    "Institut für $deutsche Sprache",
+                    "Institut für &deutsch Sprache",
+                    "Institut für /+w2 Sprache",
+                    "Institut für %+w1 deutsche Sprache",
+                    "Institut für MORPH(A) Sprache",
+
+                    "wegen #IN(L) <s>",
+                    "$wegen #IN(L) <s>",
+                    "#BED($wegen , +sa)",
+                    "#BEG(#ELEM(S))",
+                    "MORPH(V) #IN(L) #ELEM(S)",
+                    "MORPH(V) #IN(R) #ELEM(S)",
 
             };
         } else {
@@ -115,9 +114,9 @@ public class QuerySerializer {
             throws JsonGenerationException, JsonMappingException, IOException, QueryException {
         if (queryLanguage.equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
-		} else if (queryLanguage.equals("cosmas")) {
-			ast = new CosmasTree(query);
-        } else if (queryLanguage.equals("poliqarpplus")) {
+        } else if (queryLanguage.toLowerCase().equals("cosmas2")) {
+            ast = new CosmasTree(query);
+        } else if (queryLanguage.toLowerCase().equals("poliqarpplus")) {
             ast = new PoliqarpPlusTree(query);
         } else {
             throw new QueryException(queryLanguage + " is not a supported query language!");
@@ -132,26 +131,30 @@ public class QuerySerializer {
             throws QueryException {
         if (ql.toLowerCase().equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
-		} else if (ql.toLowerCase().equals("cosmas")) {
-			ast = new CosmasTree(query);
+        } else if (ql.toLowerCase().equals("cosmas2")) {
+            ast = new CosmasTree(query);
         } else if (ql.toLowerCase().equals("poliqarpplus")) {
             ast = new PoliqarpPlusTree(query);
         } else {
             throw new QueryException(ql + " is not a supported query language!");
         }
+
         Map<String, Object> requestMap = ast.getRequestMap();
         CollectionQuery collectionQuery = new CollectionQuery();
         collectionQuery.addResources(parents);
 
+        MetaQuery meta = new MetaQuery();
+        meta.addContext(cls, cli, crs, cri);
+        meta.addEntry("cutOff", cutoff);
+        meta.addEntry("startPage", page);
+        meta.addEntry("count", num);
+
         try {
-            requestMap.put("meta", collectionQuery.raw());
-            requestMap = QueryUtils.addParameters(requestMap, page, num,
-                    cli, cri, cls, crs, cutoff);
-            String res = mapper.writeValueAsString(requestMap);
-            return res;
+            requestMap.put("collections", collectionQuery.raw());
+            requestMap.put("meta", meta.raw());
+            return mapper.writeValueAsString(requestMap);
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            return "";
         }
 
     }
