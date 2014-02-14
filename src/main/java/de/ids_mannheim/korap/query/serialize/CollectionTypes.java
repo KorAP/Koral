@@ -14,11 +14,11 @@ import java.util.Map;
  * @author hanl
  * @date 04/12/2013
  */
-public class CollectionsTypes {
+public class CollectionTypes {
 
     private ObjectMapper mapper;
 
-    public CollectionsTypes() {
+    public CollectionTypes() {
         this.mapper = new ObjectMapper();
     }
 

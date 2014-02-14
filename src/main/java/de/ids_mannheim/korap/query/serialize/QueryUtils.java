@@ -1,5 +1,10 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import de.ids_mannheim.korap.util.QueryException;
+import org.antlr.runtime.tree.Tree;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -7,139 +12,136 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.antlr.runtime.tree.Tree;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.commons.lang.StringUtils;
-
-import de.ids_mannheim.korap.util.QueryException;
-
 /**
  * @author hanl
  * @date 10/12/2013
  */
 public class QueryUtils {
 
-	/**
-	 * Returns the category (or 'label') of the root of a ParseTree (ANTLR 4).
-	 * @param node
-	 * @return
-	 */
-	public static String getNodeCat(ParseTree node) {
-		String nodeCat = node.toStringTree(PoliqarpPlusTree.poliqarpParser);
-		Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
-		Matcher m = p.matcher(node.toStringTree(PoliqarpPlusTree.poliqarpParser));
-		if (m.find()) {
-			nodeCat = m.group(1);
-		} 
-		return nodeCat;
-	}
-	
-	/**
-	 * Returns the category (or 'label') of the root of a ParseTree (ANTLR 3).
-	 * @param node
-	 * @return
-	 */
-	public static String getNodeCat(Tree node) {
-		String nodeCat = node.toStringTree();
-		Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
-		Matcher m = p.matcher(node.toStringTree());
-		if (m.find()) {
-			nodeCat = m.group(1);
-		} 
-		return nodeCat;
-	}
-	
-	
-	/**
-	 * Tests whether a certain node has a child by a certain name
-	 * @param node The parent node.
-	 * @param childCat The category of the potential child.
-	 * @return true iff one or more children belong to the specified category
-	 */
-	public static boolean hasChild(ParseTree node, String childCat) {
-		for (int i=0; i<node.getChildCount(); i++) {
-			if (getNodeCat(node.getChild(i)).equals(childCat)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public static boolean hasDescendant(ParseTree node, String childCat) {
-		for (int i=0; i<node.getChildCount(); i++) {
-			ParseTree child = node.getChild(i);
-			if (getNodeCat(child).equals(childCat)) {
-				return true;
-			}
-			if (hasDescendant(child, childCat)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public static List<Tree> getChildrenWithCat(Tree node, String nodeCat) {
-		ArrayList<Tree> children = new ArrayList<Tree>();
-		for (int i=0; i<node.getChildCount(); i++) {
-			if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
-				children.add(node.getChild(i));
-			}
-		}
-		return children;
-	}
-	
-	public static List<ParseTree> getChildrenWithCat(ParseTree node, String nodeCat) {
-		ArrayList<ParseTree> children = new ArrayList<ParseTree>();
-		for (int i=0; i<node.getChildCount(); i++) {
-			if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
-				children.add(node.getChild(i));
-			}
-		}
-		return children;
-	}
-	
-	public static Tree getFirstChildWithCat(Tree node, String nodeCat) {
-		for (int i=0; i<node.getChildCount(); i++) {
-			if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
-				return node.getChild(i);
-			}
-		}
-		return null;
-	}
-	
-	public static ParseTree getFirstChildWithCat(ParseTree node, String nodeCat) {
-		for (int i=0; i<node.getChildCount(); i++) {
-			if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
-				return node.getChild(i);
-			}
-		}
-		return null;
-	}
-	
-	public static void checkUnbalancedPars(String q) throws QueryException {
-		int openingPars = StringUtils.countMatches(q, "(");
-		int closingPars = StringUtils.countMatches(q, ")");
-		int openingBrkts = StringUtils.countMatches(q, "[");
-		int closingBrkts = StringUtils.countMatches(q, "]");
-		int openingBrcs = StringUtils.countMatches(q, "{");
-		int closingBrcs = StringUtils.countMatches(q, "}");
-		if (openingPars != closingPars) throw new QueryException(
-				"Your query string contains an unbalanced number of parantheses.");
-		if (openingBrkts != closingBrkts) throw new QueryException(
-				"Your query string contains an unbalanced number of brackets.");
-		if (openingBrcs != closingBrcs) throw new QueryException(
-				"Your query string contains an unbalanced number of braces.");
-	}
-	
-	public static List<String> parseMorph(String stringTree) {
-		
-		ArrayList<String> morph = new ArrayList<String>();
-		return morph;
-	}
+    /**
+     * Returns the category (or 'label') of the root of a ParseTree (ANTLR 4).
+     *
+     * @param node
+     * @return
+     */
+    public static String getNodeCat(ParseTree node) {
+        String nodeCat = node.toStringTree(PoliqarpPlusTree.poliqarpParser);
+        Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
+        Matcher m = p.matcher(node.toStringTree(PoliqarpPlusTree.poliqarpParser));
+        if (m.find()) {
+            nodeCat = m.group(1);
+        }
+        return nodeCat;
+    }
+
+    /**
+     * Returns the category (or 'label') of the root of a ParseTree (ANTLR 3).
+     *
+     * @param node
+     * @return
+     */
+    public static String getNodeCat(Tree node) {
+        String nodeCat = node.toStringTree();
+        Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
+        Matcher m = p.matcher(node.toStringTree());
+        if (m.find()) {
+            nodeCat = m.group(1);
+        }
+        return nodeCat;
+    }
+
+
+    /**
+     * Tests whether a certain node has a child by a certain name
+     *
+     * @param node     The parent node.
+     * @param childCat The category of the potential child.
+     * @return true iff one or more children belong to the specified category
+     */
+    public static boolean hasChild(ParseTree node, String childCat) {
+        for (int i = 0; i < node.getChildCount(); i++) {
+            if (getNodeCat(node.getChild(i)).equals(childCat)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasDescendant(ParseTree node, String childCat) {
+        for (int i = 0; i < node.getChildCount(); i++) {
+            ParseTree child = node.getChild(i);
+            if (getNodeCat(child).equals(childCat)) {
+                return true;
+            }
+            if (hasDescendant(child, childCat)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static List<Tree> getChildrenWithCat(Tree node, String nodeCat) {
+        ArrayList<Tree> children = new ArrayList<Tree>();
+        for (int i = 0; i < node.getChildCount(); i++) {
+            if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+                children.add(node.getChild(i));
+            }
+        }
+        return children;
+    }
+
+    public static List<ParseTree> getChildrenWithCat(ParseTree node, String nodeCat) {
+        ArrayList<ParseTree> children = new ArrayList<ParseTree>();
+        for (int i = 0; i < node.getChildCount(); i++) {
+            if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+                children.add(node.getChild(i));
+            }
+        }
+        return children;
+    }
+
+    public static Tree getFirstChildWithCat(Tree node, String nodeCat) {
+        for (int i = 0; i < node.getChildCount(); i++) {
+            if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+                return node.getChild(i);
+            }
+        }
+        return null;
+    }
+
+    public static ParseTree getFirstChildWithCat(ParseTree node, String nodeCat) {
+        for (int i = 0; i < node.getChildCount(); i++) {
+            if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+                return node.getChild(i);
+            }
+        }
+        return null;
+    }
+
+    public static void checkUnbalancedPars(String q) throws QueryException {
+        int openingPars = StringUtils.countMatches(q, "(");
+        int closingPars = StringUtils.countMatches(q, ")");
+        int openingBrkts = StringUtils.countMatches(q, "[");
+        int closingBrkts = StringUtils.countMatches(q, "]");
+        int openingBrcs = StringUtils.countMatches(q, "{");
+        int closingBrcs = StringUtils.countMatches(q, "}");
+        if (openingPars != closingPars) throw new QueryException(
+                "Your query string contains an unbalanced number of parantheses.");
+        if (openingBrkts != closingBrkts) throw new QueryException(
+                "Your query string contains an unbalanced number of brackets.");
+        if (openingBrcs != closingBrcs) throw new QueryException(
+                "Your query string contains an unbalanced number of braces.");
+    }
+
+    public static List<String> parseMorph(String stringTree) {
+
+        ArrayList<String> morph = new ArrayList<String>();
+        return morph;
+    }
 
 
     public static String buildCypherQuery(String cypher, String ctypel, String ctyper,
-                                    int cl, int cr, int page, int limit) {
+                                          int cl, int cr, int page, int limit) {
         //todo: implies that there is only one type allowed!
         String sctypel = "", sctyper = "";
         switch (ctypel) {
@@ -240,6 +242,7 @@ public class QueryUtils {
         return b.toString();
     }
 
+    @Deprecated
     public static Map addParameters(Map request, int page, int num, String cli, String cri,
                                     int cls, int crs, boolean cutoff) {
         Map ctx = new LinkedHashMap();
@@ -259,82 +262,77 @@ public class QueryUtils {
 
         return request;
     }
-    
+
     public static void prepareContext(LinkedHashMap<String, Object> requestMap) {
-		LinkedHashMap<String,Object> context = new LinkedHashMap<String,Object>();
-		
-		LinkedHashMap<String,Object> classMap = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> operands = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> operation = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> frame = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> classRef = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> spanRef = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> classRefOp = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> min = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> max = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> exclude = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> distances = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> inOrder = new LinkedHashMap<String,Object>();
-		
-		operation.put("@id", "group:operation/");
-		operation.put("@type", "@id");
-		
-		classMap.put("@id", "group:class");
-		classMap.put("@type", "xsd:integer");
-		
-		operands.put("@id", "group:operands");
-		operands.put("@container", "@list");
-		
-		frame.put("@id", "group:frame/");
-		frame.put("@type", "@id");
-		
-		classRef.put("@id", "group:classRef");
-		classRef.put("@type", "xsd:integer");
-		
-		spanRef.put("@id", "group:spanRef");
-		spanRef.put("@type", "xsd:integer");
-		
-		classRefOp.put("@id", "group:classRefOp");
-		classRefOp.put("@type", "@id");
-		
-		min.put("@id", "boundary:min");
-		min.put("@type", "xsd:integer");
-		
-		max.put("@id", "boundary:max");
-		max.put("@type", "xsd:integer");
-		
-		exclude.put("@id", "group:exclude");
-		exclude.put("@type", "xsd:boolean");
-		
-		distances.put("@id", "group:distances");
-		distances.put("@container", "@list");
-		
-		inOrder.put("@id", "group:inOrder");
-		inOrder.put("@type", "xsd:boolean");
-		
-		context.put("korap", "http://korap.ids-mannheim.de/ns/KorAP/json-ld/v0.1/");
-		context.put("boundary", "korap:boundary/");
-		context.put("group", "korap:group/");
-		context.put("operation", operation);
-		context.put("class", classMap);
-		context.put("operands", operands);
-		context.put("frame", frame);
-		context.put("classRef", classRef);
-		context.put("spanRef", spanRef);
-		context.put("classRefOp", classRefOp);
-		context.put("min", min);
-		context.put("max", max);
-		context.put("exclude", exclude);
-		context.put("distances", distances);
-		context.put("inOrder", inOrder);
-		
-		requestMap.put("@context", context);		
-	}
+        LinkedHashMap<String, Object> context = new LinkedHashMap<String, Object>();
 
-	
+        LinkedHashMap<String, Object> classMap = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> operands = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> operation = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> frame = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> classRef = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> spanRef = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> classRefOp = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> min = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> max = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> exclude = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> distances = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> inOrder = new LinkedHashMap<String, Object>();
 
-	
+        operation.put("@id", "group:operation/");
+        operation.put("@type", "@id");
 
+        classMap.put("@id", "group:class");
+        classMap.put("@type", "xsd:integer");
+
+        operands.put("@id", "group:operands");
+        operands.put("@container", "@list");
+
+        frame.put("@id", "group:frame/");
+        frame.put("@type", "@id");
+
+        classRef.put("@id", "group:classRef");
+        classRef.put("@type", "xsd:integer");
+
+        spanRef.put("@id", "group:spanRef");
+        spanRef.put("@type", "xsd:integer");
+
+        classRefOp.put("@id", "group:classRefOp");
+        classRefOp.put("@type", "@id");
+
+        min.put("@id", "boundary:min");
+        min.put("@type", "xsd:integer");
+
+        max.put("@id", "boundary:max");
+        max.put("@type", "xsd:integer");
+
+        exclude.put("@id", "group:exclude");
+        exclude.put("@type", "xsd:boolean");
+
+        distances.put("@id", "group:distances");
+        distances.put("@container", "@list");
+
+        inOrder.put("@id", "group:inOrder");
+        inOrder.put("@type", "xsd:boolean");
+
+        context.put("korap", "http://korap.ids-mannheim.de/ns/KorAP/json-ld/v0.1/");
+        context.put("boundary", "korap:boundary/");
+        context.put("group", "korap:group/");
+        context.put("operation", operation);
+        context.put("class", classMap);
+        context.put("operands", operands);
+        context.put("frame", frame);
+        context.put("classRef", classRef);
+        context.put("spanRef", spanRef);
+        context.put("classRefOp", classRefOp);
+        context.put("min", min);
+        context.put("max", max);
+        context.put("exclude", exclude);
+        context.put("distances", distances);
+        context.put("inOrder", inOrder);
+
+        requestMap.put("@context", context);
+    }
 
 
 }

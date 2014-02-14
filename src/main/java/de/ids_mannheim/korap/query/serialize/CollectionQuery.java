@@ -18,7 +18,7 @@ import java.util.*;
 public class CollectionQuery {
 
     private JsonFactory factory;
-    private CollectionsTypes types;
+    private CollectionTypes types;
     private ObjectMapper serialzer;
     private List<Map> rq;
     private List<Map> mfil;
@@ -30,7 +30,7 @@ public class CollectionQuery {
         this.mfil = new ArrayList<>();
         this.mext = new ArrayList<>();
         this.factory = serialzer.getFactory();
-        this.types = new CollectionsTypes();
+        this.types = new CollectionTypes();
     }
 
     public CollectionQuery addResource(String query) {
