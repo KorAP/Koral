@@ -308,14 +308,32 @@ public class CosmasTree extends AbstractSyntaxTree {
 			putIntoSuperObject(elem);
 		}
 		
-		if (nodeCat.equals("OPOR") || nodeCat.equals("OPAND") || nodeCat.equals("OPNOT")) {
+		if (nodeCat.equals("OPAND") || nodeCat.equals("OPNOT")) {
+			// Step I: create group
+			LinkedHashMap<String, Object> distgroup = new LinkedHashMap<String, Object>();
+			distgroup.put("@type", "korap:group");
+			distgroup.put("operation", "operation:sequence");
+			ArrayList<Object> distances = new ArrayList<Object>(); 
+			LinkedHashMap<String, Object> zerodistance = new LinkedHashMap<String, Object>();
+			zerodistance.put("@type", "korap:distance");
+			zerodistance.put("key", "t");
+			zerodistance.put("min", 0);
+			zerodistance.put("max", 0);
+			if (nodeCat.equals("OPNOT")) zerodistance.put("exclude", true);
+			distances.add(zerodistance);
+			distgroup.put("distances", distances);
+			distgroup.put("operands", new ArrayList<Object>());
+			objectStack.push(distgroup);
+			stackedObjects++;
+			// Step II: decide where to put
+			putIntoSuperObject(distgroup, 1);
+		}
+		
+		if (nodeCat.equals("OPOR")) {
 			// Step I: create group
 			LinkedHashMap<String, Object> disjunction = new LinkedHashMap<String, Object>();
 			disjunction.put("@type", "korap:group");
-			String relation = "or";
-			if (nodeCat.equals("OPAND")) relation = "and";
-			if (nodeCat.equals("OPNOT")) relation = "not";
-			disjunction.put("operation", "operation:"+ relation);
+			disjunction.put("operation", "operation:or");
 			disjunction.put("operands", new ArrayList<Object>());
 			objectStack.push(disjunction);
 			stackedObjects++;

@@ -184,12 +184,14 @@ public class CosmasTreeTest {
 	public void testOPORAND() throws QueryException {
 		query="(Sonne oder Mond) und scheint";
 		String orand1 = 
-				"{@type=korap:group, operation=operation:and, operands=[" +
-					"{@type=korap:group, operation=operation:or, operands=[" +
-						"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
-						"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
-					"]}," +
-					"{@type=korap:token, wrap={@type=korap:term, key=scheint, layer=orth, match=match:eq}}" +
+				"{@type=korap:group, operation=operation:sequence, distances=[" +
+					"{@type=korap:distance, key=t, min=0, max=0}" +
+					"], operands=[" +
+						"{@type=korap:group, operation=operation:or, operands=[" +
+							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
+							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+						"]}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=scheint, layer=orth, match=match:eq}}" +
 				"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
@@ -197,11 +199,13 @@ public class CosmasTreeTest {
 		
 		query="scheint und (Sonne oder Mond)";
 		String orand2 = 
-				"{@type=korap:group, operation=operation:and, operands=[" +
-					"{@type=korap:token, wrap={@type=korap:term, key=scheint, layer=orth, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:or, operands=[" +
-						"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
-						"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+				"{@type=korap:group, operation=operation:sequence, distances=[" +
+						"{@type=korap:distance, key=t, min=0, max=0}" +
+					"], operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=scheint, layer=orth, match=match:eq}}," +
+						"{@type=korap:group, operation=operation:or, operands=[" +
+							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
+							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
 					"]}" +
 				"]}";
 		ct = new CosmasTree(query);
@@ -410,7 +414,9 @@ public class CosmasTreeTest {
 	public void testOPNOT() throws QueryException {
 		query="Sonne nicht Mond";
 		String opnot1 = 
-					"{@type=korap:group, operation=operation:not, operands=[" +
+					"{@type=korap:group, operation=operation:sequence, distances=[" +
+						"{@type=korap:distance, key=t, min=0, max=0, exclude=true}" +
+					"], operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
 					"]}";
