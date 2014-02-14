@@ -783,9 +783,10 @@ public class CosmasTree extends AbstractSyntaxTree {
 //				"#BEG(der /w3:5 Mann) /+w10 kommt",
 //				"&würde /w0 MORPH(V)",
 				"#NHIT(gehen /w1:10 voran)",
-				"#BED(der Mann , sa,-pa)"
+				"#BED(der Mann , sa,-pa)",
+				"Mann /t0 Frau"
 				};
-		CosmasTree.debug=true;
+//		CosmasTree.debug=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);

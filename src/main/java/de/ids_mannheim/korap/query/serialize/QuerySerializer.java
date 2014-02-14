@@ -80,8 +80,8 @@ public class QuerySerializer {
             i++;
             try {
                 System.out.println(q);
-                String ql = "cosmas";
-                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + i + ".json");
+                String ql = "cosmas2";
+                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + "_" + i + ".json");
                 System.out.println();
             } catch (NullPointerException npe) {
                 npe.printStackTrace();

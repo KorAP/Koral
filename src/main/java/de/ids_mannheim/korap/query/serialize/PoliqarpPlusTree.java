@@ -449,10 +449,10 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			}
 			if (relation.equals("=")) {
 				relation="eq";
-			}
-			if (relation.equals("!=")) {
+			} else 	if (relation.equals("!=")) {
 				relation="ne";
 			}
+			
 			String value = "";
 			ParseTree valNode = node.getChild(2);
 			String valType = QueryUtils.getNodeCat(valNode);
