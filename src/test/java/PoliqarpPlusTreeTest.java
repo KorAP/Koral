@@ -701,7 +701,7 @@ public class PoliqarpPlusTreeTest {
 	@Test
 	public void testFoundries() throws QueryException {
 		// [tt/base=Mann]
-		String layer1 = "{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=base, foundry=tt, match=match:eq}}";
+		String layer1 = "{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=lemma, foundry=tt, match=match:eq}}";
 		ppt = new PoliqarpPlusTree("[tt/base=Mann]");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(layer1.replaceAll(" ", ""), map.replaceAll(" ", ""));

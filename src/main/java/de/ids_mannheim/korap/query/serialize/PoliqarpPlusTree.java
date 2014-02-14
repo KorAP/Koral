@@ -430,6 +430,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			String layer = "";
 			String foundry = null;
 			String value = null;
+			String key = null;
 			ParseTree fieldNameNode = node.getChild(0);
 			if (fieldNameNode.getChildCount() == 1) {
 				layer = fieldNameNode.getChild(0).toStringTree(poliqarpParser);   //e.g. (field_name base) (field_op !=) (re_query "bar*")
@@ -437,12 +438,16 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				// layer is indicated, merge layer and field name (0th and 2nd children, 1st is "/")
 				foundry = fieldNameNode.getChild(0).toStringTree(poliqarpParser);
 				layer = fieldNameNode.getChild(2).toStringTree(poliqarpParser);
-			} else if (fieldNameNode.getChildCount() == 5) {
-				// layer and value are indicated
-				foundry = fieldNameNode.getChild(0).toStringTree(poliqarpParser);
-				layer = fieldNameNode.getChild(2).toStringTree(poliqarpParser);
-				value = fieldNameNode.getChild(4).toStringTree(poliqarpParser);
+//			} else if (fieldNameNode.getChildCount() == 5) {
+//				// layer and value are indicated
+//				foundry = fieldNameNode.getChild(0).toStringTree(poliqarpParser);
+//				layer = fieldNameNode.getChild(2).toStringTree(poliqarpParser);
+//				value = fieldNameNode.getChild(4).toStringTree(poliqarpParser);
 			}	
+			if (QueryUtils.hasChild(node, "key")) {
+				ParseTree keyNode = QueryUtils.getFirstChildWithCat(node, "key");
+				key = keyNode.getChild(0).toStringTree(poliqarpParser);
+			}
 			
 			String relation = node.getChild(1).getChild(0).toStringTree(poliqarpParser);
 			if (negField) {
@@ -458,21 +463,31 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				relation="ne";
 			}
 			
-			String key = "";
-			ParseTree valNode = node.getChild(2);
+			ParseTree valNode;
+			if (QueryUtils.hasChild(node, "key")) valNode = node.getChild(3);
+			else valNode = node.getChild(2);
+			System.err.println("WOOAH "+valNode.toStringTree(poliqarpParser));
 			String valType = QueryUtils.getNodeCat(valNode);
 			fieldMap.put("@type", "korap:term");
 			if (valType.equals("simple_query")) {
-				key = valNode.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (simple_query (sq_segment foo))
+				value = valNode.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (simple_query (sq_segment foo))
 			} else if (valType.equals("re_query")) {
-				key = valNode.getChild(0).toStringTree(poliqarpParser); 				//e.g. (re_query "bar*")
+				value = valNode.getChild(0).toStringTree(poliqarpParser); 				//e.g. (re_query "bar*")
 				fieldMap.put("type", "type:regex");
-				key = key.substring(1,key.length()-1); //remove trailing quotes
+				value = value.substring(1,value.length()-1); //remove trailing quotes
 			}
-			fieldMap.put("key", key);
+			if (key == null) {
+				fieldMap.put("key", value);
+				System.err.println("WUUUH "+key+value);
+			} else {
+				fieldMap.put("key", key);
+				fieldMap.put("value", value);
+				System.err.println("WAAAH "+key+value);
+			}
+			
+			if (layer.equals("base")) layer="lemma";
 			fieldMap.put("layer", layer);
 			if (foundry != null) fieldMap.put("foundry", foundry);
-			if (value != null) fieldMap.put("value", value);
 			
 			fieldMap.put("match", "match:"+relation);
 			// Step II: decide where to put the field map (as the only value of a token or the meta filter or as a part of a group in case of coordinated fields)
@@ -488,6 +503,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			visited.add(node.getChild(0));
 			visited.add(node.getChild(1));
 			visited.add(node.getChild(2));
+			if (key != null) visited.add(node.getChild(3));
 		}
 		
 		if (nodeCat.equals("neg_field") || nodeCat.equals("neg_field_group")) {
@@ -839,6 +855,12 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		openNodeCats.pop();
 	}
 
+	private void markAllChildrenVisited(ParseTree node) {
+		for (int i=0; i<node.getChildCount(); i++) {
+			visited.add(node.getChild(i));
+		}
+	}
+
 	private int[] parseRepetition(String repetition) {
 		if (repetition.equals("*")) {
 			return new int[] {0, 100};
@@ -962,7 +984,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				"{[base=Mann]}",
 				"shrink(1:[orth=Der]{1:[orth=Mann][orth=geht]})",
 				"[base=Mann/i]",
-				"[cnx/base/pos=n]"
+				"[cnx/base=pos:n]"
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {
