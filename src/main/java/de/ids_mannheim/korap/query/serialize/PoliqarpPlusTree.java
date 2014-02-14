@@ -427,17 +427,22 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		if (nodeCat.equals("field")) {
 			LinkedHashMap<String,Object> fieldMap = new LinkedHashMap<String,Object>();
 			// Step I: extract info
-			String fieldName = "";
+			String layer = "";
+			String foundry = null;
+			String value = null;
 			ParseTree fieldNameNode = node.getChild(0);
 			if (fieldNameNode.getChildCount() == 1) {
-				fieldName = fieldNameNode.getChild(0).toStringTree(poliqarpParser);   //e.g. (field_name base) (field_op !=) (re_query "bar*")
+				layer = fieldNameNode.getChild(0).toStringTree(poliqarpParser);   //e.g. (field_name base) (field_op !=) (re_query "bar*")
 			} else if (fieldNameNode.getChildCount() == 3) {
 				// layer is indicated, merge layer and field name (0th and 2nd children, 1st is "/")
-				String layer = fieldNameNode.getChild(0).toStringTree(poliqarpParser);
-				if (layer.equals("base")) layer="lemma";
-				String layeredFieldName = fieldNameNode.getChild(2).toStringTree(poliqarpParser);
-				fieldName = layer+"/"+layeredFieldName;
-			}
+				foundry = fieldNameNode.getChild(0).toStringTree(poliqarpParser);
+				layer = fieldNameNode.getChild(2).toStringTree(poliqarpParser);
+			} else if (fieldNameNode.getChildCount() == 5) {
+				// layer and value are indicated
+				foundry = fieldNameNode.getChild(0).toStringTree(poliqarpParser);
+				layer = fieldNameNode.getChild(2).toStringTree(poliqarpParser);
+				value = fieldNameNode.getChild(4).toStringTree(poliqarpParser);
+			}	
 			
 			String relation = node.getChild(1).getChild(0).toStringTree(poliqarpParser);
 			if (negField) {
@@ -453,26 +458,22 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				relation="ne";
 			}
 			
-			String value = "";
+			String key = "";
 			ParseTree valNode = node.getChild(2);
 			String valType = QueryUtils.getNodeCat(valNode);
 			fieldMap.put("@type", "korap:term");
 			if (valType.equals("simple_query")) {
-				value = valNode.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (simple_query (sq_segment foo))
+				key = valNode.getChild(0).getChild(0).toStringTree(poliqarpParser);   //e.g. (simple_query (sq_segment foo))
 			} else if (valType.equals("re_query")) {
-				value = valNode.getChild(0).toStringTree(poliqarpParser); 				//e.g. (re_query "bar*")
+				key = valNode.getChild(0).toStringTree(poliqarpParser); 				//e.g. (re_query "bar*")
 				fieldMap.put("type", "type:regex");
-				value = value.substring(1,value.length()-1); //remove trailing quotes
+				key = key.substring(1,key.length()-1); //remove trailing quotes
 			}
-			fieldMap.put("key", value);
-			if (fieldName.contains("/")) {
-				String[] splitted = fieldName.split("/");
-				fieldMap.put("layer", splitted[1]);
-				fieldMap.put("foundry", splitted[0]);
-			} else {
-				if (fieldName.equals("base")) fieldName = "lemma";
-				fieldMap.put("layer", fieldName);
-			}
+			fieldMap.put("key", key);
+			fieldMap.put("layer", layer);
+			if (foundry != null) fieldMap.put("foundry", foundry);
+			if (value != null) fieldMap.put("value", value);
+			
 			fieldMap.put("match", "match:"+relation);
 			// Step II: decide where to put the field map (as the only value of a token or the meta filter or as a part of a group in case of coordinated fields)
 			if (fieldStack.isEmpty()) {
@@ -960,7 +961,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 //				"[base=foo] meta year=2000",
 				"{[base=Mann]}",
 				"shrink(1:[orth=Der]{1:[orth=Mann][orth=geht]})",
-				"[base=Mann/i]"
+				"[base=Mann/i]",
+				"[cnx/base/pos=n]"
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {
