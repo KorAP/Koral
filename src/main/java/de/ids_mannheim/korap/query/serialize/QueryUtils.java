@@ -58,6 +58,22 @@ public class QueryUtils {
      * @param childCat The category of the potential child.
      * @return true iff one or more children belong to the specified category
      */
+    public static boolean hasChild(Tree node, String childCat) {
+        for (int i = 0; i < node.getChildCount(); i++) {
+            if (getNodeCat(node.getChild(i)).equals(childCat)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Tests whether a certain node has a child by a certain name
+     *
+     * @param node     The parent node.
+     * @param childCat The category of the potential child.
+     * @return true iff one or more children belong to the specified category
+     */
     public static boolean hasChild(ParseTree node, String childCat) {
         for (int i = 0; i < node.getChildCount(); i++) {
             if (getNodeCat(node.getChild(i)).equals(childCat)) {
@@ -333,6 +349,7 @@ public class QueryUtils {
 
         requestMap.put("@context", context);
     }
+
 
 
 }

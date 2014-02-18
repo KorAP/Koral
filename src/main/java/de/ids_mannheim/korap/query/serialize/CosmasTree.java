@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.RecognitionException;
@@ -85,7 +87,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 	/**
 	 * A list of node categories that can be sequenced (i.e. which can be in a sequence with any number of other nodes in this list)
 	 */
-	private final List<String> sequentiableCats = Arrays.asList(new String[] {"OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND", "OPIN"});
+	private final List<String> sequentiableCats = Arrays.asList(new String[] {"OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND", "OPIN", "OPBED"});
 	/**
 	 * Keeps track of sequenced nodes, i.e. nodes that implicitly govern  a sequence, as in (C2PQ (OPWF der) (OPWF Mann)).
 	 * This is necessary in order to know when to take the sequence off the object stack, as the sequence is introduced by the
@@ -133,7 +135,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		}
 		
 		System.out.println("Processing Cosmas");
-		requestMap.put("context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
+		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
 //		QueryUtils.prepareContext(requestMap);
 		processNode(tree);
 	}
@@ -164,6 +166,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		// Check for potential implicit sequences as in (C2PQ (OPWF der) (OPWF Mann)). The sequence is introduced
 		// by the first child if it (and its siblings) is sequentiable.
 		if (sequentiableCats.contains(nodeCat)) {
+			System.err.println(nodeCat);
 			// for each node, check if parent has more than one child (-> could be implicit sequence)
 			Tree parent = node.getParent();
 			if (parent.getChildCount()>1) {
@@ -173,13 +176,14 @@ public class CosmasTree extends AbstractSyntaxTree {
 					for (int i=1; i<parent.getChildCount() ;i++) {
 						if (sequentiableCats.contains(QueryUtils.getNodeCat(parent.getChild(i)))) {
 							hasSequentiableSiblings = true;
+							continue;
 						}
 					}
 					if (hasSequentiableSiblings) {
 						// Step I: create sequence
 						LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
 						sequence.put("@type", "korap:group");
-						sequence.put("operation", "operation:"+ "sequence");
+						sequence.put("operation", "operation:sequence");
 						sequence.put("operands", new ArrayList<Object>());
 						// push sequence on object stack but don't increment stackedObjects counter since
 						// we've got to wait until the parent node is processed - therefore, add the parent
@@ -223,7 +227,12 @@ public class CosmasTree extends AbstractSyntaxTree {
 				fieldMap.put("match", "match:eq");
 			}
 			//Step II: decide where to put
-			putIntoSuperObject(token, 1);
+			if (! QueryUtils.hasChild(node, "TPOS")) {
+				putIntoSuperObject(token, 1);
+			} else {
+				
+			}
+			
 		}
 		
 		if (nodeCat.equals("OPMORPH")) {
@@ -505,7 +514,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 			submatchgroup.put("classRef", spanRef);
 			ArrayList<Object> submatchoperands = new ArrayList<Object>();
 			submatchgroup.put("operands", submatchoperands);
-			putIntoSuperObject(submatchgroup, 1);
+			putIntoSuperObject(submatchgroup, 0);
 			
 			// Distinguish two cases. Normal case: query has just one condition, like #BED(X, sa) ...
 			if (conditions.getChildCount()==1) {
@@ -767,9 +776,27 @@ public class CosmasTree extends AbstractSyntaxTree {
 	}
 	
 
-	private static Tree parseCosmasQuery(String p) throws RecognitionException {
+	private static Tree parseCosmasQuery(String q) throws RecognitionException {
+		  Pattern p = Pattern.compile("(\\w+):((\\+|-)?(sa|se|pa|pe|ta|te),?)+");
+		  Matcher m = p.matcher(q);
+		  
+		  String rewrittenQuery = q;
+		  while (m.find()) {
+			  String match = m.group();
+			  String conditionsString = match.split(":")[1];
+			  Pattern conditionPattern = Pattern.compile("(\\+|-)?(sa|se|pa|pe|ta|te)");
+			  Matcher conditionMatcher = conditionPattern.matcher(conditionsString);
+			  String replacement = "#BED("+m.group(1)+" , ";
+			  while (conditionMatcher.find()) {
+				  replacement = replacement+conditionMatcher.group()+",";
+			  }
+			  replacement = replacement.substring(0, replacement.length()-1)+")"; //remove trailing comma and close parenthesis
+			  System.out.println(replacement);
+			  rewrittenQuery = rewrittenQuery.replace(match, replacement);
+		  }
+		  q = rewrittenQuery;
 		  Tree tree = null;
-		  ANTLRStringStream	ss = new ANTLRStringStream(p);
+		  ANTLRStringStream	ss = new ANTLRStringStream(q);
 		  c2psLexer	lex = new c2psLexer(ss);
 		  org.antlr.runtime.CommonTokenStream tokens = new org.antlr.runtime.CommonTokenStream(lex);  //v3
 		  cosmasParser = new c2psParser(tokens);
@@ -800,9 +827,11 @@ public class CosmasTree extends AbstractSyntaxTree {
 //				"(Mann oder Frau) #IN <s>",
 //				"#BEG(der /w3:5 Mann) /+w10 kommt",
 //				"&würde /w0 MORPH(V)",
-				"#NHIT(gehen /w1:10 voran)",
-				"#BED(der Mann , sa,-pa)",
-				"Mann /t0 Frau"
+//				"#NHIT(gehen /w1:10 voran)",
+//				"#BED(der Mann , sa,-pa)",
+//				"Mann /t0 Frau",
+				"sagt der:sa Bundeskanzler",
+//				"Der:sa,-pe,+te ",
 				};
 //		CosmasTree.debug=true;
 		for (String q : queries) {

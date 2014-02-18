@@ -1,5 +1,5 @@
 {
-  "context" : "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld",
+  "@context" : "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld",
   "query" : {
     "@type" : "korap:group",
     "operation" : "operation:sequence",
@@ -8,17 +8,28 @@
       "@type" : "korap:distance",
       "key" : "w",
       "min" : 0,
-      "max" : 1,
-      "exclude" : true
+      "max" : 5
     } ],
     "operands" : [ {
       "@type" : "korap:group",
       "operation" : "operation:sequence",
+      "inOrder" : true,
+      "distances" : [ {
+        "@type" : "korap:distance",
+        "key" : "w",
+        "min" : 1,
+        "max" : 3
+      }, {
+        "@type" : "korap:distance",
+        "key" : "s",
+        "min" : 0,
+        "max" : 1
+      } ],
       "operands" : [ {
         "@type" : "korap:token",
         "wrap" : {
           "@type" : "korap:term",
-          "key" : "Institut",
+          "key" : "das",
           "layer" : "orth",
           "match" : "match:eq"
         }
@@ -26,31 +37,19 @@
         "@type" : "korap:token",
         "wrap" : {
           "@type" : "korap:term",
-          "key" : "für",
+          "key" : "Buch",
           "layer" : "orth",
           "match" : "match:eq"
         }
       } ]
     }, {
-      "@type" : "korap:group",
-      "operation" : "operation:sequence",
-      "operands" : [ {
-        "@type" : "korap:token",
-        "wrap" : {
-          "@type" : "korap:term",
-          "key" : "deutsche",
-          "layer" : "orth",
-          "match" : "match:eq"
-        }
-      }, {
-        "@type" : "korap:token",
-        "wrap" : {
-          "@type" : "korap:term",
-          "key" : "Sprache",
-          "layer" : "orth",
-          "match" : "match:eq"
-        }
-      } ]
+      "@type" : "korap:token",
+      "wrap" : {
+        "@type" : "korap:term",
+        "key" : "Tisch",
+        "layer" : "orth",
+        "match" : "match:eq"
+      }
     } ]
   }
 }

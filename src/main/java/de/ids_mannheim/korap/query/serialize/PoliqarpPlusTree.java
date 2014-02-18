@@ -179,7 +179,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			}
 		}
 		System.out.println("Processing PoliqarpPlus");
-		requestMap.put("context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
+		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
 //		QueryUtils.prepareContext(requestMap);
 		processNode(tree);
 	}

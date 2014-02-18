@@ -24,24 +24,9 @@ public class CosmasTreeTest {
 		return res.equals(queryMap);
 	}
 	
-//	@Test
+	@Test
 	public void testContext() throws QueryException {
-		String contextString = "{korap = http://korap.ids-mannheim.de/ns/KorAP/json-ld/v0.1/, " +
-							"boundary = korap:boundary/,"+
-							"group = korap:group/,"+ 
-							"operation = {@id = group:operation/, @type = @id},"+
-							"class = {@id = group:class, @type = xsd:integer},"+
-							"operands = {@id = group:operands, @container = @list},"+
-							"frame = {@id = group:frame/, @type = @id},"+
-							"classRef = {@id = group:classRef, @type = xsd:integer},"+
-							"spanRef = {@id = group:spanRef, @type = xsd:integer},"+
-							"classRefOp = {@id = group:classRefOp, @type = @id},"+
-							"min = {@id = boundary:min, @type = xsd:integer},"+
-							"max = {@id = boundary:max, @type = xsd:integer},"+
-							"exclude = {@id = group:exclude, @type = xsd:boolean},"+
-							"distances = {@id = group:distances, @container = @list},"+
-							"inOrder = {@id = group:inOrder, @type = xsd:boolean}"+
-							"}";
+		String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld";
 		ct = new CosmasTree("Test");
 		assertEquals(contextString.replaceAll(" ", ""), ct.getRequestMap().get("@context").toString().replaceAll(" ", ""));
 	}
@@ -599,5 +584,52 @@ public class CosmasTreeTest {
 		assertEquals(bed3.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
+	@Test
+	public void testColonSeparatedConditions() throws QueryException {
+		
+		query = "Der:sa";
+		String col1 = 
+				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+					"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +
+						"{@type=korap:span, key=s}," +
+						"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:token, wrap={@type=korap:term, key=Der, layer=orth, match=match:eq}}" +
+						"]}" +
+					"]}" +
+				"]}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(col1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "Mann:sa,-pa,+te)";
+		String col2 = 
+				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+					"{@type=korap:group, operation=operation:sequence, distances=[" +
+						"{@type=korap:distance, key=w, min=0, max=0}" +
+					"], operands=[" +
+						"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +
+							"{@type=korap:span, key=s}," +
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
+							"]}" +
+						"]}," +
+						"{@type=korap:group, operation=operation:position, frame=frame:startswith, exclude=true, operands=[" +
+							"{@type=korap:span, key=p}," +
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
+							"]}" +
+						"]}," +
+						"{@type=korap:group, operation=operation:position, frame=frame:endswith, operands=[" +
+							"{@type=korap:span, key=t}," +
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
+						"]}" +
+					"]}" +
+					"]}" +
+				"]}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(col2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
 }
 

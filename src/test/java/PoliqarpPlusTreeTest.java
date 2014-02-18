@@ -24,24 +24,9 @@ public class PoliqarpPlusTreeTest {
 		return res.equals(queryMap);
 	}
 	
-//	@Test
+	@Test
 	public void testContext() throws QueryException {
-		String contextString = "{korap = http://korap.ids-mannheim.de/ns/KorAP/json-ld/v0.1/, " +
-							"boundary = korap:boundary/,"+
-							"group = korap:group/,"+ 
-							"operation = {@id = group:operation/, @type = @id},"+
-							"class = {@id = group:class, @type = xsd:integer},"+
-							"operands = {@id = group:operands, @container = @list},"+
-							"frame = {@id = group:frame/, @type = @id},"+
-							"classRef = {@id = group:classRef, @type = xsd:integer},"+
-							"spanRef = {@id = group:spanRef, @type = xsd:integer},"+
-							"classRefOp = {@id = group:classRefOp, @type = @id},"+
-							"min = {@id = boundary:min, @type = xsd:integer},"+
-							"max = {@id = boundary:max, @type = xsd:integer},"+
-							"exclude = {@id = group:exclude, @type = xsd:boolean},"+
-							"distances = {@id = group:distances, @container = @list},"+
-							"inOrder = {@id = group:inOrder, @type = xsd:boolean}"+
-							"}";
+		String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld";
 		ppt = new PoliqarpPlusTree("Test");
 		assertEquals(contextString.replaceAll(" ", ""), ppt.getRequestMap().get("@context").toString().replaceAll(" ", ""));
 	}

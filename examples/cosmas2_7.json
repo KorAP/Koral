@@ -1,5 +1,5 @@
 {
-  "context" : "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld",
+  "@context" : "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld",
   "query" : {
     "@type" : "korap:group",
     "operation" : "operation:sequence",
@@ -43,13 +43,33 @@
         }
       } ]
     }, {
-      "@type" : "korap:token",
-      "wrap" : {
-        "@type" : "korap:term",
-        "key" : "Tisch",
-        "layer" : "orth",
-        "match" : "match:eq"
-      }
+      "@type" : "korap:group",
+      "operation" : "operation:sequence",
+      "operands" : [ {
+        "@type" : "korap:token",
+        "wrap" : {
+          "@type" : "korap:term",
+          "key" : "auf",
+          "layer" : "orth",
+          "match" : "match:eq"
+        }
+      }, {
+        "@type" : "korap:token",
+        "wrap" : {
+          "@type" : "korap:term",
+          "key" : "dem",
+          "layer" : "orth",
+          "match" : "match:eq"
+        }
+      }, {
+        "@type" : "korap:token",
+        "wrap" : {
+          "@type" : "korap:term",
+          "key" : "Tisch",
+          "layer" : "orth",
+          "match" : "match:eq"
+        }
+      } ]
     } ]
   }
 }
