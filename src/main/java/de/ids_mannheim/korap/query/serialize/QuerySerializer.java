@@ -129,14 +129,20 @@ public class QuerySerializer {
                              String cli, String cri, int cls, int crs,
                              int num, int page, boolean cutoff)
             throws QueryException {
-        if (ql.toLowerCase().equals("poliqarp")) {
-            ast = new PoliqarpPlusTree(query);
-        } else if (ql.toLowerCase().equals("cosmas2")) {
-            ast = new CosmasTree(query);
-        } else if (ql.toLowerCase().equals("poliqarpplus")) {
-            ast = new PoliqarpPlusTree(query);
-        } else {
-            throw new QueryException(ql + " is not a supported query language!");
+        try {
+            if (ql.toLowerCase().equals("poliqarp")) {
+                ast = new PoliqarpPlusTree(query);
+            } else if (ql.toLowerCase().equals("cosmas2")) {
+                ast = new CosmasTree(query);
+            } else if (ql.toLowerCase().equals("poliqarpplus")) {
+                ast = new PoliqarpPlusTree(query);
+            } else {
+                throw new QueryException(ql + " is not a supported query language!");
+            }
+        } catch (QueryException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new QueryException("UNKNOWN: Query could not be parsed");
         }
 
         Map<String, Object> requestMap = ast.getRequestMap();
@@ -149,11 +155,17 @@ public class QuerySerializer {
         meta.addEntry("startPage", page);
         meta.addEntry("count", num);
 
-        try {
+        try
+
+        {
             requestMap.put("collections", collectionQuery.raw());
             requestMap.put("meta", meta.raw());
             return mapper.writeValueAsString(requestMap);
-        } catch (IOException e) {
+        } catch (
+                IOException e
+                )
+
+        {
             return "";
         }
 

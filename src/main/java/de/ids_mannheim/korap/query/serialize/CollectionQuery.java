@@ -202,6 +202,7 @@ public class CollectionQuery {
      *
      * @return
      */
+    @Deprecated
     public String stringify() {
         List collection = getCollectionsOnly();
         if (collection.isEmpty())
@@ -214,6 +215,22 @@ public class CollectionQuery {
             return "";
         }
     }
+
+
+    /**
+     * returns all references to parents and meta query as string representation
+     *
+     * @return
+     */
+    public String stringifyAll() {
+        try {
+            return serialzer.writeValueAsString(join());
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
 
     /**
      * returns the List<Map> that contains all the meta queries and resource queries
