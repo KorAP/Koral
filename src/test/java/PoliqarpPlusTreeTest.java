@@ -81,6 +81,7 @@ public class PoliqarpPlusTreeTest {
 	
 	@Test
 	public void testElements() throws QueryException {
+		String query;
 		// <s>
 		String elem1 = "{@type=korap:span, key=s}";
 		assertTrue(equalsQueryContent(elem1, "<s>"));
@@ -88,6 +89,20 @@ public class PoliqarpPlusTreeTest {
 		// <vp>
 		String elem2 = "{@type=korap:span, key=vp}";
 		assertTrue(equalsQueryContent(elem2, "<vp>"));
+		
+		// <cnx/c=vp>
+		query = "<c=vp>";
+		String span3 = "{@type=korap:span, layer=c, key=vp}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(span3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// <cnx/c=vp>
+		query = "<cnx/c=vp>";
+		String span4 = "{@type=korap:span, foundry=cnx, layer=c, key=vp}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(span4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test

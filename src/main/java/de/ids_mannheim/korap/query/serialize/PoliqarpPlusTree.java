@@ -466,7 +466,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			ParseTree valNode;
 			if (QueryUtils.hasChild(node, "key")) valNode = node.getChild(3);
 			else valNode = node.getChild(2);
-			System.err.println("WOOAH "+valNode.toStringTree(poliqarpParser));
 			String valType = QueryUtils.getNodeCat(valNode);
 			fieldMap.put("@type", "korap:term");
 			if (valType.equals("simple_query")) {
@@ -478,11 +477,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			}
 			if (key == null) {
 				fieldMap.put("key", value);
-				System.err.println("WUUUH "+key+value);
 			} else {
 				fieldMap.put("key", key);
 				fieldMap.put("value", value);
-				System.err.println("WAAAH "+key+value);
 			}
 			
 			if (layer.equals("base")) layer="lemma";
@@ -643,7 +640,16 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			stackedObjects++;
 			// Step II: fill object (token values) and put into containing sequence
 			elem.put("@type", "korap:span");
-			String value = node.getChild(1).toStringTree(poliqarpParser);
+			int valChildIdx = node.getChildCount()-2; // closing '>' is last child
+			String value = node.getChild(valChildIdx).toStringTree(poliqarpParser);
+			ParseTree foundryNode = QueryUtils.getFirstChildWithCat(node, "foundry");
+			ParseTree layerNode = QueryUtils.getFirstChildWithCat(node, "layer");
+			if (foundryNode != null) {
+				elem.put("foundry", foundryNode.getChild(0).toStringTree(poliqarpParser));
+			}
+			if (layerNode != null) {
+				elem.put("layer", layerNode.getChild(0).toStringTree(poliqarpParser));
+			}	
 			elem.put("key", value);
 			// add token to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the values from "field")
 			if (node.getParent().getChildCount()>1) {
@@ -731,7 +737,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				ParseTree spanNode = node.getChild(2);
 				for (int i=0; i<spanNode.getChildCount()-1; i++) {
 					String ref = spanNode.getChild(i).getText();
-					System.err.println("       "+ref);
 					if (ref.equals("|") || ref.equals("&")) {
 						classRefOp = ref.equals("|") ? "intersection" : "union";
 					} else {
@@ -984,7 +989,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				"{[base=Mann]}",
 				"shrink(1:[orth=Der]{1:[orth=Mann][orth=geht]})",
 				"[base=Mann/i]",
-				"[cnx/base=pos:n]"
+				"[cnx/base=pos:n]",
+				"<cnx/c=np>"
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {
