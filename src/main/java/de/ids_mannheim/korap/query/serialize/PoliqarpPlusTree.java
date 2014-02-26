@@ -520,7 +520,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			if (negField) {
 				relation = relation.equals("or") ? "and": "or";
 			}
-			group.put("relation", relation);
+			group.put("relation", "relation:" + relation);
 			ArrayList<Object> groupOperands = new ArrayList<Object>();
 			group.put("operands", groupOperands);
 			fieldStack.push(groupOperands);
