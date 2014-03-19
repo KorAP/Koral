@@ -222,7 +222,7 @@ public class CollectionQuery {
      *
      * @return
      */
-    public String stringifyAll() {
+    public String build() {
         try {
             return serialzer.writeValueAsString(join());
         } catch (JsonProcessingException e) {
