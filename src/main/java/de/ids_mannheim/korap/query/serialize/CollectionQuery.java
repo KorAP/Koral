@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multiset;
 
 import java.io.IOException;
 import java.util.*;
@@ -101,14 +102,17 @@ public class CollectionQuery {
     }
 
     // fixme: map can only have one key/value pair. thus,
-    // text class can only be added once. Multiple types are not possible!
+    // fixme: text class can only be added once. Multiple types are not possible!
     public CollectionQuery addMetaFilter(String queries) {
         Multimap<String, String> m = resEq(queries);
         boolean multypes = m.keys().size() > 1;
         String def_key = null;
 
-        if (!multypes)
-            def_key = m.keys().toArray(new String[0])[0];
+
+        if (!multypes){
+            Multiset<String> keys = m.keys();
+            def_key = keys.toArray(new String[keys.size()])[0];
+        }
 
         List value = this.createValue(m);
         // todo: missing: - takes only one resource, but resources can be chained!

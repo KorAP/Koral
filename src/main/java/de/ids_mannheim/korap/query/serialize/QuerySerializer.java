@@ -105,13 +105,11 @@ public class QuerySerializer {
      * @param outFile       The file to which the serialization is written
      * @param query         The query string
      * @param queryLanguage The query language. As of 13/11/20, this must be either 'poliqarp' or 'poliqarpplus'. Some extra maven stuff needs to done to support CosmasII ('cosmas') [that maven stuff would be to tell maven how to build the cosmas grammar and where to find the classes]
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
      * @throws IOException
      * @throws QueryException
      */
     public void run(String query, String queryLanguage, String outFile)
-            throws JsonGenerationException, JsonMappingException, IOException, QueryException {
+            throws IOException, QueryException {
         if (queryLanguage.equals("poliqarp")) {
             ast = new PoliqarpPlusTree(query);
         } else if (queryLanguage.toLowerCase().equals("cosmas2")) {
@@ -125,7 +123,7 @@ public class QuerySerializer {
         mapper.writeValue(new File(outFile), requestMap);
     }
 
-    public String buildQuery(String query, String ql, List<String> parents,
+    public String buildQuery(String query, String ql, String collection,
                              String cli, String cri, int cls, int crs,
                              int num, int page, boolean cutoff)
             throws QueryException {
@@ -146,8 +144,6 @@ public class QuerySerializer {
         }
 
         Map<String, Object> requestMap = ast.getRequestMap();
-        CollectionQuery collectionQuery = new CollectionQuery();
-        collectionQuery.addResources(parents);
 
         MetaQuery meta = new MetaQuery();
         meta.addContext(cls, cli, crs, cri);
@@ -155,19 +151,12 @@ public class QuerySerializer {
         meta.addEntry("startPage", page);
         meta.addEntry("count", num);
 
-        try
-
-        {
-            requestMap.put("collections", collectionQuery.raw());
+        try {
+            requestMap.put("collections", collection);
             requestMap.put("meta", meta.raw());
             return mapper.writeValueAsString(requestMap);
-        } catch (
-                IOException e
-                )
-
-        {
+        } catch (IOException e){
             return "";
         }
-
     }
 }
