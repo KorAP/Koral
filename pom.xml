@@ -45,6 +45,11 @@
             <version>LATEST</version>
         </dependency>
         <dependency>
+            <groupId>KorAP-modules</groupId>
+            <artifactId>KorAP-Entities</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
