@@ -90,6 +90,8 @@ public class CollectionTypes {
         return meta;
     }
 
+
+
     public Map mapify(String s) throws IOException {
         return mapper.readValue(s, Map.class);
     }

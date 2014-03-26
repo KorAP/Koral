@@ -18,18 +18,19 @@ import java.util.*;
  */
 public class CollectionQuery {
 
+
+    private static ObjectMapper serialzer = new ObjectMapper();
     private JsonFactory factory;
     private CollectionTypes types;
-    private ObjectMapper serialzer;
     private List<Map> rq;
-    private List<Map> mfil;
-    private List<Map> mext;
+    private Multimap<String, String> mfilter;
+    private Multimap<String, String> mextension;
+
 
     public CollectionQuery() {
-        this.serialzer = new ObjectMapper();
         this.rq = new ArrayList<>();
-        this.mfil = new ArrayList<>();
-        this.mext = new ArrayList<>();
+        this.mfilter = ArrayListMultimap.create();
+        this.mextension = ArrayListMultimap.create();
         this.factory = serialzer.getFactory();
         this.types = new CollectionTypes();
     }
@@ -51,6 +52,84 @@ public class CollectionQuery {
         for (String query : queries)
             addResource(query);
         return this;
+    }
+
+
+    public CollectionQuery addMetaFilter(String key, String value) {
+        this.mfilter.put(key, value);
+        return this;
+    }
+
+    public CollectionQuery addMetaFilter(String queries) {
+        this.mfilter.putAll(resEq(queries));
+        return this;
+    }
+
+    public CollectionQuery addMetaExtend(String attr, String val) {
+        this.mextension.put(attr, val);
+        return this;
+    }
+
+    public CollectionQuery addMetaExtend(String queries) {
+        this.mextension.putAll(resEq(queries));
+        return this;
+    }
+
+
+    private List<Map> createFilter() {
+        List<Map> mfil = new ArrayList();
+        boolean multypes = this.mfilter.keys().size() > 1;
+        String def_key = null;
+
+        if (!multypes) {
+            Multiset<String> keys = this.mfilter.keys();
+            def_key = keys.toArray(new String[keys.size()])[0];
+        }
+
+        List value = this.createValue(this.mfilter);
+        if (mfilter.values().size() == 1)
+            Collections.addAll(mfil, types.createMetaFilter((Map) value.get(0)));
+        else {
+            Map group;
+            if (!multypes)
+                group = types.createGroup("and", def_key, value);
+            else
+                group = types.createGroup("and", null, value);
+            Collections.addAll(mfil, types.createMetaFilter(group));
+        }
+        return mfil;
+    }
+
+    private List<Map> createExtender() {
+        List<Map> mex = new ArrayList();
+        boolean multypes = this.mextension.keys().size() > 1;
+        String def_key = null;
+
+        if (!multypes)
+            def_key = this.mextension.keys().toArray(new String[0])[0];
+
+        List value = this.createValue(this.mextension);
+        // todo: missing: - takes only one resource, but resources can be chained!
+        if (this.mextension.values().size() == 1)
+            Collections.addAll(mex, types.createMetaExtend((Map) value.get(0)));
+        else {
+            Map group;
+            if (!multypes)
+                group = types.createGroup("and", def_key, value);
+            else
+                group = types.createGroup("and", null, value);
+            Collections.addAll(mex, types.createMetaExtend(group));
+        }
+        return mex;
+    }
+
+    private List<Map> join() {
+        List<Map> cursor = new ArrayList<>(this.rq);
+        if (!this.mfilter.isEmpty())
+            cursor.addAll(this.createFilter());
+        if (!this.mextension.isEmpty())
+            cursor.addAll(this.createExtender());
+        return cursor;
     }
 
     private List createValue(Multimap<String, String> map) {
@@ -101,65 +180,6 @@ public class CollectionQuery {
         return value;
     }
 
-    // fixme: map can only have one key/value pair. thus,
-    // fixme: text class can only be added once. Multiple types are not possible!
-    public CollectionQuery addMetaFilter(String queries) {
-        Multimap<String, String> m = resEq(queries);
-        boolean multypes = m.keys().size() > 1;
-        String def_key = null;
-
-
-        if (!multypes){
-            Multiset<String> keys = m.keys();
-            def_key = keys.toArray(new String[keys.size()])[0];
-        }
-
-        List value = this.createValue(m);
-        // todo: missing: - takes only one resource, but resources can be chained!
-        if (m.values().size() == 1)
-            Collections.addAll(this.mfil, types.createMetaFilter((Map) value.get(0)));
-        else {
-            Map group;
-            if (!multypes)
-                group = types.createGroup("and", def_key, value);
-            else
-                group = types.createGroup("and", null, value);
-            Collections.addAll(this.mfil, types.createMetaFilter(group));
-        }
-        return this;
-    }
-
-    public CollectionQuery addMetaExtend(String queries) {
-        Multimap<String, String> m = resEq(queries);
-        boolean multypes = m.keys().size() > 1;
-        String def_key = null;
-
-        if (!multypes)
-            def_key = m.keys().toArray(new String[0])[0];
-
-        List value = this.createValue(m);
-        // todo: missing: - takes only one resource, but resources can be chained!
-        if (m.values().size() == 1)
-            Collections.addAll(this.mext, types.createMetaExtend((Map) value.get(0)));
-        else {
-            Map group;
-            if (!multypes)
-                group = types.createGroup("and", def_key, value);
-            else
-                group = types.createGroup("and", null, value);
-            Collections.addAll(this.mext, types.createMetaExtend(group));
-        }
-        return this;
-    }
-
-    public CollectionQuery addMetaFilter(String attr, String val) {
-        return addMetaFilter(attr + ":" + val);
-    }
-
-    public CollectionQuery addMetaExtend(String attr, String val) {
-        return addMetaExtend(attr + ":" + val);
-    }
-
     private String[] processDates(List<String> dates) {
         if (dates.isEmpty())
             return new String[3];
@@ -182,38 +202,17 @@ public class CollectionQuery {
         return el;
     }
 
-    public void clear() {
-        this.rq.clear();
-        this.mfil.clear();
-        this.mext.clear();
+    public List<Map> raw() {
+        return join();
     }
 
-    private List<Map> join() {
-        List<Map> cursor = new ArrayList<>(this.rq);
-        cursor.addAll(this.mfil);
-        cursor.addAll(this.mext);
-        return cursor;
-    }
 
-    private List<Map> getCollectionsOnly() {
-        List<Map> cursor = new ArrayList<>(this.mfil);
-        cursor.addAll(this.mext);
-        return cursor;
-    }
-
-    /**
-     * returns the meta query only and does not contain parent dependencies
-     *
-     * @return
-     */
-    @Deprecated
-    public String stringify() {
-        List collection = getCollectionsOnly();
-        if (collection.isEmpty())
-            return "";
+    public String toCollections() {
+        Map meta = new LinkedHashMap();
+        meta.put("collections", join());
 
         try {
-            return serialzer.writeValueAsString(collection);
+            return serialzer.writeValueAsString(meta);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return "";
@@ -237,34 +236,6 @@ public class CollectionQuery {
 
 
     /**
-     * returns the List<Map> that contains all the meta queries and resource queries
-     * added to the meta query container
-     *
-     * @return
-     */
-    public List<Map> raw() {
-        return join();
-    }
-
-    /**
-     * returns a JSON String representation that contains all information
-     * (meta query and resource meta queries alike) in a root meta JSON node
-     *
-     * @return
-     */
-    public String toCollections() {
-        Map meta = new LinkedHashMap();
-        meta.put("collections", join());
-
-        try {
-            return serialzer.writeValueAsString(meta);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-    /**
      * resolves all queries as equal (hierarchy) AND relations
      *
      * @param queries
@@ -283,15 +254,9 @@ public class CollectionQuery {
     }
 
 
-    /**
-     * resolves query string with AND and OR relations alike!
-     *
-     * @param queries
-     * @return
-     */
-    private Multimap<String, String> resDep(String queries) {
-        return null;
+    public void clear() {
+        this.rq.clear();
+        this.mfilter.clear();
+        this.mextension.clear();
     }
-
-
 }
