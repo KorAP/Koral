@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,8 +16,8 @@ import java.util.Map;
  */
 public class QuerySerializer {
 
-	public static String queryLanguageVersion;
-	
+    public static String queryLanguageVersion;
+
     private ObjectMapper mapper;
     private AbstractSyntaxTree ast;
     private org.slf4j.Logger log = LoggerFactory
@@ -118,11 +117,9 @@ public class QuerySerializer {
             ast = new CosmasTree(query);
         } else if (queryLanguage.toLowerCase().equals("poliqarpplus")) {
             ast = new PoliqarpPlusTree(query);
-        }
-        else if (queryLanguage.toLowerCase().equals("cql")) {
+        } else if (queryLanguage.toLowerCase().equals("cql")) {
             ast = new CQLTree(query);
-        }
-        else {
+        } else {
             throw new QueryException(queryLanguage + " is not a supported query language!");
         }
         Map<String, Object> requestMap = ast.getRequestMap();
@@ -140,12 +137,10 @@ public class QuerySerializer {
                 ast = new CosmasTree(query);
             } else if (ql.toLowerCase().equals("poliqarpplus")) {
                 ast = new PoliqarpPlusTree(query);
-            } 
-            else if (ql.toLowerCase().equals("cql")){
-            	queryLanguageVersion = "1.2"; // set me
-            	ast = new CQLTree(query);
-            }
-            else {
+            } else if (ql.toLowerCase().equals("cql")) {
+                queryLanguageVersion = "1.2"; // set me
+                ast = new CQLTree(query);
+            } else {
                 throw new QueryException(ql + " is not a supported query language!");
             }
         } catch (QueryException e) {
@@ -166,16 +161,16 @@ public class QuerySerializer {
             requestMap.put("collections", collection);
             requestMap.put("meta", meta.raw());
             return mapper.writeValueAsString(requestMap);
-        } catch (IOException e){
+        } catch (IOException e) {
             return "";
         }
     }
 
-	public static String getQueryLanguageVersion() {
-		return queryLanguageVersion;
-	}
+    public static String getQueryLanguageVersion() {
+        return queryLanguageVersion;
+    }
 
-	public static void setQueryLanguageVersion(String queryLanguageVersion) {
-		QuerySerializer.queryLanguageVersion = queryLanguageVersion;
-	}
+    public static void setQueryLanguageVersion(String queryLanguageVersion) {
+        QuerySerializer.queryLanguageVersion = queryLanguageVersion;
+    }
 }

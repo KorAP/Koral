@@ -1,7 +1,6 @@
 package de.ids_mannheim.korap.query.serialize;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,14 +36,22 @@ public class CollectionQuery {
 
     public CollectionQuery addResource(String query) {
         try {
-            JsonParser jp = factory.createParser(query);
-            JsonNode m = jp.readValueAsTree();
-            for (JsonNode n : m)
-                this.rq.add(serialzer.treeToValue(n, Map.class));
+            List v = serialzer.readValue(query, LinkedList.class);
+            this.rq.addAll(v);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("Conversion went wrong!");
         }
+
+
+//        try {
+//            JsonParser jp = factory.createParser(query);
+//            JsonNode m = jp.readValueAsTree();
+//            for (JsonNode n : m)
+//                this.rq.add(serialzer.treeToValue(n, Map.class));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            throw new IllegalArgumentException("Conversion went wrong!");
+//        }
         return this;
     }
 
@@ -65,8 +72,8 @@ public class CollectionQuery {
         return this;
     }
 
-    public CollectionQuery addMetaExtend(String attr, String val) {
-        this.mextension.put(attr, val);
+    public CollectionQuery addMetaExtend(String key, String value) {
+        this.mextension.put(key, value);
         return this;
     }
 
@@ -78,7 +85,7 @@ public class CollectionQuery {
 
     private List<Map> createFilter() {
         List<Map> mfil = new ArrayList();
-        boolean multypes = this.mfilter.keys().size() > 1;
+        boolean multypes = this.mfilter.keySet().size() > 1;
         String def_key = null;
 
         if (!multypes) {
@@ -87,6 +94,7 @@ public class CollectionQuery {
         }
 
         List value = this.createValue(this.mfilter);
+
         if (mfilter.values().size() == 1)
             Collections.addAll(mfil, types.createMetaFilter((Map) value.get(0)));
         else {
@@ -142,16 +150,22 @@ public class CollectionQuery {
             }
 
             if (map.get(key).size() == 1) {
-                Map term = types.createTerm(key, null, map.get(key).toArray(new String[0])[0], null);
+                Map term = types.createTerm(key, null,
+                        map.get(key).toArray(new String[0])[0], null);
                 value.add(term);
             } else {
+                boolean multypes = map.keySet().size() > 1;
                 List g = new ArrayList();
                 for (String v : map.get(key))
                     g.add(types.createTerm(null, v, null));
-                Map group = types.createGroup("and", key, g);
-                value.add(group);
-            }
 
+                if (multypes) {
+                    Map group = types.createGroup("and", key, g);
+                    value.add(group);
+                } else
+                    value.addAll(g);
+
+            }
         }
 
         int idx = 3;
@@ -225,13 +239,18 @@ public class CollectionQuery {
      *
      * @return
      */
-    public String build() {
+    public JsonNode buildNode() {
+        return serialzer.valueToTree(join());
+    }
+
+    public String buildString() {
         try {
             return serialzer.writeValueAsString(join());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return "";
         }
+
     }
 
 

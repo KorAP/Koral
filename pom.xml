@@ -13,6 +13,12 @@
     <packaging>jar</packaging>
     <name>KorAP-querySerialization</name>
     <url>http://maven.apache.org</url>
+    <repositories>
+        <repository>
+            <id>id-maven-repo</id>
+            <url>http://maven.indexdata.com</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.antlr</groupId>
@@ -59,6 +65,11 @@
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.z3950.zing</groupId>
+            <artifactId>cql-java</artifactId>
+            <version>1.12</version>
         </dependency>
     </dependencies>
     <build>
