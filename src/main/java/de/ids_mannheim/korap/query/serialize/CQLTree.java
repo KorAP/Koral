@@ -1,5 +1,7 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ids_mannheim.korap.util.QueryException;
 import org.z3950.zing.cql.*;
 
@@ -20,8 +22,8 @@ public class CQLTree extends AbstractSyntaxTree {
     private static final String TERM_RELATION_CQL_1_1 = "scr";
     private static final String TERM_RELATION_CQL_1_2 = "=";
     private static final String SUPPORTED_RELATION_EXACT = "exact"; // not in the doc    
-    private static final String OPERATION_OR = "operation:or";
-    private static final String OPERATION_SEQUENCE = "operation:sequence";
+    private static final String OPERATION_OR = "\"operation:or\"";
+    private static final String OPERATION_SEQUENCE = "\"operation:sequence\"";
     private static final String KORAP_CONTEXT = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld";
 
     private LinkedHashMap<String, Object> requestMap;
@@ -41,7 +43,7 @@ public class CQLTree extends AbstractSyntaxTree {
         this.sb = new StringBuilder();
         this.version = version;
         this.isCaseSensitive = isCaseSensitive;
-        this.requestMap = new LinkedHashMap<String, Object>();
+        this.requestMap = new LinkedHashMap<>();
         requestMap.put("@context", KORAP_CONTEXT);
         process(query);
     }
@@ -56,8 +58,16 @@ public class CQLTree extends AbstractSyntaxTree {
     public void process(String query) throws QueryException {
         CQLNode cqlNode = parseQuerytoCQLNode(query);
         parseCQLNode(cqlNode);
-        String serializedQuery = sb.toString();
-        requestMap.put("query", serializedQuery);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node;
+        try {
+            node = mapper.readTree(sb.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new QueryException("Something went wrong!");
+        }
+        requestMap.put("query", node);
+
     }
 
     private CQLNode parseQuerytoCQLNode(String query) throws QueryException {
@@ -104,10 +114,11 @@ public class CQLTree extends AbstractSyntaxTree {
 
     private void parseAndNode(CQLAndNode node) throws QueryException {
         checkBooleanModifier(node);
-        sb.append("{@type=korap:group, operation=");
+        sb.append("{\"@type\":\"korap:group\", \"operation\":");
         sb.append(OPERATION_SEQUENCE);
-        sb.append(", distances=[{@type=korap:distance, key=t, min=0, max=0}]");
-        sb.append(", operands=[");
+        sb.append(", distances:[{\"@type\":\"korap:distance\", \"key\":\"t\"," +
+                " \"min\":0, \"max\":0}]");
+        sb.append(", \"operands\":[");
         parseCQLNode(node.getLeftOperand());
         sb.append(", ");
         parseCQLNode(node.getRightOperand());
@@ -116,9 +127,9 @@ public class CQLTree extends AbstractSyntaxTree {
 
     private void parseOrNode(CQLOrNode node) throws QueryException {
         checkBooleanModifier(node);
-        sb.append("{@type=korap:group, operation=");
+        sb.append("{\"@type\":\"korap:group\", \"operation\":");
         sb.append(OPERATION_OR);
-        sb.append(", operands=[");
+        sb.append(", \"operands\":[");
         parseCQLNode(node.getLeftOperand());
         sb.append(", ");
         parseCQLNode(node.getRightOperand());
@@ -127,9 +138,9 @@ public class CQLTree extends AbstractSyntaxTree {
 
     private void writeSequence(String str) {
         String[] terms = str.split(" ");
-        sb.append("{@type=korap:group, operation=");
+        sb.append("{\"@type\":\"korap:group\", \"operation\":");
         sb.append(OPERATION_SEQUENCE);
-        sb.append(", operands=[");
+        sb.append(", \"operands\":[");
 
         int size = terms.length;
         for (int i = 0; i < size; i++) {
@@ -142,21 +153,21 @@ public class CQLTree extends AbstractSyntaxTree {
     }
 
     private void writeTerm(String term) {
-        sb.append("{@type=korap:token, wrap={@type=korap:term");
+        sb.append("{\"@type\":\"korap:token\", \"wrap\":{\"@type\":\"korap:term\"");
         if (!isCaseSensitive) {
-            sb.append(", caseInsensitive=true");
+            sb.append(", \"caseInsensitive\":true");
         }
-        sb.append(", key=");
-        sb.append(term);
-        sb.append(", layer=orth, match=match:eq}}");
+        sb.append(", \"key\":");
+        sb.append("\"" + term + "\"");
+        sb.append(", \"layer\":\"orth\", \"match\":\"match:eq\"}}");
     }
 
     private void checkBooleanModifier(CQLBooleanNode node) throws QueryException {
         List<Modifier> modifiers = node.getModifiers();
         if ((modifiers != null) && !modifiers.isEmpty()) {
             Modifier modifier = modifiers.get(0);
-            throw new QueryException(20, "Relation modifier \"" +
-                    modifier.toCQL() + "\" is not supported.");
+            throw new QueryException(20, "Relation modifier " +
+                    modifier.toCQL() + " is not supported.");
         }
     }
 
@@ -164,7 +175,7 @@ public class CQLTree extends AbstractSyntaxTree {
         // only allow "cql.serverChoice" and "words" index
         if (!(INDEX_CQL_SERVERCHOICE.equals(node.getIndex()) ||
                 INDEX_WORDS.equals(node.getIndex()))) {
-            throw new QueryException(16, "Index \"" + node.getIndex() + "\" is not supported.");
+            throw new QueryException(16, "Index " + node.getIndex() + " is not supported.");
         }
         // only allow "=" relation without any modifiers
         CQLRelation relation = node.getRelation();
@@ -172,14 +183,14 @@ public class CQLTree extends AbstractSyntaxTree {
         if (!(TERM_RELATION_CQL_1_1.equals(baseRel) ||
                 TERM_RELATION_CQL_1_2.equals(baseRel) ||
                 SUPPORTED_RELATION_EXACT.equals(baseRel))) {
-            throw new QueryException(19, "Relation \"" +
-                    relation.getBase() + "\" is not supported.");
+            throw new QueryException(19, "Relation " +
+                    relation.getBase() + " is not supported.");
         }
         List<Modifier> modifiers = relation.getModifiers();
         if ((modifiers != null) && !modifiers.isEmpty()) {
             Modifier modifier = modifiers.get(0);
-            throw new QueryException(20, "Relation modifier \"" +
-                    modifier.getValue() + "\" is not supported.");
+            throw new QueryException(20, "Relation modifier " +
+                    modifier.getValue() + " is not supported.");
         }
     }
 

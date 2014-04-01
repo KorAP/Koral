@@ -165,12 +165,4 @@ public class QuerySerializer {
             return "";
         }
     }
-
-    public static String getQueryLanguageVersion() {
-        return queryLanguageVersion;
-    }
-
-    public static void setQueryLanguageVersion(String queryLanguageVersion) {
-        QuerySerializer.queryLanguageVersion = queryLanguageVersion;
-    }
 }
