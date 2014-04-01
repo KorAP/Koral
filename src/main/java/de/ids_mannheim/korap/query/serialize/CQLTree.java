@@ -17,6 +17,10 @@ import org.z3950.zing.cql.Modifier;
 
 import de.ids_mannheim.korap.util.QueryException;
 
+/**
+ * 	@author margaretha
+ *  
+ * */
 public class CQLTree extends AbstractSyntaxTree {
 	
 	private static final String VERSION_1_1 = "1.1";
@@ -32,12 +36,16 @@ public class CQLTree extends AbstractSyntaxTree {
     
 	private LinkedHashMap<String,Object> requestMap;
 	private String version;
-	private boolean isCaseSensitive;
+	private boolean isCaseSensitive; // default true
 	private StringBuilder sb;
 	
-	public CQLTree(String query) throws QueryException {
+	/*public CQLTree(String query) throws QueryException {
 		this(query, VERSION_1_2, true);
-	}
+	}*/
+	
+	public CQLTree(String query, String version) throws QueryException {
+		this(query, version, true);
+	} 
 	
 	public CQLTree(String query, String version, boolean isCaseSensitive) throws QueryException {
 		this.sb = new StringBuilder();
@@ -189,12 +197,5 @@ public class CQLTree extends AbstractSyntaxTree {
                             modifier.getValue() + "\" is not supported.");
         }
 	}
-	
-	public String getVersion() {
-		return version;
-	}
 
-	public void setVersion(String version) {
-		this.version = version;
-	}
 }

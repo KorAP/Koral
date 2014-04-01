@@ -12,7 +12,7 @@ import de.ids_mannheim.korap.util.QueryException;
 public class CQLTest {
 	
 	String query;
-	
+	String version ="1.2";
 	@Test
 	public void testBooleanQuery() throws CQLParseException, IOException, QueryException{		
 		query="((Sonne) or (Mond)) and (scheint)";		
@@ -26,7 +26,7 @@ public class CQLTest {
 					"]}," +
 					"{@type=korap:token, wrap={@type=korap:term, key=scheint, layer=orth, match=match:eq}}" +
 			"]}";
-		CQLTree cqlTree = new CQLTree(query);		
+		CQLTree cqlTree = new CQLTree(query, version);		
 		String serializedQuery = cqlTree.getRequestMap().get("query").toString();
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace(" ", ""));
 		
@@ -42,7 +42,7 @@ public class CQLTest {
 							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
 					"]}" +
 				"]}";
-		cqlTree = new CQLTree(query);		
+		cqlTree = new CQLTree(query, version);		
 		serializedQuery = cqlTree.getRequestMap().get("query").toString();
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace(" ", ""));
 		
@@ -57,7 +57,7 @@ public class CQLTest {
 				"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
 			"]}";		
 		
-		CQLTree cqlTree = new CQLTree(query);		
+		CQLTree cqlTree = new CQLTree(query, version);		
 		String serializedQuery = cqlTree.getRequestMap().get("query").toString();
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace(" ", ""));
 		
@@ -71,7 +71,7 @@ public class CQLTest {
 				"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
 			"]}";
 		
-		cqlTree = new CQLTree(query);		
+		cqlTree = new CQLTree(query, version);		
 		serializedQuery = cqlTree.getRequestMap().get("query").toString();
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace(" ", ""));
 				
@@ -87,7 +87,7 @@ public class CQLTest {
 						"{@type=korap:token, wrap={@type=korap:term, key=scheint, layer=orth, match=match:eq}}" +
 					"]}" +
 				"]}";
-		cqlTree = new CQLTree(query);		
+		cqlTree = new CQLTree(query, version);		
 		serializedQuery = cqlTree.getRequestMap().get("query").toString();
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace(" ", ""));
 	}
@@ -96,7 +96,7 @@ public class CQLTest {
 	public void testTermQuery() throws CQLParseException, IOException, QueryException{
 		query = "Sonne";		
 		String jsonLd = "{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}";		
-		CQLTree cqlTree = new CQLTree(query);		
+		CQLTree cqlTree = new CQLTree(query, version);		
 		String serializedQuery = cqlTree.getRequestMap().get("query").toString();		
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace(" ", ""));
 	}
@@ -110,7 +110,7 @@ public class CQLTest {
 					"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
 				"]}";
 		
-		CQLTree cqlTree = new CQLTree(query);		
+		CQLTree cqlTree = new CQLTree(query, version);		
 		String serializedQuery = cqlTree.getRequestMap().get("query").toString();
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace(" ", ""));
 		
@@ -123,7 +123,7 @@ public class CQLTest {
 					"{@type=korap:token, wrap={@type=korap:term, key=schläft, layer=orth, match=match:eq}}" +
 				"]}";
 		
-		cqlTree = new CQLTree(query);		
+		cqlTree = new CQLTree(query, version);		
 		serializedQuery = cqlTree.getRequestMap().get("query").toString();
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace(" ", ""));
 	}	
