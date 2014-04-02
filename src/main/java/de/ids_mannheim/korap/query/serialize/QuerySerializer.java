@@ -128,7 +128,7 @@ public class QuerySerializer {
 
     public String buildQuery(String query, String ql, String collection,
                              String cli, String cri, int cls, int crs,
-                             int num, int page, boolean cutoff)
+                             int num, int page, boolean cutoff, String version)
             throws QueryException {
         try {
             if (ql.toLowerCase().equals("poliqarp")) {
@@ -138,8 +138,8 @@ public class QuerySerializer {
             } else if (ql.toLowerCase().equals("poliqarpplus")) {
                 ast = new PoliqarpPlusTree(query);
             } else if (ql.toLowerCase().equals("cql")) {
-                queryLanguageVersion = "1.2"; // set me
-                ast = new CQLTree(query);
+//                queryLanguageVersion = "1.2"; // set me
+                ast = new CQLTree(query, version);
             } else {
                 throw new QueryException(ql + " is not a supported query language!");
             }
