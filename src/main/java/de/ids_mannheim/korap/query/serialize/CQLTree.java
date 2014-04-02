@@ -55,7 +55,10 @@ public class CQLTree extends AbstractSyntaxTree {
     }
 
     @Override
-    public void process(String query) throws QueryException {
+    public void process(String query) throws QueryException {    	
+    	 if ((query == null) || query.isEmpty()) 
+             throw new QueryException(27, "An empty query is unsupported.");
+    	
         CQLNode cqlNode = parseQuerytoCQLNode(query);
         parseCQLNode(cqlNode);
         ObjectMapper mapper = new ObjectMapper();

@@ -13,6 +13,45 @@ public class CQLTest {
 	
 	String query;
 	String version ="1.2";
+	
+	@Test
+	public void testExceptions() throws CQLParseException, IOException {
+		query = "(Kuh) prox (Germ) ";
+		try {
+			CQLTree cqlTree = new CQLTree(query, version);
+		} catch (QueryException e) {
+			assertEquals(48,e.getErrorCode());
+		}
+		
+		query = "(Kuh) or/rel.combine=sum (Germ) ";		
+		try {
+			CQLTree cqlTree = new CQLTree(query, version);
+		}catch (QueryException e) {			
+			assertEquals(20,e.getErrorCode());
+		}
+		
+		query = "dc.title any Germ ";
+		try {
+			CQLTree cqlTree = new CQLTree(query, version);
+		} catch (QueryException e) {
+			assertEquals(16,e.getErrorCode());
+		}
+		
+		query = "cql.serverChoice any Germ ";
+		try {
+			CQLTree cqlTree = new CQLTree(query, version);
+		} catch (QueryException e) {
+			assertEquals(19,e.getErrorCode());
+		}
+		
+		query = "";
+		try {
+			CQLTree cqlTree = new CQLTree(query, version);
+		} catch (QueryException e) {
+			assertEquals(27,e.getErrorCode());
+		}
+	}
+	
 	@Test
 	public void testBooleanQuery() throws CQLParseException, IOException, QueryException{		
 		query="((Sonne) or (Mond)) and (scheint)";		
