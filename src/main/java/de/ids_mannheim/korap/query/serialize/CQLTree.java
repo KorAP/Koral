@@ -116,7 +116,7 @@ public class CQLTree extends AbstractSyntaxTree {
         checkBooleanModifier(node);
         sb.append("{\"@type\":\"korap:group\", \"operation\":");
         sb.append(OPERATION_SEQUENCE);
-        sb.append(", distances:[{\"@type\":\"korap:distance\", \"key\":\"t\"," +
+        sb.append(", \"distances\":[{\"@type\":\"korap:distance\", \"key\":\"t\"," +
                 " \"min\":0, \"max\":0}]");
         sb.append(", \"operands\":[");
         parseCQLNode(node.getLeftOperand());
