@@ -185,9 +185,9 @@ public class PoliqarpPlusTreeTest {
 		// [base=Mann&(cas=N|cas=A)]
 		String cof1 = 
 			"{@type=korap:token, wrap=" +
-				"{@type=korap:termGroup, relation=and, operands=[" +
+				"{@type=korap:termGroup, relation=relation:and, operands=[" +
 					"{@type=korap:term, key=Mann, layer=lemma, match=match:eq}," +
-					"{@type=korap:termGroup, relation=or, operands=[" +
+					"{@type=korap:termGroup, relation=relation:or, operands=[" +
 						"{@type=korap:term, key=N, layer=cas, match=match:eq}," +
 						"{@type=korap:term, key=A, layer=cas, match=match:eq}" +
 					"]}" +
@@ -206,7 +206,7 @@ public class PoliqarpPlusTreeTest {
 		// [base=Mann&cas=N&gen=m]
 		String cof2 = 
 			"{@type=korap:token, wrap=" +
-				"{@type=korap:termGroup, relation=and, operands=[" +
+				"{@type=korap:termGroup, relation=relation:and, operands=[" +
 					"{@type=korap:term, key=Mann, layer=lemma, match=match:eq}," +
 					"{@type=korap:term, key=N, layer=cas, match=match:eq}," +
 					"{@type=korap:term, key=m, layer=gen, match=match:eq}" +
@@ -351,6 +351,14 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree("[base=foo]{2,5}");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(occ11.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=foo]{2}
+		String occ12 = "{@type=korap:group, operands=[" +
+					     "{@type=korap:token, wrap={@type=korap:term, key=foo, layer=lemma, match=match:eq}}" +
+					  "], operation=operation:repetition, min=2, max=2}"; 
+		ppt = new PoliqarpPlusTree("[base=foo]{2}");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ12.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test

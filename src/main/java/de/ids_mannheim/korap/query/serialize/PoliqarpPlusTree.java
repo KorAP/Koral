@@ -149,12 +149,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				query = query.replaceAll(" ", "");
 				process(query);
 			} else {
-				try {
-					throw new QueryException("Error handling query.");
-				} catch (QueryException e1) {
-					e1.printStackTrace();
-					System.exit(1);
-				}
+				throw new QueryException("Error handling query.");
 			}
 		}
 		System.out.println(">>> "+requestMap.get("query")+" <<<");
@@ -261,8 +256,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 						Integer min = Integer.parseInt(minmax[0]);
 						Integer max = Integer.parseInt(minmax[1]);
 						sequence.put("@type", "korap:group");
-						sequence.put("operation", "operation:"+"sequence");
-//						sequence.put("operation", "operation:"+"distance");
+						sequence.put("operation", "operation:sequence");
 						sequence.put("inOrder", true);
 						ArrayList<Object> constraint = new ArrayList<Object>(); 
 						sequence.put("distances", constraint);
@@ -305,6 +299,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 					// else, it's a group (with shrink()/spanclass/align... as child)
 					} else {
 						sequence.put("@type", "korap:group");
+//						objectStack.push(sequence);
+//						stackedObjects++;
 					}
 				}
 				// Step II: decide where to put this element 
@@ -334,12 +330,22 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 								stackedObjects++;
 							} else {
 								// if not first child, add to previously created parent sequence
-								ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+								ArrayList<Object> topSequenceOperands;
+								try {
+									topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+								} catch (IndexOutOfBoundsException e) {
+									// Normally, the current element has been added to the object stack, so the try-block works fine.
+									// In some cases however, the element is not added (see ultimate else-block in Step I), and we need a 
+									// fallback to the first element in the object stack.
+									topSequenceOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
+								}
+								
 								topSequenceOperands.add(sequence);
 							}
 						}
 					} else if (!objectStack.isEmpty()){
 						// embed in super sequence
+						System.out.println(objectStack);
 						ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 						topSequenceOperands.add(sequence);
 					}
@@ -876,7 +882,12 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		} else {
 			repetition = repetition.substring(1, repetition.length()-1); // remove braces
 			String[] splitted = repetition.split(",");
-			return new int[] {Integer.parseInt(splitted[0]), Integer.parseInt(splitted[1])};
+			if (splitted.length==2) {
+				return new int[] {Integer.parseInt(splitted[0]), Integer.parseInt(splitted[1])};
+			} else {
+				return new int[] {Integer.parseInt(splitted[0]), Integer.parseInt(splitted[0])};
+			}
+			
 		}
 	}
 
@@ -984,13 +995,17 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		
 		String[] queries = new String[] {
 				"shrink(1|2:{1:[base=der]}{2:[base=Mann]})",
-//				"[base=foo] meta (author=name&year=2000)",
-//				"[base=foo] meta year=2000",
 				"{[base=Mann]}",
 				"shrink(1:[orth=Der]{1:[orth=Mann][orth=geht]})",
 				"[base=Mann/i]",
 				"[cnx/base=pos:n]",
-				"<cnx/c=np>"
+				"<cnx/c=np>",
+				"contains(<cnx/c=np>, [mate/pos=NE])",
+				"matches(<A>,[pos=N]*)",
+				"matches(<A>,[pos=N]{4})",
+				"([base=bar][base=foo])*"
+//				"matches(<A>,[pos=N])",
+//				"[pos=V]{3}"
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {
