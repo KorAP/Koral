@@ -26,6 +26,10 @@ public class CollectionQuery {
     private Multimap<String, String> mextension;
 
 
+    public enum RELATION {
+        AND, OR
+    }
+
     public CollectionQuery() {
         this.rq = new ArrayList<>();
         this.mfilter = ArrayListMultimap.create();
@@ -42,16 +46,6 @@ public class CollectionQuery {
             throw new IllegalArgumentException("Conversion went wrong!");
         }
 
-
-//        try {
-//            JsonParser jp = factory.createParser(query);
-//            JsonNode m = jp.readValueAsTree();
-//            for (JsonNode n : m)
-//                this.rq.add(serialzer.treeToValue(n, Map.class));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            throw new IllegalArgumentException("Conversion went wrong!");
-//        }
         return this;
     }
 
@@ -61,14 +55,13 @@ public class CollectionQuery {
         return this;
     }
 
-
     public CollectionQuery addMetaFilter(String key, String value) {
         this.mfilter.put(key, value);
         return this;
     }
 
-    public CollectionQuery addMetaFilter(String queries) {
-        this.mfilter.putAll(resEq(queries));
+    public CollectionQuery addMetaFilter(String queries, RELATION rel) {
+        this.mfilter.putAll(resRel(queries, rel));
         return this;
     }
 
@@ -77,13 +70,15 @@ public class CollectionQuery {
         return this;
     }
 
-    public CollectionQuery addMetaExtend(String queries) {
-        this.mextension.putAll(resEq(queries));
+    public CollectionQuery addMetaExtend(String queries, RELATION rel) {
+        this.mextension.putAll(resRel(queries, rel));
+
         return this;
     }
 
 
-    private List<Map> createFilter() {
+    private List<Map> createFilter(RELATION rel) {
+        String relation = rel == RELATION.AND ? "and" : "or";
         List<Map> mfil = new ArrayList();
         boolean multypes = this.mfilter.keySet().size() > 1;
         String def_key = null;
@@ -100,15 +95,16 @@ public class CollectionQuery {
         else {
             Map group;
             if (!multypes)
-                group = types.createGroup("and", def_key, value);
+                group = types.createGroup(relation, def_key, value);
             else
-                group = types.createGroup("and", null, value);
+                group = types.createGroup(relation, null, value);
             Collections.addAll(mfil, types.createMetaFilter(group));
         }
         return mfil;
     }
 
-    private List<Map> createExtender() {
+    private List<Map> createExtender(RELATION rel) {
+        String relation = rel == RELATION.AND ? "and" : "or";
         List<Map> mex = new ArrayList();
         boolean multypes = this.mextension.keys().size() > 1;
         String def_key = null;
@@ -123,20 +119,20 @@ public class CollectionQuery {
         else {
             Map group;
             if (!multypes)
-                group = types.createGroup("and", def_key, value);
+                group = types.createGroup(relation, def_key, value);
             else
-                group = types.createGroup("and", null, value);
+                group = types.createGroup(relation, null, value);
             Collections.addAll(mex, types.createMetaExtend(group));
         }
         return mex;
     }
 
-    private List<Map> join() {
+    private List<Map> join(RELATION filter, RELATION extension) {
         List<Map> cursor = new ArrayList<>(this.rq);
         if (!this.mfilter.isEmpty())
-            cursor.addAll(this.createFilter());
+            cursor.addAll(this.createFilter(filter));
         if (!this.mextension.isEmpty())
-            cursor.addAll(this.createExtender());
+            cursor.addAll(this.createExtender(extension));
         return cursor;
     }
 
@@ -216,14 +212,14 @@ public class CollectionQuery {
         return el;
     }
 
-    public List<Map> raw() {
-        return join();
+    public List<Map> raw(RELATION filter, RELATION extension) {
+        return join(filter, extension);
     }
 
 
-    public String toCollections() {
+    public String toCollections(RELATION filter, RELATION extension) {
         Map meta = new LinkedHashMap();
-        meta.put("collections", join());
+        meta.put("collections", join(filter, extension));
 
         try {
             return serialzer.writeValueAsString(meta);
@@ -233,19 +229,23 @@ public class CollectionQuery {
         }
     }
 
+    public String toCollections() {
+        return toCollections(RELATION.AND, RELATION.AND);
+    }
+
 
     /**
      * returns all references to parents and meta query as string representation
      *
      * @return
      */
-    public JsonNode buildNode() {
-        return serialzer.valueToTree(join());
+    public JsonNode buildNode(RELATION filter, RELATION extension) {
+        return serialzer.valueToTree(join(filter, extension));
     }
 
-    public String buildString() {
+    public String buildString(RELATION filter, RELATION extension) {
         try {
-            return serialzer.writeValueAsString(join());
+            return serialzer.writeValueAsString(join(filter, extension));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return "";
@@ -260,9 +260,9 @@ public class CollectionQuery {
      * @param queries
      * @return
      */
-    private Multimap<String, String> resEq(String queries) {
+    private Multimap<String, String> resRel(String queries, RELATION rel) {
         Multimap<String, String> qmap = ArrayListMultimap.create();
-        String[] spl = queries.split(" AND ");
+        String[] spl = queries.split(rel.toString());
         for (String query : spl) {
             String[] q = query.split(":");
             String attr = q[0];
