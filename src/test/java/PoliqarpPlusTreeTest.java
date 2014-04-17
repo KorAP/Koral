@@ -110,7 +110,7 @@ public class PoliqarpPlusTreeTest {
 		// [base=der][][base=Mann]
 		String et1 = 
 			"{@type=korap:group, operation=operation:sequence, inOrder=true, distances=[" +
-				"{@type=korap:distance, key=w, min=1, max=1}" +
+				"{@type=korap:distance, key=w, min=2, max=2}" +
 			"], " +
 			"operands=[" +
 				"{@type=korap:token, wrap={@type=korap:term, key=der, layer=lemma, match=match:eq}}," +
@@ -123,7 +123,7 @@ public class PoliqarpPlusTreeTest {
 		// [base=der][][][base=Mann]
 		String et2 = 
 			"{@type=korap:group, operation=operation:sequence, inOrder=true, distances=[" +
-				"{@type=korap:distance, key=w, min=2, max=2}" +
+				"{@type=korap:distance, key=w, min=3, max=3}" +
 			"], " +
 			"operands=[" +
 				"{@type=korap:token, wrap={@type=korap:term, key=der, layer=lemma, match=match:eq}}," +
@@ -136,7 +136,7 @@ public class PoliqarpPlusTreeTest {
 		// [base=der][][]?[base=Mann]
 		String et3 = 
 			"{@type=korap:group, operation=operation:sequence, inOrder=true, distances=[" +
-				"{@type=korap:distance, key=w, min=1, max=2}" +
+				"{@type=korap:distance, key=w, min=2, max=3}" +
 			"], " +
 			"operands=[" +
 				"{@type=korap:token, wrap={@type=korap:term, key=der, layer=lemma, match=match:eq}}," +
@@ -162,12 +162,12 @@ public class PoliqarpPlusTreeTest {
 		// [base=der][]{2,5}[base=Mann][]?[][base=Frau]   nested distances=
 		String et5 = 
 				"{@type=korap:group, operation=operation:sequence, inOrder=true, distances=[" +
-					"{@type=korap:distance, key=w, min=2, max=5}" +
+					"{@type=korap:distance, key=w, min=3, max=6}" +
 				"], " +
 				"operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, key=der, layer=lemma, match=match:eq}}," +
 					"{@type=korap:group, operation=operation:sequence, inOrder=true, distances=[" +
-						"{@type=korap:distance, key=w, min=1, max=2}" +
+						"{@type=korap:distance, key=w, min=2, max=3}" +
 					"], " +
 					"operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=lemma, match=match:eq}}," +

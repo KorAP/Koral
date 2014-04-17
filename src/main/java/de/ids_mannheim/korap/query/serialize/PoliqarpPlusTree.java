@@ -278,8 +278,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 							String[] minmax = parseEmptySegments(emptySegments);
 							Integer min = Integer.parseInt(minmax[0]);
 							Integer max = Integer.parseInt(minmax[1]);
-							sequence.put("offset-min", min);
-							sequence.put("offset-max", max);
+							sequence.put("offset-min", min-1);
+							sequence.put("offset-max", max-1);
 						}
 						sequence.put("operands", sequenceOperands);
 						objectStack.push(sequence);
@@ -893,8 +893,8 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 
 	private String[] parseEmptySegments(ParseTree emptySegments) {
 		String[] minmax = new String[2];
-		Integer min = 0;
-		Integer max = 0;
+		Integer min = 1;
+		Integer max = 1;
 		ParseTree child;
 		for (int i=0; i<emptySegments.getChildCount()-1; i++) {
 			child = emptySegments.getChild(i);
