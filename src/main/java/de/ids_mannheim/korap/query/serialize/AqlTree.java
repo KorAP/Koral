@@ -52,32 +52,22 @@ public class AqlTree extends AbstractSyntaxTree {
 	 * Keeps track of all visited nodes in a tree
 	 */
 	List<ParseTree> visited = new ArrayList<ParseTree>();
-
 	/**
-	 * Keeps track of active fields (like 'base=foo').
+	 * Keeps track of active object.
 	 */
-	LinkedList<ArrayList<Object>> fieldStack = new LinkedList<ArrayList<Object>>();
-	/**
-	 * Keeps track of active sequences.
-	 */
-	LinkedList<LinkedHashMap<String,Object>> sequenceStack = new LinkedList<LinkedHashMap<String,Object>>();
-	/**
-	 * Keeps track of active tokens.
-	 */
-	LinkedList<LinkedHashMap<String,Object>> tokenStack = new LinkedList<LinkedHashMap<String,Object>>();
-	/**
-	 * Keeps track of sequence/token/field groups.
-	 */
-	LinkedList<ArrayList<Object>> groupStack = new LinkedList<ArrayList<Object>>();
-	/**
-	 * Marks the currently active object (sequence/token/group...) in order to know where to add stuff like occurrence info etc.
-	 */
-	LinkedHashMap<String,Object> curObject = new LinkedHashMap<String,Object>();
+	LinkedList<LinkedHashMap<String,Object>> objectStack = new LinkedList<LinkedHashMap<String,Object>>();
 	/**
 	 * Marks the currently active token in order to know where to add flags (might already have been taken away from token stack).
 	 */
 	LinkedHashMap<String,Object> curToken = new LinkedHashMap<String,Object>();
+
+	private LinkedList<ArrayList<ArrayList<Object>>> distributedOperandsLists = new LinkedList<ArrayList<ArrayList<Object>>>();
 	
+	/**
+	 * Keeps track of how many objects there are to pop after every recursion of {@link #processNode(ParseTree)}
+	 */
+	LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
+	Integer stackedObjects = 0;
 	public static boolean verbose = false;
 	
 	/**
@@ -135,7 +125,6 @@ public class AqlTree extends AbstractSyntaxTree {
 		processNode(tree);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void processNode(ParseTree node) {
 		// Top-down processing
 		if (visited.contains(node)) return;
@@ -144,7 +133,12 @@ public class AqlTree extends AbstractSyntaxTree {
 		String nodeCat = getNodeCat(node);
 		openNodeCats.push(nodeCat);
 		
-		if (verbose) System.out.println(openNodeCats);
+		stackedObjects = 0;
+		
+		if (verbose) {
+			System.err.println(" "+objectStack);
+			System.out.println(openNodeCats);
+		}
 
 		/*
 		 ****************************************************************
@@ -153,10 +147,12 @@ public class AqlTree extends AbstractSyntaxTree {
 		 ****************************************************************
 		 ****************************************************************
 		 */
-		if (nodeCat.equals("query")) {
+		if (nodeCat.equals("start")) {
 			
 		}
 
+		objectsToPop.push(stackedObjects);
+		
 		/*
 		 ****************************************************************
 		 **************************************************************** 
@@ -169,26 +165,19 @@ public class AqlTree extends AbstractSyntaxTree {
 			processNode(child);
 		}
 				
-		// Stuff that happens when leaving a node (taking it off the stack)
-		if (nodeCat.equals("cq_segments") || nodeCat.equals("sq_segments")) {
-			// exclude whitespaces analysed as empty cq_segments
-			if (node.getChildCount() > 0 && !getNodeCat(node.getChild(0)).equals(" ")) {
-				sequenceStack.pop();
-			}
+		
+		/*
+		 **************************************************************
+		 * Stuff that happens after processing the children of a node *
+		 **************************************************************
+		 */
+		
+		
+		for (int i=0; i<objectsToPop.pop(); i++) {
+			objectStack.pop();
 		}
 		
-		if (nodeCat.equals("cq_disj_segments")) {
-			groupStack.pop();
-		}
-		
-		if (nodeCat.equals("cq_segment") || nodeCat.equals("sq_segment")){
-			tokenStack.pop();
-		}
-		
-		if (nodeCat.equals("conj_field")) {
-			fieldStack.pop();
-		}
-		
+
 		openNodeCats.pop();
 		
 	}
@@ -206,6 +195,27 @@ public class AqlTree extends AbstractSyntaxTree {
 			nodeCat = m.group(1);
 		} 
 		return nodeCat;
+	}
+	
+	@SuppressWarnings("unused")
+	private void putIntoSuperObject(LinkedHashMap<String, Object> object) {
+		putIntoSuperObject(object, 0);
+	}
+	
+	@SuppressWarnings({ "unchecked" })
+	private void putIntoSuperObject(LinkedHashMap<String, Object> object, int objStackPosition) {
+		if (distributedOperandsLists.size()>0) {
+			ArrayList<ArrayList<Object>> distributedOperands = distributedOperandsLists.pop();
+			for (ArrayList<Object> operands : distributedOperands) {
+				operands.add(object);
+			}
+		} else if (objectStack.size()>objStackPosition) {
+			ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
+			topObjectOperands.add(0, object);
+			
+		} else {
+			requestMap.put("query", object);
+		}
 	}
 	
 	private static ParserRuleContext parseAnnisQuery (String p) throws QueryException {
@@ -247,7 +257,7 @@ public class AqlTree extends AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[] {
-			"node & node & #2 > #1",
+			
 			"#1 . #2 ",
 			"#1 . #2 & meta::Genre=\"Sport\"",
 			"A _i_ B",
@@ -262,10 +272,7 @@ public class AqlTree extends AbstractSyntaxTree {
 			"#1 ->LABEL[lbl=/foo/] #2",
 			"#1 ->LABEL[foundry/layer=\"foo\"] #2",
 			"#1 ->LABEL[foundry/layer=\"foo\"] #2",
-			"/[Ss]tatisch/",
-			"/boo/",
-			"//",
-			"lalala"
+			"node & node & #2 > #1",
 			};
 //		AqlTree.verbose=true;
 		for (String q : queries) {
