@@ -209,7 +209,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		
 		if (debug) {
 			System.err.println(" "+objectStack);
-			System.err.println(" "+tokenStack);
+//			System.err.println(" "+tokenStack);
 			System.out.println(openNodeCats);
 		}
 		
@@ -288,9 +288,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				} else {
 					// if only child, make the sequence a mere token...
 					// ... but only if it has a real token/element beneath it
-					if (QueryUtils.getNodeCat(node.getChild(0)).equals("cq_segment")
-						|| QueryUtils.getNodeCat(node.getChild(0)).equals("sq_segment")
-						|| QueryUtils.getNodeCat(node.getChild(0)).equals("element")	) {
+					if (! QueryUtils.isContainerOnly(node)) {
 						sequence.put("@type", "korap:token");
 						tokenStack.push(sequence);
 						stackedTokens++;
@@ -298,7 +296,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 						stackedObjects++;
 					// else, it's a group (with shrink()/spanclass/align... as child)
 					} else {
-						sequence.put("@type", "korap:group");
+//						sequence.put("@type", "korap:group");
 //						objectStack.push(sequence);
 //						stackedObjects++;
 					}
@@ -308,7 +306,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				if (cqHasOccSibling) {
 					ArrayList<Object> topGroupOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 					topGroupOperands.add(sequence);
-				// ...if not modified by occurrence, put into suitable super structure
+				// ...if not modified by occurrence, put into appropriate super object
 				} else {
 					if (openNodeCats.get(1).equals("query")) {
 						// cq_segment is top query node
@@ -346,8 +344,17 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 					} else if (!objectStack.isEmpty()){
 						// embed in super sequence
 						System.out.println(objectStack);
-						ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
-						topSequenceOperands.add(sequence);
+						ArrayList<Object> topSequenceOperands;
+						if (! QueryUtils.isContainerOnly(node)) {
+							try {
+								topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
+								topSequenceOperands.add(sequence);
+							} catch (IndexOutOfBoundsException e) {
+//								topSequenceOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
+							}
+						}
+						
+						
 					}
 				}
 			}
@@ -403,7 +410,9 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			stackedObjects++;
 			// add group to sequence only if it is not an only child (in that case, cq_segments has already added the info and is just waiting for the values from "field")
 			// take into account a possible 'occ' child
-			if (node.getParent().getChildCount()>1) {
+			System.out.println(objectStack);
+//			if (node.getParent().getChildCount()>1) {
+			if (objectStack.size()>1) {
 				ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
 				topSequenceOperands.add(group);
 			} else {
@@ -991,8 +1000,6 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 		/*
 		 * For testing
 		 */
-		
-		
 		String[] queries = new String[] {
 				"shrink(1|2:{1:[base=der]}{2:[base=Mann]})",
 				"{[base=Mann]}",
@@ -1002,10 +1009,7 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 				"<cnx/c=np>",
 				"contains(<cnx/c=np>, [mate/pos=NE])",
 				"matches(<A>,[pos=N]*)",
-				"matches(<A>,[pos=N]{4})",
-				"([base=bar][base=foo])*"
-//				"matches(<A>,[pos=N])",
-//				"[pos=V]{3}"
+				"[base=Auto]matches(<A>,[][pos=N]{4})",
 		};
 		PoliqarpPlusTree.debug=true;
 		for (String q : queries) {
@@ -1023,5 +1027,4 @@ public class PoliqarpPlusTree extends AbstractSyntaxTree {
 			}
 		}
 	}
-
 }

@@ -550,6 +550,35 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree("[base=Auto]contains(<s>,[base=Mann])");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(pos4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// contains(<s>,[pos=N]*)
+		String pos5 = 
+					"{@type=korap:group, operation=operation:position, frame=frame:contains, operands=[" +
+				  		"{@type=korap:span, key=s}," +
+				  		"{@type=korap:group, " +
+				  			"operands=[{@type=korap:token, wrap={@type=korap:term, key=N, layer=pos, match=match:eq}}" +
+				  			"], operation=operation:repetition, min=0, max=100" +
+				  		"}" +
+				  	"]}";
+		ppt = new PoliqarpPlusTree("contains(<s>,[pos=N]*)");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(pos5.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=Auto]contains(<s>,[pos=N]*)
+		String pos6 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:token, wrap={@type=korap:term, key=Auto, layer=lemma, match=match:eq}}," +
+					"{@type=korap:group, operation=operation:position, frame=frame:contains, operands=[" +
+				  		"{@type=korap:span, key=s}," +
+				  		"{@type=korap:group, " +
+				  			"operands=[{@type=korap:token, wrap={@type=korap:term, key=N, layer=pos, match=match:eq}}" +
+				  			"], operation=operation:repetition, min=0, max=100" +
+				  		"}" +
+				  	"]}" +
+				"]}";
+		ppt = new PoliqarpPlusTree("[base=Auto]contains(<s>,[pos=N]*)");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(pos6.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test

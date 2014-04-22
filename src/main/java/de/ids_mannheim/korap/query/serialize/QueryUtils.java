@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,6 +117,14 @@ public class QueryUtils {
         return children;
     }
 
+    public static List<ParseTree> getChildren(ParseTree node) {
+        ArrayList<ParseTree> children = new ArrayList<ParseTree>();
+        for (int i = 0; i < node.getChildCount(); i++) {
+                children.add(node.getChild(i));
+        }
+        return children;
+    }
+    
     public static Tree getFirstChildWithCat(Tree node, String nodeCat) {
         for (int i = 0; i < node.getChildCount(); i++) {
             if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
@@ -132,6 +141,24 @@ public class QueryUtils {
             }
         }
         return null;
+    }
+    
+    /**
+     * Checks whether a node only serves as a container for another node (e.g. in (cq_segment ( cg_seg_occ ...)), the cq_segment node does not contain
+     * any information and only contains the cq_seg_occ node.  
+     * @param node The node to check
+     * @return true iff the node is a container only.
+     */
+    public static boolean isContainerOnly(ParseTree node) {
+    	String[] validNodeNamesArray = "cq_segment sq_segment element empty_segments".split(" ");
+    	List<String> validNodeNames = Arrays.asList(validNodeNamesArray);
+    	List<ParseTree> children = getChildren(node);
+    	for (ParseTree child : children) {
+    		if (validNodeNames.contains(getNodeCat(child))) {
+    			return false;
+    		}
+    	}
+    	return true;
     }
 
     public static void checkUnbalancedPars(String q) throws QueryException {
