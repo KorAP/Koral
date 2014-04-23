@@ -5,7 +5,11 @@ import java.io.IOException;
 import org.junit.Test;
 import org.z3950.zing.cql.CQLParseException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.ids_mannheim.korap.query.serialize.CQLTree;
+import de.ids_mannheim.korap.query.serialize.CosmasTree;
 import de.ids_mannheim.korap.util.QueryException;
 
 
@@ -13,6 +17,7 @@ public class CQLTest {
 	
 	String query;
 	String version ="1.2";
+	ObjectMapper mapper = new ObjectMapper();
 	
 	@Test
 	public void testExceptions() throws CQLParseException, IOException {
@@ -53,6 +58,27 @@ public class CQLTest {
 	}
 	
 	@Test
+	public void testAndQuery() throws CQLParseException, IOException, QueryException{
+		query="(Sonne) and (scheint)";	
+		String jsonLd = 
+			"{@type : korap:group, operation : operation:sequence, distances:[ "+
+				"{@type : korap:distance, key : t, min : 0, max : 0 } ],"+
+					"operands : ["+
+						"{@type : korap:token, wrap : {@type : korap:term,key : Sonne, layer : orth, match : match:eq}}," + 
+						"{@type : korap:token,wrap : {@type : korap:term,key : scheint,layer : orth,match : match:eq}" +
+					"}]}";
+			
+			CQLTree cqlTree = new CQLTree(query, version);		
+			String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
+			assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
+			
+		CosmasTree ct = new CosmasTree("Sonne und scheint");
+		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
+		
+		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
+	}
+	
+	@Test
 	public void testBooleanQuery() throws CQLParseException, IOException, QueryException{		
 		query="((Sonne) or (Mond)) and (scheint)";		
 		String jsonLd = 
@@ -66,7 +92,7 @@ public class CQLTest {
 					"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}" +
 			"]}";
 		CQLTree cqlTree = new CQLTree(query, version);		
-		String serializedQuery = cqlTree.getRequestMap().get("query").toString();
+		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
 		
@@ -82,7 +108,7 @@ public class CQLTest {
 					"]}" +
 				"]}";
 		cqlTree = new CQLTree(query, version);		
-		serializedQuery = cqlTree.getRequestMap().get("query").toString();
+		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
 	}
@@ -97,7 +123,7 @@ public class CQLTest {
 			"]}";		
 		
 		CQLTree cqlTree = new CQLTree(query, version);		
-		String serializedQuery = cqlTree.getRequestMap().get("query").toString();
+		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
 		query="(\"Sonne scheint\") or (Mond)";		
@@ -111,7 +137,7 @@ public class CQLTest {
 			"]}";
 		
 		cqlTree = new CQLTree(query, version);		
-		serializedQuery = cqlTree.getRequestMap().get("query").toString();
+		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 				
 		query="(\"Sonne scheint\") or (\"Mond scheint\")";		
@@ -127,7 +153,7 @@ public class CQLTest {
 					"]}" +
 				"]}";
 		cqlTree = new CQLTree(query, version);		
-		serializedQuery = cqlTree.getRequestMap().get("query").toString();
+		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 	}
 	
@@ -136,7 +162,7 @@ public class CQLTest {
 		query = "Sonne";		
 		String jsonLd = "{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}";		
 		CQLTree cqlTree = new CQLTree(query, version);		
-		String serializedQuery = cqlTree.getRequestMap().get("query").toString();		
+		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));		
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 	}
 	
@@ -150,7 +176,7 @@ public class CQLTest {
 			"]}";
 		
 		CQLTree cqlTree = new CQLTree(query, version);		
-		String serializedQuery = cqlTree.getRequestMap().get("query").toString();
+		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
 		
@@ -163,7 +189,7 @@ public class CQLTest {
 			"]}";
 		
 		cqlTree = new CQLTree(query, version);		
-		serializedQuery = cqlTree.getRequestMap().get("query").toString();
+		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 	}	
 }
