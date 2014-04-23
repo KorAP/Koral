@@ -114,7 +114,7 @@ public class CQLTree extends AbstractSyntaxTree {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         Map<String, Object> distanceMap = new LinkedHashMap<String,Object>();
         distanceMap.put("@type", "korap:distance");
-        distanceMap.put("key", "t");
+        distanceMap.put("key", "w");
         distanceMap.put("min", "0");
         distanceMap.put("max", "0");
         list.add(distanceMap);
