@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import de.ids_mannheim.korap.query.cosmas2.c2psLexer;
 import de.ids_mannheim.korap.query.cosmas2.c2psParser;
-import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
 import de.ids_mannheim.korap.query.serialize.util.CosmasCondition;
 import de.ids_mannheim.korap.util.QueryException;
 
@@ -27,11 +26,10 @@ import de.ids_mannheim.korap.util.QueryException;
  * @author joachim
  *
  */
-public class CosmasTree extends AbstractSyntaxTree {
+public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	
 	private static Logger log = LoggerFactory.getLogger(CosmasTree.class);
 	
-	private static c2psParser cosmasParser;
 	/*
 	 * Following collections have the following functions:
 	 * - the request is a map with two keys (meta/query):			{meta=[], query=[]}
@@ -113,7 +111,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 	public CosmasTree(String query) throws QueryException {
 		this.query = query;
 		process(query);
-		System.out.println(requestMap.get("query"));
+		System.out.println("\n"+requestMap.get("query"));
+		log.info(">>> " + requestMap.get("query") + " <<<");
 	}
 	
 	@Override
@@ -136,7 +135,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		
 		System.out.println("Processing Cosmas");
 		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
-//		QueryUtils.prepareContext(requestMap);
+//		prepareContext(requestMap);
 		processNode(tree);
 	}
 	
@@ -147,7 +146,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 		else visited.add(node);
 		
 		
-		String nodeCat = QueryUtils.getNodeCat(node);
+		String nodeCat = getNodeCat(node);
 		openNodeCats.push(nodeCat);
 		
 		stackedObjects = 0;
@@ -166,7 +165,6 @@ public class CosmasTree extends AbstractSyntaxTree {
 		// Check for potential implicit sequences as in (C2PQ (OPWF der) (OPWF Mann)). The sequence is introduced
 		// by the first child if it (and its siblings) is sequentiable.
 		if (sequentiableCats.contains(nodeCat)) {
-			System.err.println(nodeCat);
 			// for each node, check if parent has more than one child (-> could be implicit sequence)
 			Tree parent = node.getParent();
 			if (parent.getChildCount()>1) {
@@ -174,7 +172,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 				if (node == parent.getChild(0)) {
 					hasSequentiableSiblings = false;
 					for (int i=1; i<parent.getChildCount() ;i++) {
-						if (sequentiableCats.contains(QueryUtils.getNodeCat(parent.getChild(i)))) {
+						if (sequentiableCats.contains(getNodeCat(parent.getChild(i)))) {
 							hasSequentiableSiblings = true;
 							continue;
 						}
@@ -227,7 +225,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 				fieldMap.put("match", "match:eq");
 			}
 			//Step II: decide where to put
-			if (! QueryUtils.hasChild(node, "TPOS")) {
+			if (! hasChild(node, "TPOS")) {
 				putIntoSuperObject(token, 1);
 			} else {
 				
@@ -256,7 +254,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 			} else {
 				fieldMap.put("match", "match:eq");
 			}
-//			List<String> morphValues = QueryUtils.parseMorph(node.getChild(0).toStringTree());
+//			List<String> morphValues = parseMorph(node.getChild(0).toStringTree());
 //			System.err.println(morphValues);
 //			if (morphValues.size() == 1) {
 //				LinkedHashMap<String, Object> fieldMap = new LinkedHashMap<String, Object>();
@@ -649,10 +647,10 @@ public class CosmasTree extends AbstractSyntaxTree {
 	
 
 	private void parseOPINOptions(Tree node, LinkedHashMap<String, Object> posgroup) {
-		Tree posnode = QueryUtils.getFirstChildWithCat(node, "POS");
-		Tree rangenode = QueryUtils.getFirstChildWithCat(node, "RANGE");
-		Tree exclnode = QueryUtils.getFirstChildWithCat(node, "EXCL");
-		Tree groupnode = QueryUtils.getFirstChildWithCat(node, "GROUP");
+		Tree posnode = getFirstChildWithCat(node, "POS");
+		Tree rangenode = getFirstChildWithCat(node, "RANGE");
+		Tree exclnode = getFirstChildWithCat(node, "EXCL");
+		Tree groupnode = getFirstChildWithCat(node, "GROUP");
 		boolean negatePosition = false;
 		
 		String position = "";
@@ -691,9 +689,9 @@ public class CosmasTree extends AbstractSyntaxTree {
 	}
 	
 	private void parseOPOVOptions(Tree node, LinkedHashMap<String, Object> posgroup) {
-		Tree posnode = QueryUtils.getFirstChildWithCat(node, "POS");
-		Tree exclnode = QueryUtils.getFirstChildWithCat(node, "EXCL");
-		Tree groupnode = QueryUtils.getFirstChildWithCat(node, "GROUP");
+		Tree posnode = getFirstChildWithCat(node, "POS");
+		Tree exclnode = getFirstChildWithCat(node, "EXCL");
+		Tree groupnode = getFirstChildWithCat(node, "GROUP");
 		
 		String position = "";
 		if (posnode != null) {
@@ -776,7 +774,7 @@ public class CosmasTree extends AbstractSyntaxTree {
 	}
 	
 
-	private static Tree parseCosmasQuery(String q) throws RecognitionException {
+	private Tree parseCosmasQuery(String q) throws RecognitionException {
 		  Pattern p = Pattern.compile("(\\w+):((\\+|-)?(sa|se|pa|pe|ta|te),?)+");
 		  Matcher m = p.matcher(q);
 		  
@@ -799,8 +797,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 		  ANTLRStringStream	ss = new ANTLRStringStream(q);
 		  c2psLexer	lex = new c2psLexer(ss);
 		  org.antlr.runtime.CommonTokenStream tokens = new org.antlr.runtime.CommonTokenStream(lex);  //v3
-		  cosmasParser = new c2psParser(tokens);
-		  c2psParser.c2ps_query_return c2Return = cosmasParser.c2ps_query();  // statt t().
+		  parser = new c2psParser(tokens);
+		  c2psParser.c2ps_query_return c2Return = ((c2psParser) parser).c2ps_query();  // statt t().
 		  // AST Tree anzeigen:
 		  tree = (Tree)c2Return.getTree();
 		  
@@ -838,11 +836,8 @@ public class CosmasTree extends AbstractSyntaxTree {
 			try {
 				System.out.println(q);
 				try {
-					System.out.println(parseCosmasQuery(q).toStringTree());
 					@SuppressWarnings("unused")
 					CosmasTree act = new CosmasTree(q);
-				} catch (RecognitionException e) {
-					e.printStackTrace();
 				} catch (QueryException e) {
 					e.printStackTrace();
 				}

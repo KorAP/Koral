@@ -30,7 +30,7 @@ import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
  * @author joachim
  *
  */
-public class PoliqarpTree extends AbstractSyntaxTree {
+public class PoliqarpTree extends Antlr4AbstractSyntaxTree {
 	
 	/**
 	 * Top-level map representing the whole request.
@@ -383,20 +383,20 @@ public class PoliqarpTree extends AbstractSyntaxTree {
 		
 	}
 
-	/**
-	 * Returns the category (or 'label') of the root of a ParseTree.
-	 * @param node
-	 * @return
-	 */
-	public String getNodeCat(ParseTree node) {
-		String nodeCat = node.toStringTree(poliqarpParser);
-		Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
-		Matcher m = p.matcher(node.toStringTree(poliqarpParser));
-		if (m.find()) {
-			nodeCat = m.group(1);
-		} 
-		return nodeCat;
-	}
+//	/**
+//	 * Returns the category (or 'label') of the root of a ParseTree.
+//	 * @param node
+//	 * @return
+//	 */
+//	public String getNodeCat(ParseTree node) {
+//		String nodeCat = node.toStringTree(poliqarpParser);
+//		Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
+//		Matcher m = p.matcher(node.toStringTree(poliqarpParser));
+//		if (m.find()) {
+//			nodeCat = m.group(1);
+//		} 
+//		return nodeCat;
+//	}
 	
 	private static ParserRuleContext parsePoliqarpQuery (String p) {
 		Lexer poliqarpLexer = new PoliqarpLexer((CharStream)null);
