@@ -149,7 +149,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
     @Override
     public void process(String query) throws QueryException {
-        ParseTree tree = null;
+        ParseTree tree;
         try {
             tree = parsePoliqarpQuery(query);
         } catch (QueryException e) {
