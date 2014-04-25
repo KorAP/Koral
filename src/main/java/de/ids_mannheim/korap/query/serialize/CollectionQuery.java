@@ -1,15 +1,17 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
+import lombok.Data;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author hanl
@@ -19,7 +21,6 @@ public class CollectionQuery {
 
 
     private static ObjectMapper serialzer = new ObjectMapper();
-    private JsonFactory factory;
     private CollectionTypes types;
     private List<Map> rq;
     private Multimap<String, String> mfilter;
@@ -34,7 +35,6 @@ public class CollectionQuery {
         this.rq = new ArrayList<>();
         this.mfilter = ArrayListMultimap.create();
         this.mextension = ArrayListMultimap.create();
-        this.factory = serialzer.getFactory();
         this.types = new CollectionTypes();
     }
 
@@ -255,21 +255,59 @@ public class CollectionQuery {
 
 
     /**
-     * resolves all queries as equal (hierarchy) AND relations
+     * resolves all queries as equal (hierarchy) AND/OR relations
+     * grouping is not supported!
      *
      * @param queries
      * @return
      */
     private Multimap<String, String> resRel(String queries, RELATION rel) {
         Multimap<String, String> qmap = ArrayListMultimap.create();
-        String[] spl = queries.split(rel.toString());
+        String[] spl = queries.trim().split(rel.toString());
         for (String query : spl) {
-            String[] q = query.split(":");
-            String attr = q[0];
-            String val = q[1];
-            qmap.put(attr, val);
+            String[] q = query.split("=");
+            if (q.length > 1) {
+                String attr = q[0].trim();
+                String val = q[1].trim();
+                qmap.put(attr, val);
+            }
+            //return error when query not well formed
         }
         return qmap;
+    }
+
+    /**
+     * resolve relations and allow grouping of attributes: (tc1 and tc1) or (tc3)
+     *
+     * @param queries
+     * @param filter  flag if either filter or extend collection
+     * @return
+     */
+    private void resRelation(String queries, boolean filter) {
+        Pattern p = Pattern.compile("\\(([\\w\\s:]+)\\)");
+        List _fill = new ArrayList();
+        Matcher m = p.matcher(queries);
+        while (m.find()) {
+            String gr = m.group(1);
+            _fill.add(gr);
+            String whole = "(" + gr + ")";
+            int fin = queries.lastIndexOf(whole);
+            String sub = queries.substring(queries.indexOf(whole), queries.lastIndexOf(whole));
+            queries.replace(whole, "");
+        }
+
+    }
+
+    private void v(String queries, boolean filter) {
+        // and exclude sub-groups?? : ((tc=121))
+        Pattern p = Pattern.compile("\\(([\\w\\s=]+)\\)");
+        List _fill = new ArrayList();
+        Matcher m = p.matcher(queries);
+        while (m.find()) {
+            String gr = m.group(1);
+
+        }
+
     }
 
 
@@ -277,5 +315,22 @@ public class CollectionQuery {
         this.rq.clear();
         this.mfilter.clear();
         this.mextension.clear();
+    }
+
+
+    private static interface Value {
+    }
+
+    @Data
+    private static class Group implements Value {
+        private RELATION relation;
+        private List<Term> _terms;
+
+    }
+
+    @Data
+    private static class Term implements Value {
+
+        private String _value;
     }
 }
