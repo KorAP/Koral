@@ -130,7 +130,6 @@ public class QuerySerializer {
                              String cli, String cri, int cls, int crs,
                              int num, int page, boolean cutoff, String version)
             throws QueryException {
-        PoliqarpPlusTree.debug = true;
         try {
             if (ql.toLowerCase().equals("poliqarp")) {
                 ast = new PoliqarpPlusTree(query);
@@ -145,7 +144,6 @@ public class QuerySerializer {
                 throw new QueryException(ql + " is not a supported query language!");
             }
         } catch (QueryException e) {
-            log.error("QUERY EXCEPTION {}", e.getErrorCode());
             throw e;
         } catch (Exception e) {
             throw new QueryException("UNKNOWN: Query could not be parsed");
