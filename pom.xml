@@ -47,6 +47,11 @@
         </dependency>
         <dependency>
             <groupId>KorAP-modules</groupId>
+            <artifactId>KorAP-AnnisParser</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <groupId>KorAP-modules</groupId>
             <artifactId>KorAP-lucene-index</artifactId>
             <version>LATEST</version>
         </dependency>
