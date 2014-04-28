@@ -11,18 +11,6 @@ public class CosmasTreeTest {
 	String map;
 	String query;
 	
-	private boolean equalsContent(String str, Object map) {
-		str = str.replaceAll(" ", "");
-		String mapStr = map.toString().replaceAll(" ", "");
-		return str.equals(mapStr);
-	}
-	
-	private boolean equalsQueryContent(String res, String query) throws QueryException {
-		res = res.replaceAll(" ", "");
-		ct = new CosmasTree(query);
-		String queryMap = ct.getRequestMap().get("query").toString().replaceAll(" ", "");
-		return res.equals(queryMap);
-	}
 	
 	@Test
 	public void testContext() throws QueryException {

@@ -2,6 +2,7 @@ package de.ids_mannheim.korap.query.serialize;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,6 +71,12 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 */
 	LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
 	Integer stackedObjects = 0;
+	/**
+	 * Keeps track of references to nodes that are operands of groups (e.g. tree relations). Those nodes appear on the top level of the parse tree
+	 * but are to be integrated into the AqlTree at a later point (namely as operands of the respective group). Therefore, store references to these
+	 * nodes here and exclude the operands from being written into the query map individually.   
+	 */
+	private LinkedList<String> operandOnlyNodeRefs = new LinkedList<String>();
 	public static boolean verbose = false;
 	
 	/**
@@ -137,6 +144,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		processNode(tree);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void processNode(ParseTree node) {
 		// Top-down processing
 		if (visited.contains(node)) return;
@@ -170,66 +178,103 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		}
 		
 		if (nodeCat.equals("andTopExpr")) {
-			if (node.getChildCount() > 1) {
-				LinkedHashMap<String, Object> andGroup = makeGroup("and");
-				objectStack.push(andGroup);
-				stackedObjects++;
-				putIntoSuperObject(andGroup,1);
+			// Before processing any child expr node, check if it has one or more "n_ary_linguistic_term" nodes.
+			// Those nodes may use references to earlier established operand nodes.
+			// Those operand nodes are not to be included into the query map individually but
+			// naturally as operands of the relations/groups introduced by the 
+			// n_ary_linguistic_term node. For that purpose, this section mines all used references
+			// and stores them in a list for later reference.
+			for (ParseTree exprNode : getChildrenWithCat(node,"expr")) {
+				List<ParseTree> lingTermNodes = new ArrayList<ParseTree>();
+				lingTermNodes.addAll(getChildrenWithCat(exprNode, "unary_linguistic_term"));
+				lingTermNodes.addAll(getChildrenWithCat(exprNode, "n_ary_linguistic_term"));
+				// Traverse refOrNode nodes under *ary_linguistic_term nodes and extract references
+				for (ParseTree lingTermNode : lingTermNodes) {
+					for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
+						operandOnlyNodeRefs.add(refOrNode.getChild(0).toStringTree(parser).substring(1));
+					}
+				}
 			}
+//			// TODO first check all 'expr' children for n_ary_linguistic_terms (see below)
+//			if (node.getChildCount() > 1) {
+//				LinkedHashMap<String, Object> andGroup = makeGroup("and");
+//				objectStack.push(andGroup);
+//				stackedObjects++;
+//				putIntoSuperObject(andGroup,1);
+//			}
 		}
 		
+		// establish new variables or relations between vars
 		if (nodeCat.equals("expr")) {
-			// establish new variables or relations between vars
-			
+			// Check if expr node has one or more "n_ary_linguistic_term" nodes.
+			// Those nodes may use references to earlier established operand nodes.
+			// Those operand nodes are not to be included into the query map individually but
+			// naturally as operands of the relations/groups introduced by the 
+			// n_ary_linguistic_term node. For that purpose, this section mines all used references
+			// and stores them in a list for later reference.
+//			List<ParseTree> lingTermNodes = new ArrayList<ParseTree>();
+//			lingTermNodes.addAll(getChildrenWithCat(node, "unary_linguistic_term"));
+//			lingTermNodes.addAll(getChildrenWithCat(node, "n_ary_linguistic_term"));
+//			// Traverse refOrNode nodes under *ary_linguistic_term nodes and extract references
+//			for (ParseTree lingTermNode : lingTermNodes) {
+//				for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
+//					operandOnlyNodeRefs.add(refOrNode.getChild(0).toStringTree(parser).substring(1));
+//				}
+//			}
+		}
+		
+		if (nodeCat.equals("n_ary_linguistic_term") || nodeCat.equals("unary_linguistic_term")) {
+			// get referenced operands
+			// TODO generalize operator
+			// TODO capture variableExprs
+			LinkedHashMap<String, Object> group = makeGroup("treeRelation");
+			group.put("treeRelation", getNodeCat(node.getChild(1).getChild(0)));
+			List<Object> operands = (List<Object>) group.get("operands");
+			for (ParseTree refOrNode : getChildrenWithCat(node, "refOrNode")) {
+				String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
+				operands.add(variableReferences.get(ref));
+			}
+			putIntoSuperObject(group);
 		}
 		
 		if (nodeCat.equals("variableExpr")) {
 			// simplex word or complex assignment (like qname = textSpec)?
-			if (node.getChildCount()==1) {						// simplex
-				String firstChildNodeCat = getNodeCat(node.getChild(0));
-				if (firstChildNodeCat.equals("node")) {
-					LinkedHashMap<String, Object> span = makeSpan();
-					putIntoSuperObject(span);
-					variableReferences.put(variableCounter.toString(), span);
-					variableCounter++;
-				} else if (firstChildNodeCat.equals("tok")) {
-					// TODO
-				} else if (firstChildNodeCat.equals("qName")) {	// only (foundry/)?layer specified
-					// TODO may also be token!
-					LinkedHashMap<String, Object> span = makeSpan();
-					span.putAll(parseQNameNode(node.getChild(0)));
-					putIntoSuperObject(span);
-					variableReferences.put(variableCounter.toString(), span);
-					variableCounter++;
+			String firstChildNodeCat = getNodeCat(node.getChild(0));
+			LinkedHashMap<String, Object> object = null;
+			if (firstChildNodeCat.equals("node")) {
+				object = makeSpan();
+			} else if (firstChildNodeCat.equals("tok")) {
+				object = makeToken();
+				LinkedHashMap<String, Object> term = makeTerm();
+				object.put("wrap", term);
+			} else if (firstChildNodeCat.equals("qName")) {	// only (foundry/)?layer specified
+				// TODO may also be token!
+				object = makeSpan();
+				object.putAll(parseQNameNode(node.getChild(0)));
+			} else if (firstChildNodeCat.equals("textSpec")) {
+				object = makeToken();
+				LinkedHashMap<String, Object> term = makeTerm();
+				object.put("wrap", term);
+				term.putAll(parseTextSpec(node.getChild(0)));
+			}
+				
+			if (node.getChildCount() == 3) {  			// (foundry/)?layer=key specification
+				if (firstChildNodeCat.equals("tok")) {
+					HashMap<String, Object> term = (HashMap<String, Object>) object.get("wrap");
+					term.putAll(parseTextSpec(node.getChild(2)));
+					term.put("match", parseMatchOperator(node.getChild(1)));
+				} else {
+					object.putAll(parseTextSpec(node.getChild(2)));
+					object.put("match", parseMatchOperator(node.getChild(1)));
 				}
-			} else if (node.getChildCount() == 3) {  			// (foundry/)?layer=key specification
-				LinkedHashMap<String, Object> span = makeSpan();
-				// get foundry and layer
-				span.putAll(parseQNameNode(node.getChild(0)));
-				// get key
-				span.putAll(parseVarKey(node.getChild(2)));
-				// get relation (match or no match)
-				span.put("match", parseMatchOperator(node.getChild(1)));
-				putIntoSuperObject(span);
-				variableReferences.put(variableCounter.toString(), span);
+			}
+			
+			if (object != null) {
+				if (! operandOnlyNodeRefs.contains(variableCounter.toString())) putIntoSuperObject(object);
+				variableReferences.put(variableCounter.toString(), object);
 				variableCounter++;
 			}
 		}
-		
-		if (nodeCat.equals("regex")) {
-			// mother node can be start or other
-			// if start: make token root of tree
-			// else: integrate into super object
-			if (openNodeCats.get(1).equals("start")) {
-				LinkedHashMap<String, Object> token = makeToken();
-				LinkedHashMap<String, Object> term = makeTerm();
-				token.put("wrap", term);
-				term.put("type", "type:regex");
-				term.put("key", node.getChild(1).toStringTree(parser));
-			}
-		}
-		
-		
 
 		objectsToPop.push(stackedObjects);
 		
@@ -244,29 +289,35 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			ParseTree child = node.getChild(i);
 			processNode(child);
 		}
-				
-		
+
 		/*
 		 **************************************************************
 		 * Stuff that happens after processing the children of a node *
 		 **************************************************************
 		 */
-		
 		if (!objectsToPop.isEmpty()) {
 			for (int i=0; i<objectsToPop.pop(); i++) {
 				objectStack.pop();
 			}
 		}
-		
-		
-
 		openNodeCats.pop();
-		
 	}
 
 
 
 
+
+	private Map<? extends String, ? extends Object> parseTextSpec(ParseTree node) {
+		HashMap<String, Object> term = new HashMap<String, Object>();
+		if (hasChild(node, "regex")) {
+			term.put("type", "type:regex");
+			term.put("key", node.getChild(0).getChild(0).toStringTree(parser).replaceAll("/", ""));
+		} else {
+			term.put("key", node.getChild(1).toStringTree(parser));
+		}
+		term.put("match", "match:eq");
+		return term;
+	}
 
 	/**
 	 * Parses the match operator (= or !=)
@@ -299,6 +350,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 
 
 	private LinkedHashMap<String, Object> parseQNameNode(ParseTree node) {
+		System.err.println(getNodeCat(node));
 		LinkedHashMap<String, Object> fields = new LinkedHashMap<String, Object>();
 		if (node.getChildCount() == 1) { 									// only layer specification
 			fields.put("layer", node.getChild(0).toStringTree(parser));
@@ -390,9 +442,14 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			"tiger/pos=\"NN\" >  node",
 			"ref#node & pos=\"NN\" > #ref",
 			"node & tree/pos=\"NN\"",
-			"/node/"
+			"/node/",
+			"\"Mann\"",
+			"tok!=/Frau/",
+			"node",
+			"treetagger/pos=\"NN\"",
+			"node & node & #2 > #1"
 			};
-		AqlTree.verbose=true;
+//		AqlTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);

@@ -2,7 +2,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import de.ids_mannheim.korap.query.serialize.CosmasTree;
 import de.ids_mannheim.korap.query.serialize.PoliqarpPlusTree;
 import de.ids_mannheim.korap.util.QueryException;
 
@@ -11,11 +10,6 @@ public class PoliqarpPlusTreeTest {
 	PoliqarpPlusTree ppt;
 	String map;
 
-	private boolean equalsContent(String str, Object map) {
-		str = str.replaceAll(" ", "");
-		String mapStr = map.toString().replaceAll(" ", "");
-		return str.equals(mapStr);
-	}
 	
 	private boolean equalsQueryContent(String res, String query) throws QueryException {
 		res = res.replaceAll(" ", "");
