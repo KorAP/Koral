@@ -140,6 +140,8 @@ public class QuerySerializer {
             } else if (ql.toLowerCase().equals("cql")) {
 //                queryLanguageVersion = "1.2"; // set me
                 ast = new CQLTree(query, version);
+            } else if (ql.toLowerCase().equals("annis")) {
+                ast = new AqlTree(query);
             } else {
                 throw new QueryException(ql + " is not a supported query language!");
             }
