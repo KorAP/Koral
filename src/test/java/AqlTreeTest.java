@@ -72,7 +72,7 @@ public class AqlTreeTest {
 		assertEquals(layers1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "treetagger/pos=\"NN\"";
-		String layers2 = "{@type=korap:token, wrap={@type=korap:term, foundry=treetagger, layer=pos, key=NN, match=match:eq}}";
+		String layers2 = "{@type=korap:token, wrap={@type=korap:term, foundry=treetagger, layer=pos, match=match:eq, key=NN}}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(layers2.replaceAll(" ", ""), map.replaceAll(" ", ""));

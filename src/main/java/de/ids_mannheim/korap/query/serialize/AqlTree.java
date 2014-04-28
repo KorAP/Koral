@@ -2,6 +2,7 @@ package de.ids_mannheim.korap.query.serialize;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -248,9 +249,17 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				LinkedHashMap<String, Object> term = makeTerm();
 				object.put("wrap", term);
 			} else if (firstChildNodeCat.equals("qName")) {	// only (foundry/)?layer specified
-				// TODO may also be token!
-				object = makeSpan();
-				object.putAll(parseQNameNode(node.getChild(0)));
+				// may be token or span, depending on indicated layer! (e.g. cnx/cat=NP or mate/pos=NN)
+				HashMap<String, Object> qNameParse = parseQNameNode(node.getChild(0));
+				if (Arrays.asList(new String[]{"pos", "lemma", "morph", "tok"}).contains(qNameParse.get("layer"))) {
+					object = makeToken();
+					LinkedHashMap<String, Object> term = makeTerm();
+					object.put("wrap", term);
+					term.putAll(qNameParse);
+				} else {
+					object = makeSpan();
+					object.putAll(qNameParse);
+				}
 			} else if (firstChildNodeCat.equals("textSpec")) {
 				object = makeToken();
 				LinkedHashMap<String, Object> term = makeTerm();
@@ -259,7 +268,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			}
 				
 			if (node.getChildCount() == 3) {  			// (foundry/)?layer=key specification
-				if (firstChildNodeCat.equals("tok")) {
+				if (object.get("@type").equals("korap:token")) {
 					HashMap<String, Object> term = (HashMap<String, Object>) object.get("wrap");
 					term.putAll(parseTextSpec(node.getChild(2)));
 					term.put("match", parseMatchOperator(node.getChild(1)));
