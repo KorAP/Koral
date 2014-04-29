@@ -18,6 +18,8 @@ public abstract class AbstractSyntaxTree {
 	public abstract Map<String, Object> getRequestMap();
 
 	public abstract void process(String query) throws QueryException;
+	
+	public static final Integer MAXIMUM_DISTANCE = 100; 
 
 	protected LinkedHashMap<String, Object> makeSpan() {
 		LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
@@ -30,7 +32,7 @@ public abstract class AbstractSyntaxTree {
 		term.put("@type", "korap:term");
 		return term;
 	}
-
+	
 	protected LinkedHashMap<String, Object> makeToken() {
 		LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
 		token.put("@type", "korap:token");
@@ -42,6 +44,28 @@ public abstract class AbstractSyntaxTree {
 		group.put("@type", "korap:group");
 		group.put("operation", "operation:"+operation);
 		group.put("operands", new ArrayList<Object>());
+		return group;
+	}
+	
+	protected LinkedHashMap<String, Object> makeTreeRelation(String reltype) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:treeRelation");
+		if (reltype != null) group.put("reltype", reltype);
+		return group;
+	}
+	
+	protected LinkedHashMap<String, Object> makeRelation(String reltype) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:relation");
+		if (reltype != null) group.put("reltype", reltype);
+		return group;
+	}
+	
+	protected LinkedHashMap<String, Object> makeBoundary(int min, int max) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:boundary");
+		group.put("min", min);
+		group.put("max", max);
 		return group;
 	}
 	

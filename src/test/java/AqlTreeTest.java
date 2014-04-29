@@ -82,10 +82,10 @@ public class AqlTreeTest {
 	public void testSimpleDominance() throws QueryException {
 		query = "node & node & #2 > #1";
 		String dom1 = 
-				"{@type=korap:group, operation=operation:treeRelation, operands=[" +
+				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
-				"], treeRelation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:treeRelation, reltype=dominance}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -93,36 +93,48 @@ public class AqlTreeTest {
 		
 		query = "\"Mann\" & node & #2 > #1";
 		String dom2 = 
-				"{@type=korap:group, operation=operation:treeRelation, operands=[" +
+				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
-				"], treeRelation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:treeRelation, reltype=dominance}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(dom2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
-		query = "\"Mann\" & node & #2 >[cnx/cat=\"NP\"] #1";
+		query = "\"Mann\" & node & #2 >[cat=\"NP\"] #1";
 		String dom3 = 
-				"{@type=korap:group, operation=operation:treeRelation, operands=[" +
+				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
-				"], treeRelation={@type=korap:treeRelation, reltype=dominance, foundry=cnx, layer=cat, key=NP, match=match:eq}" +
+				"], relation={@type=korap:treeRelation, reltype=dominance, edges=[{@type=korap:edge, label=cat, key=NP, match=match:eq}]}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(dom3.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
-		query = "\"Mann\" & node & #2 >@l[cnx/cat=\"NP\"] #1";
+		query = "\"Mann\" & node & #2 >@l[cat=\"NP\"] #1";
 		String dom4 = 
-				"{@type=korap:group, operation=operation:treeRelation, operands=[" +
+				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
-				"], treeRelation={@type=korap:treeRelation, reltype=dominance, index=0, foundry=cnx, layer=cat, key=NP, match=match:eq}" +
+				"], relation={@type=korap:treeRelation, reltype=dominance, index=0, edges=[{@type=korap:edge, label=cat, key=NP, match=match:eq}]}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(dom4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "\"Mann\" & node & #2 >2,4 #1";
+		String dom5 = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+				"], relation={@type=korap:treeRelation, reltype=dominance, " +
+						"boundary={@type=korap:boundary, min=2, max=4}}" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	

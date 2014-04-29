@@ -228,8 +228,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			// get referenced operands
 			// TODO generalize operator
 			// TODO capture variableExprs
-			LinkedHashMap<String, Object> group = makeGroup("treeRelation");
-			group.put("treeRelation", parseOperatorNode(node.getChild(1).getChild(0)));
+			LinkedHashMap<String, Object> group = makeGroup("relation");
+			group.put("relation", parseOperatorNode(node.getChild(1).getChild(0)));
 			List<Object> operands = (List<Object>) group.get("operands");
 			for (ParseTree refOrNode : getChildrenWithCat(node, "refOrNode")) {
 				String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
@@ -313,43 +313,92 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	}
 
 
-
-
-
 	private LinkedHashMap<String, Object> parseOperatorNode(ParseTree operatorNode) {
-		LinkedHashMap<String, Object> treeRelation = new LinkedHashMap<String, Object>();
-		treeRelation.put("@type", "korap:treeRelation");
+		LinkedHashMap<String, Object> relation = null;
 		String operator = getNodeCat(operatorNode);
-		// TODO complete (check Antlr grammar)
+		// DOMINANCE
 		if (operator.equals("dominance")) {
-			treeRelation.put("reltype", "dominance");
+			relation = makeTreeRelation("dominance");
 			ParseTree leftChildSpec = getFirstChildWithCat(operatorNode, "@l");
 			ParseTree rightChildSpec = getFirstChildWithCat(operatorNode, "@r");
+			ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
 			ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
-			System.err.println(edgeSpec);
-			if (leftChildSpec != null) treeRelation.put("index", 0);
-			if (rightChildSpec != null) treeRelation.put("index", -1);
-			if (edgeSpec != null) {
-				for (ParseTree edgeAnno : getChildrenWithCat(edgeSpec, "edgeAnno")) {
-					treeRelation.putAll(parseEdgeAnno(edgeAnno));
-				}
-			}
+			ParseTree star = getFirstChildWithCat(operatorNode, "*");
+			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
+			if (leftChildSpec != null) relation.put("index", 0);
+			if (rightChildSpec != null) relation.put("index", -1);
+			if (qName != null) relation.putAll(parseQNameNode(qName));
+			if (edgeSpec != null) relation.put("edges", parseEdgeSpec(edgeSpec)) ;
+			if (star != null) relation.put("boundary", makeBoundary(0, 100));
+			if (rangeSpec != null) relation.put("boundary", parseRangeSpec(rangeSpec));
+			
 		}
-		return treeRelation;
+		else if (operator.equals("pointing")) {
+//			String reltype = operatorNode.getChild(1).toStringTree(parser);
+			relation = makeRelation(null);
+			ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
+			ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
+			ParseTree star = getFirstChildWithCat(operatorNode, "*");
+			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
+			if (qName != null) relation.putAll(parseQNameNode(qName));
+			if (edgeSpec != null) relation.put("edges", parseEdgeSpec(edgeSpec)) ;
+			if (star != null) relation.put("boundary", makeBoundary(0, 100));
+			if (rangeSpec != null) relation.put("boundary", parseRangeSpec(rangeSpec));
+			
+		}
+		else if (operator.equals("precedence")) {
+			
+		}
+		else if (operator.equals("spanrelation")) {
+			
+		}
+		else if (operator.equals("commonparent")) {
+			
+		}
+		else if (operator.equals("commonancestor")) {
+			
+		}
+		else if (operator.equals("identity")) {
+			
+		}
+		else if (operator.equals("equalvalue")) {
+			
+		}
+		else if (operator.equals("notequalvalue")) {
+			
+		}
+		return relation;
+	}
+
+	private Object parseEdgeSpec(ParseTree edgeSpec) {
+		ArrayList<Object> edgeAnnos = new ArrayList<Object>();
+		for (ParseTree edgeAnno : getChildrenWithCat(edgeSpec, "edgeAnno")) {
+			edgeAnnos.add(parseEdgeAnno(edgeAnno));
+		}
+		return edgeAnnos;
 	}
 
 	private LinkedHashMap<String, Object> parseEdgeAnno(
 			ParseTree edgeAnnoSpec) {
 		LinkedHashMap<String, Object> edgeAnno = new LinkedHashMap<String, Object>();
-		ParseTree qNameNode = edgeAnnoSpec.getChild(0);
+		edgeAnno.put("@type", "korap:edge");
+		ParseTree labelNode = edgeAnnoSpec.getChild(0);
 		ParseTree matchOperatorNode = edgeAnnoSpec.getChild(1);
 		ParseTree textSpecNode = edgeAnnoSpec.getChild(2);
-		edgeAnno.putAll(parseQNameNode(qNameNode));
+		edgeAnno.put("label", labelNode.getChild(0).toStringTree(parser));
 		edgeAnno.putAll(parseTextSpec(textSpecNode));
 		edgeAnno.put("match", parseMatchOperator(matchOperatorNode));
 		return edgeAnno;
 	}
 
+	private LinkedHashMap<String, Object> parseRangeSpec(ParseTree rangeSpec) {
+		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
+		Integer max = MAXIMUM_DISTANCE;
+		if (rangeSpec.getChildCount()==3) 
+			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
+		return makeBoundary(min, max);
+	}
+	
 	private LinkedHashMap<String, Object> parseTextSpec(ParseTree node) {
 		LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
 		if (hasChild(node, "regex")) {
@@ -393,14 +442,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 
 
 	private LinkedHashMap<String, Object> parseQNameNode(ParseTree node) {
-		System.err.println(getNodeCat(node));
 		LinkedHashMap<String, Object> fields = new LinkedHashMap<String, Object>();
-		if (node.getChildCount() == 1) { 									// only layer specification
-			fields.put("layer", node.getChild(0).toStringTree(parser));
-		} else if (node.getChildCount() == 3) {								// foundry / layer specification
-			fields.put("foundry", node.getChild(0).toStringTree(parser));
-			fields.put("layer", node.getChild(2).toStringTree(parser));
-		}
+		ParseTree layerNode = getFirstChildWithCat(node, "layer");
+		ParseTree foundryNode = getFirstChildWithCat(node, "foundry");
+		if (foundryNode != null) fields.put("foundry", foundryNode.getChild(0).toStringTree(parser));
+		fields.put("layer", layerNode.getChild(0).toStringTree(parser));
 		return fields;
 	}
 
@@ -491,9 +537,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			"tok!=/Frau/",
 			"node",
 			"treetagger/pos=\"NN\"",
-			
-			"node & node & #2 >@r[foundry/layer=\"key\"] #1",
-			"node & node & #2 > #1",
+			"node & node & #2 ->foundry/dep[anno=\"key\"],2,4 #1",
+			"tiger/pos=\"NN\" >cnx/cat  node",
+			 "\"Mann\" & node & #2 >[cat=\"NP\"] #1"
+
+//			"node & node & #2 ->[foundry/layer=\"key\"],2,4 #1",
 			};
 //		AqlTree.verbose=true;
 		for (String q : queries) {
