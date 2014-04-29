@@ -857,24 +857,24 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
         openNodeCats.pop();
     }
 
-    private int[] parseRepetition(String repetition) {
-        if (repetition.equals("*")) {
-            return new int[]{0, 100};
-        } else if (repetition.equals("+")) {
-            return new int[]{1, 100};
-        } else if (repetition.equals("?")) {
-            return new int[]{0, 1};
-        } else {
-            repetition = repetition.substring(1, repetition.length() - 1); // remove braces
-            String[] splitted = repetition.split(",");
-            if (splitted.length == 2) {
-                return new int[]{Integer.parseInt(splitted[0]), Integer.parseInt(splitted[1])};
-            } else {
-                return new int[]{Integer.parseInt(splitted[0]), Integer.parseInt(splitted[0])};
-            }
-
-        }
-    }
+	private int[] parseRepetition(String repetition) {
+		if (repetition.equals("*")) {
+			return new int[] {0, MAXIMUM_DISTANCE};
+		} else if (repetition.equals("+")) {
+			return new int[] {1, MAXIMUM_DISTANCE};
+		} else if (repetition.equals("?")) {
+			return new int[] {0, 1};
+		} else {
+			repetition = repetition.substring(1, repetition.length()-1); // remove braces
+			String[] splitted = repetition.split(",");
+			if (splitted.length==2) {
+				return new int[] {Integer.parseInt(splitted[0]), Integer.parseInt(splitted[1])};
+			} else {
+				return new int[] {Integer.parseInt(splitted[0]), Integer.parseInt(splitted[0])};
+			}
+			
+		}
+	}
 
     private String[] parseEmptySegments(ParseTree emptySegments) {
         String[] minmax = new String[2];
