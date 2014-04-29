@@ -229,7 +229,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			// TODO generalize operator
 			// TODO capture variableExprs
 			LinkedHashMap<String, Object> group = makeGroup("treeRelation");
-			group.put("treeRelation", getNodeCat(node.getChild(1).getChild(0)));
+			group.put("treeRelation", parseOperatorNode(node.getChild(1).getChild(0)));
 			List<Object> operands = (List<Object>) group.get("operands");
 			for (ParseTree refOrNode : getChildrenWithCat(node, "refOrNode")) {
 				String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
@@ -316,8 +316,42 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 
 
 
-	private Map<? extends String, ? extends Object> parseTextSpec(ParseTree node) {
-		HashMap<String, Object> term = new HashMap<String, Object>();
+	private LinkedHashMap<String, Object> parseOperatorNode(ParseTree operatorNode) {
+		LinkedHashMap<String, Object> treeRelation = new LinkedHashMap<String, Object>();
+		treeRelation.put("@type", "korap:treeRelation");
+		String operator = getNodeCat(operatorNode);
+		// TODO complete (check Antlr grammar)
+		if (operator.equals("dominance")) {
+			treeRelation.put("reltype", "dominance");
+			ParseTree leftChildSpec = getFirstChildWithCat(operatorNode, "@l");
+			ParseTree rightChildSpec = getFirstChildWithCat(operatorNode, "@r");
+			ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
+			System.err.println(edgeSpec);
+			if (leftChildSpec != null) treeRelation.put("index", 0);
+			if (rightChildSpec != null) treeRelation.put("index", -1);
+			if (edgeSpec != null) {
+				for (ParseTree edgeAnno : getChildrenWithCat(edgeSpec, "edgeAnno")) {
+					treeRelation.putAll(parseEdgeAnno(edgeAnno));
+				}
+			}
+		}
+		return treeRelation;
+	}
+
+	private LinkedHashMap<String, Object> parseEdgeAnno(
+			ParseTree edgeAnnoSpec) {
+		LinkedHashMap<String, Object> edgeAnno = new LinkedHashMap<String, Object>();
+		ParseTree qNameNode = edgeAnnoSpec.getChild(0);
+		ParseTree matchOperatorNode = edgeAnnoSpec.getChild(1);
+		ParseTree textSpecNode = edgeAnnoSpec.getChild(2);
+		edgeAnno.putAll(parseQNameNode(qNameNode));
+		edgeAnno.putAll(parseTextSpec(textSpecNode));
+		edgeAnno.put("match", parseMatchOperator(matchOperatorNode));
+		return edgeAnno;
+	}
+
+	private LinkedHashMap<String, Object> parseTextSpec(ParseTree node) {
+		LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
 		if (hasChild(node, "regex")) {
 			term.put("type", "type:regex");
 			term.put("key", node.getChild(0).getChild(0).toStringTree(parser).replaceAll("/", ""));
@@ -376,12 +410,13 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	
 	@SuppressWarnings({ "unchecked" })
 	private void putIntoSuperObject(LinkedHashMap<String, Object> object, int objStackPosition) {
-		if (distributedOperandsLists.size()>0) {
-			ArrayList<ArrayList<Object>> distributedOperands = distributedOperandsLists.pop();
-			for (ArrayList<Object> operands : distributedOperands) {
-				operands.add(object);
-			}
-		} else if (objectStack.size()>objStackPosition) {
+//		if (distributedOperandsLists.size()>0) {
+//			ArrayList<ArrayList<Object>> distributedOperands = distributedOperandsLists.pop();
+//			for (ArrayList<Object> operands : distributedOperands) {
+//				operands.add(object);
+//			}
+//		} else if (objectStack.size()>objStackPosition) {
+		if (objectStack.size()>objStackPosition) {
 			ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
 			topObjectOperands.add(0, object);
 			
@@ -456,7 +491,9 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			"tok!=/Frau/",
 			"node",
 			"treetagger/pos=\"NN\"",
-			"node & node & #2 > #1"
+			
+			"node & node & #2 >@r[foundry/layer=\"key\"] #1",
+			"node & node & #2 > #1",
 			};
 //		AqlTree.verbose=true;
 		for (String q : queries) {

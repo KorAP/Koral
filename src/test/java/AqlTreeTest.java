@@ -30,12 +30,12 @@ public class AqlTreeTest {
 	public void testSingleTokens() throws QueryException {
 		// "Mann"
 		query = "\"Mann\"";
-		String token1 = "{@type=korap:token, wrap={@type=korap:term, match=match:eq, key=Mann}}";
+		String token1 = "{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}";
 		assertTrue(equalsQueryContent(token1, query));
 		
 		// [orth!=Frau]
 		query = "tok!=\"Frau\"";
-		String token2 = "{@type=korap:token, wrap={@type=korap:term, match=match:ne, key=Frau}}";
+		String token2 = "{@type=korap:token, wrap={@type=korap:term, key=Frau, match=match:ne}}";
 		assertTrue(equalsQueryContent(token2, query));
 		
 		// Mann
@@ -57,7 +57,7 @@ public class AqlTreeTest {
 	@Test
 	public void testRegex() throws QueryException {
 		query = "/Mann/";
-		String regex1 = "{@type=korap:token, wrap={@type=korap:term, match=match:eq, type=type:regex, key=Mann}}";
+		String regex1 = "{@type=korap:token, wrap={@type=korap:term, type=type:regex, key=Mann, match=match:eq}}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(regex1.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -66,13 +66,13 @@ public class AqlTreeTest {
 	@Test
 	public void testLayers() throws QueryException {
 		query = "cnx/cat=\"NP\"";
-		String layers1 = "{@type=korap:span, foundry=cnx, layer=cat, match=match:eq, key=NP}";
+		String layers1 = "{@type=korap:span, foundry=cnx, layer=cat, key=NP, match=match:eq}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(layers1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "treetagger/pos=\"NN\"";
-		String layers2 = "{@type=korap:token, wrap={@type=korap:term, foundry=treetagger, layer=pos, match=match:eq, key=NN}}";
+		String layers2 = "{@type=korap:token, wrap={@type=korap:term, foundry=treetagger, layer=pos, key=NN, match=match:eq}}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(layers2.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -85,11 +85,46 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:treeRelation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
-				"], treeRelation=dominance}";
+				"], treeRelation={@type=korap:treeRelation, reltype=dominance}" +
+				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(dom1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "\"Mann\" & node & #2 > #1";
+		String dom2 = 
+				"{@type=korap:group, operation=operation:treeRelation, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+				"], treeRelation={@type=korap:treeRelation, reltype=dominance}" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "\"Mann\" & node & #2 >[cnx/cat=\"NP\"] #1";
+		String dom3 = 
+				"{@type=korap:group, operation=operation:treeRelation, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+				"], treeRelation={@type=korap:treeRelation, reltype=dominance, foundry=cnx, layer=cat, key=NP, match=match:eq}" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "\"Mann\" & node & #2 >@l[cnx/cat=\"NP\"] #1";
+		String dom4 = 
+				"{@type=korap:group, operation=operation:treeRelation, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+				"], treeRelation={@type=korap:treeRelation, reltype=dominance, index=0, foundry=cnx, layer=cat, key=NP, match=match:eq}" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
+	
 	
 }
 
