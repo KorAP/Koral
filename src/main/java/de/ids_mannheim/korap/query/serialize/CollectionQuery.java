@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
+import de.ids_mannheim.korap.resource.Relation;
 import lombok.Data;
 
 import java.io.IOException;
@@ -26,10 +27,6 @@ public class CollectionQuery {
     private Multimap<String, String> mfilter;
     private Multimap<String, String> mextension;
 
-
-    public enum RELATION {
-        AND, OR
-    }
 
     public CollectionQuery() {
         this.rq = new ArrayList<>();
@@ -60,7 +57,7 @@ public class CollectionQuery {
         return this;
     }
 
-    public CollectionQuery addMetaFilter(String queries, RELATION rel) {
+    public CollectionQuery addMetaFilter(String queries, Relation rel) {
         this.mfilter.putAll(resRel(queries, rel));
         return this;
     }
@@ -70,15 +67,15 @@ public class CollectionQuery {
         return this;
     }
 
-    public CollectionQuery addMetaExtend(String queries, RELATION rel) {
+    public CollectionQuery addMetaExtend(String queries, Relation rel) {
         this.mextension.putAll(resRel(queries, rel));
 
         return this;
     }
 
 
-    private List<Map> createFilter(RELATION rel) {
-        String relation = rel == RELATION.AND ? "and" : "or";
+    private List<Map> createFilter(Relation rel) {
+        String relation = rel == Relation.AND ? "and" : "or";
         List<Map> mfil = new ArrayList();
         boolean multypes = this.mfilter.keySet().size() > 1;
         String def_key = null;
@@ -103,8 +100,8 @@ public class CollectionQuery {
         return mfil;
     }
 
-    private List<Map> createExtender(RELATION rel) {
-        String relation = rel == RELATION.AND ? "and" : "or";
+    private List<Map> createExtender(Relation rel) {
+        String relation = rel == Relation.AND ? "and" : "or";
         List<Map> mex = new ArrayList();
         boolean multypes = this.mextension.keys().size() > 1;
         String def_key = null;
@@ -127,7 +124,7 @@ public class CollectionQuery {
         return mex;
     }
 
-    private List<Map> join(RELATION filter, RELATION extension) {
+    private List<Map> join(Relation filter, Relation extension) {
         List<Map> cursor = new ArrayList<>(this.rq);
         if (!this.mfilter.isEmpty())
             cursor.addAll(this.createFilter(filter));
@@ -212,12 +209,16 @@ public class CollectionQuery {
         return el;
     }
 
-    public List<Map> raw(RELATION filter, RELATION extension) {
+    public List<Map> raw(Relation filter, Relation extension) {
         return join(filter, extension);
     }
 
+    public List<Map> raw() {
+        return raw(Relation.AND, Relation.AND);
+    }
 
-    public String toCollections(RELATION filter, RELATION extension) {
+
+    public String toCollections(Relation filter, Relation extension) {
         Map meta = new LinkedHashMap();
         meta.put("collections", join(filter, extension));
 
@@ -230,7 +231,7 @@ public class CollectionQuery {
     }
 
     public String toCollections() {
-        return toCollections(RELATION.AND, RELATION.AND);
+        return toCollections(Relation.AND, Relation.AND);
     }
 
 
@@ -239,11 +240,11 @@ public class CollectionQuery {
      *
      * @return
      */
-    public JsonNode buildNode(RELATION filter, RELATION extension) {
+    public JsonNode buildNode(Relation filter, Relation extension) {
         return serialzer.valueToTree(join(filter, extension));
     }
 
-    public String buildString(RELATION filter, RELATION extension) {
+    public String buildString(Relation filter, Relation extension) {
         try {
             return serialzer.writeValueAsString(join(filter, extension));
         } catch (JsonProcessingException e) {
@@ -261,7 +262,7 @@ public class CollectionQuery {
      * @param queries
      * @return
      */
-    private Multimap<String, String> resRel(String queries, RELATION rel) {
+    private Multimap<String, String> resRel(String queries, Relation rel) {
         Multimap<String, String> qmap = ArrayListMultimap.create();
         String[] spl = queries.trim().split(rel.toString());
         for (String query : spl) {
@@ -323,7 +324,7 @@ public class CollectionQuery {
 
     @Data
     private static class Group implements Value {
-        private RELATION relation;
+        private Relation relation;
         private List<Term> _terms;
 
     }

@@ -126,9 +126,10 @@ public class QuerySerializer {
         mapper.writeValue(new File(outFile), requestMap);
     }
 
+    // change page to startindex
     public String buildQuery(String query, String ql, String collection,
                              String cli, String cri, int cls, int crs,
-                             int num, int page, boolean cutoff, String version)
+                             int num, int page, String version)
             throws QueryException {
         try {
             if (ql.toLowerCase().equals("poliqarp")) {
@@ -153,14 +154,18 @@ public class QuerySerializer {
 
         Map<String, Object> requestMap = ast.getRequestMap();
 
+        //todo: use startindex instead
         MetaQuery meta = new MetaQuery();
         meta.addContext(cls, cli, crs, cri);
-        meta.addEntry("cutOff", cutoff);
-        meta.addEntry("startPage", page);
+//        meta.addEntry("startPage", page);
+        meta.addEntry("startIndex", page);
         meta.addEntry("count", num);
 
+        CollectionQuery qobj = new CollectionQuery();
+        qobj.addResource(collection);
+
         try {
-            requestMap.put("collections", collection);
+            requestMap.put("collections", qobj.raw());
             requestMap.put("meta", meta.raw());
             return mapper.writeValueAsString(requestMap);
         } catch (IOException e) {
