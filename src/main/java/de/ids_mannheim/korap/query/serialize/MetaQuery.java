@@ -22,7 +22,8 @@ public class MetaQuery {
         this.meta = new LinkedHashMap();
     }
 
-    public MetaQuery addContext(Integer left, String leftType, Integer right, String rightType) {
+    public MetaQuery addContext(Integer left, String leftType,
+                                Integer right, String rightType) {
         Map map = new LinkedHashMap();
         List l = new LinkedList();
         List r = new LinkedList();

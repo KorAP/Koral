@@ -3,7 +3,6 @@ package de.ids_mannheim.korap.query.serialize;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import de.ids_mannheim.korap.util.QueryException;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +19,14 @@ public class QuerySerializer {
 
     private ObjectMapper mapper;
     private AbstractSyntaxTree ast;
+    private Object collection;
+    private Object meta;
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(QuerySerializer.class);
 
     public QuerySerializer() {
         mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+//        mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     /**
@@ -127,9 +128,7 @@ public class QuerySerializer {
     }
 
     // change page to startindex
-    public String buildQuery(String query, String ql, String collection,
-                             String cli, String cri, int cls, int crs,
-                             int num, int page, String version)
+    public QuerySerializer setQuery(String query, String ql, String version)
             throws QueryException {
         try {
             if (ql.toLowerCase().equals("poliqarp")) {
@@ -151,25 +150,48 @@ public class QuerySerializer {
         } catch (Exception e) {
             throw new QueryException("UNKNOWN: Query could not be parsed");
         }
+        return this;
+    }
 
-        Map<String, Object> requestMap = ast.getRequestMap();
-
-        //todo: use startindex instead
-        MetaQuery meta = new MetaQuery();
-        meta.addContext(cls, cli, crs, cri);
-//        meta.addEntry("startPage", page);
-        meta.addEntry("startIndex", page);
-        meta.addEntry("count", num);
-
-        CollectionQuery qobj = new CollectionQuery();
-        qobj.addResource(collection);
-
+    public final String build() {
         try {
-            requestMap.put("collections", qobj.raw());
-            requestMap.put("meta", meta.raw());
-            return mapper.writeValueAsString(requestMap);
+            return mapper.writeValueAsString(raw());
         } catch (IOException e) {
             return "";
         }
+    }
+
+
+    private Map raw() {
+        Map<String, Object> requestMap = ast.getRequestMap();
+        if (collection != null)
+            requestMap.put("collections", collection);
+        if (meta != null)
+            requestMap.put("meta", meta);
+        return requestMap;
+    }
+
+
+    public QuerySerializer setMeta(
+            String cli, String cri, int cls, int crs,
+            int num, int pageIndex) {
+        MetaQuery meta = new MetaQuery();
+        meta.addContext(cls, cli, crs, cri);
+        meta.addEntry("startIndex", pageIndex);
+        meta.addEntry("count", num);
+        this.meta = meta.raw();
+        return this;
+    }
+
+    public QuerySerializer setCollection(String collection) {
+        CollectionQuery qobj = new CollectionQuery();
+        qobj.addResource(collection);
+        this.collection = qobj.raw();
+        return this;
+    }
+
+    public QuerySerializer setCollection(CollectionQuery collections) {
+        this.collection = collections.raw();
+        return this;
     }
 }

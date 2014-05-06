@@ -26,6 +26,8 @@ public class CollectionQuery {
     private List<Map> rq;
     private Multimap<String, String> mfilter;
     private Multimap<String, String> mextension;
+    private Relation simpleFilterRel = Relation.AND;
+    private Relation simpleExtendRel = Relation.AND;
 
 
     public CollectionQuery() {
@@ -57,8 +59,8 @@ public class CollectionQuery {
         return this;
     }
 
-    public CollectionQuery addMetaFilter(String queries, Relation rel) {
-        this.mfilter.putAll(resRel(queries, rel));
+    public CollectionQuery addMetaFilterQuery(String queries) {
+        this.mfilter.putAll(resRel(queries));
         return this;
     }
 
@@ -67,9 +69,20 @@ public class CollectionQuery {
         return this;
     }
 
-    public CollectionQuery addMetaExtend(String queries, Relation rel) {
-        this.mextension.putAll(resRel(queries, rel));
 
+    public CollectionQuery setFilterAttributeRelation(Relation rel) {
+        simpleFilterRel = rel;
+        return this;
+    }
+
+
+    public CollectionQuery setExtendAttributeRelation(Relation rel) {
+        simpleExtendRel = rel;
+        return this;
+    }
+
+    public CollectionQuery addMetaExtendQuery(String queries) {
+        this.mextension.putAll(resRel(queries));
         return this;
     }
 
@@ -124,12 +137,12 @@ public class CollectionQuery {
         return mex;
     }
 
-    private List<Map> join(Relation filter, Relation extension) {
+    private List<Map> join() {
         List<Map> cursor = new ArrayList<>(this.rq);
         if (!this.mfilter.isEmpty())
-            cursor.addAll(this.createFilter(filter));
+            cursor.addAll(this.createFilter(simpleFilterRel));
         if (!this.mextension.isEmpty())
-            cursor.addAll(this.createExtender(extension));
+            cursor.addAll(this.createExtender(simpleExtendRel));
         return cursor;
     }
 
@@ -209,18 +222,13 @@ public class CollectionQuery {
         return el;
     }
 
-    public List<Map> raw(Relation filter, Relation extension) {
-        return join(filter, extension);
-    }
-
     public List<Map> raw() {
-        return raw(Relation.AND, Relation.AND);
+        return join();
     }
 
-
-    public String toCollections(Relation filter, Relation extension) {
+    public String toCollections() {
         Map meta = new LinkedHashMap();
-        meta.put("collections", join(filter, extension));
+        meta.put("collections", join());
 
         try {
             return serialzer.writeValueAsString(meta);
@@ -230,23 +238,18 @@ public class CollectionQuery {
         }
     }
 
-    public String toCollections() {
-        return toCollections(Relation.AND, Relation.AND);
-    }
-
-
     /**
      * returns all references to parents and meta query as string representation
      *
      * @return
      */
-    public JsonNode buildNode(Relation filter, Relation extension) {
-        return serialzer.valueToTree(join(filter, extension));
+    public JsonNode buildNode() {
+        return serialzer.valueToTree(join());
     }
 
-    public String buildString(Relation filter, Relation extension) {
+    public String buildString() {
         try {
-            return serialzer.writeValueAsString(join(filter, extension));
+            return serialzer.writeValueAsString(join());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return "";
@@ -262,9 +265,11 @@ public class CollectionQuery {
      * @param queries
      * @return
      */
-    private Multimap<String, String> resRel(String queries, Relation rel) {
+    private Multimap<String, String> resRel(String queries) {
         Multimap<String, String> qmap = ArrayListMultimap.create();
-        String[] spl = queries.trim().split(rel.toString());
+        String rel = queries.contains("AND") ? "AND" : "OR";
+
+        String[] spl = queries.trim().split(rel);
         for (String query : spl) {
             String[] q = query.split("=");
             if (q.length > 1) {
@@ -272,7 +277,7 @@ public class CollectionQuery {
                 String val = q[1].trim();
                 qmap.put(attr, val);
             }
-            //return error when query not well formed
+            // todo: return error when query not well-formed
         }
         return qmap;
     }
