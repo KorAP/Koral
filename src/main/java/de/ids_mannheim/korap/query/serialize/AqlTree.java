@@ -228,8 +228,24 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			// get referenced operands
 			// TODO generalize operator
 			// TODO capture variableExprs
-			LinkedHashMap<String, Object> group = makeGroup("relation");
-			group.put("relation", parseOperatorNode(node.getChild(1).getChild(0)));
+			
+			// get operator and determine type of group (sequence/treeRelation/relation/...)
+			LinkedHashMap<String, Object> operatorTree = parseOperatorNode(node.getChild(1).getChild(0));
+			String groupType;
+			try {
+				groupType = (String) operatorTree.get("groupType");
+			} catch (ClassCastException | NullPointerException n) {
+				groupType = "relation";
+			}
+			LinkedHashMap<String, Object> group = makeGroup(groupType);
+			if (groupType.equals("relation") || groupType.equals("treeRelation")) {
+				LinkedHashMap<String, Object> relationGroup = new LinkedHashMap<String, Object>();
+				putAllButGroupType(relationGroup, operatorTree);
+				group.put("relation", relationGroup);
+			} else if (groupType.equals("sequence")) {
+				putAllButGroupType(group, operatorTree);
+			}
+			
 			List<Object> operands = (List<Object>) group.get("operands");
 			for (ParseTree refOrNode : getChildrenWithCat(node, "refOrNode")) {
 				String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
@@ -319,6 +335,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		// DOMINANCE
 		if (operator.equals("dominance")) {
 			relation = makeTreeRelation("dominance");
+			relation.put("groupType", "relation");
 			ParseTree leftChildSpec = getFirstChildWithCat(operatorNode, "@l");
 			ParseTree rightChildSpec = getFirstChildWithCat(operatorNode, "@r");
 			ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
@@ -336,6 +353,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		else if (operator.equals("pointing")) {
 //			String reltype = operatorNode.getChild(1).toStringTree(parser);
 			relation = makeRelation(null);
+			relation.put("groupType", "relation");
 			ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
 			ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
@@ -347,7 +365,20 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			
 		}
 		else if (operator.equals("precedence")) {
-			
+			relation = new LinkedHashMap<String, Object>();
+			relation.put("groupType", "sequence");
+			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
+			ParseTree star = getFirstChildWithCat(operatorNode, "*");
+			ArrayList<Object> distances = new ArrayList<Object>();
+			if (star != null) {
+				distances.add(makeDistance("w", 0, 100));
+				relation.put("distances", distances);
+			}
+			if (rangeSpec != null) {
+				distances.add(parseDistance(rangeSpec));
+				relation.put("distances", distances);
+			}
+			relation.put("inOrder", true);
 		}
 		else if (operator.equals("spanrelation")) {
 			
@@ -397,6 +428,14 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		if (rangeSpec.getChildCount()==3) 
 			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
 		return makeBoundary(min, max);
+	}
+	
+	private LinkedHashMap<String, Object> parseDistance(ParseTree rangeSpec) {
+		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
+		Integer max = MAXIMUM_DISTANCE;
+		if (rangeSpec.getChildCount()==3) 
+			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
+		return makeDistance("w", min, max);
 	}
 	
 	private LinkedHashMap<String, Object> parseTextSpec(ParseTree node) {
@@ -456,18 +495,20 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	
 	@SuppressWarnings({ "unchecked" })
 	private void putIntoSuperObject(LinkedHashMap<String, Object> object, int objStackPosition) {
-//		if (distributedOperandsLists.size()>0) {
-//			ArrayList<ArrayList<Object>> distributedOperands = distributedOperandsLists.pop();
-//			for (ArrayList<Object> operands : distributedOperands) {
-//				operands.add(object);
-//			}
-//		} else if (objectStack.size()>objStackPosition) {
 		if (objectStack.size()>objStackPosition) {
 			ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
 			topObjectOperands.add(0, object);
 			
 		} else {
 			requestMap.put("query", object);
+		}
+	}
+	
+	private void putAllButGroupType(Map<String, Object> container, Map<String, Object> input) {
+		for (String key : input.keySet()) {
+			if (!key.equals("groupType")) {
+				container.put(key, input.get(key));
+			}
 		}
 	}
 	
@@ -511,35 +552,38 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 */
 		String[] queries = new String[] {
 			
-			"#1 . #2 ",
-			"#1 . #2 & meta::Genre=\"Sport\"",
-			"A _i_ B",
-			"A .* B",
-			"A >* B",
-			"#1 > [label=\"foo\"] #2",
-			"pos=\"VVFIN\" & cas=\"Nom\" & #1 . #2",
-			"A .* B ",
-			"A .* B .* C",
-			
-			"#1 ->LABEL[lbl=\"foo\"] #2",
-			"#1 ->LABEL[lbl=/foo/] #2",
-			"#1 ->LABEL[foundry/layer=\"foo\"] #2",
-			"#1 ->LABEL[foundry/layer=\"foo\"] #2",
-			"node & pos=\"VVFIN\" & #2 > #1",
-			"node & pos=\"VVFIN\" & #2 > #1",
-			"pos=\"VVFIN\" > cas=\"Nom\" ",
-			"pos=\"VVFIN\" >* cas=\"Nom\" ",
-			"tiger/pos=\"NN\" >  node",
-			"ref#node & pos=\"NN\" > #ref",
-			"node & tree/pos=\"NN\"",
-			"/node/",
-			"\"Mann\"",
-			"tok!=/Frau/",
-			"node",
-			"treetagger/pos=\"NN\"",
-			"node & node & #2 ->foundry/dep[anno=\"key\"],2,4 #1",
-			"tiger/pos=\"NN\" >cnx/cat  node",
-			 "\"Mann\" & node & #2 >[cat=\"NP\"] #1"
+//			"#1 . #2 ",
+//			"#1 . #2 & meta::Genre=\"Sport\"",
+//			"A _i_ B",
+//			"A .* B",
+//			"A >* B",
+//			"#1 > [label=\"foo\"] #2",
+//			"pos=\"VVFIN\" & cas=\"Nom\" & #1 . #2",
+//			"A .* B ",
+//			"A .* B .* C",
+//			
+//			"#1 ->LABEL[lbl=\"foo\"] #2",
+//			"#1 ->LABEL[lbl=/foo/] #2",
+//			"#1 ->LABEL[foundry/layer=\"foo\"] #2",
+//			"#1 ->LABEL[foundry/layer=\"foo\"] #2",
+//			"node & pos=\"VVFIN\" & #2 > #1",
+//			"node & pos=\"VVFIN\" & #2 > #1",
+//			"pos=\"VVFIN\" > cas=\"Nom\" ",
+//			"pos=\"VVFIN\" >* cas=\"Nom\" ",
+//			"tiger/pos=\"NN\" >  node",
+//			"ref#node & pos=\"NN\" > #ref",
+//			"node & tree/pos=\"NN\"",
+//			"/node/",
+//			"\"Mann\"",
+//			"tok!=/Frau/",
+//			"node",
+//			"treetagger/pos=\"NN\"",
+//			"node & node & #2 ->foundry/dep[anno=\"key\"],2,4 #1",
+//			"tiger/pos=\"NN\" >cnx/cat  node",
+//			 "\"Mann\" & node & #2 >[cat=\"NP\"] #1",
+			 "node & node & #1 . #2",
+			 "node & node & #1 .2,6 #2",
+			 "node & node & #1 .* #2"
 
 //			"node & node & #2 ->[foundry/layer=\"key\"],2,4 #1",
 			};

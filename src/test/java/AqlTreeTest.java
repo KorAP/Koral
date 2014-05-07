@@ -3,7 +3,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import de.ids_mannheim.korap.query.serialize.AqlTree;
-import de.ids_mannheim.korap.query.serialize.PoliqarpPlusTree;
 import de.ids_mannheim.korap.util.QueryException;
 
 public class AqlTreeTest {
@@ -135,6 +134,51 @@ public class AqlTreeTest {
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(dom5.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
+	public void testPointingRelations() throws QueryException {
+		query = "node & node & #2 ->label[coref=\"true\"] #1";
+		String dom1 = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:span}" +
+				"], relation={@type=korap:relation, layer=coref, label=label, key=true}" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+	}
+	
+	@Test
+	public void testSequence() throws QueryException {
+		query = "node & node & #1 . #2";
+		String dom1 = 
+				"{@type=korap:group, operation=operation:sequence, " +
+					"operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:span}" +
+					"], inOrder=true" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "node & node & #1 .* #2";
+		String dom2 = 
+				"{@type=korap:group, operation=operation:sequence,  " +
+						"operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:span}" +
+					"], distances=[" +
+						"{@type=korap:distance, key=w, min=0, max=100}" +
+					"], inOrder=true" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
 	}
 	
 	
