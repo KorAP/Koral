@@ -880,6 +880,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
         String[] minmax = new String[2];
         Integer min = 1;
         Integer max = 1;
+        boolean infinite = false;
         ParseTree child;
         for (int i = 0; i < emptySegments.getChildCount() - 1; i++) {
             child = emptySegments.getChild(i);
@@ -888,7 +889,13 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             if (child.toStringTree().equals("[]")) {
                 if (nextSiblingString.equals("?")) {
                     max++;
-                } else if (nextSiblingString.startsWith("{")) {
+                } else if (nextSiblingString.equals("+")) {
+                	min++;
+                	infinite = true;
+                } else if (nextSiblingString.equals("*")) {
+                	infinite = true;
+                }
+                else if (nextSiblingString.startsWith("{")) {
                     String occ = nextSiblingString.substring(1, nextSiblingString.length() - 1);
                     System.out.println(occ);
                     if (occ.contains(",")) {
@@ -910,6 +917,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             min++;
             max++;
         }
+        if (infinite) max = MAXIMUM_DISTANCE;
         minmax[0] = min.toString();
         minmax[1] = max.toString();
         return minmax;
@@ -984,7 +992,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                 "contains(<cnx/c=np>, [mate/pos=NE])",
                 "matches(<A>,[pos=N]*)",
                 "[base=Auto]matches(<A>,[][pos=N]{4})",
-                "[base=der][][base=Mann]"
+                "[base=der][]*[base=Mann]"
         };
 //		PoliqarpPlusTree.verbose=true;
         for (String q : queries) {
@@ -993,6 +1001,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 //				System.out.println(PoliqarpPlusTree.parsePoliqarpQuery(q).toStringTree(PoliqarpPlusTree.parser));
                 @SuppressWarnings("unused")
                 PoliqarpPlusTree pt = new PoliqarpPlusTree(q);
+                System.out.println(pt.parsePoliqarpQuery(q).toStringTree(pt.parser));
                 System.out.println(q);
                 System.out.println();
 

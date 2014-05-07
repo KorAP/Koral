@@ -172,6 +172,31 @@ public class PoliqarpPlusTreeTest {
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(et5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
+		// [base=der][]*[base=Mann]
+		String et6 = 
+			"{@type=korap:group, operation=operation:sequence, inOrder=true, distances=[" +
+				"{@type=korap:distance, key=w, min=1, max=100}" +
+			"], " +
+			"operands=[" +
+				"{@type=korap:token, wrap={@type=korap:term, key=der, layer=lemma, match=match:eq}}," +
+				"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=lemma, match=match:eq}}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("[base=der][]*[base=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et6.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=der][]*[base=Mann]
+		String et7 = 
+			"{@type=korap:group, operation=operation:sequence, inOrder=true, distances=[" +
+				"{@type=korap:distance, key=w, min=2, max=100}" +
+			"], " +
+			"operands=[" +
+				"{@type=korap:token, wrap={@type=korap:term, key=der, layer=lemma, match=match:eq}}," +
+				"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=lemma, match=match:eq}}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("[base=der][]+[base=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et7.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 
 	@Test
