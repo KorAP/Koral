@@ -1,8 +1,5 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,11 +11,9 @@ import java.util.Map;
  */
 public class MetaQuery {
 
-    private ObjectMapper serialier;
     private Map meta;
 
     public MetaQuery() {
-        this.serialier = new ObjectMapper();
         this.meta = new LinkedHashMap();
     }
 
@@ -46,11 +41,4 @@ public class MetaQuery {
         return meta;
     }
 
-    public String toMetaString() {
-        try {
-            return serialier.writeValueAsString(meta);
-        } catch (JsonProcessingException e) {
-            return "";
-        }
-    }
 }

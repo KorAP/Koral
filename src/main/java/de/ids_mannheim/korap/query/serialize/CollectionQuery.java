@@ -1,12 +1,11 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import de.ids_mannheim.korap.resource.Relation;
+import de.ids_mannheim.korap.utils.JsonUtils;
 import lombok.Data;
 
 import java.io.IOException;
@@ -20,8 +19,6 @@ import java.util.regex.Pattern;
  */
 public class CollectionQuery {
 
-
-    private static ObjectMapper serialzer = new ObjectMapper();
     private CollectionTypes types;
     private List<Map> rq;
     private Multimap<String, String> mfilter;
@@ -39,12 +36,11 @@ public class CollectionQuery {
 
     public CollectionQuery addResource(String query) {
         try {
-            List v = serialzer.readValue(query, LinkedList.class);
+            List v = JsonUtils.read(query, LinkedList.class);
             this.rq.addAll(v);
         } catch (IOException e) {
             throw new IllegalArgumentException("Conversion went wrong!");
         }
-
         return this;
     }
 
@@ -229,13 +225,7 @@ public class CollectionQuery {
     public String toCollections() {
         Map meta = new LinkedHashMap();
         meta.put("collections", join());
-
-        try {
-            return serialzer.writeValueAsString(meta);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "";
-        }
+        return JsonUtils.toJSON(meta);
     }
 
     /**
@@ -244,17 +234,11 @@ public class CollectionQuery {
      * @return
      */
     public JsonNode buildNode() {
-        return serialzer.valueToTree(join());
+        return JsonUtils.valueToTree(join());
     }
 
     public String buildString() {
-        try {
-            return serialzer.writeValueAsString(join());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "";
-        }
-
+        return JsonUtils.toJSON(join());
     }
 
 
@@ -301,7 +285,6 @@ public class CollectionQuery {
             String sub = queries.substring(queries.indexOf(whole), queries.lastIndexOf(whole));
             queries.replace(whole, "");
         }
-
     }
 
     private void v(String queries, boolean filter) {

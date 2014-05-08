@@ -2,11 +2,10 @@ package de.ids_mannheim.korap.query.serialize;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.utils.JsonUtils;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -17,7 +16,6 @@ public class QuerySerializer {
 
     public static String queryLanguageVersion;
 
-    private ObjectMapper mapper;
     private AbstractSyntaxTree ast;
     private Object collection;
     private Object meta;
@@ -25,7 +23,6 @@ public class QuerySerializer {
             .getLogger(QuerySerializer.class);
 
     public QuerySerializer() {
-        mapper = new ObjectMapper();
 //        mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
@@ -124,10 +121,9 @@ public class QuerySerializer {
             throw new QueryException(queryLanguage + " is not a supported query language!");
         }
         Map<String, Object> requestMap = ast.getRequestMap();
-        mapper.writeValue(new File(outFile), requestMap);
+//        mapper.writeValue(new File(outFile), requestMap);
     }
 
-    // change page to startindex
     public QuerySerializer setQuery(String query, String ql, String version)
             throws QueryException {
         try {
@@ -148,17 +144,13 @@ public class QuerySerializer {
         } catch (QueryException e) {
             throw e;
         } catch (Exception e) {
-            throw new QueryException("UNKNOWN: Query could not be parsed");
+            throw new QueryException("UNKNOWN: Query could not be parsed (" + query + ")");
         }
         return this;
     }
 
     public final String build() {
-        try {
-            return mapper.writeValueAsString(raw());
-        } catch (IOException e) {
-            return "";
-        }
+        return JsonUtils.toJSON(raw());
     }
 
 
@@ -179,6 +171,11 @@ public class QuerySerializer {
         meta.addContext(cls, cli, crs, cri);
         meta.addEntry("startIndex", pageIndex);
         meta.addEntry("count", num);
+        this.meta = meta.raw();
+        return this;
+    }
+
+    public QuerySerializer setMeta(MetaQuery meta) {
         this.meta = meta.raw();
         return this;
     }
