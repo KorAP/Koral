@@ -69,6 +69,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	 * Flag that indicates whether token fields or meta fields are currently being processed
 	 */
 	boolean inMeta = false;
+	/**
+	 * 
+	 */
+	int classRefCounter = 1;
 	boolean negate = false;
 	
 	Tree cosmasTree;
@@ -139,6 +143,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		processNode(tree);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void processNode(Tree node) {
 		
 		// Top-down processing
@@ -301,7 +306,46 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			// Step I: create element
 			LinkedHashMap<String, Object> elem = new LinkedHashMap<String, Object>();
 			elem.put("@type", "korap:span");
-			elem.put("key", node.getChild(0).getChild(0).toStringTree().toLowerCase());
+			if (node.getChild(0).toStringTree().equals("EMPTY")) {
+				
+			} else {
+				int elname = 0;
+				Tree elnameNode = getFirstChildWithCat(node, "ELNAME");
+				if (elnameNode != null) {
+					elem.put("key", elnameNode.getChild(0).toStringTree().toLowerCase());
+					elname = 1;
+				}
+				if (node.getChildCount() > elname) {
+					LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
+					ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup.get("operands"); 
+					for (int i=elname; i<node.getChildCount(); i++) {
+						Tree attrNode = node.getChild(i);
+						if (attrNode.getChildCount()==2) {
+							LinkedHashMap<String, Object> term = makeTerm();
+							termGroupOperands.add(term);
+							String layer = attrNode.getChild(0).toStringTree();
+							term.put("layer", translateMorph(layer));
+							term.put("key", attrNode.getChild(1).toStringTree());
+							term.put("match", "match:eq");
+						} else {
+							for (int j=1; j<attrNode.getChildCount(); j++) {
+								LinkedHashMap<String, Object> term = makeTerm();
+								termGroupOperands.add(term);
+								String layer = attrNode.getChild(0).toStringTree();
+								term.put("layer", translateMorph(layer));
+								term.put("key", attrNode.getChild(j).toStringTree());
+								term.put("match", "match:eq");
+							}
+						}
+						 
+						
+						if (getNodeCat(attrNode).equals("NOTEQ")) negate=true;
+						
+					}
+					elem.put("attr", termGroup);
+				}
+			}
+			
 			//Step II: decide where to put
 			putIntoSuperObject(elem);
 		}		
@@ -407,7 +451,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			submatchgroup.put("@type", "korap:group");
 			submatchgroup.put("operation", "operation:"+ "submatch");
 			ArrayList<Integer> classRef = new ArrayList<Integer>();
-			classRef.add(1);
+			classRef.add(classRefCounter);
 			submatchgroup.put("classRef", classRef);
 			
 			ArrayList<Object> submatchoperands = new ArrayList<Object>(); 
@@ -439,7 +483,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
 			classGroup.put("@type", "korap:group");
 			classGroup.put("operation", "operation:"+ "class");
-			classGroup.put("class", 1);
+			classGroup.put("class", classRefCounter);
+			classRefCounter++;
 			classGroup.put("operands", new ArrayList<Object>());
 			objectStack.push(classGroup);
 			stackedObjects++;
@@ -453,7 +498,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
 			classGroup.put("@type", "korap:group");
 			classGroup.put("operation", "operation:"+ "class");
-			classGroup.put("class", 2);
+			classGroup.put("class", classRefCounter);
+			classRefCounter++;
 			classGroup.put("operands", new ArrayList<Object>());
 			objectStack.push(classGroup);
 			stackedObjects++;
@@ -467,8 +513,12 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			exclGroup.put("@type", "korap:group");
 			exclGroup.put("operation", "operation:"+ "submatch");
 			ArrayList<Integer> classRef = new ArrayList<Integer>();
-			classRef.add(1);
-			classRef.add(2);
+			
+			classRef.add(classRefCounter);
+//			classRefCounter++;
+			 // yes, do this twice!
+			classRef.add(classRefCounter+1);
+//			classRefCounter++;
 			exclGroup.put("classRef", classRef);
 			exclGroup.put("classRefOp", "classRefOp:"+"intersection");
 			ArrayList<Object> operands = new ArrayList<Object>();
@@ -537,7 +587,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 				LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
 				classGroup.put("@type", "korap:group");
 				classGroup.put("operation", "operation:class");
-				classGroup.put("class", 1);
+				classGroup.put("class", classRefCounter);
+				classRefCounter++;
 				classGroup.put("operands", new ArrayList<Object>());
 				objectStack.push(classGroup);
 				stackedObjects++;
@@ -584,7 +635,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 					LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
 					classGroup.put("@type", "korap:group");
 					classGroup.put("operation", "operation:class");
-					classGroup.put("class", 1);
+					classGroup.put("class", classRefCounter);
+					classRefCounter++;
 					ArrayList<Object> classOperands = new ArrayList<Object>(); 
 					classGroup.put("operands", classOperands);
 					distributedOperands.add(classOperands);  // subtree to be put into every class group -> distribute
@@ -645,6 +697,15 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
 	
 	
+
+	private Object translateMorph(String layer) {
+		LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+		map.put("ANA", "pos");
+		if (map.containsKey(layer))
+			return map.get(layer);
+		else
+			return layer;
+	}
 
 	private void parseOPINOptions(Tree node, LinkedHashMap<String, Object> posgroup) {
 		Tree posnode = getFirstChildWithCat(node, "POS");
@@ -830,15 +891,20 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //				"Mann /t0 Frau",
 				"sagt der:sa Bundeskanzler",
 //				"Der:sa,-pe,+te ",
+				"#ELEM(W POS!='N V' title=tada)",
+				"#ELEM(W ANA != 'N V')"
+//				"(&Baum #IN #ELEM(NP)) #IN(L) #ELEM(S)"
 				};
 //		CosmasTree.debug=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);
 				try {
-					@SuppressWarnings("unused")
 					CosmasTree act = new CosmasTree(q);
+					System.out.println(act.parseCosmasQuery(q).toStringTree());
 				} catch (QueryException e) {
+					e.printStackTrace();
+				} catch (RecognitionException e) {
 					e.printStackTrace();
 				}
 				System.out.println();

@@ -464,6 +464,44 @@ public class CosmasTreeTest {
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(elem1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="#ELEM(W ANA=N)";
+		String elem2 = 
+			"{@type=korap:span, key=w, attr=" +
+				"{@type=korap:termGroup, relation=relation:and, operands=[" +
+					"{@type=korap:term, layer=pos, key=N, match=match:eq}" +
+				"]}" +
+			"}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(elem2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="#ELEM(W ANA != 'N V')";
+		String elem3 = 
+			"{@type=korap:span, key=w, attr=" +
+				"{@type=korap:termGroup, relation=relation:and, operands=[" +
+					"{@type=korap:term, layer=pos, key=N, match=match:eq}," +
+					"{@type=korap:term, layer=pos, key=V, match=match:eq}" +
+				"]}" +
+			"}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(elem3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="#ELEM(W ANA != 'N V' Genre = Sport)";
+		String elem4 = 
+			"{@type=korap:span, key=w, attr=" +
+				"{@type=korap:termGroup, relation=relation:and, operands=[" +
+					"{@type=korap:termGroup, relation=relation:and, operands=[" +
+						"{@type=korap:term, layer=pos, key=N, match=match:eq}," +
+						"{@type=korap:term, layer=pos, key=V, match=match:eq}" +
+					"]}" +
+					"{@type=korap:term, layer=Genre, key=Sport, match=match:eq}" +
+				"]}" +
+			"}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(elem4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
@@ -558,7 +596,7 @@ public class CosmasTreeTest {
 						"]}," +
 						"{@type=korap:group, operation=operation:position, frame=frame:startswith, exclude=true, operands=[" +
 							"{@type=korap:span, key=p}," +
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=2, operands=[" +
 								"{@type=korap:group, operation=operation:sequence, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
 									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
@@ -603,13 +641,13 @@ public class CosmasTreeTest {
 						"]}," +
 						"{@type=korap:group, operation=operation:position, frame=frame:startswith, exclude=true, operands=[" +
 							"{@type=korap:span, key=p}," +
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=2, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
 							"]}" +
 						"]}," +
 						"{@type=korap:group, operation=operation:position, frame=frame:endswith, operands=[" +
 							"{@type=korap:span, key=t}," +
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=3, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
 						"]}" +
 					"]}" +

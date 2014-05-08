@@ -33,6 +33,14 @@ public abstract class AbstractSyntaxTree {
 		return term;
 	}
 	
+	protected LinkedHashMap<String, Object> makeTermGroup(String relation) {
+		LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
+		term.put("@type", "korap:termGroup");
+		term.put("relation", "relation:"+relation);
+		term.put("operands", new ArrayList<Object>());
+		return term;
+	}
+	
 	protected LinkedHashMap<String, Object> makeToken() {
 		LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
 		token.put("@type", "korap:token");
@@ -64,6 +72,15 @@ public abstract class AbstractSyntaxTree {
 	protected LinkedHashMap<String, Object> makeBoundary(int min, int max) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:boundary");
+		group.put("min", min);
+		group.put("max", max);
+		return group;
+	}
+
+	protected LinkedHashMap<String, Object> makeDistance(String key, int min, int max) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:distance");
+		group.put("key", key);
 		group.put("min", min);
 		group.put("max", max);
 		return group;
