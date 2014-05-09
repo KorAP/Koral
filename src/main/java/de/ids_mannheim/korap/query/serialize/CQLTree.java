@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * @author margaretha
- * @date 	23.04.14
+ * @date 	09.05.14
  */
 public class CQLTree extends AbstractSyntaxTree {
 
@@ -55,7 +55,7 @@ public class CQLTree extends AbstractSyntaxTree {
     @Override
     public void process(String query) throws QueryException {    	
     	 if ((query == null) || query.isEmpty()) 
-             throw new QueryException(27, "An empty query is unsupported.");
+             throw new QueryException(400, "SRU diagnostic 27: An empty query is unsupported.");
     	
         CQLNode cqlNode = parseQuerytoCQLNode(query);
         Map<String,Object> queryMap = parseCQLNode(cqlNode);
@@ -87,7 +87,7 @@ public class CQLTree extends AbstractSyntaxTree {
         } else if (node instanceof CQLOrNode) {
             return parseOrNode((CQLOrNode) node);
         } else {
-            throw new QueryException(48, "Only basic search including term-only " +
+            throw new QueryException(400, "SRU diagnostic 48: Only basic search including term-only " +
                     "and boolean operator queries (AND and OR) are currently supported.");
         }
     }
@@ -96,7 +96,7 @@ public class CQLTree extends AbstractSyntaxTree {
         checkTermNode(node);
         final String term = node.getTerm();
         if ((term == null) || term.isEmpty()) {
-            throw new QueryException(27, "An empty term is unsupported.");
+            throw new QueryException(400, "SRU diagnostic 27: An empty term is unsupported.");
         } else if (term.contains(" ")) {
             return writeSequence(term);
         } else {
@@ -178,7 +178,7 @@ public class CQLTree extends AbstractSyntaxTree {
         List<Modifier> modifiers = node.getModifiers();
         if ((modifiers != null) && !modifiers.isEmpty()) {
             Modifier modifier = modifiers.get(0);
-            throw new QueryException(20, "Relation modifier " +
+            throw new QueryException(400, "SRU diagnostic 20: Relation modifier " +
                     modifier.toCQL() + " is not supported.");
         }
     }
@@ -187,7 +187,7 @@ public class CQLTree extends AbstractSyntaxTree {
         // only allow "cql.serverChoice" and "words" index
         if (!(INDEX_CQL_SERVERCHOICE.equals(node.getIndex()) ||
                 INDEX_WORDS.equals(node.getIndex()))) {
-            throw new QueryException(16, "Index " + node.getIndex() + " is not supported.");
+            throw new QueryException(400, "SRU diagnostic 16: Index " + node.getIndex() + " is not supported.");
         }
         // only allow "=" relation without any modifiers
         CQLRelation relation = node.getRelation();
@@ -195,13 +195,13 @@ public class CQLTree extends AbstractSyntaxTree {
         if (!(TERM_RELATION_CQL_1_1.equals(baseRel) ||
                 TERM_RELATION_CQL_1_2.equals(baseRel) ||
                 SUPPORTED_RELATION_EXACT.equals(baseRel))) {
-            throw new QueryException(19, "Relation " +
+            throw new QueryException(400, "SRU diagnostic 19: Relation " +
                     relation.getBase() + " is not supported.");
         }
         List<Modifier> modifiers = relation.getModifiers();
         if ((modifiers != null) && !modifiers.isEmpty()) {
             Modifier modifier = modifiers.get(0);
-            throw new QueryException(20, "Relation modifier " +
+            throw new QueryException(400, "SRU diagnostic 20: Relation modifier " +
                     modifier.getValue() + " is not supported.");
         }
     }

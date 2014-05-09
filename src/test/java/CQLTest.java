@@ -25,35 +25,40 @@ public class CQLTest {
 		try {
 			CQLTree cqlTree = new CQLTree(query, version);
 		} catch (QueryException e) {
-			assertEquals(48,e.getErrorCode());
+			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
+			assertEquals(48,errorCode);
 		}
 		
 		query = "(Kuh) or/rel.combine=sum (Germ) ";		
 		try {
 			CQLTree cqlTree = new CQLTree(query, version);
 		}catch (QueryException e) {			
-			assertEquals(20,e.getErrorCode());
+			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
+			assertEquals(20,errorCode);
 		}
 		
 		query = "dc.title any Germ ";
 		try {
 			CQLTree cqlTree = new CQLTree(query, version);
 		} catch (QueryException e) {
-			assertEquals(16,e.getErrorCode());
+			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
+			assertEquals(16,errorCode);
 		}
 		
 		query = "cql.serverChoice any Germ ";
 		try {
 			CQLTree cqlTree = new CQLTree(query, version);
 		} catch (QueryException e) {
-			assertEquals(19,e.getErrorCode());
+			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
+			assertEquals(19,errorCode);
 		}
 		
 		query = "";
 		try {
 			CQLTree cqlTree = new CQLTree(query, version);
 		} catch (QueryException e) {
-			assertEquals(27,e.getErrorCode());
+			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
+			assertEquals(27,errorCode);
 		}
 	}
 	
@@ -62,7 +67,7 @@ public class CQLTest {
 		query="(Sonne) and (scheint)";	
 		String jsonLd = 
 			"{@type : korap:group, operation : operation:sequence, distances:[ "+
-				"{@type : korap:distance, key : t, min : 0, max : 0 } ],"+
+				"{@type : korap:distance, key : w, min : 0, max : 0 } ],"+
 					"operands : ["+
 						"{@type : korap:token, wrap : {@type : korap:term,key : Sonne, layer : orth, match : match:eq}}," + 
 						"{@type : korap:token,wrap : {@type : korap:term,key : scheint,layer : orth,match : match:eq}" +
@@ -83,7 +88,7 @@ public class CQLTest {
 		query="((Sonne) or (Mond)) and (scheint)";		
 		String jsonLd = 
 			"{@type:korap:group, operation:operation:sequence, distances:[" +
-				"{@type:korap:distance, key:t, min:0, max:0}" +
+				"{@type:korap:distance, key:w, min:0, max:0}" +
 				"], operands:[" +
 					"{@type:korap:group, operation:operation:or, operands:[" +
 						"{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}," +
@@ -99,7 +104,7 @@ public class CQLTest {
 		query="(scheint) and ((Sonne) or (Mond))";
 		jsonLd = 
 				"{@type:korap:group, operation:operation:sequence, distances:[" +
-						"{@type:korap:distance, key:t, min:0, max:0}" +
+						"{@type:korap:distance, key:w, min:0, max:0}" +
 					"], operands:[" +
 						"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}," +
 						"{@type:korap:group, operation:operation:or, operands:[" +
