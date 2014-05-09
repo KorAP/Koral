@@ -316,6 +316,15 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 					elname = 1;
 				}
 				if (node.getChildCount() > elname) {
+					/*
+					 * Attributes can carry several values, like #ELEM(W ANA != 'N V'), 
+					 * denoting a word whose POS is neither N nor V.
+					 * When seeing this, create a sub-termGroup and put it into the top-level
+					 * term group, but only if there are other attributes in that group. If
+					 * not, put the several values as distinct attr-val-pairs into the
+					 * top-level group (in order to avoid a top-level group that only
+					 * contains a sub-group).
+					 */
 					LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
 					ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup.get("operands"); 
 					for (int i=elname; i<node.getChildCount(); i++) {
@@ -326,21 +335,34 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 							String layer = attrNode.getChild(0).toStringTree();
 							term.put("layer", translateMorph(layer));
 							term.put("key", attrNode.getChild(1).toStringTree());
-							term.put("match", "match:eq");
+							String match = getNodeCat(attrNode).equals("EQ") ? "eq" : "ne";
+							term.put("match", "match:"+match);
 						} else {
-							for (int j=1; j<attrNode.getChildCount(); j++) {
+							LinkedHashMap<String, Object> subTermGroup = makeTermGroup("and");
+							ArrayList<Object> subTermGroupOperands = (ArrayList<Object>) subTermGroup.get("operands"); 
+							int j;
+							for (j=1; j<attrNode.getChildCount(); j++) {
 								LinkedHashMap<String, Object> term = makeTerm();
-								termGroupOperands.add(term);
 								String layer = attrNode.getChild(0).toStringTree();
 								term.put("layer", translateMorph(layer));
 								term.put("key", attrNode.getChild(j).toStringTree());
-								term.put("match", "match:eq");
+								String match = getNodeCat(attrNode).equals("EQ") ? "eq" : "ne";
+								term.put("match", "match:"+match);
+								if (node.getChildCount()==elname+1) {
+									termGroupOperands.add(term);
+									System.err.println("taga");
+								} else {
+									subTermGroupOperands.add(term);
+									System.err.println(layer);
+								}
+							}
+							if (node.getChildCount()>elname+1) {
+								System.err.println(termGroupOperands);
+								termGroupOperands.add(subTermGroup);
+								System.err.println(termGroupOperands);
 							}
 						}
-						 
-						
 						if (getNodeCat(attrNode).equals("NOTEQ")) negate=true;
-						
 					}
 					elem.put("attr", termGroup);
 				}
@@ -892,7 +914,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 				"sagt der:sa Bundeskanzler",
 //				"Der:sa,-pe,+te ",
 				"#ELEM(W POS!='N V' title=tada)",
-				"#ELEM(W ANA != 'N V')"
+				"#ELEM(W ANA != 'N V')",
+				"#ELEM(W ANA != 'N V' Genre = Sport)"
 //				"(&Baum #IN #ELEM(NP)) #IN(L) #ELEM(S)"
 				};
 //		CosmasTree.debug=true;

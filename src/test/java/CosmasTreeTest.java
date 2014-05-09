@@ -480,28 +480,47 @@ public class CosmasTreeTest {
 		String elem3 = 
 			"{@type=korap:span, key=w, attr=" +
 				"{@type=korap:termGroup, relation=relation:and, operands=[" +
-					"{@type=korap:term, layer=pos, key=N, match=match:eq}," +
-					"{@type=korap:term, layer=pos, key=V, match=match:eq}" +
+					"{@type=korap:term, layer=pos, key=N, match=match:ne}," +
+					"{@type=korap:term, layer=pos, key=V, match=match:ne}" +
 				"]}" +
 			"}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(elem3.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
-		query="#ELEM(W ANA != 'N V' Genre = Sport)";
+		query="#ELEM(W ANA != 'N A V' Genre = Sport)";
 		String elem4 = 
 			"{@type=korap:span, key=w, attr=" +
 				"{@type=korap:termGroup, relation=relation:and, operands=[" +
 					"{@type=korap:termGroup, relation=relation:and, operands=[" +
-						"{@type=korap:term, layer=pos, key=N, match=match:eq}," +
-						"{@type=korap:term, layer=pos, key=V, match=match:eq}" +
-					"]}" +
+						"{@type=korap:term, layer=pos, key=N, match=match:ne}," +
+						"{@type=korap:term, layer=pos, key=A, match=match:ne}," +
+						"{@type=korap:term, layer=pos, key=V, match=match:ne}" +
+					"]}," +
 					"{@type=korap:term, layer=Genre, key=Sport, match=match:eq}" +
 				"]}" +
 			"}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(elem4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="#ELEM(W ANA != 'N V' Genre != 'Sport Politik')";
+		String elem5 = 
+			"{@type=korap:span, key=w, attr=" +
+				"{@type=korap:termGroup, relation=relation:and, operands=[" +
+					"{@type=korap:termGroup, relation=relation:and, operands=[" +
+						"{@type=korap:term, layer=pos, key=N, match=match:ne}," +
+						"{@type=korap:term, layer=pos, key=V, match=match:ne}" +
+					"]}," +
+					"{@type=korap:termGroup, relation=relation:and, operands=[" +
+						"{@type=korap:term, layer=Genre, key=Sport, match=match:ne}," +
+						"{@type=korap:term, layer=Genre, key=Politik, match=match:ne}" +
+					"]}" +
+				"]}" +
+			"}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(elem5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
