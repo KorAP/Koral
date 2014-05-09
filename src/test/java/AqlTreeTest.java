@@ -106,7 +106,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance, edges=[{@type=korap:edge, label=cat, key=NP, match=match:eq}]}" +
+				"], relation={@type=korap:treeRelation, reltype=dominance, wrap=[{@type=korap:term, layer=cat, key=NP, match=match:eq}]}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -117,7 +117,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance, index=0, edges=[{@type=korap:edge, label=cat, key=NP, match=match:eq}]}" +
+				"], relation={@type=korap:treeRelation, reltype=dominance, index=0, wrap=[{@type=korap:term, layer=cat, key=NP, match=match:eq}]}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -129,7 +129,7 @@ public class AqlTreeTest {
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
 				"], relation={@type=korap:treeRelation, reltype=dominance, " +
-						"boundary={@type=korap:boundary, min=2, max=4}}" +
+						"distance={@type=korap:distance, key=r, min=2, max=4}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -143,7 +143,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
-				"], relation={@type=korap:relation, layer=coref, label=label, key=true}" +
+				"], relation={@type=korap:relation, reltype=label, wrap=[{@type=korap:term, layer=coref, key=true, match=match:eq}]}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();

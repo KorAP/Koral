@@ -345,9 +345,9 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			if (leftChildSpec != null) relation.put("index", 0);
 			if (rightChildSpec != null) relation.put("index", -1);
 			if (qName != null) relation.putAll(parseQNameNode(qName));
-			if (edgeSpec != null) relation.put("edges", parseEdgeSpec(edgeSpec)) ;
-			if (star != null) relation.put("boundary", makeBoundary(0, 100));
-			if (rangeSpec != null) relation.put("boundary", parseRangeSpec(rangeSpec));
+			if (edgeSpec != null) relation.put("wrap", parseEdgeSpec(edgeSpec)) ;
+			if (star != null) relation.put("distance", makeDistance("r", 0, 100));
+			if (rangeSpec != null) relation.put("distance", distanceFromRangeSpec("r", rangeSpec));
 			
 		}
 		else if (operator.equals("pointing")) {
@@ -358,10 +358,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
 			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
-			if (qName != null) relation.putAll(parseQNameNode(qName));
-			if (edgeSpec != null) relation.put("edges", parseEdgeSpec(edgeSpec)) ;
-			if (star != null) relation.put("boundary", makeBoundary(0, 100));
-			if (rangeSpec != null) relation.put("boundary", parseRangeSpec(rangeSpec));
+//			if (qName != null) relation.putAll(parseQNameNode(qName));
+			if (qName != null) relation.put("reltype", qName.getText());
+			if (edgeSpec != null) relation.put("wrap", parseEdgeSpec(edgeSpec)) ;
+			if (star != null) relation.put("distance", makeDistance("r", 0, 100));
+			if (rangeSpec != null) relation.put("distance", distanceFromRangeSpec("r", rangeSpec));
 			
 		}
 		else if (operator.equals("precedence")) {
@@ -412,22 +413,30 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	private LinkedHashMap<String, Object> parseEdgeAnno(
 			ParseTree edgeAnnoSpec) {
 		LinkedHashMap<String, Object> edgeAnno = new LinkedHashMap<String, Object>();
-		edgeAnno.put("@type", "korap:edge");
+		edgeAnno.put("@type", "korap:term");
 		ParseTree labelNode = edgeAnnoSpec.getChild(0);
 		ParseTree matchOperatorNode = edgeAnnoSpec.getChild(1);
 		ParseTree textSpecNode = edgeAnnoSpec.getChild(2);
-		edgeAnno.put("label", labelNode.getChild(0).toStringTree(parser));
+		edgeAnno.put("layer", labelNode.getChild(0).toStringTree(parser));
 		edgeAnno.putAll(parseTextSpec(textSpecNode));
 		edgeAnno.put("match", parseMatchOperator(matchOperatorNode));
 		return edgeAnno;
 	}
 
-	private LinkedHashMap<String, Object> parseRangeSpec(ParseTree rangeSpec) {
+	private LinkedHashMap<String, Object> boundaryFromRangeSpec(ParseTree rangeSpec) {
 		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
 		Integer max = MAXIMUM_DISTANCE;
 		if (rangeSpec.getChildCount()==3) 
 			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
 		return makeBoundary(min, max);
+	}
+
+	private LinkedHashMap<String, Object> distanceFromRangeSpec(String key, ParseTree rangeSpec) {
+		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
+		Integer max = MAXIMUM_DISTANCE;
+		if (rangeSpec.getChildCount()==3) 
+			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
+		return makeDistance(key, min, max);
 	}
 	
 	private LinkedHashMap<String, Object> parseDistance(ParseTree rangeSpec) {
