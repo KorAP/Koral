@@ -24,6 +24,7 @@ public class CQLTree extends AbstractSyntaxTree {
     private static final String SUPPORTED_RELATION_EXACT = "exact"; // not in the doc    
     private static final String OPERATION_OR = "operation:or";
     private static final String OPERATION_SEQUENCE = "operation:sequence";
+    private static final String OPERATION_POSITION = "operation:position";
     private static final String KORAP_CONTEXT = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld";
 
     private LinkedHashMap<String, Object> requestMap;
@@ -58,10 +59,28 @@ public class CQLTree extends AbstractSyntaxTree {
              throw new QueryException(400, "SRU diagnostic 27: An empty query is unsupported.");
     	
         CQLNode cqlNode = parseQuerytoCQLNode(query);
-        Map<String,Object> queryMap = parseCQLNode(cqlNode);
-        requestMap.put("query", queryMap);
+        Map<String,Object> queryMap = parseCQLNode(cqlNode);        
+        requestMap.put("query", sentenceWrapper(queryMap));
     }
 
+    private Map<String,Object> sentenceWrapper(Map<String,Object> m){
+    	Map<String, Object> map = new LinkedHashMap<String,Object>();    	
+        map.put("@type", "korap:group");
+        map.put("operation", OPERATION_POSITION);
+        map.put("frame", "frame:contains");
+        
+        Map<String, Object> sentence = new LinkedHashMap<String,Object>();    	
+        sentence.put("@type", "korap:span");
+        sentence.put("key", "s");
+        
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        list.add(sentence);
+        list.add(m);
+        map.put("operands", list);        
+        
+    	return map;
+    }
+    
     private CQLNode parseQuerytoCQLNode(String query) throws QueryException {
         try {
             int compat = -1;
@@ -79,7 +98,8 @@ public class CQLTree extends AbstractSyntaxTree {
         }
     }
 
-    private Map<String,Object> parseCQLNode(CQLNode node) throws QueryException {
+    private Map<String,Object> parseCQLNode(CQLNode node) throws QueryException {    	
+    	    	
         if (node instanceof CQLTermNode) {
             return parseTermNode((CQLTermNode) node);
         } else if (node instanceof CQLAndNode) {
