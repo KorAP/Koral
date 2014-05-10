@@ -3,7 +3,10 @@ package de.ids_mannheim.korap.query.serialize.util;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * @author bingel
+ * @date 9/05/2014
+ */
 public class ResourceMapper {
 
     private static final Map<String, String> map = new HashMap<>();
