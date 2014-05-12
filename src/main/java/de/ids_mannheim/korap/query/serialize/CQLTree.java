@@ -59,8 +59,9 @@ public class CQLTree extends AbstractSyntaxTree {
              throw new QueryException(400, "SRU diagnostic 27: An empty query is unsupported.");
     	
         CQLNode cqlNode = parseQuerytoCQLNode(query);
-        Map<String,Object> queryMap = parseCQLNode(cqlNode);        
-        requestMap.put("query", sentenceWrapper(queryMap));
+        Map<String,Object> queryMap = parseCQLNode(cqlNode);
+        requestMap.put("query", queryMap);
+        //requestMap.put("query", sentenceWrapper(queryMap));
     }
 
     private Map<String,Object> sentenceWrapper(Map<String,Object> m){
