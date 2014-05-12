@@ -414,10 +414,14 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			ParseTree edgeAnnoSpec) {
 		LinkedHashMap<String, Object> edgeAnno = new LinkedHashMap<String, Object>();
 		edgeAnno.put("@type", "korap:term");
-		ParseTree labelNode = edgeAnnoSpec.getChild(0);
+		ParseTree qNameNode = edgeAnnoSpec.getChild(0);
 		ParseTree matchOperatorNode = edgeAnnoSpec.getChild(1);
 		ParseTree textSpecNode = edgeAnnoSpec.getChild(2);
-		edgeAnno.put("layer", labelNode.getChild(0).toStringTree(parser));
+		System.err.println(edgeAnnoSpec.toStringTree(parser));
+		ParseTree layerNode = getFirstChildWithCat(qNameNode, "layer");
+		ParseTree foundryNode = getFirstChildWithCat(qNameNode, "foundry");
+		if (foundryNode!=null) edgeAnno.put("foundry", foundryNode.getChild(0).toStringTree(parser));
+		if (layerNode!=null) edgeAnno.put("layer", layerNode.getChild(0).toStringTree(parser));
 		edgeAnno.putAll(parseTextSpec(textSpecNode));
 		edgeAnno.put("match", parseMatchOperator(matchOperatorNode));
 		return edgeAnno;
@@ -592,7 +596,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 //			 "\"Mann\" & node & #2 >[cat=\"NP\"] #1",
 			 "node & node & #1 . #2",
 			 "node & node & #1 .2,6 #2",
-			 "node & node & #1 .* #2"
+			 "node & node & #1 .* #2",
+			 "node & node & #2 ->label[mate/coref=\"true\"] #1"
 
 //			"node & node & #2 ->[foundry/layer=\"key\"],2,4 #1",
 			};

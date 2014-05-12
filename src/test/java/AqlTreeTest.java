@@ -149,6 +149,17 @@ public class AqlTreeTest {
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(dom1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
+		query = "node & node & #2 ->label[mate/coref=\"true\"] #1";
+		String dom2 = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:span}" +
+				"], relation={@type=korap:relation, reltype=label, wrap=[{@type=korap:term, foundry=mate, layer=coref, key=true, match=match:eq}]}" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
 	}
 	
 	@Test
