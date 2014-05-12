@@ -82,6 +82,30 @@
         <outputDirectory>${basedir}/bin</outputDirectory>
         <plugins>
             <plugin>
+				<!--
+				    This plugin will help to build the ANTLR4 grammar on the fly.
+				    The recipe is based on
+				    http://stackoverflow.com/questions/15310628/
+				           customize-maven-to-automatically-create-antlr4-grammar-java-files-on-build
+				-->
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4-maven-plugin</artifactId>
+				<version>4.0</version>
+				<configuration>
+				  <sourceDirectory>${basedir}/src/main/antlr</sourceDirectory>
+				  <outputDirectory>${basedir}/src/main/java/de/ids_mannheim/korap/query/serialize/util</outputDirectory>
+			      <libDirectory>${basedir}/src/main/antlr</libDirectory>
+				</configuration>
+				<executions>
+				  <execution>
+				    <goals>
+				      <goal>antlr4</goal>
+				    </goals>
+				    <phase>generate-sources</phase>
+				  </execution>
+				</executions>
+	        </plugin>
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
