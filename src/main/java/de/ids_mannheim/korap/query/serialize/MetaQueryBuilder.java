@@ -9,15 +9,15 @@ import java.util.Map;
  * @author hanl
  * @date 07/02/2014
  */
-public class MetaQuery {
+public class MetaQueryBuilder {
 
     private Map meta;
 
-    public MetaQuery() {
+    public MetaQueryBuilder() {
         this.meta = new LinkedHashMap();
     }
 
-    public MetaQuery addContext(Integer left, String leftType,
+    public MetaQueryBuilder addContext(Integer left, String leftType,
                                 Integer right, String rightType) {
         Map map = new LinkedHashMap();
         List l = new LinkedList();
@@ -32,7 +32,7 @@ public class MetaQuery {
         return this;
     }
 
-    public MetaQuery addEntry(String name, Object value) {
+    public MetaQueryBuilder addEntry(String name, Object value) {
         meta.put(name, value);
         return this;
     }

@@ -22,9 +22,6 @@ public class QuerySerializer {
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(QuerySerializer.class);
 
-    public QuerySerializer() {
-//        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-    }
 
     /**
      * @param args
@@ -167,7 +164,7 @@ public class QuerySerializer {
     public QuerySerializer setMeta(
             String cli, String cri, int cls, int crs,
             int num, int pageIndex) {
-        MetaQuery meta = new MetaQuery();
+        MetaQueryBuilder meta = new MetaQueryBuilder();
         meta.addContext(cls, cli, crs, cri);
         meta.addEntry("startIndex", pageIndex);
         meta.addEntry("count", num);
@@ -175,19 +172,19 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer setMeta(MetaQuery meta) {
+    public QuerySerializer setMeta(MetaQueryBuilder meta) {
         this.meta = meta.raw();
         return this;
     }
 
     public QuerySerializer setCollection(String collection) {
-        CollectionQuery qobj = new CollectionQuery();
+        CollectionQueryBuilder qobj = new CollectionQueryBuilder();
         qobj.addResource(collection);
         this.collection = qobj.raw();
         return this;
     }
 
-    public QuerySerializer setCollection(CollectionQuery collections) {
+    public QuerySerializer setCollection(CollectionQueryBuilder collections) {
         this.collection = collections.raw();
         return this;
     }

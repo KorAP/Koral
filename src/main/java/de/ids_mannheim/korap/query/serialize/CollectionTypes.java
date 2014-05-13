@@ -1,12 +1,9 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +50,7 @@ public class CollectionTypes {
     }
 
     public Map createTerm(String field, String value) {
-        return createTerm(field, value,  null);
+        return createTerm(field, value, null);
     }
 
     public Map createResourceFilter(String resource, Map value) {
@@ -89,7 +86,6 @@ public class CollectionTypes {
         meta.put("@value", value);
         return meta;
     }
-
 
 
     public Map mapify(String s) throws IOException {

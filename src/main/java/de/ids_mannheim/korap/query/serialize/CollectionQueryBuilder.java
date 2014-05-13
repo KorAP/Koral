@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * @author hanl
  * @date 06/12/2013
  */
-public class CollectionQuery {
+public class CollectionQueryBuilder {
 
     private CollectionTypes types;
     private List<Map> rq;
@@ -27,14 +27,14 @@ public class CollectionQuery {
     private Relation simpleExtendRel = Relation.AND;
 
 
-    public CollectionQuery() {
+    public CollectionQueryBuilder() {
         this.rq = new ArrayList<>();
         this.mfilter = ArrayListMultimap.create();
         this.mextension = ArrayListMultimap.create();
         this.types = new CollectionTypes();
     }
 
-    public CollectionQuery addResource(String query) {
+    public CollectionQueryBuilder addResource(String query) {
         try {
             List v = JsonUtils.read(query, LinkedList.class);
             this.rq.addAll(v);
@@ -44,40 +44,40 @@ public class CollectionQuery {
         return this;
     }
 
-    public CollectionQuery addResources(List<String> queries) {
+    public CollectionQueryBuilder addResources(List<String> queries) {
         for (String query : queries)
             addResource(query);
         return this;
     }
 
-    public CollectionQuery addMetaFilter(String key, String value) {
+    public CollectionQueryBuilder addMetaFilter(String key, String value) {
         this.mfilter.put(key, value);
         return this;
     }
 
-    public CollectionQuery addMetaFilterQuery(String queries) {
+    public CollectionQueryBuilder addMetaFilterQuery(String queries) {
         this.mfilter.putAll(resRel(queries));
         return this;
     }
 
-    public CollectionQuery addMetaExtend(String key, String value) {
+    public CollectionQueryBuilder addMetaExtend(String key, String value) {
         this.mextension.put(key, value);
         return this;
     }
 
 
-    public CollectionQuery setFilterAttributeRelation(Relation rel) {
+    public CollectionQueryBuilder setFilterAttributeRelation(Relation rel) {
         simpleFilterRel = rel;
         return this;
     }
 
 
-    public CollectionQuery setExtendAttributeRelation(Relation rel) {
+    public CollectionQueryBuilder setExtendAttributeRelation(Relation rel) {
         simpleExtendRel = rel;
         return this;
     }
 
-    public CollectionQuery addMetaExtendQuery(String queries) {
+    public CollectionQueryBuilder addMetaExtendQuery(String queries) {
         this.mextension.putAll(resRel(queries));
         return this;
     }
