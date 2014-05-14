@@ -6,7 +6,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import de.ids_mannheim.korap.resource.Relation;
 import de.ids_mannheim.korap.utils.JsonUtils;
-import lombok.Data;
 
 import java.io.IOException;
 import java.util.*;
@@ -17,6 +16,7 @@ import java.util.regex.Pattern;
  * @author hanl
  * @date 06/12/2013
  */
+@Deprecated
 public class CollectionQueryBuilder {
 
     private CollectionTypes types;
@@ -55,6 +55,7 @@ public class CollectionQueryBuilder {
         return this;
     }
 
+    @Deprecated
     public CollectionQueryBuilder addMetaFilterQuery(String queries) {
         this.mfilter.putAll(resRel(queries));
         return this;
@@ -77,12 +78,13 @@ public class CollectionQueryBuilder {
         return this;
     }
 
+    @Deprecated
     public CollectionQueryBuilder addMetaExtendQuery(String queries) {
         this.mextension.putAll(resRel(queries));
         return this;
     }
 
-
+    @Deprecated
     private List<Map> createFilter(Relation rel) {
         String relation = rel == Relation.AND ? "and" : "or";
         List<Map> mfil = new ArrayList();
@@ -109,6 +111,7 @@ public class CollectionQueryBuilder {
         return mfil;
     }
 
+    @Deprecated
     private List<Map> createExtender(Relation rel) {
         String relation = rel == Relation.AND ? "and" : "or";
         List<Map> mex = new ArrayList();
@@ -233,7 +236,7 @@ public class CollectionQueryBuilder {
      *
      * @return
      */
-    public JsonNode buildNode() {
+    public JsonNode toNode() {
         return JsonUtils.valueToTree(join());
     }
 
@@ -299,27 +302,9 @@ public class CollectionQueryBuilder {
 
     }
 
-
     public void clear() {
         this.rq.clear();
         this.mfilter.clear();
         this.mextension.clear();
-    }
-
-
-    private static interface Value {
-    }
-
-    @Data
-    private static class Group implements Value {
-        private Relation relation;
-        private List<Term> _terms;
-
-    }
-
-    @Data
-    private static class Term implements Value {
-
-        private String _value;
     }
 }

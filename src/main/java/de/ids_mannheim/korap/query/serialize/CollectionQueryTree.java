@@ -13,7 +13,7 @@ import java.util.*;
  * @author hanl
  * @date 06/12/2013
  */
-public class ExpertFilter extends Antlr4AbstractSyntaxTree {
+public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 
     private Parser parser;
     private boolean verbose = false;
@@ -35,10 +35,6 @@ public class ExpertFilter extends Antlr4AbstractSyntaxTree {
      */
     LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
     Integer stackedObjects = 0;
-
-
-    public ExpertFilter() {
-    }
 
     @Override
     public void process(String query) throws QueryException {
@@ -96,7 +92,7 @@ public class ExpertFilter extends Antlr4AbstractSyntaxTree {
 
             if (valueNodes.size() == 1) {
                 LinkedHashMap<String, Object> term = makeTerm();
-                term.put("attribute", field);
+                term.put("attribute", "korap:field#" + field);
                 term.put("key", valueNodes.get(0).getChild(0).toStringTree(parser));
                 String match = operatorNodes.get(0).getChild(0).toStringTree(parser);
                 term.put("match", "match:" + interpretMatch(match));
@@ -106,14 +102,14 @@ public class ExpertFilter extends Antlr4AbstractSyntaxTree {
                 ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup.get("operands");
 
                 LinkedHashMap<String, Object> term1 = makeTerm();
-                term1.put("attribute", field);
+                term1.put("attribute", "korap:field#" + field);
                 term1.put("key", valueNodes.get(0).getChild(0).toStringTree(parser));
                 String match1 = operatorNodes.get(0).getChild(0).toStringTree(parser);
                 term1.put("match", "match:" + invertInequation(interpretMatch(match1)));
                 termGroupOperands.add(term1);
 
                 LinkedHashMap<String, Object> term2 = makeTerm();
-                term2.put("attribute", field);
+                term2.put("attribute", "korap:field#" + field);
                 term2.put("key", valueNodes.get(1).getChild(0).toStringTree(parser));
                 String match2 = operatorNodes.get(1).getChild(0).toStringTree(parser);
                 term2.put("match", "match:" + interpretMatch(match2));
@@ -124,9 +120,9 @@ public class ExpertFilter extends Antlr4AbstractSyntaxTree {
 
         }
         objectsToPop.push(stackedObjects);
-		
+
 		/*
-		 ****************************************************************
+         ****************************************************************
 		 **************************************************************** 
 		 *  recursion until 'request' node (root of tree) is processed  *
 		 ****************************************************************
@@ -138,7 +134,7 @@ public class ExpertFilter extends Antlr4AbstractSyntaxTree {
         }
 
 		/*
-		 **************************************************************
+         **************************************************************
 		 * Stuff that happens after processing the children of a node *
 		 **************************************************************
 		 */
@@ -206,8 +202,8 @@ public class ExpertFilter extends Antlr4AbstractSyntaxTree {
         if (objectStack.size() > objStackPosition) {
             ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
             topObjectOperands.add(0, object);
-
         } else {
+            // I want the raw object, not a wrapped
             requestMap.put("query", object);
         }
     }
@@ -234,10 +230,10 @@ public class ExpertFilter extends Antlr4AbstractSyntaxTree {
         }
         // Some things went wrong ...
         catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Parsing exception message: " + e.getMessage());
         }
         if (tree == null) {
-            throw new QueryException("Could not parse expert filter query. Make sure it is correct syntax.");
+            throw new QueryException("Could not parse query. Make sure it is correct syntax.");
         }
         // Return the generated tree
         return tree;
@@ -248,7 +244,7 @@ public class ExpertFilter extends Antlr4AbstractSyntaxTree {
         query = "(1990<year<2010&genre=Sport)|textClass=politk";
         query = "(textClass=wissenschaft & textClass=politik) | textClass=ausland";
         query = "1990<year<2010 & genre=Sport";
-        ExpertFilter filter = new ExpertFilter();
+        CollectionQueryTree filter = new CollectionQueryTree();
 //    	filter.verbose = true;
         try {
             filter.process(query);

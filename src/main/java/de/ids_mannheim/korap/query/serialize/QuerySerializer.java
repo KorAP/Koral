@@ -177,14 +177,27 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer setCollection(String collection) {
+    @Deprecated
+    public QuerySerializer setCollectionSimple(String collection) {
         CollectionQueryBuilder qobj = new CollectionQueryBuilder();
         qobj.addResource(collection);
         this.collection = qobj.raw();
         return this;
     }
 
-    public QuerySerializer setCollection(CollectionQueryBuilder collections) {
+    public QuerySerializer setCollection(String collection) throws QueryException {
+        CollectionQueryTree tree = new CollectionQueryTree();
+        tree.process(collection);
+        this.collection = tree.getRequestMap();
+        return this;
+    }
+
+    public QuerySerializer setCollection(CollectionQueryBuilder2 collections) {
+        this.collection = collections.raw();
+        return this;
+    }
+
+    public QuerySerializer setDeprCollection(CollectionQueryBuilder collections) {
         this.collection = collections.raw();
         return this;
     }
