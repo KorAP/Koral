@@ -28,7 +28,7 @@ public class CosmasTreeTest {
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(single1.replaceAll(" ", ""), map.replaceAll(" ", ""));
-		
+
 		query="Mann";
 		String single2 = 
 				"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}";

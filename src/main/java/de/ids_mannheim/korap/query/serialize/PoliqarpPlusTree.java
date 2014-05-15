@@ -2,6 +2,7 @@ package de.ids_mannheim.korap.query.serialize;
 
 import de.ids_mannheim.korap.query.PoliqarpPlusLexer;
 import de.ids_mannheim.korap.query.PoliqarpPlusParser;
+import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.util.QueryException;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -480,6 +481,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             }
 
             if (layer.equals("base")) layer = "lemma";
+
+            // fixme: injected layer mapping:
+            layer = ResourceMapper.descriptor2policy(layer);
+
             fieldMap.put("layer", layer);
             if (foundry != null) fieldMap.put("foundry", foundry);
 

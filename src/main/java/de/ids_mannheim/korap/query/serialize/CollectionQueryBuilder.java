@@ -240,7 +240,7 @@ public class CollectionQueryBuilder {
         return JsonUtils.valueToTree(join());
     }
 
-    public String buildString() {
+    public String toJSON() {
         return JsonUtils.toJSON(join());
     }
 

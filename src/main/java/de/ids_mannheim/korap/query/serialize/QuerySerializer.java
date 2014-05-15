@@ -146,6 +146,10 @@ public class QuerySerializer {
         return this;
     }
 
+    public QuerySerializer setQuery(String query, String ql) throws QueryException {
+        return setQuery(query, ql, "");
+    }
+
     public final String build() {
         return JsonUtils.toJSON(raw());
     }

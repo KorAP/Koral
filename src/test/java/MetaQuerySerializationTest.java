@@ -30,7 +30,7 @@ public class MetaQuerySerializationTest {
         b.append("textClass:wissenschaft");
 //        CollectionQuery qu = new CollectionQuery().addMetaFilterQuery(b.toString());
         CollectionQueryBuilder query = new CollectionQueryBuilder().addMetaFilterQuery(b.toString());
-        System.out.println(query.buildString());
+        System.out.println(query.toJSON());
         System.out.println(query.toCollections());
 //        System.out.println("value reference " + qu.stringify());
 //        System.out.println();
@@ -40,7 +40,7 @@ public class MetaQuerySerializationTest {
     public void testSingle() throws IOException {
         CollectionQueryBuilder query = new CollectionQueryBuilder().addMetaFilter("textClass", "wissenschaft");
 //        System.out.println("------ TEXT SINGLE " + query.stringify());
-        System.out.println(query.buildString());
+        System.out.println(query.toJSON());
     }
 
     @Test
@@ -52,9 +52,9 @@ public class MetaQuerySerializationTest {
         b.append(" AND ");
         b.append("author:Goethe");
         CollectionQueryBuilder query = new CollectionQueryBuilder().addMetaFilterQuery(b.toString());
-        System.out.println("value until/since : " + query.buildString());
+        System.out.println("value until/since : " + query.toJSON());
         System.out.println("meta value until/since " + query.toCollections());
-        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Goethe\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"between\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2012-04-01\"},{\"@type\":\"korap:date\",\"@value\":\"2013-04-01\"}]}]}}]", query.buildString());
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Goethe\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"between\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2012-04-01\"},{\"@type\":\"korap:date\",\"@value\":\"2013-04-01\"}]}]}}]", query.toJSON());
 //        System.out.println();
     }
 
@@ -66,7 +66,7 @@ public class MetaQuerySerializationTest {
         b.append("author:Hesse");
         CollectionQueryBuilder query = new CollectionQueryBuilder().addMetaFilterQuery(b.toString());
         System.out.println("Running date check (until) with additional attribute author");
-        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Hesse\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"until\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.buildString());
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Hesse\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"until\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.toJSON());
 //        System.out.println("value until : " + query.stringify());
 //        System.out.println();
     }
@@ -78,11 +78,11 @@ public class MetaQuerySerializationTest {
         b.append(" AND ");
         b.append("author:Kafka");
         CollectionQueryBuilder query = new CollectionQueryBuilder().addMetaFilterQuery(b.toString());
-        System.out.println("value since : " + query.buildString());
+        System.out.println("value since : " + query.toJSON());
         System.out.println("meta value since " + query.toCollections());
 //        System.out.println();
         System.out.println("Running date check (since) with additional attribute author");
-        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Kafka\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"since\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.buildString());
+        Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Kafka\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"since\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.toJSON());
     }
 
     @Test
@@ -128,7 +128,7 @@ public class MetaQuerySerializationTest {
         CollectionQueryBuilder q = new CollectionQueryBuilder().addMetaFilterQuery(b.toString());
         q.addMetaExtend("author", "Hesse");
 
-        System.out.println("--- ALL " + q.buildString());
+        System.out.println("--- ALL " + q.toJSON());
         System.out.println();
 
     }
@@ -140,7 +140,7 @@ public class MetaQuerySerializationTest {
         b.append(" AND ");
         b.append("author:Kafka");
         CollectionQueryBuilder q = new CollectionQueryBuilder().addMetaExtendQuery(b.toString());
-        System.out.println("array repres " + q.buildString());
+        System.out.println("array repres " + q.toJSON());
         System.out.println();
     }
 
@@ -149,7 +149,7 @@ public class MetaQuerySerializationTest {
         CollectionQueryBuilder q = new CollectionQueryBuilder().addMetaFilter("corpusID", "A00");
         q.addMetaExtend("corpusID", "A01");
 
-        System.out.println("results stringified " + q.buildString());
+        System.out.println("results stringified " + q.toJSON());
         System.out.println("results to meta" + q.toCollections());
         System.out.println();
     }
@@ -171,7 +171,7 @@ public class MetaQuerySerializationTest {
     @Test
     public void testA00() throws IOException {
         CollectionQueryBuilder q = new CollectionQueryBuilder().addMetaExtend("corpusID", "A00").addMetaExtend("corpusID", "A01");
-        System.out.println("A meta: " + q.buildString());
+        System.out.println("A meta: " + q.toJSON());
         System.out.println();
     }
 
@@ -180,7 +180,7 @@ public class MetaQuerySerializationTest {
         String meta = "[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:term\",\"@field\":\"korap:field#corpusID\",\"@value\":\"WPD\"}}]";
         CollectionQueryBuilder q = new CollectionQueryBuilder().addResource(meta);
         q.addMetaFilter("textClass", "wissenschaft");
-        System.out.println("stringified meta " + q.buildString());
+        System.out.println("stringified meta " + q.toJSON());
         System.out.println("meta string " + q.toCollections());
     }
 
