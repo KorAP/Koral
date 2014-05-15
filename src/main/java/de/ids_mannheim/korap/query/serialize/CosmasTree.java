@@ -136,11 +136,12 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		} catch (NullPointerException e) {
 			throw new QueryException("Your query could not be processed. Please make sure it is well-formed.");
 		}
-		
+		log.info("Processing CosmasII query");
 		System.out.println("Processing Cosmas");
 		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
 //		prepareContext(requestMap);
 		processNode(tree);
+		log.info(requestMap.toString());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -333,6 +334,11 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 							LinkedHashMap<String, Object> term = makeTerm();
 							termGroupOperands.add(term);
 							String layer = attrNode.getChild(0).toStringTree();
+							String[] splitted = layer.split("/");
+							if (splitted.length > 1) {
+								term.put("foundry", splitted[0]);
+								layer = splitted[1];
+							}
 							term.put("layer", translateMorph(layer));
 							term.put("key", attrNode.getChild(1).toStringTree());
 							String match = getNodeCat(attrNode).equals("EQ") ? "eq" : "ne";
@@ -344,6 +350,11 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 							for (j=1; j<attrNode.getChildCount(); j++) {
 								LinkedHashMap<String, Object> term = makeTerm();
 								String layer = attrNode.getChild(0).toStringTree();
+								String[] splitted = layer.split("/");
+								if (splitted.length > 1) {
+									term.put("foundry", splitted[0]);
+									layer = splitted[1];
+								}
 								term.put("layer", translateMorph(layer));
 								term.put("key", attrNode.getChild(j).toStringTree());
 								String match = getNodeCat(attrNode).equals("EQ") ? "eq" : "ne";
@@ -887,8 +898,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		  
 		  String treestring = tree.toStringTree();
 		  if (treestring.contains("<mismatched token") || treestring.contains("<error") || treestring.contains("<unexpected")) {
+			  log.error("Invalid tree. Could not parse Cosmas query. Make sure it is well-formed.");
 			  throw new RecognitionException();
 		  } 
+		  
 		  return tree;
 	}
 	
@@ -915,7 +928,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //				"Der:sa,-pe,+te ",
 				"#ELEM(W POS!='N V' title=tada)",
 				"#ELEM(W ANA != 'N V')",
-				"#ELEM(W ANA != 'N V' Genre = Sport)"
+				"#ELEM(W ANA != 'N V' Genre = Sport)",
+				"(&Baum #IN #ELEM(xip/c=np)) #IN(L) #ELEM(s)"
 //				"(&Baum #IN #ELEM(NP)) #IN(L) #ELEM(S)"
 				};
 //		CosmasTree.debug=true;
