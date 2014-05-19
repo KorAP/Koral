@@ -17,6 +17,7 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.LoggerFactory;
 
 import de.ids_mannheim.korap.query.annis.AqlLexer;
 import de.ids_mannheim.korap.query.annis.AqlParser;
@@ -28,6 +29,8 @@ import de.ids_mannheim.korap.util.QueryException;
  *
  */
 public class AqlTree extends Antlr4AbstractSyntaxTree {
+    private org.slf4j.Logger log = LoggerFactory
+            .getLogger(AqlTree.class);
 	/**
 	 * Top-level map representing the whole request.
 	 */
@@ -64,6 +67,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 * Marks the currently active token in order to know where to add flags (might already have been taken away from token stack).
 	 */
 	LinkedHashMap<String,Object> curToken = new LinkedHashMap<String,Object>();
+	/**
+	 * Keeps track of operands lists that are to be serialised in an inverted
+	 * order (e.g. the IN() operator) compared to their AST representation. 
+	 */
+	private LinkedList<ArrayList<Object>> invertedOperandsLists = new LinkedList<ArrayList<Object>>();
 
 	private LinkedList<ArrayList<ArrayList<Object>>> distributedOperandsLists = new LinkedList<ArrayList<ArrayList<Object>>>();
 	
@@ -78,6 +86,9 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 * nodes here and exclude the operands from being written into the query map individually.   
 	 */
 	private LinkedList<String> operandOnlyNodeRefs = new LinkedList<String>();
+	private List<String> mirroredPositionFrames = Arrays.asList(new String[]{"startswith", "endswith", "overlaps", "contains"});
+//	private List<String> mirroredPositionFrames = Arrays.asList(new String[]{});
+	
 	public static boolean verbose = false;
 	
 	/**
@@ -139,10 +150,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		} else {
 			throw new NullPointerException("Parser has not been instantiated!"); 
 		}
-		
+		log.info("Processing Annis query.");
 		System.out.println("Processing Annis QL");
 		if (verbose) System.out.println(tree.toStringTree(parser));
 		processNode(tree);
+		log.info(requestMap.toString());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -179,11 +191,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		}
 		
 		if (nodeCat.equals("andTopExpr")) {
-			// Before processing any child expr node, check if it has one or more "n_ary_linguistic_term" nodes.
+			// Before processing any child expr node, check if it has one or more "*ary_linguistic_term" nodes.
 			// Those nodes may use references to earlier established operand nodes.
 			// Those operand nodes are not to be included into the query map individually but
 			// naturally as operands of the relations/groups introduced by the 
-			// n_ary_linguistic_term node. For that purpose, this section mines all used references
+			// *node. For that purpose, this section mines all used references
 			// and stores them in a list for later reference.
 			for (ParseTree exprNode : getChildrenWithCat(node,"expr")) {
 				List<ParseTree> lingTermNodes = new ArrayList<ParseTree>();
@@ -192,7 +204,13 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				// Traverse refOrNode nodes under *ary_linguistic_term nodes and extract references
 				for (ParseTree lingTermNode : lingTermNodes) {
 					for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
-						operandOnlyNodeRefs.add(refOrNode.getChild(0).toStringTree(parser).substring(1));
+						String refOrNodeString = refOrNode.getChild(0).toStringTree(parser);
+						if (refOrNodeString.startsWith("#")) {
+							operandOnlyNodeRefs.add(refOrNode.getChild(0).toStringTree(parser).substring(1));
+						} else {
+							
+						}
+						
 					}
 				}
 			}
@@ -244,14 +262,39 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				group.put("relation", relationGroup);
 			} else if (groupType.equals("sequence")) {
 				putAllButGroupType(group, operatorTree);
+			} else if (groupType.equals("position")) {
+				String frame = (String) operatorTree.get("frame");
+				if (!mirroredPositionFrames.contains(frame.substring(6))) { //remove leading "frame:"
+					putAllButGroupType(group, operatorTree);
+				} else {
+					group = makeGroup("or");
+					LinkedHashMap<String, Object> group1 = makeGroup(groupType);
+					LinkedHashMap<String, Object> group2 = makeGroup(groupType);
+					putAllButGroupType(group1, operatorTree);
+					putAllButGroupType(group2, operatorTree);
+					ArrayList<Object> groupOperands = (ArrayList<Object>) group.get("operands");
+					groupOperands.add(group1);
+					groupOperands.add(group2);
+					ArrayList<ArrayList<Object>> distOperandsList = new ArrayList<ArrayList<Object>>();
+					distOperandsList.add((ArrayList<Object>) group1.get("operands"));
+					distOperandsList.add((ArrayList<Object>) group2.get("operands"));
+					invertedOperandsLists.push((ArrayList<Object>) group2.get("operands"));
+					distributedOperandsLists.push(distOperandsList);
+				}
 			}
-			
+			// insert referenced nodes into operands list
 			List<Object> operands = (List<Object>) group.get("operands");
 			for (ParseTree refOrNode : getChildrenWithCat(node, "refOrNode")) {
-				String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
-				operands.add(variableReferences.get(ref));
+				if (!getNodeCat(refOrNode.getChild(0)).equals("variableExpr")) {
+					String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
+					operands.add(variableReferences.get(ref));
+				} else {
+					
+				}
 			}
 			putIntoSuperObject(group);
+			objectStack.push(group);
+			stackedObjects++;
 		}
 		
 		if (nodeCat.equals("variableExpr")) {
@@ -295,7 +338,10 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			}
 			
 			if (object != null) {
-				if (! operandOnlyNodeRefs.contains(variableCounter.toString())) putIntoSuperObject(object);
+				if (! operandOnlyNodeRefs.contains(variableCounter.toString())) {
+					putIntoSuperObject(object);
+					System.out.println(object.toString()+" "+objectStack.toString());
+				}
 				variableReferences.put(variableCounter.toString(), object);
 				variableCounter++;
 			}
@@ -382,7 +428,28 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			relation.put("inOrder", true);
 		}
 		else if (operator.equals("spanrelation")) {
-			
+			relation = makeGroup(null);
+			relation.put("groupType", "position");
+			String reltype = operatorNode.getChild(0).toStringTree(parser);
+			String frame = null;
+			switch (reltype) {
+				case "_=_":
+					frame = "matches"; break;
+				case "_l_":
+					frame = "startswith"; break;
+				case "_r_":
+					frame = "endswith"; break;
+				case "_i_":
+					frame = "contains"; break;
+				case "_o_":
+					frame = "overlaps"; break;
+				case "_ol_":
+					frame = "overlapsLeft"; break;
+				case "_or_":
+					frame = "overlapsRight"; break;
+			}
+			relation.put("operation", "operation:position");
+			relation.put("frame", "frame:"+frame);
 		}
 		else if (operator.equals("commonparent")) {
 			
@@ -417,7 +484,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		ParseTree qNameNode = edgeAnnoSpec.getChild(0);
 		ParseTree matchOperatorNode = edgeAnnoSpec.getChild(1);
 		ParseTree textSpecNode = edgeAnnoSpec.getChild(2);
-		System.err.println(edgeAnnoSpec.toStringTree(parser));
 		ParseTree layerNode = getFirstChildWithCat(qNameNode, "layer");
 		ParseTree foundryNode = getFirstChildWithCat(qNameNode, "foundry");
 		if (foundryNode!=null) edgeAnno.put("foundry", foundryNode.getChild(0).toStringTree(parser));
@@ -508,9 +574,19 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	
 	@SuppressWarnings({ "unchecked" })
 	private void putIntoSuperObject(LinkedHashMap<String, Object> object, int objStackPosition) {
-		if (objectStack.size()>objStackPosition) {
+//		if (distributedOperandsLists.size()>0) {
+//			ArrayList<ArrayList<Object>> distributedOperands = distributedOperandsLists.pop();
+//			for (ArrayList<Object> operands : distributedOperands) {
+//				operands.add(object);
+//			}
+//		} else
+			if (objectStack.size()>objStackPosition) {
 			ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
-			topObjectOperands.add(0, object);
+			if (!invertedOperandsLists.contains(topObjectOperands)) {
+				topObjectOperands.add(object);
+			} else {
+				topObjectOperands.add(0, object);
+			}
 			
 		} else {
 			requestMap.put("query", object);
@@ -548,10 +624,12 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 
 	    // Some things went wrong ...
 	    catch (Exception e) {
-	      System.err.println( e.getMessage() );
+	    	log.error(e.getMessage());
+	    	System.err.println( e.getMessage() );
 	    }
 	    
 	    if (tree == null) {
+	    	log.error("Could not parse query. Make sure it is correct ANNIS QL syntax.");
 	    	throw new QueryException("Could not parse query. Make sure it is correct ANNIS QL syntax.");
 	    }
 
@@ -565,43 +643,20 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 */
 		String[] queries = new String[] {
 			
-//			"#1 . #2 ",
-//			"#1 . #2 & meta::Genre=\"Sport\"",
-//			"A _i_ B",
-//			"A .* B",
-//			"A >* B",
-//			"#1 > [label=\"foo\"] #2",
-//			"pos=\"VVFIN\" & cas=\"Nom\" & #1 . #2",
-//			"A .* B ",
-//			"A .* B .* C",
-//			
-//			"#1 ->LABEL[lbl=\"foo\"] #2",
-//			"#1 ->LABEL[lbl=/foo/] #2",
-//			"#1 ->LABEL[foundry/layer=\"foo\"] #2",
-//			"#1 ->LABEL[foundry/layer=\"foo\"] #2",
-//			"node & pos=\"VVFIN\" & #2 > #1",
-//			"node & pos=\"VVFIN\" & #2 > #1",
-//			"pos=\"VVFIN\" > cas=\"Nom\" ",
-//			"pos=\"VVFIN\" >* cas=\"Nom\" ",
-//			"tiger/pos=\"NN\" >  node",
-//			"ref#node & pos=\"NN\" > #ref",
-//			"node & tree/pos=\"NN\"",
-//			"/node/",
-//			"\"Mann\"",
-//			"tok!=/Frau/",
-//			"node",
-//			"treetagger/pos=\"NN\"",
-//			"node & node & #2 ->foundry/dep[anno=\"key\"],2,4 #1",
-//			"tiger/pos=\"NN\" >cnx/cat  node",
-//			 "\"Mann\" & node & #2 >[cat=\"NP\"] #1",
 			 "node & node & #1 . #2",
 			 "node & node & #1 .2,6 #2",
 			 "node & node & #1 .* #2",
-			 "node & node & #2 ->label[mate/coref=\"true\"] #1"
-
-//			"node & node & #2 ->[foundry/layer=\"key\"],2,4 #1",
+			 "node & node & #2 ->label[mate/coref=\"true\"] #1",
+			 "node & node & #1 _ol_ #2",
+			 "node & cat=\"NP\" & #2 _r_ #1",
+			 "node > cat=\"NP\"",
+			 "cat=\"NP\" > node",
+			 "node > cat=\"NP\"",
+//			 "node > node",
+			 "node & node & #2 _=_ #1",
+			 "node & node & #2 _i_ #1"
 			};
-//		AqlTree.verbose=true;
+		AqlTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);
