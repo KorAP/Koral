@@ -10,6 +10,16 @@ grammar CollectionQuery;
 /*
  * LEXER SECTION
  */
+LRB					: '(';
+RRB					: ')';
+LT					: '<';
+GT					: '>';
+LEQ					: '<=';
+GEQ					: '>=';
+EQ					: '=';
+NE					: '!=';
+AND					: '&' | 'AND' | 'and' | 'UND' | 'und' ;
+OR					: '|' | 'OR' | 'or' | 'ODER' | 'oder' ;
 
 WS 					: ( ' ' | '\t' | '\r' | '\n' )+ -> skip ;
 fragment FOCC       : '{' WS* ( [0-9]* WS* ',' WS* [0-9]+ | [0-9]+ WS* ','? ) WS* '}';
@@ -22,20 +32,29 @@ NL                  : [\r\n] -> skip;
 ws                  : WS+;
 
 WORD                : ALPHABET+;
-LRB					: '(';
-RRB					: ')';
-LT					: '<';
-GT					: '>';
-LEQ					: '<=';
-GEQ					: '>=';
-EQ					: '=';
-NE					: '!=';
-AND					: '&';
-OR					: '|';
+
+/*
+ * Regular expressions (delimited by slashes in Annis)
+ */
+fragment RE_char     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']' | '/'
+         	            | '(' | ')' | '|' | '"' | ':' | '\'' | '\\');
+fragment RE_alter    : ((RE_char | ('(' REGEX ')') | RE_chgroup) '|' REGEX )+;
+fragment RE_chgroup  : '[' RE_char+ ']';
+fragment RE_opt      : (RE_char | RE_chgroup | ( '(' REGEX ')')) '?';
+fragment RE_star     : (RE_char | RE_chgroup | ( '(' REGEX ')')) '*';
+fragment RE_plus     : (RE_char | RE_chgroup | ( '(' REGEX ')')) '+';
+fragment RE_occ      : (RE_char | RE_chgroup | ( '(' REGEX ')')) FOCC;
+fragment RE_group    : '(' REGEX ')';
+SLASH				 : '/';
+REGEX     		     : SLASH ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_star | RE_plus | RE_occ | RE_group)* SLASH;
 
 /*
  * PARSER SECTION
  */
+
+regex
+:	REGEX
+;
 
 conj
 :	AND | OR;
@@ -44,24 +63,22 @@ operator
 :	EQ | NE | LT | GT | LEQ | GEQ;
 
 expr
-:	field operator value
-|	value operator field operator value
+:	(value operator)? field operator value
 ;
 	
 field
 :	WORD;
 	
 value
-:	WORD | NUMBER;
+:	WORD | NUMBER | '"' (WORD ws*)+'"'
+| 	regex;
 	
 andGroup
-: 	(expr AND)* (LRB orGroup RRB)? (AND expr)*
-|	(expr AND)+ expr
+: 	(((LRB exprGroup RRB)|expr) AND)+ ((LRB exprGroup RRB)|expr)
 ;
 
 orGroup
-: 	(expr OR)* (LRB andGroup RRB)? (OR expr)* 
-|	(expr OR)+ expr
+: 	(((LRB exprGroup RRB)|expr) OR)+ ((LRB exprGroup RRB)|expr)
 ;
 
 exprGroup
@@ -70,6 +87,6 @@ exprGroup
 ;
 
 start
-:	expr
-|	exprGroup
+:	expr EOF
+|	exprGroup EOF
 ;
