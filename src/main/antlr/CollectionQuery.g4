@@ -87,6 +87,6 @@ exprGroup
 ;
 
 start
-:	expr EOF
+:	expr 
 |	exprGroup EOF
 ;
