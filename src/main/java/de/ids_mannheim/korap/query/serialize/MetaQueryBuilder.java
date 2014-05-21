@@ -18,7 +18,14 @@ public class MetaQueryBuilder {
     }
 
     public MetaQueryBuilder addContext(Integer left, String leftType,
-                                Integer right, String rightType) {
+                                       Integer right, String rightType) {
+        if (leftType.equalsIgnoreCase("sentence") | leftType.equalsIgnoreCase("paragraph")) {
+            addEntry("context", leftType);
+            return this;
+        } else if (rightType.equalsIgnoreCase("sentence") | rightType.equalsIgnoreCase("paragraph")) {
+            addEntry("context", rightType);
+            return this;
+        }
         Map map = new LinkedHashMap();
         List l = new LinkedList();
         List r = new LinkedList();
@@ -40,5 +47,4 @@ public class MetaQueryBuilder {
     public Map raw() {
         return meta;
     }
-
 }
