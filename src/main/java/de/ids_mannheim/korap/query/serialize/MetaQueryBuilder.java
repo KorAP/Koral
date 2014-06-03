@@ -17,15 +17,17 @@ public class MetaQueryBuilder {
         this.meta = new LinkedHashMap();
     }
 
+    /**
+     * context segment if context is either of type char or token.
+     * size can differ for left and right span
+     * @param left
+     * @param leftType
+     * @param right
+     * @param rightType
+     * @return
+     */
     public MetaQueryBuilder addContext(Integer left, String leftType,
                                        Integer right, String rightType) {
-        if (leftType.equalsIgnoreCase("sentence") | leftType.equalsIgnoreCase("paragraph")) {
-            addEntry("context", leftType);
-            return this;
-        } else if (rightType.equalsIgnoreCase("sentence") | rightType.equalsIgnoreCase("paragraph")) {
-            addEntry("context", rightType);
-            return this;
-        }
         Map map = new LinkedHashMap();
         List l = new LinkedList();
         List r = new LinkedList();
@@ -38,6 +40,17 @@ public class MetaQueryBuilder {
         meta.put("context", map);
         return this;
     }
+
+    /**
+     * context if of type paragraph or sentence where left and right size delimiters are irrelevant.
+     * @param type
+     * @return
+     */
+    public MetaQueryBuilder addContext(String type) {
+        addEntry("context", type);
+        return this;
+    }
+
 
     public MetaQueryBuilder addEntry(String name, Object value) {
         meta.put(name, value);
