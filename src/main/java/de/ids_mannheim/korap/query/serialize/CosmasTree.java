@@ -216,7 +216,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                 fieldMap.put("caseInsensitive", true);
             }
 
-            attr = ResourceMapper.descriptor2policy(attr);
             fieldMap.put("key", value);
             fieldMap.put("layer", attr);
 
@@ -249,7 +248,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
             fieldMap.put("key", pos);
 
-            fieldMap.put("layer", ResourceMapper.descriptor2policy("pos"));
+            fieldMap.put("layer", "pos");
             // make category-specific fieldMap entry
             // negate field (see above)
             if (negate) {
