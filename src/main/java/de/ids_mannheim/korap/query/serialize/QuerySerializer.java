@@ -124,16 +124,16 @@ public class QuerySerializer {
     public QuerySerializer setQuery(String query, String ql, String version)
             throws QueryException {
         try {
-            if (ql.toLowerCase().equals("poliqarp")) {
+            if (ql.equalsIgnoreCase("poliqarp")) {
                 ast = new PoliqarpPlusTree(query);
-            } else if (ql.toLowerCase().equals("cosmas2")) {
+            } else if (ql.equalsIgnoreCase("cosmas2")) {
                 ast = new CosmasTree(query);
-            } else if (ql.toLowerCase().equals("poliqarpplus")) {
+            } else if (ql.equalsIgnoreCase("poliqarpplus")) {
                 ast = new PoliqarpPlusTree(query);
-            } else if (ql.toLowerCase().equals("cql")) {
+            } else if (ql.equalsIgnoreCase("cql")) {
 //                queryLanguageVersion = "1.2"; // set me
                 ast = new CQLTree(query, version);
-            } else if (ql.toLowerCase().equals("annis")) {
+            } else if (ql.equalsIgnoreCase("annis")) {
                 ast = new AqlTree(query);
             } else {
                 throw new QueryException(ql + " is not a supported query language!");
@@ -150,10 +150,13 @@ public class QuerySerializer {
         return setQuery(query, ql, "");
     }
 
-    public final String build() {
+    public final String toJSON() {
         return JsonUtils.toJSON(raw());
     }
 
+    public final Map build() {
+        return raw();
+    }
 
     private Map raw() {
         Map<String, Object> requestMap = ast.getRequestMap();
