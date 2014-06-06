@@ -25,15 +25,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
     private static Logger log = LoggerFactory.getLogger(CosmasTree.class);
 
-    /*
-     * Following collections have the following functions:
-     * - the request is a map with two keys (meta/query):			{meta=[], query=[]}
-     * - the query is a list of token group maps: 					{meta=[], query=[tg1=[], tg2=[]]}
-     * - each token group is a list of tokens: 						{meta=[], query=[tg1=[t1_1, t1_2], tg2=[t2_1, t2_2, t2_3]]}
-     * - each token corresponds to a single 'fields' linked list	{meta=[], query=[tg1=[t1_1=[], t1_2=[]], ... ]}
-     * - each fields list contains a logical operator and 'field maps' defining attributes and values
-     * 																{meta=[], query=[tg1=[t1_1=[[disj, {base=foo}, {base=bar}]], t1_2=[]], ... ]}
-     */
     String query;
     LinkedHashMap<String, Object> requestMap = new LinkedHashMap<String, Object>();
     /**
@@ -245,9 +236,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //			fieldMap.put("key", "morph:"+node.getChild(0).toString().replace(" ", "_"));
             String[] morphValues = node.getChild(0).toString().split(" ");
             String pos = morphValues[0];
-
             fieldMap.put("key", pos);
-
             fieldMap.put("layer", "pos");
             // make category-specific fieldMap entry
             // negate field (see above)

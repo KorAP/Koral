@@ -86,8 +86,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 * nodes here and exclude the operands from being written into the query map individually.   
 	 */
 	private LinkedList<String> operandOnlyNodeRefs = new LinkedList<String>();
-	private List<String> mirroredPositionFrames = Arrays.asList(new String[]{"startswith", "endswith", "overlaps", "contains"});
-//	private List<String> mirroredPositionFrames = Arrays.asList(new String[]{});
+//	private List<String> mirroredPositionFrames = Arrays.asList(new String[]{"startswith", "endswith", "overlaps", "contains"});
+	private List<String> mirroredPositionFrames = Arrays.asList(new String[]{});
 	
 	public static boolean verbose = false;
 	
@@ -197,10 +197,12 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			// naturally as operands of the relations/groups introduced by the 
 			// *node. For that purpose, this section mines all used references
 			// and stores them in a list for later reference.
+			List<ParseTree> globalLingTermNodes = new ArrayList<ParseTree>();
 			for (ParseTree exprNode : getChildrenWithCat(node,"expr")) {
 				List<ParseTree> lingTermNodes = new ArrayList<ParseTree>();
 				lingTermNodes.addAll(getChildrenWithCat(exprNode, "unary_linguistic_term"));
 				lingTermNodes.addAll(getChildrenWithCat(exprNode, "n_ary_linguistic_term"));
+				globalLingTermNodes.addAll(lingTermNodes);
 				// Traverse refOrNode nodes under *ary_linguistic_term nodes and extract references
 				for (ParseTree lingTermNode : lingTermNodes) {
 					for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
@@ -221,6 +223,16 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 //				stackedObjects++;
 //				putIntoSuperObject(andGroup,1);
 //			}
+			System.out.println(globalLingTermNodes.size());
+			if (globalLingTermNodes.size() > 1) {
+				LinkedHashMap<String, Object> zeroTextDistance = makeGroup("sequence");
+				ArrayList<Object> distances = new ArrayList<Object>();
+				distances.add(makeDistance("t",0,0));
+				zeroTextDistance.put("distances", distances);
+				putIntoSuperObject(zeroTextDistance);
+				objectStack.push(zeroTextDistance);
+//				stackedObjects++;
+			}
 		}
 		
 		// establish new variables or relations between vars
@@ -242,7 +254,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 //			}
 		}
 		
-		if (nodeCat.equals("n_ary_linguistic_term") || nodeCat.equals("unary_linguistic_term")) {
+		if (nodeCat.equals("unary_linguistic_term")) {
+			
+		}
+		
+		if (nodeCat.equals("n_ary_linguistic_term")) {
 			// get referenced operands
 			// TODO generalize operator
 			// TODO capture variableExprs
@@ -264,23 +280,23 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				putAllButGroupType(group, operatorTree);
 			} else if (groupType.equals("position")) {
 				String frame = (String) operatorTree.get("frame");
-				if (!mirroredPositionFrames.contains(frame.substring(6))) { //remove leading "frame:"
+//				if (!mirroredPositionFrames.contains(frame.substring(6))) { //remove leading "frame:"
 					putAllButGroupType(group, operatorTree);
-				} else {
-					group = makeGroup("or");
-					LinkedHashMap<String, Object> group1 = makeGroup(groupType);
-					LinkedHashMap<String, Object> group2 = makeGroup(groupType);
-					putAllButGroupType(group1, operatorTree);
-					putAllButGroupType(group2, operatorTree);
-					ArrayList<Object> groupOperands = (ArrayList<Object>) group.get("operands");
-					groupOperands.add(group1);
-					groupOperands.add(group2);
-					ArrayList<ArrayList<Object>> distOperandsList = new ArrayList<ArrayList<Object>>();
-					distOperandsList.add((ArrayList<Object>) group1.get("operands"));
-					distOperandsList.add((ArrayList<Object>) group2.get("operands"));
-					invertedOperandsLists.push((ArrayList<Object>) group2.get("operands"));
-					distributedOperandsLists.push(distOperandsList);
-				}
+//				} else {
+//					group = makeGroup("or");
+//					LinkedHashMap<String, Object> group1 = makeGroup(groupType);
+//					LinkedHashMap<String, Object> group2 = makeGroup(groupType);
+//					putAllButGroupType(group1, operatorTree);
+//					putAllButGroupType(group2, operatorTree);
+//					ArrayList<Object> groupOperands = (ArrayList<Object>) group.get("operands");
+//					groupOperands.add(group1);
+//					groupOperands.add(group2);
+//					ArrayList<ArrayList<Object>> distOperandsList = new ArrayList<ArrayList<Object>>();
+//					distOperandsList.add((ArrayList<Object>) group1.get("operands"));
+//					distOperandsList.add((ArrayList<Object>) group2.get("operands"));
+//					invertedOperandsLists.push((ArrayList<Object>) group2.get("operands"));
+//					distributedOperandsLists.push(distOperandsList);
+//				}
 			}
 			// insert referenced nodes into operands list
 			List<Object> operands = (List<Object>) group.get("operands");
@@ -432,39 +448,51 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			relation.put("groupType", "position");
 			String reltype = operatorNode.getChild(0).toStringTree(parser);
 			String frame = null;
+			boolean inOrder = true;
 			switch (reltype) {
 				case "_=_":
 					frame = "matches"; break;
 				case "_l_":
-					frame = "startswith"; break;
+					frame = "startswith"; 
+					inOrder = false;
+					break;
 				case "_r_":
-					frame = "endswith"; break;
+					frame = "endswith";
+					inOrder = false;
+					break;
 				case "_i_":
 					frame = "contains"; break;
 				case "_o_":
-					frame = "overlaps"; break;
+					frame = "overlaps"; 
+					inOrder = false;
+					break;
 				case "_ol_":
-					frame = "overlapsLeft"; break;
+					frame = "overlapsLeft"; 
+					inOrder = false;
+					break;
 				case "_or_":
-					frame = "overlapsRight"; break;
+					frame = "overlapsRight"; 
+					inOrder = false;
+					break;
 			}
 			relation.put("operation", "operation:position");
+			if (!inOrder) relation.put("inOrder", false);
 			relation.put("frame", "frame:"+frame);
 		}
 		else if (operator.equals("commonparent")) {
-			
+			//TODO
 		}
 		else if (operator.equals("commonancestor")) {
-			
+			//TODO
 		}
 		else if (operator.equals("identity")) {
-			
+			//TODO
 		}
 		else if (operator.equals("equalvalue")) {
-			
+			//TODO
 		}
 		else if (operator.equals("notequalvalue")) {
-			
+			//TODO
 		}
 		return relation;
 	}
@@ -642,19 +670,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[] {
-			
-			 "node & node & #1 . #2",
-			 "node & node & #1 .2,6 #2",
-			 "node & node & #1 .* #2",
-			 "node & node & #2 ->label[mate/coref=\"true\"] #1",
-			 "node & node & #1 _ol_ #2",
-			 "node & cat=\"NP\" & #2 _r_ #1",
-			 "node > cat=\"NP\"",
-			 "cat=\"NP\" > node",
-			 "node > cat=\"NP\"",
-//			 "node > node",
-			 "node & node & #2 _=_ #1",
-			 "node & node & #2 _i_ #1"
+			 "node & #1:root",
+			 "pos=\"N\" & pos=\"V\" & pos=\"N\" & #1 . #2 & #2 . #3"
 			};
 		AqlTree.verbose=true;
 		for (String q : queries) {
