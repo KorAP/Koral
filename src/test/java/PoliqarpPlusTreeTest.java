@@ -425,6 +425,76 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree("[base=Schild]([base=der]|[base=das])");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(disj2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// "([orth=der][base=katze])|([orth=eine][base=baum])"
+		String disj3 = 
+				"{@type=korap:group, operation=operation:or, operands=[" +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=katze, layer=lemma, match=match:eq}}" +
+					"]}," +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=eine, layer=orth, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=baum, layer=lemma, match=match:eq}}" +
+					"]}" +
+				"]}";
+		ppt = new PoliqarpPlusTree("([orth=der][base=katze])|([orth=eine][base=baum])");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(disj3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// "[orth=der][base=katze]|[orth=eine][base=baum]"
+		String disj4 = 
+				"{@type=korap:group, operation=operation:or, operands=[" +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=katze, layer=lemma, match=match:eq}}" +
+					"]}," +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=eine, layer=orth, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=baum, layer=lemma, match=match:eq}}" +
+					"]}" +
+				"]}";
+		ppt = new PoliqarpPlusTree("[orth=der][base=katze]|[orth=eine][base=baum]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(disj4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		PoliqarpPlusTree ppt1 = new PoliqarpPlusTree("[orth=der][base=katze]|[orth=eine][base=baum]");
+		PoliqarpPlusTree ppt2 = new PoliqarpPlusTree("([orth=der][base=katze])|([orth=eine][base=baum])");
+		assertEquals(ppt1.getRequestMap().toString(), ppt2.getRequestMap().toString());
+		
+		// "[orth=der][base=katze]|[orth=der][base=hund]|[orth=der][base=baum]"
+		String disj5 = 
+				"{@type=korap:group, operation=operation:or, operands=[" +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=katze, layer=lemma, match=match:eq}}" +
+					"]}," +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=hund, layer=lemma, match=match:eq}}" +
+					"]}," +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=baum, layer=lemma, match=match:eq}}" +
+					"]}" +
+				"]}";
+		ppt = new PoliqarpPlusTree("[orth=der][base=katze]|[orth=der][base=hund]|[orth=der][base=baum]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(disj5.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [orth=der]([base=katze]|[base=hund]|[base=baum])
+		String disj6 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
+					"{@type=korap:group, operation=operation:or, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=katze, layer=lemma, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=hund, layer=lemma, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=baum, layer=lemma, match=match:eq}}" +
+					"]}" +
+				"]}";
+		ppt = new PoliqarpPlusTree("[orth=der]([base=katze]|[base=hund]|[base=baum])");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(disj6.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test

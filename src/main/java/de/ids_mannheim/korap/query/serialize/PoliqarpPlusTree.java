@@ -157,6 +157,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             tree = parsePoliqarpQuery(query.replaceAll(" ", ""));
         }
         super.parser = this.parser;
+        log.info("Processing PoliqarpPlus");
         System.out.println("Processing PoliqarpPlus");
         requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
 //		prepareContext(requestMap);
@@ -215,7 +216,9 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             // ignore this node if it only serves as an aligned sequence container
             if (node.getChildCount() > 1) {
                 if (getNodeCat(node.getChild(1)).equals("cq_segments") && hasChild(node.getChild(1), "alignment")) {
-//				if (getNodeCat(node.getChild(0)).equals("align")) {	
+                    ignoreCq_segment = true;
+                }
+                if (getNodeCat(node.getChild(0)).equals("(") && getNodeCat(node.getChild(node.getChildCount()-1)).equals(")")) {
                     ignoreCq_segment = true;
                 }
             }
@@ -970,12 +973,14 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
         // Some things went wrong ...
         catch (Exception e) {
+        	log.error(e.getMessage());
             System.err.println(e.getMessage());
         }
 
-        if (tree == null) throw new QueryException(
-                "The query you specified could not be processed. Please make sure it is well-formed.");
-
+        if (tree == null) {
+        	log.error("The query you specified could not be processed. Please make sure it is well-formed.");
+        	throw new QueryException("The query you specified could not be processed. Please make sure it is well-formed.");
+        }
         // Return the generated tree
         return tree;
     }
@@ -994,9 +999,12 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                 "contains(<cnx/c=np>, [mate/pos=NE])",
                 "matches(<A>,[pos=N]*)",
                 "[base=Auto]matches(<A>,[][pos=N]{4})",
-                "[base=der][]*[base=Mann]"
+                "[base=der][]*[base=Mann]",
+                "[base=der] within s",
+                "([orth=der][base=katze])|([orth=eine][base=baum])",
+                "[orth=der][base=katze]|[orth=eine][base=baum]"
         };
-//		PoliqarpPlusTree.verbose=true;
+		PoliqarpPlusTree.verbose=true;
         for (String q : queries) {
             try {
                 System.out.println(q);

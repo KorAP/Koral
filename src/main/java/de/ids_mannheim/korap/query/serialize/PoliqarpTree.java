@@ -18,6 +18,7 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.LoggerFactory;
 
 //import de.ids_mannheim.korap.query.poliqarp.PoliqarpLexer;
 //import de.ids_mannheim.korap.query.poliqarp.PoliqarpParser;
@@ -31,7 +32,8 @@ import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
  *
  */
 public class PoliqarpTree extends Antlr4AbstractSyntaxTree {
-	
+    private static org.slf4j.Logger log = LoggerFactory
+            .getLogger(PoliqarpTree.class);
 	/**
 	 * Top-level map representing the whole request.
 	 */
@@ -124,8 +126,10 @@ public class PoliqarpTree extends Antlr4AbstractSyntaxTree {
 	@Override
 	public void process(String query) {
 		ParseTree tree = parsePoliqarpQuery(query);
+		log.info("Processing Poliqarp query.");
 		System.out.println("Processing Poliqarp");
 		processNode(tree);
+		log.info(requestMap.toString());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -421,7 +425,8 @@ public class PoliqarpTree extends Antlr4AbstractSyntaxTree {
 
 	    // Some things went wrong ...
 	    catch (Exception e) {
-	      System.err.println( e.getMessage() );
+	    	log.error(e.getMessage());
+	    	System.err.println( e.getMessage() );
 	    }
 
 	    // Return the generated tree
