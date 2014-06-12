@@ -821,6 +821,23 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree("split(2|3:startswith(<s>,{3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}})) ");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(shr7.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		
+		String shr8 = 
+				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+							"{@type=korap:token, wrap={@type=korap:term, key=der, layer=lemma, match=match:eq}}" +
+						"]}," +
+						"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:token, wrap={@type=korap:term, key=ADJA, layer=pos, match=match:eq}}" +
+						"]}" +
+					"]}" +
+				"]}";
+			ppt = new PoliqarpPlusTree("shrink(1:{[base=der]}{1:[pos=ADJA]})");
+			map = ppt.getRequestMap().get("query").toString();
+			assertEquals(shr8.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
 	}
 	
 	

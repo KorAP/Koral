@@ -213,6 +213,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             cqHasOccChild = false;
             // disregard empty segments in simple queries (parsed by ANTLR as empty cq_segments)
             ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(parser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position")));
+//            ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(parser).equals(" ") || getNodeCat(node.getChild(0)).equals("position")));
             // ignore this node if it only serves as an aligned sequence container
             if (node.getChildCount() > 1) {
                 if (getNodeCat(node.getChild(1)).equals("cq_segments") && hasChild(node.getChild(1), "alignment")) {
@@ -222,6 +223,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                     ignoreCq_segment = true;
                 }
             }
+            System.err.println("WAAAAAAH"+objectStack);
             if (!ignoreCq_segment) {
                 LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
                 // Step 0:  cq_segments has 'occ' child -> introduce group as super group to the sequence/token/group
@@ -330,6 +332,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                         }
                     } else if (!objectStack.isEmpty()) {
                         // embed in super sequence
+                    	System.err.println("BBBBUUUHH "+isContainerOnly(node));
+
                         ArrayList<Object> topSequenceOperands;
                         if (!isContainerOnly(node)) {
                             try {
@@ -1002,7 +1006,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                 "[base=der][]*[base=Mann]",
                 "[base=der] within s",
                 "([orth=der][base=katze])|([orth=eine][base=baum])",
-                "[orth=der][base=katze]|[orth=eine][base=baum]"
+                "[orth=der][base=katze]|[orth=eine][base=baum]",
+                "shrink(1:{[base=der]}{1:[pos=ADJA]})"
         };
 		PoliqarpPlusTree.verbose=true;
         for (String q : queries) {

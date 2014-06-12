@@ -93,7 +93,7 @@ public abstract class Antlr4AbstractSyntaxTree extends AbstractSyntaxTree {
      * @return true iff the node is a container only.
      */
     public boolean isContainerOnly(ParseTree node) {
-    	String[] validNodeNamesArray = "cq_segment sq_segment element empty_segments".split(" ");
+    	String[] validNodeNamesArray = "cq_segment sq_segment element empty_segments spanclass".split(" ");
     	List<String> validNodeNames = Arrays.asList(validNodeNamesArray);
     	List<ParseTree> children = getChildren(node);
     	for (ParseTree child : children) {
