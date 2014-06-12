@@ -223,7 +223,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                     ignoreCq_segment = true;
                 }
             }
-            System.err.println("WAAAAAAH"+objectStack);
             if (!ignoreCq_segment) {
                 LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
                 // Step 0:  cq_segments has 'occ' child -> introduce group as super group to the sequence/token/group
@@ -332,8 +331,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                         }
                     } else if (!objectStack.isEmpty()) {
                         // embed in super sequence
-                    	System.err.println("BBBBUUUHH "+isContainerOnly(node));
-
                         ArrayList<Object> topSequenceOperands;
                         if (!isContainerOnly(node)) {
                             try {
