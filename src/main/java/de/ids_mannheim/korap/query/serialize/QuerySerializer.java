@@ -123,6 +123,8 @@ public class QuerySerializer {
 
     public QuerySerializer setQuery(String query, String ql, String version)
             throws QueryException {
+
+
         try {
             if (ql.equalsIgnoreCase("poliqarp")) {
                 ast = new PoliqarpPlusTree(query);
