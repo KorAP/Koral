@@ -58,7 +58,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	/**
 	 * Keeps track of explicitly (by #-var definition) or implicitly (number as reference) introduced entities (for later reference by #-operator)
 	 */
-	Map<String, Object> variableReferences = new LinkedHashMap<String, Object>(); 
+	Map<String, LinkedHashMap<String,Object>> variableReferences = new LinkedHashMap<String, LinkedHashMap<String,Object>>(); 
 	/**
 	 * Counter for variable definitions.
 	 */
@@ -151,6 +151,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			throw new NullPointerException("Parser has not been instantiated!"); 
 		}
 		log.info("Processing Annis query.");
+		log.info("AST is: "+tree.toStringTree(parser));
 		System.out.println("Processing Annis QL");
 		if (verbose) System.out.println(tree.toStringTree(parser));
 		processNode(tree);
@@ -200,7 +201,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			List<ParseTree> globalLingTermNodes = new ArrayList<ParseTree>();
 			for (ParseTree exprNode : getChildrenWithCat(node,"expr")) {
 				List<ParseTree> lingTermNodes = new ArrayList<ParseTree>();
-				lingTermNodes.addAll(getChildrenWithCat(exprNode, "unary_linguistic_term"));
+//				lingTermNodes.addAll(getChildrenWithCat(exprNode, "unary_linguistic_term"));
 				lingTermNodes.addAll(getChildrenWithCat(exprNode, "n_ary_linguistic_term"));
 				globalLingTermNodes.addAll(lingTermNodes);
 				// Traverse refOrNode nodes under *ary_linguistic_term nodes and extract references
@@ -255,62 +256,65 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		}
 		
 		if (nodeCat.equals("unary_linguistic_term")) {
-			
+			LinkedHashMap<String, Object> unaryOperator = parseUnaryOperator(node);
+			String reference = node.getChild(0).toStringTree(parser).substring(1);
+			LinkedHashMap<String, Object> object = variableReferences.get(reference);
+			object.putAll(unaryOperator);
 		}
 		
 		if (nodeCat.equals("n_ary_linguistic_term")) {
 			// get referenced operands
-			// TODO generalize operator
-			// TODO capture variableExprs
 			
 			// get operator and determine type of group (sequence/treeRelation/relation/...)
-			LinkedHashMap<String, Object> operatorTree = parseOperatorNode(node.getChild(1).getChild(0));
-			String groupType;
-			try {
-				groupType = (String) operatorTree.get("groupType");
-			} catch (ClassCastException | NullPointerException n) {
-				groupType = "relation";
-			}
-			LinkedHashMap<String, Object> group = makeGroup(groupType);
-			if (groupType.equals("relation") || groupType.equals("treeRelation")) {
-				LinkedHashMap<String, Object> relationGroup = new LinkedHashMap<String, Object>();
-				putAllButGroupType(relationGroup, operatorTree);
-				group.put("relation", relationGroup);
-			} else if (groupType.equals("sequence")) {
-				putAllButGroupType(group, operatorTree);
-			} else if (groupType.equals("position")) {
-				String frame = (String) operatorTree.get("frame");
-//				if (!mirroredPositionFrames.contains(frame.substring(6))) { //remove leading "frame:"
+			List<ParseTree> operatorNodes = getChildrenWithCat(node, "operator");
+			int i = 1;
+			for (ParseTree operatorNode : operatorNodes) {
+				ParseTree operand1 = node.getChild(i-1);
+				ParseTree operand2 = node.getChild(i+1);
+				LinkedHashMap<String, Object> operatorTree = parseOperatorNode(node.getChild(i).getChild(0));
+				String groupType;
+				try {
+					groupType = (String) operatorTree.get("groupType");
+				} catch (ClassCastException | NullPointerException n) {
+					groupType = "relation";
+				}
+				LinkedHashMap<String, Object> group = makeGroup(groupType);
+				if (groupType.equals("relation") || groupType.equals("treeRelation")) {
+					LinkedHashMap<String, Object> relationGroup = new LinkedHashMap<String, Object>();
+					putAllButGroupType(relationGroup, operatorTree);
+					group.put("relation", relationGroup);
+				} else if (groupType.equals("sequence")) {
 					putAllButGroupType(group, operatorTree);
-//				} else {
-//					group = makeGroup("or");
-//					LinkedHashMap<String, Object> group1 = makeGroup(groupType);
-//					LinkedHashMap<String, Object> group2 = makeGroup(groupType);
-//					putAllButGroupType(group1, operatorTree);
-//					putAllButGroupType(group2, operatorTree);
-//					ArrayList<Object> groupOperands = (ArrayList<Object>) group.get("operands");
-//					groupOperands.add(group1);
-//					groupOperands.add(group2);
-//					ArrayList<ArrayList<Object>> distOperandsList = new ArrayList<ArrayList<Object>>();
-//					distOperandsList.add((ArrayList<Object>) group1.get("operands"));
-//					distOperandsList.add((ArrayList<Object>) group2.get("operands"));
-//					invertedOperandsLists.push((ArrayList<Object>) group2.get("operands"));
-//					distributedOperandsLists.push(distOperandsList);
-//				}
-			}
-			// insert referenced nodes into operands list
-			List<Object> operands = (List<Object>) group.get("operands");
-			for (ParseTree refOrNode : getChildrenWithCat(node, "refOrNode")) {
-				if (!getNodeCat(refOrNode.getChild(0)).equals("variableExpr")) {
-					String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
+				} else if (groupType.equals("position")) {
+					putAllButGroupType(group, operatorTree);
+				}
+				// insert referenced nodes into operands list
+				List<Object> operands = (List<Object>) group.get("operands");
+				if (!getNodeCat(operand1.getChild(0)).equals("variableExpr")) {
+					String ref = operand1.getChild(0).toStringTree(parser).substring(1);
 					operands.add(variableReferences.get(ref));
 				} else {
 					
 				}
+				// also process second operand, but only if there is no subsequent operator
+				// that will claim the second operand as its first!
+				if (i == node.getChildCount()-2) {
+					if (!getNodeCat(operand2.getChild(0)).equals("variableExpr")) {
+						String ref = operand2.getChild(0).toStringTree(parser).substring(1);
+						operands.add(variableReferences.get(ref));
+					} else {
+						
+					}
+				}
+				putIntoSuperObject(group);
+				objectStack.push(group);
+				stackedObjects++;
+				
+				i += 2;
 			}
-			putIntoSuperObject(group);
-			objectStack.push(group);
-			stackedObjects++;
+			
+			
+
 		}
 		
 		if (nodeCat.equals("variableExpr")) {
@@ -322,6 +326,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			} else if (firstChildNodeCat.equals("tok")) {
 				object = makeToken();
 				LinkedHashMap<String, Object> term = makeTerm();
+				term.put("layer", "orth");
 				object.put("wrap", term);
 			} else if (firstChildNodeCat.equals("qName")) {	// only (foundry/)?layer specified
 				// may be token or span, depending on indicated layer! (e.g. cnx/cat=NP or mate/pos=NN)
@@ -390,6 +395,27 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		openNodeCats.pop();
 	}
 
+
+	/**
+	 * Parses a unary_linguistic_operator node. Possible operators are: root, arity, tokenarity.
+	 * Operators are embedded into a korap:term, in turn wrapped by an 'attr' property in a korap:span.
+	 * @param node The unary_linguistic_operator node
+	 * @return A map containing the attr key, to be inserted into korap:span 
+	 */
+	private LinkedHashMap<String, Object> parseUnaryOperator(ParseTree node) {
+		LinkedHashMap<String, Object> attr = new LinkedHashMap<String, Object>();
+		LinkedHashMap<String, Object> term = makeTerm();
+		String op = node.getChild(1).toStringTree(parser).substring(1);
+		if (op.equals("arity") || op.equals("tokenarity")) {
+			LinkedHashMap<String, Object> boundary = boundaryFromRangeSpec(node.getChild(3), false);
+			term.put(op, boundary);
+		} else {
+			term.put(op, true);
+		}
+		
+		attr.put("attr", term);
+		return attr;
+	}
 
 	private LinkedHashMap<String, Object> parseOperatorNode(ParseTree operatorNode) {
 		LinkedHashMap<String, Object> relation = null;
@@ -522,8 +548,13 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	}
 
 	private LinkedHashMap<String, Object> boundaryFromRangeSpec(ParseTree rangeSpec) {
+		return boundaryFromRangeSpec(rangeSpec, true); 
+	}
+	
+	private LinkedHashMap<String, Object> boundaryFromRangeSpec(ParseTree rangeSpec, boolean expandToMax) {
 		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
-		Integer max = MAXIMUM_DISTANCE;
+		Integer max = min;
+		if (expandToMax) max = MAXIMUM_DISTANCE;
 		if (rangeSpec.getChildCount()==3) 
 			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
 		return makeBoundary(min, max);
@@ -671,13 +702,19 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 */
 		String[] queries = new String[] {
 			 "node & #1:root",
-			 "pos=\"N\" & pos=\"V\" & pos=\"N\" & #1 . #2 & #2 . #3"
+			 "pos=\"N\" & pos=\"V\" & pos=\"N\" & #1 . #2 & #2 . #3",
+			 "cat=\"NP\" & #1:tokenarity=2",
+			 "node & node & node & #1 . #2 . #3"
+//			 "cnx/cat=\"NP\" > node",
+//			 "node > node",
+//			 "cat=/NP/ > node",
+//			 "/Mann/",
+//			 "node > tok=\"foo\"",
 			};
-		AqlTree.verbose=true;
+//		AqlTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);
-//				System.out.println(AqlTree.parseAnnisQuery(q).toStringTree(AqlTree.parser));
 				AqlTree at = new AqlTree(q);
 				System.out.println(at.parseAnnisQuery(q).toStringTree(at.parser));
 				System.out.println();

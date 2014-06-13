@@ -34,7 +34,7 @@ public class AqlTreeTest {
 		
 		// [orth!=Frau]
 		query = "tok!=\"Frau\"";
-		String token2 = "{@type=korap:token, wrap={@type=korap:term, key=Frau, match=match:ne}}";
+		String token2 = "{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Frau, match=match:ne}}";
 		assertTrue(equalsQueryContent(token2, query));
 		
 		// Mann
@@ -163,6 +163,23 @@ public class AqlTreeTest {
 	}
 	
 	@Test
+	public void testMultipleDominance() throws QueryException {
+		query = "cat=\"NP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";
+		String dom1 = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span, layer=cat, key=NP, match=match:eq}," +
+						"{@type=korap:group, operation=operation:relation, operands=[" +
+							"{@type=korap:span, layer=cat, key=VP, match=match:eq}," +
+							"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
+						"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
 	public void testPointingRelations() throws QueryException {
 		query = "node & node & #2 ->label[coref=\"true\"] #1";
 		String dom1 = 
@@ -190,7 +207,7 @@ public class AqlTreeTest {
 	@Test
 	public void testSequence() throws QueryException {
 		query = "node & node & #1 . #2";
-		String dom1 = 
+		String seq1 = 
 				"{@type=korap:group, operation=operation:sequence, " +
 					"operands=[" +
 						"{@type=korap:span}," +
@@ -199,10 +216,10 @@ public class AqlTreeTest {
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
-		assertEquals(dom1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(seq1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "node & node & #1 .* #2";
-		String dom2 = 
+		String seq2 = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
@@ -212,7 +229,59 @@ public class AqlTreeTest {
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
-		assertEquals(dom2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(seq2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "node & node & #1 .2,3 #2";
+		String seq3 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:span}" +
+					"], distances=[" +
+						"{@type=korap:distance, key=w, min=2, max=3}" +
+					"], inOrder=true" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(seq3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+	}
+	
+	@Test
+	public void testMultipleSequence() throws QueryException {
+		query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & #1 .0,2 #2 .0,4 #3";
+		String seq4 = 
+				"{@type=korap:group, operation=operation:sequence," +
+						"operands=[" +
+							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
+							"{@type=korap:group, operation=operation:sequence, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}," +
+									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
+								"], distances=[" +
+									"{@type=korap:distance, key=w, min=0, max=4}" +
+								"], inOrder=true}" +
+						"],distances=[" +
+							"{@type=korap:distance, key=w, min=0, max=2}" +
+						"], inOrder=true" +
+					"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(seq4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "node & node & node & #1 . #2 .1,3 #3";
+		String seq5 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:group, operation=operation:sequence, operands=[" +
+							"{@type=korap:span}," +
+							"{@type=korap:span}" +
+						"], distances=[" +
+							"{@type=korap:distance, key=w, min=1, max=3}" +
+						"], inOrder=true}" +
+					"], inOrder=true" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(seq5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
@@ -228,48 +297,110 @@ public class AqlTreeTest {
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(pos1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
-//		query = "node & node & #2 _i_ #1";
-//		String pos2 = 
-//				"{@type=korap:group, operation=operation:position, operands=[" +
-//						"{@type=korap:span}," +
-//						"{@type=korap:span}" +
-//				"], frame=frame:contains" +
-//				"}";
-//		aqlt = new AqlTree(query);
-//		map = aqlt.getRequestMap().get("query").toString();
-//		assertEquals(pos2.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		query = "node & node & #2 _l_ #1";
-//		String pos3 = 
-//				"{@type=korap:group, operation=operation:position, operands=[" +
-//						"{@type=korap:span}," +
-//						"{@type=korap:span}" +
-//				"], frame=frame:startswith" +
-//				"}";
-//		aqlt = new AqlTree(query);
-//		map = aqlt.getRequestMap().get("query").toString();
-//		assertEquals(pos3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		query = "node & node & #2 _i_ #1";
+		String pos2 = 
+				"{@type=korap:group, operation=operation:position, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:span}" +
+				"], frame=frame:contains" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(pos2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
-		query = "node & \"Mann\" & #2 _r_ #1";
+		query = "node & node & #2 _l_ #1";
+		String pos3 = 
+				"{@type=korap:group, operation=operation:position, operands=[" +
+						"{@type=korap:span}," +
+						"{@type=korap:span}" +
+				"], inOrder=false, frame=frame:startswith" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(pos3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "node & \"Mann\" & #1 _r_ #2";
 		String pos4 = 
-				"{@type=korap:group, operation=operation:or, operands=[" +
 					"{@type=korap:group, operation=operation:position, operands=[" +
 						"{@type=korap:span}," +
-						"{@type=korap:token, wrap={@type=korap:term, type=type:regex, key=Mann, match=match:eq}}" +
-						"], frame=frame:endswith" +
-					"}," +
-					"{@type=korap:group, operation=operation:position, operands=[" +
-						"{@type=korap:token, wrap={@type=korap:term, type=type:regex, key=Mann, match=match:eq}}," +
-						"{@type=korap:span}" +
-						"], frame=frame:endswith" +
-					"}" +
-				"]}";
+						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+						"], inOrder=false, frame=frame:endswith" +
+					"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(pos4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
+		query = "node & \"Mann\" & #2 _r_ #1";
+		String pos5 = 
+					"{@type=korap:group, operation=operation:position, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}," +
+						"{@type=korap:span}" +
+						"], inOrder=false, frame=frame:endswith" +
+					"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(pos5.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
+	@Test
+	public void testMultiplePredications() throws QueryException {
+		// a noun before a verb before a noun
+		// XXX Warning incorrect serialisation! Need to ensure that the two Vs are identical! 
+		// Embed in one sequence!
+		query = "pos=\"N\" & pos=\"V\" & pos=\"N\" & #1 . #2 & #2 . #3"; 
+		String mult1 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
+					"], inOrder=true}," +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}" +
+					"], inOrder=true}" +
+				"], distances=[" +
+					"{@type=korap:distance, key=t, min=0, max=0}" +
+				"]}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(mult1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}	
+	
+	@Test
+	public void testUnaryRelations() throws QueryException {
+		query = "node & #1:tokenarity=2";
+		String unary1 = 
+				"{@type=korap:span, attr={@type=korap:term, tokenarity={@type=korap:boundary,min=2,max=2}}}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(unary1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "cnx/cat=\"NP\" & #1:tokenarity=2";
+		String unary2 = 
+				"{@type=korap:span, foundry=cnx, layer=cat, key=NP, match=match:eq, attr={@type=korap:term, tokenarity={@type=korap:boundary,min=2,max=2}}}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(unary2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "cnx/cat=\"NP\" & #1:root";
+		String unary3 = 
+				"{@type=korap:span, foundry=cnx, layer=cat, key=NP, match=match:eq, attr={@type=korap:term, root=true}}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(unary3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "cnx/cat=\"NP\" & node & #1>#2 & #1:tokenarity=2";
+		String unary4 = 
+					"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span, foundry=cnx, layer=cat, key=NP, match=match:eq, attr={@type=korap:term, tokenarity={@type=korap:boundary,min=2,max=2}}}," +
+						"{@type=korap:span}" +
+					"], relation={@type=korap:treeRelation, reltype=dominance}" +
+					"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(unary4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}	
+	
+	// TODO commonparent, commonancestor
 	
 }
-
