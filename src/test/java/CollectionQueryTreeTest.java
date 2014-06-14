@@ -51,7 +51,7 @@ public class CollectionQueryTreeTest {
         System.out.println("BUILDER RESULT: " + builder.toJSON());
     }
 
-    @Test
+//    @Test
     public void testSimpleBuilder() {
         CollectionQueryBuilder b = new CollectionQueryBuilder();
         b.addMetaFilter("corpusID", "WPD");
@@ -61,7 +61,7 @@ public class CollectionQueryTreeTest {
     }
 
     // old builder pubDate query
-    @Test
+//    @Test
     public void testDateQuery() {
         CollectionQueryBuilder b = new CollectionQueryBuilder();
         String query = "pubDate=>" + TimeUtils.getNow().getMillis();
