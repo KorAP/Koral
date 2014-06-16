@@ -164,19 +164,36 @@ public class AqlTreeTest {
 	
 	@Test
 	public void testMultipleDominance() throws QueryException {
-		query = "cat=\"NP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";
+		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";
 		String dom1 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
-						"{@type=korap:span, layer=cat, key=NP, match=match:eq}," +
 						"{@type=korap:group, operation=operation:relation, operands=[" +
-							"{@type=korap:span, layer=cat, key=VP, match=match:eq}," +
-							"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
-						"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+							"{@type=korap:span, layer=cat, key=CP, match=match:eq}," +
+							"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
+						"], relation={@type=korap:treeRelation, reltype=dominance}}," +
+						"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
 				"], relation={@type=korap:treeRelation, reltype=dominance}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(dom1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & cat=\"DP\" & #1 > #2 > #3 > #4";
+		String dom2 = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:group, operation=operation:relation, operands=[" +
+							"{@type=korap:group, operation=operation:relation, operands=[" +
+								"{@type=korap:span, layer=cat, key=CP, match=match:eq}," +
+								"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
+							"], relation={@type=korap:treeRelation, reltype=dominance}}," +
+							"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
+						"], relation={@type=korap:treeRelation, reltype=dominance}}," +
+						"{@type=korap:span, layer=cat, key=DP, match=match:eq}" +
+					"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(dom2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
@@ -252,15 +269,15 @@ public class AqlTreeTest {
 		String seq4 = 
 				"{@type=korap:group, operation=operation:sequence," +
 						"operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
-									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}," +
-									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
-								"], distances=[" +
-									"{@type=korap:distance, key=w, min=0, max=4}" +
-								"], inOrder=true}" +
+								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
+								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
+							"], distances=[" +
+								"{@type=korap:distance, key=w, min=0, max=2}" +
+							"], inOrder=true}," +	
+							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 						"],distances=[" +
-							"{@type=korap:distance, key=w, min=0, max=2}" +
+							"{@type=korap:distance, key=w, min=0, max=4}" +
 						"], inOrder=true" +
 					"}";
 		aqlt = new AqlTree(query);
@@ -270,18 +287,38 @@ public class AqlTreeTest {
 		query = "node & node & node & #1 . #2 .1,3 #3";
 		String seq5 = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
-						"{@type=korap:span}," +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:span}," +
 							"{@type=korap:span}" +
-						"], distances=[" +
+						"], inOrder=true}," +
+						"{@type=korap:span}" +
+					"], distances=[" +
 							"{@type=korap:distance, key=w, min=1, max=3}" +
-						"], inOrder=true}" +
-					"], inOrder=true" +
+						"], inOrder=true" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(seq5.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
+	public void testMultipleMixedOperators() throws QueryException {
+		query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & #1 > #2 .0,4 #3";
+		String seq4 = 
+					"{@type=korap:group, operation=operation:sequence," +
+						"operands=[" +
+							"{@type=korap:group, operation=operation:relation, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
+									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
+								"], relation={@type=korap:treeRelation, reltype=dominance}}," +
+								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
+						"], distances=[" +
+							"{@type=korap:distance, key=w, min=0, max=4}" +
+						"], inOrder=true" +
+					"}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(seq4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test

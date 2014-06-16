@@ -56,6 +56,10 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 */
 	LinkedList<LinkedHashMap<String,Object>> objectStack = new LinkedList<LinkedHashMap<String,Object>>();
 	/**
+	 * Keeps track of operands that are to be integrated into yet uncreated objects.
+	 */
+	LinkedList<LinkedHashMap<String,Object>> operandStack = new LinkedList<LinkedHashMap<String,Object>>();
+	/**
 	 * Keeps track of explicitly (by #-var definition) or implicitly (number as reference) introduced entities (for later reference by #-operator)
 	 */
 	Map<String, LinkedHashMap<String,Object>> variableReferences = new LinkedHashMap<String, LinkedHashMap<String,Object>>(); 
@@ -72,9 +76,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 * order (e.g. the IN() operator) compared to their AST representation. 
 	 */
 	private LinkedList<ArrayList<Object>> invertedOperandsLists = new LinkedList<ArrayList<Object>>();
-
-	private LinkedList<ArrayList<ArrayList<Object>>> distributedOperandsLists = new LinkedList<ArrayList<ArrayList<Object>>>();
-	
 	/**
 	 * Keeps track of how many objects there are to pop after every recursion of {@link #processNode(ParseTree)}
 	 */
@@ -224,7 +225,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 //				stackedObjects++;
 //				putIntoSuperObject(andGroup,1);
 //			}
-			System.out.println(globalLingTermNodes.size());
 			if (globalLingTermNodes.size() > 1) {
 				LinkedHashMap<String, Object> zeroTextDistance = makeGroup("sequence");
 				ArrayList<Object> distances = new ArrayList<Object>();
@@ -263,12 +263,10 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		}
 		
 		if (nodeCat.equals("n_ary_linguistic_term")) {
-			// get referenced operands
-			
 			// get operator and determine type of group (sequence/treeRelation/relation/...)
-			List<ParseTree> operatorNodes = getChildrenWithCat(node, "operator");
-			int i = 1;
-			for (ParseTree operatorNode : operatorNodes) {
+			// It's possible in Annis QL to concatenate operators, so there may be several operators under one n_ary_linguistic_term node. 
+			// Counter 'i' will point to all operator nodes under this node.
+			for (int i=1; i<node.getChildCount(); i = i+2) {
 				ParseTree operand1 = node.getChild(i-1);
 				ParseTree operand2 = node.getChild(i+1);
 				LinkedHashMap<String, Object> operatorTree = parseOperatorNode(node.getChild(i).getChild(0));
@@ -290,31 +288,63 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				}
 				// insert referenced nodes into operands list
 				List<Object> operands = (List<Object>) group.get("operands");
-				if (!getNodeCat(operand1.getChild(0)).equals("variableExpr")) {
-					String ref = operand1.getChild(0).toStringTree(parser).substring(1);
-					operands.add(variableReferences.get(ref));
-				} else {
-					
-				}
-				// also process second operand, but only if there is no subsequent operator
-				// that will claim the second operand as its first!
-				if (i == node.getChildCount()-2) {
+				
+				// -> Case distinction:
+				// Things are easy when there's just one operator (thus 3 children incl. operands)...				
+				if (node.getChildCount()==3) {
+					if (!getNodeCat(operand1.getChild(0)).equals("variableExpr")) {
+						String ref1 = operand1.getChild(0).toStringTree(parser).substring(1);
+						operands.add(variableReferences.get(ref1));
+					}
 					if (!getNodeCat(operand2.getChild(0)).equals("variableExpr")) {
-						String ref = operand2.getChild(0).toStringTree(parser).substring(1);
-						operands.add(variableReferences.get(ref));
+						String ref2 = operand2.getChild(0).toStringTree(parser).substring(1);
+						operands.add(variableReferences.get(ref2));
+					}
+					putIntoSuperObject(group);
+					objectStack.push(group);
+					stackedObjects++;
+				// ...but stuff gets a little more complicated here. The AST is of this form: (operand1 operator 1 operand2 operator2 operand3 operator3 ...)
+				// but we'll have to serialize it in a nested, binary way: (((operand1 operator1 operand2) operator2 operand3) operator3 ...)
+				// the following code will do just that:
+				} else { 
+					// for the first operator, include both operands
+					if (i == 1) {
+						if (!getNodeCat(operand1.getChild(0)).equals("variableExpr")) {
+							String ref1 = operand1.getChild(0).toStringTree(parser).substring(1);
+							operands.add(variableReferences.get(ref1));
+						}
+						if (!getNodeCat(operand2.getChild(0)).equals("variableExpr")) {
+							String ref2= operand2.getChild(0).toStringTree(parser).substring(1);
+							operands.add(variableReferences.get(ref2));
+						}
+						// Don't put this into the super object directly but store on operandStack 
+						// (because this group will have to be an operand of a subsequent operator)
+						operandStack.push(group);
+					// for all subsequent operators, only take the 2nd operand (first was already added by previous operator)
+					// This is the last operator. Include 2nd operand and insert previously stored group at first position
+					} else if (i == node.getChildCount()-2) {
+						if (!getNodeCat(operand2.getChild(0)).equals("variableExpr")) {
+							String ref2 = operand2.getChild(0).toStringTree(parser).substring(1);
+							operands.add(variableReferences.get(ref2));
+						}
+						putIntoSuperObject(group);
+						if (!operandStack.isEmpty()) {
+							operands.add(0, operandStack.pop());
+							operandStack.clear();
+						}
+						objectStack.push(group);
+						stackedObjects++;
+					// for all intermediate operators, include other previous groups and 2nd operand. Store this on the operandStack, too.
 					} else {
-						
+						if (!getNodeCat(operand2.getChild(0)).equals("variableExpr")) {
+							String ref2 = operand2.getChild(0).toStringTree(parser).substring(1);
+							operands.add(variableReferences.get(ref2));
+						}
+						operands.add(0, operandStack.pop());
+						operandStack.push(group);
 					}
 				}
-				putIntoSuperObject(group);
-				objectStack.push(group);
-				stackedObjects++;
-				
-				i += 2;
 			}
-			
-			
-
 		}
 		
 		if (nodeCat.equals("variableExpr")) {
@@ -361,7 +391,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			if (object != null) {
 				if (! operandOnlyNodeRefs.contains(variableCounter.toString())) {
 					putIntoSuperObject(object);
-					System.out.println(object.toString()+" "+objectStack.toString());
 				}
 				variableReferences.put(variableCounter.toString(), object);
 				variableCounter++;
@@ -704,14 +733,16 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			 "node & #1:root",
 			 "pos=\"N\" & pos=\"V\" & pos=\"N\" & #1 . #2 & #2 . #3",
 			 "cat=\"NP\" & #1:tokenarity=2",
-			 "node & node & node & #1 . #2 . #3"
+			 "node & node & node & #1 . #2 . #3",
+			 "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3",
+			 "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & cat=\"DP\" & #1 > #2 > #3 > #4"
 //			 "cnx/cat=\"NP\" > node",
 //			 "node > node",
 //			 "cat=/NP/ > node",
 //			 "/Mann/",
 //			 "node > tok=\"foo\"",
 			};
-//		AqlTree.verbose=true;
+		AqlTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);
