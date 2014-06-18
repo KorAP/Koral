@@ -82,6 +82,10 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
 	Integer stackedObjects = 0;
 	/**
+	 * Keeps track of operation:class numbers.
+	 */
+	int classCounter = 0;
+	/**
 	 * Keeps track of references to nodes that are operands of groups (e.g. tree relations). Those nodes appear on the top level of the parse tree
 	 * but are to be integrated into the AqlTree at a later point (namely as operands of the respective group). Therefore, store references to these
 	 * nodes here and exclude the operands from being written into the query map individually.   
@@ -201,8 +205,14 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			// and stores them in a list for later reference.
 			List<ParseTree> globalLingTermNodes = new ArrayList<ParseTree>();
 			for (ParseTree exprNode : getChildrenWithCat(node,"expr")) {
+				// Pre-process any 'variableExpr' such that the variableReferences map can be filled
+				List<ParseTree> definitionNodes = new ArrayList<ParseTree>();
+				definitionNodes.addAll(getChildrenWithCat(exprNode, "variableExpr"));
+				for (ParseTree definitionNode : definitionNodes) {
+					processNode(definitionNode);
+				}
+				// Then, mine all relations between nodes
 				List<ParseTree> lingTermNodes = new ArrayList<ParseTree>();
-//				lingTermNodes.addAll(getChildrenWithCat(exprNode, "unary_linguistic_term"));
 				lingTermNodes.addAll(getChildrenWithCat(exprNode, "n_ary_linguistic_term"));
 				globalLingTermNodes.addAll(lingTermNodes);
 				// Traverse refOrNode nodes under *ary_linguistic_term nodes and extract references
@@ -265,7 +275,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		if (nodeCat.equals("n_ary_linguistic_term")) {
 			// get operator and determine type of group (sequence/treeRelation/relation/...)
 			// It's possible in Annis QL to concatenate operators, so there may be several operators under one n_ary_linguistic_term node. 
-			// Counter 'i' will point to all operator nodes under this node.
+			// Counter 'i' will point to all operator nodes (odd-numbered) under this node.
 			for (int i=1; i<node.getChildCount(); i = i+2) {
 				ParseTree operand1 = node.getChild(i-1);
 				ParseTree operand2 = node.getChild(i+1);
@@ -276,18 +286,39 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				} catch (ClassCastException | NullPointerException n) {
 					groupType = "relation";
 				}
-				LinkedHashMap<String, Object> group = makeGroup(groupType);
-				if (groupType.equals("relation") || groupType.equals("treeRelation")) {
-					LinkedHashMap<String, Object> relationGroup = new LinkedHashMap<String, Object>();
-					putAllButGroupType(relationGroup, operatorTree);
-					group.put("relation", relationGroup);
-				} else if (groupType.equals("sequence")) {
-					putAllButGroupType(group, operatorTree);
-				} else if (groupType.equals("position")) {
-					putAllButGroupType(group, operatorTree);
+				LinkedHashMap<String, Object> group;
+				List<Object> operands;
+				if (i == node.getChildCount()-2) {
+					group = makeGroup(groupType);
+					if (groupType.equals("relation") || groupType.equals("treeRelation")) {
+						LinkedHashMap<String, Object> relationGroup = new LinkedHashMap<String, Object>();
+						putAllButGroupType(relationGroup, operatorTree);
+						group.put("relation", relationGroup);
+					} else if (groupType.equals("sequence")) {
+						putAllButGroupType(group, operatorTree);
+					} else if (groupType.equals("position")) {
+						putAllButGroupType(group, operatorTree);
+					}
+					// insert referenced nodes into operands list
+					operands = (List<Object>) group.get("operands");
+				} else {
+					group = makeGroup("submatch");
+					ArrayList<Integer> classRef = new ArrayList<Integer>();
+					classRef.add(classCounter);
+					LinkedHashMap<String, Object> actualGroup = makeGroup(groupType);
+					group.put("classRef", classRef);
+					((ArrayList<Object>) group.get("operands")).add(actualGroup);
+					if (groupType.equals("relation") || groupType.equals("treeRelation")) {
+						LinkedHashMap<String, Object> relationGroup = new LinkedHashMap<String, Object>();
+						putAllButGroupType(relationGroup, operatorTree);
+						actualGroup.put("relation", relationGroup);
+					} else if (groupType.equals("sequence")) {
+						putAllButGroupType(actualGroup, operatorTree);
+					} else if (groupType.equals("position")) {
+						putAllButGroupType(actualGroup, operatorTree);
+					}
+					operands = (List<Object>) actualGroup.get("operands");
 				}
-				// insert referenced nodes into operands list
-				List<Object> operands = (List<Object>) group.get("operands");
 				
 				// -> Case distinction:
 				// Things are easy when there's just one operator (thus 3 children incl. operands)...				
@@ -315,7 +346,10 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 						}
 						if (!getNodeCat(operand2.getChild(0)).equals("variableExpr")) {
 							String ref2= operand2.getChild(0).toStringTree(parser).substring(1);
-							operands.add(variableReferences.get(ref2));
+							LinkedHashMap<String, Object> classGroup = makeClass(classCounter);
+							((ArrayList<Object>) classGroup.get("operands")).add(variableReferences.get(ref2));
+							operands.add(classGroup);
+							classCounter++;
 						}
 						// Don't put this into the super object directly but store on operandStack 
 						// (because this group will have to be an operand of a subsequent operator)
@@ -338,7 +372,10 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 					} else {
 						if (!getNodeCat(operand2.getChild(0)).equals("variableExpr")) {
 							String ref2 = operand2.getChild(0).toStringTree(parser).substring(1);
-							operands.add(variableReferences.get(ref2));
+							LinkedHashMap<String, Object> classGroup = makeClass(classCounter);
+							((ArrayList<Object>) classGroup.get("operands")).add(variableReferences.get(ref2));
+							operands.add(classGroup);
+							classCounter++;
 						}
 						operands.add(0, operandStack.pop());
 						operandStack.push(group);
@@ -735,7 +772,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			 "cat=\"NP\" & #1:tokenarity=2",
 			 "node & node & node & #1 . #2 . #3",
 			 "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3",
-			 "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & cat=\"DP\" & #1 > #2 > #3 > #4"
+			 "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & cat=\"DP\" & #1 > #2 > #3 > #4",
+			 "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 . #2 & #2 . #3"
 //			 "cnx/cat=\"NP\" > node",
 //			 "node > node",
 //			 "cat=/NP/ > node",
