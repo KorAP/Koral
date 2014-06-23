@@ -181,7 +181,7 @@ public class AqlTreeTest {
 		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";
 		String dom1 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
-						"{@type=korap:group, operation=operation:submatch, operands=[" +
+						"{@type=korap:group, operation=operation:focus, operands=[" +
 							"{@type=korap:group, operation=operation:relation, operands=[" +
 								"{@type=korap:span, layer=cat, key=CP, match=match:eq}," +
 								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
@@ -199,9 +199,9 @@ public class AqlTreeTest {
 		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & cat=\"DP\" & #1 > #2 > #3 > #4";
 		String dom2 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
-						"{@type=korap:group, operation=operation:submatch, operands=[" +
+						"{@type=korap:group, operation=operation:focus, operands=[" +
 							"{@type=korap:group, operation=operation:relation, operands=[" +
-								"{@type=korap:group, operation=operation:submatch, operands=[" +
+								"{@type=korap:group, operation=operation:focus, operands=[" +
 									"{@type=korap:group, operation=operation:relation, operands=[" +
 										"{@type=korap:span, layer=cat, key=CP, match=match:eq}," +
 										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
@@ -295,7 +295,7 @@ public class AqlTreeTest {
 		String seq4 = 
 				"{@type=korap:group, operation=operation:sequence," +
 					"operands=[" +
-						"{@type=korap:group, operation=operation:submatch, operands=[" +
+						"{@type=korap:group, operation=operation:focus, operands=[" +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
 								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
@@ -317,7 +317,7 @@ public class AqlTreeTest {
 		query = "node & node & node & #1 . #2 .1,3 #3";
 		String seq5 = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
-						"{@type=korap:group, operation=operation:submatch, operands=[" +
+						"{@type=korap:group, operation=operation:focus, operands=[" +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
 								"{@type=korap:span}," +
 								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
@@ -340,7 +340,7 @@ public class AqlTreeTest {
 		query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & #1 > #2 .0,4 #3";
 		String seq4 = 
 					"{@type=korap:group, operation=operation:sequence, operands=[" +
-							"{@type=korap:group, operation=operation:submatch, operands=[" +
+							"{@type=korap:group, operation=operation:focus, operands=[" +
 									"{@type=korap:group, operation=operation:relation, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
 										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
@@ -360,7 +360,7 @@ public class AqlTreeTest {
 		query = "tok=\"Sonne\" & tok=\"Mond\" & #1 > #2 .0,4  tok=\"Sterne\"";
 		String seq5 = 
 					"{@type=korap:group, operation=operation:sequence, operands=[" +
-							"{@type=korap:group, operation=operation:submatch, operands=[" +
+							"{@type=korap:group, operation=operation:focus, operands=[" +
 									"{@type=korap:group, operation=operation:relation, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
 										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
@@ -438,25 +438,41 @@ public class AqlTreeTest {
 	
 	@Test
 	public void testMultiplePredications() throws QueryException {
-		// a noun before a verb before a noun
-		// XXX Warning incorrect serialisation! Need to ensure that the two Vs are identical! 
-		// Embed in one sequence!
+		// a noun before a verb before a preposition
 		query = "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 . #2 & #2 . #3"; 
 		String mult1 = 
+		"{@type=korap:group, operation=operation:sequence, operands=[" +
+			"{@type=korap:group, operation=operation:focus, operands=[" +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
-					"{@type=korap:group, operation=operation:submatch, operands=[" +
-						"{@type=korap:group, operation=operation:sequence, operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:class, class=0, operands=[" +
-								"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
-							"]}" +
-						"], inOrder=true}" +
-					"], classRef=[0]}," +
-					"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
-				"]}";
+					"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}," +
+					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
+					"]}" +
+				"], inOrder=true}" +
+			"], classRef=[0]}," +
+			"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
+		"], inOrder=true}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(mult1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// a noun before a verb before a preposition
+		query = "pos=\"N\" & pos=\"V\" & #1 . #2 & #2 . pos=\"P\""; 
+		String mult2 = 
+		"{@type=korap:group, operation=operation:sequence, operands=[" +
+			"{@type=korap:group, operation=operation:focus, operands=[" +
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}," +
+					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
+					"]}" +
+				"], inOrder=true}" +
+			"], classRef=[0]}," +
+			"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
+		"], inOrder=true}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(mult2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}	
 	
 	@Test

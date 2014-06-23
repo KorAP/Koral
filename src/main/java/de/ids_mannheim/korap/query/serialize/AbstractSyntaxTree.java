@@ -95,6 +95,13 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
+	protected LinkedHashMap<String, Object> makeFocus(int classRef) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:focus");
+		group.put("classRef", classRef);
+		return group;
+	}
+	
 	protected void addOperandsToGroup(LinkedHashMap<String, Object> group) {
 		ArrayList<Object> operands = new ArrayList<Object>();
 		group.put("operands", operands);
