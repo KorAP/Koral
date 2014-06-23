@@ -297,25 +297,31 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				if (!getNodeCat(operandTree1.getChild(0)).equals("variableExpr")) {
 					ref1 = operandTree1.getChild(0).toStringTree(parser).substring(1);
 					operand1 = variableReferences.get(ref1);
-					if (nodeReferencesProcessed.get(ref1) < nodeReferencesTotal.get(ref1)-1) {
-						operand1 = wrapInClass(operand1);
-						group = wrapInFocus(group);
-						classCounter++;
-						nodeReferencesProcessed.put(ref1, nodeReferencesProcessed.get(ref1)+1);
+					if (nodeReferencesTotal.get(ref1) > 1) {
+						if (nodeReferencesProcessed.get(ref1) == 0) {
+							operand1 = wrapInClass(operand1);
+							group = wrapInFocus(group);
+							classCounter++;
+							nodeReferencesProcessed.put(ref1, nodeReferencesProcessed.get(ref1)+1);
+						} else if (nodeReferencesProcessed.get(ref1)>0) {
+							operand1 = null;
+						}
 					}
 				}
 				if (!getNodeCat(operandTree2.getChild(0)).equals("variableExpr")) {
 					ref2 = operandTree2.getChild(0).toStringTree(parser).substring(1);
 					operand2 = variableReferences.get(ref2);
-					if (nodeReferencesProcessed.get(ref2) < nodeReferencesTotal.get(ref2)-1) {
-						operand2 = wrapInClass(operand2);
-						group = wrapInFocus(group);
-						classCounter++;
-						nodeReferencesProcessed.put(ref2, nodeReferencesProcessed.get(ref2)+1);
+					if (nodeReferencesTotal.get(ref2) > 1) {
+						if (nodeReferencesProcessed.get(ref2)==0) {
+							operand2 = wrapInClass(operand2);
+							group = wrapInFocus(group);
+							classCounter++;
+							nodeReferencesProcessed.put(ref2, nodeReferencesProcessed.get(ref2)+1);
+						} else if (nodeReferencesProcessed.get(ref2)>0 && nodeReferencesTotal.get(ref2)>1) {
+							operand2 = null;
+						}
 					}
 				}
-				// XXX deal with multiple predications
-				
 				// Inject operands.
 				// -> Case distinction:
 				if (node.getChildCount()==3) {
@@ -327,8 +333,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 					// ... but things get a little more complicated here. The AST is of this form: (operand1 operator 1 operand2 operator2 operand3 operator3 ...)
 					// but we'll have to serialize it in a nested, binary way: (((operand1 operator1 operand2) operator2 operand3) operator3 ...)
 					// the following code will do just that:
-					// for the first operator, include both operands
 					if (i == 1) {
+						// for the first operator, include both operands
 						if (operand1 != null) operands.add(operand1);
 						if (operand2 != null) operands.add(wrapInClass(operand2));
 						classCounter++;
@@ -336,17 +342,18 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 						// (because this group will have to be an operand of a subsequent operator)
 						operandStack.push(group);
 					// for all subsequent operators, only take the 2nd operand (first was already added by previous operator)
-					// This is the last operator. Include 2nd operand and insert previously stored group at first position
-					} else if (i == node.getChildCount()-2) {
-						if (operand2 != null) operands.add(operand2);
-					// for all intermediate operators, include other previous groups and 2nd operand. Store this on the operandStack, too.
-					} else {
+					} else if (i < node.getChildCount()-2){
+						// for all intermediate operators, include other previous groups and 2nd operand. Store this on the operandStack, too.
 						if (operand2 != null) operands.add(wrapInClass(operand2));
 						classCounter++;
 						operands.add(0, operandStack.pop());
 						operandStack.push(group);
+					} else if (i == node.getChildCount()-2) {
+						// This is the last operator. Include 2nd operand only
+						if (operand2 != null) operands.add(operand2);
 					}
 				}
+				// Final step: decide what to do with the 'group' object, depending on whether all relations have been processed
 				if (i == node.getChildCount()-2 && relationCounter == totalRelationCount) {
 					putIntoSuperObject(group);
 					if (!operandStack.isEmpty()) {
