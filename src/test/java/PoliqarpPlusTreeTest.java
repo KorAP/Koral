@@ -71,6 +71,23 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(cs2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="deutscher/i";
+		String cs3 = 
+				"{@type=korap:token, wrap={@type=korap:term, key=deutscher, layer=orth, match=match:eq, caseInsensitive=true}}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(cs3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="deutscher/i Bundestag";
+		String cs4 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=deutscher, layer=orth, match=match:eq, caseInsensitive=true}}," +
+						"{@type=korap:token, wrap={@type=korap:term, key=Bundestag, layer=orth, match=match:eq}}" +
+					"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(cs4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
@@ -824,19 +841,19 @@ public class PoliqarpPlusTreeTest {
 		
 		
 		String shr8 = 
-				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
-					"{@type=korap:group, operation=operation:sequence, operands=[" +
-						"{@type=korap:group, operation=operation:class, class=0, operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=der, layer=lemma, match=match:eq}}" +
-						"]}," +
-						"{@type=korap:group, operation=operation:class, class=1, operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=ADJA, layer=pos, match=match:eq}}" +
-						"]}" +
+			"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=der, layer=lemma, match=match:eq}}" +
+					"]}," +
+					"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, key=ADJA, layer=pos, match=match:eq}}" +
 					"]}" +
-				"]}";
-			ppt = new PoliqarpPlusTree("shrink(1:{[base=der]}{1:[pos=ADJA]})");
-			map = ppt.getRequestMap().get("query").toString();
-			assertEquals(shr8.replaceAll(" ", ""), map.replaceAll(" ", ""));
+				"]}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("shrink(1:{[base=der]}{1:[pos=ADJA]})");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(shr8.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 	}
 	

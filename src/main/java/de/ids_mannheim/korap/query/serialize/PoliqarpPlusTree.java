@@ -213,6 +213,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             cqHasOccChild = false;
             // disregard empty segments in simple queries (parsed by ANTLR as empty cq_segments)
             ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(parser).equals(" ") || getNodeCat(node.getChild(0)).equals("spanclass") || getNodeCat(node.getChild(0)).equals("position")));
+//            ignoreCq_segment = ignoreCq_segment | (node.getParent().getChildCount()==2 && getNodeCat(node.getParent().getChild(1)).equals("flag"));
+            
 //            ignoreCq_segment = (node.getChildCount() == 1 && (node.getChild(0).toStringTree(parser).equals(" ") || getNodeCat(node.getChild(0)).equals("position")));
             // ignore this node if it only serves as an aligned sequence container
             if (node.getChildCount() > 1) {
@@ -490,6 +492,16 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             if (foundry != null) fieldMap.put("foundry", foundry);
 
             fieldMap.put("match", "match:" + relation);
+
+        	
+            if (hasChild(valNode.getChild(0), "flag")) {
+            	ParseTree flagNode = getFirstChildWithCat(valNode.getChild(0), "flag").getChild(0);
+            	String flag = getNodeCat(flagNode).substring(1); //substring removes leading slash '/'
+                // add to current token's value
+                if (flag.contains("i")) fieldMap.put("caseInsensitive", true);
+                else if (flag.contains("I")) fieldMap.put("caseInsensitive", false);
+                else fieldMap.put("flag", flag);
+            }
             // Step II: decide where to put the field map (as the only value of a token or the meta filter or as a part of a group in case of coordinated fields)
             if (fieldStack.isEmpty()) {
                 if (!inMeta) {
@@ -1004,7 +1016,11 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                 "[base=der] within s",
                 "([orth=der][base=katze])|([orth=eine][base=baum])",
                 "[orth=der][base=katze]|[orth=eine][base=baum]",
-                "shrink(1:{[base=der]}{1:[pos=ADJA]})"
+                "shrink(1:{[base=der]}{1:[pos=ADJA]})",
+                "[mate/m : tense=pres]",
+                "[cnx/base=pos:n]",
+                "deutscher/i",
+                "[orth=deutscher/i]"
         };
 		PoliqarpPlusTree.verbose=true;
         for (String q : queries) {
