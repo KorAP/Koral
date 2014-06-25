@@ -290,15 +290,14 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
         if (nodeCat.equals("OPELEM")) {
             // Step I: create element
-            LinkedHashMap<String, Object> elem = new LinkedHashMap<String, Object>();
-            elem.put("@type", "korap:span");
+            LinkedHashMap<String, Object> span = makeSpan();
             if (node.getChild(0).toStringTree().equals("EMPTY")) {
 
             } else {
                 int elname = 0;
                 Tree elnameNode = getFirstChildWithCat(node, "ELNAME");
                 if (elnameNode != null) {
-                    elem.put("key", elnameNode.getChild(0).toStringTree().toLowerCase());
+                    span.put("key", elnameNode.getChild(0).toStringTree().toLowerCase());
                     elname = 1;
                 }
                 if (node.getChildCount() > elname) {
@@ -360,12 +359,12 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                         }
                         if (getNodeCat(attrNode).equals("NOTEQ")) negate = true;
                     }
-                    elem.put("attr", termGroup);
+                    span.put("attr", termGroup);
                 }
             }
 
             //Step II: decide where to put
-            putIntoSuperObject(elem);
+            putIntoSuperObject(span);
         }
 
         if (nodeCat.equals("OPLABEL")) {
@@ -722,7 +721,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //        else
 //            return layer;
         if (layer.equals("ANA"))
-            return ResourceMapper.descriptor2policy(layer);
+            return ResourceMapper.descriptor2policy("ANA");
         else
             return layer;
 
