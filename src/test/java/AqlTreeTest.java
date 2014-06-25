@@ -181,14 +181,14 @@ public class AqlTreeTest {
 		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";
 		String dom1 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
-						"{@type=korap:group, operation=operation:focus, operands=[" +
+						"{@type=korap:reference, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:relation, operands=[" +
 								"{@type=korap:span, layer=cat, key=CP, match=match:eq}," +
 								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 									"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
 								"]}" +
 							"], relation={@type=korap:treeRelation, reltype=dominance}}" +
-						"], classRef=[0]}," +
+						"]}," +
 						"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
 				"], relation={@type=korap:treeRelation, reltype=dominance}" +
 				"}";
@@ -199,21 +199,21 @@ public class AqlTreeTest {
 		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & cat=\"DP\" & #1 > #2 > #3 > #4";
 		String dom2 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
-						"{@type=korap:group, operation=operation:focus, operands=[" +
+						"{@type=korap:reference, classRef=[1], operands=[" +
 							"{@type=korap:group, operation=operation:relation, operands=[" +
-								"{@type=korap:group, operation=operation:focus, operands=[" +
+								"{@type=korap:reference, classRef=[0], operands=[" +
 									"{@type=korap:group, operation=operation:relation, operands=[" +
 										"{@type=korap:span, layer=cat, key=CP, match=match:eq}," +
 										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 											"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
 										"]}" +
 									"], relation={@type=korap:treeRelation, reltype=dominance}}" +
-								"], classRef=[0]}," +
+								"]}," +
 								"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 									"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
 								"]}" +
 							"], relation={@type=korap:treeRelation, reltype=dominance}}" +
-						"], classRef=[1]}," +
+						"]}," +
 						"{@type=korap:span, layer=cat, key=DP, match=match:eq}" +
 					"], relation={@type=korap:treeRelation, reltype=dominance}" +
 				"}";
@@ -295,7 +295,7 @@ public class AqlTreeTest {
 		String seq4 = 
 				"{@type=korap:group, operation=operation:sequence," +
 					"operands=[" +
-						"{@type=korap:group, operation=operation:focus, operands=[" +
+						"{@type=korap:reference, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
 								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
@@ -304,7 +304,7 @@ public class AqlTreeTest {
 							"], distances=[" +
 								"{@type=korap:distance, key=w, min=0, max=2}" +
 							"], inOrder=true}" +
-						"], classRef=[0]}," +	
+						"]}," +	
 						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 					"],distances=[" +
 						"{@type=korap:distance, key=w, min=0, max=4}" +
@@ -317,14 +317,14 @@ public class AqlTreeTest {
 		query = "node & node & node & #1 . #2 .1,3 #3";
 		String seq5 = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
-						"{@type=korap:group, operation=operation:focus, operands=[" +
+						"{@type=korap:reference, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
 								"{@type=korap:span}," +
 								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 									"{@type=korap:span}" +
 								"]} "+
 							"], inOrder=true}" +
-						"], classRef=[0]}," +
+						"]}," +
 						"{@type=korap:span}" +
 					"], distances=[" +
 							"{@type=korap:distance, key=w, min=1, max=3}" +
@@ -333,6 +333,34 @@ public class AqlTreeTest {
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(seq5.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & tok=\"Himmel\" & #1 .0,2 #2 .0,4 #3 . #4";
+		String seq6 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:reference, classRef=[1], operands=[" +
+						"{@type=korap:group, operation=operation:sequence, operands=[" +
+							"{@type=korap:reference, classRef=[0], operands=[" +
+								"{@type=korap:group, operation=operation:sequence, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
+									"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+										"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
+									"]}" +
+								"], distances=[" +
+									"{@type=korap:distance, key=w, min=0, max=2}" +
+								"], inOrder=true}" +
+							"]}," +	
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
+							"]}" +
+						"],distances=[" +
+							"{@type=korap:distance, key=w, min=0, max=4}" +
+						"], inOrder=true}" +
+					"]}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Himmel, match=match:eq}}" +
+				"], inOrder=true}" ;
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(seq6.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
@@ -340,14 +368,14 @@ public class AqlTreeTest {
 		query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & #1 > #2 .0,4 #3";
 		String seq4 = 
 					"{@type=korap:group, operation=operation:sequence, operands=[" +
-							"{@type=korap:group, operation=operation:focus, operands=[" +
+							"{@type=korap:reference, classRef=[0], operands=[" +
 									"{@type=korap:group, operation=operation:relation, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
 										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 											"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 										"]}" +
 									"], relation={@type=korap:treeRelation, reltype=dominance}}" +
-								"], classRef=[0]}," +
+								"]}," +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 						"], distances=[" +
 							"{@type=korap:distance, key=w, min=0, max=4}" +
@@ -360,14 +388,14 @@ public class AqlTreeTest {
 		query = "tok=\"Sonne\" & tok=\"Mond\" & #1 > #2 .0,4  tok=\"Sterne\"";
 		String seq5 = 
 					"{@type=korap:group, operation=operation:sequence, operands=[" +
-							"{@type=korap:group, operation=operation:focus, operands=[" +
+							"{@type=korap:reference, classRef=[0], operands=[" +
 									"{@type=korap:group, operation=operation:relation, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
 										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 											"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 										"]}" +
 									"], relation={@type=korap:treeRelation, reltype=dominance}}" +
-								"], classRef=[0]}," +
+								"]}," +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 						"], distances=[" +
 							"{@type=korap:distance, key=w, min=0, max=4}" +
@@ -442,14 +470,14 @@ public class AqlTreeTest {
 		query = "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 . #2 & #2 . #3"; 
 		String mult1 = 
 		"{@type=korap:group, operation=operation:sequence, operands=[" +
-			"{@type=korap:group, operation=operation:focus, operands=[" +
+			"{@type=korap:reference, classRef=[0], operands=[" +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}," +
 					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
 					"]}" +
 				"], inOrder=true}" +
-			"], classRef=[0]}," +
+			"]}," +
 			"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
 		"], inOrder=true}";
 		aqlt = new AqlTree(query);
@@ -460,19 +488,66 @@ public class AqlTreeTest {
 		query = "pos=\"N\" & pos=\"V\" & #1 . #2 & #2 . pos=\"P\""; 
 		String mult2 = 
 		"{@type=korap:group, operation=operation:sequence, operands=[" +
-			"{@type=korap:group, operation=operation:focus, operands=[" +
+			"{@type=korap:reference, classRef=[0], operands=[" +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}," +
 					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
 					"]}" +
 				"], inOrder=true}" +
-			"], classRef=[0]}," +
+			"]}," +
 			"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
 		"], inOrder=true}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(mult2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+
+		query = "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 > #2 & #1 > #3";
+		String mult3 = 
+			"{@type=korap:group, operation=operation:relation, operands=[" +
+				"{@type=korap:reference, classRef=[0], operands=[" +
+					"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+							"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}" +
+						"]}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
+					"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+				"]}," +
+				"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
+			"], relation={@type=korap:treeRelation, reltype=dominance}}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(mult3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "cat=\"NP\" & pos=\"V\" & pos=\"P\" & #1 > #2 & #1 > #3 & #2 . #3";
+		String mult4 = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					// reduce dominance relations "#1 > #2 & #1 > #3" to operand #2 in order to make it accessible for #2 . #3 (the last/outermost relation)  
+					"{@type=korap:reference, classRef=[1], operands=[" +
+						"{@type=korap:group, operation=operation:relation, operands=[" +
+							// dominance relation #1 > #2 is reduced to #1, for expressing #1 > #3
+							"{@type=korap:reference, classRef=[0], operands=[" +
+								"{@type=korap:group, operation=operation:relation, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+										"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
+									"]}," +
+									"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+										"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
+									"]}" +
+								"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+							"]}," +
+							// establish class 2 around P for later reference
+							"{@type=korap:group, operation=operation:class, class=2, operands=[" +
+								"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
+							"]}" +
+						"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+					"]}," +
+					// refer back to class 2 as second operand
+					"{@type=korap:reference, classRef=[2]}" +
+				"], inOrder=true}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(mult4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}	
 	
 	@Test
