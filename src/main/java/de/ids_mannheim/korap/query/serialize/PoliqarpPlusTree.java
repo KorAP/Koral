@@ -740,11 +740,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             }
         }
 
-        if (nodeCat.equals("shrink")) {
-            LinkedHashMap<String, Object> shrinkGroup = new LinkedHashMap<String, Object>();
-            objectStack.push(shrinkGroup);
+        if (nodeCat.equals("focus")) {
+            
             stackedObjects++;
-            ArrayList<Object> shrinkOperands = new ArrayList<Object>();
+            ArrayList<Object> referenceOperands = new ArrayList<Object>();
             // Step I: get info
             ArrayList<Integer> classRefs = new ArrayList<Integer>();
             String classRefOp = null;
@@ -770,26 +769,25 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             } else {
                 classRefs.add(0);
             }
-            shrinkGroup.put("@type", "korap:group");
+            LinkedHashMap<String, Object> referenceGroup = makeReference(classRefs);
+            objectStack.push(referenceGroup);
             String type = node.getChild(0).toStringTree(parser);
-            String operation = type.equals("shrink") ? "submatch" : "split";
-            shrinkGroup.put("operation", "operation:" + operation);
-            shrinkGroup.put("classRef", classRefs);
+            if (type.equals("split")) referenceGroup.put("operation", "operation:split");
             if (classRefOp != null) {
-                shrinkGroup.put("classRefOp", "classRefOp:" + classRefOp);
+                referenceGroup.put("classRefOp", "classRefOp:" + classRefOp);
             }
-            shrinkGroup.put("operands", shrinkOperands);
+            referenceGroup.put("operands", referenceOperands);
             int i = 1;
             // Step II: decide where to put the group
             // add group to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the relevant info)
             if (node.getParent().getChildCount() > 1) {
                 ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(i).get("operands"); // this shrinkGroup is on top
-                topSequenceOperands.add(shrinkGroup);
+                topSequenceOperands.add(referenceGroup);
             } else if (openNodeCats.get(2).equals("query")) {
-                requestMap.put("query", shrinkGroup);
+                requestMap.put("query", referenceGroup);
             } else if (objectStack.size() > 1) {
                 ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(i).get("operands");
-                topSequenceOperands.add(shrinkGroup);
+                topSequenceOperands.add(referenceGroup);
             }
             visited.add(node.getChild(0));
         }
@@ -1003,9 +1001,9 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		 * For testing
 		 */
         String[] queries = new String[]{
-                "shrink(1|2:{1:[base=der]}{2:[base=Mann]})",
+                "focus(1|2:{1:[base=der]}{2:[base=Mann]})",
                 "{[base=Mann]}",
-                "shrink(1:[orth=Der]{1:[orth=Mann][orth=geht]})",
+                "focus(1:[orth=Der]{1:[orth=Mann][orth=geht]})",
                 "[base=Mann/i]",
                 "[cnx/base=pos:n]",
                 "<cnx/c=np>",
@@ -1016,11 +1014,12 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                 "[base=der] within s",
                 "([orth=der][base=katze])|([orth=eine][base=baum])",
                 "[orth=der][base=katze]|[orth=eine][base=baum]",
-                "shrink(1:{[base=der]}{1:[pos=ADJA]})",
+                "focus(1:{[base=der]}{1:[pos=ADJA]})",
                 "[mate/m : tense=pres]",
                 "[cnx/base=pos:n]",
                 "deutscher/i",
-                "[orth=deutscher/i]"
+                "[orth=deutscher/i]",
+                "deutscher Bundestag/i"
         };
 		PoliqarpPlusTree.verbose=true;
         for (String q : queries) {
