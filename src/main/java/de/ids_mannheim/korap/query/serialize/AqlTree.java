@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -260,6 +261,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		}
 		
 		if (nodeCat.equals("n_ary_linguistic_term")) {
+			System.err.println(operandStack);
 			relationCounter++;
 			// get operator and determine type of group (sequence/treeRelation/relation/...)
 			// It's possible in Annis QL to concatenate operators, so there may be several operators under one n_ary_linguistic_term node. 
@@ -287,45 +289,62 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				ArrayList<Object> operands  = (ArrayList<Object>) group.get("operands");
 				// Wrap in focus object in case other relations are following
 				if (i < node.getChildCount()-2) {
-					group = wrapInFocus(group);
+					group = wrapInReference(group);
 				}
 				// Retrieve operands.
 				String ref1 = null;
 				String ref2 = null;
 				LinkedHashMap<String, Object> operand1 = null;
 				LinkedHashMap<String, Object> operand2 = null;
+				// Operand 1
 				if (!getNodeCat(operandTree1.getChild(0)).equals("variableExpr")) {
 					ref1 = operandTree1.getChild(0).toStringTree(parser).substring(1);
+					System.err.println("Operand 1: #"+ref1);
 					operand1 = variableReferences.get(ref1);
 					if (nodeReferencesTotal.get(ref1) > 1) {
 						if (nodeReferencesProcessed.get(ref1) == 0) {
 							operand1 = wrapInClass(operand1);
-							group = wrapInFocus(group);
-							classCounter++;
+//							group = wrapInFocus(group);
+//							classCounter++;
 							nodeReferencesProcessed.put(ref1, nodeReferencesProcessed.get(ref1)+1);
-						} else if (nodeReferencesProcessed.get(ref1)>0) {
-							operand1 = null;
+						} else if (nodeReferencesProcessed.get(ref1)>0 && nodeReferencesTotal.get(ref1)>1) {
+							try {
+								operand1 = wrapInReference(operandStack.pop());
+								classCounter++;
+							} catch (NoSuchElementException e) {
+//								operand1 = null;
+								operand1 = makeReference(classCounter);
+							}
 						}
 					}
 				}
+				System.err.println("Operand 1 done");
+				// Operand 2
 				if (!getNodeCat(operandTree2.getChild(0)).equals("variableExpr")) {
 					ref2 = operandTree2.getChild(0).toStringTree(parser).substring(1);
+					System.err.println("Operand 2: #"+ref2);
 					operand2 = variableReferences.get(ref2);
 					if (nodeReferencesTotal.get(ref2) > 1) {
 						if (nodeReferencesProcessed.get(ref2)==0) {
 							operand2 = wrapInClass(operand2);
-							group = wrapInFocus(group);
-							classCounter++;
+//							group = wrapInFocus(group);
+//							classCounter++;
 							nodeReferencesProcessed.put(ref2, nodeReferencesProcessed.get(ref2)+1);
 						} else if (nodeReferencesProcessed.get(ref2)>0 && nodeReferencesTotal.get(ref2)>1) {
-							operand2 = null;
+							try {
+								operand2 = wrapInReference(operandStack.pop());
+								classCounter++;
+							} catch (NoSuchElementException e) {
+//								operand2 = null;
+								operand2 = makeReference(classCounter);
+							}
 						}
 					}
 				}
+				System.err.println("Operand 2 done");
 				// Inject operands.
 				// -> Case distinction:
 				if (node.getChildCount()==3) {
-					System.err.println("foo");
 					// Things are easy when there's just one operator (thus 3 children incl. operands)...
 					if (operand1 != null) operands.add(operand1);
 					if (operand2 != null) operands.add(operand2);
@@ -358,7 +377,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 					putIntoSuperObject(group);
 					if (!operandStack.isEmpty()) {
 						operands.add(0, operandStack.pop());
-						operandStack.clear();
+//						operandStack.clear();
 					}
 					objectStack.push(group);
 					stackedObjects++;
@@ -366,6 +385,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 					operandStack.push(group);
 				}
 			}
+			System.err.println(operandStack);
 		}
 		
 		if (nodeCat.equals("variableExpr")) {
@@ -445,23 +465,19 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		openNodeCats.pop();
 	}
 
-
-	@SuppressWarnings("unchecked")
-	private LinkedHashMap<String, Object> wrapInFocus(
-			LinkedHashMap<String, Object> group) {
-		LinkedHashMap<String, Object> focusGroup = makeGroup("focus");
-		((ArrayList<Object>) focusGroup.get("operands")).add(group);
-		ArrayList<Integer> classRefs = new ArrayList<Integer>();
-		classRefs.add(classCounter);
-		focusGroup.put("classRef", classRefs);
-		return focusGroup;
+	private LinkedHashMap<String, Object> wrapInReference(LinkedHashMap<String, Object> group) {
+		LinkedHashMap<String, Object> refGroup = makeReference(classCounter);
+		ArrayList<Object> operands = new ArrayList<Object>();
+		operands.add(group);
+		refGroup.put("operands", operands);
+		return refGroup;
 	}
 
 	@SuppressWarnings("unchecked")
-	private LinkedHashMap<String, Object> wrapInClass(LinkedHashMap<String, Object> object) {
-		LinkedHashMap<String, Object> group = makeClass(classCounter);
-		((ArrayList<Object>) group.get("operands")).add(object);
-		return group;
+	private LinkedHashMap<String, Object> wrapInClass(LinkedHashMap<String, Object> group) {
+		LinkedHashMap<String, Object> classGroup = makeClass(classCounter);
+		((ArrayList<Object>) classGroup.get("operands")).add(group);
+		return classGroup;
 	}
 
 	/**
@@ -782,8 +798,10 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 //			 "cat=/NP/ > node",
 //			 "/Mann/",
 //			 "node > tok=\"foo\"",
-				"tok=\"Sonne\" & tok=\"Mond\" & #1 > #2 .0,4  tok=\"Sterne\"",
-				 "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 . #2 & #2 . #3"
+//				"tok=\"Sonne\" & tok=\"Mond\" & #1 > #2 .0,4  tok=\"Sterne\"",
+//				 "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 . #2 & #2 . #3",
+//				 "cat=\"NP\" & pos=\"V\" & pos=\"P\" & #1 > #2 & #1 > #3 & #2 . #3",
+				 "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3"
 			};
 		AqlTree.verbose=true;
 		for (String q : queries) {
