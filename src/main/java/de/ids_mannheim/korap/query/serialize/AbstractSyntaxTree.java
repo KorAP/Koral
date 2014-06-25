@@ -55,6 +55,15 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
+	protected LinkedHashMap<String, Object> makePosition(String frame) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:group");
+		group.put("operation", "operation:position");
+		group.put("frame", "frame:"+frame);
+		group.put("operands", new ArrayList<Object>());
+		return group;
+	}
+	
 	protected LinkedHashMap<String, Object> makeClass(int classCount) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:group");
