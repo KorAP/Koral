@@ -308,7 +308,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                                     // fallback to the first element in the object stack.
                                     topSequenceOperands = (ArrayList<Object>) objectStack.get(0).get("operands");
                                 }
-
                                 topSequenceOperands.add(sequence);
                             }
                         }
@@ -536,7 +535,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                 tokenValues.put("@type", "korap:term");
                 tokenValues.put("key", word);
                 tokenValues.put("layer", "orth");
-                tokenValues.put("match", "match:" + "eq");
+                tokenValues.put("match", "match:eq");
                 // add token to sequence only if it is not an only child (in that case, sq_segments has already added the info and is just waiting for the values from "field")
                 if (node.getParent().getChildCount() > 1) {
                     ArrayList<Object> topSequenceOperands = (ArrayList<Object>) objectStack.get(1).get("operands");
@@ -554,7 +553,13 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
                 token.put("@type", "korap:token");
                 token.put("wrap", reQuery);
                 reQuery.put("@type", "korap:term");
-                putIntoSuperObject(reQuery);
+                String key = node.getChild(0).toStringTree(parser);
+                key = key.substring(1, key.length()-1);
+                reQuery.put("key", key);
+                reQuery.put("layer", "orth");
+                reQuery.put("type", "type:regex");
+                reQuery.put("match", "match:eq");
+                putIntoSuperObject(token);
             }
         }
 
@@ -756,6 +761,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			topObjectOperands.add(object);
 		} else if (openNodeCats.get(2).equals("query")) {
 			requestMap.put("query", object);
+		} else if (openNodeCats.get(0).equals("re_query") && openNodeCats.get(1).equals("query")) {
+			requestMap.put("query", object);
 		} else {
 			ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
 			topObjectOperands.add(object);
@@ -869,16 +876,18 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
             // Get starting rule from parser
             Method startRule = PoliqarpPlusParser.class.getMethod("request");
             tree = (ParserRuleContext) startRule.invoke(parser, (Object[]) null);
+            log.debug(tree.toStringTree(parser));
         }
 
         // Some things went wrong ...
         catch (Exception e) {
-        	log.error(e.getMessage());
-            System.err.println(e.getMessage());
+        	log.error("Could not parse query. Please make sure it is well-formed.");;
+            log.error("Underlying error is: "+e.getStackTrace());
+        	System.err.println(e.getMessage());
         }
 
         if (tree == null) {
-        	log.error("The query you specified could not be processed. Please make sure it is well-formed.");
+        	log.error("Could not parse query. Please make sure it is well-formed.");
         	throw new QueryException("The query you specified could not be processed. Please make sure it is well-formed.");
         }
         // Return the generated tree
@@ -890,6 +899,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		 * For testing
 		 */
         String[] queries = new String[]{
+//        		"matches(<np>,[base=Berlin][][base=Tegel])",
+        		"[base=\"foo\"][]",
+//        		"[][base=Foo]",
+        		"[base=der][]{2,5}[base=Mann][]?[][base=Frau]",
         };
 		PoliqarpPlusTree.verbose=true;
         for (String q : queries) {
