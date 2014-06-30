@@ -78,11 +78,19 @@ public abstract class Antlr4AbstractSyntaxTree extends AbstractSyntaxTree {
     }
 
     public ParseTree getFirstChildWithCat(ParseTree node, String nodeCat) {
-        for (int i = 0; i < node.getChildCount(); i++) {
-            if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
-                return node.getChild(i);
-            }
-        }
+        return getNthChildWithCat(node, nodeCat, 1);
+    }
+    
+    public ParseTree getNthChildWithCat(ParseTree node, String nodeCat, int n) {
+    	int counter = 0;
+    	for (int i = 0; i < node.getChildCount(); i++) {
+    		if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+    			counter++;
+    			if (counter == n) {
+    				return node.getChild(i);
+    			}
+    		}
+    	}
         return null;
     }
     
