@@ -38,7 +38,7 @@
         <dependency>
             <groupId>KorAP-modules</groupId>
             <artifactId>KorAP-PoliqarpParser</artifactId>
-            <version>0.05</version>
+            <version>0.1</version>
         </dependency>
         <dependency>
             <groupId>KorAP-modules</groupId>
