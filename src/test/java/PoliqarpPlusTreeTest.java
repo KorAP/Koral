@@ -427,6 +427,22 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree("[base=foo]{2}");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(occ12.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=foo]{2}
+		String occ13 = "{@type=korap:group, operation=operation:repetition, operands=[" +
+					     "{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=foo, match=match:eq}}" +
+					  "], min=2, max=100}"; 
+		ppt = new PoliqarpPlusTree("[base=foo]{2,}");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ13.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=foo]{2}
+		String occ14 = "{@type=korap:group, operation=operation:repetition, operands=[" +
+					     "{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=foo, match=match:eq}}" +
+					  "], min=0, max=2}"; 
+		ppt = new PoliqarpPlusTree("[base=foo]{,2}");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(occ14.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test

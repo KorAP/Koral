@@ -28,10 +28,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 */
 	LinkedList<String> openNodeCats = new LinkedList<String>();
 	/**
-	 * Flag that indicates whether a cq_segment is to be ignored (e.g. when it is empty, is followed directly by only a spanclass and has no other children etc...).
-	 */
-	private boolean negField = false;
-	/**
 	 * Parser object deriving the ANTLR parse tree.
 	 */
 	private Parser parser;
@@ -111,7 +107,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			System.out.println(openNodeCats);
 		}
 
-
 		/*
 		 ****************************************************************
 		 **************************************************************** 
@@ -152,10 +147,12 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
 		if (nodeCat.equals("token")) {
 			LinkedHashMap<String,Object> token = makeToken();
+			// handle negation
 			List<ParseTree> negations = getChildrenWithCat(node, "!");
 			boolean negated = false;
 			if (negations.size() % 2 == 1) negated = true;
 			if (getNodeCat(node.getChild(0)).equals("key")) {
+				// no 'term' child, but direct key specification: process here
 				LinkedHashMap<String,Object> term = makeTerm();
 				
 				String key = node.getChild(0).getText();
@@ -170,7 +167,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				ParseTree flagNode = getFirstChildWithCat(node, "flag");
 				if (flagNode != null) {
 					String flag = getNodeCat(flagNode.getChild(0)).substring(1); //substring removes leading slash '/'
-					System.err.println(flag);
 					if (flag.contains("i")) term.put("caseInsensitive", true);
 					else if (flag.contains("I")) term.put("caseInsensitive", false);
 					if (flag.contains("x")) {
@@ -179,6 +175,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				}
 				token.put("wrap", term);
 			} else {
+				// child is 'term' or 'termGroup' -> process in extra method 
 				LinkedHashMap<String,Object> termOrTermGroup = parseTermOrTermGroup(node.getChild(1), negated);
 				token.put("wrap", termOrTermGroup);
 			}
@@ -342,27 +339,29 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			processNode(child);
 		}
 
-		// set negField back
-		if (nodeCat.equals("neg_field") || nodeCat.equals("neg_field_group")) {
-			negField = !negField;
-		}
-
 		// Stuff that happens when leaving a node (taking items off the stacks)
 		for (int i = 0; i < objectsToPop.get(0); i++) {
 			objectStack.pop();
 		}
 		objectsToPop.pop();
-
 		openNodeCats.pop();
 	}
 
+	/**
+	 * Parses a repetition node
+	 * @param node
+	 * @return A two-element array, of which the first element is an int representing 
+	 * the minimal number of repetitions of the quantified element, and the second 
+	 * element representing the maximal number of repetitions 
+	 */
 	private int[] parseRepetition(ParseTree node) {
 		int min = 0, max = 0;
-		ParseTree minNode = getFirstChildWithCat(node, "min");
-		ParseTree maxNode = getFirstChildWithCat(node, "max");
-		ParseTree kleeneNode = getFirstChildWithCat(node, "kleene");
-		if (kleeneNode != null) {
-			String kleeneOp = kleeneNode.getText();
+		// (repetition) node can be of two types: 'kleene' or 'range'
+		ParseTree repetitionTypeNode = node.getChild(0);
+		String repetitionType = getNodeCat(repetitionTypeNode);
+		if (repetitionType.equals("kleene")) {
+			// kleene operators (+ and *) as well as optionality (?)
+			String kleeneOp = repetitionTypeNode.getText();
 			if (kleeneOp.equals("*")) {
 				max = MAXIMUM_DISTANCE;
 			} else if (kleeneOp.equals("+")) {
@@ -372,8 +371,14 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				max = 1;
 			}
 		} else {
-			max = Integer.parseInt(maxNode.getText());
+			// Range node of form "{ min , max }" or "{ max }" or "{ , max }"  or "{ min , }"
+			ParseTree minNode = getFirstChildWithCat(repetitionTypeNode, "min");
+			ParseTree maxNode = getFirstChildWithCat(repetitionTypeNode, "max");
+			if (maxNode!=null) max = Integer.parseInt(maxNode.getText());
+			else max = MAXIMUM_DISTANCE;
+			// min is optional: if not specified, min = max
 			if (minNode!=null) min = Integer.parseInt(minNode.getText());
+			else if (hasChild(repetitionTypeNode, ",")) min = 0;
 			else min = max;
 		}
 		return new int[]{min,max};
@@ -383,72 +388,102 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		return node.toStringTree(parser);
 	}
 
+	/**
+	 * Parses a (term) or (termGroup) node
+	 * @param node
+	 * @param negatedGlobal Indicates whether the term/termGroup is globally negated, e.g. through a negation 
+	 * operator preceding the related token like "![base=foo]". Global negation affects the term's "match" parameter.
+	 * @return A term or termGroup object, depending on input
+	 */
 	@SuppressWarnings("unchecked")
 	private LinkedHashMap<String, Object> parseTermOrTermGroup(ParseTree node, boolean negatedGlobal) {
 		if (getNodeCat(node).equals("term")) {
-			String regex = null;
+			String key = null;
 			LinkedHashMap<String,Object> term = makeTerm();
+			// handle negation
 			boolean negated = negatedGlobal;
 			List<ParseTree> negations = getChildrenWithCat(node, "!");
 			if (negations.size() % 2 == 1) negated = !negated;
+			// retrieve possible nodes
 			ParseTree keyNode = getFirstChildWithCat(node, "key");
 			ParseTree layerNode = getFirstChildWithCat(node, "layer");
 			ParseTree foundryNode = getFirstChildWithCat(node, "foundry");
 			ParseTree termOpNode = getFirstChildWithCat(node, "termOp");
 			ParseTree flagNode = getFirstChildWithCat(node, "flag");
+			// process foundry
 			if (foundryNode != null) term.put("foundry", foundryNode.getText());
+			// process layer: map "base" -> "lemma"
 			if (layerNode != null) {
 				String layer = layerNode.getText();
 				if (layer.equals("base")) layer="lemma";
 				term.put("layer", layer);
 			}
+			// process key: 'normal' or regex?
+			key = keyNode.getText();
 			if (getNodeCat(keyNode.getChild(0)).equals("regex")) {
 				term.put("type", "type:regex");
-				regex = keyNode.getText();
-				regex = regex.substring(1, regex.length()-1);
-				term.put("key", regex);
-			} else {
-				term.put("key", keyNode.getText());
+				key = key.substring(1, key.length()-1); // remove leading and trailing quotes
 			}
+			term.put("key", key);
+			// process operator ("match" property)
 			if (termOpNode != null) {
 				String termOp = termOpNode.getText();
-				negated = termOp.equals("=") ? negated : !negated; 
+				negated = termOp.contains("!") ? !negated : negated; 
 				if (!negated) term.put("match", "match:eq");
 				else term.put("match", "match:ne");
 			}
+			// process possible flags
 			if (flagNode != null) {
 				String flag = getNodeCat(flagNode.getChild(0)).substring(1); //substring removes leading slash '/'
 				System.err.println(flag);
 				if (flag.contains("i")) term.put("caseInsensitive", true);
 				else if (flag.contains("I")) term.put("caseInsensitive", false);
 				if (flag.contains("x")) {
-					term.put("key", ".*?"+regex+".*?");
+					term.put("key", ".*?"+key+".*?");  // flag 'x' allows submatches: overwrite key with appended .*? 
 				}
 			}
 			return term;
 		} else {
+			// For termGroups, establish a boolean relation between operands and recursively call this function with
+			// the term or termGroup operands
 			LinkedHashMap<String,Object> termGroup = null;
 			ParseTree leftOp = null;
 			ParseTree rightOp = null;
+			// check for leading/trailing parantheses
 			if (!getNodeCat(node.getChild(0)).equals("(")) leftOp = node.getChild(0);
 			else leftOp = node.getChild(1);
 			if (!getNodeCat(node.getChild(node.getChildCount()-1)).equals(")")) rightOp = node.getChild(node.getChildCount()-1);
 			else rightOp = node.getChild(node.getChildCount()-2);
-
+			// establish boolean relation
 			ParseTree boolOp = getFirstChildWithCat(node, "booleanOp"); 
 			String operator = boolOp.getText().equals("&") ? "and" : "or";
 			termGroup = makeTermGroup(operator);
 			ArrayList<Object> operands = (ArrayList<Object>) termGroup.get("operands");
+			// recursion with left/right operands
 			operands.add(parseTermOrTermGroup(leftOp, negatedGlobal));
 			operands.add(parseTermOrTermGroup(rightOp, negatedGlobal));
 			return termGroup;
 		}
 	}
 
+	/**
+	 * Puts an object into the operands list of its governing (or "super") object which had been placed on the
+	 * {@link #objectStack} before and is still on top of the stack. If this is the top object of the tree, it is put there
+	 * instead of into some (non-existent) operand stack.
+	 * @param object The object to be inserted
+	 */
 	private void putIntoSuperObject(LinkedHashMap<String, Object> object) {
 		putIntoSuperObject(object, 0);
 	}
 
+	/**
+	 * Puts an object into the operands list of its governing (or "super") object which had been placed on the
+	 * {@link #objectStack} before. If this is the top object of the tree, it is put there
+	 * instead of into some (non-existent) operand stack.
+	 * @param object The object to be inserted
+	 * @param objStackPosition Indicated the position of the super object on the {@link #objectStack} (in case not the top
+	 * element of the stack is the super object.
+	 */
 	@SuppressWarnings({ "unchecked" })
 	private void putIntoSuperObject(LinkedHashMap<String, Object> object, int objStackPosition) {
 		if (objectStack.size()>objStackPosition) {
@@ -483,13 +518,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
 	private ParserRuleContext parsePoliqarpQuery(String p) throws QueryException {
 		checkUnbalancedPars(p);
-
 		Lexer poliqarpLexer = new PoliqarpPlusLexer((CharStream) null);
 		ParserRuleContext tree = null;
-
 		// Like p. 111
 		try {
-
 			// Tokenize input data
 			ANTLRInputStream input = new ANTLRInputStream(p);
 			poliqarpLexer.setInputStream(input);
@@ -524,7 +556,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[]{
-				"[base=foo][base=foo]"
+				"[base=foo][base=foo]",
+				"Der \"Baum\"/x",
+				"contains(<vp>,[][base=foo])",
+				"[hallo=welt]*"
 		};
 //		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {
