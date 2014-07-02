@@ -464,30 +464,20 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         // inlcusion or overlap
         if (nodeCat.equals("OPIN") || nodeCat.equals("OPOV")) {
             // Step I: create group
-            LinkedHashMap<String, Object> submatchgroup = new LinkedHashMap<String, Object>();
-            submatchgroup.put("@type", "korap:group");
-            submatchgroup.put("operation", "operation:" + "submatch");
-            ArrayList<Integer> classRef = new ArrayList<Integer>();
-            classRef.add(classRefCounter);
-            submatchgroup.put("classRef", classRef);
+            LinkedHashMap<String, Object> submatchgroup = makeReference(classRefCounter);
 
             ArrayList<Object> submatchoperands = new ArrayList<Object>();
-            LinkedHashMap<String, Object> posgroup = new LinkedHashMap<String, Object>();
+            LinkedHashMap<String, Object> posgroup = makePosition(null);
             submatchgroup.put("operands", submatchoperands);
             submatchoperands.add(posgroup);
-            posgroup.put("@type", "korap:group");
-//			String relation = nodeCat.equals("OPIN") ? "position" : "overlaps";
-            posgroup.put("operation", "operation:" + "position");
             if (nodeCat.equals("OPIN")) {
                 parseOPINOptions(node, posgroup);
             } else {
                 parseOPOVOptions(node, posgroup);
             }
-            ArrayList<Object> posoperands = new ArrayList<Object>();
-            posgroup.put("operands", posoperands);
             objectStack.push(posgroup);
             // mark this an inverted list
-            invertedOperandsLists.push(posoperands);
+            invertedOperandsLists.push((ArrayList<Object>) posgroup.get("operands"));
             stackedObjects++;
             // Step II: decide where to put
             putIntoSuperObject(submatchgroup, 1);
@@ -526,17 +516,11 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
 
         if (nodeCat.equals("OPNHIT")) {
-            LinkedHashMap<String, Object> exclGroup = new LinkedHashMap<String, Object>();
-            exclGroup.put("@type", "korap:group");
-            exclGroup.put("operation", "operation:" + "submatch");
             ArrayList<Integer> classRef = new ArrayList<Integer>();
-
             classRef.add(classRefCounter);
-//			classRefCounter++;
             // yes, do this twice!
             classRef.add(classRefCounter + 1);
-//			classRefCounter++;
-            exclGroup.put("classRef", classRef);
+            LinkedHashMap<String, Object> exclGroup = makeReference(classRef);
             exclGroup.put("classRefOp", "classRefOp:" + "intersection");
             ArrayList<Object> operands = new ArrayList<Object>();
             exclGroup.put("operands", operands);
@@ -548,8 +532,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         if (nodeCat.equals("OPEND") || nodeCat.equals("OPBEG")) {
             // Step I: create group
             LinkedHashMap<String, Object> beggroup = new LinkedHashMap<String, Object>();
-            beggroup.put("@type", "korap:group");
-            beggroup.put("operation", "operation:" + "submatch");
+            beggroup.put("@type", "korap:reference");
+            beggroup.put("operation", "operation:focus");
             ArrayList<Integer> spanRef = new ArrayList<Integer>();
             if (nodeCat.equals("OPBEG")) {
                 spanRef.add(0);
@@ -573,29 +557,21 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             Tree conditions = node.getChild(optsChild).getChild(0);
 
             // create a containing group expressing the submatch constraint on the first argument
-            LinkedHashMap<String, Object> submatchgroup = new LinkedHashMap<String, Object>();
-            submatchgroup.put("@type", "korap:group");
-            submatchgroup.put("operation", "operation:" + "submatch");
             ArrayList<Integer> spanRef = new ArrayList<Integer>();
             spanRef.add(1);
-            submatchgroup.put("classRef", spanRef);
+            LinkedHashMap<String, Object> submatchgroup = makeReference(spanRef);
             ArrayList<Object> submatchoperands = new ArrayList<Object>();
             submatchgroup.put("operands", submatchoperands);
-            putIntoSuperObject(submatchgroup, 0);
+            putIntoSuperObject(submatchgroup);
 
             // Distinguish two cases. Normal case: query has just one condition, like #BED(X, sa) ...
             if (conditions.getChildCount() == 1) {
                 CosmasCondition c = new CosmasCondition(conditions.getChild(0));
 
                 // create the group expressing the position constraint
-                LinkedHashMap<String, Object> posgroup = new LinkedHashMap<String, Object>();
-                posgroup.put("@type", "korap:group");
-                posgroup.put("operation", "operation:" + "position");
-
-                posgroup.put("frame", "frame:" + c.position);
+                LinkedHashMap<String, Object> posgroup = makePosition(c.position);
+                ArrayList<Object> operands = (ArrayList<Object>) posgroup.get("operands");
                 if (c.negated) posgroup.put("exclude", true);
-                ArrayList<Object> operands = new ArrayList<Object>();
-                posgroup.put("operands", operands);
 
                 // create span representing the element expressed in the condition
                 LinkedHashMap<String, Object> bedElem = new LinkedHashMap<String, Object>();
@@ -603,10 +579,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                 bedElem.put("key", c.elem);
 
                 // create a class group containing the argument, in order to submatch the arg.
-                LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
-                classGroup.put("@type", "korap:group");
-                classGroup.put("operation", "operation:class");
-                classGroup.put("class", classRefCounter);
+                LinkedHashMap<String, Object> classGroup = makeSpanClass(classRefCounter);
                 classRefCounter++;
                 classGroup.put("operands", new ArrayList<Object>());
                 objectStack.push(classGroup);

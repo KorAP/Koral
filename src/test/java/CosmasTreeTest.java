@@ -317,7 +317,7 @@ public class CosmasTreeTest {
 	public void testOPIN() throws QueryException {
 		query="wegen #IN <s>";
 		String opin1 = 
-					"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+					"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
 						"{@type=korap:group, operation=operation:position, frame=frame:contains, operands=[" +
 							"{@type=korap:span, key=s}," +
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
@@ -331,7 +331,7 @@ public class CosmasTreeTest {
 		
 		query="wegen #IN(L) <s>";
 		String opin2 = 
-					"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+					"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
 						"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +
 							"{@type=korap:span, key=s}," +
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
@@ -345,13 +345,13 @@ public class CosmasTreeTest {
 		
 		query="wegen #IN(%, L) <s>";
 		String opin3 = 
-					"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
-						"{@type=korap:group, operation=operation:position, frame=frame:startswith, exclude=true, operands=[" +
+					"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
+						"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +
 							"{@type=korap:span, key=s}," +
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, key=wegen, layer=orth, match=match:eq}}" +
 							"]}" +
-						"]}" +
+						"], exclude=true}" +
 					"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
@@ -359,13 +359,13 @@ public class CosmasTreeTest {
 		
 		query="wegen #IN('FE,ALL,%,MIN') <s>";
 		String opin4 = 
-					"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
-						"{@type=korap:group, operation=operation:position, frame=frame:matches, range=all, exclude=true, grouping=false, operands=[" +
+					"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
+						"{@type=korap:group, operation=operation:position, frame=frame:matches, operands=[" +
 							"{@type=korap:span, key=s}," +
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, key=wegen, layer=orth, match=match:eq}}" +
 							"]}" +
-						"]}" +
+						"], range=all, exclude=true, grouping=false}" +
 					"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
@@ -376,7 +376,7 @@ public class CosmasTreeTest {
 	public void testOPOV() throws QueryException {
 		query="wegen #OV <s>";
 		String opov1 = 
-					"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+					"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
 						"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
 							"{@type=korap:span, key=s}," +
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
@@ -390,7 +390,7 @@ public class CosmasTreeTest {
 		
 		query="wegen #OV(L) <s>";
 		String opov2 = 
-					"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+					"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
 						"{@type=korap:group, operation=operation:position, frame=frame:overlaps-left, operands=[" +
 							"{@type=korap:span, key=s}," +
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
@@ -426,7 +426,7 @@ public class CosmasTreeTest {
 		// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/thematische-bsp/bsp-satzlaenge.html
 		query="#BEG(der /w3:5 Mann)";
 		String beg1 = 
-				"{@type=korap:group, operation=operation:submatch, spanRef=[0,1], operands=[" +
+				"{@type=korap:reference, operation=operation:focus, spanRef=[0,1], operands=[" +
 					"{@type=korap:group, operation=operation:sequence, inOrder=false, distances=[" +
 						"{@type=korap:distance, key=w, min=3, max=5}" +
 					"]," +
@@ -444,7 +444,7 @@ public class CosmasTreeTest {
 				"{@type=korap:group, operation=operation:sequence, inOrder=true, distances=[" +
 					"{@type=korap:distance, key=w, min=0, max=10}" +
 				"], operands=[" +
-					"{@type=korap:group, operation=operation:submatch, spanRef=[0,1], operands=[" +
+					"{@type=korap:reference, operation=operation:focus, spanRef=[0,1], operands=[" +
 						"{@type=korap:group, operation=operation:sequence, inOrder=false, distances=[" +
 							"{@type=korap:distance, key=w, min=3, max=5}" +
 						"]," +
@@ -461,7 +461,7 @@ public class CosmasTreeTest {
 		
 		query="#END(der /w3:5 Mann)";
 		String end1 = 
-				"{@type=korap:group, operation=operation:submatch, spanRef=[-1,1], operands=[" +
+				"{@type=korap:reference, operation=operation:focus, spanRef=[-1,1], operands=[" +
 					"{@type=korap:group, operation=operation:sequence, inOrder=false, distances=[" +
 						"{@type=korap:distance, key=w, min=3, max=5}" +
 					"], " +
@@ -565,7 +565,7 @@ public class CosmasTreeTest {
 	public void testOPNHIT() throws QueryException {
 		query="#NHIT(gehen /w1:10 voran)";
 		String nhit1 = 
-				"{@type=korap:group, operation=operation:submatch, classRef=[1,2], classRefOp=classRefOp:intersection, operands=[" +
+				"{@type=korap:reference, operation=operation:focus, classRef=[1,2], classRefOp=classRefOp:intersection, operands=[" +
 					"{@type=korap:group, operation=operation:sequence, inOrder=false, " +
 						"distances=[" +
 							"{@type=korap:distance, key=w, min=1, max=10}" +
@@ -589,7 +589,7 @@ public class CosmasTreeTest {
 	public void testOPBED() throws QueryException {
 		query = "#BED(der , sa)";
 		String bed1 = 
-				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands= [" +
+				"{@type=korap:reference, operation=operation:focus, classRef=[1], operands= [" +
 					"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +
 						"{@type=korap:span, key=s}," +
 						"{@type=korap:group, operation=operation:class, class=1, operands=[" +
@@ -603,7 +603,7 @@ public class CosmasTreeTest {
 		
 		query = "#BED(der Mann , +pe)";
 		String bed2 = 
-				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands= [" +
+				"{@type=korap:reference, operation=operation:focus, classRef=[1], operands= [" +
 						"{@type=korap:group, operation=operation:position, frame=frame:endswith, operands=[" +
 							"{@type=korap:span, key=p}," +
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
@@ -620,7 +620,7 @@ public class CosmasTreeTest {
 		
 		query = "#BED(der Mann , sa,-pa)";
 		String bed3 = 
-				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+				"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
 					"{@type=korap:group, operation=operation:sequence, distances=[" +
 						"{@type=korap:distance, key=w, min=0, max=0}" +
 					"], operands=[" +
@@ -654,7 +654,7 @@ public class CosmasTreeTest {
 		
 		query = "Der:sa";
 		String col1 = 
-				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+				"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
 					"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +
 						"{@type=korap:span, key=s}," +
 						"{@type=korap:group, operation=operation:class, class=1, operands=[" +
@@ -668,7 +668,7 @@ public class CosmasTreeTest {
 		
 		query = "Mann:sa,-pa,+te)";
 		String col2 = 
-				"{@type=korap:group, operation=operation:submatch, classRef=[1], operands=[" +
+				"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
 					"{@type=korap:group, operation=operation:sequence, distances=[" +
 						"{@type=korap:distance, key=w, min=0, max=0}" +
 					"], operands=[" +
