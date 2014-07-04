@@ -461,7 +461,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 
 	@SuppressWarnings("unchecked")
 	private LinkedHashMap<String, Object> wrapInClass(LinkedHashMap<String, Object> group) {
-		LinkedHashMap<String, Object> classGroup = makeClass(classCounter);
+		LinkedHashMap<String, Object> classGroup = makeSpanClass(classCounter);
 		((ArrayList<Object>) classGroup.get("operands")).add(group);
 		classCounter++;
 		return classGroup;
