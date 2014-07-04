@@ -410,26 +410,21 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         }
 
         if (nodeCat.equals("OPPROX")) {
-            //TODO direction "both": wrap in "or" group with operands once flipped, once not
             // collect info
             Tree prox_opts = node.getChild(0);
             Tree typ = prox_opts.getChild(0);
             Tree dist_list = prox_opts.getChild(1);
             // Step I: create group
-            LinkedHashMap<String, Object> proxSequence = new LinkedHashMap<String, Object>();
-            proxSequence.put("@type", "korap:group");
-            proxSequence.put("operation", "operation:" + "sequence");
-            objectStack.push(proxSequence);
-            stackedObjects++;
+            LinkedHashMap<String, Object> proxSequence = makeGroup("sequence");
+            
             ArrayList<Object> constraints = new ArrayList<Object>();
-            boolean exclusion = !typ.getChild(0).toStringTree().equals("PROX");
+            boolean exclusion = typ.getChild(0).toStringTree().equals("EXCL");
 
             boolean inOrder = false;
             proxSequence.put("inOrder", inOrder);
             proxSequence.put("distances", constraints);
 
-            ArrayList<Object> operands = new ArrayList<Object>();
-            proxSequence.put("operands", operands);
+            ArrayList<Object> operands = (ArrayList<Object>) proxSequence.get("operands");
 
             // possibly several distance constraints
             for (int i = 0; i < dist_list.getChildCount(); i++) {
@@ -449,15 +444,21 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                     distance.put("exclude", exclusion);
                 }
                 constraints.add(distance);
-                if (direction.equals("plus")) {
-                    inOrder = true;
-                } else if (direction.equals("minus")) {
-                    inOrder = true;
-                    invertedOperandsLists.add(operands);
+                if (i==0) {
+                	if (direction.equals("plus")) {
+                        inOrder = true;
+                    } else if (direction.equals("minus")) {
+                        inOrder = true;
+                        invertedOperandsLists.add(operands);
+                    } else if (direction.equals("both")) {
+                    	inOrder = false;
+                    }
                 }
             }
             proxSequence.put("inOrder", inOrder);
             // Step II: decide where to put
+            objectStack.push(proxSequence);
+            stackedObjects++;
             putIntoSuperObject(proxSequence, 1);
         }
 
@@ -487,12 +488,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         // Wrap the first argument of an #IN operator in a class group
         if (nodeCat.equals("ARG1") && (openNodeCats.get(1).equals("OPIN") || openNodeCats.get(1).equals("OPOV") || openNodeCats.get(2).equals("OPNHIT"))) {
             // Step I: create group
-            LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
-            classGroup.put("@type", "korap:group");
-            classGroup.put("operation", "operation:" + "class");
-            classGroup.put("class", classRefCounter);
+            LinkedHashMap<String, Object> classGroup = makeSpanClass(classRefCounter);
             classRefCounter++;
-            classGroup.put("operands", new ArrayList<Object>());
             objectStack.push(classGroup);
             stackedObjects++;
             // Step II: decide where to put
@@ -502,12 +499,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         // Wrap the 2nd argument of an #IN operator embedded in NHIT in a class group
         if (nodeCat.equals("ARG2") && openNodeCats.get(2).equals("OPNHIT")) {
             // Step I: create group
-            LinkedHashMap<String, Object> classGroup = new LinkedHashMap<String, Object>();
-            classGroup.put("@type", "korap:group");
-            classGroup.put("operation", "operation:" + "class");
-            classGroup.put("class", classRefCounter);
+            LinkedHashMap<String, Object> classGroup = makeSpanClass(classRefCounter);
             classRefCounter++;
-            classGroup.put("operands", new ArrayList<Object>());
             objectStack.push(classGroup);
             stackedObjects++;
             // Step II: decide where to put
@@ -747,12 +740,14 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         Tree exclnode = getFirstChildWithCat(node, "EXCL");
         Tree groupnode = getFirstChildWithCat(node, "GROUP");
 
-        String position = "";
+      
+        
+        String position = "overlaps";
         if (posnode != null) {
             String value = posnode.getChild(0).toStringTree();
-            position = "-" + translateTextAreaArgument(value, "ov");
+            position = translateTextAreaArgument(value, "ov");
         }
-        posgroup.put("frame", "frame:" + "overlaps" + position);
+        posgroup.put("frame", "frame:" + position);
 
         if (exclnode != null) {
             if (exclnode.getChild(0).toStringTree().equals("YES")) {
@@ -777,13 +772,15 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
      * @return
      */
     private String translateTextAreaArgument(String argument, String mode) {
-        String position = "";
+        String position = "overlaps";
+        // POSTYP	:	'L'|'l'|'R'|'r'|'F'|'f'|'FE'|'fe'|'FI'|'fi'|'N'|'n'|'X'|'x' ;
+        argument = argument.toUpperCase();
         switch (argument) {
             case "L":
-                position = mode.equals("in") ? "startswith" : "left";
+                position = mode.equals("in") ? "startswith" : "overlapsLeft";
                 break;
             case "R":
-                position = mode.equals("in") ? "endswith" : "right";
+                position = mode.equals("in") ? "endswith" : "overlapsRight";
                 break;
             case "F":
                 position = "leftrightmatch";
@@ -830,24 +827,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
 
     private Tree parseCosmasQuery(String q) throws RecognitionException {
-        Pattern p = Pattern.compile("(\\w+):((\\+|-)?(sa|se|pa|pe|ta|te),?)+");
-        Matcher m = p.matcher(q);
-
-        String rewrittenQuery = q;
-        while (m.find()) {
-            String match = m.group();
-            String conditionsString = match.split(":")[1];
-            Pattern conditionPattern = Pattern.compile("(\\+|-)?(sa|se|pa|pe|ta|te)");
-            Matcher conditionMatcher = conditionPattern.matcher(conditionsString);
-            String replacement = "#BED(" + m.group(1) + " , ";
-            while (conditionMatcher.find()) {
-                replacement = replacement + conditionMatcher.group() + ",";
-            }
-            replacement = replacement.substring(0, replacement.length() - 1) + ")"; //remove trailing comma and close parenthesis
-            System.out.println(replacement);
-            rewrittenQuery = rewrittenQuery.replace(match, replacement);
-        }
-        q = rewrittenQuery;
+        q = rewritePositionQuery(q);
+    	
         Tree tree = null;
         ANTLRStringStream ss = new ANTLRStringStream(q);
         c2psLexer lex = new c2psLexer(ss);
@@ -867,6 +848,29 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
     }
 
     /**
+     * Normalises position operators to equivalents using #BED  
+     */
+    private String rewritePositionQuery(String q) {
+    	Pattern p = Pattern.compile("(\\w+):((\\+|-)?(sa|se|pa|pe|ta|te),?)+");
+        Matcher m = p.matcher(q);
+      
+        String rewrittenQuery = q;
+        while (m.find()) {
+            String match = m.group();
+            String conditionsString = match.split(":")[1];
+            Pattern conditionPattern = Pattern.compile("(\\+|-)?(sa|se|pa|pe|ta|te)");
+            Matcher conditionMatcher = conditionPattern.matcher(conditionsString);
+            String replacement = "#BED(" + m.group(1) + " , ";
+            while (conditionMatcher.find()) {
+                replacement = replacement + conditionMatcher.group() + ",";
+            }
+            replacement = replacement.substring(0, replacement.length() - 1) + ")"; //remove trailing comma and close parenthesis
+            rewrittenQuery = rewrittenQuery.replace(match, replacement);
+        }
+        return rewrittenQuery;
+	}
+
+	/**
      * @param args
      */
     public static void main(String[] args) {
@@ -875,23 +879,12 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		 */
         String[] queries = new String[]{
 				/* COSMAS 2 */
-//				"MORPH(V)",
-//				"MORPH(V PRES)",
-//				"wegen #IN(%, L) <s>",
-//				"wegen #IN(%) <s>",
-//				"(Mann oder Frau) #IN <s>",
-//				"#BEG(der /w3:5 Mann) /+w10 kommt",
-//				"&würde /w0 MORPH(V)",
-//				"#NHIT(gehen /w1:10 voran)",
-//				"#BED(der Mann , sa,-pa)",
-//				"Mann /t0 Frau",
-                "sagt der:sa Bundeskanzler",
-//				"Der:sa,-pe,+te ",
-                "#ELEM(W POS!='N V' title=tada)",
-                "#ELEM(W ANA != 'N V')",
-                "#ELEM(W ANA != 'N V' Genre = Sport)",
-                "(&Baum #IN #ELEM(xip/c=np)) #IN(L) #ELEM(s)"
-//				"(&Baum #IN #ELEM(NP)) #IN(L) #ELEM(S)"
+                "wegen #OV(x) <s>",
+                "wegen #OV(L) <s>",
+                "wegen #OV <s>",
+                "Der:pa Mann:se ",
+                "Der /+w1:1 Mann"
+                
         };
 //		CosmasTree.debug=true;
         for (String q : queries) {
