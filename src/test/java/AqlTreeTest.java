@@ -169,7 +169,7 @@ public class AqlTreeTest {
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
 				"], relation={@type=korap:treeRelation, reltype=dominance, " +
-						"distance={@type=korap:distance, key=r, min=2, max=4}}" +
+						"boundary={@type=korap:boundary, min=2, max=4}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();

@@ -390,7 +390,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				LinkedHashMap<String,Object> innerGroup = makeGroup("relation");
 				LinkedHashMap<String,Object> treeRelation = makeTreeRelation("dominance");
 				// commonancestor is an indirect commonparent relation
-				if (reltype.equals("commonancestor")) treeRelation.put("distance", makeDistance("r", 1, MAXIMUM_DISTANCE));
+				if (reltype.equals("commonancestor")) treeRelation.put("boundary", makeBoundary(1, MAXIMUM_DISTANCE));
 				group.put("relation", treeRelation);
 				innerGroup.put("relation", treeRelation);
 				// Get operands list before possible re-assignment of 'group' (see following 'if')
@@ -523,8 +523,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			if (rightChildSpec != null) relation.put("index", -1);
 			if (qName != null) relation.putAll(parseQNameNode(qName));
 			if (edgeSpec != null) relation.put("wrap", parseEdgeSpec(edgeSpec)) ;
-			if (star != null) relation.put("distance", makeDistance("r", 0, 100));
-			if (rangeSpec != null) relation.put("distance", distanceFromRangeSpec("r", rangeSpec));
+			if (star != null) relation.put("distance", makeBoundary(0, 100));
+			if (rangeSpec != null) relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
 
 		}
 		else if (operator.equals("pointing")) {
@@ -538,8 +538,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			//			if (qName != null) relation.putAll(parseQNameNode(qName));
 			if (qName != null) relation.put("reltype", qName.getText());
 			if (edgeSpec != null) relation.put("wrap", parseEdgeSpec(edgeSpec)) ;
-			if (star != null) relation.put("distance", makeDistance("r", 0, 100));
-			if (rangeSpec != null) relation.put("distance", distanceFromRangeSpec("r", rangeSpec));
+			if (star != null) relation.put("distance", makeBoundary(0, 100));
+			if (rangeSpec != null) relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
 
 		}
 		else if (operator.equals("precedence")) {
