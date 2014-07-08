@@ -30,8 +30,8 @@ import de.ids_mannheim.korap.util.QueryException;
  *
  */
 public class AqlTree extends Antlr4AbstractSyntaxTree {
-    private org.slf4j.Logger log = LoggerFactory
-            .getLogger(AqlTree.class);
+	private org.slf4j.Logger log = LoggerFactory
+			.getLogger(AqlTree.class);
 	/**
 	 * Top-level map representing the whole request.
 	 */
@@ -60,7 +60,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 * Keeps track of operands that are to be integrated into yet uncreated objects.
 	 */
 	LinkedList<LinkedHashMap<String,Object>> operandStack = new LinkedList<LinkedHashMap<String,Object>>();
-	
+
 	/**
 	 * Keeps track of explicitly (by #-var definition) or implicitly (number as reference) introduced entities (for later reference by #-operator)
 	 */
@@ -97,27 +97,24 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 * nodes here and exclude the operands from being written into the query map individually.   
 	 */
 	private LinkedList<String> operandOnlyNodeRefs = new LinkedList<String>();
-	
-	private LinkedList<Integer> establishedFoci = new LinkedList<Integer>();
-	private LinkedList<Integer> usedReferences = new LinkedList<Integer>();
-//	private List<String> mirroredPositionFrames = Arrays.asList(new String[]{"startswith", "endswith", "overlaps", "contains"});
-	private List<String> mirroredPositionFrames = Arrays.asList(new String[]{});
-	List<ParseTree> globalLingTermNodes = new ArrayList<ParseTree>();
+
+	private List<ParseTree> globalLingTermNodes = new ArrayList<ParseTree>();
 	private int totalRelationCount;
+	/**
+	 * Keeps a record of reference-class-mapping, i.e. which 'class' has been assigned to which #n reference. This is important when introducing korap:reference 
+	 * spans to refer back to previously established classes for entities.
+	 */
 	private LinkedHashMap<String, Integer> refClassMapping = new LinkedHashMap<String, Integer>();
 	private LinkedHashMap<String, Integer> nodeReferencesTotal = new LinkedHashMap<String, Integer>();
 	private LinkedHashMap<String, Integer> nodeReferencesProcessed = new LinkedHashMap<String, Integer>();
 	public static boolean verbose = false;
-	
+
 	/**
 	 * 
 	 * @param tree The syntax tree as returned by ANTLR
 	 * @param parser The ANTLR parser instance that generated the parse tree
 	 */
 	public AqlTree(String query) {
-//		prepareContext();
-//		parseAnnisQuery(query);
-//		super.parser = this.parser;
 		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
 		try {
 			process(query);
@@ -133,16 +130,16 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		LinkedHashMap<String,Object> operands = new LinkedHashMap<String,Object>();
 		LinkedHashMap<String,Object> relation = new LinkedHashMap<String,Object>();
 		LinkedHashMap<String,Object> classMap = new LinkedHashMap<String,Object>();
-		
+
 		operands.put("@id", "korap:operands");
 		operands.put("@container", "@list");
-		
+
 		relation.put("@id", "korap:relation");
 		relation.put("@type", "korap:relation#types");
-		
+
 		classMap.put("@id", "korap:class");
 		classMap.put("@type", "xsd:integer");
-		
+
 		context.put("korap", "http://korap.ids-mannheim.de/ns/query");
 		context.put("@language", "de");
 		context.put("operands", operands);
@@ -151,7 +148,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		context.put("query", "korap:query");
 		context.put("filter", "korap:filter");
 		context.put("meta", "korap:meta");
-		
+
 		requestMap.put("@context", context);		
 	}
 
@@ -159,7 +156,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	public Map<String, Object> getRequestMap() {
 		return requestMap;
 	}
-	
+
 	@Override
 	public void process(String query) throws QueryException {
 		ParseTree tree = parseAnnisQuery(query);
@@ -175,24 +172,22 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		processNode(tree);
 		log.info(requestMap.toString());
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void processNode(ParseTree node) {
 		// Top-down processing
 		if (visited.contains(node)) return;
 		else visited.add(node);
-		
+
 		String nodeCat = getNodeCat(node);
 		openNodeCats.push(nodeCat);
-		
+
 		stackedObjects = 0;
-		
+
 		if (verbose) {
 			System.err.println(" "+objectStack);
 			System.out.println(openNodeCats);
 		}
-		
-		
 
 		/*
 		 ****************************************************************
@@ -201,16 +196,15 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 ****************************************************************
 		 ****************************************************************
 		 */
-		if (nodeCat.equals("start")) {
-		}
-		
 		if (nodeCat.equals("exprTop")) {
-			// has several andTopExpr as children delimited by OR (Disj normal form)
-			if (node.getChildCount() > 1) {
-				// TODO or-groups for every and
+			List<ParseTree> andTopExprs = getChildrenWithCat(node, "andTopExpr");
+			if (andTopExprs.size() > 1) {
+				LinkedHashMap<String, Object> topOr = makeGroup("or");
+				requestMap.put("query", topOr);
+				objectStack.push(topOr);
 			}
 		}
-		
+
 		if (nodeCat.equals("andTopExpr")) {
 			// Before processing any child expr node, check if it has one or more "*ary_linguistic_term" nodes.
 			// Those nodes may use references to earlier established operand nodes.
@@ -218,7 +212,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			// naturally as operands of the relations/groups introduced by the 
 			// *node. For that purpose, this section mines all used references
 			// and stores them in a list for later reference.
-			
 			for (ParseTree exprNode : getChildrenWithCat(node,"expr")) {
 				// Pre-process any 'variableExpr' such that the variableReferences map can be filled
 				List<ParseTree> definitionNodes = new ArrayList<ParseTree>();
@@ -248,132 +241,18 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				}
 			}
 		}
-		
-		// establish new variables or relations between vars
-		if (nodeCat.equals("expr")) {
-		}
-		
+
 		if (nodeCat.equals("unary_linguistic_term")) {
 			LinkedHashMap<String, Object> unaryOperator = parseUnaryOperator(node);
 			String reference = node.getChild(0).toStringTree(parser).substring(1);
 			LinkedHashMap<String, Object> object = variableReferences.get(reference);
 			object.putAll(unaryOperator);
 		}
-		
+
 		if (nodeCat.equals("n_ary_linguistic_term")) {
-			System.err.println(operandStack);
-			relationCounter++;
-			// get operator and determine type of group (sequence/treeRelation/relation/...)
-			// It's possible in Annis QL to concatenate operators, so there may be several operators under one n_ary_linguistic_term node. 
-			// Counter 'i' will iteratively point to all operator nodes (odd-numbered) under this node.
-			for (int i=1; i<node.getChildCount(); i = i+2) {
-				ParseTree operandTree1 = node.getChild(i-1);
-				ParseTree operandTree2 = node.getChild(i+1);
-				
-				LinkedHashMap<String, Object> operatorGroup = parseOperatorNode(node.getChild(i).getChild(0));
-				String groupType;
-				try {
-					groupType = (String) operatorGroup.get("groupType");
-				} catch (ClassCastException | NullPointerException n) {
-					groupType = "relation";
-				}
-				LinkedHashMap<String, Object> group = makeGroup(groupType);
-				if (groupType.equals("relation") || groupType.equals("treeRelation")) {
-					LinkedHashMap<String, Object> relationGroup = new LinkedHashMap<String, Object>();
-					putAllButGroupType(relationGroup, operatorGroup);
-					group.put("relation", relationGroup);
-				} else if (groupType.equals("sequence") || groupType.equals("position")) {
-					putAllButGroupType(group, operatorGroup);
-				}
-				// Get operands list before possible re-assignment of 'group' (see following 'if')
-				ArrayList<Object> operands  = (ArrayList<Object>) group.get("operands");
-				// Wrap in reference object in case other relations are following
-				if (i < node.getChildCount()-2) {
-					group = wrapInReference(group, classCounter);
-				}
-				// Retrieve operands.
-				String ref1 = null;
-				String ref2 = null;
-				LinkedHashMap<String, Object> operand1 = null;
-				LinkedHashMap<String, Object> operand2 = null;
-				// Operand 1
-				if (!getNodeCat(operandTree1.getChild(0)).equals("variableExpr")) {
-					ref1 = operandTree1.getChild(0).toStringTree(parser).substring(1);
-					operand1 = variableReferences.get(ref1);
-					if (nodeReferencesTotal.get(ref1) > 1) {
-						if (nodeReferencesProcessed.get(ref1) == 0) {
-							refClassMapping.put(ref1, classCounter);
-							operand1 = wrapInClass(operand1);
-							nodeReferencesProcessed.put(ref1, nodeReferencesProcessed.get(ref1)+1);
-						} else if (nodeReferencesProcessed.get(ref1)>0 && nodeReferencesTotal.get(ref1)>1) {
-							try {
-								operand1 = wrapInReference(operandStack.pop(), refClassMapping.get(ref1));
-							} catch (NoSuchElementException e) {
-								operand1 = makeReference(refClassMapping.get(ref1));
-							}
-						}
-					}
-				}
-				// Operand 2
-				if (!getNodeCat(operandTree2.getChild(0)).equals("variableExpr")) {
-					ref2 = operandTree2.getChild(0).toStringTree(parser).substring(1);
-					operand2 = variableReferences.get(ref2);
-					if (nodeReferencesTotal.get(ref2) > 1) {
-						if (nodeReferencesProcessed.get(ref2)==0) {
-							refClassMapping.put(ref2, classCounter);
-							operand2 = wrapInClass(operand2);
-							nodeReferencesProcessed.put(ref2, nodeReferencesProcessed.get(ref2)+1);
-						} else if (nodeReferencesProcessed.get(ref2)>0 && nodeReferencesTotal.get(ref2)>1) {
-							try {
-								operand2 = wrapInReference(operandStack.pop(), refClassMapping.get(ref2));
-							} catch (NoSuchElementException e) {
-								operand2 = makeReference(refClassMapping.get(ref2));
-							}
-						}
-					}
-				}
-				// Inject operands.
-				// -> Case distinction:
-				if (node.getChildCount()==3) {
-					// Things are easy when there's just one operator (thus 3 children incl. operands)...
-					if (operand1 != null) operands.add(operand1);
-					if (operand2 != null) operands.add(operand2);
-				} else {
-					// ... but things get a little more complicated here. The AST is of this form: (operand1 operator 1 operand2 operator2 operand3 operator3 ...)
-					// but we'll have to serialize it in a nested, binary way: (((operand1 operator1 operand2) operator2 operand3) operator3 ...)
-					// the following code will do just that:
-					if (i == 1) {
-						// for the first operator, include both operands
-						if (operand1 != null) operands.add(operand1);
-						if (operand2 != null) operands.add(wrapInClass(operand2));
-						// Don't put this into the super object directly but store on operandStack 
-						// (because this group will have to be an operand of a subsequent operator)
-						operandStack.push(group);
-					// for all subsequent operators, only take the 2nd operand (first was already added by previous operator)
-					} else if (i < node.getChildCount()-2){
-						// for all intermediate operators, include other previous groups and 2nd operand. Store this on the operandStack, too.
-						if (operand2 != null) operands.add(wrapInClass(operand2));
-						operands.add(0, operandStack.pop());
-						operandStack.push(group);
-					} else if (i == node.getChildCount()-2) {
-						// This is the last operator. Include 2nd operand only
-						if (operand2 != null) operands.add(operand2);
-					}
-				}
-				// Final step: decide what to do with the 'group' object, depending on whether all relations have been processed
-				if (i == node.getChildCount()-2 && relationCounter == totalRelationCount) {
-					putIntoSuperObject(group);
-					if (!operandStack.isEmpty()) {
-						operands.add(0, operandStack.pop());
-					}
-					objectStack.push(group);
-					stackedObjects++;
-				} else {
-					operandStack.push(group);
-				}
-			}
+			processN_ary_linguistic_term(node);
 		}
-		
+
 		if (nodeCat.equals("variableExpr")) {
 			// simplex word or complex assignment (like qname = textSpec)?
 			String firstChildNodeCat = getNodeCat(node.getChild(0));
@@ -403,7 +282,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				object.put("wrap", term);
 				term.putAll(parseTextSpec(node.getChild(0)));
 			}
-				
+
 			if (node.getChildCount() == 3) {  			// (foundry/)?layer=key specification
 				if (object.get("@type").equals("korap:token")) {
 					HashMap<String, Object> term = (HashMap<String, Object>) object.get("wrap");
@@ -414,7 +293,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 					object.put("match", parseMatchOperator(node.getChild(1)));
 				}
 			}
-			
+
 			if (object != null) {
 				if (! operandOnlyNodeRefs.contains(variableCounter.toString())) {
 					putIntoSuperObject(object);
@@ -425,7 +304,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		}
 
 		objectsToPop.push(stackedObjects);
-		
+
 		/*
 		 ****************************************************************
 		 **************************************************************** 
@@ -451,21 +330,161 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		openNodeCats.pop();
 	}
 
-	private LinkedHashMap<String, Object> wrapInReference(LinkedHashMap<String, Object> group, Integer classId) {
-		LinkedHashMap<String, Object> refGroup = makeReference(classId);
-		ArrayList<Object> operands = new ArrayList<Object>();
-		operands.add(group);
-		refGroup.put("operands", operands);
-		return refGroup;
+
+
+	/**
+	 * Processes an operand node, creating a map for the operand containing all its information
+	 * given in the node definition (referenced via '#'). If this node has been referred to  and used earlier,
+	 * a korap:reference is created in its place. 
+	 * The operand will be wrapped in a class group if necessary.
+	 * @param operandTree
+	 * @return A map object with the appropriate CQLF representation of the operand 
+	 */
+	private LinkedHashMap<String, Object> retrieveOperand(ParseTree operandTree) {
+		LinkedHashMap<String, Object> operand = null;
+		if (!getNodeCat(operandTree.getChild(0)).equals("variableExpr")) {
+			String ref = operandTree.getChild(0).toStringTree(parser).substring(1);
+			operand = variableReferences.get(ref);
+			if (nodeReferencesTotal.get(ref) > 1) {
+				if (nodeReferencesProcessed.get(ref)==0) {
+					refClassMapping.put(ref, classCounter);
+					operand = wrapInClass(operand, classCounter++);
+					nodeReferencesProcessed.put(ref, nodeReferencesProcessed.get(ref)+1);
+				} else if (nodeReferencesProcessed.get(ref)>0 && nodeReferencesTotal.get(ref)>1) {
+					try {
+						operand = wrapInReference(operandStack.pop(), refClassMapping.get(ref));
+					} catch (NoSuchElementException e) {
+						operand = makeReference(refClassMapping.get(ref));
+					}
+				}
+			}
+		}
+		return operand;
 	}
 
 	@SuppressWarnings("unchecked")
-	private LinkedHashMap<String, Object> wrapInClass(LinkedHashMap<String, Object> group) {
-		LinkedHashMap<String, Object> classGroup = makeSpanClass(classCounter);
-		((ArrayList<Object>) classGroup.get("operands")).add(group);
-		classCounter++;
-		return classGroup;
+	private void processN_ary_linguistic_term(ParseTree node) {
+		relationCounter++;
+		// get operator and determine type of group (sequence/treeRelation/relation/...)
+		// It's possible in Annis QL to concatenate operators, so there may be several operators under one n_ary_linguistic_term node. 
+		// Counter 'i' will iteratively point to all operator nodes (odd-numbered) under this node.
+		for (int i=1; i<node.getChildCount(); i = i+2) {
+			ParseTree operandTree1 = node.getChild(i-1);
+			ParseTree operandTree2 = node.getChild(i+1);
+			String reltype = getNodeCat(node.getChild(i).getChild(0));
+
+			LinkedHashMap<String,Object> group = null;
+			ArrayList<Object> operands = null;
+			// Retrieve operands.
+			LinkedHashMap<String, Object> operand1 = retrieveOperand(operandTree1);
+			LinkedHashMap<String, Object> operand2 = retrieveOperand(operandTree2);
+
+			// 'Proper' n_ary_linguistic_operators receive a considerably different serialisation than 'commonparent' and 'commonancestor'.
+			// For the latter cases, a dummy span is introduced and declared as a span class that has a dominance relation towards
+			// the two operands, one after the other, thus resulting in two nested relations! A Poliqarp+ equivalent for A $ B would be
+			// contains(focus(1:contains({1:<>},A)), B).
+			// This is modeled here...
+			if (reltype.equals("commonparent") || reltype.equals("commonancestor")) {
+				// make an (outer) group and an inner group containing the dummy node or previous relations
+				group = makeGroup("relation");
+				LinkedHashMap<String,Object> innerGroup = makeGroup("relation");
+				LinkedHashMap<String,Object> treeRelation = makeTreeRelation("dominance");
+				// commonancestor is an indirect commonparent relation
+				if (reltype.equals("commonancestor")) treeRelation.put("distance", makeDistance("r", 1, MAXIMUM_DISTANCE));
+				group.put("relation", treeRelation);
+				innerGroup.put("relation", treeRelation);
+				// Get operands list before possible re-assignment of 'group' (see following 'if')
+				ArrayList<Object> outerOperands  = (ArrayList<Object>) group.get("operands");
+				ArrayList<Object> innerOperands  = (ArrayList<Object>) innerGroup.get("operands");
+				// for lowest level, add the underspecified node as first operand and wrap it in a class group
+				if (i == 1) {
+					innerOperands.add(wrapInClass(makeSpan(), classCounter));
+					// add the first operand and wrap the whole group in a focusing reference 
+					innerOperands.add(operand1);
+					innerGroup = wrapInReference(innerGroup, classCounter);
+					outerOperands.add(innerGroup);
+				} else {
+					outerOperands.add(operandStack.pop());
+				}
+				// Lookahead: if next operator is not commonparent or commonancestor, wrap in class for accessibility
+				if (i < node.getChildCount()-2 && !getNodeCat(node.getChild(i+2).getChild(0)).startsWith("common")) {
+					operand2 = wrapInClass(operand2, ++classCounter);
+				}
+				outerOperands.add(operand2);
+
+				// Wrap in another reference object in case other relations are following
+				if (i < node.getChildCount()-2) {
+					group = wrapInReference(group, classCounter);
+				}
+			// All other n-ary linguistic relations have special 'relation' attributes defined in CQLF and can be
+			// handled more easily...
+			} else {
+				LinkedHashMap<String, Object> operatorGroup = parseOperatorNode(node.getChild(i).getChild(0));
+				String groupType;
+				try {
+					groupType = (String) operatorGroup.get("groupType");
+				} catch (ClassCastException | NullPointerException n) {
+					groupType = "relation";
+				}
+				group = makeGroup(groupType);
+				if (groupType.equals("relation") || groupType.equals("treeRelation")) {
+					LinkedHashMap<String, Object> relationGroup = new LinkedHashMap<String, Object>();
+					putAllButGroupType(relationGroup, operatorGroup);
+					group.put("relation", relationGroup);
+				} else if (groupType.equals("sequence") || groupType.equals("position")) {
+					putAllButGroupType(group, operatorGroup);
+				}
+				// Get operands list before possible re-assignment of 'group' (see following 'if')
+				operands  = (ArrayList<Object>) group.get("operands");
+				// Wrap in reference object in case other relations are following
+				if (i < node.getChildCount()-2) {
+					group = wrapInReference(group, classCounter);
+				}
+
+				// Inject operands.
+				// -> Case distinction:
+				if (node.getChildCount()==3) {
+					// Things are easy when there's just one operator (thus 3 children incl. operands)...
+					if (operand1 != null) operands.add(operand1);
+					if (operand2 != null) operands.add(operand2);
+				} else {
+					// ... but things get a little more complicated here. The AST is of this form: (operand1 operator 1 operand2 operator2 operand3 operator3 ...)
+					// but we'll have to serialize it in a nested, binary way: (((operand1 operator1 operand2) operator2 operand3) operator3 ...)
+					// the following code will do just that:
+					if (i == 1) {
+						// for the first operator, include both operands
+						if (operand1 != null) operands.add(operand1);
+						if (operand2 != null) operands.add(wrapInClass(operand2, classCounter++));
+						// Don't put this into the super object directly but store on operandStack 
+						// (because this group will have to be an operand of a subsequent operator)
+						operandStack.push(group);
+						// for all subsequent operators, only take the 2nd operand (first was already added by previous operator)
+					} else if (i < node.getChildCount()-2) {
+						// for all intermediate operators, include other previous groups and 2nd operand. Store this on the operandStack, too.
+						if (operand2 != null) operands.add(wrapInClass(operand2, classCounter++));
+						operands.add(0, operandStack.pop());
+						operandStack.push(group);
+					} else if (i == node.getChildCount()-2) {
+						// This is the last operator. Include 2nd operand only
+						if (operand2 != null) operands.add(operand2);
+					}
+				}
+			}
+			// Final step: decide what to do with the 'group' object, depending on whether all relations have been processed
+			if (i == node.getChildCount()-2 && relationCounter == totalRelationCount) {
+				putIntoSuperObject(group);
+				if (!operandStack.isEmpty()) {
+					operands.add(0, operandStack.pop());
+				}
+				objectStack.push(group);
+				stackedObjects++;
+			} else {
+				operandStack.push(group);
+			}
+		}
 	}
+
+
 
 	/**
 	 * Parses a unary_linguistic_operator node. Possible operators are: root, arity, tokenarity.
@@ -483,7 +502,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		} else {
 			term.put(op, true);
 		}
-		
 		attr.put("attr", term);
 		return attr;
 	}
@@ -507,22 +525,22 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			if (edgeSpec != null) relation.put("wrap", parseEdgeSpec(edgeSpec)) ;
 			if (star != null) relation.put("distance", makeDistance("r", 0, 100));
 			if (rangeSpec != null) relation.put("distance", distanceFromRangeSpec("r", rangeSpec));
-			
+
 		}
 		else if (operator.equals("pointing")) {
-//			String reltype = operatorNode.getChild(1).toStringTree(parser);
+			//			String reltype = operatorNode.getChild(1).toStringTree(parser);
 			relation = makeRelation(null);
 			relation.put("groupType", "relation");
 			ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
 			ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
 			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
-//			if (qName != null) relation.putAll(parseQNameNode(qName));
+			//			if (qName != null) relation.putAll(parseQNameNode(qName));
 			if (qName != null) relation.put("reltype", qName.getText());
 			if (edgeSpec != null) relation.put("wrap", parseEdgeSpec(edgeSpec)) ;
 			if (star != null) relation.put("distance", makeDistance("r", 0, 100));
 			if (rangeSpec != null) relation.put("distance", distanceFromRangeSpec("r", rangeSpec));
-			
+
 		}
 		else if (operator.equals("precedence")) {
 			relation = new LinkedHashMap<String, Object>();
@@ -541,46 +559,39 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			relation.put("inOrder", true);
 		}
 		else if (operator.equals("spanrelation")) {
-			relation = makeGroup(null);
+			relation = makeGroup("position");
 			relation.put("groupType", "position");
 			String reltype = operatorNode.getChild(0).toStringTree(parser);
 			String frame = null;
 			boolean inOrder = true;
 			switch (reltype) {
-				case "_=_":
-					frame = "matches"; break;
-				case "_l_":
-					frame = "startswith"; 
-					inOrder = false;
-					break;
-				case "_r_":
-					frame = "endswith";
-					inOrder = false;
-					break;
-				case "_i_":
-					frame = "contains"; break;
-				case "_o_":
-					frame = "overlaps"; 
-					inOrder = false;
-					break;
-				case "_ol_":
-					frame = "overlapsLeft"; 
-					inOrder = false;
-					break;
-				case "_or_":
-					frame = "overlapsRight"; 
-					inOrder = false;
-					break;
+			case "_=_":
+				frame = "matches"; break;
+			case "_l_":
+				frame = "startswith"; 
+				inOrder = false;
+				break;
+			case "_r_":
+				frame = "endswith";
+				inOrder = false;
+				break;
+			case "_i_":
+				frame = "contains"; break;
+			case "_o_":
+				frame = "overlaps"; 
+				inOrder = false;
+				break;
+			case "_ol_":
+				frame = "overlapsLeft"; 
+				inOrder = false;
+				break;
+			case "_or_":
+				frame = "overlapsRight"; 
+				inOrder = false;
+				break;
 			}
-			relation.put("operation", "operation:position");
 			if (!inOrder) relation.put("inOrder", false);
 			relation.put("frame", "frame:"+frame);
-		}
-		else if (operator.equals("commonparent")) {
-			//TODO
-		}
-		else if (operator.equals("commonancestor")) {
-			//TODO
 		}
 		else if (operator.equals("identity")) {
 			//TODO
@@ -621,7 +632,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	private LinkedHashMap<String, Object> boundaryFromRangeSpec(ParseTree rangeSpec) {
 		return boundaryFromRangeSpec(rangeSpec, true); 
 	}
-	
+
 	private LinkedHashMap<String, Object> boundaryFromRangeSpec(ParseTree rangeSpec, boolean expandToMax) {
 		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
 		Integer max = min;
@@ -638,7 +649,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
 		return makeDistance(key, min, max);
 	}
-	
+
 	private LinkedHashMap<String, Object> parseDistance(ParseTree rangeSpec) {
 		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
 		Integer max = MAXIMUM_DISTANCE;
@@ -646,7 +657,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
 		return makeDistance("w", min, max);
 	}
-	
+
 	private LinkedHashMap<String, Object> parseTextSpec(ParseTree node) {
 		LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
 		if (hasChild(node, "regex")) {
@@ -667,27 +678,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	private String parseMatchOperator(ParseTree node) {
 		return node.toStringTree(parser).equals("=") ? "match:eq" : "match:ne";
 	}
-	
-	
-	/**
-	 * Parses a textSpec node (which holds the 'key' field)
-	 * @param node
-	 * @return
-	 */
-	private LinkedHashMap<String, Object> parseVarKey(ParseTree node) {
-		LinkedHashMap<String, Object> fields = new LinkedHashMap<String, Object>();
-		if (node.getChildCount() == 2) {	// no content, empty quotes
-			
-		} else if (node.getChildCount() == 3) {
-			fields.put("key", node.getChild(1).toStringTree(parser));
-			if (node.getChild(0).toStringTree(parser).equals("/") &&		// slashes -> regex
-					node.getChild(2).toStringTree(parser).equals("/")) {
-				fields.put("type", "type:regex");
-			}
-		}
-		return fields;
-	}
-
 
 	private LinkedHashMap<String, Object> parseQNameNode(ParseTree node) {
 		LinkedHashMap<String, Object> fields = new LinkedHashMap<String, Object>();
@@ -701,7 +691,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	private void putIntoSuperObject(LinkedHashMap<String, Object> object) {
 		putIntoSuperObject(object, 0);
 	}
-	
+
 	@SuppressWarnings({ "unchecked" })
 	private void putIntoSuperObject(LinkedHashMap<String, Object> object, int objStackPosition) {
 		if (objectStack.size()>objStackPosition) {
@@ -716,14 +706,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private void putGroupAndWrapFocus(LinkedHashMap<String, Object> thisObject, LinkedHashMap<String, Object> formerObject, int focusClass) {
-		LinkedHashMap<String, Object> focusWrap = makeGroup("focus");
-		focusWrap.put("classRef", focusClass);
-		((ArrayList<Object>) focusWrap.get("operands")).add(formerObject);
-		((ArrayList<Object>) thisObject.get("operands")).add(focusWrap);
-	}
-	
 	private void putAllButGroupType(Map<String, Object> container, Map<String, Object> input) {
 		for (String key : input.keySet()) {
 			if (!key.equals("groupType")) {
@@ -731,73 +713,58 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			}
 		}
 	}
-	
+
 	private ParserRuleContext parseAnnisQuery (String p) throws QueryException {
 		Lexer poliqarpLexer = new AqlLexer((CharStream)null);
-	    ParserRuleContext tree = null;
-	    // Like p. 111
-	    try {
+		ParserRuleContext tree = null;
+		// Like p. 111
+		try {
 
-	      // Tokenize input data
-	      ANTLRInputStream input = new ANTLRInputStream(p);
-	      poliqarpLexer.setInputStream(input);
-	      CommonTokenStream tokens = new CommonTokenStream(poliqarpLexer);
-	      parser = new AqlParser(tokens);
+			// Tokenize input data
+			ANTLRInputStream input = new ANTLRInputStream(p);
+			poliqarpLexer.setInputStream(input);
+			CommonTokenStream tokens = new CommonTokenStream(poliqarpLexer);
+			parser = new AqlParser(tokens);
 
-	      // Don't throw out erroneous stuff
-	      parser.setErrorHandler(new BailErrorStrategy());
-	      parser.removeErrorListeners();
+			// Don't throw out erroneous stuff
+			parser.setErrorHandler(new BailErrorStrategy());
+			parser.removeErrorListeners();
 
-	      // Get starting rule from parser
-	      Method startRule = AqlParser.class.getMethod("start"); 
-	      tree = (ParserRuleContext) startRule.invoke(parser, (Object[])null);
-	    }
+			// Get starting rule from parser
+			Method startRule = AqlParser.class.getMethod("start"); 
+			tree = (ParserRuleContext) startRule.invoke(parser, (Object[])null);
+		}
 
-	    // Some things went wrong ...
-	    catch (Exception e) {
-	    	log.error(e.getMessage());
-	    	System.err.println( e.getMessage() );
-	    }
-	    
-	    if (tree == null) {
-	    	log.error("Could not parse query. Make sure it is correct ANNIS QL syntax.");
-	    	throw new QueryException("Could not parse query. Make sure it is correct ANNIS QL syntax.");
-	    }
+		// Some things went wrong ...
+		catch (Exception e) {
+			log.error(e.getMessage());
+			System.err.println( e.getMessage() );
+		}
 
-	    // Return the generated tree
-	    return tree;
-	  }
-	
+		if (tree == null) {
+			log.error("Could not parse query. Make sure it is correct ANNIS QL syntax.");
+			throw new QueryException("Could not parse query. Make sure it is correct ANNIS QL syntax.");
+		}
+
+		// Return the generated tree
+		return tree;
+	}
+
 	public static void main(String[] args) {
 		/*
 		 * For testing
 		 */
 		String[] queries = new String[] {
-//			 "node & #1:root",
-//			 "pos=\"N\" & pos=\"V\" & pos=\"N\" & #1 . #2 & #2 . #3",
-//			 "cat=\"NP\" & #1:tokenarity=2",
-//			 "node & node & node & #1 . #2 . #3",
-//			 "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3",
-//			 "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & cat=\"DP\" & #1 > #2 > #3 > #4",
-//			 "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 . #2 & #2 . #3"
-//			 "cnx/cat=\"NP\" > node",
-//			 "node > node",
-//			 "cat=/NP/ > node",
-//			 "/Mann/",
-//			 "node > tok=\"foo\"",
-//				"tok=\"Sonne\" & tok=\"Mond\" & #1 > #2 .0,4  tok=\"Sterne\"",
-//				 "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 . #2 & #2 . #3",
-//				 "cat=\"NP\" & pos=\"V\" & pos=\"P\" & #1 > #2 & #1 > #3 & #2 . #3",
-				 "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3"
-			};
-		AqlTree.verbose=true;
+				"cat=\"NP\" & cat=\"VP\" & #1 $ #2 ",
+		};
+		//		AqlTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);
 				AqlTree at = new AqlTree(q);
 				System.out.println(at.parseAnnisQuery(q).toStringTree(at.parser));
 				System.out.println();
-				
+
 			} catch (NullPointerException | QueryException npe) {
 				npe.printStackTrace();
 			}
