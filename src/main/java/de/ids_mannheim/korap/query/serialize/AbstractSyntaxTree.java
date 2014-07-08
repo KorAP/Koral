@@ -104,22 +104,48 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
-	protected LinkedHashMap<String, Object> makeReference(ArrayList<Integer> classRefs) {
+	protected LinkedHashMap<String, Object> makeReference(ArrayList<Integer> classRefs, String operation) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:reference");
+		group.put("operation", "operation:"+operation);
 		group.put("classRef", classRefs);
 		return group;
+	}
+	
+	protected LinkedHashMap<String, Object> makeReference(ArrayList<Integer> classRefs) {
+		return makeReference(classRefs, "focus");
+	}
+	
+	protected LinkedHashMap<String, Object> makeReference(int classRef, String operation) {
+		ArrayList<Integer> classRefs = new ArrayList<Integer>();
+		classRefs.add(classRef);
+		return makeReference(classRefs, operation);
 	}
 	
 	protected LinkedHashMap<String, Object> makeReference(int classRef) {
 		ArrayList<Integer> classRefs = new ArrayList<Integer>();
 		classRefs.add(classRef);
-		return makeReference(classRefs);
+		return makeReference(classRefs, "focus");
 	}
 	
 	protected void addOperandsToGroup(LinkedHashMap<String, Object> group) {
 		ArrayList<Object> operands = new ArrayList<Object>();
 		group.put("operands", operands);
+	}
+	
+	protected LinkedHashMap<String, Object> wrapInReference(LinkedHashMap<String, Object> group, Integer classId) {
+		LinkedHashMap<String, Object> refGroup = makeReference(classId);
+		ArrayList<Object> operands = new ArrayList<Object>();
+		operands.add(group);
+		refGroup.put("operands", operands);
+		return refGroup;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected LinkedHashMap<String, Object> wrapInClass(LinkedHashMap<String, Object> group, Integer classId) {
+		LinkedHashMap<String, Object> classGroup = makeSpanClass(classId);
+		((ArrayList<Object>) classGroup.get("operands")).add(group);
+		return classGroup;
 	}
 	
     /**
