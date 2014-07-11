@@ -177,21 +177,6 @@ public class TreeTemplate extends Antlr4AbstractSyntaxTree {
 		
 	}
 
-//	/**
-//	 * Returns the category (or 'label') of the root of a ParseTree.
-//	 * @param node
-//	 * @return
-//	 */
-//	public String getNodeCat(ParseTree node) {
-//		String nodeCat = node.toStringTree(qlParser);
-//		Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
-//		Matcher m = p.matcher(node.toStringTree(qlParser));
-//		if (m.find()) {
-//			nodeCat = m.group(1);
-//		} 
-//		return nodeCat;
-//	}
-	
 	@SuppressWarnings("unused")
 	private void putIntoSuperObject(LinkedHashMap<String, Object> object) {
 		putIntoSuperObject(object, 0);

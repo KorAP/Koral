@@ -194,7 +194,7 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:span, key=s}," +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-				"], offset-min=1, offset-max=1}" +
+				"], leftOffset={@type=korap:boundary, min=1, max=1}}" +
 			"]}";
 		ppt = new PoliqarpPlusTree("startswith(<s>, [][base=Mann])");
 		map = ppt.getRequestMap().get("query").toString();

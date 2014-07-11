@@ -83,7 +83,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	/**
 	 * Recursively calls itself with the children of the currently active node, traversing the tree nodes in a top-down, depth-first fashion.
 	 * A list is maintained that contains all visited nodes
-	 * in case they have been directly addressed by its (grand-/grand-grand-/...) parent node, such that some processing time is saved, as these node will
+	 * which have been directly addressed by their (grand-/grand-grand-/...) parent nodes, such that some processing time is saved, as these node will
 	 * not be processed. This method is effectively a list of if-statements that are responsible for treating the different node types correctly and filling the
 	 * respective maps/lists.
 	 *
