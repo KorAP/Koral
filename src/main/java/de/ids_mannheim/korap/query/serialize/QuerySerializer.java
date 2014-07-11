@@ -36,36 +36,6 @@ public class QuerySerializer {
         String[] queries;
         if (args.length == 0) {
             queries = new String[]{
-                    /*
-                     * negation
-					 * elemente
-					 * within
-					 * regex
-					 * & field_group
-					 */
-                    "Buch",
-                    "das Buch",
-                    "das /+w1:3 Buch",
-                    "das /+w1:3,s1 Buch",
-                    "(das /+w1:3,s1 Buch) /+w5 Tisch",
-                    "(das /+w1:3,s1 Buch) /-w5 Tisch",
-                    "(das /+w1:3,s1 Buch) /+w5 (auf dem Tisch)",
-
-
-                    "Institut für Deutsche Sprache",
-                    "Institut für deutsche Sprache",
-                    "Institut für $deutsche Sprache",
-                    "Institut für &deutsch Sprache",
-                    "Institut für /+w2 Sprache",
-                    "Institut für %+w1 deutsche Sprache",
-                    "Institut für MORPH(A) Sprache",
-
-                    "wegen #IN(L) <s>",
-                    "$wegen #IN(L) <s>",
-                    "#BED($wegen , +sa)",
-                    "#BEG(#ELEM(S))",
-                    "MORPH(V) #IN(L) #ELEM(S)",
-                    "MORPH(V) #IN(R) #ELEM(S)",
 
             };
         } else {
@@ -77,7 +47,7 @@ public class QuerySerializer {
             try {
                 System.out.println(q);
                 String ql = "cosmas2";
-                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + "_" + i + ".json");
+                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + "_" + i + ".jsonld");
                 System.out.println();
             } catch (NullPointerException npe) {
                 npe.printStackTrace();
@@ -114,6 +84,8 @@ public class QuerySerializer {
             ast = new PoliqarpPlusTree(query);
         } else if (queryLanguage.toLowerCase().equals("cql")) {
             ast = new CQLTree(query);
+        } else if (queryLanguage.toLowerCase().equals("annis")) {
+            ast = new AqlTree(query);
         } else {
             throw new QueryException(queryLanguage + " is not a supported query language!");
         }
@@ -123,8 +95,6 @@ public class QuerySerializer {
 
     public QuerySerializer setQuery(String query, String ql, String version)
             throws QueryException {
-
-
         try {
             if (ql.equalsIgnoreCase("poliqarp")) {
                 ast = new PoliqarpPlusTree(query);
