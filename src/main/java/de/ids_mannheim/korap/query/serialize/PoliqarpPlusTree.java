@@ -170,6 +170,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 					if (flag.contains("i")) term.put("caseInsensitive", true);
 					else if (flag.contains("I")) term.put("caseInsensitive", false);
 					if (flag.contains("x")) {
+						term.put("type", "type:regex");
 						term.put("key", ".*?"+key+".*?");
 					}
 				}
@@ -297,6 +298,12 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
 			String type = node.getChild(0).toStringTree(parser);
 			if (type.equals("split")) referenceGroup.put("operation", "operation:split");
+			if (type.equals("submatch") || type.equals("shrink")) {
+				String warning = "You used the deprecated operator '"+type+"'that has been replaced by 'focus'! " +
+						"In future, please use 'focus' when you want to refer to specific classes in your query.";
+				log.warn(warning);
+				requestMap.put("warning", warning);
+			}
 			if (classRefOp != null) {
 				referenceGroup.put("classRefOp", "classRefOp:" + classRefOp);
 			}
@@ -556,10 +563,13 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[]{
-				"[base=foo][base=foo]",
-				"Der \"Baum\"/x",
-				"contains(<vp>,[][base=foo])",
-				"[hallo=welt]*"
+//				"[base=foo][base=foo]",
+//				"Der \"Baum\"/x",
+//				"contains(<vp>,[][base=foo])",
+//				"[hallo=welt]*",
+				"schland/x",
+				"focus([orth=Der]{[orth=Mann]})",
+				"shrink([orth=Der]{[orth=Mann]})"
 		};
 //		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {
