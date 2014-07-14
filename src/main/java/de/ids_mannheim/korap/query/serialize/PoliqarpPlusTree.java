@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Map representation of Poliqarp syntax tree as returned by ANTLR
@@ -171,6 +172,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 					else if (flag.contains("I")) term.put("caseInsensitive", false);
 					if (flag.contains("x")) {
 						term.put("type", "type:regex");
+						key = escapeRegexSpecialChars(key);
 						term.put("key", ".*?"+key+".*?");
 					}
 				}
@@ -354,6 +356,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		openNodeCats.pop();
 	}
 
+	private String escapeRegexSpecialChars(String key) {
+		return Pattern.quote(key);
+	}
+
 	/**
 	 * Parses a repetition node
 	 * @param node
@@ -413,6 +419,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			if (negations.size() % 2 == 1) negated = !negated;
 			// retrieve possible nodes
 			ParseTree keyNode = getFirstChildWithCat(node, "key");
+			ParseTree valueNode = getFirstChildWithCat(node, "value");
 			ParseTree layerNode = getFirstChildWithCat(node, "layer");
 			ParseTree foundryNode = getFirstChildWithCat(node, "foundry");
 			ParseTree termOpNode = getFirstChildWithCat(node, "termOp");
@@ -432,6 +439,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				key = key.substring(1, key.length()-1); // remove leading and trailing quotes
 			}
 			term.put("key", key);
+			// process value
+			if (valueNode != null) term.put("value", valueNode.getText());
 			// process operator ("match" property)
 			if (termOpNode != null) {
 				String termOp = termOpNode.getText();
@@ -569,7 +578,9 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 //				"[hallo=welt]*",
 				"schland/x",
 				"focus([orth=Der]{[orth=Mann]})",
-				"shrink([orth=Der]{[orth=Mann]})"
+				"shrink([orth=Der]{[orth=Mann]})",
+				"[mate/m=number:sg]",
+				"z.B./x"
 		};
 //		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {
