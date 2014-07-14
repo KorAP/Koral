@@ -151,6 +151,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			// handle negation
 			List<ParseTree> negations = getChildrenWithCat(node, "!");
 			boolean negated = false;
+			boolean isRegex = false;
 			if (negations.size() % 2 == 1) negated = true;
 			if (getNodeCat(node.getChild(0)).equals("key")) {
 				// no 'term' child, but direct key specification: process here
@@ -158,6 +159,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				
 				String key = node.getChild(0).getText();
 				if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
+					isRegex = true;
 					term.put("type", "type:regex");
 					key = key.substring(1,key.length()-1);
 				}
@@ -172,8 +174,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 					else if (flag.contains("I")) term.put("caseInsensitive", false);
 					if (flag.contains("x")) {
 						term.put("type", "type:regex");
-						key = escapeRegexSpecialChars(key);
-						term.put("key", ".*?"+key+".*?");
+						if (!isRegex) {
+							key = escapeRegexSpecialChars(key); 
+						}
+						term.put("key", ".*?"+key+".*?"); // overwrite key
 					}
 				}
 				token.put("wrap", term);
@@ -415,6 +419,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			LinkedHashMap<String,Object> term = makeTerm();
 			// handle negation
 			boolean negated = negatedGlobal;
+			boolean isRegex = false;
 			List<ParseTree> negations = getChildrenWithCat(node, "!");
 			if (negations.size() % 2 == 1) negated = !negated;
 			// retrieve possible nodes
@@ -435,6 +440,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			// process key: 'normal' or regex?
 			key = keyNode.getText();
 			if (getNodeCat(keyNode.getChild(0)).equals("regex")) {
+				isRegex = true;
 				term.put("type", "type:regex");
 				key = key.substring(1, key.length()-1); // remove leading and trailing quotes
 			}
@@ -455,7 +461,11 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				if (flag.contains("i")) term.put("caseInsensitive", true);
 				else if (flag.contains("I")) term.put("caseInsensitive", false);
 				if (flag.contains("x")) {
+					if (!isRegex) {
+						key = escapeRegexSpecialChars(key); 
+					}
 					term.put("key", ".*?"+key+".*?");  // flag 'x' allows submatches: overwrite key with appended .*? 
+					term.put("type", "type:regex");
 				}
 			}
 			return term;
