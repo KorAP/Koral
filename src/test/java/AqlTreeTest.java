@@ -60,6 +60,12 @@ public class AqlTreeTest {
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(regex1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "/.*?Mann.*?/";
+		String regex2 = "{@type=korap:token, wrap={@type=korap:term, type=type:regex, key=.*?Mann.*?, match=match:eq}}";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(regex2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
