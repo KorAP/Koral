@@ -305,8 +305,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			String type = node.getChild(0).toStringTree(parser);
 			if (type.equals("split")) referenceGroup.put("operation", "operation:split");
 			if (type.equals("submatch") || type.equals("shrink")) {
-				String warning = "You used the deprecated operator '"+type+"'that has been replaced by 'focus'! " +
-						"In future, please use 'focus' when you want to refer to specific classes in your query.";
+				String warning = type + "() is deprecated in favor of focus()";
 				log.warn(warning);
 				requestMap.put("warning", warning);
 			}
