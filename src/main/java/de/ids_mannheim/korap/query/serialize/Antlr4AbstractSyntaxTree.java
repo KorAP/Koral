@@ -11,7 +11,11 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 public abstract class Antlr4AbstractSyntaxTree extends AbstractSyntaxTree {
 
-	public Parser parser;
+
+	/**
+	 * Parser object deriving the ANTLR parse tree.
+	 */
+	protected Parser parser;
 
 	 /**
      * Returns the category (or 'label') of the root of a (sub-) ParseTree (ANTLR 4).

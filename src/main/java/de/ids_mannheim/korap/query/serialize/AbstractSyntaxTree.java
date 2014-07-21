@@ -2,6 +2,7 @@ package de.ids_mannheim.korap.query.serialize;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -20,6 +21,35 @@ public abstract class AbstractSyntaxTree {
 	public abstract void process(String query) throws QueryException;
 	
 	public static final Integer MAXIMUM_DISTANCE = 100; 
+	
+	/**
+	 * Top-level map representing the whole request.
+	 */
+	LinkedHashMap<String, Object> requestMap = new LinkedHashMap<String, Object>();
+	/**
+	 * Keeps track of open node categories
+	 */
+	LinkedList<String> openNodeCats = new LinkedList<String>();
+	/**
+	 * Keeps track of all visited nodes in a tree
+	 */
+	List<ParseTree> visited = new ArrayList<ParseTree>();
+	/**
+	 * Keeps track of active object.
+	 */
+	LinkedList<LinkedHashMap<String, Object>> objectStack = new LinkedList<LinkedHashMap<String, Object>>();
+	/**
+	 * Keeps track of how many objects there are to pop after every recursion of {@link #processNode(ParseTree)}
+	 */
+	LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
+	/**
+	 * If true, print debug statements
+	 */
+	public static boolean verbose = false;
+	ParseTree currentNode = null;
+	Integer stackedObjects = 0;
+	ArrayList<String> errorMsgs = new ArrayList<String>();
+	ArrayList<String> warningMsgs = new ArrayList<String>();
 
 	protected LinkedHashMap<String, Object> makeSpan() {
 		LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();

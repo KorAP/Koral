@@ -33,34 +33,13 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	private org.slf4j.Logger log = LoggerFactory
 			.getLogger(AqlTree.class);
 	/**
-	 * Top-level map representing the whole request.
-	 */
-	LinkedHashMap<String,Object> requestMap = new LinkedHashMap<String,Object>();
-	/**
-	 * Keeps track of open node categories
-	 */
-	LinkedList<String> openNodeCats = new LinkedList<String>();
-	/**
 	 * Flag that indicates whether token fields or meta fields are currently being processed
 	 */
 	boolean inMeta = false;
 	/**
-	 * Parser object deriving the ANTLR parse tree.
-	 */
-	Parser parser;
-	/**
-	 * Keeps track of all visited nodes in a tree
-	 */
-	List<ParseTree> visited = new ArrayList<ParseTree>();
-	/**
-	 * Keeps track of active object.
-	 */
-	LinkedList<LinkedHashMap<String,Object>> objectStack = new LinkedList<LinkedHashMap<String,Object>>();
-	/**
 	 * Keeps track of operands that are to be integrated into yet uncreated objects.
 	 */
 	LinkedList<LinkedHashMap<String,Object>> operandStack = new LinkedList<LinkedHashMap<String,Object>>();
-
 	/**
 	 * Keeps track of explicitly (by #-var definition) or implicitly (number as reference) introduced entities (for later reference by #-operator)
 	 */
@@ -79,11 +58,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 */
 	private LinkedList<ArrayList<Object>> invertedOperandsLists = new LinkedList<ArrayList<Object>>();
 	/**
-	 * Keeps track of how many objects there are to pop after every recursion of {@link #processNode(ParseTree)}
-	 */
-	LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
-	Integer stackedObjects = 0;
-	/**
 	 * Keeps track of operation:class numbers.
 	 */
 	int classCounter = 0;
@@ -97,7 +71,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 * nodes here and exclude the operands from being written into the query map individually.   
 	 */
 	private LinkedList<String> operandOnlyNodeRefs = new LinkedList<String>();
-
 	private List<ParseTree> globalLingTermNodes = new ArrayList<ParseTree>();
 	private int totalRelationCount;
 	/**
@@ -107,7 +80,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	private LinkedHashMap<String, Integer> refClassMapping = new LinkedHashMap<String, Integer>();
 	private LinkedHashMap<String, Integer> nodeReferencesTotal = new LinkedHashMap<String, Integer>();
 	private LinkedHashMap<String, Integer> nodeReferencesProcessed = new LinkedHashMap<String, Integer>();
-	public static boolean verbose = false;
 
 	/**
 	 * 
@@ -124,33 +96,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		System.out.println(">>> "+requestMap.get("query")+" <<<");
 	}
 
-	@SuppressWarnings("unused")
-	private void prepareContext() {
-		LinkedHashMap<String,Object> context = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> operands = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> relation = new LinkedHashMap<String,Object>();
-		LinkedHashMap<String,Object> classMap = new LinkedHashMap<String,Object>();
-
-		operands.put("@id", "korap:operands");
-		operands.put("@container", "@list");
-
-		relation.put("@id", "korap:relation");
-		relation.put("@type", "korap:relation#types");
-
-		classMap.put("@id", "korap:class");
-		classMap.put("@type", "xsd:integer");
-
-		context.put("korap", "http://korap.ids-mannheim.de/ns/query");
-		context.put("@language", "de");
-		context.put("operands", operands);
-		context.put("relation", relation);
-		context.put("class", classMap);
-		context.put("query", "korap:query");
-		context.put("filter", "korap:filter");
-		context.put("meta", "korap:meta");
-
-		requestMap.put("@context", context);		
-	}
 
 	@Override
 	public Map<String, Object> getRequestMap() {
@@ -756,6 +701,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 */
 		String[] queries = new String[] {
 				"cat=\"NP\" & cat=\"VP\" & #1 $ #2 ",
+				"Haus",
+				"lemma=\"Haus\"",
+				"Katze=\"Hund\"",
+				"cnx/c=\"NP\"",
+				"cat=\"NP\""
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {

@@ -20,36 +20,6 @@ import java.util.regex.Pattern;
 public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
 	Logger log = LoggerFactory.getLogger(PoliqarpPlusTree.class);
-	/**
-	 * Top-level map representing the whole request.
-	 */
-	LinkedHashMap<String, Object> requestMap = new LinkedHashMap<String, Object>();
-	/**
-	 * Keeps track of open node categories
-	 */
-	LinkedList<String> openNodeCats = new LinkedList<String>();
-	/**
-	 * Parser object deriving the ANTLR parse tree.
-	 */
-	private Parser parser;
-	/**
-	 * Keeps track of all visited nodes in a tree
-	 */
-	private List<ParseTree> visited = new ArrayList<ParseTree>();
-	/**
-	 * Keeps track of active object.
-	 */
-	private LinkedList<LinkedHashMap<String, Object>> objectStack = new LinkedList<LinkedHashMap<String, Object>>();
-	/**
-	 * Keeps track of how many objects there are to pop after every recursion of {@link #processNode(ParseTree)}
-	 */
-	private LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
-	/**
-	 * If true, print debug statements
-	 */
-	public static boolean verbose = false;
-	ParseTree currentNode = null;
-	Integer stackedObjects = 0;
 
 	/**
 	 * Most centrally, this class maintains a set of nested maps and lists which represent the JSON tree, which is built by the JSON serialiser
@@ -589,7 +559,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				"focus([orth=Der]{[orth=Mann]})",
 				"shrink([orth=Der]{[orth=Mann]})",
 				"[mate/m=number:sg]",
-				"z.B./x"
+				"z.B./x",
+				"\".*?Mann.\"",
+				"\".*?Mann.*?\"",
+				"[orth=\".*?l(au|ie)fen.*?*\"]"
 		};
 //		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {

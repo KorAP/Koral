@@ -26,31 +26,15 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
     private static Logger log = LoggerFactory.getLogger(CosmasTree.class);
 
     String query;
-    LinkedHashMap<String, Object> requestMap = new LinkedHashMap<String, Object>();
-    /**
-     * Keeps track of active object.
-     */
-    LinkedList<LinkedHashMap<String, Object>> objectStack = new LinkedList<LinkedHashMap<String, Object>>();
-    /**
-     * Makes it possible to store several distantTokenGroups
-     */
     LinkedList<LinkedHashMap[]> toWrapStack = new LinkedList<LinkedHashMap[]>();
     /**
      * Field for repetition query (Kleene + or * operations, or min/max queries: {2,4}
      */
     String repetition = "";
     /**
-     * Keeps track of open node categories
-     */
-    LinkedList<String> openNodeCats = new LinkedList<String>();
-    /**
      * Global control structure for fieldGroups, keeps track of open fieldGroups.
      */
     LinkedList<ArrayList<Object>> openFieldGroups = new LinkedList<ArrayList<Object>>();
-    /**
-     * Keeps track of how many objects there are to pop after every recursion of {@link #processNode(ParseTree)}
-     */
-    LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
     /**
      * Keeps track of how many toWrap objects there are to pop after every recursion of {@link #processNode(ParseTree)}
      */
@@ -75,10 +59,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
      */
     List<Tree> visited = new ArrayList<Tree>();
 
-    Integer stackedObjects = 0;
     Integer stackedToWrap = 0;
-
-    private static boolean debug = false;
     /**
      * A list of node categories that can be sequenced (i.e. which can be in a sequence with any number of other nodes in this list)
      */
@@ -150,7 +131,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         stackedObjects = 0;
         stackedToWrap = 0;
 
-        if (debug) {
+        if (verbose) {
             System.err.println(" " + objectStack);
             System.out.println(openNodeCats);
         }
