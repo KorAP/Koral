@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * @author hanl
+ * @author hanl, bingel
  * @date 06/12/2013
  */
 public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
@@ -44,7 +44,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         } else {
             throw new NullPointerException("Parser has not been instantiated!");
         }
-
+        requestMap.put("@type", "korap:filter");
         System.out.println("Processing collection query");
         if (verbose) System.out.println(tree.toStringTree(parser));
         processNode(tree);
@@ -70,19 +70,20 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 		 ****************************************************************
 		 */
 
-        if (nodeCat.equals("andGroup")) {
-            LinkedHashMap<String, Object> exprGroup = makeTermGroup("and");
-            objectStack.push(exprGroup);
+        if (nodeCat.equals("relation")) {
+        	String operator = node.getChild(1).getChild(0).toStringTree(parser).equals("&") ? "and" : "or"; 
+            LinkedHashMap<String, Object> relationGroup = makeDocGroup(operator);
+            putIntoSuperObject(relationGroup);
+            objectStack.push(relationGroup);
             stackedObjects++;
-            putIntoSuperObject(exprGroup, 1);
         }
 
-        if (nodeCat.equals("orGroup")) {
-            LinkedHashMap<String, Object> exprGroup = makeTermGroup("or");
-            objectStack.push(exprGroup);
-            stackedObjects++;
-            putIntoSuperObject(exprGroup, 1);
-        }
+//        if (nodeCat.equals("orGroup")) {
+//            LinkedHashMap<String, Object> exprGroup = makeDocGroup("or");
+//            putIntoSuperObject(exprGroup);
+//            objectStack.push(exprGroup);
+//            stackedObjects++;
+//        }
 
         if (nodeCat.equals("expr")) {
             ParseTree fieldNode = getFirstChildWithCat(node, "field");
@@ -91,26 +92,26 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
             List<ParseTree> valueNodes = getChildrenWithCat(node, "value");
 
             if (valueNodes.size() == 1) {
-                LinkedHashMap<String, Object> term = makeTerm();
-                term.put("attribute", "korap:field#" + field);
-                term.put("key", valueNodes.get(0).getChild(0).toStringTree(parser));
+                LinkedHashMap<String, Object> term = makeDoc();
+                term.put("key", field);
+                term.putAll(parseValue(valueNodes.get(0)));
                 String match = operatorNodes.get(0).getChild(0).toStringTree(parser);
                 term.put("match", "match:" + interpretMatch(match));
                 putIntoSuperObject(term);
             } else { // (valueNodes.size()==2)
-                LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
+                LinkedHashMap<String, Object> termGroup = makeDocGroup("and");
                 ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup.get("operands");
 
-                LinkedHashMap<String, Object> term1 = makeTerm();
-                term1.put("attribute", "korap:field#" + field);
-                term1.put("key", valueNodes.get(0).getChild(0).toStringTree(parser));
+                LinkedHashMap<String, Object> term1 = makeDoc();
+                term1.put("key", field);
+                term1.putAll(parseValue(valueNodes.get(0)));
                 String match1 = operatorNodes.get(0).getChild(0).toStringTree(parser);
                 term1.put("match", "match:" + invertInequation(interpretMatch(match1)));
                 termGroupOperands.add(term1);
 
-                LinkedHashMap<String, Object> term2 = makeTerm();
-                term2.put("attribute", "korap:field#" + field);
-                term2.put("key", valueNodes.get(1).getChild(0).toStringTree(parser));
+                LinkedHashMap<String, Object> term2 = makeDoc();
+                term2.put("key", field);
+                term2.putAll(parseValue(valueNodes.get(1)));
                 String match2 = operatorNodes.get(1).getChild(0).toStringTree(parser);
                 term2.put("match", "match:" + interpretMatch(match2));
                 termGroupOperands.add(term2);
@@ -139,7 +140,8 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 		 **************************************************************
 		 */
         if (!objectsToPop.isEmpty()) {
-            for (int i = 0; i < objectsToPop.pop(); i++) {
+        	int toPop = objectsToPop.pop();
+            for (int i = 0; i < toPop; i++) {
                 objectStack.pop();
             }
         }
@@ -149,7 +151,19 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
     }
 
 
-    private String interpretMatch(String match) {
+    private LinkedHashMap<String, Object> parseValue(ParseTree valueNode) {
+    	LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+    	if (getNodeCat(valueNode.getChild(0)).equals("regex")) {
+    		String regex = valueNode.getChild(0).getChild(0).toStringTree(parser);
+    		map.put("value", regex.substring(1, regex.length()-1));
+    		map.put("type", "type:regex");
+    	} else {
+    		map.put("value", valueNode.getChild(0).toStringTree(parser));
+    	}
+		return map;
+	}
+
+	private String interpretMatch(String match) {
         String out = null;
         switch (match) {
             case "<":
@@ -201,10 +215,10 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
     private void putIntoSuperObject(LinkedHashMap<String, Object> object, int objStackPosition) {
         if (objectStack.size() > objStackPosition) {
             ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
-            topObjectOperands.add(0, object);
+            topObjectOperands.add(object);
         } else {
             // I want the raw object, not a wrapped
-            requestMap.put("query", object);
+            requestMap.put("filter", object);
         }
     }
 
@@ -226,6 +240,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
             // Get starting rule from parser
             Method startRule = CollectionQueryParser.class.getMethod("start");
             tree = (ParserRuleContext) startRule.invoke(parser, (Object[]) null);
+            System.out.println(tree.toStringTree(parser));
 
         }
         // Some things went wrong ...
@@ -244,8 +259,10 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         query = "(1990<year<2010&genre=Sport)|textClass=politk";
         query = "(textClass=wissenschaft & textClass=politik) | textClass=ausland";
         query = "1990<year<2010 & genre=Sport";
+        query = "(textClass=Sport | textClass=ausland) & corpusID=WPD";
+        query = "textClass=Sport";
         CollectionQueryTree filter = new CollectionQueryTree();
-//    	filter.verbose = true;
+    	filter.verbose = true;
         try {
             filter.process(query);
         } catch (QueryException e) {
