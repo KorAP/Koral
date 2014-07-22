@@ -61,6 +61,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 * @param node The currently processed node. The process(String query) method calls this method with the root.
 	 * @throws QueryException
 	 */
+	@SuppressWarnings("unchecked")
 	private void processNode(ParseTree node) throws QueryException {
 		// Top-down processing
 		if (visited.contains(node)) return;
@@ -102,19 +103,36 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
 		if (nodeCat.equals("sequence")) {
 			LinkedHashMap<String,Object> sequence = makeGroup("sequence");
-			ParseTree emptyTokens = getFirstChildWithCat(node, "emptyTokenSequence");
-			if (emptyTokens!=null) {
-				int[] minmax = parseEmptySegments(emptyTokens);
+			ParseTree distanceNode = getFirstChildWithCat(node, "distance");
+			if (distanceNode!=null) {
+				int[] minmax = parseDistance(distanceNode);
 				LinkedHashMap<String,Object> distance = makeDistance("w", minmax[0], minmax[1]);
 				sequence.put("inOrder", true);
 				ArrayList<Object> distances = new ArrayList<Object>();
 				distances.add(distance);
 				sequence.put("distances", distances);
+				visited.add(distanceNode.getChild(0));
 			}
 			putIntoSuperObject(sequence);
 			objectStack.push(sequence);
 			stackedObjects++;
 		}
+		
+		if (nodeCat.equals("emptyTokenSequence")) {
+			int[] minmax = parseEmptySegments(node);
+			LinkedHashMap<String,Object> object;
+			LinkedHashMap<String,Object> emptyToken = makeToken();
+			if (minmax[0] != 1 || minmax[1] != 1) {
+				object = makeRepetition(minmax[0], minmax[1]);
+				((ArrayList<Object>) object.get("operands")).add(emptyToken);
+			} else {
+				object = emptyToken;
+			}
+			putIntoSuperObject(object);
+			objectStack.push(object);
+			stackedObjects++;
+		}
+		
 
 		if (nodeCat.equals("token")) {
 			LinkedHashMap<String,Object> token = makeToken();
@@ -204,25 +222,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			putIntoSuperObject(position);
 			objectStack.push(position);
 			stackedObjects++;
-			// offsets
-			if (hasChild(node, "emptyTokenSequence")) {
-				LinkedHashMap<String,Object> sequence = makeGroup("sequence");
-				ParseTree leftOffset = getNthChildWithCat(node, "emptyTokenSequence", 1);
-				if (leftOffset!=null) {
-					int[] minmax = parseEmptySegments(leftOffset);
-					sequence.put("leftoffset-min", minmax[0]-1);
-					sequence.put("leftoffset-max", minmax[1]-1);
-				}
-				ParseTree rightOffset = getNthChildWithCat(node, "emptyTokenSequence", 2);
-				if (rightOffset!=null) {
-					int[] minmax = parseEmptySegments(rightOffset);
-					sequence.put("rightoffset-min", minmax[0]-1);
-					sequence.put("rightoffset-max", minmax[1]-1);
-				}
-				putIntoSuperObject(sequence);
-				objectStack.push(sequence);
-				stackedObjects++;
-			}
 		}
 
 		if (nodeCat.equals("spanclass")) {
@@ -426,7 +425,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			// process possible flags
 			if (flagNode != null) {
 				String flag = getNodeCat(flagNode.getChild(0)).substring(1); //substring removes leading slash '/'
-				System.err.println(flag);
 				if (flag.contains("i")) term.put("caseInsensitive", true);
 				else if (flag.contains("I")) term.put("caseInsensitive", false);
 				if (flag.contains("x")) {
@@ -489,9 +487,23 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		}
 	}
 
+	/**
+	 * Basically only increases the min and max counters as required by Poliqarp
+	 * @param distanceNode
+	 * @return
+	 */
+	private int[] parseDistance(ParseTree distanceNode) {
+		int[] minmax = parseEmptySegments(distanceNode.getChild(0));
+		Integer min = minmax[0];
+		Integer max = minmax[1];
+		min = cropToMaxValue(min+1);
+		max = cropToMaxValue(max+1);
+		return new int[]{min, max};
+	}
+	
 	private int[] parseEmptySegments(ParseTree emptySegments) {
-		Integer min = 1;
-		Integer max = 1;
+		Integer min = 0;
+		Integer max = 0;
 		ParseTree child;
 		for (int i = 0; i < emptySegments.getChildCount(); i++) {
 			child = emptySegments.getChild(i);
@@ -507,8 +519,25 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				}
 			}
 		}
-		if (max > MAXIMUM_DISTANCE) max = MAXIMUM_DISTANCE;
+		min = cropToMaxValue(min);
+		max = cropToMaxValue(max);
 		return new int[]{min, max};
+	}
+
+	/**
+	 * Ensures that a distance or quantification value does not exceed the allowed maximum value. 
+	 * @param number
+	 * @return The input number if it is below the allowed maximum value, else the maximum value. 
+	 */
+	private int cropToMaxValue(int number) {
+		if (number > MAXIMUM_DISTANCE) {
+			number = MAXIMUM_DISTANCE; 
+			String warning = String.format("You specified a distance between two segments that is greater than " +
+					"the allowed max value of %d. Your query will be re-interpreted using a distance of %d.", MAXIMUM_DISTANCE, MAXIMUM_DISTANCE);
+			warningMsgs.add(warning);
+			log.warn(warning);
+		}
+		return number;
 	}
 
 	private ParserRuleContext parsePoliqarpQuery(String p) throws QueryException {
@@ -562,7 +591,11 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				"z.B./x",
 				"\".*?Mann.\"",
 				"\".*?Mann.*?\"",
-				"[orth=\".*?l(au|ie)fen.*?*\"]"
+				"[orth=\".*?l(au|ie)fen.*?*\"]",
+				"[orth=Mann][][orth=Mann]",
+				"startswith(<s>, [][base=Mann])",
+				"[base=der][]{1,102}[base=Mann]",
+				"[base=geht][base=der][]*[base=Mann]"
 		};
 //		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {

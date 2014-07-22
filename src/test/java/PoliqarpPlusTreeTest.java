@@ -9,7 +9,8 @@ public class PoliqarpPlusTreeTest {
 	
 	PoliqarpPlusTree ppt;
 	String map;
-
+	String expected;
+	String query;
 	
 	private boolean equalsQueryContent(String res, String query) throws QueryException {
 		res = res.replaceAll(" ", "");
@@ -99,7 +100,6 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(re5.replaceAll(" ", ""), map.replaceAll(" ", ""));
-		
 	}
 	
 	@Test
@@ -176,7 +176,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testEmptyTokens() throws QueryException {
+	public void testDistances() throws QueryException {
 		// [base=der][][base=Mann]
 		String et1 = 
 			"{@type=korap:group, operation=operation:sequence, " +
@@ -217,17 +217,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(et3.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		
-		// startswith(<s>, [][base=Mann]
-		String et4 = 
-			"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +	
-				"{@type=korap:span, key=s}," +
-				"{@type=korap:group, operation=operation:sequence, operands=[" +
-					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-				"], leftOffset={@type=korap:boundary, min=1, max=1}}" +
-			"]}";
-		ppt = new PoliqarpPlusTree("startswith(<s>, [][base=Mann])");
-		map = ppt.getRequestMap().get("query").toString();
-		assertEquals(et4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
 		
 		// [base=der][]{2,5}[base=Mann][]?[][base=Frau]   nested distances=
 		String et5 = 
@@ -273,8 +263,158 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree("[base=der][]+[base=Mann]");
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(et7.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=der][]+[base=Mann]
+		String et8 = 
+			"{@type=korap:group, operation=operation:sequence, " +
+			"operands=[" +
+				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
+				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
+			"], inOrder=true, distances=[" +
+				"{@type=korap:distance, key=w, min=2, max=100}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("[base=der][]{1,102}[base=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et8.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// [base=geht][base=der][]*[base=Mann]
+		String et9 = 
+			"{@type=korap:group, operation=operation:sequence, operands=[" +
+				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=geht, match=match:eq}}," +
+				"{@type=korap:group, operation=operation:sequence, " +
+				"operands=[" +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
+				"], inOrder=true, distances=[" +
+					"{@type=korap:distance, key=w, min=1, max=100}" +
+				"]}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("[base=geht][base=der][]*[base=Mann]");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et9.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[base=geht][base=der][]*[base=Mann][base=da]";
+		expected = 
+			"{@type=korap:group, operation=operation:sequence, operands=[" +
+				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=geht, match=match:eq}}," +
+				"{@type=korap:group, operation=operation:sequence, " +
+				"operands=[" +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=da, match=match:eq}}" +
+					"]}" +
+				"], inOrder=true, distances=[" +
+					"{@type=korap:distance, key=w, min=1, max=100}" +
+				"]}" +
+			"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[base=geht][base=der][]*contains(<s>,<np>)";
+		expected = 
+			"{@type=korap:group, operation=operation:sequence, operands=[" +
+				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=geht, match=match:eq}}," +
+				"{@type=korap:group, operation=operation:sequence, " +
+				"operands=[" +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
+					"{@type=korap:group, operation=operation:position, frame=frame:contains, operands=[" +
+					  "{@type=korap:span, key=s}," +
+					  "{@type=korap:span, key=np}" +
+					"]}" +
+				"], inOrder=true, distances=[" +
+					"{@type=korap:distance, key=w, min=1, max=100}" +
+				"]}" +
+			"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 
+	@Test
+	public void testLeadingTrailingEmptyTokens() throws QueryException {
+		// startswith(<s>, [][base=Mann]
+		String et1 = 
+			"{@type=korap:group, operation=operation:position, frame=frame:startswith, operands=[" +	
+				"{@type=korap:span, key=s}," +
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:token}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
+				"]}" +
+			"]}";
+		ppt = new PoliqarpPlusTree("startswith(<s>, [][base=Mann])");
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(et1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[][base=Mann]";
+		expected = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:token}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[][][base=Mann]";
+		expected = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:group, operation=operation:repetition, operands=[" +
+						"{@type=korap:token}" +
+					"], min=2, max=2}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[][]*[base=Mann]";
+		expected = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:group, operation=operation:repetition, operands=[" +
+						"{@type=korap:token}" +
+					"], min=1, max=100}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[][]*[base=Mann][][]";
+		expected = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:group, operation=operation:repetition, operands=[" +
+						"{@type=korap:token}" +
+					"], min=1, max=100}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
+					"{@type=korap:group, operation=operation:repetition, operands=[" +
+						"{@type=korap:token}" +
+					"], min=2, max=2}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[][]*contains(<s>, <np>)[][]";
+		expected = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:group, operation=operation:repetition, operands=[" +
+						"{@type=korap:token}" +
+					"], min=1, max=100}," +
+					"{@type=korap:group, operation=operation:position, frame=frame:contains, operands=[" +
+					  "{@type=korap:span, key=s}," +
+					  "{@type=korap:span, key=np}" +
+					"]}," +
+					"{@type=korap:group, operation=operation:repetition, operands=[" +
+						"{@type=korap:token}" +
+					"], min=2, max=2}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
 	@Test
 	public void testCoordinatedFields() throws QueryException {
 		// [base=Mann&(cas=N|cas=A)]

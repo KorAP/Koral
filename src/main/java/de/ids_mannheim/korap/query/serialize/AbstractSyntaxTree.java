@@ -85,6 +85,13 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
+	protected LinkedHashMap<String, Object> makeRepetition(int min, int max) {
+		LinkedHashMap<String, Object> group = makeGroup("repetition");
+		group.put("min", min);
+		group.put("max", max);
+		return group;
+	}
+	
 	protected LinkedHashMap<String, Object> makePosition(String frame) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:group");
