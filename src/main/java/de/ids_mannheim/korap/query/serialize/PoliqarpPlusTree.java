@@ -188,11 +188,17 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		}
 
 		if (nodeCat.equals("span")) {
+			List<ParseTree> negations = getChildrenWithCat(node, "!");
+			boolean negated = false;
+			boolean isRegex = false;
+			if (negations.size() % 2 == 1) negated = true;
 			LinkedHashMap<String,Object> span = makeSpan();
 			ParseTree keyNode = getFirstChildWithCat(node, "key");
 			ParseTree layerNode = getFirstChildWithCat(node, "layer");
 			ParseTree foundryNode = getFirstChildWithCat(node, "foundry");
 			ParseTree termOpNode = getFirstChildWithCat(node, "termOp");
+			ParseTree termNode = getFirstChildWithCat(node, "term");
+			ParseTree termGroupNode = getFirstChildWithCat(node, "termGroup");
 			if (foundryNode != null) span.put("foundry", foundryNode.getText());
 			if (layerNode != null) {
 				String layer = layerNode.getText();
@@ -202,8 +208,16 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			span.put("key", keyNode.getText());
 			if (termOpNode != null) {
 				String termOp = termOpNode.getText();
-				if (termOp.equals("==")) span.put("matches", "matches:eq");
-				else if (termOp.equals("!=")) span.put("matches", "matches:ne");
+				if (termOp.equals("==")) span.put("match", "match:eq");
+				else if (termOp.equals("!=")) span.put("match", "match:ne");
+			}
+			if (termNode != null) {
+				LinkedHashMap<String,Object> termOrTermGroup = parseTermOrTermGroup(termNode, negated, "span");
+				span.put("attr", termOrTermGroup);
+			}
+			if (termGroupNode != null) {
+				LinkedHashMap<String,Object> termOrTermGroup = parseTermOrTermGroup(termGroupNode, negated, "span");
+				span.put("attr", termOrTermGroup);
 			}
 			putIntoSuperObject(span);
 			objectStack.push(span);
@@ -373,6 +387,12 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		return node.toStringTree(parser);
 	}
 
+
+	private LinkedHashMap<String, Object> parseTermOrTermGroup(
+			ParseTree node, boolean negated) {
+		return parseTermOrTermGroup(node, negated, "token");
+	}
+	
 	/**
 	 * Parses a (term) or (termGroup) node
 	 * @param node
@@ -381,7 +401,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 * @return A term or termGroup object, depending on input
 	 */
 	@SuppressWarnings("unchecked")
-	private LinkedHashMap<String, Object> parseTermOrTermGroup(ParseTree node, boolean negatedGlobal) {
+	private LinkedHashMap<String, Object> parseTermOrTermGroup(ParseTree node, boolean negatedGlobal, String mode) {
 		if (getNodeCat(node).equals("term")) {
 			String key = null;
 			LinkedHashMap<String,Object> term = makeTerm();
@@ -403,7 +423,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			if (layerNode != null) {
 				String layer = layerNode.getText();
 				if (layer.equals("base")) layer="lemma";
-				term.put("layer", layer);
+				if (mode.equals("span")) term.put("key", layer);
+				else term.put("layer", layer);
 			}
 			// process key: 'normal' or regex?
 			key = keyNode.getText();
@@ -412,7 +433,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				term.put("type", "type:regex");
 				key = key.substring(1, key.length()-1); // remove leading and trailing quotes
 			}
-			term.put("key", key);
+			if (mode.equals("span")) term.put("value", key);
+			else term.put("key", key);
 			// process value
 			if (valueNode != null) term.put("value", valueNode.getText());
 			// process operator ("match" property)
@@ -453,8 +475,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			termGroup = makeTermGroup(operator);
 			ArrayList<Object> operands = (ArrayList<Object>) termGroup.get("operands");
 			// recursion with left/right operands
-			operands.add(parseTermOrTermGroup(leftOp, negatedGlobal));
-			operands.add(parseTermOrTermGroup(rightOp, negatedGlobal));
+			operands.add(parseTermOrTermGroup(leftOp, negatedGlobal, mode));
+			operands.add(parseTermOrTermGroup(rightOp, negatedGlobal, mode));
 			return termGroup;
 		}
 	}
@@ -595,7 +617,9 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				"[orth=Mann][][orth=Mann]",
 				"startswith(<s>, [][base=Mann])",
 				"[base=der][]{1,102}[base=Mann]",
-				"[base=geht][base=der][]*[base=Mann]"
+				"[base=geht][base=der][]*[base=Mann]",
+				"<cnx/c=vp (class=header&id=7)>",
+				"<cnx/c=vp class=header&id=a>"
 		};
 //		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {

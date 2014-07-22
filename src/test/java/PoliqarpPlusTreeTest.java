@@ -150,8 +150,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testElements() throws QueryException {
-		String query;
+	public void testSpans() throws QueryException {
 		// <s>
 		String elem1 = "{@type=korap:span, key=s}";
 		assertTrue(equalsQueryContent(elem1, "<s>"));
@@ -173,6 +172,56 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(span4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// span negation
+		query = "<cnx/c!=vp>";
+		expected = "{@type=korap:span, foundry=cnx, layer=c, key=vp, match=match:ne}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		// span negation
+		query = "<cnx/c!=vp>";
+		expected = "{@type=korap:span, foundry=cnx, layer=c, key=vp, match=match:ne}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "<cnx/c=vp class!=header>";
+		expected = "{@type=korap:span, foundry=cnx, layer=c, key=vp, attr={@type=korap:term, key=class, value=header, match=match:ne}}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "<cnx/c=vp !(class=header&id=7)>";
+		expected = 
+			"{@type=korap:span, foundry=cnx, layer=c, key=vp, attr=" +
+				"{@type=korap:termGroup, relation=relation:and, operands=[" +
+					"{@type=korap:term, key=class, value=header, match=match:ne}," +
+					"{@type=korap:term, key=id, value=7, match=match:ne}" +
+				"]}" +
+			"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "<cnx/c!=vp (class=header&id=7)>";
+		expected = 
+			"{@type=korap:span, foundry=cnx, layer=c, key=vp, match=match:ne, attr=" +
+				"{@type=korap:termGroup, relation=relation:and, operands=[" +
+					"{@type=korap:term, key=class, value=header, match=match:eq}," +
+					"{@type=korap:term, key=id, value=7, match=match:eq}" +
+				"]}" +
+			"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "<cnx/c=vp !!class=header>";
+		expected = "{@type=korap:span, foundry=cnx, layer=c, key=vp, attr={@type=korap:term, key=class, value=header, match=match:eq}}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
