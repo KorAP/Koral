@@ -71,6 +71,20 @@ public abstract class AbstractSyntaxTree {
 		return term;
 	}
 	
+	protected LinkedHashMap<String, Object> makeDoc() {
+		LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
+		term.put("@type", "korap:doc");
+		return term;
+	}
+	
+	protected LinkedHashMap<String, Object> makeDocGroup(String relation) {
+		LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
+		term.put("@type", "korap:docGroup");
+		term.put("relation", "relation:"+relation);
+		term.put("operands", new ArrayList<Object>());
+		return term;
+	}
+	
 	protected LinkedHashMap<String, Object> makeToken() {
 		LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
 		token.put("@type", "korap:token");
