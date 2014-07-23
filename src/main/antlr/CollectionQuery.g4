@@ -22,10 +22,12 @@ AND					: '&' | 'AND' | 'and' | 'UND' | 'und' ;
 OR					: '|' | 'OR' | 'or' | 'ODER' | 'oder' ;
 QMARK				: '?';
 SLASH				: '/';
+DASH				: '-';
 WS 					: ( ' ' | '\t' | '\r' | '\n' )+ -> skip ;
 fragment NO_RE      : ~[ \t\/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
                     | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' );
+DIGIT				: [0-9];
 NUMBER              : [0-9]+;
 
 NL                  : [\r\n] -> skip;
@@ -54,7 +56,11 @@ REGEX     		     : SLASH ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_qu
  */
 
 regex
-:	REGEX
+: REGEX
+;
+
+date
+: DIGIT DIGIT DIGIT DIGIT  (DASH DIGIT DIGIT (DASH DIGIT DIGIT)?)?
 ;
 
 conj
@@ -69,15 +75,17 @@ expr
 ;
 	
 field
-:	WORD
+: WORD
 ;
 	
 value
 : WORD 
 | NUMBER 
+| date
 | '"' (WORD ws*)+'"'
 | regex
 ;
+
 
 
 relation

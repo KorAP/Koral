@@ -215,6 +215,26 @@ public class CollectionQueryTreeTest {
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "pubDate>=1990-05";
+		expected = 
+			"{@type=korap:filter, filter=" +
+				"{@type=korap:doc, key=pubDate, value=1990-05, match=match:geq}" +
+			"}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "pubDate>=1990-05-01";
+		expected = 
+			"{@type=korap:filter, filter=" +
+				"{@type=korap:doc, key=pubDate, value=1990-05-01, match=match:geq}" +
+			"}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 
 	@Test
