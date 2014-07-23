@@ -65,6 +65,7 @@ operator
 
 expr
 :	(value operator)? field operator value
+//|	LRB expr RRB
 ;
 	
 field
@@ -78,18 +79,10 @@ value
 | regex
 ;
 
-/*	
-andGroup
-: 	(((LRB exprGroup RRB)|expr) AND)+ ((LRB exprGroup RRB)|expr)
-;
-
-orGroup
-: 	(((LRB exprGroup RRB)|expr) OR)+ ((LRB exprGroup RRB)|expr)
-;
-*/
 
 relation
 :	(expr|exprGroup) conj (expr|exprGroup|relation)
+//|	LRB relation RRB
 ; 
 
 exprGroup
@@ -98,6 +91,6 @@ exprGroup
 
 start
 :	( expr 
-	| exprGroup EOF 
-	| relation EOF ) 
+	| exprGroup 
+	| relation  ) 
 ;
