@@ -152,8 +152,10 @@ public abstract class AbstractSyntaxTree {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:distance");
 		group.put("key", key);
+		group.put("boundary", makeBoundary(min, max));
 		group.put("min", min);
 		group.put("max", max);
+		warningMsgs.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 		return group;
 	}
 	

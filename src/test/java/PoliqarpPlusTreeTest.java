@@ -245,7 +245,7 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 			"], inOrder=true, distances=[" +
-				"{@type=korap:distance, key=w, min=2, max=2}" +
+				"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=2, max=2}, min=2, max=2}" +
 			"]}";
 		ppt = new PoliqarpPlusTree("[base=der][][base=Mann]");
 		map = ppt.getRequestMap().get("query").toString();
@@ -258,7 +258,7 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 			"], inOrder=true, distances=[" +
-				"{@type=korap:distance, key=w, min=3, max=3}" +
+				"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=3, max=3}, min=3, max=3}" +
 			"]}";
 		ppt = new PoliqarpPlusTree("[base=der][][][base=Mann]");
 		map = ppt.getRequestMap().get("query").toString();
@@ -271,7 +271,7 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 			"], inOrder=true, distances=[" +
-				"{@type=korap:distance, key=w, min=2, max=3}" +
+				"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=2, max=3}, min=2, max=3}" +
 			"]}";
 		ppt = new PoliqarpPlusTree("[base=der][][]?[base=Mann]");
 		map = ppt.getRequestMap().get("query").toString();
@@ -290,10 +290,10 @@ public class PoliqarpPlusTreeTest {
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Frau, match=match:eq}}" +
 					"], inOrder=true, distances=[" +
-						"{@type=korap:distance, key=w, min=2, max=3}" +
+						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=2, max=3}, min=2, max=3}" +
 					"]}" +
 				"], inOrder=true, distances=[" +
-					"{@type=korap:distance, key=w, min=3, max=6}" +
+					"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=3, max=6}, min=3, max=6}" +
 				"]}";
 		ppt = new PoliqarpPlusTree("[base=der][]{2,5}[base=Mann][]?[][base=Frau]");
 		map = ppt.getRequestMap().get("query").toString();
@@ -306,7 +306,7 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 			"], inOrder=true, distances=[" +
-				"{@type=korap:distance, key=w, min=1, max=100}" +
+				"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=100}, min=1, max=100}" +
 			"]}";
 		ppt = new PoliqarpPlusTree("[base=der][]*[base=Mann]");
 		map = ppt.getRequestMap().get("query").toString();
@@ -319,7 +319,7 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 			"], inOrder=true, distances=[" +
-				"{@type=korap:distance, key=w, min=2, max=100}" +
+				"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=2, max=100}, min=2, max=100}" +
 			"]}";
 		ppt = new PoliqarpPlusTree("[base=der][]+[base=Mann]");
 		map = ppt.getRequestMap().get("query").toString();
@@ -332,7 +332,7 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 			"], inOrder=true, distances=[" +
-				"{@type=korap:distance, key=w, min=2, max=100}" +
+				"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=2, max=100}, min=2, max=100}" +
 			"]}";
 		ppt = new PoliqarpPlusTree("[base=der][]{1,102}[base=Mann]");
 		map = ppt.getRequestMap().get("query").toString();
@@ -347,7 +347,7 @@ public class PoliqarpPlusTreeTest {
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 				"], inOrder=true, distances=[" +
-					"{@type=korap:distance, key=w, min=1, max=100}" +
+					"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=100}, min=1, max=100}" +
 				"]}" +
 			"]}";
 		ppt = new PoliqarpPlusTree("[base=geht][base=der][]*[base=Mann]");
@@ -366,7 +366,7 @@ public class PoliqarpPlusTreeTest {
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=da, match=match:eq}}" +
 					"]}" +
 				"], inOrder=true, distances=[" +
-					"{@type=korap:distance, key=w, min=1, max=100}" +
+					"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=100}, min=1, max=100}" +
 				"]}" +
 			"]}";
 		ppt = new PoliqarpPlusTree(query);
@@ -385,7 +385,7 @@ public class PoliqarpPlusTreeTest {
 					  "{@type=korap:span, key=np}" +
 					"]}" +
 				"], inOrder=true, distances=[" +
-					"{@type=korap:distance, key=w, min=1, max=100}" +
+					"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=100}, min=1, max=100}" +
 				"]}" +
 			"]}";
 		ppt = new PoliqarpPlusTree(query);
