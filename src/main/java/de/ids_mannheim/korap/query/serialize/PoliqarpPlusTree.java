@@ -92,8 +92,11 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			ParseTree quantification = getFirstChildWithCat(node, "repetition");
 			if (quantification != null) {
 				LinkedHashMap<String,Object> quantGroup = makeGroup("repetition");
-				int[] minmax = parseRepetition(quantification);
-				quantGroup.put("repetition", makeBoundary(minmax[0], minmax[1]));
+				Integer[] minmax = parseRepetition(quantification);
+				quantGroup.put("boundary", makeBoundary(minmax[0], minmax[1]));
+				if (minmax[0] != null) quantGroup.put("min", minmax[0]);
+				if (minmax[1] != null) quantGroup.put("max", minmax[1]);
+				warningMsgs.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 				putIntoSuperObject(quantGroup);
 				objectStack.push(quantGroup);
 				stackedObjects++;
@@ -352,7 +355,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 * the minimal number of repetitions of the quantified element, and the second 
 	 * element representing the maximal number of repetitions 
 	 */
-	private int[] parseRepetition(ParseTree node) {
+	private Integer[] parseRepetition(ParseTree node) {
 		int min = 0, max = 0;
 		// (repetition) node can be of two types: 'kleene' or 'range'
 		ParseTree repetitionTypeNode = node.getChild(0);
@@ -379,7 +382,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			else if (hasChild(repetitionTypeNode, ",")) min = 0;
 			else min = max;
 		}
-		return new int[]{min,max};
+		return new Integer[]{min,max};
 	}
 
 	private String parseFrame(ParseTree node) {
@@ -531,7 +534,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			ParseTree nextSibling = emptySegments.getChild(i + 1);
 			if (child.toStringTree(parser).equals("(emptyToken [ ])")) {
 				if (nextSibling != null && getNodeCat(nextSibling).equals("repetition")) {
-					int[] minmax = parseRepetition(nextSibling);
+					Integer[] minmax = parseRepetition(nextSibling);
 					min += minmax[0];
 					max += minmax[1];
 				} else {

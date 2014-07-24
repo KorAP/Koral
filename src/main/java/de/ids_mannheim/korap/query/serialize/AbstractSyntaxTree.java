@@ -101,7 +101,10 @@ public abstract class AbstractSyntaxTree {
 	
 	protected LinkedHashMap<String, Object> makeRepetition(int min, int max) {
 		LinkedHashMap<String, Object> group = makeGroup("repetition");
-		group.put("repetition", makeBoundary(min, max));
+		group.put("boundary", makeBoundary(min, max));
+		group.put("min", min);
+		group.put("max", max);
+		warningMsgs.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 		return group;
 	}
 	
