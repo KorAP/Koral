@@ -101,8 +101,7 @@ public abstract class AbstractSyntaxTree {
 	
 	protected LinkedHashMap<String, Object> makeRepetition(int min, int max) {
 		LinkedHashMap<String, Object> group = makeGroup("repetition");
-		group.put("min", min);
-		group.put("max", max);
+		group.put("repetition", makeBoundary(min, max));
 		return group;
 	}
 	

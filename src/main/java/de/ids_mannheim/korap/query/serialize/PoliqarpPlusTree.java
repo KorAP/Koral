@@ -93,8 +93,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			if (quantification != null) {
 				LinkedHashMap<String,Object> quantGroup = makeGroup("repetition");
 				int[] minmax = parseRepetition(quantification);
-				quantGroup.put("min", minmax[0]);
-				quantGroup.put("max", minmax[1]);
+				quantGroup.put("repetition", makeBoundary(minmax[0], minmax[1]));
 				putIntoSuperObject(quantGroup);
 				objectStack.push(quantGroup);
 				stackedObjects++;
