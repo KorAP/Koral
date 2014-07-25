@@ -1,12 +1,8 @@
-import static org.junit.Assert.*;
-import de.ids_mannheim.korap.query.serialize.CollectionQueryBuilder;
-import de.ids_mannheim.korap.query.serialize.CollectionQueryBuilder2;
 import de.ids_mannheim.korap.query.serialize.CollectionQueryTree;
-import de.ids_mannheim.korap.resource.Relation;
 import de.ids_mannheim.korap.util.QueryException;
-import de.ids_mannheim.korap.utils.JsonUtils;
-import de.ids_mannheim.korap.utils.TimeUtils;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class CollectionQueryTreeTest {
 
@@ -166,8 +162,8 @@ public class CollectionQueryTreeTest {
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-		
-		query = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White & year=2010)";
+
+        query = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White & year=2010)";
 		expected = 
 			"{@type=korap:filter, filter=" +
 				"{@type=korap:docGroup, relation=relation:or, operands=[" +

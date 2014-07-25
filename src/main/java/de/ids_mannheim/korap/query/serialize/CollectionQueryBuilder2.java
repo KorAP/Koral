@@ -16,11 +16,18 @@ public class CollectionQueryBuilder2 {
     private List<Map> rq;
     private Map groups;
     private CollectionTypes types;
+    private boolean verbose;
 
     public CollectionQueryBuilder2() {
+        this.verbose = false;
         this.rq = new ArrayList<>();
         this.groups = new HashMap();
         this.types = new CollectionTypes();
+    }
+
+    public CollectionQueryBuilder2(boolean verbose) {
+        this();
+        this.verbose = verbose;
     }
 
 
@@ -43,8 +50,7 @@ public class CollectionQueryBuilder2 {
     public CollectionQueryBuilder2 setQuery(String query) throws QueryException {
         CollectionQueryTree tree = new CollectionQueryTree();
         tree.process(query);
-        this.groups = (Map) tree.getRequestMap().get("query");
-        System.out.println("RAW QUERY: " + this.groups);
+        this.groups = tree.getRequestMap();
         return this;
     }
 
@@ -54,18 +60,22 @@ public class CollectionQueryBuilder2 {
         return list;
     }
 
+    private Object raw2() {
+        return this.groups;
+    }
+
     public String toCollections() {
         Map value = new HashMap();
-        value.put("collections", raw());
+        value.put("collections", raw2());
         return JsonUtils.toJSON(value);
     }
 
     public JsonNode toNode() {
-        return JsonUtils.valueToTree(raw());
+        return JsonUtils.valueToTree(raw2());
     }
 
     public String toJSON() {
-        return JsonUtils.toJSON(raw());
+        return JsonUtils.toJSON(raw2());
     }
 
 

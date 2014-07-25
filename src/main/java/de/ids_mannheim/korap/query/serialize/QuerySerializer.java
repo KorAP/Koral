@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import de.ids_mannheim.korap.util.QueryException;
 import de.ids_mannheim.korap.utils.JsonUtils;
+import de.ids_mannheim.korap.utils.KorAPLogger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.util.Map;
  */
 public class QuerySerializer {
 
+    private Logger qllogger = KorAPLogger.initiate("ql");
     public static String queryLanguageVersion;
 
     private AbstractSyntaxTree ast;
@@ -95,6 +98,11 @@ public class QuerySerializer {
 
     public QuerySerializer setQuery(String query, String ql, String version)
             throws QueryException {
+
+        if (query.isEmpty())
+            throw new QueryException(406, "No Content!");
+
+
         try {
             if (ql.equalsIgnoreCase("poliqarp")) {
                 ast = new PoliqarpPlusTree(query);
@@ -103,8 +111,10 @@ public class QuerySerializer {
             } else if (ql.equalsIgnoreCase("poliqarpplus")) {
                 ast = new PoliqarpPlusTree(query);
             } else if (ql.equalsIgnoreCase("cql")) {
-//                queryLanguageVersion = "1.2"; // set me
-                ast = new CQLTree(query, version);
+                if (version == null)
+                    ast = new CQLTree(query);
+                else
+                    ast = new CQLTree(query, version);
             } else if (ql.equalsIgnoreCase("annis")) {
                 ast = new AqlTree(query);
             } else {
@@ -113,6 +123,7 @@ public class QuerySerializer {
         } catch (QueryException e) {
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new QueryException("UNKNOWN: Query could not be parsed (" + query + ")");
         }
         return this;
@@ -123,7 +134,9 @@ public class QuerySerializer {
     }
 
     public final String toJSON() {
-        return JsonUtils.toJSON(raw());
+        String ser = JsonUtils.toJSON(raw());
+        qllogger.info("Serialized query: " + ser);
+        return ser;
     }
 
     public final Map build() {
