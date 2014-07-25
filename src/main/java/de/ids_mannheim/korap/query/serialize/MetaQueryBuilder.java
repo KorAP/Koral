@@ -20,6 +20,7 @@ public class MetaQueryBuilder {
     /**
      * context segment if context is either of type char or token.
      * size can differ for left and right span
+     *
      * @param left
      * @param leftType
      * @param right
@@ -42,12 +43,21 @@ public class MetaQueryBuilder {
     }
 
     /**
-     * context if of type paragraph or sentence where left and right size delimiters are irrelevant.
-     * @param type
+     * context if of type paragraph or sentence where left and right size delimiters are irrelevant; or 2-token, 2-char
+     * p/paragraph, s/sentence or token, char
+     *
+     * @param context
      * @return
      */
-    public MetaQueryBuilder addContext(String type) {
-        addEntry("context", type);
+    public MetaQueryBuilder addContext(String context) {
+        if (context.startsWith("s") | context.startsWith("p"))
+            addEntry("context", context);
+        else {
+            String[] ct = context.split(",");
+            String[] lc = ct[0].split("-");
+            String[] rc = ct[1].split("-");
+            addContext(Integer.valueOf(lc[0]), lc[1], Integer.valueOf(rc[0]), rc[1]);
+        }
         return this;
     }
 
