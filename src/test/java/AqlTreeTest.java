@@ -273,7 +273,7 @@ public class AqlTreeTest {
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
 					"], distances=[" +
-						"{@type=korap:distance, key=w, min=0, max=100}" +
+						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=100}, min=0, max=100}" +
 					"], inOrder=true" +
 				"}";
 		aqlt = new AqlTree(query);
@@ -286,7 +286,7 @@ public class AqlTreeTest {
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
 					"], distances=[" +
-						"{@type=korap:distance, key=w, min=2, max=3}" +
+						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=2, max=3}, min=2, max=3}" +
 					"], inOrder=true" +
 				"}";
 		aqlt = new AqlTree(query);
@@ -308,12 +308,12 @@ public class AqlTreeTest {
 									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 								"]}" +
 							"], distances=[" +
-								"{@type=korap:distance, key=w, min=0, max=2}" +
+								"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=2}, min=0, max=2}" +
 							"], inOrder=true}" +
 						"]}," +	
 						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 					"],distances=[" +
-						"{@type=korap:distance, key=w, min=0, max=4}" +
+						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=4}, min=0, max=4}" +
 					"], inOrder=true" +
 				"}";
 		aqlt = new AqlTree(query);
@@ -333,7 +333,7 @@ public class AqlTreeTest {
 						"]}," +
 						"{@type=korap:span}" +
 					"], distances=[" +
-							"{@type=korap:distance, key=w, min=1, max=3}" +
+							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=3}, min=1, max=3}" +
 						"], inOrder=true" +
 				"}";
 		aqlt = new AqlTree(query);
@@ -352,14 +352,14 @@ public class AqlTreeTest {
 										"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 									"]}" +
 								"], distances=[" +
-									"{@type=korap:distance, key=w, min=0, max=2}" +
+									"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=2}, min=0, max=2}" +
 								"], inOrder=true}" +
 							"]}," +	
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 							"]}" +
 						"],distances=[" +
-							"{@type=korap:distance, key=w, min=0, max=4}" +
+							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=4}, min=0, max=4}" +
 						"], inOrder=true}" +
 					"]}," +
 					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Himmel, match=match:eq}}" +
@@ -384,7 +384,7 @@ public class AqlTreeTest {
 								"]}," +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 						"], distances=[" +
-							"{@type=korap:distance, key=w, min=0, max=4}" +
+							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=4}, min=0, max=4}" +
 						"], inOrder=true" +
 					"}";
 		aqlt = new AqlTree(query);
@@ -404,7 +404,7 @@ public class AqlTreeTest {
 								"]}," +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 						"], distances=[" +
-							"{@type=korap:distance, key=w, min=0, max=4}" +
+							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=4}, min=0, max=4}" +
 						"], inOrder=true" +
 					"}";
 		aqlt = new AqlTree(query);
