@@ -122,11 +122,13 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
-	protected LinkedHashMap<String, Object> makeRepetition(int min, int max) {
+	protected LinkedHashMap<String, Object> makeRepetition(Integer min, Integer max) {
 		LinkedHashMap<String, Object> group = makeGroup("repetition");
 		group.put("boundary", makeBoundary(min, max));
 		group.put("min", min);
-		group.put("max", max);
+		if (max != null) {
+			group.put("max", max);
+		}
 		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 		return group;
 	}
@@ -163,21 +165,25 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
-	protected LinkedHashMap<String, Object> makeBoundary(int min, int max) {
+	protected LinkedHashMap<String, Object> makeBoundary(Integer min, Integer max) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:boundary");
 		group.put("min", min);
-		group.put("max", max);
+		if (max != null) {
+			group.put("max", max);
+		}
 		return group;
 	}
 
-	protected LinkedHashMap<String, Object> makeDistance(String key, int min, int max) {
+	protected LinkedHashMap<String, Object> makeDistance(String key, Integer min, Integer max) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:distance");
 		group.put("key", key);
 		group.put("boundary", makeBoundary(min, max));
 		group.put("min", min);
-		group.put("max", max);
+		if (max != null) {
+			group.put("max", max);
+		}
 		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 		return group;
 	}

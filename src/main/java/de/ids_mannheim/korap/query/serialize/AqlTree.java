@@ -1,5 +1,7 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import static org.junit.Assert.assertEquals;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -486,7 +488,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
 			ArrayList<Object> distances = new ArrayList<Object>();
 			if (star != null) {
-				distances.add(makeDistance("w", 0, 100));
+				distances.add(makeDistance("w", 0, null));
 				relation.put("distances", distances);
 			}
 			if (rangeSpec != null) {
@@ -573,23 +575,15 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	private LinkedHashMap<String, Object> boundaryFromRangeSpec(ParseTree rangeSpec, boolean expandToMax) {
 		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
 		Integer max = min;
-		if (expandToMax) max = MAXIMUM_DISTANCE;
+		if (expandToMax) max = null;
 		if (rangeSpec.getChildCount()==3) 
 			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
 		return makeBoundary(min, max);
 	}
 
-	private LinkedHashMap<String, Object> distanceFromRangeSpec(String key, ParseTree rangeSpec) {
-		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
-		Integer max = MAXIMUM_DISTANCE;
-		if (rangeSpec.getChildCount()==3) 
-			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
-		return makeDistance(key, min, max);
-	}
-
 	private LinkedHashMap<String, Object> parseDistance(ParseTree rangeSpec) {
 		Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
-		Integer max = MAXIMUM_DISTANCE;
+		Integer max = null;
 		if (rangeSpec.getChildCount()==3) 
 			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
 		return makeDistance("w", min, max);
@@ -697,7 +691,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				"lemma=\"Haus\"",
 				"Katze=\"Hund\"",
 				"cnx/c=\"NP\"",
-				"cat=\"NP\""
+				"cat=\"NP\"",
+				 "node & node & #1 .+ #2"
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {

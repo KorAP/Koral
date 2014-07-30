@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  */
 public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
-	Logger log = LoggerFactory.getLogger(PoliqarpPlusTree.class);
+	private static Logger log = LoggerFactory.getLogger(PoliqarpPlusTree.class);
 
 	/**
 	 * Most centrally, this class maintains a set of nested maps and lists which represent the JSON tree, which is built by the JSON serialiser
@@ -37,17 +37,11 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	}
 
 	@Override
-	public Map<String, Object> getRequestMap() {
-		return requestMap;
-	}
-
-	@Override
 	public void process(String query) throws QueryException {
 		ParseTree tree;
 		tree = parsePoliqarpQuery(query);
 		super.parser = this.parser;
 		log.info("Processing PoliqarpPlus");
-		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
 		processNode(tree);
 	}
 
@@ -96,7 +90,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				quantGroup.put("boundary", makeBoundary(minmax[0], minmax[1]));
 				if (minmax[0] != null) quantGroup.put("min", minmax[0]);
 				if (minmax[1] != null) quantGroup.put("max", minmax[1]);
-				warningMsgs.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
+				announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 				putIntoSuperObject(quantGroup);
 				objectStack.push(quantGroup);
 				stackedObjects++;
@@ -107,7 +101,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			LinkedHashMap<String,Object> sequence = makeGroup("sequence");
 			ParseTree distanceNode = getFirstChildWithCat(node, "distance");
 			if (distanceNode!=null) {
-				int[] minmax = parseDistance(distanceNode);
+				Integer[] minmax = parseDistance(distanceNode);
 				LinkedHashMap<String,Object> distance = makeDistance("w", minmax[0], minmax[1]);
 				sequence.put("inOrder", true);
 				ArrayList<Object> distances = new ArrayList<Object>();
@@ -121,10 +115,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		}
 		
 		if (nodeCat.equals("emptyTokenSequence")) {
-			int[] minmax = parseEmptySegments(node);
+			Integer[] minmax = parseEmptySegments(node);
 			LinkedHashMap<String,Object> object;
 			LinkedHashMap<String,Object> emptyToken = makeToken();
-			if (minmax[0] != 1 || minmax[1] != 1) {
+			if (minmax[0] != 1 || minmax[1] == null || minmax[1] != 1) {
 				object = makeRepetition(minmax[0], minmax[1]);
 				((ArrayList<Object>) object.get("operands")).add(emptyToken);
 			} else {
@@ -356,7 +350,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 * element representing the maximal number of repetitions 
 	 */
 	private Integer[] parseRepetition(ParseTree node) {
-		int min = 0, max = 0;
+		Integer min = 0, max = 0;
+		boolean maxInfinite = false;
 		// (repetition) node can be of two types: 'kleene' or 'range'
 		ParseTree repetitionTypeNode = node.getChild(0);
 		String repetitionType = getNodeCat(repetitionTypeNode);
@@ -364,10 +359,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			// kleene operators (+ and *) as well as optionality (?)
 			String kleeneOp = repetitionTypeNode.getText();
 			if (kleeneOp.equals("*")) {
-				max = MAXIMUM_DISTANCE;
+				maxInfinite = true;
 			} else if (kleeneOp.equals("+")) {
 				min = 1;
-				max = MAXIMUM_DISTANCE;
+				maxInfinite = true;
 			} if (kleeneOp.equals("?")) {
 				max = 1;
 			}
@@ -376,11 +371,14 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			ParseTree minNode = getFirstChildWithCat(repetitionTypeNode, "min");
 			ParseTree maxNode = getFirstChildWithCat(repetitionTypeNode, "max");
 			if (maxNode!=null) max = Integer.parseInt(maxNode.getText());
-			else max = MAXIMUM_DISTANCE;
+			else maxInfinite = true;
 			// min is optional: if not specified, min = max
 			if (minNode!=null) min = Integer.parseInt(minNode.getText());
 			else if (hasChild(repetitionTypeNode, ",")) min = 0;
 			else min = max;
+		}
+		if (maxInfinite) {
+			max = null;
 		}
 		return new Integer[]{min,max};
 	}
@@ -516,16 +514,18 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 * @param distanceNode
 	 * @return
 	 */
-	private int[] parseDistance(ParseTree distanceNode) {
-		int[] minmax = parseEmptySegments(distanceNode.getChild(0));
+	private Integer[] parseDistance(ParseTree distanceNode) {
+		Integer[] minmax = parseEmptySegments(distanceNode.getChild(0));
 		Integer min = minmax[0];
 		Integer max = minmax[1];
-		min = cropToMaxValue(min+1);
-		max = cropToMaxValue(max+1);
-		return new int[]{min, max};
+		min++;
+		if (max != null) max++;
+//		min = cropToMaxValue(min);
+//		max = cropToMaxValue(max);
+		return new Integer[]{min, max};
 	}
 	
-	private int[] parseEmptySegments(ParseTree emptySegments) {
+	private Integer[] parseEmptySegments(ParseTree emptySegments) {
 		Integer min = 0;
 		Integer max = 0;
 		ParseTree child;
@@ -536,16 +536,20 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				if (nextSibling != null && getNodeCat(nextSibling).equals("repetition")) {
 					Integer[] minmax = parseRepetition(nextSibling);
 					min += minmax[0];
-					max += minmax[1];
+					if (minmax[1] != null) {
+						max += minmax[1];
+					} else {
+						max = null;
+					}
 				} else {
 					min++;
 					max++;
 				}
 			}
 		}
-		min = cropToMaxValue(min);
-		max = cropToMaxValue(max);
-		return new int[]{min, max};
+//		min = cropToMaxValue(min);
+//		max = cropToMaxValue(max);
+		return new Integer[]{min, max};
 	}
 
 	/**
@@ -558,8 +562,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			number = MAXIMUM_DISTANCE; 
 			String warning = String.format("You specified a distance between two segments that is greater than " +
 					"the allowed max value of %d. Your query will be re-interpreted using a distance of %d.", MAXIMUM_DISTANCE, MAXIMUM_DISTANCE);
-			warningMsgs.add(warning);
-			log.warn(warning);
+			warnings.add(warning);
+			log.warn("User warning: "+warning);
 		}
 		return number;
 	}
@@ -608,20 +612,21 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 //				"Der \"Baum\"/x",
 //				"contains(<vp>,[][base=foo])",
 //				"[hallo=welt]*",
-				"schland/x",
-				"focus([orth=Der]{[orth=Mann]})",
-				"shrink([orth=Der]{[orth=Mann]})",
-				"[mate/m=number:sg]",
-				"z.B./x",
-				"\".*?Mann.\"",
-				"\".*?Mann.*?\"",
-				"[orth=\".*?l(au|ie)fen.*?*\"]",
-				"[orth=Mann][][orth=Mann]",
-				"startswith(<s>, [][base=Mann])",
-				"[base=der][]{1,102}[base=Mann]",
-				"[base=geht][base=der][]*[base=Mann]",
-				"<cnx/c=vp (class=header&id=7)>",
-				"<cnx/c=vp class=header&id=a>"
+//				"schland/x",
+//				"focus([orth=Der]{[orth=Mann]})",
+//				"shrink([orth=Der]{[orth=Mann]})",
+//				"[mate/m=number:sg]",
+//				"z.B./x",
+//				"\".*?Mann.\"",
+//				"\".*?Mann.*?\"",
+//				"[orth=\".*?l(au|ie)fen.*?*\"]",
+//				"[orth=Mann][][orth=Mann]",
+//				"startswith(<s>, [][base=Mann])",
+//				"[base=der][]{1,102}[base=Mann]",
+//				"[base=geht][base=der][]*[base=Mann]",
+//				"<cnx/c=vp (class=header&id=7)>",
+//				"<cnx/c=vp class=header&id=a>",
+				"[][]*[base=Mann]"
 		};
 //		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {

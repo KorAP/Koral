@@ -273,7 +273,7 @@ public class AqlTreeTest {
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
 					"], distances=[" +
-						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=100}, min=0, max=100}" +
+						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0}, min=0}" +
 					"], inOrder=true" +
 				"}";
 		aqlt = new AqlTree(query);
