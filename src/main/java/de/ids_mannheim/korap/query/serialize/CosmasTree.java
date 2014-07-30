@@ -420,26 +420,24 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             // possibly several distance constraints
             for (int i = 0; i < dist_list.getChildCount(); i++) {
                 String direction = dist_list.getChild(i).getChild(0).getChild(0).toStringTree().toLowerCase();
-                String min = dist_list.getChild(i).getChild(1).getChild(0).toStringTree();
-                String max = dist_list.getChild(i).getChild(1).getChild(1).toStringTree();
+                String minStr = dist_list.getChild(i).getChild(1).getChild(0).toStringTree();
+                String maxStr = dist_list.getChild(i).getChild(1).getChild(1).toStringTree();
                 String meas = dist_list.getChild(i).getChild(2).getChild(0).toStringTree();
-                if (min.equals("VAL0")) {
-                    min = "0";
+                if (minStr.equals("VAL0")) {
+                    minStr = "0";
                 }
+                int min = Integer.parseInt(minStr);
+                int max = Integer.parseInt(maxStr);
                 // If zero word-distance, wrap this sequence in a disjunction along with an overlap position
                 // between the two operands
-                if (meas.equals("w") && min.equals("0")) {
-                	min = "1";
+                if (meas.equals("w") && min == 0) {
+                	min = 1;
                 	putIntoOverlapDisjunction = true;
                 }
-                if (!meas.equals("w") && min.equals("0") ) {
-                	processSpanDistance(meas, Integer.parseInt(min), Integer.parseInt(max));
+                if (!meas.equals("w") && min == 0 ) {
+                	processSpanDistance(meas,min,max);
                 }
-                LinkedHashMap<String, Object> distance = new LinkedHashMap<String, Object>();
-                distance.put("@type", "korap:distance");
-                distance.put("key", meas);
-                distance.put("min", Integer.parseInt(min));
-                distance.put("max", Integer.parseInt(max));
+                LinkedHashMap<String, Object> distance = makeDistance(meas,min,max);
                 if (exclusion) {
                     distance.put("exclude", true);
                 }

@@ -49,11 +49,19 @@ public abstract class AbstractSyntaxTree {
 	ParseTree currentNode = null;
 	Integer stackedObjects = 0;
 	ArrayList<String> errorMsgs = new ArrayList<String>();
-	ArrayList<String> warningMsgs = new ArrayList<String>();
+	ArrayList<String> userWarnings = new ArrayList<String>();
+	ArrayList<String> backendWarnings = new ArrayList<String>();
 
 	protected LinkedHashMap<String, Object> makeSpan() {
 		LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
 		span.put("@type", "korap:span");
+		return span;
+	}
+	
+	protected LinkedHashMap<String, Object> makeSpan(String key) {
+		LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
+		span.put("@type", "korap:span");
+		span.put("key", key);
 		return span;
 	}
 	
@@ -104,7 +112,7 @@ public abstract class AbstractSyntaxTree {
 		group.put("boundary", makeBoundary(min, max));
 		group.put("min", min);
 		group.put("max", max);
-		warningMsgs.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
+		backendWarnings.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 		return group;
 	}
 	
@@ -155,7 +163,7 @@ public abstract class AbstractSyntaxTree {
 		group.put("boundary", makeBoundary(min, max));
 		group.put("min", min);
 		group.put("max", max);
-		warningMsgs.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
+		backendWarnings.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 		return group;
 	}
 	
