@@ -25,7 +25,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
     private static Logger log = LoggerFactory.getLogger(CosmasTree.class);
 
-    String query;
     LinkedList<LinkedHashMap[]> toWrapStack = new LinkedList<LinkedHashMap[]>();
     /**
      * Field for repetition query (Kleene + or * operations, or min/max queries: {2,4}
@@ -51,9 +50,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
     int wrapFirstOpInClass = -1;
     int wrapSecondOpInClass = -1;
 
-    Tree cosmasTree;
-
-    LinkedHashMap<String, Object> treeMap = new LinkedHashMap<String, Object>();
     /**
      * Keeps track of all visited nodes in a tree
      */
@@ -91,12 +87,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
     }
 
     @Override
-    public Map<String, Object> getRequestMap() {
-        return this.requestMap;
-    }
-
-
-    @Override
     public void process(String query) throws QueryException {
         Tree tree = null;
         try {
@@ -108,8 +98,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         }
         log.info("Processing CosmasII query");
         System.out.println("Processing Cosmas");
-        requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
-//		prepareContext(requestMap);
         processNode(tree);
         log.info(requestMap.toString());
     }

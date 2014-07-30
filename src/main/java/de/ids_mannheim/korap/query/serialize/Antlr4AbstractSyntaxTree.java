@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 public abstract class Antlr4AbstractSyntaxTree extends AbstractSyntaxTree {
 
-
 	/**
 	 * Parser object deriving the ANTLR parse tree.
 	 */

@@ -15,10 +15,10 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import de.ids_mannheim.korap.query.annis.AqlLexer;
 import de.ids_mannheim.korap.query.annis.AqlParser;
@@ -30,8 +30,7 @@ import de.ids_mannheim.korap.util.QueryException;
  *
  */
 public class AqlTree extends Antlr4AbstractSyntaxTree {
-	private org.slf4j.Logger log = LoggerFactory
-			.getLogger(AqlTree.class);
+	private static Logger log = LoggerFactory.getLogger(AqlTree.class);
 	/**
 	 * Flag that indicates whether token fields or meta fields are currently being processed
 	 */
@@ -87,19 +86,12 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 * @param parser The ANTLR parser instance that generated the parse tree
 	 */
 	public AqlTree(String query) {
-		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
 		try {
 			process(query);
 		} catch (QueryException e) {
 			e.printStackTrace();
 		}
 		System.out.println(">>> "+requestMap.get("query")+" <<<");
-	}
-
-
-	@Override
-	public Map<String, Object> getRequestMap() {
-		return requestMap;
 	}
 
 	@Override

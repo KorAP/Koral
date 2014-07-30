@@ -11,17 +11,21 @@ import java.util.regex.Pattern;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
 import de.ids_mannheim.korap.util.QueryException;
 
 public abstract class AbstractSyntaxTree {
 	
-	public abstract Map<String, Object> getRequestMap();
-
 	public abstract void process(String query) throws QueryException;
 	
 	public static final Integer MAXIMUM_DISTANCE = 100; 
-	
+
+	Logger log;
+	/**
+	 *  The query
+	 */
+	String query;
 	/**
 	 * Top-level map representing the whole request.
 	 */
@@ -49,9 +53,20 @@ public abstract class AbstractSyntaxTree {
 	ParseTree currentNode = null;
 	Integer stackedObjects = 0;
 	ArrayList<String> errorMsgs = new ArrayList<String>();
-	ArrayList<String> userWarnings = new ArrayList<String>();
-	ArrayList<String> backendWarnings = new ArrayList<String>();
-
+	ArrayList<String> warnings = new ArrayList<String>();
+	ArrayList<String> announcements = new ArrayList<String>();
+	
+	AbstractSyntaxTree() {
+		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
+		requestMap.put("errors", errorMsgs);
+		requestMap.put("warnings", warnings);
+		requestMap.put("announcements", announcements);
+	}
+	
+	public Map<String, Object> getRequestMap() {
+		return requestMap;
+	}
+	
 	protected LinkedHashMap<String, Object> makeSpan() {
 		LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
 		span.put("@type", "korap:span");
@@ -112,7 +127,7 @@ public abstract class AbstractSyntaxTree {
 		group.put("boundary", makeBoundary(min, max));
 		group.put("min", min);
 		group.put("max", max);
-		backendWarnings.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
+		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 		return group;
 	}
 	
@@ -163,7 +178,7 @@ public abstract class AbstractSyntaxTree {
 		group.put("boundary", makeBoundary(min, max));
 		group.put("min", min);
 		group.put("max", max);
-		backendWarnings.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
+		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
 		return group;
 	}
 	
