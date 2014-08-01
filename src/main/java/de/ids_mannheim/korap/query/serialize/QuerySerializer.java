@@ -164,6 +164,14 @@ public class QuerySerializer {
         return this;
     }
 
+    public QuerySerializer setMeta(String context, int num, int pageidx) {
+        MetaQueryBuilder meta = new MetaQueryBuilder();
+        meta.addEntry("startIndex", pageidx);
+        meta.addEntry("count", num);
+        meta.addContext(context);
+        return this;
+    }
+
     public QuerySerializer setMeta(MetaQueryBuilder meta) {
         this.meta = meta.raw();
         return this;

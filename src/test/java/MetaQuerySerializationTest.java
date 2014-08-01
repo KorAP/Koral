@@ -87,7 +87,7 @@ public class MetaQuerySerializationTest {
 
     @Test
     public void testGenerator() throws QueryException {
-                   /*
+         /*
          * just for testing...
 		 */
         QuerySerializer jg = new QuerySerializer();
