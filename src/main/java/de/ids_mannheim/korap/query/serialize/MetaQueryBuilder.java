@@ -30,7 +30,7 @@ public class MetaQueryBuilder {
      * @param rightType
      * @return
      */
-    public MetaQueryBuilder addContext(Integer left, String leftType,
+    public MetaQueryBuilder setContext(Integer left, String leftType,
                                        Integer right, String rightType) {
         this.spanContext = new SpanContext(left, leftType, right, rightType);
         return this;
@@ -47,15 +47,13 @@ public class MetaQueryBuilder {
      * @param context
      * @return
      */
-    public MetaQueryBuilder addContext(String context) {
+    public MetaQueryBuilder setContext(String context) {
         if (context.startsWith("s") | context.startsWith("p"))
-//            addEntry("context", context);
             this.spanContext = new SpanContext(context);
         else {
             String[] ct = context.split(",");
             String[] lc = ct[0].split("-");
             String[] rc = ct[1].split("-");
-//            addContext(Integer.valueOf(lc[0]), lc[1], Integer.valueOf(rc[0]), rc[1]);
             this.spanContext = new SpanContext(Integer.valueOf(lc[0]), lc[1], Integer.valueOf(rc[0]), rc[1]);
         }
         return this;
@@ -71,7 +69,7 @@ public class MetaQueryBuilder {
         if (pageLength != null)
             this.addEntry("count", pageLength);
         if (ctx != null)
-            this.addContext(ctx);
+            this.setContext(ctx);
         if (cutoff != null)
             this.addEntry("cutOff", cutoff);
         return this;
@@ -134,17 +132,6 @@ public class MetaQueryBuilder {
             } else
                 meta.put("context", this.context);
             return meta;
-        }
-
-        @Override
-        public String toString() {
-            return "SpanContext{" +
-                    "left_type='" + left_type + '\'' +
-                    ", right_type='" + right_type + '\'' +
-                    ", left_size=" + left_size +
-                    ", right_size=" + right_size +
-                    ", context='" + context + '\'' +
-                    '}';
         }
     }
 }

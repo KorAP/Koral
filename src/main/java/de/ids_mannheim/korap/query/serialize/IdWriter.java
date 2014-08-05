@@ -62,6 +62,7 @@ public class IdWriter {
 
     }
 
+    @Deprecated
     public JsonNode getFinalNode() {
         return this.node;
     }
