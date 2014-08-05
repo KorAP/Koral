@@ -20,10 +20,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.LoggerFactory;
 
-//import de.ids_mannheim.korap.query.poliqarp.PoliqarpLexer;
-//import de.ids_mannheim.korap.query.poliqarp.PoliqarpParser;
-import de.ids_mannheim.korap.query.PoliqarpLexer;
-import de.ids_mannheim.korap.query.PoliqarpParser;
+import de.ids_mannheim.korap.query.poliqarp.PoliqarpPlusLexer;
+import de.ids_mannheim.korap.query.poliqarp.PoliqarpPlusParser;
 import de.ids_mannheim.korap.query.serialize.AbstractSyntaxTree;
 
 /**
@@ -403,7 +401,7 @@ public class PoliqarpTree extends Antlr4AbstractSyntaxTree {
 //	}
 	
 	private static ParserRuleContext parsePoliqarpQuery (String p) {
-		Lexer poliqarpLexer = new PoliqarpLexer((CharStream)null);
+		Lexer poliqarpLexer = new PoliqarpPlusLexer((CharStream)null);
 	    ParserRuleContext tree = null;
 	    // Like p. 111
 	    try {
@@ -412,14 +410,14 @@ public class PoliqarpTree extends Antlr4AbstractSyntaxTree {
 	      ANTLRInputStream input = new ANTLRInputStream(p);
 	      poliqarpLexer.setInputStream(input);
 	      CommonTokenStream tokens = new CommonTokenStream(poliqarpLexer);
-	      poliqarpParser = new PoliqarpParser(tokens);
+	      poliqarpParser = new PoliqarpPlusParser(tokens);
 
 	      // Don't throw out erroneous stuff
 	      poliqarpParser.setErrorHandler(new BailErrorStrategy());
 	      poliqarpParser.removeErrorListeners();
 
 	      // Get starting rule from parser
-	      Method startRule = PoliqarpParser.class.getMethod("request");
+	      Method startRule = PoliqarpPlusParser.class.getMethod("request");
 	      tree = (ParserRuleContext) startRule.invoke(poliqarpParser, (Object[])null);
 	    }
 

@@ -64,18 +64,17 @@ public class MetaQueryBuilder {
     public MetaQueryBuilder fillMeta(Integer pageIndex, Integer pageInteger,
                                      Integer pageLength,
                                      String ctx, Boolean cutoff) {
-        MetaQueryBuilder meta = new MetaQueryBuilder();
         if (pageIndex != null)
-            meta.addEntry("startIndex", pageIndex);
+            this.addEntry("startIndex", pageIndex);
         if (pageIndex == null && pageInteger != null)
-            meta.addEntry("startPage", pageInteger);
+            this.addEntry("startPage", pageInteger);
         if (pageLength != null)
-            meta.addEntry("count", pageLength);
+            this.addEntry("count", pageLength);
         if (ctx != null)
-            meta.addContext(ctx);
+            this.addContext(ctx);
         if (cutoff != null)
-            meta.addEntry("cutOff", cutoff);
-        return meta;
+            this.addEntry("cutOff", cutoff);
+        return this;
     }
 
 
@@ -135,6 +134,17 @@ public class MetaQueryBuilder {
             } else
                 meta.put("context", this.context);
             return meta;
+        }
+
+        @Override
+        public String toString() {
+            return "SpanContext{" +
+                    "left_type='" + left_type + '\'' +
+                    ", right_type='" + right_type + '\'' +
+                    ", left_size=" + left_size +
+                    ", right_size=" + right_size +
+                    ", context='" + context + '\'' +
+                    '}';
         }
     }
 }
