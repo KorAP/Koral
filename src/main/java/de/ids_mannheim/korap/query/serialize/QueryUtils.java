@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author hanl
@@ -371,6 +373,20 @@ public class QueryUtils {
 
         requestMap.put("@context", context);
     }
+
+    public static String escapeRegexSpecialChars(String key) {
+		key.replace("\\", "\\\\");
+		Pattern p = Pattern.compile("\\.|\\^|\\$|\\||\\?|\\*|\\+|\\(|\\)|\\[|\\]|\\{|\\}");
+		Matcher m = p.matcher(key);
+		while (m.find()) {
+			System.out.println(m.group(0));
+			String match = m.group();
+			System.out.println(key);
+			key = m.replaceAll("\\\\"+match);
+			System.out.println(" > "+key);
+		}
+		return key;
+	}
 
 
 

@@ -159,7 +159,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 					if (flag.contains("x")) {
 						term.put("type", "type:regex");
 						if (!isRegex) {
-							key = escapeRegexSpecialChars(key); 
+							key = QueryUtils.escapeRegexSpecialChars(key); 
 						}
 						term.put("key", ".*?"+key+".*?"); // overwrite key
 					}
@@ -338,10 +338,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		openNodeCats.pop();
 	}
 
-	private String escapeRegexSpecialChars(String key) {
-		return Pattern.quote(key);
-	}
-
 	/**
 	 * Parses a repetition node
 	 * @param node
@@ -451,7 +447,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				else if (flag.contains("I")) term.put("caseInsensitive", false);
 				if (flag.contains("x")) {
 					if (!isRegex) {
-						key = escapeRegexSpecialChars(key); 
+						key = QueryUtils.escapeRegexSpecialChars(key); 
 					}
 					term.put("key", ".*?"+key+".*?");  // flag 'x' allows submatches: overwrite key with appended .*? 
 					term.put("type", "type:regex");

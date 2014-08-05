@@ -52,7 +52,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(token4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "[base=schland/x]";
-		String token5 = "{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=.*?\\Qschland\\E.*?, match=match:eq, type=type:regex}}";
+		String token5 = "{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=.*?schland.*?, match=match:eq, type=type:regex}}";
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(token5.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -90,7 +90,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(re3.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "schland/x";
-		String re4 = "{@type=korap:token, wrap={@type=korap:term, layer=orth, key=.*?\\Qschland\\E.*?, match=match:eq, type=type:regex}}";
+		String re4 = "{@type=korap:token, wrap={@type=korap:term, layer=orth, key=.*?schland.*?, match=match:eq, type=type:regex}}";
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(re4.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -100,6 +100,12 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(re5.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "z.B./x";
+		String re6 = "{@type=korap:token, wrap={@type=korap:term, layer=orth, key=.*?z\\.B\\..*?, match=match:eq, type=type:regex}}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(re6.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
