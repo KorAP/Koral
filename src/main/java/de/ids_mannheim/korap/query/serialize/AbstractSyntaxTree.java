@@ -151,6 +151,7 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
+	@Deprecated
 	protected LinkedHashMap<String, Object> makeTreeRelation(String reltype) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:treeRelation");
@@ -158,10 +159,9 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
-	protected LinkedHashMap<String, Object> makeRelation(String reltype) {
+	protected LinkedHashMap<String, Object> makeRelation() {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:relation");
-		if (reltype != null) group.put("reltype", reltype);
 		return group;
 	}
 	

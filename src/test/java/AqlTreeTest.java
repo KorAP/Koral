@@ -90,7 +90,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -101,7 +101,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span, foundry=cnx, layer=cat, key=NP, match=match:eq}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -116,7 +116,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span, foundry=cnx, layer=cat, key=VP, match=match:eq}," +
 						"{@type=korap:span, foundry=cnx, layer=cat, key=NP, match=match:eq}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -130,7 +130,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -141,7 +141,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -152,7 +152,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance, wrap=[{@type=korap:term, layer=cat, key=NP, match=match:eq}]}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c, key=NP, match=match:eq}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -163,7 +163,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance, index=0, wrap=[{@type=korap:term, layer=cat, key=NP, match=match:eq}]}" +
+				"], relation={@type=korap:relation, index=0, wrap={@type=korap:term, layer=c, key=NP, match=match:eq}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -174,8 +174,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance, " +
-						"boundary={@type=korap:boundary, min=2, max=4}}" +
+				"], relation={@type=korap:relation, boundary={@type=korap:boundary, min=2, max=4}, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -193,10 +192,10 @@ public class AqlTreeTest {
 								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 									"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
 								"]}" +
-							"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+							"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 						"]}," +
 						"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -213,15 +212,15 @@ public class AqlTreeTest {
 										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 											"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
 										"]}" +
-									"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+									"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 								"]}," +
 								"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 									"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
 								"]}" +
-							"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+							"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 						"]}," +
 						"{@type=korap:span, layer=cat, key=DP, match=match:eq}" +
-					"], relation={@type=korap:treeRelation, reltype=dominance}" +
+					"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -230,23 +229,23 @@ public class AqlTreeTest {
 	
 	@Test
 	public void testPointingRelations() throws QueryException {
-		query = "node & node & #2 ->label[coref=\"true\"] #1";
+		query = "node & node & #2 ->coref[val=\"true\"] #1";
 		String dom1 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
-				"], relation={@type=korap:relation, reltype=label, wrap=[{@type=korap:term, layer=coref, key=true, match=match:eq}]}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=coref, key=true, match=match:eq}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(dom1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
-		query = "node & node & #2 ->label[mate/coref=\"true\"] #1";
+		query = "node & node & #2 ->mate/coref[val=\"true\"] #1";
 		String dom2 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
-				"], relation={@type=korap:relation, reltype=label, wrap=[{@type=korap:term, foundry=mate, layer=coref, key=true, match=match:eq}]}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, foundry=mate, layer=coref, key=true, match=match:eq}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -380,7 +379,7 @@ public class AqlTreeTest {
 										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 											"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 										"]}" +
-									"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+									"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 								"]}," +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 						"], distances=[" +
@@ -400,7 +399,7 @@ public class AqlTreeTest {
 										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 											"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 										"]}" +
-									"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+									"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 								"]}," +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 						"], distances=[" +
@@ -422,16 +421,16 @@ public class AqlTreeTest {
 										"{@type=korap:span}" +
 									"]}," +
 									"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
-								"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+								"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 							"]}," +
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 								"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
 							"]}" +
-						"], relation={@type=korap:treeRelation, reltype=dominance}" +
+						"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 						"}" +
 					"]}," +
 					"{@type=korap:span, layer=cat, key=PP, match=match:eq}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -543,10 +542,10 @@ public class AqlTreeTest {
 							"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}" +
 						"]}," +
 						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
-					"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+					"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 				"]}," +
 				"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
-			"], relation={@type=korap:treeRelation, reltype=dominance}}";
+			"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(mult3.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -566,13 +565,13 @@ public class AqlTreeTest {
 									"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
 									"]}" +
-								"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+								"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 							"]}," +
 							// establish class 2 around P for later reference
 							"{@type=korap:group, operation=operation:class, class=2, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
 							"]}" +
-						"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+						"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 					"]}," +
 					// refer back to class 2 as second operand
 					"{@type=korap:reference, operation=operation:focus, classRef=[2]}" +
@@ -610,7 +609,7 @@ public class AqlTreeTest {
 					"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span, foundry=cnx, layer=cat, key=NP, match=match:eq, attr={@type=korap:term, tokenarity={@type=korap:boundary,min=2,max=2}}}," +
 						"{@type=korap:span}" +
-					"], relation={@type=korap:treeRelation, reltype=dominance}" +
+					"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 					"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -628,10 +627,10 @@ public class AqlTreeTest {
 									"{@type=korap:span}" +
 								"]}," +
 								"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
-							"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+							"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 						"]}," +
 						"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
-					"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+					"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 					"";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -648,14 +647,14 @@ public class AqlTreeTest {
 										"{@type=korap:span}" +
 									"]}," +
 									"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
-								"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+								"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 							"]}," +
 							"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
-						"], relation={@type=korap:treeRelation, reltype=dominance}" +
+						"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 						"}" +
 					"]}," +
 					"{@type=korap:span, layer=cat, key=PP, match=match:eq}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -674,16 +673,16 @@ public class AqlTreeTest {
 												"{@type=korap:span}" +
 											"]}," +
 											"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
-										"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+										"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 									"]}," +
 									"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
-								"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+								"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 							"]}," +
 							"{@type=korap:span, layer=cat, key=PP, match=match:eq}" +
-						"], relation={@type=korap:treeRelation, reltype=dominance}}" +
+						"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 					"]}," +
 					"{@type=korap:span, layer=cat, key=CP, match=match:eq}" +
-				"], relation={@type=korap:treeRelation, reltype=dominance}" +
+				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}" +
 				"";
 		aqlt = new AqlTree(query);

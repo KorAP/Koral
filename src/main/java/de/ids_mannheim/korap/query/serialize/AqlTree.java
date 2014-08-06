@@ -1,7 +1,5 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import static org.junit.Assert.assertEquals;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -327,11 +325,14 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				// make an (outer) group and an inner group containing the dummy node or previous relations
 				group = makeGroup("relation");
 				LinkedHashMap<String,Object> innerGroup = makeGroup("relation");
-				LinkedHashMap<String,Object> treeRelation = makeTreeRelation("dominance");
+				LinkedHashMap<String,Object> relation = makeRelation();
+				LinkedHashMap<String,Object> term = makeTerm();
+				term.put("layer", "c");
+				relation.put("wrap", term);
 				// commonancestor is an indirect commonparent relation
-				if (reltype.equals("commonancestor")) treeRelation.put("boundary", makeBoundary(1, MAXIMUM_DISTANCE));
-				group.put("relation", treeRelation);
-				innerGroup.put("relation", treeRelation);
+				if (reltype.equals("commonancestor")) relation.put("boundary", makeBoundary(1, MAXIMUM_DISTANCE));
+				group.put("relation", relation);
+				innerGroup.put("relation", relation);
 				// Get operands list before possible re-assignment of 'group' (see following 'if')
 				ArrayList<Object> outerOperands  = (ArrayList<Object>) group.get("operands");
 				ArrayList<Object> innerOperands  = (ArrayList<Object>) innerGroup.get("operands");
@@ -355,8 +356,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				if (i < node.getChildCount()-2) {
 					group = wrapInReference(group, classCounter);
 				}
-			// All other n-ary linguistic relations have special 'relation' attributes defined in CQLF and can be
-			// handled more easily...
+				// All other n-ary linguistic relations have special 'relation' attributes defined in CQLF and can be
+				// handled more easily...
 			} else {
 				LinkedHashMap<String, Object> operatorGroup = parseOperatorNode(node.getChild(i).getChild(0));
 				String groupType;
@@ -367,9 +368,10 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				}
 				group = makeGroup(groupType);
 				if (groupType.equals("relation") || groupType.equals("treeRelation")) {
-					LinkedHashMap<String, Object> relationGroup = new LinkedHashMap<String, Object>();
-					putAllButGroupType(relationGroup, operatorGroup);
-					group.put("relation", relationGroup);
+					LinkedHashMap<String, Object> relation = new LinkedHashMap<String, Object>();
+					putAllButGroupType(relation, operatorGroup);
+					System.err.println(relation);
+					group.put("relation", relation);
 				} else if (groupType.equals("sequence") || groupType.equals("position")) {
 					putAllButGroupType(group, operatorGroup);
 				}
@@ -450,7 +452,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		String operator = getNodeCat(operatorNode);
 		// DOMINANCE
 		if (operator.equals("dominance")) {
-			relation = makeTreeRelation("dominance");
+			relation = makeRelation();
 			relation.put("groupType", "relation");
 			ParseTree leftChildSpec = getFirstChildWithCat(operatorNode, "@l");
 			ParseTree rightChildSpec = getFirstChildWithCat(operatorNode, "@r");
@@ -458,28 +460,31 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
 			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
+			LinkedHashMap<String,Object> term = makeTerm();
+			term.put("layer", "c");
 			if (leftChildSpec != null) relation.put("index", 0);
 			if (rightChildSpec != null) relation.put("index", -1);
-			if (qName != null) relation.putAll(parseQNameNode(qName));
-			if (edgeSpec != null) relation.put("wrap", parseEdgeSpec(edgeSpec)) ;
-			if (star != null) relation.put("distance", makeBoundary(0, 100));
+			if (qName != null) term = parseQNameNode(qName);
+			if (edgeSpec != null) term.putAll(parseEdgeSpec(edgeSpec));
+			if (star != null) relation.put("boundary", makeBoundary(0, null));
 			if (rangeSpec != null) relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
-
+			relation.put("wrap", term);
 		}
 		else if (operator.equals("pointing")) {
 			//			String reltype = operatorNode.getChild(1).toStringTree(parser);
-			relation = makeRelation(null);
+			relation = makeRelation();
 			relation.put("groupType", "relation");
 			ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
 			ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
 			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
 			//			if (qName != null) relation.putAll(parseQNameNode(qName));
-			if (qName != null) relation.put("reltype", qName.getText());
-			if (edgeSpec != null) relation.put("wrap", parseEdgeSpec(edgeSpec)) ;
-			if (star != null) relation.put("distance", makeBoundary(0, 100));
+			LinkedHashMap<String,Object> term = makeTerm();
+			if (qName != null) term.putAll(parseQNameNode(qName));
+			if (edgeSpec != null) term.putAll(parseEdgeSpec(edgeSpec));
+			if (star != null) relation.put("boundary", makeBoundary(0, 100));
 			if (rangeSpec != null) relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
-
+			relation.put("wrap", term);
 		}
 		else if (operator.equals("precedence")) {
 			relation = new LinkedHashMap<String, Object>();
@@ -544,12 +549,17 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		return relation;
 	}
 
-	private Object parseEdgeSpec(ParseTree edgeSpec) {
-		ArrayList<Object> edgeAnnos = new ArrayList<Object>();
-		for (ParseTree edgeAnno : getChildrenWithCat(edgeSpec, "edgeAnno")) {
-			edgeAnnos.add(parseEdgeAnno(edgeAnno));
+	private LinkedHashMap<String,Object> parseEdgeSpec(ParseTree edgeSpec) {
+		List<ParseTree> annos = getChildrenWithCat(edgeSpec, "edgeAnno");
+		if (annos.size() == 1) return parseEdgeAnno(annos.get(0));
+		else {
+			LinkedHashMap<String,Object> termGroup = makeTermGroup("and");
+			ArrayList<Object> operands = (ArrayList<Object>) termGroup.get("operands");
+			for (ParseTree anno : annos) {
+				operands.add(parseEdgeAnno(anno));
+			}
+			return termGroup;
 		}
-		return edgeAnnos;
 	}
 
 	private LinkedHashMap<String, Object> parseEdgeAnno(
@@ -692,7 +702,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				"Katze=\"Hund\"",
 				"cnx/c=\"NP\"",
 				"cat=\"NP\"",
-				 "node & node & #1 .+ #2"
+				"node & node & #1 .+ #2",
+				" #1 > #2 & cnx/cat=\"VP\" & cnx/cat=\"NP\"",
+				"\"Mann\" & node & #2 >[cat=\"NP\"] #1",
+				"node & node & #2 ->coref[val=\"true\"] #1",
+				"cat=\"NP\" & cat=\"VP\" & cat=\"PP\" & #1 $ #2 > #3"
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {
