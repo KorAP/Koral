@@ -4,25 +4,40 @@ grammar CollectionQuery;
 
 /*
  -- author: jbingel
- -- date: 14-05-11
+ -- date: 2014-05-11
 */
 
 /*
  * LEXER SECTION
  */
+/*
+ Regular expression
+ /x allows submatches like /^.*?RE.*?$/
+ /X forces full matches
+ /i means case insensitivity
+ /I forces case sensitivity
+*/
+FLAG_xi      : '/' ( ('x'|'X') ('i'|'I')? );
+FLAG_ix      : '/' ( ('i'|'I') ('x'|'X')? );
+ 
+ 
 LRB					: '(';
 RRB					: ')';
+LB					: '[';
+RB					: ']';
 LT					: '<';
 GT					: '>';
 LEQ					: '<=';
 GEQ					: '>=';
 EQ					: '=';
-NE					: '!=';
 AND					: '&' | 'AND' | 'and' | 'UND' | 'und' ;
 OR					: '|' | 'OR' | 'or' | 'ODER' | 'oder' ;
+NEG					: '!';
 QMARK				: '?';
 SLASH				: '/';
+COLON				: ':';
 DASH				: '-';
+TILDE				: '~';
 WS 					: ( ' ' | '\t' | '\r' | '\n' )+ -> skip ;
 fragment NO_RE      : ~[ \t\/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
@@ -34,6 +49,7 @@ NL                  : [\r\n] -> skip;
 ws                  : WS+;
 
 WORD                : ALPHABET+;
+
 
 /*
  * Regular expressions
@@ -63,15 +79,56 @@ date
 : DIGIT DIGIT DIGIT DIGIT  (DASH DIGIT DIGIT (DASH DIGIT DIGIT)?)?
 ;
 
-conj
-:	AND | OR;
-
 operator
-:	EQ | NE | LT | GT | LEQ | GEQ;
+:	(NEG? EQ) | LT | GT | LEQ | GEQ;
 
 expr
-:	(value operator)? field operator value
-//|	LRB expr RRB
+: meta
+| token
+;
+
+meta
+: (value operator)? field operator value
+;
+
+token
+: LB (term|termGroup) RB
+;
+
+term       
+: NEG* (foundry SLASH)? layer termOp key (COLON value)? flag? 
+;
+
+termOp
+: (NEG? EQ? EQ | NEG? TILDE? TILDE)
+;
+
+termGroup
+: (term | LRB termGroup RRB) booleanOp (term | LRB termGroup RRB | termGroup)
+;
+
+key
+: WORD
+| regex
+| NUMBER
+;
+
+foundry
+: WORD
+;
+
+layer
+: WORD
+;
+
+booleanOp
+: AND 
+| OR 
+;
+
+flag
+: FLAG_xi 
+| FLAG_ix
 ;
 	
 field
@@ -86,11 +143,8 @@ value
 | regex
 ;
 
-
-
 relation
-:	(expr|exprGroup) conj (expr|exprGroup|relation)
-//|	LRB relation RRB
+:	(expr|exprGroup) booleanOp (expr|exprGroup|relation)
 ; 
 
 exprGroup
@@ -98,7 +152,7 @@ exprGroup
 ;
 
 start
-:	( expr 
-	| exprGroup 
-	| relation  ) 
+: expr EOF
+| exprGroup EOF 
+| relation EOF
 ;

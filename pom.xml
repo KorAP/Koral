@@ -23,8 +23,13 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.0</version>
+            <version>4.1</version>
         </dependency>
+        <dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-maven-plugin</artifactId>
+			<version>4.1</version>
+		</dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -90,7 +95,7 @@
 				-->
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
-				<version>4.0</version>
+				<version>4.1</version>
 				<configuration>
 				  <sourceDirectory>${basedir}/src/main/antlr</sourceDirectory>
 				  <outputDirectory>${basedir}/src/main/java/de/ids_mannheim/korap/query/serialize/util</outputDirectory>
