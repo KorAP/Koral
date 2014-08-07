@@ -1,8 +1,7 @@
+import static org.junit.Assert.*;
 import de.ids_mannheim.korap.query.serialize.CollectionQueryTree;
 import de.ids_mannheim.korap.util.QueryException;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class CollectionQueryTreeTest {
 
@@ -23,7 +22,7 @@ public class CollectionQueryTreeTest {
 	public void testSimple() throws QueryException {
 		query = "textClass=Sport";
 		//      String regex1 = "{@type=korap:filter, filter={@type=korap:doc, attribute=textClass, key=Sport, match=match:eq}}";
-		expected = "{@type=korap:filter, filter={@type=korap:doc, key=textClass, value=Sport, match=match:eq}}";
+		expected = "{@type=korap:doc, key=textClass, value=Sport, match=match:eq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -31,7 +30,7 @@ public class CollectionQueryTreeTest {
 
 		query = "textClass!=Sport";
 		//	      String regex1 = "{@type=korap:filter, filter={@type=korap:doc, attribute=textClass, key=Sport, match=match:eq}}";
-		expected = "{@type=korap:filter, filter={@type=korap:doc, key=textClass, value=Sport, match=match:ne}}";
+		expected = "{@type=korap:doc, key=textClass, value=Sport, match=match:ne}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -42,12 +41,10 @@ public class CollectionQueryTreeTest {
 	public void testTwoConjuncts() throws QueryException {
 		query = "textClass=Sport & year=2014";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:docGroup, relation=relation:and, operands=[" +
+				"{@type=korap:group, operation=operation:and, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 					"{@type=korap:doc, key=year, value=2014, match=match:eq}" +
-				"]}" +
-			"}";
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -58,15 +55,13 @@ public class CollectionQueryTreeTest {
 	public void testThreeConjuncts() throws QueryException {
 		query = "textClass=Sport & year=2014 & corpusID=WPD";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:docGroup, relation=relation:and, operands=[" +
+				"{@type=korap:group, operation=operation:and, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
-					"{@type=korap:docGroup, relation=relation:and, operands=[" +
+					"{@type=korap:group, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=year, value=2014, match=match:eq}," +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}" +
 					"]}" +
-				"]}" +
-			"}";
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -78,12 +73,10 @@ public class CollectionQueryTreeTest {
 	public void testTwoDisjuncts() throws QueryException {
 		query = "textClass=Sport | year=2014";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:docGroup, relation=relation:or, operands=[" +
+				"{@type=korap:group, operation=operation:or, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 					"{@type=korap:doc, key=year, value=2014, match=match:eq}" +
-				"]}" +
-			"}";
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -94,15 +87,13 @@ public class CollectionQueryTreeTest {
 	public void testThreeDisjuncts() throws QueryException {
 		query = "textClass=Sport | year=2014 | corpusID=WPD";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:docGroup, relation=relation:or, operands=[" +
+				"{@type=korap:group, operation=operation:or, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
-					"{@type=korap:docGroup, relation=relation:or, operands=[" +
+					"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:doc, key=year, value=2014, match=match:eq}," +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}" +
 					"]}" +
-				"]}" +
-			"}";
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -114,15 +105,14 @@ public class CollectionQueryTreeTest {
 	public void testMixed() throws QueryException {
 		query = "(textClass=Sport | textClass=ausland) & corpusID=WPD";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:docGroup, relation=relation:and, operands=[" +
-					"{@type=korap:docGroup, relation=relation:or, operands=[" +
+			
+				"{@type=korap:group, operation=operation:and, operands=[" +
+					"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 						"{@type=korap:doc, key=textClass, value=ausland, match=match:eq}" +
 					"]}," +
 					"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}" +
-				"]}" +
-			"}";
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -130,15 +120,14 @@ public class CollectionQueryTreeTest {
 		
 		query = "(textClass=Sport & textClass=ausland) & corpusID=WPD";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:docGroup, relation=relation:and, operands=[" +
-					"{@type=korap:docGroup, relation=relation:and, operands=[" +
+			
+				"{@type=korap:group, operation=operation:and, operands=[" +
+					"{@type=korap:group, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 						"{@type=korap:doc, key=textClass, value=ausland, match=match:eq}" +
 					"]}," +
 					"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}" +
-				"]}" +
-			"}";
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -146,40 +135,37 @@ public class CollectionQueryTreeTest {
 		
 		query = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White)";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:docGroup, relation=relation:or, operands=[" +
-					"{@type=korap:docGroup, relation=relation:and, operands=[" +
+			
+				"{@type=korap:group, operation=operation:or, operands=[" +
+					"{@type=korap:group, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 						"{@type=korap:doc, key=textClass, value=ausland, match=match:eq}" +
 					"]}," +
-					"{@type=korap:docGroup, relation=relation:and, operands=[" +
+					"{@type=korap:group, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}," +
 						"{@type=korap:doc, key=author, value=White, match=match:eq}" +
 					"]}" +
-				"]}" +
-			"}";
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-
-        query = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White & year=2010)";
+		
+		query = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White & year=2010)";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:docGroup, relation=relation:or, operands=[" +
-					"{@type=korap:docGroup, relation=relation:and, operands=[" +
+				"{@type=korap:group, operation=operation:or, operands=[" +
+					"{@type=korap:group, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 						"{@type=korap:doc, key=textClass, value=ausland, match=match:eq}" +
 					"]}," +
-					"{@type=korap:docGroup, relation=relation:and, operands=[" +
+					"{@type=korap:group, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}," +
-						"{@type=korap:docGroup, relation=relation:and, operands=[" +
+						"{@type=korap:group, operation=operation:and, operands=[" +
 							"{@type=korap:doc, key=author, value=White, match=match:eq}," +
 							"{@type=korap:doc, key=year, value=2010, match=match:eq}" +
 						"]}" +
 					"]}" +
-				"]}" +
-			"}";
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -191,12 +177,10 @@ public class CollectionQueryTreeTest {
 		// search for pubDate between 1990 and 2010!
 		query = "1990<pubDate<2010";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:docGroup, relation=relation:and, operands=[" +
+				"{@type=korap:group, operation=operation:and, operands=[" +
 					"{@type=korap:doc, key=pubDate, value=1990, match=match:gt}," +
 					"{@type=korap:doc, key=pubDate, value=2010, match=match:lt}" +
-				"]}" +
-			"}";
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -204,9 +188,7 @@ public class CollectionQueryTreeTest {
 		
 		query = "pubDate>=1990";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:doc, key=pubDate, value=1990, match=match:geq}" +
-			"}";
+				"{@type=korap:doc, key=pubDate, value=1990, match=match:geq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -214,9 +196,7 @@ public class CollectionQueryTreeTest {
 		
 		query = "pubDate>=1990-05";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:doc, key=pubDate, value=1990-05, match=match:geq}" +
-			"}";
+				"{@type=korap:doc, key=pubDate, value=1990-05, match=match:geq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -224,9 +204,7 @@ public class CollectionQueryTreeTest {
 		
 		query = "pubDate>=1990-05-01";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:doc, key=pubDate, value=1990-05-01, match=match:geq}" +
-			"}";
+				"{@type=korap:doc, key=pubDate, value=1990-05-01, match=match:geq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -237,9 +215,70 @@ public class CollectionQueryTreeTest {
 	public void testRegex() throws QueryException {
 		query = "author=/Go.*he/";
 		expected = 
-			"{@type=korap:filter, filter=" +
-				"{@type=korap:doc, key=author, value=Go.*he, type=type:regex, match=match:eq}" +
-			"}";
+				"{@type=korap:doc, key=author, value=Go.*he, type=type:regex, match=match:eq}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
+	public void testContentFilter() throws QueryException {
+		query = "[base=Schwalbe]";
+		expected = 
+				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:eq}}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[cnx/base=Schwalbe]";
+		expected = 
+				"{@type=korap:token, wrap={@type=korap:term, foundry=cnx, layer=lemma, key=Schwalbe, match=match:eq}}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[base!=Schwalbe]";
+		expected = 
+				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:ne}}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[base=Schwalbe] & [orth=Foul]";
+		expected = 
+				"{@type=korap:group, operation=operation:and, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Foul, match=match:eq}}" +
+					"]}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
+	public void testContentMetaMixed() throws QueryException {
+		query = "textClass=Sport & [base=Schwalbe]";
+		expected = 
+				"{@type=korap:group, operation=operation:and, operands=[" +
+					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:eq}}" +
+				"]}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[base=Schwalbe] & textClass=Sport";
+		expected = 
+				"{@type=korap:group, operation=operation:and, operands=[" +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:eq}}," +
+					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}" +
+				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
