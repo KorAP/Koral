@@ -90,7 +90,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				quantGroup.put("boundary", makeBoundary(minmax[0], minmax[1]));
 				if (minmax[0] != null) quantGroup.put("min", minmax[0]);
 				if (minmax[1] != null) quantGroup.put("max", minmax[1]);
-				announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
+				announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
 				putIntoSuperObject(quantGroup);
 				objectStack.push(quantGroup);
 				stackedObjects++;
@@ -312,7 +312,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			// Default is focus(), if deviating catch here
 			if (type.equals("split")) referenceGroup.put("operation", "operation:split");
 			if (type.equals("submatch") || type.equals("shrink")) {
-				String warning = type + "() is deprecated in favor of focus()";
+				String warning = "Deprecated 2014-07-24: "+type + "() as a match reducer to a specific class is deprecated in " +
+						"favor of focus() and will only be supported for 3 months after deprecation date.";
 				log.warn(warning);
 				requestMap.put("warning", warning);
 			}
@@ -328,9 +329,9 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			visited.add(node.getChild(0));
 		}
 
-		if (nodeCat.equals("subspan")) {
-			LinkedHashMap<String,Object> subspan = makeReference(null);
-			subspan.put("operands", new ArrayList<Object>());
+		if (nodeCat.equals("submatch")) {
+			LinkedHashMap<String,Object> submatch = makeReference(null);
+			submatch.put("operands", new ArrayList<Object>());
 			ParseTree startpos = getFirstChildWithCat(node,"startpos");
 			ParseTree length = getFirstChildWithCat(node,"length");
 			ArrayList<Integer> spanRef = new ArrayList<Integer>();
@@ -338,9 +339,9 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			if (length != null) {
 				spanRef.add(Integer.parseInt(length.getText()));
 			}
-			subspan.put("spanRef", spanRef);
-			putIntoSuperObject(subspan);
-			objectStack.push(subspan);
+			submatch.put("spanRef", spanRef);
+			putIntoSuperObject(submatch);
+			objectStack.push(submatch);
 			stackedObjects++;
 			visited.add(node.getChild(0));
 		}
@@ -671,9 +672,9 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				"focus(2&3|4:contains({2:<s>},[base=mann]))",
 				"relatesTo(cnx/c:<s>,<np>)",
 				"dominates(cnx/c*:<np>,[base=Baum])",
-				"subspan(2,3:<s>)"
+				"submatch(2:<np>{2:<s>})"
 		};
-		PoliqarpPlusTree.verbose=true;
+//		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);

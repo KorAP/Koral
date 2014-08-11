@@ -129,7 +129,7 @@ public abstract class AbstractSyntaxTree {
 		if (max != null) {
 			group.put("max", max);
 		}
-		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
+		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
 		return group;
 	}
 	
@@ -184,7 +184,7 @@ public abstract class AbstractSyntaxTree {
 		if (max != null) {
 			group.put("max", max);
 		}
-		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 6 months from deprecation date.");
+		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
 		return group;
 	}
 	
@@ -192,7 +192,9 @@ public abstract class AbstractSyntaxTree {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:reference");
 		group.put("operation", "operation:"+operation);
-		group.put("classRef", classRefs);
+		if (classRefs!= null && !classRefs.isEmpty()) {
+			group.put("classRef", classRefs);
+		}
 		return group;
 	}
 	

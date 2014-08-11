@@ -1149,7 +1149,7 @@ public class PoliqarpPlusTreeTest {
 	
 	@Test
 	public void testSubspan() throws QueryException {
-		query = "subspan(1:<s>)";
+		query = "submatch(1,:<s>)";
 		expected = 
 			"{@type=korap:reference, operation=operation:focus, operands=[" +
 					"{@type=korap:span, key=s}" +
@@ -1159,7 +1159,7 @@ public class PoliqarpPlusTreeTest {
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	
-		query = "subspan(1,4:<s>)";
+		query = "submatch(1,4:<s>)";
 		expected = 
 			"{@type=korap:reference, operation=operation:focus, operands=[" +
 					"{@type=korap:span, key=s}" +
@@ -1169,7 +1169,7 @@ public class PoliqarpPlusTreeTest {
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
-		query = "subspan(1,4:contains(<s>,[base=Haus]))";
+		query = "submatch(1,4:contains(<s>,[base=Haus]))";
 		expected = 
 			"{@type=korap:reference, operation=operation:focus, operands=[" +
 				"{@type=korap:group, operation=operation:position, frame=frame:contains, operands=[" +
