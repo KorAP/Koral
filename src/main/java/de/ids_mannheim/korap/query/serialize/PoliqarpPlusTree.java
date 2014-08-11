@@ -234,6 +234,32 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			stackedObjects++;
 		}
 
+		if (nodeCat.equals("relation")) {
+			LinkedHashMap<String, Object> relationGroup = makeGroup("relation");
+			LinkedHashMap<String, Object> relation = makeRelation();
+			relationGroup.put("relation", relation);
+			if (node.getChild(0).getText().equals("dominates")) {
+				relation.put("layer", "c");
+			}
+			ParseTree relSpec = getFirstChildWithCat(node, "relSpec");
+			ParseTree repetition = getFirstChildWithCat(node, "repetition");
+			if (relSpec != null) {
+				ParseTree foundry = getFirstChildWithCat(relSpec, "foundry");
+				ParseTree layer = getFirstChildWithCat(relSpec, "layer");
+				ParseTree key = getFirstChildWithCat(relSpec, "key");
+				if (foundry != null) relation.put("foundry", foundry.getText());
+				if (layer != null) relation.put("layer", layer.getText());
+				if (key != null) relation.put("key", key.getText());
+			}
+			if (repetition != null) {
+				Integer[] minmax =  parseRepetition(repetition);
+				relation.put("boundary", makeBoundary(minmax[0], minmax[1]));
+			}
+			putIntoSuperObject(relationGroup);
+			objectStack.push(relationGroup);
+			stackedObjects++;
+		}
+		
 		if (nodeCat.equals("spanclass")) {
 			// Step I: get info
 			int classId = 0;
@@ -256,7 +282,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			stackedObjects++;
 		}
 
-
 		if (nodeCat.equals("matching")) {
 			// Step I: get info
 			ArrayList<Integer> classRefs = new ArrayList<Integer>();
@@ -272,7 +297,9 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 							int classRef = Integer.parseInt(ref);
 							classRefs.add(classRef);
 						} catch (NumberFormatException e) {
-							throw new QueryException("The specified class reference in the shrink/split-Operator is not a number.");
+							String err = "The specified class reference in the shrink/split-Operator is not a number.";
+							errorMsgs.add(err);
+							throw new QueryException(err);
 						}
 					}
 				}
@@ -282,6 +309,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			LinkedHashMap<String, Object> referenceGroup = makeReference(classRefs);
 
 			String type = node.getChild(0).toStringTree(parser);
+			// Default is focus(), if deviating catch here
 			if (type.equals("split")) referenceGroup.put("operation", "operation:split");
 			if (type.equals("submatch") || type.equals("shrink")) {
 				String warning = type + "() is deprecated in favor of focus()";
@@ -300,6 +328,23 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			visited.add(node.getChild(0));
 		}
 
+		if (nodeCat.equals("subspan")) {
+			LinkedHashMap<String,Object> subspan = makeReference(null);
+			subspan.put("operands", new ArrayList<Object>());
+			ParseTree startpos = getFirstChildWithCat(node,"startpos");
+			ParseTree length = getFirstChildWithCat(node,"length");
+			ArrayList<Integer> spanRef = new ArrayList<Integer>();
+			spanRef.add(Integer.parseInt(startpos.getText()));
+			if (length != null) {
+				spanRef.add(Integer.parseInt(length.getText()));
+			}
+			subspan.put("spanRef", spanRef);
+			putIntoSuperObject(subspan);
+			objectStack.push(subspan);
+			stackedObjects++;
+			visited.add(node.getChild(0));
+		}
+		
 		if (nodeCat.equals("meta")) {
 			LinkedHashMap<String, Object> metaFilter = new LinkedHashMap<String, Object>();
 			requestMap.put("meta", metaFilter);
@@ -466,7 +511,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			if (!getNodeCat(node.getChild(node.getChildCount()-1)).equals(")")) rightOp = node.getChild(node.getChildCount()-1);
 			else rightOp = node.getChild(node.getChildCount()-2);
 			// establish boolean relation
-			ParseTree boolOp = getFirstChildWithCat(node, "booleanOp"); 
+			ParseTree boolOp = getFirstChildWithCat(node, "boolOp"); 
 			String operator = boolOp.getText().equals("&") ? "and" : "or";
 			termGroup = makeTermGroup(operator);
 			ArrayList<Object> operands = (ArrayList<Object>) termGroup.get("operands");
@@ -622,9 +667,13 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 //				"[base=geht][base=der][]*[base=Mann]",
 //				"<cnx/c=vp (class=header&id=7)>",
 //				"<cnx/c=vp class=header&id=a>",
-				"[][]*[base=Mann]"
+				"[][]*[base=Mann]",
+				"focus(2&3|4:contains({2:<s>},[base=mann]))",
+				"relatesTo(cnx/c:<s>,<np>)",
+				"dominates(cnx/c*:<np>,[base=Baum])",
+				"subspan(2,3:<s>)"
 		};
-//		PoliqarpPlusTree.verbose=true;
+		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);

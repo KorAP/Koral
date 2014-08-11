@@ -994,7 +994,7 @@ public class PoliqarpPlusTreeTest {
 	}
 	
 	@Test
-	public void testShrinkSplit() throws QueryException {
+	public void testFocusSplit() throws QueryException {
 		// focus([orth=Der]{[orth=Mann]})
 		String shr1 = 
 			"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
@@ -1146,6 +1146,124 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(shr8.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 	}
+	
+	@Test
+	public void testSubspan() throws QueryException {
+		query = "subspan(1:<s>)";
+		expected = 
+			"{@type=korap:reference, operation=operation:focus, operands=[" +
+					"{@type=korap:span, key=s}" +
+				"], spanRef=[1]" +
+			"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	
+		query = "subspan(1,4:<s>)";
+		expected = 
+			"{@type=korap:reference, operation=operation:focus, operands=[" +
+					"{@type=korap:span, key=s}" +
+				"], spanRef=[1,4]" +
+			"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "subspan(1,4:contains(<s>,[base=Haus]))";
+		expected = 
+			"{@type=korap:reference, operation=operation:focus, operands=[" +
+				"{@type=korap:group, operation=operation:position, frame=frame:contains, operands=[" +
+					"{@type=korap:span, key=s}," +
+					"{@type=korap:token, wrap= {@type=korap:term, layer=lemma, key=Haus, match=match:eq}}" +
+				"]}" +
+				"], spanRef=[1,4]" +
+			"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
+	public void testRelations() throws QueryException {
+		query = "relatesTo(<s>,<np>)";
+		expected = 
+			"{@type=korap:group, operation=operation:relation, operands=[" +
+					"{@type=korap:span, key=s}," +
+					"{@type=korap:span, key=np}" +
+				"], relation={@type=korap:relation}" +
+			"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "relatesTo([base=Baum],<np>)";
+		expected = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Baum, match=match:eq}}," +
+						"{@type=korap:span, key=np}" +
+					"], relation={@type=korap:relation}" +
+				"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "dominates(<np>,[base=Baum])";
+		expected = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span, key=np}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Baum, match=match:eq}}" +
+					"], relation={@type=korap:relation, layer=c}" +
+				"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "dominates(cnx/c:<np>,[base=Baum])";
+		expected = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span, key=np}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Baum, match=match:eq}}" +
+					"], relation={@type=korap:relation, layer=c, foundry=cnx}" +
+				"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "dominates(cnx/c*:<np>,[base=Baum])";
+		expected = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span, key=np}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Baum, match=match:eq}}" +
+					"], relation={@type=korap:relation, layer=c, foundry=cnx, boundary={@type=korap:boundary, min=0}}" +
+				"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "dominates(cnx/c{1,5}:<np>,[base=Baum])";
+		expected = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span, key=np}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Baum, match=match:eq}}" +
+					"], relation={@type=korap:relation, layer=c, foundry=cnx, boundary={@type=korap:boundary, min=1, max=5}}" +
+				"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "relatesTo(mate/d=HEAD:<np>,[base=Baum])";
+		expected = 
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:span, key=np}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Baum, match=match:eq}}" +
+					"], relation={@type=korap:relation, foundry=mate, layer=d, key=HEAD}" +
+				"}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+	}
+	
 	
 	
 	@Test
