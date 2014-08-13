@@ -217,6 +217,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				object = makeToken();
 				LinkedHashMap<String, Object> term = makeTerm();
 				object.put("wrap", term);
+				term.put("layer", "orth");
 				term.putAll(parseTextSpec(node.getChild(0)));
 			}
 
@@ -706,7 +707,9 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				" #1 > #2 & cnx/cat=\"VP\" & cnx/cat=\"NP\"",
 				"\"Mann\" & node & #2 >[cat=\"NP\"] #1",
 				"node & node & #2 ->coref[val=\"true\"] #1",
-				"cat=\"NP\" & cat=\"VP\" & cat=\"PP\" & #1 $ #2 > #3"
+				"cat=\"NP\" & cat=\"VP\" & cat=\"PP\" & #1 $ #2 > #3",
+				"tok=\"Mann\" & tok=\"geht\" & #1 .* #2",
+				"\"Sonne\""
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {

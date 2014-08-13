@@ -29,7 +29,7 @@ public class AqlTreeTest {
 	public void testSingleTokens() throws QueryException {
 		// "Mann"
 		query = "\"Mann\"";
-		String token1 = "{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}";
+		String token1 = "{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}";
 		assertTrue(equalsQueryContent(token1, query));
 		
 		// [orth!=Frau]
@@ -56,13 +56,13 @@ public class AqlTreeTest {
 	@Test
 	public void testRegex() throws QueryException {
 		query = "/Mann/";
-		String regex1 = "{@type=korap:token, wrap={@type=korap:term, type=type:regex, key=Mann, match=match:eq}}";
+		String regex1 = "{@type=korap:token, wrap={@type=korap:term, layer=orth, type=type:regex, key=Mann, match=match:eq}}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(regex1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "/.*?Mann.*?/";
-		String regex2 = "{@type=korap:token, wrap={@type=korap:term, type=type:regex, key=.*?Mann.*?, match=match:eq}}";
+		String regex2 = "{@type=korap:token, wrap={@type=korap:term, layer=orth, type=type:regex, key=.*?Mann.*?, match=match:eq}}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(regex2.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -140,7 +140,7 @@ public class AqlTreeTest {
 		String dom2 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
-						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
 				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
@@ -151,7 +151,7 @@ public class AqlTreeTest {
 		String dom3 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
-						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
 				"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c, key=NP, match=match:eq}}" +
 				"}";
 		aqlt = new AqlTree(query);
@@ -162,7 +162,7 @@ public class AqlTreeTest {
 		String dom4 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
-						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
 				"], relation={@type=korap:relation, index=0, wrap={@type=korap:term, layer=c, key=NP, match=match:eq}}" +
 				"}";
 		aqlt = new AqlTree(query);
@@ -173,7 +173,7 @@ public class AqlTreeTest {
 		String dom5 = 
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:span}," +
-						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
 				"], relation={@type=korap:relation, boundary={@type=korap:boundary, min=2, max=4}, wrap={@type=korap:term, layer=c}}" +
 				"}";
 		aqlt = new AqlTree(query);
@@ -476,7 +476,7 @@ public class AqlTreeTest {
 		String pos4 = 
 					"{@type=korap:group, operation=operation:position, operands=[" +
 						"{@type=korap:span}," +
-						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}" +
+						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
 						"], inOrder=false, frame=frame:endswith" +
 					"}";
 		aqlt = new AqlTree(query);
@@ -486,7 +486,7 @@ public class AqlTreeTest {
 		query = "node & \"Mann\" & #2 _r_ #1";
 		String pos5 = 
 					"{@type=korap:group, operation=operation:position, operands=[" +
-						"{@type=korap:token, wrap={@type=korap:term, key=Mann, match=match:eq}}," +
+						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}," +
 						"{@type=korap:span}" +
 						"], inOrder=false, frame=frame:endswith" +
 					"}";
