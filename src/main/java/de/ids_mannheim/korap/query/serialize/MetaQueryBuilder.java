@@ -30,8 +30,8 @@ public class MetaQueryBuilder {
      * @param rightType
      * @return
      */
-    public MetaQueryBuilder setContext(Integer left, String leftType,
-                                       Integer right, String rightType) {
+    public MetaQueryBuilder setSpanContext(Integer left, String leftType,
+                                           Integer right, String rightType) {
         this.spanContext = new SpanContext(left, leftType, right, rightType);
         return this;
     }
@@ -47,7 +47,7 @@ public class MetaQueryBuilder {
      * @param context
      * @return
      */
-    public MetaQueryBuilder setContext(String context) {
+    public MetaQueryBuilder setSpanContext(String context) {
         if (context.startsWith("s") | context.startsWith("p"))
             this.spanContext = new SpanContext(context);
         else {
@@ -69,7 +69,7 @@ public class MetaQueryBuilder {
         if (pageLength != null)
             this.addEntry("count", pageLength);
         if (ctx != null)
-            this.setContext(ctx);
+            this.setSpanContext(ctx);
         if (cutoff != null)
             this.addEntry("cutOff", cutoff);
         return this;
@@ -82,7 +82,8 @@ public class MetaQueryBuilder {
     }
 
     public Map raw() {
-        meta.putAll(this.spanContext.raw());
+        if (this.spanContext != null)
+            meta.putAll(this.spanContext.raw());
         return meta;
     }
 

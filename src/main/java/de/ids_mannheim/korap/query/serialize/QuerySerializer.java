@@ -157,7 +157,7 @@ public class QuerySerializer {
             String cli, String cri, int cls, int crs,
             int num, int pageIndex) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
-        meta.setContext(cls, cli, crs, cri);
+        meta.setSpanContext(cls, cli, crs, cri);
         meta.addEntry("startIndex", pageIndex);
         meta.addEntry("count", num);
         this.meta = meta.raw();
@@ -168,7 +168,7 @@ public class QuerySerializer {
         MetaQueryBuilder meta = new MetaQueryBuilder();
         meta.addEntry("startIndex", pageidx);
         meta.addEntry("count", num);
-        meta.setContext(context);
+        meta.setSpanContext(context);
         return this;
     }
 
