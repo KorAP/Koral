@@ -210,49 +210,67 @@ public class CosmasTreeTest {
 	public void testOPPROX() throws QueryException {
 		query="Sonne /+w1:4 Mond";
 		String prox1 = 
-					"{@type=korap:group, operation=operation:sequence, " +
-						"operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
-							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
-						"], inOrder=true, " +
-						"distances=[" +
-							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}" +
-						"]" +
-					"}";
+					"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
+						"{@type=korap:group, operation=operation:sequence, " +
+							"operands=[" +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+								"]}," +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+									"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+								"]}" +
+							"], inOrder=true, " +
+							"distances=[" +
+								"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}" +
+							"]" +
+						"}" +
+					"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(prox1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query="Sonne /+w1:4,s0,p1:3 Mond";
 		String prox2 = 
+				"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 					"{@type=korap:group, operation=operation:sequence, " +
 						"operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
-							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+								"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+							"]}," +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+								"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+							"]}" +
 						"], inOrder=true, " +
 						"distances=[" +
 							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}," +
 							"{@type=korap:distance, key=s, boundary={@type=korap:boundary, min=0, max=0}, min=0, max=0}," +
 							"{@type=korap:distance, key=p, boundary={@type=korap:boundary, min=1, max=3}, min=1, max=3}" +
 						"]" +
-					"}";
+					"}" +
+				"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(prox2.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query="Sonne %+w1:4,s0,p1:3 Mond";
 		String prox3 = 
-				"{@type=korap:group, operation=operation:sequence, " +
+				"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
+					"{@type=korap:group, operation=operation:sequence, " +
 						"operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
-							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+								"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+							"]}," +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+								"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+							"]}" +
 						"], inOrder=true, " +
 						"distances=[" +
 							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4, exclude=true}," +
 							"{@type=korap:distance, key=s, boundary={@type=korap:boundary, min=0, max=0}, min=0, max=0, exclude=true}," +
 							"{@type=korap:distance, key=p, boundary={@type=korap:boundary, min=1, max=3}, min=1, max=3, exclude=true}" +
 						"]" +
-					"}";
+					"}" +
+				"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 //		assertEquals(prox3.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -261,18 +279,28 @@ public class CosmasTreeTest {
 		String prox4 = 
 					"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
-							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
-						"]}," +
-						"{@type=korap:group, operation=operation:sequence, " +
-							"operands=[" +
-								"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+								"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+							"]}," +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
 								"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
-							"], inOrder=true, " +
-							"distances=[" +
-								"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}" +
-							"]" +
-						"}" +
+							"]}" +
+						"]}," +
+						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
+							"{@type=korap:group, operation=operation:sequence, " +
+								"operands=[" +
+									"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+										"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+									"]}," +
+									"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+										"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+									"]}" +
+								"], inOrder=true, " +
+								"distances=[" +
+									"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}" +
+								"]" +
+							"}" +
+						"]}" +
 					"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
@@ -281,20 +309,30 @@ public class CosmasTreeTest {
 		query="Sonne /-w4 Mond";
 		String prox5 = 
 				"{@type=korap:group, operation=operation:or, operands=[" +
-						"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}," +
-							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+					"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
+						"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
 						"]}," +
+						"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+						"]}" +
+					"]}," +
+					"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 						"{@type=korap:group, operation=operation:sequence, " +
 							"operands=[" +
-								"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}," +
-								"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+									"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+								"]}," +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+									"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+								"]}" +
 							"], inOrder=true, " +
 							"distances=[" +
 								"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}" +
 							"]" +
 						"}" +
-					"]}";
+					"]}" +
+				"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(prox5.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -302,20 +340,30 @@ public class CosmasTreeTest {
 		query="Sonne /w4 Mond";
 		String prox6 = 
 				"{@type=korap:group, operation=operation:or, operands=[" +
-						"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
-							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
-							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+					"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
+						"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
 						"]}," +
+						"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+						"]}" +
+					"]}," +
+					"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 						"{@type=korap:group, operation=operation:sequence, " +
 							"operands=[" +
-								"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
-								"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+									"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+								"]}," +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+									"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+								"]}" +
 							"], inOrder=false, " +
 							"distances=[" +
 								"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}" +
 							"]" +
 						"}" +
-					"]}";
+					"]}" +
+				"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(prox6.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -328,36 +376,71 @@ public class CosmasTreeTest {
 		String mondsterne = 
 					"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}," +
 					"{@type=korap:token, wrap={@type=korap:term, key=Sterne, layer=orth, match=match:eq}}" ;
+		
+		String mondsterneClasses = 
+					"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+						"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
+					"]}," +
+					"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+						"{@type=korap:token, wrap={@type=korap:term, key=Sterne, layer=orth, match=match:eq}}" +
+					"]}";
 		String mondsterneSeq = 
 					"{@type=korap:group, operation=operation:sequence, operands=[" +
 						mondsterne +
 					"], inOrder=true, distances=[" +
 						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=2}, min=1, max=2}" +
 					"]}" ;
+		String mondsterneClassesSeq = 
+				"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
+					"{@type=korap:group, operation=operation:sequence, operands=[" +
+						mondsterneClasses +
+					"], inOrder=true, distances=[" +
+						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=2}, min=1, max=2}" +
+					"]}" +
+				"]}" ;
 		String mondsterneOv =
 					"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
 						mondsterne +
 					"]}";
+		String mondsterneClassesOv =
+				"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
+					mondsterneClasses +
+				"]}";
 		String mondsterneAll =
 					"{@type=korap:group, operation=operation:or, operands=[" +
-						mondsterneOv + "," + mondsterneSeq +
+						mondsterneOv + "," + mondsterneClassesSeq +
 					"]}";
-
+		String mondsterneAllClasses = 
+					"{@type=korap:group, operation=operation:or, operands=[" +
+						mondsterneClassesOv + "," + mondsterneClassesSeq +
+					"]}";
+		
+		
 		String prox6 = 
 			"{@type=korap:group, operation=operation:or, operands=[" +
 				"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
-					mondsterneAll + "," +
-					"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
-				"]}," +
-				"{@type=korap:group, operation=operation:sequence, " +
-					"operands=[" +
-						mondsterneAll + "," +
+					"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+						mondsterneAllClasses  + 
+					"]}," +
+					"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
 						"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
-					"], inOrder=true, " +
-					"distances=[" +
-						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}" +
-					"]" +
-				"}" +
+					"]}" +
+				"]}," +
+				"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
+					"{@type=korap:group, operation=operation:sequence, " +
+						"operands=[" +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
+								mondsterneAllClasses  + 
+							"]}," +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
+							"]}" +
+						"], inOrder=true, " +
+						"distances=[" +
+							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}" +
+						"]" +
+					"}" +
+				"]}" +
 			"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
@@ -632,32 +715,53 @@ public class CosmasTreeTest {
 		assertEquals(beg1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		
-		String dermannSeq = "{@type=korap:group, operation=operation:sequence," +
-								"operands = [" +
-									"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}," +
-									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
-								"], inOrder=false, distances=[" +
-									"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=3, max=5}, min=3, max=5}" +
-								"]}";
-		String begDermannSeq = "{@type=korap:reference, operation=operation:focus, spanRef=[0,1], operands=[" +
-								dermannSeq +
-							"]}";
+//		String dermannSeq = "{@type=korap:group, operation=operation:sequence," +
+//								"operands = [" +
+//									"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+//										"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}" +
+//									"]}," +
+//									"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+//										"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
+//									"]}" +
+//									
+//								"], inOrder=false, distances=[" +
+//									"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=3, max=5}, min=3, max=5}" +
+//								"]}";
+//		
+//		String begDermannSeq = 
+////							"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+//								"{@type=korap:reference, operation=operation:focus, spanRef=[0,1], operands=[" +
+//									dermannSeq +
+//								"]}" +
+////							"]}" +
+//							"";
+		
 		String kommt = "{@type=korap:token, wrap={@type=korap:term, key=kommt, layer=orth, match=match:eq}}";
 		
 		query="#BEG(der /w3:5 Mann) /+w10 kommt"; // nesting #BEG() in a distance group
 		String beg2 = 
-				"{@type=korap:group, operation=operation:or, operands=[" +
+					"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
-							begDermannSeq + "," +
-							kommt +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								beg1 +
+							"]}" + "," +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								kommt +
+							"]}" +
 						"]}," +
-						"{@type=korap:group, operation=operation:sequence, operands=[" +
-							begDermannSeq + "," +
-							kommt +
-						"], inOrder=true, distances=[" +
-							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=10}, min=1, max=10}" +
+						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
+							"{@type=korap:group, operation=operation:sequence, operands=[" +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									beg1 + 
+								"]}," +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									kommt +
+								"]}" +
+							"], inOrder=true, distances=[" +
+								"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=10}, min=1, max=10}" +
+							"]}" +
 						"]}" +
-				"]}";
+					"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(beg2.replaceAll(" ", ""), map.replaceAll(" ", ""));
@@ -666,16 +770,27 @@ public class CosmasTreeTest {
 		String beg3 = 
 				"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:group, operation=operation:position, frame=frame:overlaps, operands=[" +
-							kommt + "," +
-							begDermannSeq +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								kommt + 
+//							"," +
+							"]}," +
+							"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								beg1+
+							"]}" +
 						"]}," +
-						"{@type=korap:group, operation=operation:sequence, operands=[" +
-							kommt + "," +
-							begDermannSeq +
-						"], inOrder=true, distances=[" +
-							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=10}, min=1, max=10}" +
+						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
+							"{@type=korap:group, operation=operation:sequence, operands=[" +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									kommt +
+								"]}," +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									beg1+
+								"]}" +
+							"], inOrder=true, distances=[" +
+								"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=10}, min=1, max=10}" +
+							"]}" +
 						"]}" +
-				"]}";
+					"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(beg3.replaceAll(" ", ""), map.replaceAll(" ", ""));

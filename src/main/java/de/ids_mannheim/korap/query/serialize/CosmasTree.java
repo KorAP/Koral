@@ -12,6 +12,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,8 +51,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
      */
     int classCounter = 1;
     boolean negate = false;
-    int wrapFirstOpInClass = -1;
-    int wrapSecondOpInClass = -1;
+//    int wrapFirstOpInClass = -1;
+//    int wrapSecondOpInClass = -1;
+    
+    Table<Tree,Integer,Integer> operandWrap = HashBasedTable.create();
 
     /**
      * Keeps track of all visited nodes in a tree
@@ -442,11 +448,21 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                 }
             }
             group.put("inOrder", inOrder);
+            LinkedHashMap<String, Object> embeddedSequence = group;
+            
+            if (! (openNodeCats.get(1).equals("OPBEG") || openNodeCats.get(1).equals("OPEND") || openNodeCats.get(1).equals("OPALL") || openNodeCats.get(1).equals("OPNHIT"))) {
+//            	wrapFirstOpInClass = 0;
+//                wrapSecondOpInClass = 0;
+                wrapOperandInClass(node,1,0);
+                wrapOperandInClass(node,2,0);
+                group = wrapInReference(group, 0);
+            }
+            
             
 //            ArrayList<ArrayList<Object>> distributedOperands = new ArrayList<ArrayList<Object>>();
             LinkedHashMap<String,Object> sequence = null;
             if (putIntoOverlapDisjunction) {
-            	sequence = group;
+            	sequence = embeddedSequence;
             	group = makeGroup("or");
             	ArrayList<Object> disjOperands = (ArrayList<Object>) group.get("operands");
             	LinkedHashMap<String,Object> overlapsGroup = makePosition("overlaps");
@@ -456,7 +472,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             	sequence.put("operands", overlapsOperands);
             	if (invertedOperands) invertedOperandsLists.push(overlapsOperands);
             	disjOperands.add(overlapsGroup);
-            	disjOperands.add(sequence);
+            	disjOperands.add(wrapInReference(sequence, 0));
             	// Step II: decide where to put
             	putIntoSuperObject(group, 0);
             	objectStack.push(sequence);
@@ -464,7 +480,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             else {
             	// Step II: decide where to put
             	putIntoSuperObject(group, 0);
-            	objectStack.push(group);
+            	objectStack.push(embeddedSequence);
             }
             stackedObjects++;
             visited.add(node.getChild(0));
@@ -473,7 +489,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         // inlcusion or overlap
         if (nodeCat.equals("OPIN") || nodeCat.equals("OPOV")) {
             // Step I: create group
-        	wrapFirstOpInClass = classCounter;
+//        	wrapFirstOpInClass = classCounter;
+        	wrapOperandInClass(node,1,classCounter);
             LinkedHashMap<String, Object> posgroup = makePosition(null);
             if (nodeCat.equals("OPIN")) {
                 posgroup = parseOPINOptions(node, posgroup);
@@ -489,33 +506,48 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             putIntoSuperObject(submatchgroup, 1);
         }
 
-        // Wrap the first argument of an #IN operator in a class group
-        if (nodeCat.equals("ARG1"))  {
-    		if (wrapFirstOpInClass > -1) {        		
-        		// Step I: create group
-    			System.err.println("1st op: "+wrapFirstOpInClass);
-                LinkedHashMap<String, Object> classGroup = makeSpanClass(wrapFirstOpInClass);
-                objectStack.push(classGroup);
-                stackedObjects++;
-                // Step II: decide where to put
-                putIntoSuperObject(classGroup, 1);
-                wrapFirstOpInClass = -1;
-        	}
+        // Wrap the argument of an #IN operator in a class group
+        if (nodeCat.equals("ARG1") || nodeCat.equals("ARG2"))  {
+        	Tree parent = node.getParent();
+        	String child = getNodeCat(node.getChild(0));
+//        	if (child.equals("OPWF") | child.equals("OPLEM") | child.equals("OPELEM") | child.equals("OPMOPRH") | child.equals("OPLABEL")) {
+//        		if (wrapFirstOpInClass > -1) {        		
+        		if (operandWrap.containsRow(parent)) {
+            		// Step I: create group
+        			int argNr = nodeCat.equals("ARG1") ? 1 : 2;
+        			try {
+        				int cls = operandWrap.row(parent).get(argNr);
+            			System.err.println("1st op: "+cls);
+                        LinkedHashMap<String, Object> classGroup = makeSpanClass(cls);
+                        objectStack.push(classGroup);
+                        stackedObjects++;
+                        // Step II: decide where to put
+                        putIntoSuperObject(classGroup, 1);
+        			} catch (NullPointerException npe) {
+        				// do nothing, this just means the argument shall not be wrapped
+        				if (verbose) System.out.println("No class for argument "+argNr);
+        			}
+            	}
+//        	}
+//        	wrapFirstOpInClass = -1;
         }
 
-        // Wrap the 2nd argument of an #IN operator embedded in NHIT in a class group
-        if (nodeCat.equals("ARG2")) {
-        	if (wrapSecondOpInClass > -1) {
-        		System.err.println("2nd op: "+wrapSecondOpInClass);
-        		// Step I: create group
-                LinkedHashMap<String, Object> classGroup = makeSpanClass(wrapSecondOpInClass);
-                objectStack.push(classGroup);
-                stackedObjects++;
-                // Step II: decide where to put
-                putIntoSuperObject(classGroup, 1);
-                wrapSecondOpInClass = -1;
-        	}
-        }
+//        // Wrap the 2nd argument of an #IN operator embedded in NHIT in a class group
+//        if (nodeCat.equals("ARG2")) {
+//        	String child = getNodeCat(node.getChild(0));
+//        	if (child.equals("OPWF") | child.equals("OPLEM") | child.equals("OPELEM") | child.equals("OPMOPRH") | child.equals("OPLABEL")) {
+//	        	if (wrapSecondOpInClass > -1) {
+//	        		System.err.println("2nd op: "+wrapSecondOpInClass);
+//	        		// Step I: create group
+//	                LinkedHashMap<String, Object> classGroup = makeSpanClass(wrapSecondOpInClass);
+//	                objectStack.push(classGroup);
+//	                stackedObjects++;
+//	                // Step II: decide where to put
+//	                putIntoSuperObject(classGroup, 1);
+//	        	}
+//        	}
+//        	wrapSecondOpInClass = -1;
+//        }
 
 
         if (nodeCat.equals("OPNHIT")) {
@@ -527,8 +559,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             ArrayList<Object> operands = new ArrayList<Object>();
             exclGroup.put("operands", operands);
             System.err.println(classCounter);
-            wrapFirstOpInClass = classCounter++;
-            wrapSecondOpInClass = classCounter++;
+            wrapOperandInClass(node,1,classCounter++);
+            wrapOperandInClass(node,2,classCounter++);
+//            wrapFirstOpInClass = classCounter++;
+//            wrapSecondOpInClass = classCounter++;
             objectStack.push(exclGroup);
             stackedObjects++;
             putIntoSuperObject(exclGroup, 1);
@@ -678,7 +712,12 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         openNodeCats.pop();
     }
 
-    private void processSpanDistance(String meas, int parseInt, int parseInt2) {
+    private void wrapOperandInClass(Tree node, int arg, int cls) {
+		operandWrap.put(node, arg, cls);
+		
+	}
+
+	private void processSpanDistance(String meas, int parseInt, int parseInt2) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -736,7 +775,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         	outerFocus.put("operands", new ArrayList<Object>());
         	toWrapStack.push(new LinkedHashMap[]{posgroup, innerFocus, noMatchPosition, outerFocus});
         	stackedToWrap++;
-        	wrapSecondOpInClass = classCounter+1;
+//        	wrapSecondOpInClass = classCounter+1;
+        	wrapOperandInClass(node,2,classCounter+1);
         }
         
         if (posOption != null && (posOption.equals("F") || posOption.equals("FI")) && !negatePosition) {
@@ -748,8 +788,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         	outerFocus.put("operands", new ArrayList<Object>());
         	toWrapStack.push(new LinkedHashMap[]{posgroup, innerFocus, endsWithPosition, outerFocus});
         	stackedToWrap++;
-        	wrapFirstOpInClass = classCounter;
-        	wrapSecondOpInClass = ++classCounter;
+        	wrapOperandInClass(node,1,classCounter);
+        	wrapOperandInClass(node,2,++classCounter);
+//        	wrapFirstOpInClass = classCounter;
+//        	wrapSecondOpInClass = ++classCounter;
         }
         
         
@@ -818,8 +860,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         	
         	toWrapStack.push(toWrap);
         	stackedToWrap++;
-        	wrapFirstOpInClass = classCounter+1;
-        	wrapSecondOpInClass = classCounter;
+        	wrapOperandInClass(node,1,classCounter+1);
+        	wrapOperandInClass(node,2,classCounter);
+//        	wrapFirstOpInClass = classCounter+1;
+//        	wrapSecondOpInClass = classCounter;
         }
         
         if (groupnode != null) {
@@ -862,8 +906,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
     		toWrapStack.push(toWrap);
     		stackedToWrap++;
-    		wrapFirstOpInClass = classCounter+1;
-    		wrapSecondOpInClass = classCounter;
+//    		wrapOperandInClass(node,1,classCounter+1);
+//    		wrapOperandInClass(node,2,classCounter);
+//    		wrapFirstOpInClass = classCounter+1;
+//    		wrapSecondOpInClass = classCounter;
     	}
     	
     	return posgroup;
@@ -992,7 +1038,9 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //                "#BEG(der /w3:5 Mann) /+w10 kommt",
 //                "Sonne /s0 Mond"
 //                "Sonne /+w4 Mond",
-                "#BED(der Mann , sa,-pa)"
+//                "#BED(der Mann , sa,-pa)",
+                "kommt /+w10 #BEG(der /w3:5 Mann) ",
+//                "wegen #OV(F) <s>"
                 
         };
 		CosmasTree.verbose=true;

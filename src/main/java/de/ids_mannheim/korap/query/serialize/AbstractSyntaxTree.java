@@ -1,6 +1,7 @@
 package de.ids_mannheim.korap.query.serialize;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -138,6 +139,17 @@ public abstract class AbstractSyntaxTree {
 		group.put("@type", "korap:group");
 		group.put("operation", "operation:position");
 		group.put("frame", "frame:"+frame);
+		group.put("operands", new ArrayList<Object>());
+		return group;
+	}
+	
+	protected LinkedHashMap<String, Object> makePosition(String[] allowedPositions, String[] disallowedPositions, String[] sharedClasses) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:group");
+		group.put("operation", "operation:position");
+		group.put("allowed", Arrays.asList(allowedPositions));
+		group.put("disallowed", Arrays.asList(disallowedPositions));
+		group.put("sharedClasses", Arrays.asList(sharedClasses));
 		group.put("operands", new ArrayList<Object>());
 		return group;
 	}
