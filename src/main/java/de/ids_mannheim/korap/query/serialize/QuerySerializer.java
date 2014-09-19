@@ -99,9 +99,8 @@ public class QuerySerializer {
     public QuerySerializer setQuery(String query, String ql, String version)
             throws QueryException {
 
-        if (query.isEmpty())
+        if (query == null || query.isEmpty())
             throw new QueryException(406, "No Content!");
-
 
         try {
             if (ql.equalsIgnoreCase("poliqarp")) {
