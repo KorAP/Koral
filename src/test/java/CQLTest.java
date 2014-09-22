@@ -62,7 +62,7 @@ public class CQLTest {
 		}
 	}
 	
-	@Test
+/*	@Test
 	public void testAndQuery() throws CQLParseException, IOException, QueryException{
 		query="(Sonne) and (scheint)";	
 		String jsonLd = 
@@ -81,9 +81,9 @@ public class CQLTest {
 		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
-	}
+	}*/
 	
-	@Test
+/*	@Test
 	public void testBooleanQuery() throws CQLParseException, IOException, QueryException{		
 		query="((Sonne) or (Mond)) and (scheint)";		
 		String jsonLd = 
@@ -116,7 +116,7 @@ public class CQLTest {
 		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
-	}
+	}*/
 	
 	@Test
 	public void testOrQuery() throws CQLParseException, IOException, QueryException{
