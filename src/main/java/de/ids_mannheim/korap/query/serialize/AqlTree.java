@@ -550,6 +550,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		return relation;
 	}
 
+	@SuppressWarnings("unchecked")
 	private LinkedHashMap<String,Object> parseEdgeSpec(ParseTree edgeSpec) {
 		List<ParseTree> annos = getChildrenWithCat(edgeSpec, "edgeAnno");
 		if (annos.size() == 1) return parseEdgeAnno(annos.get(0));

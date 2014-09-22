@@ -228,7 +228,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		}
 
 		if (nodeCat.equals("position")) {
-			LinkedHashMap<String,Object> position = makePosition(parseFrame(node.getChild(0)));
+			LinkedHashMap<String,Object> position = parseFrame(node.getChild(0));
 			putIntoSuperObject(position);
 			objectStack.push(position);
 			stackedObjects++;
@@ -425,8 +425,29 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		return new Integer[]{min,max};
 	}
 
-	private String parseFrame(ParseTree node) {
-		return node.toStringTree(parser);
+	private LinkedHashMap<String,Object> parseFrame(ParseTree node) {
+		String operator = node.toStringTree(parser);
+		String[] frames = new String[]{""};
+		String[] sharedClasses = new String[]{"includes"};
+		switch (operator) {
+			case "contains":
+				frames = new String[]{};
+				break;
+			case "matches":
+				frames = new String[]{"matches"};
+				break;
+			case "startswith":
+				frames = new String[]{"startswith"};
+				break;
+			case "endswith":
+				frames = new String[]{"endswith"};
+				break;	
+			case "overlaps":
+				frames = new String[]{"overlapsLeft","overlapsRight"};
+				sharedClasses = new String[]{"intersects"};
+				break;
+		}
+		return makePosition(frames,sharedClasses);
 	}
 
 
@@ -668,12 +689,13 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 //				"[base=geht][base=der][]*[base=Mann]",
 //				"<cnx/c=vp (class=header&id=7)>",
 //				"<cnx/c=vp class=header&id=a>",
-				"[][]*[base=Mann]",
-				"focus(2&3|4:contains({2:<s>},[base=mann]))",
-				"relatesTo(cnx/c:<s>,<np>)",
-				"dominates(cnx/c*:<np>,[base=Baum])",
-				"submatch(2:<np>{2:<s>})",
-				"focus(3:{1:[orth=der]}{3:[]}{2:[orth=Mann]})"
+//				"[][]*[base=Mann]",
+//				"focus(2&3|4:contains({2:<s>},[base=mann]))",
+//				"relatesTo(cnx/c:<s>,<np>)",
+//				"dominates(cnx/c*:<np>,[base=Baum])",
+//				"submatch(2:<np>{2:<s>})",
+//				"focus(3:{1:[orth=der]}{3:[]}{2:[orth=Mann]})",
+				"[base=geht][base=der][]*contains(<s>,<np>)"
 		};
 //		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {

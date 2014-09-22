@@ -409,8 +409,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             
             boolean putIntoOverlapDisjunction = false;
 
-            ArrayList<Object> sequenceOperands = (ArrayList<Object>) group.get("operands");
-
             // possibly several distance constraints
             for (int i = 0; i < dist_list.getChildCount(); i++) {
                 String direction = dist_list.getChild(i).getChild(0).getChild(0).toStringTree().toLowerCase();
@@ -461,7 +459,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             	sequence = embeddedSequence;
             	group = makeGroup("or");
             	ArrayList<Object> disjOperands = (ArrayList<Object>) group.get("operands");
-            	LinkedHashMap<String,Object> overlapsGroup = makePosition("overlaps");
+            	String[] sharedClasses = new String[]{"intersects"};
+            	LinkedHashMap<String,Object> overlapsGroup = makePosition(new String[0], sharedClasses);
             	
             	ArrayList<Object> overlapsOperands = (ArrayList<Object>) overlapsGroup.get("operands");
             	// this ensures identity of the operands lists and thereby a distribution of the operands for both created objects 
@@ -577,7 +576,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                 CosmasCondition c = new CosmasCondition(conditions.getChild(0));
 
                 // create the group expressing the position constraint
-                LinkedHashMap<String, Object> posgroup = makePosition(c.position);
+                String[] frames = new String[]{c.position};
+                String[] sharedClasses = new String[]{"includes"};  // OPBED only defines #IN-corresponding positions
+            	LinkedHashMap<String,Object> posgroup = makePosition(frames, sharedClasses);
+//                LinkedHashMap<String, Object> posgroup = makePosition(c.position);
                 ArrayList<Object> operands = (ArrayList<Object>) posgroup.get("operands");
                 if (c.negated) posgroup.put("exclude", true);
 
@@ -612,7 +614,9 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                     // for each condition, create a position group containing a class group.
                     // make position group
                     CosmasCondition c = new CosmasCondition(conditions.getChild(i));
-                    LinkedHashMap<String, Object> posGroup = makePosition(c.position);
+                    String[] frames = new String[]{c.position};
+                    String[] sharedClasses = new String[]{"includes"};  // OPBED only defines #IN-corresponding positions
+                	LinkedHashMap<String,Object> posGroup = makePosition(frames, sharedClasses);
                     operands.add(posGroup);
                     if (c.negated) posGroup.put("exclude", "true");
                     ArrayList<Object> posOperands = new ArrayList<Object>();
