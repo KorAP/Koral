@@ -134,6 +134,7 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
+	@Deprecated
 	protected LinkedHashMap<String, Object> makePosition(String frame) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:group");
@@ -143,12 +144,11 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
-	protected LinkedHashMap<String, Object> makePosition(String[] allowedPositions, String[] disallowedPositions, String[] sharedClasses) {
+	protected LinkedHashMap<String, Object> makePosition(String[] allowedFrames, String[] sharedClasses) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:group");
 		group.put("operation", "operation:position");
-		group.put("allowed", Arrays.asList(allowedPositions));
-		group.put("disallowed", Arrays.asList(disallowedPositions));
+		group.put("frames", Arrays.asList(allowedFrames));
 		group.put("sharedClasses", Arrays.asList(sharedClasses));
 		group.put("operands", new ArrayList<Object>());
 		return group;
@@ -224,6 +224,15 @@ public abstract class AbstractSyntaxTree {
 		ArrayList<Integer> classRefs = new ArrayList<Integer>();
 		classRefs.add(classRef);
 		return makeReference(classRefs, "focus");
+	}
+	
+	protected LinkedHashMap<String, Object> makeResetReference() {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:reference");
+		group.put("operation", "operation:focus");
+		group.put("reset", true);
+		group.put("operands", new ArrayList<Object>());
+		return group;
 	}
 	
 	protected void addOperandsToGroup(LinkedHashMap<String, Object> group) {

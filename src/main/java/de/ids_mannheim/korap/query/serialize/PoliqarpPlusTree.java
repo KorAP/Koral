@@ -672,7 +672,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				"focus(2&3|4:contains({2:<s>},[base=mann]))",
 				"relatesTo(cnx/c:<s>,<np>)",
 				"dominates(cnx/c*:<np>,[base=Baum])",
-				"submatch(2:<np>{2:<s>})"
+				"submatch(2:<np>{2:<s>})",
+				"focus(3:{1:[orth=der]}{3:[]}{2:[orth=Mann]})"
 		};
 //		PoliqarpPlusTree.verbose=true;
 		for (String q : queries) {
