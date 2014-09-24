@@ -698,19 +698,20 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[] {
-				"cat=\"NP\" & cat=\"VP\" & #1 $ #2 ",
-				"Haus",
-				"lemma=\"Haus\"",
-				"Katze=\"Hund\"",
-				"cnx/c=\"NP\"",
-				"cat=\"NP\"",
-				"node & node & #1 .+ #2",
-				" #1 > #2 & cnx/cat=\"VP\" & cnx/cat=\"NP\"",
-				"\"Mann\" & node & #2 >[cat=\"NP\"] #1",
-				"node & node & #2 ->coref[val=\"true\"] #1",
-				"cat=\"NP\" & cat=\"VP\" & cat=\"PP\" & #1 $ #2 > #3",
-				"tok=\"Mann\" & tok=\"geht\" & #1 .* #2",
-				"\"Sonne\""
+//				"cat=\"NP\" & cat=\"VP\" & #1 $ #2 ",
+//				"Haus",
+//				"lemma=\"Haus\"",
+//				"Katze=\"Hund\"",
+//				"cnx/c=\"NP\"",
+//				"cat=\"NP\"",
+//				"node & node & #1 .+ #2",
+//				" #1 > #2 & cnx/cat=\"VP\" & cnx/cat=\"NP\"",
+//				"\"Mann\" & node & #2 >[cat=\"NP\"] #1",
+//				"node & node & #2 ->coref[val=\"true\"] #1",
+//				"cat=\"NP\" & cat=\"VP\" & cat=\"PP\" & #1 $ #2 > #3",
+//				"tok=\"Mann\" & tok=\"geht\" & #1 .* #2",
+//				"\"Sonne\"",
+				"\"so\" & \"nicht\" & #1 .1,6 #2"
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {

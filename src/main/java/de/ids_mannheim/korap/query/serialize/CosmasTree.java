@@ -51,9 +51,12 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
      */
     int classCounter = 1;
     boolean negate = false;
-//    int wrapFirstOpInClass = -1;
-//    int wrapSecondOpInClass = -1;
-    
+
+    /**
+     * Allows for the definition of objects to be wrapped around the arguments of an operation.
+     * Each record in the table holds the parent node of the argument, the number of the argument 
+     * and an object in whose operands list the argument shall be wrapped.
+     */
     Table<Tree,Integer,LinkedHashMap<String,Object>> operandWrap = HashBasedTable.create();
 
     /**
@@ -685,19 +688,33 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         openNodeCats.pop();
     }
 
+    private void processSpanDistance(String meas, int min, int max) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+     * Registers an entry in the {@link #operandWrap} table in order to allow an operator's arguments
+     * (or only one of them) to be wrapped in a class group.
+     * @param node The operator node (parent node of the ARG1/ARG2 node)
+     * @param arg The argument number (1 or 2)
+     * @param cls The class id.
+     */
     private void wrapOperandInClass(Tree node, int arg, int cls) {
     	LinkedHashMap<String,Object> clsGroup = makeSpanClass(cls);
 		wrapOperand(node,arg,clsGroup);
 	}
 
+    /**
+     * Registers an entry in the {@link #operandWrap} table in order to allow an operator's arguments
+     * (or only one of them) to be wrapped in an arbitrary object, e.g. a reference group.
+     * @param node The operator node (parent node of the ARG1/ARG2 node)
+     * @param arg The argument number (1 or 2)
+     * @param container The object in whose operand list the argument shall be wrapped.
+     */
     private void wrapOperand(Tree node, int arg, LinkedHashMap<String, Object> container) {
     	operandWrap.put(node, arg, container);
   	}
-    
-	private void processSpanDistance(String meas, int parseInt, int parseInt2) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	private Object translateMorph(String layer) {
         // todo: not very nicely solved! Does this require extension somehow? if not, why not use simple string comparison?!
@@ -769,8 +786,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         if (rangenode != null) {
             String range = rangenode.getChild(0).toStringTree().toLowerCase();
             if (range.equals("all")) {
-//            	wrapOperandInClass(node,2,classCounter);
-            	LinkedHashMap<String,Object> ref = makeResetReference();
+            	LinkedHashMap<String,Object> ref = makeResetReference(); // reset all defined classes
             	wrapOperand(node,2,ref);
             }
         }
@@ -1039,11 +1055,11 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //                "Sonne /+w4 Mond",
 //                "#BED(der Mann , sa,-pa)",
 //        		"Sonne /+w1:4 Mond /-w1:7 Sterne",
-        		"wegen #IN('FE,ALL,%,MIN') <s>",
-        		"#NHIT(gehen /w1:10 voran)"
-        		
+//        		"wegen #IN('FE,ALL,%,MIN') <s>",
+//        		"#NHIT(gehen /w1:10 voran)"
+//        		"MORPH(V PRES IND)",
 //                "wegen #OV(F) <s>"
-                
+        		"Sonne /s0 Mond"
         };
 		CosmasTree.verbose=true;
         for (String q : queries) {

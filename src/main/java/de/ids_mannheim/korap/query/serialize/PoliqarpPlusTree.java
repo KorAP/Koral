@@ -32,7 +32,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 */
 	public PoliqarpPlusTree(String query) throws QueryException {
 		process(query);
-		System.out.println(">>> " + requestMap.get("query") + " <<<");
+		System.out.println(">>> " + requestMap + " <<<");
 		log.info(">>> " + requestMap.get("query") + " <<<");
 	}
 
@@ -90,7 +90,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				quantGroup.put("boundary", makeBoundary(minmax[0], minmax[1]));
 				if (minmax[0] != null) quantGroup.put("min", minmax[0]);
 				if (minmax[1] != null) quantGroup.put("max", minmax[1]);
-				announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
+				announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be " +
+						"supported until 3 months from deprecation date.");
 				putIntoSuperObject(quantGroup);
 				objectStack.push(quantGroup);
 				stackedObjects++;
@@ -107,16 +108,20 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				ArrayList<Object> distances = new ArrayList<Object>();
 				distances.add(distance);
 				sequence.put("distances", distances);
-				visited.add(distanceNode.getChild(0));
+				visited.add(distanceNode.getChild(0)); // don't re-visit the emptyTokenSequence node
 			}
 			putIntoSuperObject(sequence);
 			objectStack.push(sequence);
 			stackedObjects++;
 		}
 		
+		/*
+		 * empty tokens at beginning/end of sequence
+		 */
 		if (nodeCat.equals("emptyTokenSequence")) {
 			Integer[] minmax = parseEmptySegments(node);
-			LinkedHashMap<String,Object> object;
+			// object will be either a repetition group or a single empty token
+			LinkedHashMap<String,Object> object; 
 			LinkedHashMap<String,Object> emptyToken = makeToken();
 			if (minmax[0] != 1 || minmax[1] == null || minmax[1] != 1) {
 				object = makeRepetition(minmax[0], minmax[1]);
@@ -153,7 +158,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				term.put("match", "match:"+matches);
 				ParseTree flagNode = getFirstChildWithCat(node, "flag");
 				if (flagNode != null) {
-					String flag = getNodeCat(flagNode.getChild(0)).substring(1); //substring removes leading slash '/'
+					// substring removes leading slash '/'
+					String flag = getNodeCat(flagNode.getChild(0)).substring(1);
 					if (flag.contains("i")) term.put("caseInsensitive", true);
 					else if (flag.contains("I")) term.put("caseInsensitive", false);
 					if (flag.contains("x")) {
@@ -167,7 +173,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				token.put("wrap", term);
 			} else {
 				// child is 'term' or 'termGroup' -> process in extra method 
-				LinkedHashMap<String,Object> termOrTermGroup = parseTermOrTermGroup(node.getChild(1), negated);
+				LinkedHashMap<String,Object> termOrTermGroup = 
+						parseTermOrTermGroup(node.getChild(1), negated);
 				token.put("wrap", termOrTermGroup);
 			}
 			putIntoSuperObject(token);
@@ -208,11 +215,13 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				else if (termOp.equals("!=")) span.put("match", "match:ne");
 			}
 			if (termNode != null) {
-				LinkedHashMap<String,Object> termOrTermGroup = parseTermOrTermGroup(termNode, negated, "span");
+				LinkedHashMap<String,Object> termOrTermGroup = 
+						parseTermOrTermGroup(termNode, negated, "span");
 				span.put("attr", termOrTermGroup);
 			}
 			if (termGroupNode != null) {
-				LinkedHashMap<String,Object> termOrTermGroup = parseTermOrTermGroup(termGroupNode, negated, "span");
+				LinkedHashMap<String,Object> termOrTermGroup = 
+						parseTermOrTermGroup(termGroupNode, negated, "span");
 				span.put("attr", termOrTermGroup);
 			}
 			putIntoSuperObject(span);
@@ -268,8 +277,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				try {
 					classId = Integer.parseInt(ref);
 				} catch (NumberFormatException e) {
-					log.error("The specified class reference in the focus/split-Operator is not a number: " + ref);
-					throw new QueryException("The specified class reference in the focus/split-Operator is not a number: " + ref);
+					String msg = "The specified class reference in the " +
+							"focus/split-Operator is not a number: " + ref;
+					log.error(msg);
+					throw new QueryException(msg);
 				}
 				// only allow class id up to 255
 				if (classId > 255) {
@@ -297,7 +308,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 							int classRef = Integer.parseInt(ref);
 							classRefs.add(classRef);
 						} catch (NumberFormatException e) {
-							String err = "The specified class reference in the shrink/split-Operator is not a number.";
+							String err = "The specified class reference in the " +
+									"shrink/split-Operator is not a number.";
 							errorMsgs.add(err);
 							throw new QueryException(err);
 						}
@@ -312,8 +324,9 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			// Default is focus(), if deviating catch here
 			if (type.equals("split")) referenceGroup.put("operation", "operation:split");
 			if (type.equals("submatch") || type.equals("shrink")) {
-				String warning = "Deprecated 2014-07-24: "+type + "() as a match reducer to a specific class is deprecated in " +
-						"favor of focus() and will only be supported for 3 months after deprecation date.";
+				String warning = "Deprecated 2014-07-24: "+type + "() as a match reducer " +
+						"to a specific class is deprecated in favor of focus() and will " +
+						"only be supported for 3 months after deprecation date.";
 				log.warn(warning);
 				requestMap.put("warning", warning);
 			}
@@ -355,7 +368,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		if (nodeCat.equals("within") && !getNodeCat(node.getParent()).equals("position")) {
 			ParseTree domainNode = node.getChild(2);
 			String domain = getNodeCat(domainNode);
-			LinkedHashMap<String, Object> curObject = (LinkedHashMap<String, Object>) objectStack.getFirst();
+			LinkedHashMap<String, Object> curObject = 
+					(LinkedHashMap<String, Object>) objectStack.getFirst();
 			curObject.put("within", domain);
 			visited.add(node.getChild(0));
 			visited.add(node.getChild(1));
@@ -426,7 +440,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	}
 
 	private LinkedHashMap<String,Object> parseFrame(ParseTree node) {
-		String operator = node.toStringTree(parser);
+		String operator = node.toStringTree(parser).toLowerCase();
 		String[] frames = new String[]{""};
 		String[] sharedClasses = new String[]{"includes"};
 		switch (operator) {
@@ -615,21 +629,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		return new Integer[]{min, max};
 	}
 
-	/**
-	 * Ensures that a distance or quantification value does not exceed the allowed maximum value. 
-	 * @param number
-	 * @return The input number if it is below the allowed maximum value, else the maximum value. 
-	 */
-	private int cropToMaxValue(int number) {
-		if (number > MAXIMUM_DISTANCE) {
-			number = MAXIMUM_DISTANCE; 
-			String warning = String.format("You specified a distance between two segments that is greater than " +
-					"the allowed max value of %d. Your query will be re-interpreted using a distance of %d.", MAXIMUM_DISTANCE, MAXIMUM_DISTANCE);
-			warnings.add(warning);
-			log.warn("User warning: "+warning);
-		}
-		return number;
-	}
 
 	private ParserRuleContext parsePoliqarpQuery(String p) throws QueryException {
 		checkUnbalancedPars(p);
@@ -664,51 +663,5 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		}
 		// Return the generated tree
 		return tree;
-	}
-
-	public static void main(String[] args) {
-		/*
-		 * For testing
-		 */
-		String[] queries = new String[]{
-//				"[base=foo][base=foo]",
-//				"Der \"Baum\"/x",
-//				"contains(<vp>,[][base=foo])",
-//				"[hallo=welt]*",
-//				"schland/x",
-//				"focus([orth=Der]{[orth=Mann]})",
-//				"shrink([orth=Der]{[orth=Mann]})",
-//				"[mate/m=number:sg]",
-//				"z.B./x",
-//				"\".*?Mann.\"",
-//				"\".*?Mann.*?\"",
-//				"[orth=\".*?l(au|ie)fen.*?*\"]",
-//				"[orth=Mann][][orth=Mann]",
-//				"startswith(<s>, [][base=Mann])",
-//				"[base=der][]{1,102}[base=Mann]",
-//				"[base=geht][base=der][]*[base=Mann]",
-//				"<cnx/c=vp (class=header&id=7)>",
-//				"<cnx/c=vp class=header&id=a>",
-//				"[][]*[base=Mann]",
-//				"focus(2&3|4:contains({2:<s>},[base=mann]))",
-//				"relatesTo(cnx/c:<s>,<np>)",
-//				"dominates(cnx/c*:<np>,[base=Baum])",
-//				"submatch(2:<np>{2:<s>})",
-//				"focus(3:{1:[orth=der]}{3:[]}{2:[orth=Mann]})",
-				"[base=geht][base=der][]*contains(<s>,<np>)"
-		};
-//		PoliqarpPlusTree.verbose=true;
-		for (String q : queries) {
-			try {
-				System.out.println(q);
-				@SuppressWarnings("unused")
-				PoliqarpPlusTree pt = new PoliqarpPlusTree(q);
-				System.out.println();
-
-			} catch (Exception npe) {
-				npe.printStackTrace();
-				System.out.println("null\n");
-			}
-		}
 	}
 }

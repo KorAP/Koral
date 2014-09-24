@@ -151,6 +151,40 @@ public abstract class AbstractSyntaxTree {
 		group.put("frames", Arrays.asList(allowedFrames));
 		group.put("sharedClasses", Arrays.asList(sharedClasses));
 		group.put("operands", new ArrayList<Object>());
+		// DEPRECATED 'frame'
+		String frame = "";
+		if (allowedFrames.length==0 && sharedClasses[0]=="includes") {
+			frame = "contains";
+		} else if (allowedFrames.length==0 && sharedClasses[0]=="intersects") {
+			frame = "overlaps";
+		} else if (allowedFrames[0]=="startswith" && sharedClasses[0]=="includes") {
+			frame = "startswith";
+		} else if (allowedFrames[0]=="endswith" && sharedClasses[0]=="includes") {
+			frame = "endswith";
+		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="includes" && sharedClasses.length==1) {
+			frame = "endswith";
+		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="includes" && sharedClasses[1]=="unequals") {
+			frame = "matches";
+		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="equals") {
+			frame = "matches";			
+		} else if (allowedFrames[0]=="contains" && sharedClasses[0]=="includes") {
+			frame = "contains";
+		} else if (allowedFrames[0]=="startswith" && sharedClasses[0]=="intersects") {
+			frame = "overlapsLeft";
+		} else if (allowedFrames[0]=="endswith" && sharedClasses[0]=="intersects") {
+			frame = "overlapsRight";
+		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="intersects") {
+			frame = "matches";
+		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="unequals") {
+			frame = "matches";
+		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="equals") {
+			frame = "matches";
+		} else if (allowedFrames[0]=="contains" && sharedClasses[0]=="intersects") {
+			frame = "contains";
+		}
+		group.put("frame", frame);
+		announcements.add("Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
+				"Position frames are now expressed through 'frames' and 'sharedClasses'");
 		return group;
 	}
 	
@@ -253,6 +287,22 @@ public abstract class AbstractSyntaxTree {
 		LinkedHashMap<String, Object> classGroup = makeSpanClass(classId);
 		((ArrayList<Object>) classGroup.get("operands")).add(group);
 		return classGroup;
+	}
+	
+	/**
+	 * Ensures that a distance or quantification value does not exceed the allowed maximum value. 
+	 * @param number
+	 * @return The input number if it is below the allowed maximum value, else the maximum value. 
+	 */
+	protected int cropToMaxValue(int number) {
+		if (number > MAXIMUM_DISTANCE) {
+			number = MAXIMUM_DISTANCE; 
+			String warning = String.format("You specified a distance between two segments that is greater than " +
+					"the allowed max value of %d. Your query will be re-interpreted using a distance of %d.", MAXIMUM_DISTANCE, MAXIMUM_DISTANCE);
+			warnings.add(warning);
+			log.warn("User warning: "+warning);
+		}
+		return number;
 	}
 	
     /**

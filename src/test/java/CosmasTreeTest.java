@@ -285,7 +285,7 @@ public class CosmasTreeTest {
 							"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
 								"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
 							"]}" +
-						"]}," +
+						"], frame=overlaps}," +
 						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:sequence, " +
 								"operands=[" +
@@ -316,7 +316,7 @@ public class CosmasTreeTest {
 						"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
 							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
 						"]}" +
-					"]}," +
+					"], frame=overlaps}," +
 					"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 						"{@type=korap:group, operation=operation:sequence, " +
 							"operands=[" +
@@ -347,7 +347,7 @@ public class CosmasTreeTest {
 						"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
 							"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
 						"]}" +
-					"]}," +
+					"], frame=overlaps}," +
 					"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 						"{@type=korap:group, operation=operation:sequence, " +
 							"operands=[" +
@@ -441,7 +441,7 @@ public class CosmasTreeTest {
 		String mondsterneClassesOv =
 				"{@type=korap:group, operation=operation:position, frames=[], sharedClasses=[intersects], operands=[" +
 					mondsterneClasses +
-				"]}";
+				"], frame=overlaps}";
 //		String mondsterneAll =
 //					"{@type=korap:group, operation=operation:or, operands=[" +
 //						mondsterneOv + "," + mondsterneClassesSeq +
@@ -461,7 +461,7 @@ public class CosmasTreeTest {
 					"{@type=korap:group, operation=operation:class, class=0, operands=[" +	
 						"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}" +
 					"]}" +
-				"]}," +
+				"], frame=overlaps}," +
 				"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 					"{@type=korap:group, operation=operation:sequence, " +
 						"operands=[" +
@@ -734,7 +734,7 @@ public class CosmasTreeTest {
 							"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 								kommt +
 							"]}" +
-						"]}," +
+						"], frame=overlaps}," +
 						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
@@ -763,7 +763,7 @@ public class CosmasTreeTest {
 							"{@type=korap:group, operation=operation:class, class=0, operands=[" +
 								beg1+
 							"]}" +
-						"]}," +
+						"], frame=overlaps}," +
 						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
@@ -1026,7 +1026,7 @@ public class CosmasTreeTest {
 						"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, key=der, layer=orth, match=match:eq}}" +
 						"]}" +
-					"]}" +
+					"], frame=startswith}" +
 				"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
@@ -1043,7 +1043,7 @@ public class CosmasTreeTest {
 									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
 								"]}" +
 							"]}" +
-						"]}" +
+						"], frame=endswith}" +
 					"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
@@ -1061,7 +1061,7 @@ public class CosmasTreeTest {
 									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
 								"]}" +
 							"]}" +
-						"]}," +
+						"], frame=startswith}," +
 						"{@type=korap:group, operation=operation:position, frames=[startswith], sharedClasses=[includes], operands=[" +
 							"{@type=korap:span, key=p}," +
 							"{@type=korap:group, operation=operation:class, class=2, operands=[" +
@@ -1070,7 +1070,7 @@ public class CosmasTreeTest {
 									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
 								"]}" +
 							"]}" +
-						"], exclude=true}" +
+						"], frame=startswith, exclude=true}" +
 					"], distances=[" +
 						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=0}, min=0, max=0}" +
 					"]}" +
@@ -1091,7 +1091,7 @@ public class CosmasTreeTest {
 						"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, key=Der, layer=orth, match=match:eq}}" +
 						"]}" +
-					"]}" +
+					"], frame=startswith}" +
 				"]}";
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
@@ -1106,19 +1106,19 @@ public class CosmasTreeTest {
 							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
 							"]}" +
-						"]}," +
+						"], frame=startswith}," +
 						"{@type=korap:group, operation=operation:position, frames=[startswith], sharedClasses=[includes], operands=[" +
 							"{@type=korap:span, key=p}," +
 							"{@type=korap:group, operation=operation:class, class=2, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
 							"]}" +
-						"], exclude=true}," +
+						"], frame=startswith, exclude=true}," +
 						"{@type=korap:group, operation=operation:position, frames=[endswith], sharedClasses=[includes], operands=[" +
 							"{@type=korap:span, key=t}," +
 							"{@type=korap:group, operation=operation:class, class=3, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, key=Mann, layer=orth, match=match:eq}}" +
-						"]}" +
-					"]}" +
+							"]}" +
+						"], frame=endswith}" +
 					"], distances=[" +
 						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=0}, min=0, max=0}" +
 					"]}" +
