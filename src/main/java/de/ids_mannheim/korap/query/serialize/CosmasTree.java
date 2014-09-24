@@ -329,16 +329,12 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                                 term.put("match", "match:" + match);
                                 if (node.getChildCount() == elname + 1) {
                                     termGroupOperands.add(term);
-                                    System.err.println("taga");
                                 } else {
                                     subTermGroupOperands.add(term);
-                                    System.err.println(layer);
                                 }
                             }
                             if (node.getChildCount() > elname + 1) {
-                                System.err.println(termGroupOperands);
                                 termGroupOperands.add(subTermGroup);
-                                System.err.println(termGroupOperands);
                             }
                         }
                         if (getNodeCat(attrNode).equals("NOTEQ")) negate = true;
@@ -425,10 +421,15 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                 int max = Integer.parseInt(maxStr);
                 // If zero word-distance, wrap this sequence in a disjunction along with an overlap position
                 // between the two operands
+     /*   
+     	XXX: This is currently deactivated. Uncomment to activate treatment of zero-word distances as overlap-alternatives
+     			(see google doc on special distances serialization)
+     	
                 if (meas.equals("w") && min == 0) {
                 	min = 1;
                 	putIntoOverlapDisjunction = true;
                 }
+     */
                 if (!meas.equals("w") && min == 0 ) {
                 	processSpanDistance(meas,min,max);
                 }
@@ -468,7 +469,9 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             	ArrayList<Object> overlapsOperands = (ArrayList<Object>) overlapsGroup.get("operands");
             	// this ensures identity of the operands lists and thereby a distribution of the operands for both created objects 
             	sequence.put("operands", overlapsOperands);
-            	if (invertedOperands) invertedOperandsLists.push(overlapsOperands);
+            	if (invertedOperands) {
+                    invertedOperandsLists.push(overlapsOperands);
+            	}
             	disjOperands.add(overlapsGroup);
             	disjOperands.add(wrapInReference(sequence, 0));
             	// Step II: decide where to put
@@ -476,6 +479,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             	objectStack.push(sequence);
             }
             else {
+            	if (invertedOperands) {
+            		ArrayList<Object> operands = (ArrayList<Object>) embeddedSequence.get("operands");
+                    invertedOperandsLists.push(operands);
+            	}
             	// Step II: decide where to put
             	putIntoSuperObject(group, 0);
             	objectStack.push(embeddedSequence);
@@ -508,7 +515,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         // Wrap the argument of an #IN operator in a previously defined container
         if (nodeCat.equals("ARG1") || nodeCat.equals("ARG2"))  {
         	Tree parent = node.getParent();
-        	String child = getNodeCat(node.getChild(0));
+//        	String child = getNodeCat(node.getChild(0));
 //        	if (child.equals("OPWF") | child.equals("OPLEM") | child.equals("OPELEM") | child.equals("OPMOPRH") | child.equals("OPLABEL")) {
     		if (operandWrap.containsRow(parent)) {
         		// Step I: create group
@@ -689,8 +696,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
     }
 
     private void processSpanDistance(String meas, int min, int max) {
-		// TODO Auto-generated method stub
-		
+		// TODO Do stuff here in case we'll decide one day to treat span distances in a special way.
 	}
 
 	/**
@@ -978,6 +984,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
     		ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
     		if (!invertedOperandsLists.contains(topObjectOperands)) {
     			topObjectOperands.add(object);
+    			System.out.println(objectStack.get(objStackPosition));
     		} else {
     			topObjectOperands.add(0, object);
     		}
@@ -1059,7 +1066,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //        		"#NHIT(gehen /w1:10 voran)"
 //        		"MORPH(V PRES IND)",
 //                "wegen #OV(F) <s>"
-        		"Sonne /s0 Mond"
+//        		"Sonne /s0 Mond",
+        		"Sonne /+w1:4 Mond /-w1:7 Sterne"
         };
 		CosmasTree.verbose=true;
         for (String q : queries) {
