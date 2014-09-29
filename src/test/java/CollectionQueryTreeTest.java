@@ -41,7 +41,7 @@ public class CollectionQueryTreeTest {
 	public void testTwoConjuncts() throws QueryException {
 		query = "textClass=Sport & year=2014";
 		expected = 
-				"{@type=korap:group, operation=operation:and, operands=[" +
+				"{@type=korap:docGroup, operation=operation:and, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 					"{@type=korap:doc, key=year, value=2014, match=match:eq}" +
 				"]}";
@@ -55,9 +55,9 @@ public class CollectionQueryTreeTest {
 	public void testThreeConjuncts() throws QueryException {
 		query = "textClass=Sport & year=2014 & corpusID=WPD";
 		expected = 
-				"{@type=korap:group, operation=operation:and, operands=[" +
+				"{@type=korap:docGroup, operation=operation:and, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
-					"{@type=korap:group, operation=operation:and, operands=[" +
+					"{@type=korap:docGroup, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=year, value=2014, match=match:eq}," +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}" +
 					"]}" +
@@ -73,7 +73,7 @@ public class CollectionQueryTreeTest {
 	public void testTwoDisjuncts() throws QueryException {
 		query = "textClass=Sport | year=2014";
 		expected = 
-				"{@type=korap:group, operation=operation:or, operands=[" +
+				"{@type=korap:docGroup, operation=operation:or, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 					"{@type=korap:doc, key=year, value=2014, match=match:eq}" +
 				"]}";
@@ -87,9 +87,9 @@ public class CollectionQueryTreeTest {
 	public void testThreeDisjuncts() throws QueryException {
 		query = "textClass=Sport | year=2014 | corpusID=WPD";
 		expected = 
-				"{@type=korap:group, operation=operation:or, operands=[" +
+				"{@type=korap:docGroup, operation=operation:or, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
-					"{@type=korap:group, operation=operation:or, operands=[" +
+					"{@type=korap:docGroup, operation=operation:or, operands=[" +
 						"{@type=korap:doc, key=year, value=2014, match=match:eq}," +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}" +
 					"]}" +
@@ -106,8 +106,8 @@ public class CollectionQueryTreeTest {
 		query = "(textClass=Sport | textClass=ausland) & corpusID=WPD";
 		expected = 
 			
-				"{@type=korap:group, operation=operation:and, operands=[" +
-					"{@type=korap:group, operation=operation:or, operands=[" +
+				"{@type=korap:docGroup, operation=operation:and, operands=[" +
+					"{@type=korap:docGroup, operation=operation:or, operands=[" +
 						"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 						"{@type=korap:doc, key=textClass, value=ausland, match=match:eq}" +
 					"]}," +
@@ -121,8 +121,8 @@ public class CollectionQueryTreeTest {
 		query = "(textClass=Sport & textClass=ausland) & corpusID=WPD";
 		expected = 
 			
-				"{@type=korap:group, operation=operation:and, operands=[" +
-					"{@type=korap:group, operation=operation:and, operands=[" +
+				"{@type=korap:docGroup, operation=operation:and, operands=[" +
+					"{@type=korap:docGroup, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 						"{@type=korap:doc, key=textClass, value=ausland, match=match:eq}" +
 					"]}," +
@@ -136,12 +136,12 @@ public class CollectionQueryTreeTest {
 		query = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White)";
 		expected = 
 			
-				"{@type=korap:group, operation=operation:or, operands=[" +
-					"{@type=korap:group, operation=operation:and, operands=[" +
+				"{@type=korap:docGroup, operation=operation:or, operands=[" +
+					"{@type=korap:docGroup, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 						"{@type=korap:doc, key=textClass, value=ausland, match=match:eq}" +
 					"]}," +
-					"{@type=korap:group, operation=operation:and, operands=[" +
+					"{@type=korap:docGroup, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}," +
 						"{@type=korap:doc, key=author, value=White, match=match:eq}" +
 					"]}" +
@@ -153,14 +153,14 @@ public class CollectionQueryTreeTest {
 		
 		query = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White & year=2010)";
 		expected = 
-				"{@type=korap:group, operation=operation:or, operands=[" +
-					"{@type=korap:group, operation=operation:and, operands=[" +
+				"{@type=korap:docGroup, operation=operation:or, operands=[" +
+					"{@type=korap:docGroup, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 						"{@type=korap:doc, key=textClass, value=ausland, match=match:eq}" +
 					"]}," +
-					"{@type=korap:group, operation=operation:and, operands=[" +
+					"{@type=korap:docGroup, operation=operation:and, operands=[" +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}," +
-						"{@type=korap:group, operation=operation:and, operands=[" +
+						"{@type=korap:docGroup, operation=operation:and, operands=[" +
 							"{@type=korap:doc, key=author, value=White, match=match:eq}," +
 							"{@type=korap:doc, key=year, value=2010, match=match:eq}" +
 						"]}" +
@@ -177,7 +177,7 @@ public class CollectionQueryTreeTest {
 		// search for pubDate between 1990 and 2010!
 		query = "1990<pubDate<2010";
 		expected = 
-				"{@type=korap:group, operation=operation:and, operands=[" +
+				"{@type=korap:docGroup, operation=operation:and, operands=[" +
 					"{@type=korap:doc, key=pubDate, value=1990, match=match:gt}," +
 					"{@type=korap:doc, key=pubDate, value=2010, match=match:lt}" +
 				"]}";
@@ -250,7 +250,7 @@ public class CollectionQueryTreeTest {
 		
 		query = "[base=Schwalbe] & [orth=Foul]";
 		expected = 
-				"{@type=korap:group, operation=operation:and, operands=[" +
+				"{@type=korap:docGroup, operation=operation:and, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:eq}}," +
 						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Foul, match=match:eq}}" +
 					"]}";
@@ -264,7 +264,7 @@ public class CollectionQueryTreeTest {
 	public void testContentMetaMixed() throws QueryException {
 		query = "textClass=Sport & [base=Schwalbe]";
 		expected = 
-				"{@type=korap:group, operation=operation:and, operands=[" +
+				"{@type=korap:docGroup, operation=operation:and, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:eq}}" +
 				"]}";
@@ -275,7 +275,7 @@ public class CollectionQueryTreeTest {
 		
 		query = "[base=Schwalbe] & textClass=Sport";
 		expected = 
-				"{@type=korap:group, operation=operation:and, operands=[" +
+				"{@type=korap:docGroup, operation=operation:and, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:eq}}," +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}" +
 				"]}";

@@ -104,7 +104,7 @@ public abstract class AbstractSyntaxTree {
 	protected LinkedHashMap<String, Object> makeDocGroup(String relation) {
 		LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
 		term.put("@type", "korap:docGroup");
-		term.put("relation", "relation:"+relation);
+		term.put("operation", "operation:"+relation);
 		term.put("operands", new ArrayList<Object>());
 		return term;
 	}

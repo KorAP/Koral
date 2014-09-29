@@ -71,7 +71,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 
         if (nodeCat.equals("relation")) {
         	String operator = node.getChild(1).getChild(0).toStringTree(parser).equals("&") ? "and" : "or"; 
-            LinkedHashMap<String, Object> relationGroup = makeGroup(operator);
+            LinkedHashMap<String, Object> relationGroup = makeDocGroup(operator);
             putIntoSuperObject(relationGroup);
             objectStack.push(relationGroup);
             stackedObjects++;
@@ -98,7 +98,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
                 term.put("match", "match:" + interpretMatch(match));
                 putIntoSuperObject(term);
             } else { // (valueNodes.size()==2)
-                LinkedHashMap<String, Object> termGroup = makeGroup("and");
+                LinkedHashMap<String, Object> termGroup = makeDocGroup("and");
                 ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup.get("operands");
 
                 LinkedHashMap<String, Object> term1 = makeDoc();
