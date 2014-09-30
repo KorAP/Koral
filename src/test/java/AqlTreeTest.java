@@ -436,23 +436,44 @@ public class AqlTreeTest {
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(cp2.replaceAll(" ", ""), map.replaceAll(" ", ""));		
 	}
-	
+	/*
+	@Test
+	public void testMultipleOperatorsWithSameOperands() throws QueryException {
+		
+		query = "cat=\"NP\" > cat=\"VP\" & #1 _l_ #2";
+		String eq2 =
+				"{@type=korap:group, operation=operation:position, frames=[frame:startswith], sharedClasses=[sharedClasses:includes], operands=[" +
+						"{@type=korap:group, operation=operation:relation, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+								"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
+							"]}," +
+							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+								"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
+							"]}" +
+						"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}," +
+					"{@type=korap:reference, operation=operation:focus, classRef=[2]}" +
+				"]" +
+				"}"; // ???
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(eq2.replaceAll(" ", ""), map.replaceAll(" ", ""));		
+	}
+	*/
 	@Test
 	public void testPositions() throws QueryException {
 		query = "node & node & #2 _=_ #1";
 		String pos1 = 
-				"{@type=korap:group, operation=operation:position, operands=[" +
+				"{@type=korap:group, operation=operation:position, frames=[frame:matches], sharedClasses=[sharedClasses:equals], operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
-				"], frame=frame:matches" +
-				"}";
+				"], frame=frame:matches}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(pos1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "node & node & #2 _i_ #1";
 		String pos2 = 
-				"{@type=korap:group, operation=operation:position, operands=[" +
+				"{@type=korap:group, operation=operation:position, frames=[frame:contains], sharedClasses=[sharedClasses:includes], operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
 				"], frame=frame:contains" +
@@ -463,10 +484,10 @@ public class AqlTreeTest {
 		
 		query = "node & node & #2 _l_ #1";
 		String pos3 = 
-				"{@type=korap:group, operation=operation:position, operands=[" +
+				"{@type=korap:group, operation=operation:position, frames=[frame:startswith], sharedClasses=[sharedClasses:includes], operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:span}" +
-				"], inOrder=false, frame=frame:startswith" +
+				"], frame=frame:startswith" +
 				"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -474,10 +495,10 @@ public class AqlTreeTest {
 		
 		query = "node & \"Mann\" & #1 _r_ #2";
 		String pos4 = 
-					"{@type=korap:group, operation=operation:position, operands=[" +
+					"{@type=korap:group, operation=operation:position, frames=[frame:endswith], sharedClasses=[sharedClasses:includes], operands=[" +
 						"{@type=korap:span}," +
 						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
-						"], inOrder=false, frame=frame:endswith" +
+						"], frame=frame:endswith" +
 					"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -485,10 +506,10 @@ public class AqlTreeTest {
 		
 		query = "node & \"Mann\" & #2 _r_ #1";
 		String pos5 = 
-					"{@type=korap:group, operation=operation:position, operands=[" +
+					"{@type=korap:group, operation=operation:position, frames=[frame:endswith], sharedClasses=[sharedClasses:includes], operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}," +
 						"{@type=korap:span}" +
-						"], inOrder=false, frame=frame:endswith" +
+						"], frame=frame:endswith" +
 					"}";
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
@@ -688,6 +709,36 @@ public class AqlTreeTest {
 		aqlt = new AqlTree(query);
 		map = aqlt.getRequestMap().get("query").toString();
 		assertEquals(cp3.replaceAll(" ", ""), map.replaceAll(" ", ""));		
-	}
 		
+		query = "cat=\"NP\" & cat=\"VP\" & #1 $* #2";
+		String cp4 =
+				"{@type=korap:group, operation=operation:relation, operands=[" +
+						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
+							"{@type=korap:group, operation=operation:relation, operands=[" +
+								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									"{@type=korap:span}" +
+								"]}," +
+								"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
+							"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c},boundary={@type=korap:boundary,min=1}}}" +
+						"]}," +
+						"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
+					"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c},boundary={@type=korap:boundary,min=1}}}" +
+					"";
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(cp4.replaceAll(" ", ""), map.replaceAll(" ", ""));		
+	}
+	
+	/*		
+	@Test
+	public void testEqualNotequalValue() throws QueryException {
+		query = "cat=\"NP\" & cat=\"VP\" & #1 == #2";
+		String eq1 =
+				"{}"; // ???
+		aqlt = new AqlTree(query);
+		map = aqlt.getRequestMap().get("query").toString();
+		assertEquals(eq1.replaceAll(" ", ""), map.replaceAll(" ", ""));		
+	}
+	*/
+	
 }

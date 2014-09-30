@@ -236,8 +236,13 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				if (! operandOnlyNodeRefs.contains(variableCounter.toString())) {
 					putIntoSuperObject(object);
 				}
+				ParseTree parentsFirstChild = node.getParent().getChild(0);
+				if (getNodeCat(parentsFirstChild).endsWith("#")) {
+					variableReferences.put(getNodeCat(parentsFirstChild).replaceAll("#", ""), object);
+				}
 				variableReferences.put(variableCounter.toString(), object);
 				variableCounter++;
+				System.out.println(variableReferences);
 			}
 		}
 
@@ -331,7 +336,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				term.put("layer", "c");
 				relation.put("wrap", term);
 				// commonancestor is an indirect commonparent relation
-				if (reltype.equals("commonancestor")) relation.put("boundary", makeBoundary(1, MAXIMUM_DISTANCE));
+				if (reltype.equals("commonancestor")) relation.put("boundary", makeBoundary(1, null));
 				group.put("relation", relation);
 				innerGroup.put("relation", relation);
 				// Get operands list before possible re-assignment of 'group' (see following 'if')
@@ -367,15 +372,20 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				} catch (ClassCastException | NullPointerException n) {
 					groupType = "relation";
 				}
-				group = makeGroup(groupType);
 				if (groupType.equals("relation") || groupType.equals("treeRelation")) {
+					group = makeGroup(groupType);
 					LinkedHashMap<String, Object> relation = new LinkedHashMap<String, Object>();
 					putAllButGroupType(relation, operatorGroup);
 					System.err.println(relation);
 					group.put("relation", relation);
-				} else if (groupType.equals("sequence") || groupType.equals("position")) {
+				} else if (groupType.equals("sequence")) {
+					group = makeGroup(groupType);
+					putAllButGroupType(group, operatorGroup);
+				} else if (groupType.equals("position")) {
+					group = new LinkedHashMap<String,Object>();
 					putAllButGroupType(group, operatorGroup);
 				}
+					
 				// Get operands list before possible re-assignment of 'group' (see following 'if')
 				operands  = (ArrayList<Object>) group.get("operands");
 				// Wrap in reference object in case other relations are following
@@ -483,7 +493,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			LinkedHashMap<String,Object> term = makeTerm();
 			if (qName != null) term.putAll(parseQNameNode(qName));
 			if (edgeSpec != null) term.putAll(parseEdgeSpec(edgeSpec));
-			if (star != null) relation.put("boundary", makeBoundary(0, 100));
+			if (star != null) relation.put("boundary", makeBoundary(0, null));
 			if (rangeSpec != null) relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
 			relation.put("wrap", term);
 		}
@@ -504,39 +514,41 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			relation.put("inOrder", true);
 		}
 		else if (operator.equals("spanrelation")) {
-			relation = makeGroup("position");
-			relation.put("groupType", "position");
+//			relation = makeGroup("position");
+//			relation.put("groupType", "position");
 			String reltype = operatorNode.getChild(0).toStringTree(parser);
-			String frame = null;
-			boolean inOrder = true;
+			String[] frames = new String[]{};
+			String[] sharedClasses = new String[]{"sharedClasses:includes"};
 			switch (reltype) {
 			case "_=_":
-				frame = "matches"; break;
+				frames = new String[]{"frame:matches"}; 
+				sharedClasses = new String[]{"sharedClasses:equals"};
+				break;
 			case "_l_":
-				frame = "startswith"; 
-				inOrder = false;
+				frames = new String[]{"frame:startswith"};
 				break;
 			case "_r_":
-				frame = "endswith";
-				inOrder = false;
+				frames = new String[]{"frame:endswith"};
 				break;
 			case "_i_":
-				frame = "contains"; break;
+				frames = new String[]{"frame:contains"};break;
 			case "_o_":
-				frame = "overlaps"; 
-				inOrder = false;
+				frames = new String[]{"frame:overlapsLeft", "frame:overlapsRight"};
+				sharedClasses = new String[]{"sharedClasses:intersects"};
 				break;
 			case "_ol_":
-				frame = "overlapsLeft"; 
-				inOrder = false;
+				frames = new String[]{"frame:overlapsLeft"};
+				sharedClasses = new String[]{"sharedClasses:intersects"};
 				break;
 			case "_or_":
-				frame = "overlapsRight"; 
-				inOrder = false;
+				frames = new String[]{"frame:overlapsRight"};
+				sharedClasses = new String[]{"sharedClasses:intersects"};
 				break;
 			}
-			if (!inOrder) relation.put("inOrder", false);
-			relation.put("frame", "frame:"+frame);
+//			relation.put("frames", frames);
+//			relation.put("sharedClasses", sharedClasses);
+			relation = makePosition(frames, sharedClasses);
+			relation.put("groupType", "position");
 		}
 		else if (operator.equals("identity")) {
 			//TODO
@@ -711,7 +723,12 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 //				"cat=\"NP\" & cat=\"VP\" & cat=\"PP\" & #1 $ #2 > #3",
 //				"tok=\"Mann\" & tok=\"geht\" & #1 .* #2",
 //				"\"Sonne\"",
-				"\"so\" & \"nicht\" & #1 .1,6 #2"
+//				"\"so\" & ( \"nicht\" | \"doch\" ) & #1 .1,6 #2",
+//				
+//				"NP#cat=\"NP\" & PP1#cat=\"PP\" . PP2#cat=\"PP\" & #NP > #PP1 & #NP > #PP2 ",
+//				"cat=\"NP\" > cat=\"VP\" & #1 _l_ #2",
+//				"cat=\"NP\" > cat=\"VP\" & #1 . tok=\"foo\"",
+				"cat=\"NP\" & cat=\"VP\" & #1 > #2 & #1 _l_ #2",
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {
