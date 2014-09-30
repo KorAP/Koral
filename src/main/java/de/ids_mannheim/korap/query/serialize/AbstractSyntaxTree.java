@@ -153,34 +153,34 @@ public abstract class AbstractSyntaxTree {
 		group.put("operands", new ArrayList<Object>());
 		// DEPRECATED 'frame'
 		String frame = "";
-		if (allowedFrames.length==0 && sharedClasses[0]=="includes") {
-			frame = "contains";
-		} else if (allowedFrames.length==0 && sharedClasses[0]=="intersects") {
-			frame = "overlaps";
-		} else if (allowedFrames[0]=="startswith" && sharedClasses[0]=="includes") {
-			frame = "startswith";
-		} else if (allowedFrames[0]=="endswith" && sharedClasses[0]=="includes") {
-			frame = "endswith";
-		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="includes" && sharedClasses.length==1) {
-			frame = "endswith";
-		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="includes" && sharedClasses[1]=="unequals") {
-			frame = "matches";
-		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="equals") {
-			frame = "matches";			
-		} else if (allowedFrames[0]=="contains" && sharedClasses[0]=="includes") {
-			frame = "contains";
-		} else if (allowedFrames[0]=="startswith" && sharedClasses[0]=="intersects") {
-			frame = "overlapsLeft";
-		} else if (allowedFrames[0]=="endswith" && sharedClasses[0]=="intersects") {
-			frame = "overlapsRight";
-		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="intersects") {
-			frame = "matches";
-		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="unequals") {
-			frame = "matches";
-		} else if (allowedFrames[0]=="matches" && sharedClasses[0]=="equals") {
-			frame = "matches";
-		} else if (allowedFrames[0]=="contains" && sharedClasses[0]=="intersects") {
-			frame = "contains";
+		if (allowedFrames.length==0 && sharedClasses[0]=="sharedClasses:includes") {
+			frame = "frame:contains";
+		} else if (allowedFrames.length==0 && sharedClasses[0]=="sharedClasses:intersects") {
+			frame = "frame:overlaps";
+		} else if (allowedFrames[0]=="frame:startswith" && sharedClasses[0]=="sharedClasses:includes") {
+			frame = "frame:startswith";
+		} else if (allowedFrames[0]=="frame:endswith" && sharedClasses[0]=="sharedClasses:includes") {
+			frame = "frame:endswith";
+		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:includes" && sharedClasses.length==1) {
+			frame = "frame:endswith";
+		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:includes" && sharedClasses[1]=="sharedClasses:unequals") {
+			frame = "frame:matches";
+		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:equals") {
+			frame = "frame:matches";			
+		} else if (allowedFrames[0]=="frame:contains" && sharedClasses[0]=="sharedClasses:includes") {
+			frame = "frame:contains";
+		} else if (allowedFrames[0]=="frame:startswith" && sharedClasses[0]=="sharedClasses:intersects") {
+			frame = "frame:overlapsLeft";
+		} else if (allowedFrames[0]=="frame:endswith" && sharedClasses[0]=="sharedClasses:intersects") {
+			frame = "frame:overlapsRight";
+		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:intersects") {
+			frame = "frame:matches";
+		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:unequals") {
+			frame = "frame:matches";
+		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:equals") {
+			frame = "frame:matches";
+		} else if (allowedFrames[0]=="frame:contains" && sharedClasses[0]=="sharedClasses:intersects") {
+			frame = "frame:contains";
 		}
 		group.put("frame", frame);
 		announcements.add("Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
