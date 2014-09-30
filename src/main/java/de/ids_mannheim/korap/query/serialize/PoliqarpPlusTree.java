@@ -442,23 +442,23 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	private LinkedHashMap<String,Object> parseFrame(ParseTree node) {
 		String operator = node.toStringTree(parser).toLowerCase();
 		String[] frames = new String[]{""};
-		String[] sharedClasses = new String[]{"includes"};
+		String[] sharedClasses = new String[]{"sharedClasses:includes"};
 		switch (operator) {
 			case "contains":
 				frames = new String[]{};
 				break;
 			case "matches":
-				frames = new String[]{"matches"};
+				frames = new String[]{"frame:matches"};
 				break;
 			case "startswith":
-				frames = new String[]{"startswith"};
+				frames = new String[]{"frame:startswith"};
 				break;
 			case "endswith":
-				frames = new String[]{"endswith"};
+				frames = new String[]{"frame:endswith"};
 				break;	
 			case "overlaps":
-				frames = new String[]{"overlapsLeft","overlapsRight"};
-				sharedClasses = new String[]{"intersects"};
+				frames = new String[]{"frame:overlapsLeft","frame:overlapsRight"};
+				sharedClasses = new String[]{"sharedClasses:intersects"};
 				break;
 		}
 		return makePosition(frames,sharedClasses);
