@@ -103,13 +103,13 @@ public class CQLTree extends AbstractSyntaxTree {
     	    	
         if (node instanceof CQLTermNode) {
             return parseTermNode((CQLTermNode) node);
-        /*} else if (node instanceof CQLAndNode) {
-            return parseAndNode((CQLAndNode) node);*/
+        } else if (node instanceof CQLAndNode) {
+            return parseAndNode((CQLAndNode) node);
         } else if (node instanceof CQLOrNode) {
             return parseOrNode((CQLOrNode) node);
         } else {
             throw new QueryException(105, "SRU diagnostic 48: Only basic search including term-only " +
-                    "and boolean OR operator queries are currently supported.");
+                    "and boolean (AND,OR) operator queries are currently supported.");
         }
     }
 
@@ -131,11 +131,12 @@ public class CQLTree extends AbstractSyntaxTree {
         Map<String, Object> map = new LinkedHashMap<String,Object>();
         map.put("@type", "korap:group");
         map.put("operation", OPERATION_SEQUENCE);
+        map.put("inOrder", false);
         
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         Map<String, Object> distanceMap = new LinkedHashMap<String,Object>();
         distanceMap.put("@type", "korap:distance");
-        distanceMap.put("key", "w");
+        distanceMap.put("key", "s");
         distanceMap.put("min", "0");
         distanceMap.put("max", "0");
         list.add(distanceMap);

@@ -62,12 +62,13 @@ public class CQLTest {
 		}
 	}
 	
-/*	@Test
+	@Test
 	public void testAndQuery() throws CQLParseException, IOException, QueryException{
 		query="(Sonne) and (scheint)";	
 		String jsonLd = 
-			"{@type : korap:group, operation : operation:sequence, distances:[ "+
-				"{@type : korap:distance, key : w, min : 0, max : 0 } ],"+
+			"{@type : korap:group, operation : operation:sequence, inOrder : false," +		
+			"distances:[ "+
+				"{@type : korap:distance, key : s, min : 0, max : 0 } ],"+
 					"operands : ["+
 						"{@type : korap:token, wrap : {@type : korap:term,key : Sonne, layer : orth, match : match:eq}}," + 
 						"{@type : korap:token,wrap : {@type : korap:term,key : scheint,layer : orth,match : match:eq}" +
@@ -76,19 +77,18 @@ public class CQLTest {
 			CQLTree cqlTree = new CQLTree(query, version);		
 			String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 			assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
-			
-		CosmasTree ct = new CosmasTree("Sonne und scheint");
-		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
-		
-		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
-	}*/
+//			/System.out.println(serializedQuery);
+		//CosmasTree ct = new CosmasTree("Sonne und scheint");
+		//serializedQuery = mapper.writeValueAsString(ct.getRequestMap().get("query"));
+		//assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
+	}
 	
-/*	@Test
+	@Test
 	public void testBooleanQuery() throws CQLParseException, IOException, QueryException{		
 		query="((Sonne) or (Mond)) and (scheint)";		
 		String jsonLd = 
-			"{@type:korap:group, operation:operation:sequence, distances:[" +
-				"{@type:korap:distance, key:w, min:0, max:0}" +
+			"{@type:korap:group, operation:operation:sequence, inOrder : false, distances:[" +
+				"{@type:korap:distance, key:s, min:0, max:0}" +
 				"], operands:[" +
 					"{@type:korap:group, operation:operation:or, operands:[" +
 						"{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}," +
@@ -103,8 +103,8 @@ public class CQLTest {
 		
 		query="(scheint) and ((Sonne) or (Mond))";
 		jsonLd = 
-				"{@type:korap:group, operation:operation:sequence, distances:[" +
-						"{@type:korap:distance, key:w, min:0, max:0}" +
+				"{@type:korap:group, operation:operation:sequence, inOrder : false, distances:[" +
+						"{@type:korap:distance, key:s, min:0, max:0}" +
 					"], operands:[" +
 						"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}," +
 						"{@type:korap:group, operation:operation:or, operands:[" +
@@ -116,7 +116,7 @@ public class CQLTest {
 		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
-	}*/
+	}
 	
 	@Test
 	public void testOrQuery() throws CQLParseException, IOException, QueryException{
