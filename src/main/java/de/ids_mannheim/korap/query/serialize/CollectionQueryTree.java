@@ -202,6 +202,11 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
     		String regex = valueNode.getChild(0).getChild(0).toStringTree(parser);
     		map.put("value", regex.substring(1, regex.length()-1));
     		map.put("type", "type:regex");
+    	} else if (getNodeCat(valueNode.getChild(0)).equals("date")) {
+    		LinkedHashMap<String,String> valueMap = new LinkedHashMap<String,String>();
+    		valueMap.put("@type", "xsd:date");
+    		valueMap.put("@value", valueNode.getChild(0).getChild(0).toStringTree(parser));
+    		map.put("value", valueMap);
     	} else {
     		map.put("value", valueNode.getChild(0).toStringTree(parser));
     	}
@@ -399,7 +404,8 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         query = "(textClass=wissenschaft & textClass=politik) | textClass=ausland";
         query = "1990<year<2010 & genre=Sport";
         query = "1990<year<2010";
-        query = "year=2010   ";
+        query = "pubDate<2010-09";
+//        query = "foo=b-ar";
         CollectionQueryTree filter = new CollectionQueryTree();
 //    	filter.verbose = true;
         try {
