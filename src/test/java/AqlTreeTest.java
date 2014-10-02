@@ -41,6 +41,11 @@ public class AqlTreeTest {
 		query = "Mann";
 		String token4 = "{@type=korap:span, layer=Mann}";
 		assertTrue(equalsQueryContent(token4, query));
+		
+		// tok
+		query = "tok";
+		String token5 = "{@type=korap:token}";
+		assertTrue(equalsQueryContent(token5, query));
 	}
 	
 	@Test 

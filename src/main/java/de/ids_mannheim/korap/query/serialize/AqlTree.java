@@ -198,9 +198,11 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				object = makeSpan();
 			} else if (firstChildNodeCat.equals("tok")) {
 				object = makeToken();
-				LinkedHashMap<String, Object> term = makeTerm();
-				term.put("layer", "orth");
-				object.put("wrap", term);
+				if (node.getChildCount() > 1) { // empty tokens do not wrap a term
+					LinkedHashMap<String, Object> term = makeTerm();
+					term.put("layer", "orth");
+					object.put("wrap", term);
+				}
 			} else if (firstChildNodeCat.equals("qName")) {	// only (foundry/)?layer specified
 				// may be token or span, depending on indicated layer! (e.g. cnx/cat=NP or mate/pos=NN)
 				HashMap<String, Object> qNameParse = parseQNameNode(node.getChild(0));
@@ -729,6 +731,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 //				"cat=\"NP\" > cat=\"VP\" & #1 _l_ #2",
 //				"cat=\"NP\" > cat=\"VP\" & #1 . tok=\"foo\"",
 				"cat=\"NP\" & cat=\"VP\" & #1 > #2 & #1 _l_ #2",
+				"tok"
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {
