@@ -189,10 +189,20 @@ public abstract class AbstractSyntaxTree {
 	}
 	
 	protected LinkedHashMap<String, Object> makeSpanClass(int classCount) {
+		return makeSpanClass(classCount, true);
+	}
+	
+	protected LinkedHashMap<String, Object> makeSpanClass(int classCount, boolean setBySystem) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:group");
 		group.put("operation", "operation:class");
-		group.put("class", classCount);
+		if (setBySystem) {
+			group.put("class", 1024+classCount);
+			announcements.add("A class has been introduced into the backend representation of " +
+					"your query for later reference to a part of the query. The class id is "+classCount);
+		} else {
+			group.put("class", classCount);
+		}
 		group.put("operands", new ArrayList<Object>());
 		return group;
 	}
@@ -284,7 +294,7 @@ public abstract class AbstractSyntaxTree {
 
 	@SuppressWarnings("unchecked")
 	protected LinkedHashMap<String, Object> wrapInClass(LinkedHashMap<String, Object> group, Integer classId) {
-		LinkedHashMap<String, Object> classGroup = makeSpanClass(classId);
+		LinkedHashMap<String, Object> classGroup = makeSpanClass(classId, true);
 		((ArrayList<Object>) classGroup.get("operands")).add(group);
 		return classGroup;
 	}

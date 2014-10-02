@@ -400,6 +400,35 @@ public class PoliqarpPlusTreeTest {
 	}
 
 	@Test
+	public void testDistancesWithClass() throws QueryException {
+		query = "[base=der]{1:[]}[base=Mann]";
+		expected = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
+					"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+						"{@type=korap:token}" +
+					"]}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "{1:[]}[base=der][base=Mann]";
+		expected = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+						"{@type=korap:token}" +
+					"]}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
 	public void testLeadingTrailingEmptyTokens() throws QueryException {
 		// startswith(<s>, [][base=Mann]
 		String et1 = 

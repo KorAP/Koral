@@ -101,6 +101,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		if (nodeCat.equals("sequence")) {
 			LinkedHashMap<String,Object> sequence = makeGroup("sequence");
 			ParseTree distanceNode = getFirstChildWithCat(node, "distance");
+			
 			if (distanceNode!=null) {
 				Integer[] minmax = parseDistance(distanceNode);
 				LinkedHashMap<String,Object> distance = makeDistance("w", minmax[0], minmax[1]);
@@ -131,6 +132,18 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			}
 			putIntoSuperObject(object);
 			objectStack.push(object);
+			stackedObjects++;
+		}
+		
+		if (nodeCat.equals("emptyTokenSequenceClass")) {
+			Integer[] minmax = parseDistance(node);
+			int classId = 0;
+			if (hasChild(node, "spanclass_id")) {
+				classId = Integer.parseInt(node.getChild(1).getChild(0).toStringTree(parser));
+			}
+			LinkedHashMap<String,Object> classGroup = makeSpanClass(classId, false);
+			putIntoSuperObject(classGroup);
+			objectStack.push(classGroup);
 			stackedObjects++;
 		}
 		
@@ -287,7 +300,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 					classId = 0;
 				}
 			}
-			LinkedHashMap<String, Object> classGroup = makeSpanClass(classId);
+			LinkedHashMap<String, Object> classGroup = makeSpanClass(classId, false);
 			putIntoSuperObject(classGroup);
 			objectStack.push(classGroup);
 			stackedObjects++;
@@ -592,7 +605,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 * @return
 	 */
 	private Integer[] parseDistance(ParseTree distanceNode) {
-		Integer[] minmax = parseEmptySegments(distanceNode.getChild(0));
+		int emptyTokenSeqIndex = getNodeCat(distanceNode).equals("distance") ? 0 : 2; 
+		Integer[] minmax = parseEmptySegments(distanceNode.getChild(emptyTokenSeqIndex));
 		Integer min = minmax[0];
 		Integer max = minmax[1];
 		min++;

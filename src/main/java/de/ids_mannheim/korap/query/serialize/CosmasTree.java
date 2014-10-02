@@ -453,9 +453,9 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             LinkedHashMap<String, Object> embeddedSequence = group;
             
             if (! (openNodeCats.get(1).equals("OPBEG") || openNodeCats.get(1).equals("OPEND") || openNodeCats.get(1).equals("OPALL") || openNodeCats.get(1).equals("OPNHIT"))) {
-                wrapOperandInClass(node,1,0);
-                wrapOperandInClass(node,2,0);
-                group = wrapInReference(group, 0);
+                wrapOperandInClass(node,1,classCounter);
+                wrapOperandInClass(node,2,classCounter);
+                group = wrapInReference(group, 1024+classCounter++);
             }
             
             LinkedHashMap<String,Object> sequence = null;
@@ -508,7 +508,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             invertedOperandsLists.push((ArrayList<Object>) posgroup.get("operands"));
             stackedObjects++;
             // Step II: wrap in reference (limit match to first argument) and decide where to put
-            LinkedHashMap<String, Object> submatchgroup = wrapInReference(posgroup, classCounter);
+            LinkedHashMap<String, Object> submatchgroup = wrapInReference(posgroup, 1024+classCounter);
             putIntoSuperObject(submatchgroup, 1);
         }
 
@@ -533,14 +533,14 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
         if (nodeCat.equals("OPNHIT")) {
             ArrayList<Integer> classRef = new ArrayList<Integer>();
-            classRef.add(classCounter);
+            classRef.add(1024+classCounter);
 //            classRef.add(classCounter + 1);  // yes, do this twice (two classes)!
             LinkedHashMap<String, Object> group = makeReference(classRef);
             group.put("classRefOp", "classRefOp:inversion");
             ArrayList<Object> operands = new ArrayList<Object>();
             group.put("operands", operands);
-            wrapOperandInClass(node.getChild(0),1,classCounter); // direct child is OPPROX
-            wrapOperandInClass(node.getChild(0),2,classCounter++);
+            wrapOperandInClass(node.getChild(0),1,1024+classCounter); // direct child is OPPROX
+            wrapOperandInClass(node.getChild(0),2,1024+classCounter++);
             objectStack.push(group);
             stackedObjects++;
             putIntoSuperObject(group, 1);
@@ -576,7 +576,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             // create a containing group expressing the submatch constraint on the first argument
             ArrayList<Integer> spanRef = new ArrayList<Integer>();
             spanRef.add(1);
-            LinkedHashMap<String, Object> submatchgroup = makeReference(spanRef);
+            LinkedHashMap<String, Object> submatchgroup = makeReference(1024+classCounter);
             ArrayList<Object> submatchoperands = new ArrayList<Object>();
             submatchgroup.put("operands", submatchoperands);
             putIntoSuperObject(submatchgroup);
@@ -611,11 +611,11 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                 //     use 'focus' operations to create nested conditions
             } else {
                 // node has several conditions (like 'sa, -pa')
-                // -> create zero-distance sequence group and embed all position groups there
-                LinkedHashMap<String, Object> conjunct = makeGroup("sequence");
-                ArrayList<Object> distances = new ArrayList<Object>();
-                distances.add(makeDistance("w", 0,0));
-                conjunct.put("distances", distances);
+                // -> create identity position group and embed all position groups there
+                LinkedHashMap<String, Object> conjunct = makePosition(new String[]{"frame:matches"}, new String[]{"sharedClasses:equals"});
+//                ArrayList<Object> distances = new ArrayList<Object>();
+//                distances.add(makeDistance("w", 0,0));
+//                conjunct.put("distances", distances);
                 ArrayList<Object> operands = new ArrayList<Object>();
                 conjunct.put("operands", operands);
                 ArrayList<Object> distributedOperands = new ArrayList<Object>();
