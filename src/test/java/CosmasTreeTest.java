@@ -45,6 +45,16 @@ public class CosmasTreeTest {
 	}
 	
 	@Test
+	public void testWildcardToken() throws QueryException {
+		query="*der";
+		String wc1 = 
+					"{@type=korap:token, wrap={@type=korap:term, type=type:wildcard, key=*der, layer=orth, match=match:eq}}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(wc1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
 	public void testCaseSensitivityFlag() throws QueryException {
 		query="$deutscher";
 		String cs1 = 

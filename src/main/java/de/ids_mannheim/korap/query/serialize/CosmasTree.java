@@ -185,6 +185,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             // make category-specific fieldMap entry
             String attr = nodeCat.equals("OPWF") ? "orth" : "lemma";
             String value = node.getChild(0).toStringTree().replaceAll("\"", "");
+            Pattern p = Pattern.compile("[+*?]");
+            Matcher m = p.matcher(value);
+            if (m.find()) fieldMap.put("type", "type:wildcard");
+            
             if (value.startsWith("$")) {
                 value = value.substring(1);
                 fieldMap.put("caseInsensitive", true);
@@ -1064,7 +1068,9 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //        		"MORPH(V PRES IND)",
 //                "wegen #OV(F) <s>"
 //        		"Sonne /s0 Mond",
-        		"Sonne /+w1:4 Mond /-w1:7 Sterne"
+        		"Sonne /+w1:4 Mond /-w1:7 Sterne",
+        		"Der:t",
+        		"*mond"
         };
 		CosmasTree.verbose=true;
         for (String q : queries) {
