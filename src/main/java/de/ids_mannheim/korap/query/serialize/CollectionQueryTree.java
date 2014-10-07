@@ -96,6 +96,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
                 term.putAll(parseValue(valueNodes.get(0)));
                 String match = operatorNodes.get(0).getText();
                 term.put("match", "match:" + interpretMatch(match));
+                checkOperatorValueConformance(term);
                 putIntoSuperObject(term);
             } else { // (valueNodes.size()==2)
                 LinkedHashMap<String, Object> termGroup = makeDocGroup("and");
@@ -107,6 +108,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
                 String match1 = operatorNodes.get(0).getText();
                 term1.put("match", "match:" + invertInequation(interpretMatch(match1)));
                 termGroupOperands.add(term1);
+                checkOperatorValueConformance(term1);
 
                 LinkedHashMap<String, Object> term2 = makeDoc();
                 term2.put("key", field);
@@ -114,6 +116,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
                 String match2 = operatorNodes.get(1).getText();
                 term2.put("match", "match:" + interpretMatch(match2));
                 termGroupOperands.add(term2);
+                checkOperatorValueConformance(term2);
 
                 putIntoSuperObject(termGroup);
             }
@@ -196,17 +199,27 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
     }
 
 
-    private LinkedHashMap<String, Object> parseValue(ParseTree valueNode) {
+    private void checkOperatorValueConformance(LinkedHashMap<String, Object> term) {
+		String match = (String) term.get("match");
+		String type = (String) term.get("type");
+		if (type == null || type.equals("type:regex")) {
+			if (!(match.equals("match:eq") || match.equals("match:ne"))) {
+				errorMsgs.add("You used an inequation operator with a string value.");
+				System.err.println("You used an inequation operator with a string value.");
+			}
+		}
+	}
+
+	private LinkedHashMap<String, Object> parseValue(ParseTree valueNode) {
     	LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
     	if (getNodeCat(valueNode.getChild(0)).equals("regex")) {
     		String regex = valueNode.getChild(0).getChild(0).toStringTree(parser);
     		map.put("value", regex.substring(1, regex.length()-1));
     		map.put("type", "type:regex");
     	} else if (getNodeCat(valueNode.getChild(0)).equals("date")) {
-    		LinkedHashMap<String,String> valueMap = new LinkedHashMap<String,String>();
-    		valueMap.put("@type", "xsd:date");
-    		valueMap.put("@value", valueNode.getChild(0).getChild(0).toStringTree(parser));
-    		map.put("value", valueMap);
+    		map.put("type", "type:date");
+    		String value = valueNode.getChild(0).getChild(0).toStringTree(parser);
+    		map.put("value", value);
     	} else {
     		map.put("value", valueNode.getChild(0).toStringTree(parser));
     	}
@@ -404,7 +417,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         query = "(textClass=wissenschaft & textClass=politik) | textClass=ausland";
         query = "1990<year<2010 & genre=Sport";
         query = "1990<year<2010";
-        query = "pubDate<2010-09";
+        query = "pubDate<Sport";
 //        query = "foo=b-ar";
         CollectionQueryTree filter = new CollectionQueryTree();
 //    	filter.verbose = true;

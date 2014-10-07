@@ -43,7 +43,7 @@ public class CollectionQueryTreeTest {
 		expected = 
 				"{@type=korap:docGroup, operation=operation:and, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
-					"{@type=korap:doc, key=year, value={@type=xsd:date, @value=2014}, match=match:eq}" +
+					"{@type=korap:doc, key=year, type=type:date, value=2014, match=match:eq}" +
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
@@ -58,7 +58,7 @@ public class CollectionQueryTreeTest {
 				"{@type=korap:docGroup, operation=operation:and, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 					"{@type=korap:docGroup, operation=operation:and, operands=[" +
-						"{@type=korap:doc, key=year, value={@type=xsd:date, @value=2014}, match=match:eq}," +
+						"{@type=korap:doc, key=year, type=type:date, value=2014, match=match:eq}," +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}" +
 					"]}" +
 				"]}";
@@ -75,7 +75,7 @@ public class CollectionQueryTreeTest {
 		expected = 
 				"{@type=korap:docGroup, operation=operation:or, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
-					"{@type=korap:doc, key=year, value={@type=xsd:date, @value=2014}, match=match:eq}" +
+					"{@type=korap:doc, key=year, type=type:date, value=2014, match=match:eq}" +
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
@@ -90,7 +90,7 @@ public class CollectionQueryTreeTest {
 				"{@type=korap:docGroup, operation=operation:or, operands=[" +
 					"{@type=korap:doc, key=textClass, value=Sport, match=match:eq}," +
 					"{@type=korap:docGroup, operation=operation:or, operands=[" +
-						"{@type=korap:doc, key=year, value={@type=xsd:date, @value=2014}, match=match:eq}," +
+						"{@type=korap:doc, key=year, type=type:date, value=2014, match=match:eq}," +
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}" +
 					"]}" +
 				"]}";
@@ -162,7 +162,7 @@ public class CollectionQueryTreeTest {
 						"{@type=korap:doc, key=corpusID, value=WPD, match=match:eq}," +
 						"{@type=korap:docGroup, operation=operation:and, operands=[" +
 							"{@type=korap:doc, key=author, value=White, match=match:eq}," +
-							"{@type=korap:doc, key=year, value={@type=xsd:date, @value=2010}, match=match:eq}" +
+							"{@type=korap:doc, key=year, type=type:date, value=2010, match=match:eq}" +
 						"]}" +
 					"]}" +
 				"]}";
@@ -178,8 +178,8 @@ public class CollectionQueryTreeTest {
 		query = "1990<pubDate<2010";
 		expected = 
 				"{@type=korap:docGroup, operation=operation:and, operands=[" +
-					"{@type=korap:doc, key=pubDate, value={@type=xsd:date, @value=1990}, match=match:gt}," +
-					"{@type=korap:doc, key=pubDate, value={@type=xsd:date, @value=2010}, match=match:lt}" +
+					"{@type=korap:doc, key=pubDate, type=type:date, value=1990, match=match:gt}," +
+					"{@type=korap:doc, key=pubDate, type=type:date, value=2010, match=match:lt}" +
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
@@ -188,7 +188,7 @@ public class CollectionQueryTreeTest {
 		
 		query = "pubDate>=1990";
 		expected = 
-				"{@type=korap:doc, key=pubDate, value={@type=xsd:date, @value=1990}, match=match:geq}";
+				"{@type=korap:doc, key=pubDate, type=type:date, value=1990, match=match:geq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -196,7 +196,7 @@ public class CollectionQueryTreeTest {
 		
 		query = "pubDate>=1990-05";
 		expected = 
-				"{@type=korap:doc, key=pubDate, value={@type=xsd:date, @value=1990-05}, match=match:geq}";
+				"{@type=korap:doc, key=pubDate, type=type:date, value=1990-05, match=match:geq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
@@ -204,7 +204,7 @@ public class CollectionQueryTreeTest {
 		
 		query = "pubDate>=1990-05-01";
 		expected = 
-				"{@type=korap:doc, key=pubDate, value={@type=xsd:date, @value=1990-05-01}, match=match:geq}";
+				"{@type=korap:doc, key=pubDate, type=type:date, value=1990-05-01, match=match:geq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
 		map = cqt.getRequestMap().toString();
