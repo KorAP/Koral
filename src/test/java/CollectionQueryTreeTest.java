@@ -10,14 +10,6 @@ public class CollectionQueryTreeTest {
 	private String query;
 	private String expected;
 
-	private boolean equalsQueryContent(String res, String query) throws QueryException {
-		res = res.replaceAll(" ", "");
-		cqt = new CollectionQueryTree();
-		cqt.process(query);
-		String queryMap = cqt.getRequestMap().get("query").toString().replaceAll(" ", "");
-		return res.equals(queryMap);
-	}
-
 	@Test
 	public void testSimple() throws QueryException {
 		query = "textClass=Sport";
@@ -25,7 +17,7 @@ public class CollectionQueryTreeTest {
 		expected = "{@type=korap:doc, key=textClass, value=Sport, match=match:eq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 
 		query = "textClass!=Sport";
@@ -33,7 +25,18 @@ public class CollectionQueryTreeTest {
 		expected = "{@type=korap:doc, key=textClass, value=Sport, match=match:ne}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	}
+	
+	@Test
+	public void testContains() throws QueryException {
+		query = "title~Mannheim";
+		expected = 
+			"{@type=korap:doc, key=title, value=Mannheim, match=match:contains}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
@@ -47,7 +50,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
@@ -64,7 +67,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
@@ -79,7 +82,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
@@ -96,7 +99,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 
@@ -115,7 +118,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "(textClass=Sport & textClass=ausland) & corpusID=WPD";
@@ -130,7 +133,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White)";
@@ -148,7 +151,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White & year=2010)";
@@ -168,7 +171,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 
@@ -183,7 +186,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "pubDate>=1990";
@@ -191,7 +194,7 @@ public class CollectionQueryTreeTest {
 				"{@type=korap:doc, key=pubDate, type=type:date, value=1990, match=match:geq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "pubDate>=1990-05";
@@ -199,7 +202,7 @@ public class CollectionQueryTreeTest {
 				"{@type=korap:doc, key=pubDate, type=type:date, value=1990-05, match=match:geq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "pubDate>=1990-05-01";
@@ -207,7 +210,7 @@ public class CollectionQueryTreeTest {
 				"{@type=korap:doc, key=pubDate, type=type:date, value=1990-05-01, match=match:geq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 
@@ -218,7 +221,7 @@ public class CollectionQueryTreeTest {
 				"{@type=korap:doc, key=author, value=Go.*he, type=type:regex, match=match:eq}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
@@ -229,7 +232,7 @@ public class CollectionQueryTreeTest {
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:eq}}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "[cnx/base=Schwalbe]";
@@ -237,7 +240,7 @@ public class CollectionQueryTreeTest {
 				"{@type=korap:token, wrap={@type=korap:term, foundry=cnx, layer=lemma, key=Schwalbe, match=match:eq}}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "[base!=Schwalbe]";
@@ -245,7 +248,7 @@ public class CollectionQueryTreeTest {
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Schwalbe, match=match:ne}}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "[base=Schwalbe] & [orth=Foul]";
@@ -256,7 +259,7 @@ public class CollectionQueryTreeTest {
 					"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
@@ -270,7 +273,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
 		query = "[base=Schwalbe] & textClass=Sport";
@@ -281,7 +284,7 @@ public class CollectionQueryTreeTest {
 				"]}";
 		cqt = new CollectionQueryTree();
 		cqt.process(query);
-		map = cqt.getRequestMap().toString();
+		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 

@@ -101,7 +101,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
                 String match = operatorNodes.get(0).getText();
                 term.put("match", "match:" + interpretMatch(match));
                 if (checkOperatorValueConformance(term) == 1) {
-                	requestMap.put("query", new LinkedHashMap<String,Object>());
+                	requestMap.put("collection", new LinkedHashMap<String,Object>());
                 	return;
                 }
                 putIntoSuperObject(term);
@@ -116,7 +116,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
                 term1.put("match", "match:" + invertInequation(interpretMatch(match1)));
                 termGroupOperands.add(term1);
                 if (checkOperatorValueConformance(term1) == 1) {
-                	requestMap.put("query", new LinkedHashMap<String,Object>());
+                	requestMap.put("collection", new LinkedHashMap<String,Object>());
                 	return;
                 }
 
@@ -127,7 +127,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
                 term2.put("match", "match:" + interpretMatch(match2));
                 termGroupOperands.add(term2);
                 if (checkOperatorValueConformance(term2) == 1) {
-                	requestMap.put("query", new LinkedHashMap<String,Object>());
+                	requestMap.put("collection", new LinkedHashMap<String,Object>());
                 	return;
                 }
 
@@ -216,7 +216,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 		String match = (String) term.get("match");
 		String type = (String) term.get("type");
 		if (type == null || type.equals("type:regex")) {
-			if (!(match.equals("match:eq") || match.equals("match:ne"))) {
+			if (!(match.equals("match:eq") || match.equals("match:ne") || match.equals("match:contains"))) {
 				errorMsgs.add("You used an inequation operator with a string value.");
 				System.err.println("You used an inequation operator with a string value.");
 				return 1;
@@ -262,6 +262,10 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
             case "!=":
                 out = "ne";
                 break;
+            case "~":
+                out = "contains";
+                break;    
+               
         }
         return out;
     }
@@ -297,7 +301,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         } else {
             // I want the raw object, not a wrapped
 //            requestMap.put("filter", object);
-        	requestMap.put("query", object);
+        	requestMap.put("collection", object);
         }
     }
 
@@ -433,6 +437,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         query = "1990<year<2010 & genre=Sport";
         query = "1990<year<2010";
         query = "pubDate<Sport";
+        query = "title~Hamburg";
 //        query = "foo=b-ar";
 //    	filter.verbose = true;
         CollectionQueryTree filter = null;

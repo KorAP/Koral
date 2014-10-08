@@ -83,7 +83,7 @@ date
 ;
 
 operator
-:	(NEG? EQ) | LT | GT | LEQ | GEQ;
+:	(NEG? EQ) | LT | GT | LEQ | GEQ | TILDE;
 
 expr
 : meta
