@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 /**
  * Map representation of CosmasII syntax tree as returned by ANTLR
  *
- * @author joachim
+ * @author bingel
  */
 public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
@@ -185,6 +185,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             // make category-specific fieldMap entry
             String attr = nodeCat.equals("OPWF") ? "orth" : "lemma";
             String value = node.getChild(0).toStringTree().replaceAll("\"", "");
+            // check for wildcard string
             Pattern p = Pattern.compile("[+*?]");
             Matcher m = p.matcher(value);
             if (m.find()) fieldMap.put("type", "type:wildcard");
@@ -1070,7 +1071,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //        		"Sonne /s0 Mond",
         		"Sonne /+w1:4 Mond /-w1:7 Sterne",
         		"Der:t",
-        		"*mond"
+        		"&mond-"
         };
 		CosmasTree.verbose=true;
         for (String q : queries) {

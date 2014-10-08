@@ -19,10 +19,6 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
     private boolean verbose = false;
     private List<ParseTree> visited = new ArrayList<ParseTree>();
     /**
-     * Top-level map representing the whole request.
-     */
-    LinkedHashMap<String, Object> requestMap = new LinkedHashMap<String, Object>();
-    /**
      * Keeps track of active object.
      */
     LinkedList<LinkedHashMap<String, Object>> objectStack = new LinkedList<LinkedHashMap<String, Object>>();
@@ -36,7 +32,15 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
     LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
     Integer stackedObjects = 0;
 
-    @Override
+    public CollectionQueryTree() {
+    	super();
+	}
+    
+    public CollectionQueryTree(String query) throws QueryException {
+		process(query);
+	}
+
+	@Override
     public void process(String query) throws QueryException {
         ParseTree tree = parseCollectionQuery(query);
         if (this.parser != null) {
@@ -282,7 +286,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         } else {
             // I want the raw object, not a wrapped
 //            requestMap.put("filter", object);
-        	requestMap = object;
+        	requestMap.put("query", object);
         }
     }
 
@@ -419,21 +423,14 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         query = "1990<year<2010";
         query = "pubDate<Sport";
 //        query = "foo=b-ar";
-        CollectionQueryTree filter = new CollectionQueryTree();
 //    	filter.verbose = true;
+        CollectionQueryTree filter = null;
         try {
-            filter.process(query);
+        	 filter = new CollectionQueryTree(query);
         } catch (QueryException e) {
             e.printStackTrace();
         }
         System.out.println(filter.getRequestMap());
 
     }
-
-    @Override
-    public Map<String, Object> getRequestMap() {
-        return requestMap;
-    }
-
-
 }

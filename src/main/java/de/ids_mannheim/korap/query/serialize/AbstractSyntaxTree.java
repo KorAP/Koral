@@ -58,7 +58,7 @@ public abstract class AbstractSyntaxTree {
 	ArrayList<String> announcements = new ArrayList<String>();
 	
 	AbstractSyntaxTree() {
-		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld");
+		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld");
 		requestMap.put("errors", errorMsgs);
 		requestMap.put("warnings", warnings);
 		requestMap.put("announcements", announcements);
