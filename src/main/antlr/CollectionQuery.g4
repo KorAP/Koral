@@ -42,14 +42,17 @@ WS 					: ( ' ' | '\t' | '\r' | '\n' )+ -> skip ;
 fragment NO_RE      : ~[ \t\/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
                     | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' );
+fragment ALPHA		: [a-zA-Z];
 DIGIT				: [0-9];
-NUMBER              : [0-9]+;
+
+DATE
+: DIGIT DIGIT DIGIT DIGIT (DASH DIGIT DIGIT (DASH DIGIT DIGIT)?)?
+;
 
 NL                  : [\r\n] -> skip;
 ws                  : WS+;
 
-WORD                : ALPHABET+;
-
+WORD                : ALPHABET* ALPHA ALPHABET*;  // needs to have at least one alphabetical letter
 
 /*
  * Regular expressions
@@ -76,7 +79,7 @@ regex
 ;
 
 date
-: DIGIT DIGIT DIGIT DIGIT  (DASH DIGIT DIGIT (DASH DIGIT DIGIT)?)?
+: DATE
 ;
 
 operator
@@ -110,7 +113,6 @@ termGroup
 key
 : WORD
 | regex
-| NUMBER
 ;
 
 foundry
@@ -136,10 +138,9 @@ field
 ;
 	
 value
-: WORD 
-| NUMBER 
-| date
+: WORD
 | '"' (WORD ws*)+'"'
+| date
 | regex
 ;
 
