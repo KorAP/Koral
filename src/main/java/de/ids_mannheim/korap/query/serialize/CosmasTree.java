@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
  * Map representation of CosmasII syntax tree as returned by ANTLR
  *
  * @author bingel
+ * @version 0.2
  */
 public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
@@ -46,6 +47,12 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
      * Flag that indicates whether token fields or meta fields are currently being processed
      */
     boolean inMeta = false;
+    /**
+     * If true, a sequence (OPPROX node) is governed by an OPALL node (ALL()-operator), which requires to match
+     * all tokens of the sequence.
+     */
+    boolean inOPALL = false;
+    boolean inOPNHIT = false;
     /**
      *
      */
@@ -76,7 +83,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
      */
     private LinkedList<Tree> sequencedNodes = new LinkedList<Tree>();
 
-    private boolean hasSequentiableSiblings;
+    private boolean nodeHasSequentiableSiblings;
 
     /**
      * Keeps track of operands lists that are to be serialised in an inverted
@@ -91,7 +98,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
     public CosmasTree(String query) throws QueryException {
         this.query = query;
         process(query);
-        System.out.println("\n" + requestMap.get("query"));
         log.info(">>> " + requestMap.get("query") + " <<<");
     }
 
@@ -144,14 +150,14 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             if (parent.getChildCount() > 1) {
                 // if node is first child of parent...
                 if (node == parent.getChild(0)) {
-                    hasSequentiableSiblings = false;
+                    nodeHasSequentiableSiblings = false;
                     for (int i = 1; i < parent.getChildCount(); i++) {
                         if (sequentiableCats.contains(getNodeCat(parent.getChild(i)))) {
-                            hasSequentiableSiblings = true;
+                            nodeHasSequentiableSiblings = true;
                             continue;
                         }
                     }
-                    if (hasSequentiableSiblings) {
+                    if (nodeHasSequentiableSiblings) {
                         // Step I: create sequence
                         LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
                         sequence.put("@type", "korap:group");
@@ -413,6 +419,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             
             boolean putIntoOverlapDisjunction = false;
 
+            int min = 0, max = 0;
             // possibly several distance constraints
             for (int i = 0; i < dist_list.getChildCount(); i++) {
                 String direction = dist_list.getChild(i).getChild(0).getChild(0).toStringTree().toLowerCase();
@@ -422,8 +429,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                 if (minStr.equals("VAL0")) {
                     minStr = "0";
                 }
-                int min = Integer.parseInt(minStr);
-                int max = Integer.parseInt(maxStr);
+                min = Integer.parseInt(minStr);
+                max = Integer.parseInt(maxStr);
                 // If zero word-distance, wrap this sequence in a disjunction along with an overlap position
                 // between the two operands
      /*   
@@ -442,7 +449,9 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                 if (exclusion) {
                     distance.put("exclude", true);
                 }
-                constraints.add(distance);
+//                if (! openNodeCats.get(1).equals("OPNHIT")) {
+                	constraints.add(distance);
+//                }
                 if (i==0) {
                 	if (direction.equals("plus")) {
                         inOrder = true;
@@ -457,10 +466,15 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             group.put("inOrder", inOrder);
             LinkedHashMap<String, Object> embeddedSequence = group;
             
-            if (! (openNodeCats.get(1).equals("OPBEG") || openNodeCats.get(1).equals("OPEND") || openNodeCats.get(1).equals("OPALL") || openNodeCats.get(1).equals("OPNHIT"))) {
+            if (! (openNodeCats.get(1).equals("OPBEG") || openNodeCats.get(1).equals("OPEND") || inOPALL || openNodeCats.get(1).equals("OPNHIT"))) {
                 wrapOperandInClass(node,1,classCounter);
                 wrapOperandInClass(node,2,classCounter);
                 group = wrapInReference(group, 1024+classCounter++);
+            } else if (openNodeCats.get(1).equals("OPNHIT")) {
+            	LinkedHashMap<String,Object> repetition = makeRepetition(min, max);
+            	((ArrayList<Object>) repetition.get("operands")).add(makeToken());
+            	// TODO go on with this: put the repetition into a class and put it in between the operands
+            	// -> what if there's several distance constraints. with different keys, like /w4,s0? 
             }
             
             LinkedHashMap<String,Object> sequence = null;
@@ -499,22 +513,42 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         // inlcusion or overlap
         if (nodeCat.equals("OPIN") || nodeCat.equals("OPOV")) {
             // Step I: create group
-        	wrapOperandInClass(node,1,classCounter);
+        	wrapOperandInClass(node,2,classCounter++);
+        	wrapOperandInClass(node,1,classCounter++);
 //            LinkedHashMap<String, Object> posgroup = makePosition(null);
             LinkedHashMap<String, Object> posgroup = makeGroup("position");
+            LinkedHashMap<String, Object> positionOptions;
 //            posgroup
             if (nodeCat.equals("OPIN")) {
-                posgroup = parseOPINOptions(node, posgroup);
+            	positionOptions = parseOPINOptions(node);
             } else {
-            	posgroup = parseOPOVOptions(node, posgroup);
+            	positionOptions = parseOPOVOptions(node);
+            }
+            posgroup.put("frames", positionOptions.get("frames"));
+            posgroup.put("frame", positionOptions.get("frame"));
+            if (positionOptions.containsKey("exclude")) {
+            	posgroup.put("exclude", positionOptions.get("exclude"));
+            }
+            if (positionOptions.containsKey("grouping")) {
+            	posgroup.put("grouping", positionOptions.get("grouping"));
             }
             objectStack.push(posgroup);
             // mark this an inverted operands object
             invertedOperandsLists.push((ArrayList<Object>) posgroup.get("operands"));
             stackedObjects++;
-            // Step II: wrap in reference (limit match to first argument) and decide where to put
-            LinkedHashMap<String, Object> submatchgroup = wrapInReference(posgroup, 1024+classCounter);
-            putIntoSuperObject(submatchgroup, 1);
+            // Step II: wrap in reference and decide where to put
+            ArrayList<String> check = (ArrayList<String>) positionOptions.get("classRefCheck");
+            Integer[] classIn = new Integer[]{1024+classCounter-2,1024+classCounter-1};
+            LinkedHashMap<String, Object> classRefCheck = makeClassRefCheck(check, classIn, 1024+classCounter);
+            ((ArrayList<Object>) classRefCheck.get("operands")).add(posgroup);
+            LinkedHashMap<String, Object> focusGroup = null;
+            if ((boolean) positionOptions.get("matchall") == true) {
+            	focusGroup = makeResetReference();
+            	((ArrayList<Object>) focusGroup.get("operands")).add(classRefCheck);
+            } else { // match only first argument
+            	focusGroup = wrapInReference(classRefCheck, 1024+classCounter-1);
+            }
+            putIntoSuperObject(focusGroup, 1);
         }
 
         // Wrap the argument of an #IN operator in a previously defined container
@@ -536,17 +570,22 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //        	}
         }
 
+        if (nodeCat.equals("OPALL")) {
+        	inOPALL = true;
+        }
+        
         if (nodeCat.equals("OPNHIT")) {
-            ArrayList<Integer> classRef = new ArrayList<Integer>();
-            classRef.add(1024+classCounter);
+            Integer[] classRef = new Integer[]{1024+classCounter+1, 1024+classCounter+2}; 
 //            classRef.add(classCounter + 1);  // yes, do this twice (two classes)!
-            LinkedHashMap<String, Object> group = makeReference(classRef);
-            group.put("classRefOp", "classRefOp:inversion");
+            LinkedHashMap<String, Object> group = makeReference(1024+classCounter);
+            LinkedHashMap<String, Object> classRefCheck = makeClassRefOp("classRefOp:inversion", classRef, classCounter+1024);
             ArrayList<Object> operands = new ArrayList<Object>();
+            operands.add(classRefCheck);
             group.put("operands", operands);
-            wrapOperandInClass(node.getChild(0),1,1024+classCounter); // direct child is OPPROX
-            wrapOperandInClass(node.getChild(0),2,1024+classCounter++);
-            objectStack.push(group);
+            classCounter++;
+            wrapOperandInClass(node.getChild(0),1,classCounter++); // direct child is OPPROX
+            wrapOperandInClass(node.getChild(0),2,classCounter++);
+            objectStack.push(classRefCheck);
             stackedObjects++;
             putIntoSuperObject(group, 1);
         }
@@ -592,7 +631,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
                 // create the group expressing the position constraint
                 String[] frames = new String[]{c.position};
-                String[] sharedClasses = new String[]{"sharedClasses:includes"};  // OPBED only defines #IN-corresponding positions
+                String[] sharedClasses = new String[]{};  // OPBED only defines frame constraint, neglects intersection type
             	LinkedHashMap<String,Object> posgroup = makePosition(frames, sharedClasses);
 //                LinkedHashMap<String, Object> posgroup = makePosition(c.position);
                 ArrayList<Object> operands = (ArrayList<Object>) posgroup.get("operands");
@@ -617,7 +656,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
             } else {
                 // node has several conditions (like 'sa, -pa')
                 // -> create identity position group and embed all position groups there
-                LinkedHashMap<String, Object> conjunct = makePosition(new String[]{"frame:matches"}, new String[]{"sharedClasses:equals"});
+                LinkedHashMap<String, Object> conjunct = makePosition(new String[]{"frames:matches"}, new String[]{"classRefCheck:equals"});
 //                ArrayList<Object> distances = new ArrayList<Object>();
 //                distances.add(makeDistance("w", 0,0));
 //                conjunct.put("distances", distances);
@@ -630,7 +669,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
                     // make position group
                     CosmasCondition c = new CosmasCondition(conditions.getChild(i));
                     String[] frames = new String[]{c.position};
-                    String[] sharedClasses = new String[]{"sharedClasses:includes"};  // OPBED only defines #IN-corresponding positions
+                    String[] sharedClasses = new String[]{};  // OPBED only defines frame constraint, neglects intersection type
                 	LinkedHashMap<String,Object> posGroup = makePosition(frames, sharedClasses);
                     operands.add(posGroup);
                     if (c.negated) posGroup.put("exclude", "true");
@@ -697,6 +736,11 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         if (nodeCat.equals("ARG2") && openNodeCats.get(1).equals("OPNOT")) {
             negate = false;
         }
+        
+        if (nodeCat.equals("OPALL")) {
+        	inOPALL = false;
+        }
+        
         openNodeCats.pop();
     }
 
@@ -743,59 +787,60 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
     }
 
     @SuppressWarnings("unchecked")
-	private LinkedHashMap<String, Object> parseOPINOptions(Tree node, LinkedHashMap<String, Object> posgroup) {
+	private LinkedHashMap<String, Object> parseOPINOptions(Tree node) {
         Tree posnode = getFirstChildWithCat(node, "POS");
         Tree rangenode = getFirstChildWithCat(node, "RANGE");
         Tree exclnode = getFirstChildWithCat(node, "EXCL");
         Tree groupnode = getFirstChildWithCat(node, "GROUP");
         boolean negatePosition = false;
-
+        LinkedHashMap<String, Object> posOptions = new LinkedHashMap<String, Object>();
         ArrayList<String> positions = new ArrayList<String>();
-        ArrayList<String> sharedClasses = new ArrayList<String>();
+        ArrayList<String> classRefCheck = new ArrayList<String>();
+        posOptions.put("matchall", false);
         String frame = "";
         String posOption = null; 
         if (posnode != null) {
             posOption = posnode.getChild(0).toStringTree();
             switch (posOption) {
             case "L":
-                positions.add("frame:startswith");
-                sharedClasses.add("sharedClasses:includes");
+                positions.add("frames:startswith");
+                classRefCheck.add("classRefCheck:includes");
                 frame = "startswith";
                 break;
             case "R":
-            	positions.add("frame:endswith");
-                sharedClasses.add("sharedClasses:includes");
+            	positions.add("frames:endswith");
+                classRefCheck.add("classRefCheck:includes");
                 frame = "endswith";
                 break;
             case "F":
-            	positions.add("frame:matches");
-                sharedClasses.add("sharedClasses:includes");
+            	positions.add("frames:matches");
+                classRefCheck.add("classRefCheck:includes");
                 frame = "matches";
                 break;
             case "FE":
-            	positions.add("frame:matches");
-                sharedClasses.add("sharedClasses:equals");
+            	positions.add("frames:matches");
+                classRefCheck.add("classRefCheck:equals");
                 frame = "matches";
                 break;
             case "FI":
-            	positions.add("frame:matches");
-            	sharedClasses.add("sharedClasses:unequals");
-                sharedClasses.add("sharedClasses:includes");
+            	positions.add("frames:matches");
+            	classRefCheck.add("classRefCheck:unequals");
+                classRefCheck.add("classRefCheck:includes");
                 frame = "matches-noident";
                 break;
             case "N": 
-            	positions.add("frame:contains");
-                sharedClasses.add("sharedClasses:includes");
+            	positions.add("frames:contains");
+                classRefCheck.add("classRefCheck:includes");
                 frame = "contains";
                 break;
             }
         } else {
-        	sharedClasses.add("sharedClasses:includes");
+        	classRefCheck.add("classRefCheck:includes");
         	frame = "contains";
         }
-        posgroup.put("frames", positions);
-        posgroup.put("sharedClasses", sharedClasses);
-        posgroup.put("frame", "frame:"+frame);
+        posOptions.put("frames", positions);
+        posOptions.put("classRefCheck", classRefCheck);
+        posOptions.put("frame", "frame:"+frame);
         announcements.add("Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
 				"Position frames are now expressed through 'frames' and 'sharedClasses'");
         
@@ -808,92 +853,108 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
         if (rangenode != null) {
             String range = rangenode.getChild(0).toStringTree().toLowerCase();
             if (range.equals("all")) {
-            	LinkedHashMap<String,Object> ref = makeResetReference(); // reset all defined classes
-            	wrapOperand(node,2,ref);
+            	posOptions.put("matchall", true);
+//            	LinkedHashMap<String,Object> ref = makeResetReference(); // reset all defined classes
+//            	wrapOperand(node,2,ref);
             }
         }
 
         if (negatePosition) {
-            posgroup.put("exclude", "true");
+        	posOptions.put("exclude", "true");
         }
 
         if (groupnode != null) {
             String grouping = groupnode.getChild(0).toStringTree().equals("max") ? "true" : "false";
-            posgroup.put("grouping", grouping);
+            posOptions.put("grouping", grouping);
         }
-        return posgroup;
+        return posOptions;
     }
 
   
 
-	private LinkedHashMap<String, Object> parseOPOVOptions(Tree node, LinkedHashMap<String, Object> posgroup) {
+	private LinkedHashMap<String, Object> parseOPOVOptions(Tree node) {
     	boolean negatePosition = false;
         Tree posnode = getFirstChildWithCat(node, "POS");
+        Tree rangenode = getFirstChildWithCat(node, "RANGE");
         Tree exclnode = getFirstChildWithCat(node, "EXCL");
         Tree groupnode = getFirstChildWithCat(node, "GROUP");
-
+        LinkedHashMap<String, Object> posOptions = new LinkedHashMap<String, Object>();
         ArrayList<String> positions = new ArrayList<String>();
-        ArrayList<String> sharedClasses = new ArrayList<String>();
+        ArrayList<String> classRefCheck = new ArrayList<String>();
+        posOptions.put("matchall", false);
         String frame = "";
         String posOption = null; 
         if (posnode != null) {
             posOption = posnode.getChild(0).toStringTree();
             switch (posOption) {
             case "L":
-                positions.add("frame:startswith");
-                positions.add("frame:overlapsLeft");
-                sharedClasses.add("sharedClasses:intersects");
+                positions.add("frames:startswith");
+                positions.add("frames:overlapsLeft");
+                classRefCheck.add("classRefCheck:intersects");
                 frame = "overlapsLeft";
                 break;
             case "R":
-            	positions.add("frame:endswith");
-            	positions.add("frame:overlapsRight");
-                sharedClasses.add("sharedClasses:intersects");
+            	positions.add("frames:endswith");
+            	positions.add("frames:overlapsRight");
+                classRefCheck.add("classRefCheck:intersects");
                 frame = "overlapsRight";
                 break;
             case "F":
-            	positions.add("frame:matches");
-                sharedClasses.add("sharedClasses:intersects");
+            	positions.add("frames:matches");
+                classRefCheck.add("classRefCheck:intersects");
                 frame = "matches";
                 break;
             case "FE":
-            	positions.add("frame:matches");
-                sharedClasses.add("sharedClasses:equals");
+            	positions.add("frames:matches");
+                classRefCheck.add("classRefCheck:equals");
                 frame = "matches";
                 break;
             case "FI":
-            	positions.add("frame:matches");
-            	sharedClasses.add("sharedClasses:unequals");
+            	positions.add("frames:matches");
+            	classRefCheck.add("classRefCheck:unequals");
             	frame = "matches-noident";
                 break;
             case "X": 
-            	positions.add("frame:contains");
-                sharedClasses.add("sharedClasses:intersects");
+            	positions.add("frames:contains");
+                classRefCheck.add("classRefCheck:intersects");
                 frame = "overlaps";
                 break;
             }
         } else {
-        	sharedClasses.add("sharedClasses:intersects");
+        	classRefCheck.add("classRefCheck:intersects");
         	frame = "overlaps";
         }
         
-        posgroup.put("frames", positions);
-        posgroup.put("sharedClasses", sharedClasses);
-        posgroup.put("frame", "frame:"+frame);
+        posOptions.put("frames", positions);
+        posOptions.put("classRefCheck", classRefCheck);
+        posOptions.put("frame", "frame:"+frame);
         announcements.add("Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
 				"Position frames are now expressed through 'frames' and 'sharedClasses'");
 
         if (exclnode != null) {
             if (exclnode.getChild(0).toStringTree().equals("YES")) {
-                posgroup.put("match", "match:" + "ne");
+                negatePosition = !negatePosition;
             }
         }
         
-        if (groupnode != null) {
-            String grouping = groupnode.getChild(0).toStringTree().equals("@max") ? "true" : "false";
-            posgroup.put("grouping", grouping);
+        if (rangenode != null) {
+            String range = rangenode.getChild(0).toStringTree().toLowerCase();
+            if (range.equals("all")) {
+            	posOptions.put("matchall", true);
+//            	LinkedHashMap<String,Object> ref = makeResetReference(); // reset all defined classes
+//            	wrapOperand(node,2,ref);
+            }
         }
-        return posgroup;
+
+        if (negatePosition) {
+        	posOptions.put("exclude", "true");
+        }
+
+        if (groupnode != null) {
+            String grouping = groupnode.getChild(0).toStringTree().equals("max") ? "true" : "false";
+            posOptions.put("grouping", grouping);
+        }
+        return posOptions;
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -986,7 +1047,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
     		ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
     		if (!invertedOperandsLists.contains(topObjectOperands)) {
     			topObjectOperands.add(object);
-    			System.out.println(objectStack.get(objStackPosition));
     		} else {
     			topObjectOperands.add(0, object);
     		}
@@ -1070,10 +1130,13 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //                "wegen #OV(F) <s>"
 //        		"Sonne /s0 Mond",
         		"Sonne /+w1:4 Mond /-w1:7 Sterne",
-        		"Der:t",
-        		"&mond-"
+        		"Der:ta",
+        		"&mond-",
+        		"gehen /+w10 voran %w10 Beispiel",
+        		"(gehen /+w10 voran) %w10 Beispiel",
+        		"#BED(der Mann , sa,-pa)"
         };
-		CosmasTree.verbose=true;
+//		CosmasTree.verbose=true;
         for (String q : queries) {
             try {
                 System.out.println(q);

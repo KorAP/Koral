@@ -56,12 +56,14 @@ public abstract class AbstractSyntaxTree {
 	ArrayList<String> errorMsgs = new ArrayList<String>();
 	ArrayList<String> warnings = new ArrayList<String>();
 	ArrayList<String> announcements = new ArrayList<String>();
+	LinkedHashMap<String, Object> collection = new LinkedHashMap<String,Object>();
 	
 	AbstractSyntaxTree() {
 		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld");
 		requestMap.put("errors", errorMsgs);
 		requestMap.put("warnings", warnings);
 		requestMap.put("announcements", announcements);
+		requestMap.put("collection", collection);
 	}
 	
 	public Map<String, Object> getRequestMap() {
@@ -149,42 +151,44 @@ public abstract class AbstractSyntaxTree {
 		group.put("@type", "korap:group");
 		group.put("operation", "operation:position");
 		group.put("frames", Arrays.asList(allowedFrames));
-		group.put("sharedClasses", Arrays.asList(sharedClasses));
+//		group.put("sharedClasses", Arrays.asList(sharedClasses));
 		group.put("operands", new ArrayList<Object>());
 		// DEPRECATED 'frame'
+		if (sharedClasses.length==0) sharedClasses = new String[]{"classRefCheck:includes"};
 		String frame = "";
-		if (allowedFrames.length==0 && sharedClasses[0]=="sharedClasses:includes") {
+		
+		if (allowedFrames.length==0 && sharedClasses[0]=="classRefCheck:includes") {
 			frame = "frame:contains";
-		} else if (allowedFrames.length==0 && sharedClasses[0]=="sharedClasses:intersects") {
+		} else if (allowedFrames.length==0 && sharedClasses[0]=="classRefCheck:intersects") {
 			frame = "frame:overlaps";
-		} else if (allowedFrames[0]=="frame:startswith" && sharedClasses[0]=="sharedClasses:includes") {
+		} else if (allowedFrames[0]=="frames:startswith" && sharedClasses[0]=="classRefCheck:includes") {
 			frame = "frame:startswith";
-		} else if (allowedFrames[0]=="frame:endswith" && sharedClasses[0]=="sharedClasses:includes") {
+		} else if (allowedFrames[0]=="frames:endswith" && sharedClasses[0]=="classRefCheck:includes") {
 			frame = "frame:endswith";
-		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:includes" && sharedClasses.length==1) {
+		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:includes" && sharedClasses.length==1) {
 			frame = "frame:endswith";
-		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:includes" && sharedClasses[1]=="sharedClasses:unequals") {
+		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:includes" && sharedClasses[1]=="classRefCheck:unequals") {
 			frame = "frame:matches";
-		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:equals") {
+		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:equals") {
 			frame = "frame:matches";			
-		} else if (allowedFrames[0]=="frame:contains" && sharedClasses[0]=="sharedClasses:includes") {
+		} else if (allowedFrames[0]=="frames:contains" && sharedClasses[0]=="classRefCheck:includes") {
 			frame = "frame:contains";
-		} else if (allowedFrames[0]=="frame:startswith" && sharedClasses[0]=="sharedClasses:intersects") {
+		} else if (allowedFrames[0]=="frames:startswith" && sharedClasses[0]=="classRefCheck:intersects") {
 			frame = "frame:overlapsLeft";
-		} else if (allowedFrames[0]=="frame:endswith" && sharedClasses[0]=="sharedClasses:intersects") {
+		} else if (allowedFrames[0]=="frames:endswith" && sharedClasses[0]=="classRefCheck:intersects") {
 			frame = "frame:overlapsRight";
-		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:intersects") {
+		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:intersects") {
 			frame = "frame:matches";
-		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:unequals") {
+		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:unequals") {
 			frame = "frame:matches";
-		} else if (allowedFrames[0]=="frame:matches" && sharedClasses[0]=="sharedClasses:equals") {
+		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:equals") {
 			frame = "frame:matches";
-		} else if (allowedFrames[0]=="frame:contains" && sharedClasses[0]=="sharedClasses:intersects") {
+		} else if (allowedFrames[0]=="frames:contains" && sharedClasses[0]=="classRefCheck:intersects") {
 			frame = "frame:contains";
 		}
 		group.put("frame", frame);
 		announcements.add("Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
-				"Position frames are now expressed through 'frames' and 'sharedClasses'");
+				"Position frames are now expressed through 'frames' and 'sharedClasses'.");
 		return group;
 	}
 	
@@ -198,11 +202,41 @@ public abstract class AbstractSyntaxTree {
 		group.put("operation", "operation:class");
 		if (setBySystem) {
 			group.put("class", 1024+classCount);
+			group.put("classOut", 1024+classCount);
 			announcements.add("A class has been introduced into the backend representation of " +
-					"your query for later reference to a part of the query. The class id is "+classCount);
+					"your query for later reference to a part of the query. The class id is "+(1024+classCount));
 		} else {
 			group.put("class", classCount);
+			group.put("classOut", classCount);
 		}
+		announcements.add("Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
+				"Classes are now defined using the 'classOut' attribute.");
+		group.put("operands", new ArrayList<Object>());
+		return group;
+	}
+	
+	protected LinkedHashMap<String, Object> makeClassRefCheck(ArrayList<String> check, Integer[] classIn, int classOut) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:group");
+		group.put("operation", "operation:class");
+		if (check.size()==1) {
+			group.put("classRefCheck", check.get(0));
+		} else {
+			group.put("classRefCheck", check);
+		}
+		group.put("classIn", Arrays.asList(classIn));
+		group.put("classOut", classOut);
+		group.put("operands", new ArrayList<Object>());
+		return group;
+	}
+	
+	protected LinkedHashMap<String, Object> makeClassRefOp(String operation, Integer[] classIn, int classOut) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:group");
+		group.put("operation", "operation:class");
+		group.put("classRefOp", operation);
+		group.put("classIn", Arrays.asList(classIn));
+		group.put("classOut", classOut);
 		group.put("operands", new ArrayList<Object>());
 		return group;
 	}

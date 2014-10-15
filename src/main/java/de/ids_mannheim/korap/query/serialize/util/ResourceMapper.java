@@ -18,7 +18,7 @@ public class ResourceMapper {
         map.put("const", "c");
         map.put("dep", "d");
         map.put("morph", "msd");
-        map.put("ANA", "pos");
+        map.put("ANA", "p");
     }
 
     public static String descriptor2policy(String descriptor) {
