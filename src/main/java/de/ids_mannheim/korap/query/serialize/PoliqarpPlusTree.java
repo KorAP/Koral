@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
 	private static Logger log = LoggerFactory.getLogger(PoliqarpPlusTree.class);
+	private int classCounter = 1024;
 
 	/**
 	 * Most centrally, this class maintains a set of nested maps and lists which represent the JSON tree, which is built by the JSON serialiser
@@ -101,7 +102,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		if (nodeCat.equals("sequence")) {
 			LinkedHashMap<String,Object> sequence = makeGroup("sequence");
 			ParseTree distanceNode = getFirstChildWithCat(node, "distance");
-			
+
 			if (distanceNode!=null) {
 				Integer[] minmax = parseDistance(distanceNode);
 				LinkedHashMap<String,Object> distance = makeDistance("w", minmax[0], minmax[1]);
@@ -115,7 +116,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			objectStack.push(sequence);
 			stackedObjects++;
 		}
-		
+
 		/*
 		 * empty tokens at beginning/end of sequence
 		 */
@@ -134,7 +135,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			objectStack.push(object);
 			stackedObjects++;
 		}
-		
+
 		if (nodeCat.equals("emptyTokenSequenceClass")) {
 			Integer[] minmax = parseDistance(node);
 			int classId = 0;
@@ -146,7 +147,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			objectStack.push(classGroup);
 			stackedObjects++;
 		}
-		
+
 
 		if (nodeCat.equals("token")) {
 			LinkedHashMap<String,Object> token = makeToken();
@@ -158,7 +159,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			if (getNodeCat(node.getChild(0)).equals("key")) {
 				// no 'term' child, but direct key specification: process here
 				LinkedHashMap<String,Object> term = makeTerm();
-				
+
 				String key = node.getChild(0).getText();
 				if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
 					isRegex = true;
@@ -196,10 +197,23 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		}
 
 		if (nodeCat.equals("alignment")) {
-			LinkedHashMap<String,Object> aligned = makeGroup("alignment");
-			aligned.put("align", "align:left");
-			putIntoSuperObject(aligned);
-			objectStack.push(aligned);
+			LinkedHashMap<String,Object> alignClass = makeSpanClass(++classCounter,false);
+			LinkedHashMap<String,Object> metaMap = (LinkedHashMap<String, Object>) requestMap.get("meta");
+			if (metaMap.containsKey("alignment")) {
+				ArrayList<Integer> alignedClasses = new ArrayList<Integer>();
+				try {
+					alignedClasses = (ArrayList<Integer>) metaMap.get("alignment"); 
+				} catch (ClassCastException cce) {
+					alignedClasses.add((Integer) metaMap.get("alignment"));
+				}
+				alignedClasses.add(classCounter);
+				metaMap.put("alignment", alignedClasses);
+			} else {
+				metaMap.put("alignment", classCounter);
+			}
+
+			putIntoSuperObject(alignClass);
+			objectStack.push(alignClass);
 			stackedObjects++;
 		}
 
@@ -281,7 +295,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			objectStack.push(relationGroup);
 			stackedObjects++;
 		}
-		
+
 		if (nodeCat.equals("spanclass")) {
 			// Step I: get info
 			int classId = 0;
@@ -371,7 +385,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			stackedObjects++;
 			visited.add(node.getChild(0));
 		}
-		
+
 		if (nodeCat.equals("meta")) {
 			LinkedHashMap<String, Object> metaFilter = new LinkedHashMap<String, Object>();
 			requestMap.put("meta", metaFilter);
@@ -455,26 +469,26 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	private LinkedHashMap<String,Object> parseFrame(ParseTree node) {
 		String operator = node.toStringTree(parser).toLowerCase();
 		String[] frames = new String[]{""};
-		String[] sharedClasses = new String[]{"sharedClasses:includes"};
+		String[] classRefCheck = new String[]{"classRefCheck:includes"};
 		switch (operator) {
-			case "contains":
-				frames = new String[]{};
-				break;
-			case "matches":
-				frames = new String[]{"frame:matches"};
-				break;
-			case "startswith":
-				frames = new String[]{"frame:startswith"};
-				break;
-			case "endswith":
-				frames = new String[]{"frame:endswith"};
-				break;	
-			case "overlaps":
-				frames = new String[]{"frame:overlapsLeft","frame:overlapsRight"};
-				sharedClasses = new String[]{"sharedClasses:intersects"};
-				break;
+		case "contains":
+			frames = new String[]{"frames:contains"};
+			break;
+		case "matches":
+			frames = new String[]{"frames:matches"};
+			break;
+		case "startswith":
+			frames = new String[]{"frames:startswith"};
+			break;
+		case "endswith":
+			frames = new String[]{"frames:endswith"};
+			break;	
+		case "overlaps":
+			frames = new String[]{"frames:overlapsLeft","frames:overlapsRight"};
+			classRefCheck = new String[]{"classRefCheck:intersects"};
+			break;
 		}
-		return makePosition(frames,sharedClasses);
+		return makePosition(frames,classRefCheck);
 	}
 
 
@@ -482,7 +496,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			ParseTree node, boolean negated) {
 		return parseTermOrTermGroup(node, negated, "token");
 	}
-	
+
 	/**
 	 * Parses a (term) or (termGroup) node
 	 * @param node
@@ -611,11 +625,11 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		Integer max = minmax[1];
 		min++;
 		if (max != null) max++;
-//		min = cropToMaxValue(min);
-//		max = cropToMaxValue(max);
+		//		min = cropToMaxValue(min);
+		//		max = cropToMaxValue(max);
 		return new Integer[]{min, max};
 	}
-	
+
 	private Integer[] parseEmptySegments(ParseTree emptySegments) {
 		Integer min = 0;
 		Integer max = 0;
@@ -638,8 +652,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				}
 			}
 		}
-//		min = cropToMaxValue(min);
-//		max = cropToMaxValue(max);
+		//		min = cropToMaxValue(min);
+		//		max = cropToMaxValue(max);
 		return new Integer[]{min, max};
 	}
 

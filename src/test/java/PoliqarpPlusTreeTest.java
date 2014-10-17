@@ -10,6 +10,8 @@ public class PoliqarpPlusTreeTest {
 	PoliqarpPlusTree ppt;
 	String map;
 	String expected;
+	String metaExpected;
+	String metaMap;
 	String query;
 	
 	private boolean equalsQueryContent(String res, String query) throws QueryException {
@@ -21,14 +23,13 @@ public class PoliqarpPlusTreeTest {
 	
 	@Test
 	public void testContext() throws QueryException {
-		String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld";
+		String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld";
 		ppt = new PoliqarpPlusTree("Test");
 		assertEquals(contextString.replaceAll(" ", ""), ppt.getRequestMap().get("@context").toString().replaceAll(" ", ""));
 	}
 	
 	@Test
 	public void testSingleTokens() throws QueryException {
-		String query;
 		// [base=Mann]
 		String token1 = "{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}";
 		assertTrue(equalsQueryContent(token1, "[base=Mann]"));
@@ -60,8 +61,6 @@ public class PoliqarpPlusTreeTest {
 	
 	@Test
 	public void testValue() throws QueryException {
-		String query;
-		
 		query = "[mate/m=temp:pres]";
 		String value1 = "{@type=korap:token, wrap={@type=korap:term, foundry=mate, layer=m, key=temp, value=pres, match=match:eq}}";
 		ppt = new PoliqarpPlusTree(query);
@@ -71,7 +70,7 @@ public class PoliqarpPlusTreeTest {
 	
 	@Test
 	public void testRegex() throws QueryException {
-		String query = "[orth=\"M(a|ä)nn(er)?\"]";
+		query = "[orth=\"M(a|ä)nn(er)?\"]";
 		String re1 = "{@type=korap:token, wrap={@type=korap:term, layer=orth, type=type:regex, key=M(a|ä)nn(er)?, match=match:eq}}";
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
@@ -110,7 +109,7 @@ public class PoliqarpPlusTreeTest {
 	
 	@Test
 	public void testCaseSensitivityFlag() throws QueryException {
-		String query="[orth=deutscher/i]";
+		query="[orth=deutscher/i]";
 		String cs1 = 
 				"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=deutscher, match=match:eq, caseInsensitive=true}}";
 		ppt = new PoliqarpPlusTree(query);
@@ -386,7 +385,7 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:group, operation=operation:sequence, " +
 				"operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+					"{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 					  "{@type=korap:span, key=s}," +
 					  "{@type=korap:span, key=np}" +
 					"], frame=frame:contains}" +
@@ -405,7 +404,7 @@ public class PoliqarpPlusTreeTest {
 		expected = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
 						"{@type=korap:token}" +
 					"]}," +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
@@ -417,7 +416,7 @@ public class PoliqarpPlusTreeTest {
 		query = "{1:[]}[base=der][base=Mann]";
 		expected = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
-					"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
 						"{@type=korap:token}" +
 					"]}," +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
@@ -432,7 +431,7 @@ public class PoliqarpPlusTreeTest {
 	public void testLeadingTrailingEmptyTokens() throws QueryException {
 		// startswith(<s>, [][base=Mann]
 		String et1 = 
-			"{@type=korap:group, operation=operation:position, frames=[frame:startswith],sharedClasses=[sharedClasses:includes], operands=[" +	
+			"{@type=korap:group, operation=operation:position, frames=[frames:startswith], operands=[" +	
 				"{@type=korap:span, key=s}," +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token}," +
@@ -498,7 +497,7 @@ public class PoliqarpPlusTreeTest {
 					"{@type=korap:group, operation=operation:repetition, operands=[" +
 						"{@type=korap:token}" +
 					"], boundary={@type=korap:boundary, min=1}, min=1}," +
-					"{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+					"{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 					  "{@type=korap:span, key=s}," +
 					  "{@type=korap:span, key=np}" +
 					"], frame=frame:contains}," +
@@ -874,7 +873,7 @@ public class PoliqarpPlusTreeTest {
 	public void testClasses() throws QueryException {
 		String query;
 		// {[base=Mann]}
-		String cls1 = "{@type=korap:group, operation=operation:class, class=0, operands=[" +
+		String cls1 = "{@type=korap:group, operation=operation:class, class=0, classOut=0, operands=[" +
 				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 				"]}";
 		ppt = new PoliqarpPlusTree("{[base=Mann]}");
@@ -883,7 +882,7 @@ public class PoliqarpPlusTreeTest {
 		
 		// {[base=Mann][orth=Frau]}
 		query = "{[base=Mann][orth=Frau]}";
-		String cls2 = "{@type=korap:group, operation=operation:class, class=0, operands=[" +
+		String cls2 = "{@type=korap:group, operation=operation:class, class=0, classOut=0, operands=[" +
 				 "{@type=korap:group, operation=operation:sequence, operands=[" +
 				  "{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
 				  "{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Frau, match=match:eq}}" +
@@ -896,7 +895,7 @@ public class PoliqarpPlusTreeTest {
 		// [p=NN]{[base=Mann][orth=Frau]}
 		String cls3 = "{@type=korap:group, operation=operation:sequence, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=p, key=NN, match=match:eq}}," +
-						"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+						"{@type=korap:group, operation=operation:class, class=0, classOut=0, operands=[" +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Frau, match=match:eq}}" +
@@ -909,7 +908,7 @@ public class PoliqarpPlusTreeTest {
 		
 		// {[base=Mann][orth=Frau]}[p=NN]
 		String cls4 = "{@type=korap:group, operation=operation:sequence, operands=[" +
-						"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+						"{@type=korap:group, operation=operation:class, class=0, classOut=0, operands=[" +
 						   "{@type=korap:group, operation=operation:sequence, operands=[" +
 						     "{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
 						     "{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Frau, match=match:eq}}" +
@@ -922,9 +921,9 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(cls4.replaceAll(" ", ""), map.replaceAll(" ", ""));
 
 		// {2:{1:[tt/p=ADJA]}[mate/p=NN]}"
-		String cls5 = "{@type=korap:group, operation=operation:class, class=2, operands=[" +
+		String cls5 = "{@type=korap:group, operation=operation:class, class=2, classOut=2, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
-						   "{@type=korap:group, operation=operation:class, class=1, operands=[" +
+						   "{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
 						     "{@type=korap:token, wrap={@type=korap:term, foundry=tt, layer=p, key=ADJA, match=match:eq}}" +
 						   "]}," +
 						   "{@type=korap:token, wrap={@type=korap:term, foundry=mate, layer=p, key=NN, match=match:eq}}" + 
@@ -938,21 +937,21 @@ public class PoliqarpPlusTreeTest {
 	@Test
 	public void testPositions() throws QueryException {
 		// contains(<s>,<np>)
-		String pos1 = "{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+		String pos1 = "{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 				  "{@type=korap:span, key=s}," +
 				  "{@type=korap:span, key=np}" +
 				"], frame=frame:contains}";
 		assertTrue(equalsQueryContent(pos1, "contains(<s>,<np>)"));
 		
 		// contains(<s>,[base=Mann])
-		String pos2 = "{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+		String pos2 = "{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 				  "{@type=korap:span, key=s}," +
 				  "{@type=korap:token, wrap= {@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 				"], frame=frame:contains}";
 		assertTrue(equalsQueryContent(pos2, "contains(<s>,[base=Mann])"));
 		
 		// contains(<s>,[orth=der][orth=Mann])
-		String pos3 = "{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+		String pos3 = "{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 				  	"{@type=korap:span, key=s}," +
 				  	"{@type=korap:group, operation=operation:sequence, operands=[" +
 				  		"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=der, match=match:eq}}," +
@@ -967,7 +966,7 @@ public class PoliqarpPlusTreeTest {
 		String pos4 = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Auto, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+					"{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 				  		"{@type=korap:span, key=s}," +
 				  		"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
 				  	"], frame=frame:contains}" +
@@ -978,7 +977,7 @@ public class PoliqarpPlusTreeTest {
 		
 		// contains(<s>,[pos=N]*)
 		String pos5 = 
-					"{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+					"{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 				  		"{@type=korap:span, key=s}," +
 				  		"{@type=korap:group, operation=operation:repetition, " +
 				  			"operands=[{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}" +
@@ -993,7 +992,7 @@ public class PoliqarpPlusTreeTest {
 		String pos6 = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Auto, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+					"{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 				  		"{@type=korap:span, key=s}," +
 				  		"{@type=korap:group, operation=operation:repetition, " +
 				  			"operands=[{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}" +
@@ -1010,9 +1009,9 @@ public class PoliqarpPlusTreeTest {
 	public void testNestedPositions() throws QueryException {
 		// contains(<s>,startswith(<np>,[orth=Der]))
 		String npos1 = 
-			"{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+			"{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 				"{@type=korap:span, key=s}," +
-				"{@type=korap:group, operation=operation:position, frames=[frame:startswith],sharedClasses=[sharedClasses:includes], operands=[" +
+				"{@type=korap:group, operation=operation:position, frames=[frames:startswith], operands=[" +
 					"{@type=korap:span, key=np}," +
 					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Der, match=match:eq}}" +
 				"], frame=frame:startswith}" +
@@ -1029,7 +1028,7 @@ public class PoliqarpPlusTreeTest {
 			"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Der, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=0, classOut=0, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
 					"]}" +
 				"]}" +
@@ -1043,7 +1042,7 @@ public class PoliqarpPlusTreeTest {
 			"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Der, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=0, classOut=0, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}," +
 							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=geht, match=match:eq}}" +
@@ -1060,7 +1059,7 @@ public class PoliqarpPlusTreeTest {
 			"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Der, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}," +
 							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=geht, match=match:eq}}" +
@@ -1075,9 +1074,9 @@ public class PoliqarpPlusTreeTest {
 		// focus(1:startswith(<s>,{1:<np>}))
 		String shr4 = 
 			"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
-				"{@type=korap:group, operation=operation:position, frames=[frame:startswith],sharedClasses=[sharedClasses:includes], operands=[" +
+				"{@type=korap:group, operation=operation:position, frames=[frames:startswith], operands=[" +
 					"{@type=korap:span, key=s}," +
-					"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
 						"{@type=korap:span, key=np}" +
 					"]}" +
 				"], frame=frame:startswith}" +
@@ -1089,15 +1088,15 @@ public class PoliqarpPlusTreeTest {
 		// focus(3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}})) 
 		String shr5 = 
 			"{@type=korap:reference, operation=operation:focus, classRef=[3], operands=[" +
-				"{@type=korap:group, operation=operation:position, frames=[frame:startswith],sharedClasses=[sharedClasses:includes], operands=[" +
+				"{@type=korap:group, operation=operation:position, frames=[frames:startswith], operands=[" +
 					"{@type=korap:span, key=s}," +
-					"{@type=korap:group, operation=operation:class, class=3, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=3, classOut=3, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
 								"{@type=korap:group, operation=operation:sequence, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, foundry=mate, layer=p, key=ADJA, match=match:eq}}," +
-									"{@type=korap:group, operation=operation:class, class=2, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=2, classOut=2, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, foundry=tt, layer=p, key=NN, match=match:eq}}" +
 									"]}" + 
 								"]}" +
@@ -1113,15 +1112,15 @@ public class PoliqarpPlusTreeTest {
 		// split(3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}})) 
 		String shr6 = 
 			"{@type=korap:reference, operation=operation:split, classRef=[3], operands=[" +
-				"{@type=korap:group, operation=operation:position, frames=[frame:startswith],sharedClasses=[sharedClasses:includes], operands=[" +
+				"{@type=korap:group, operation=operation:position, frames=[frames:startswith], operands=[" +
 					"{@type=korap:span, key=s}," +
-					"{@type=korap:group, operation=operation:class, class=3, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=3, classOut=3, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
 								"{@type=korap:group, operation=operation:sequence, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, foundry=mate, layer=p, key=ADJA, match=match:eq}}," +
-									"{@type=korap:group, operation=operation:class, class=2, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=2, classOut=2, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, foundry=tt, layer=p, key=NN, match=match:eq}}" +
 									"]}" + 
 								"]}" +
@@ -1137,15 +1136,15 @@ public class PoliqarpPlusTreeTest {
 		// split(2|3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}})) 
 		String shr7 = 
 			"{@type=korap:reference, operation=operation:split, classRef=[2, 3], classRefOp=classRefOp:intersection, operands=[" +
-				"{@type=korap:group, operation=operation:position, frames=[frame:startswith],sharedClasses=[sharedClasses:includes], operands=[" +
+				"{@type=korap:group, operation=operation:position, frames=[frames:startswith], operands=[" +
 					"{@type=korap:span, key=s}," +
-					"{@type=korap:group, operation=operation:class, class=3, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=3, classOut=3, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
 								"{@type=korap:group, operation=operation:sequence, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, foundry=mate, layer=p, key=ADJA, match=match:eq}}," +
-									"{@type=korap:group, operation=operation:class, class=2, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=2, classOut=2, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, foundry=tt, layer=p, key=NN, match=match:eq}}" +
 									"]}" + 
 								"]}" +
@@ -1162,10 +1161,10 @@ public class PoliqarpPlusTreeTest {
 		String shr8 = 
 			"{@type=korap:reference, operation=operation:focus, classRef=[1], operands=[" +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
-					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=0, classOut=0, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}" +
 					"]}," +
-					"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=ADJA, match=match:eq}}" +
 					"]}" +
 				"]}" +
@@ -1201,7 +1200,7 @@ public class PoliqarpPlusTreeTest {
 		query = "submatch(1,4:contains(<s>,[base=Haus]))";
 		expected = 
 			"{@type=korap:reference, operation=operation:focus, operands=[" +
-				"{@type=korap:group, operation=operation:position, frames=[],sharedClasses=[sharedClasses:includes], operands=[" +
+				"{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
 					"{@type=korap:span, key=s}," +
 					"{@type=korap:token, wrap= {@type=korap:term, layer=lemma, key=Haus, match=match:eq}}" +
 				"], frame=frame:contains}" +
@@ -1308,85 +1307,106 @@ public class PoliqarpPlusTreeTest {
 	@Test
 	public void testAlign() throws QueryException {
 		// [orth=der]^[orth=Mann]
-		String align1 = 
+		query = "[orth=der]^[orth=Mann]";
+		expected = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=der, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:alignment, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
-					"], align=align:left}" +
+					"]}" +
 				"]}";
-		ppt = new PoliqarpPlusTree("[orth=der]^[orth=Mann]");
+		metaExpected = 
+				"{alignment=1025}";
+		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
-		assertEquals(align1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		metaMap = ppt.getRequestMap().get("meta").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(metaExpected.replaceAll(" ", ""), metaMap.replaceAll(" ", ""));
 		
 		// [orth=der]^[orth=große][orth=Mann]
-		String query = "[orth=der]^[orth=große][orth=Mann]";
-		String align1b = 
+		query = "[orth=der]^[orth=große][orth=Mann]";
+		String expected = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=der, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:alignment, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=große, match=match:eq}}," +
 							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
 						"]}" +
-					"], align=align:left}" +
+					"]}" +
 				"]}";
+		metaExpected = 
+				"{alignment=1025}";
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
-		assertEquals(align1b.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		metaMap = ppt.getRequestMap().get("meta").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(metaExpected.replaceAll(" ", ""), metaMap.replaceAll(" ", ""));
 		
-		// "([base=a]^[base=b])|[base=c]",
-		String align2 = 
+		query = "([base=a]^[base=b])|[base=c]";
+		expected = 
 				"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=a, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:alignment, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=b, match=match:eq}}" +
-							"], align=align:left}" +
+							"]}" +
 						"]}," +
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=c, match=match:eq}}" +
 				"]}";
-		ppt = new PoliqarpPlusTree("([base=a]^[base=b])|[base=c]");
+		metaExpected = 
+				"{alignment=1025}";
+		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
-		assertEquals(align2.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		metaMap = ppt.getRequestMap().get("meta").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(metaExpected.replaceAll(" ", ""), metaMap.replaceAll(" ", ""));
 		
-		// "([base=a]^[base=b][base=c])|[base=d]",
-		String align3 = 
+		query = "([base=a]^[base=b][base=c])|[base=d]";
+		expected = 
 				"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=a, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:alignment, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
 								"{@type=korap:group, operation=operation:sequence, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=b, match=match:eq}}," +
 									"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=c, match=match:eq}}" +
 								"]}" +
-							"], align=align:left}" +
+							"]}" +
 						"]}," +
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=d, match=match:eq}}" +
 				"]}";
-		ppt = new PoliqarpPlusTree("([base=a]^[base=b][base=c])|[base=d]");
+		metaExpected = 
+				"{alignment=1025}";
+		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
-		assertEquals(align3.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		metaMap = ppt.getRequestMap().get("meta").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(metaExpected.replaceAll(" ", ""), metaMap.replaceAll(" ", ""));
 		
-		// "([base=a]^[base=b]^[base=c])|[base=d]",
-		String align4 = 
+		query = "([base=a]^[base=b]^[base=c])|[base=d]";
+		expected = 
 				"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=a, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:alignment, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
 								"{@type=korap:group, operation=operation:sequence, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=b, match=match:eq}}," +
-									"{@type=korap:group, operation=operation:alignment, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=1026, classOut=1026, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=c, match=match:eq}}" +
-									"], align=align:left}" +
+									"]}" +
 								"]}" +
-							"], align=align:left}" +
+							"]}" +
 						"]}," +
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=d, match=match:eq}}" +
 				"]}";
-		ppt = new PoliqarpPlusTree("([base=a]^[base=b]^[base=c])|[base=d]");
+		metaExpected = 
+				"{alignment=[1025,1026]}";
+		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
-		assertEquals(align4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		metaMap = ppt.getRequestMap().get("meta").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		assertEquals(metaExpected.replaceAll(" ", ""), metaMap.replaceAll(" ", ""));
 		
 		
 	}

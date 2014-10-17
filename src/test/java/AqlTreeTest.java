@@ -20,7 +20,7 @@ public class AqlTreeTest {
 	
 	@Test
 	public void testContext() throws QueryException {
-		String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld";
+		String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld";
 		aqlt = new AqlTree("Test");
 		assertEquals(contextString.replaceAll(" ", ""), aqlt.getRequestMap().get("@context").toString().replaceAll(" ", ""));
 	}
@@ -194,7 +194,7 @@ public class AqlTreeTest {
 						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:relation, operands=[" +
 								"{@type=korap:span, layer=cat, key=CP, match=match:eq}," +
-								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 									"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
 								"]}" +
 							"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
@@ -214,12 +214,12 @@ public class AqlTreeTest {
 								"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 									"{@type=korap:group, operation=operation:relation, operands=[" +
 										"{@type=korap:span, layer=cat, key=CP, match=match:eq}," +
-										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+										"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 											"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
 										"]}" +
 									"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 								"]}," +
-								"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+								"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
 									"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
 								"]}" +
 							"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
@@ -308,7 +308,7 @@ public class AqlTreeTest {
 						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
-								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 								"]}" +
 							"], distances=[" +
@@ -330,7 +330,7 @@ public class AqlTreeTest {
 						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:sequence, operands=[" +
 								"{@type=korap:span}," +
-								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 									"{@type=korap:span}" +
 								"]} "+
 							"], inOrder=true}" +
@@ -352,14 +352,14 @@ public class AqlTreeTest {
 							"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 								"{@type=korap:group, operation=operation:sequence, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
-									"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 									"]}" +
 								"], distances=[" +
 									"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=2}, min=0, max=2}" +
 								"], inOrder=true}" +
 							"]}," +	
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
 							"]}" +
 						"],distances=[" +
@@ -381,7 +381,7 @@ public class AqlTreeTest {
 							"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 									"{@type=korap:group, operation=operation:relation, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
-										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+										"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 											"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 										"]}" +
 									"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
@@ -401,7 +401,7 @@ public class AqlTreeTest {
 							"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 									"{@type=korap:group, operation=operation:relation, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
-										"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+										"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 											"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
 										"]}" +
 									"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
@@ -422,13 +422,13 @@ public class AqlTreeTest {
 						"{@type=korap:group, operation=operation:relation, operands=[" +
 							"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 								"{@type=korap:group, operation=operation:relation, operands=[" +
-									"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 										"{@type=korap:span}" +
 									"]}," +
 									"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
 								"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 							"]}," +
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
 								"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
 							"]}" +
 						"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}" +
@@ -449,10 +449,10 @@ public class AqlTreeTest {
 		String eq2 =
 				"{@type=korap:group, operation=operation:position, frames=[frame:startswith], sharedClasses=[sharedClasses:includes], operands=[" +
 						"{@type=korap:group, operation=operation:relation, operands=[" +
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=, classOut=1025, operands=[" +
 								"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
 							"]}," +
-							"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=, classOut=1025, operands=[" +
 								"{@type=korap:span, layer=cat, key=VP, match=match:eq}" +
 							"]}" +
 						"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}," +
@@ -530,7 +530,7 @@ public class AqlTreeTest {
 			"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
 					"]}" +
 				"], inOrder=true}" +
@@ -548,7 +548,7 @@ public class AqlTreeTest {
 			"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
 					"]}" +
 				"], inOrder=true}" +
@@ -564,7 +564,7 @@ public class AqlTreeTest {
 			"{@type=korap:group, operation=operation:relation, operands=[" +
 				"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 					"{@type=korap:group, operation=operation:relation, operands=[" +
-						"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+						"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}" +
 						"]}," +
 						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
@@ -585,16 +585,16 @@ public class AqlTreeTest {
 							// dominance relation #1 > #2 is reduced to #1, for expressing #1 > #3
 							"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 								"{@type=korap:group, operation=operation:relation, operands=[" +
-									"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 										"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
 									"]}," +
-									"{@type=korap:group, operation=operation:class, class=1, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
 									"]}" +
 								"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
 							"]}," +
 							// establish class 2 around P for later reference
-							"{@type=korap:group, operation=operation:class, class=2, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=1026, classOut=1026, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
 							"]}" +
 						"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
@@ -649,7 +649,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:relation, operands=[" +
-								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 									"{@type=korap:span}" +
 								"]}," +
 								"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
@@ -669,7 +669,7 @@ public class AqlTreeTest {
 						"{@type=korap:group, operation=operation:relation, operands=[" +
 							"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 								"{@type=korap:group, operation=operation:relation, operands=[" +
-									"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 										"{@type=korap:span}" +
 									"]}," +
 									"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
@@ -695,7 +695,7 @@ public class AqlTreeTest {
 								"{@type=korap:group, operation=operation:relation, operands=[" +
 									"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 										"{@type=korap:group, operation=operation:relation, operands=[" +
-											"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+											"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 												"{@type=korap:span}" +
 											"]}," +
 											"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +
@@ -720,7 +720,7 @@ public class AqlTreeTest {
 				"{@type=korap:group, operation=operation:relation, operands=[" +
 						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
 							"{@type=korap:group, operation=operation:relation, operands=[" +
-								"{@type=korap:group, operation=operation:class, class=0, operands=[" +
+								"{@type=korap:group, operation=operation:class, class=1024, classOut=1024, operands=[" +
 									"{@type=korap:span}" +
 								"]}," +
 								"{@type=korap:span, layer=cat, key=NP, match=match:eq}" +

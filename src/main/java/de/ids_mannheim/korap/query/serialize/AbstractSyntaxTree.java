@@ -64,6 +64,7 @@ public abstract class AbstractSyntaxTree {
 		requestMap.put("warnings", warnings);
 		requestMap.put("announcements", announcements);
 		requestMap.put("collection", collection);
+		requestMap.put("meta", new LinkedHashMap<String, Object>());
 	}
 	
 	public Map<String, Object> getRequestMap() {
@@ -267,7 +268,11 @@ public abstract class AbstractSyntaxTree {
 
 	protected LinkedHashMap<String, Object> makeDistance(String key, Integer min, Integer max) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
-		group.put("@type", "korap:distance");
+		if (key.equals("w")) {
+			group.put("@type", "korap:distance");
+		} else {
+			group.put("@type", "cosmas:distance");
+		}
 		group.put("key", key);
 		group.put("boundary", makeBoundary(min, max));
 		group.put("min", min);

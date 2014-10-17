@@ -168,7 +168,7 @@ public class CosmasTreeTest {
 		query="(Sonne oder Mond) und scheint";
 		String orand1 = 
 				"{@type=korap:group, operation=operation:sequence, distances=[" +
-					"{@type=korap:distance, key=t, min=0, max=0}" +
+					"{@type=cosmas:distance, key=t, min=0, max=0}" +
 					"], operands=[" +
 						"{@type=korap:group, operation=operation:or, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
@@ -183,7 +183,7 @@ public class CosmasTreeTest {
 		query="scheint und (Sonne oder Mond)";
 		String orand2 = 
 				"{@type=korap:group, operation=operation:sequence, distances=[" +
-						"{@type=korap:distance, key=t, min=0, max=0}" +
+						"{@type=cosmas:distance, key=t, min=0, max=0}" +
 					"], operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, key=scheint, layer=orth, match=match:eq}}," +
 						"{@type=korap:group, operation=operation:or, operands=[" +
@@ -198,11 +198,11 @@ public class CosmasTreeTest {
 		query="Regen und scheint und (Sonne oder Mond)";
 		String orand3 = 
 				"{@type=korap:group, operation=operation:sequence, distances=[" +
-						"{@type=korap:distance, key=t, min=0, max=0}" +
+						"{@type=cosmas:distance, key=t, min=0, max=0}" +
 				"], operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, key=Regen, layer=orth, match=match:eq}}," +
 					"{@type=korap:group, operation=operation:sequence, distances=[" +
-							"{@type=korap:distance, key=t, min=0, max=0}" +
+							"{@type=cosmas:distance, key=t, min=0, max=0}" +
 						"], operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, key=scheint, layer=orth, match=match:eq}}," +
 							"{@type=korap:group, operation=operation:or, operands=[" +
@@ -253,8 +253,8 @@ public class CosmasTreeTest {
 						"], inOrder=true, " +
 						"distances=[" +
 							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4}," +
-							"{@type=korap:distance, key=s, boundary={@type=korap:boundary, min=0, max=0}, min=0, max=0}," +
-							"{@type=korap:distance, key=p, boundary={@type=korap:boundary, min=1, max=3}, min=1, max=3}" +
+							"{@type=cosmas:distance, key=s, boundary={@type=korap:boundary, min=0, max=0}, min=0, max=0}," +
+							"{@type=cosmas:distance, key=p, boundary={@type=korap:boundary, min=1, max=3}, min=1, max=3}" +
 						"]" +
 					"}" +
 				"]}";
@@ -276,8 +276,8 @@ public class CosmasTreeTest {
 						"], inOrder=true, " +
 						"distances=[" +
 							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=4}, min=1, max=4, exclude=true}," +
-							"{@type=korap:distance, key=s, boundary={@type=korap:boundary, min=0, max=0}, min=0, max=0, exclude=true}," +
-							"{@type=korap:distance, key=p, boundary={@type=korap:boundary, min=1, max=3}, min=1, max=3, exclude=true}" +
+							"{@type=cosmas:distance, key=s, boundary={@type=korap:boundary, min=0, max=0}, min=0, max=0, exclude=true}," +
+							"{@type=cosmas:distance, key=p, boundary={@type=korap:boundary, min=1, max=3}, min=1, max=3, exclude=true}" +
 						"]" +
 					"}" +
 				"]}";
@@ -801,7 +801,7 @@ public class CosmasTreeTest {
 		query="Sonne nicht Mond";
 		String opnot1 = 
 					"{@type=korap:group, operation=operation:sequence, distances=[" +
-						"{@type=korap:distance, key=t, min=0, max=0, exclude=true}" +
+						"{@type=cosmas:distance, key=t, min=0, max=0, exclude=true}" +
 					"], operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, key=Sonne, layer=orth, match=match:eq}}," +
 						"{@type=korap:token, wrap={@type=korap:term, key=Mond, layer=orth, match=match:eq}}" +
@@ -1175,23 +1175,6 @@ public class CosmasTreeTest {
 	@Test
 	public void testOPNHIT() throws QueryException {
 		query="#NHIT(gehen /w1:10 voran)";
-//		String nhit1 = 
-//				"{@type=korap:reference, operation=operation:focus, classRef=[1025], classRefOp=classRefOp:inversion, operands=[" +
-//					"{@type=korap:group, operation=operation:sequence, " +
-//						"operands=[" +
-//							"{@type=korap:group, operation=operation:class, class= , classOut=1025, operands=[" +
-//								"{@type=korap:token, wrap={@type=korap:term, key=gehen, layer=orth, match=match:eq}}" +
-//							"]}," +
-//							"{@type=korap:group, operation=operation:class, class= , classOut=1025, operands=[" +
-//								"{@type=korap:token, wrap={@type=korap:term, key=voran, layer=orth, match=match:eq}}" +
-//							"]}" +
-//						"], inOrder=false, " +
-//						"distances=[" +
-//							"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1, max=10}, min=1, max=10}" +
-//						"]" +
-//					"}" +
-//				"]}";
-//		
 		String nhit1 = 
 				"{@type=korap:reference, operation=operation:focus, classRef=[1025], operands=[" +
 					"{@type=korap:group, operation=operation:class, classRefOp=classRefOp:inversion, classIn=[1026,1027], classOut=1025, operands=[" +
@@ -1213,7 +1196,7 @@ public class CosmasTreeTest {
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(nhit1.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
+
 //		query="#NHIT(gehen %w1:10 voran)";
 //		String nhit2 = 
 //				"{@type=korap:reference, operation=operation:focus, classRef=1025, operands=[" +
