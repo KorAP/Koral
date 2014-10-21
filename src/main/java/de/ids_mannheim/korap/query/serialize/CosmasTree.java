@@ -225,6 +225,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
 			token.put("@type", "korap:token");
 			ArrayList<Object> terms = new ArrayList<Object>();
+			LinkedHashMap<String, Object> fieldMap = null;
 			for (String morphterm : morphterms) {
 				String[] attrval = morphterm.split("=");
 				if (attrval[0].endsWith("!")) {
@@ -232,7 +233,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 					attrval[0] = attrval[0].replace("!", "");
 				}
 				String[] foundrylayer = attrval[0].split("/");
-				LinkedHashMap<String, Object> fieldMap = new LinkedHashMap<String, Object>();
+				fieldMap = new LinkedHashMap<String, Object>();
 				fieldMap.put("@type", "korap:term");
 				//     			fieldMap.put("key", "morph:"+node.getChild(0).toString().replace(" ", "_"));
 				fieldMap.put("key", attrval[1]);
@@ -253,7 +254,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 				terms.add(fieldMap);
 			}
 			if (morphterms.length == 1) {
-				token.put("wrap", terms);
+				token.put("wrap", fieldMap);
 			} else {
 				LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
 				termGroup.put("operands", terms);
@@ -450,7 +451,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			if (! (openNodeCats.get(1).equals("OPBEG") || openNodeCats.get(1).equals("OPEND") || inOPALL || openNodeCats.get(1).equals("OPNHIT"))) {
 				wrapOperandInClass(node,1,classCounter);
 				wrapOperandInClass(node,2,classCounter);
-				group = wrapInReference(group, 1024+classCounter++);
+				group = wrapInReference(group, 128+classCounter++);
 			} else if (openNodeCats.get(1).equals("OPNHIT")) {
 				LinkedHashMap<String,Object> repetition = makeRepetition(min, max);
 				((ArrayList<Object>) repetition.get("operands")).add(makeToken());
@@ -519,15 +520,15 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			stackedObjects++;
 			// Step II: wrap in reference and decide where to put
 			ArrayList<String> check = (ArrayList<String>) positionOptions.get("classRefCheck");
-			Integer[] classIn = new Integer[]{1024+classCounter-2,1024+classCounter-1};
-			LinkedHashMap<String, Object> classRefCheck = makeClassRefCheck(check, classIn, 1024+classCounter);
+			Integer[] classIn = new Integer[]{128+classCounter-2,128+classCounter-1};
+			LinkedHashMap<String, Object> classRefCheck = makeClassRefCheck(check, classIn, 128+classCounter);
 			((ArrayList<Object>) classRefCheck.get("operands")).add(posgroup);
 			LinkedHashMap<String, Object> focusGroup = null;
 			if ((boolean) positionOptions.get("matchall") == true) {
 				focusGroup = makeResetReference();
 				((ArrayList<Object>) focusGroup.get("operands")).add(classRefCheck);
 			} else { // match only first argument
-				focusGroup = wrapInReference(classRefCheck, 1024+classCounter-1);
+				focusGroup = wrapInReference(classRefCheck, 128+classCounter-1);
 			}
 			putIntoSuperObject(focusGroup, 1);
 		}
@@ -556,10 +557,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		}
 
 		if (nodeCat.equals("OPNHIT")) {
-			Integer[] classRef = new Integer[]{1024+classCounter+1, 1024+classCounter+2}; 
+			Integer[] classRef = new Integer[]{128+classCounter+1, 128+classCounter+2}; 
 			//            classRef.add(classCounter + 1);  // yes, do this twice (two classes)!
-			LinkedHashMap<String, Object> group = makeReference(1024+classCounter);
-			LinkedHashMap<String, Object> classRefCheck = makeClassRefOp("classRefOp:inversion", classRef, classCounter+1024);
+			LinkedHashMap<String, Object> group = makeReference(128+classCounter);
+			LinkedHashMap<String, Object> classRefCheck = makeClassRefOp("classRefOp:inversion", classRef, classCounter+128);
 			ArrayList<Object> operands = new ArrayList<Object>();
 			operands.add(classRefCheck);
 			group.put("operands", operands);
@@ -601,7 +602,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			// create a containing group expressing the submatch constraint on the first argument
 			ArrayList<Integer> spanRef = new ArrayList<Integer>();
 			spanRef.add(1);
-			LinkedHashMap<String, Object> submatchgroup = makeReference(1024+classCounter);
+			LinkedHashMap<String, Object> submatchgroup = makeReference(128+classCounter);
 			ArrayList<Object> submatchoperands = new ArrayList<Object>();
 			submatchgroup.put("operands", submatchoperands);
 			putIntoSuperObject(submatchgroup);

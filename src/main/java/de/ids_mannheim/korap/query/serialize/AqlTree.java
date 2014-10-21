@@ -520,36 +520,31 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 //			relation.put("groupType", "position");
 			String reltype = operatorNode.getChild(0).toStringTree(parser);
 			String[] frames = new String[]{};
-			String[] sharedClasses = new String[]{"sharedClasses:includes"};
 			switch (reltype) {
 			case "_=_":
-				frames = new String[]{"frame:matches"}; 
-				sharedClasses = new String[]{"sharedClasses:equals"};
+				frames = new String[]{"frames:matches"}; 
 				break;
 			case "_l_":
-				frames = new String[]{"frame:startswith"};
+				frames = new String[]{"frames:startswith"};
 				break;
 			case "_r_":
-				frames = new String[]{"frame:endswith"};
+				frames = new String[]{"frames:endswith"};
 				break;
 			case "_i_":
-				frames = new String[]{"frame:contains"};break;
+				frames = new String[]{"frames:contains"};break;
 			case "_o_":
-				frames = new String[]{"frame:overlapsLeft", "frame:overlapsRight"};
-				sharedClasses = new String[]{"sharedClasses:intersects"};
+				frames = new String[]{"frames:overlapsLeft", "frames:overlapsRight"};
 				break;
 			case "_ol_":
-				frames = new String[]{"frame:overlapsLeft"};
-				sharedClasses = new String[]{"sharedClasses:intersects"};
+				frames = new String[]{"frames:overlapsLeft"};
 				break;
 			case "_or_":
-				frames = new String[]{"frame:overlapsRight"};
-				sharedClasses = new String[]{"sharedClasses:intersects"};
+				frames = new String[]{"frames:overlapsRight"};
 				break;
 			}
 //			relation.put("frames", frames);
 //			relation.put("sharedClasses", sharedClasses);
-			relation = makePosition(frames, sharedClasses);
+			relation = makePosition(frames, new String[]{});
 			relation.put("groupType", "position");
 		}
 		else if (operator.equals("identity")) {

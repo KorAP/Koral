@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
 	private static Logger log = LoggerFactory.getLogger(PoliqarpPlusTree.class);
-	private int classCounter = 1024;
+	private int classCounter = 128;
 
 	/**
 	 * Most centrally, this class maintains a set of nested maps and lists which represent the JSON tree, which is built by the JSON serialiser

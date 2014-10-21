@@ -1311,12 +1311,12 @@ public class PoliqarpPlusTreeTest {
 		expected = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=der, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
 					"]}" +
 				"]}";
 		metaExpected = 
-				"{alignment=1025}";
+				"{alignment=129}";
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		metaMap = ppt.getRequestMap().get("meta").toString();
@@ -1328,7 +1328,7 @@ public class PoliqarpPlusTreeTest {
 		String expected = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +
 					"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=der, match=match:eq}}," +
-					"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=große, match=match:eq}}," +
 							"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mann, match=match:eq}}" +
@@ -1336,7 +1336,7 @@ public class PoliqarpPlusTreeTest {
 					"]}" +
 				"]}";
 		metaExpected = 
-				"{alignment=1025}";
+				"{alignment=129}";
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		metaMap = ppt.getRequestMap().get("meta").toString();
@@ -1348,14 +1348,14 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=a, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 								"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=b, match=match:eq}}" +
 							"]}" +
 						"]}," +
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=c, match=match:eq}}" +
 				"]}";
 		metaExpected = 
-				"{alignment=1025}";
+				"{alignment=129}";
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		metaMap = ppt.getRequestMap().get("meta").toString();
@@ -1367,7 +1367,7 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=a, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 								"{@type=korap:group, operation=operation:sequence, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=b, match=match:eq}}," +
 									"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=c, match=match:eq}}" +
@@ -1377,7 +1377,7 @@ public class PoliqarpPlusTreeTest {
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=d, match=match:eq}}" +
 				"]}";
 		metaExpected = 
-				"{alignment=1025}";
+				"{alignment=129}";
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		metaMap = ppt.getRequestMap().get("meta").toString();
@@ -1389,10 +1389,10 @@ public class PoliqarpPlusTreeTest {
 				"{@type=korap:group, operation=operation:or, operands=[" +
 						"{@type=korap:group, operation=operation:sequence, operands=[" +
 							"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=a, match=match:eq}}," +
-							"{@type=korap:group, operation=operation:class, class=1025, classOut=1025, operands=[" +
+							"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 								"{@type=korap:group, operation=operation:sequence, operands=[" +
 									"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=b, match=match:eq}}," +
-									"{@type=korap:group, operation=operation:class, class=1026, classOut=1026, operands=[" +
+									"{@type=korap:group, operation=operation:class, class=130, classOut=130, operands=[" +
 										"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=c, match=match:eq}}" +
 									"]}" +
 								"]}" +
@@ -1401,7 +1401,7 @@ public class PoliqarpPlusTreeTest {
 						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=d, match=match:eq}}" +
 				"]}";
 		metaExpected = 
-				"{alignment=[1025,1026]}";
+				"{alignment=[129,130]}";
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		metaMap = ppt.getRequestMap().get("meta").toString();

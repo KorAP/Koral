@@ -147,49 +147,48 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
-	protected LinkedHashMap<String, Object> makePosition(String[] allowedFrames, String[] sharedClasses) {
+	protected LinkedHashMap<String, Object> makePosition(String[] allowedFrames, String[] classRefCheck) {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:group");
 		group.put("operation", "operation:position");
 		group.put("frames", Arrays.asList(allowedFrames));
-//		group.put("sharedClasses", Arrays.asList(sharedClasses));
 		group.put("operands", new ArrayList<Object>());
 		// DEPRECATED 'frame'
-		if (sharedClasses.length==0) sharedClasses = new String[]{"classRefCheck:includes"};
+		if (classRefCheck.length==0) classRefCheck = new String[]{"classRefCheck:includes"};
 		String frame = "";
 		
-		if (allowedFrames.length==0 && sharedClasses[0]=="classRefCheck:includes") {
+		if (allowedFrames.length==0 && classRefCheck[0]=="classRefCheck:includes") {
 			frame = "frame:contains";
-		} else if (allowedFrames.length==0 && sharedClasses[0]=="classRefCheck:intersects") {
+		} else if (allowedFrames.length==0 && classRefCheck[0]=="classRefCheck:intersects") {
 			frame = "frame:overlaps";
-		} else if (allowedFrames[0]=="frames:startswith" && sharedClasses[0]=="classRefCheck:includes") {
+		} else if (allowedFrames[0]=="frames:startswith" && classRefCheck[0]=="classRefCheck:includes") {
 			frame = "frame:startswith";
-		} else if (allowedFrames[0]=="frames:endswith" && sharedClasses[0]=="classRefCheck:includes") {
+		} else if (allowedFrames[0]=="frames:endswith" && classRefCheck[0]=="classRefCheck:includes") {
 			frame = "frame:endswith";
-		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:includes" && sharedClasses.length==1) {
-			frame = "frame:endswith";
-		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:includes" && sharedClasses[1]=="classRefCheck:unequals") {
+		} else if (allowedFrames[0]=="frames:matches" && classRefCheck[0]=="classRefCheck:includes" && classRefCheck.length==1) {
 			frame = "frame:matches";
-		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:equals") {
+		} else if (allowedFrames[0]=="frames:matches" && classRefCheck[0]=="classRefCheck:includes" && classRefCheck[1]=="classRefCheck:unequals") {
+			frame = "frame:matches";
+		} else if (allowedFrames[0]=="frames:matches" && classRefCheck[0]=="classRefCheck:equals") {
 			frame = "frame:matches";			
-		} else if (allowedFrames[0]=="frames:contains" && sharedClasses[0]=="classRefCheck:includes") {
+		} else if (allowedFrames[0]=="frames:contains" && classRefCheck[0]=="classRefCheck:includes") {
 			frame = "frame:contains";
-		} else if (allowedFrames[0]=="frames:startswith" && sharedClasses[0]=="classRefCheck:intersects") {
+		} else if (allowedFrames[0]=="frames:startswith" && classRefCheck[0]=="classRefCheck:intersects") {
 			frame = "frame:overlapsLeft";
-		} else if (allowedFrames[0]=="frames:endswith" && sharedClasses[0]=="classRefCheck:intersects") {
+		} else if (allowedFrames[0]=="frames:endswith" && classRefCheck[0]=="classRefCheck:intersects") {
 			frame = "frame:overlapsRight";
-		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:intersects") {
+		} else if (allowedFrames[0]=="frames:matches" && classRefCheck[0]=="classRefCheck:intersects") {
 			frame = "frame:matches";
-		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:unequals") {
+		} else if (allowedFrames[0]=="frames:matches" && classRefCheck[0]=="classRefCheck:unequals") {
 			frame = "frame:matches";
-		} else if (allowedFrames[0]=="frames:matches" && sharedClasses[0]=="classRefCheck:equals") {
+		} else if (allowedFrames[0]=="frames:matches" && classRefCheck[0]=="classRefCheck:equals") {
 			frame = "frame:matches";
-		} else if (allowedFrames[0]=="frames:contains" && sharedClasses[0]=="classRefCheck:intersects") {
+		} else if (allowedFrames[0]=="frames:contains" && classRefCheck[0]=="classRefCheck:intersects") {
 			frame = "frame:contains";
 		}
 		group.put("frame", frame);
 		announcements.add("Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
-				"Position frames are now expressed through 'frames' and 'sharedClasses'.");
+				"Position frames are now expressed through 'frames'.");
 		return group;
 	}
 	
@@ -202,10 +201,10 @@ public abstract class AbstractSyntaxTree {
 		group.put("@type", "korap:group");
 		group.put("operation", "operation:class");
 		if (setBySystem) {
-			group.put("class", 1024+classCount);
-			group.put("classOut", 1024+classCount);
+			group.put("class", 128+classCount);
+			group.put("classOut", 128+classCount);
 			announcements.add("A class has been introduced into the backend representation of " +
-					"your query for later reference to a part of the query. The class id is "+(1024+classCount));
+					"your query for later reference to a part of the query. The class id is "+(128+classCount));
 		} else {
 			group.put("class", classCount);
 			group.put("classOut", classCount);
