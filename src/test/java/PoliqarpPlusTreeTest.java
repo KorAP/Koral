@@ -452,6 +452,18 @@ public class PoliqarpPlusTreeTest {
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
+		query = "{[]}[base=Mann]";
+		expected = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
+						"{@type=korap:token}" +
+					"]}," +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
 		query = "[][][base=Mann]";
 		expected = 
 				"{@type=korap:group, operation=operation:sequence, operands=[" +

@@ -137,8 +137,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		}
 
 		if (nodeCat.equals("emptyTokenSequenceClass")) {
-			Integer[] minmax = parseDistance(node);
-			int classId = 0;
+			int classId = 1;
 			if (hasChild(node, "spanclass_id")) {
 				classId = Integer.parseInt(node.getChild(1).getChild(0).toStringTree(parser));
 			}
