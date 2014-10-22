@@ -298,7 +298,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
 		if (nodeCat.equals("spanclass")) {
 			// Step I: get info
-			int classId = 0;
+			int classId = 1;
 			if (getNodeCat(node.getChild(1)).equals("spanclass_id")) {
 				String ref = node.getChild(1).getChild(0).toStringTree(parser);
 				try {
@@ -311,7 +311,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				}
 				// only allow class id up to 255
 				if (classId > 255) {
-					classId = 0;
+					classId = 1;
 				}
 			}
 			LinkedHashMap<String, Object> classGroup = makeSpanClass(classId, false);
@@ -343,7 +343,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 					}
 				}
 			} else {
-				classRefs.add(0);
+				classRefs.add(1);
 			}
 			LinkedHashMap<String, Object> referenceGroup = makeReference(classRefs);
 
