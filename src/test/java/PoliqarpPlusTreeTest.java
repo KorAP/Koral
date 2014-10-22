@@ -1482,5 +1482,41 @@ public class PoliqarpPlusTreeTest {
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(simple5.replaceAll(" ", ""), map.replaceAll(" ", ""));		
 	}
+	
+	@Test
+	public void testUnnecessaryParantheses() throws QueryException {
+		String query1, query2;
+		PoliqarpPlusTree tree1, tree2;
+		
+		query1 = "Test";
+		query2 = "(Test)";
+		tree1 = new PoliqarpPlusTree(query1);
+		tree2 = new PoliqarpPlusTree(query2);
+		assertEquals(tree1.getRequestMap(), tree2.getRequestMap());
+		
+		query1 = "pass|fail";
+		query2 = "(pass|fail)";
+		tree1 = new PoliqarpPlusTree(query1);
+		tree2 = new PoliqarpPlusTree(query2);
+		assertEquals(tree1.getRequestMap(), tree2.getRequestMap());
+		
+		query1 = "pass|fail";
+		query2 = "pass|(fail)";
+		tree1 = new PoliqarpPlusTree(query1);
+		tree2 = new PoliqarpPlusTree(query2);
+		assertEquals(tree1.getRequestMap(), tree2.getRequestMap());
+		
+		query1 = "pass|fail";
+		query2 = "(pass|(fail))";
+		tree1 = new PoliqarpPlusTree(query1);
+		tree2 = new PoliqarpPlusTree(query2);
+		assertEquals(tree1.getRequestMap(), tree2.getRequestMap());
+		
+		query1 = "contains(<s>,Mann)";
+		query2 = "contains((<s>),Mann)";
+		tree1 = new PoliqarpPlusTree(query1);
+		tree2 = new PoliqarpPlusTree(query2);
+		assertEquals(tree1.getRequestMap(), tree2.getRequestMap());
+	}
 }
 
