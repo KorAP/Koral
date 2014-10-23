@@ -2,12 +2,9 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -185,7 +182,7 @@ public class PoliqarpPlusTreeJSONTest {
 		assertEquals("deutscher",			operands.get(0).at("/wrap/key").asText());
 		assertEquals("orth",				operands.get(0).at("/wrap/layer").asText());
 		assertEquals("match:eq",			operands.get(0).at("/wrap/match").asText());
-		assertEquals("true",				operands.get(0).at("/wrap/caseInsensitive").asText());
+		assertEquals(true,					operands.get(0).at("/wrap/caseInsensitive").asBoolean());
 		assertEquals("korap:token",			operands.get(1).at("/@type").asText());
 		assertEquals("Bundestag",			operands.get(1).at("/wrap/key").asText());
 		assertEquals("orth",				operands.get(1).at("/wrap/layer").asText());
@@ -202,7 +199,7 @@ public class PoliqarpPlusTreeJSONTest {
 		assertEquals("deutscher",			operands.get(0).at("/wrap/key").asText());
 		assertEquals("orth",				operands.get(0).at("/wrap/layer").asText());
 		assertEquals("match:eq",			operands.get(0).at("/wrap/match").asText());
-		assertEquals("true",				operands.get(0).at("/wrap/caseInsensitive").asText());
+		assertEquals(true,					operands.get(0).at("/wrap/caseInsensitive").asBoolean());
 		assertEquals("korap:token",			operands.get(1).at("/@type").asText());
 		assertEquals("Bundestag",			operands.get(1).at("/wrap/key").asText());
 		assertEquals("orth",				operands.get(1).at("/wrap/layer").asText());
@@ -282,7 +279,7 @@ public class PoliqarpPlusTreeJSONTest {
 		assertEquals("match:ne",			operands.get(0).at("/match").asText());
 		assertEquals("korap:term",			operands.get(1).at("/@type").asText());
 		assertEquals("id",					operands.get(1).at("/key").asText());
-		assertEquals("7",					operands.get(1).at("/value").asText());
+		assertEquals(7,						operands.get(1).at("/value").asInt());
 		assertEquals("match:ne",			operands.get(1).at("/match").asText());
 	}
 	
@@ -291,16 +288,14 @@ public class PoliqarpPlusTreeJSONTest {
 		query = "[base=der][][base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
-		qs.setQuery(query, "poliqarpplus");
-		res = mapper.readTree(qs.toJSON());
 		assertEquals("korap:group", 		res.at("/query/@type").asText());
 		assertEquals("operation:sequence",	res.at("/query/operation").asText());
 		assertEquals("true",				res.at("/query/inOrder").asText());
 		assertEquals("korap:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
 		assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
 		assertEquals("korap:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
-		assertEquals("2",					res.at("/query/distances").elements().next().at("/boundary/min").asText());
-		assertEquals("2",					res.at("/query/distances").elements().next().at("/boundary/max").asText());
+		assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+		assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
 		operands = Lists.newArrayList(res.at("/query/operands").elements());
 		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
 		assertEquals("der",					operands.get(0).at("/wrap/key").asText());
@@ -314,16 +309,14 @@ public class PoliqarpPlusTreeJSONTest {
 		query = "[base=der][][][base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
-		qs.setQuery(query, "poliqarpplus");
-		res = mapper.readTree(qs.toJSON());
 		assertEquals("korap:group", 		res.at("/query/@type").asText());
 		assertEquals("operation:sequence",	res.at("/query/operation").asText());
 		assertEquals("true",				res.at("/query/inOrder").asText());
 		assertEquals("korap:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
 		assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
 		assertEquals("korap:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
-		assertEquals("3",					res.at("/query/distances").elements().next().at("/boundary/min").asText());
-		assertEquals("3",					res.at("/query/distances").elements().next().at("/boundary/max").asText());
+		assertEquals(3,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+		assertEquals(3,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
 		operands = Lists.newArrayList(res.at("/query/operands").elements());
 		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
 		assertEquals("der",					operands.get(0).at("/wrap/key").asText());
@@ -337,16 +330,14 @@ public class PoliqarpPlusTreeJSONTest {
 		query = "[base=der][][]?[base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
-		qs.setQuery(query, "poliqarpplus");
-		res = mapper.readTree(qs.toJSON());
 		assertEquals("korap:group", 		res.at("/query/@type").asText());
 		assertEquals("operation:sequence",	res.at("/query/operation").asText());
 		assertEquals("true",				res.at("/query/inOrder").asText());
 		assertEquals("korap:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
 		assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
 		assertEquals("korap:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
-		assertEquals("2",					res.at("/query/distances").elements().next().at("/boundary/min").asText());
-		assertEquals("3",					res.at("/query/distances").elements().next().at("/boundary/max").asText());
+		assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+		assertEquals(3,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
 		operands = Lists.newArrayList(res.at("/query/operands").elements());
 		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
 		assertEquals("der",					operands.get(0).at("/wrap/key").asText());
@@ -356,231 +347,161 @@ public class PoliqarpPlusTreeJSONTest {
 		assertEquals("Mann",				operands.get(1).at("/wrap/key").asText());
 		assertEquals("lemma",				operands.get(1).at("/wrap/layer").asText());
 		assertEquals("match:eq",			operands.get(1).at("/wrap/match").asText());
+		
+		query = "[base=der][]+[base=Mann]";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		assertEquals("korap:group", 		res.at("/query/@type").asText());
+		assertEquals("operation:sequence",	res.at("/query/operation").asText());
+		assertEquals("true",				res.at("/query/inOrder").asText());
+		assertEquals("korap:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
+		assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
+		assertEquals("korap:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
+		assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+		assertEquals(true,					res.at("/query/distances").elements().next().at("/boundary/max").isMissingNode());
+		operands = Lists.newArrayList(res.at("/query/operands").elements());
+		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
+		assertEquals("der",					operands.get(0).at("/wrap/key").asText());
+		assertEquals("lemma",				operands.get(0).at("/wrap/layer").asText());
+		assertEquals("match:eq",			operands.get(0).at("/wrap/match").asText());
+		assertEquals("korap:token",			operands.get(1).at("/@type").asText());
+		assertEquals("Mann",				operands.get(1).at("/wrap/key").asText());
+		assertEquals("lemma",				operands.get(1).at("/wrap/layer").asText());
+		assertEquals("match:eq",			operands.get(1).at("/wrap/match").asText());
+		
+		query = "[base=der][]*[base=Mann]";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		assertEquals("korap:group", 		res.at("/query/@type").asText());
+		assertEquals("operation:sequence",	res.at("/query/operation").asText());
+		assertEquals("true",				res.at("/query/inOrder").asText());
+		assertEquals("korap:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
+		assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
+		assertEquals("korap:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
+		assertEquals(1,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+		assertEquals(true,					res.at("/query/distances").elements().next().at("/boundary/max").isMissingNode());
+		
+		query = "[base=der][]{2,5}[base=Mann][]?[][base=Frau]";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		assertEquals("korap:group", 		res.at("/query/@type").asText());
+		assertEquals("operation:sequence",	res.at("/query/operation").asText());
+		assertEquals("true",				res.at("/query/inOrder").asText());
+		assertEquals("korap:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
+		assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
+		assertEquals("korap:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
+		assertEquals(3,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+		assertEquals(6,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
+		operands = Lists.newArrayList(res.at("/query/operands").elements());
+		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
+		assertEquals("der",					operands.get(0).at("/wrap/key").asText());
+		assertEquals("lemma",				operands.get(0).at("/wrap/layer").asText());
+		assertEquals("match:eq",			operands.get(0).at("/wrap/match").asText());
+		assertEquals("korap:group",			operands.get(1).at("/@type").asText());
+		assertEquals("operation:sequence",	operands.get(1).at("/operation").asText());
+		assertEquals("korap:distance",		operands.get(1).get("distances").elements().next().at("/@type").asText());
+		assertEquals("w",					operands.get(1).get("distances").elements().next().at("/key").asText());
+		assertEquals("korap:boundary",		operands.get(1).get("distances").elements().next().at("/boundary/@type").asText());
+		assertEquals(2,						operands.get(1).get("distances").elements().next().at("/boundary/min").asInt());
+		assertEquals(3,						operands.get(1).get("distances").elements().next().at("/boundary/max").asInt());
+		operands = Lists.newArrayList(operands.get(1).get("operands").elements());
+		assertEquals("Mann",				operands.get(0).at("/wrap/key").asText());
+		assertEquals("lemma",				operands.get(0).at("/wrap/layer").asText());
+		assertEquals("match:eq",			operands.get(0).at("/wrap/match").asText());
+		assertEquals("Frau",				operands.get(1).at("/wrap/key").asText());
+		assertEquals("lemma",				operands.get(1).at("/wrap/layer").asText());
+		assertEquals("match:eq",			operands.get(1).at("/wrap/match").asText());
+		
+		query = "[base=geht][base=der][]*contains(<s>,<np>)";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		assertEquals("korap:group", 		res.at("/query/@type").asText());
+		assertEquals("operation:sequence",	res.at("/query/operation").asText());
+		assertEquals(true,					res.at("/query/inOrder").isMissingNode());
+		assertEquals(true,					res.at("/query/distances").isMissingNode());
+		operands = Lists.newArrayList(res.at("/query/operands").elements());
+		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
+		assertEquals("geht",					operands.get(0).at("/wrap/key").asText());
+		assertEquals("lemma",				operands.get(0).at("/wrap/layer").asText());
+		assertEquals("match:eq",			operands.get(0).at("/wrap/match").asText());
+		assertEquals("korap:group",			operands.get(1).at("/@type").asText());
+		assertEquals("operation:sequence",	operands.get(1).at("/operation").asText());
+		assertEquals("korap:distance",		operands.get(1).get("distances").elements().next().at("/@type").asText());
+		assertEquals("w",					operands.get(1).get("distances").elements().next().at("/key").asText());
+		assertEquals("korap:boundary",		operands.get(1).get("distances").elements().next().at("/boundary/@type").asText());
+		assertEquals(1,						operands.get(1).get("distances").elements().next().at("/boundary/min").asInt());
+		assertEquals(true,					operands.get(1).get("distances").elements().next().at("/boundary/max").isMissingNode());
+		operands = Lists.newArrayList(operands.get(1).get("operands").elements());
+		assertEquals("der",				operands.get(0).at("/wrap/key").asText());
+		assertEquals("lemma",				operands.get(0).at("/wrap/layer").asText());
+		assertEquals("match:eq",			operands.get(0).at("/wrap/match").asText());
+		assertEquals("korap:group",			operands.get(1).at("/@type").asText());
+		assertEquals("operation:position",	operands.get(1).at("/operation").asText());
 	}
-//		
-//		// [base=der][]{2,5}[base=Mann][]?[][base=Frau]   nested distances=
-//		String et5 = 
-//				"{@type=korap:group, operation=operation:sequence," +
-//				"operands=[" +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-//					"{@type=korap:group, operation=operation:sequence, " +
-//					"operands=[" +
-//						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
-//						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Frau, match=match:eq}}" +
-//					"], inOrder=true, distances=[" +
-//						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=2, max=3}, min=2, max=3}" +
-//					"]}" +
-//				"], inOrder=true, distances=[" +
-//					"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=3, max=6}, min=3, max=6}" +
-//				"]}";
-//		ppt = new PoliqarpPlusTree("[base=der][]{2,5}[base=Mann][]?[][base=Frau]");
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(et5.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		// [base=der][]*[base=Mann]
-//		String et6 = 
-//			"{@type=korap:group, operation=operation:sequence, " +
-//			"operands=[" +
-//				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-//				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//			"], inOrder=true, distances=[" +
-//				"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1}, min=1}" +
-//			"]}";
-//		ppt = new PoliqarpPlusTree("[base=der][]*[base=Mann]");
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(et6.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		// [base=der][]+[base=Mann]
-//		String et7 = 
-//			"{@type=korap:group, operation=operation:sequence, " +
-//			"operands=[" +
-//				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-//				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//			"], inOrder=true, distances=[" +
-//				"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=2}, min=2}" +
-//			"]}";
-//		ppt = new PoliqarpPlusTree("[base=der][]+[base=Mann]");
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(et7.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		// [base=der][]+[base=Mann]
-//		String et8 = 
-//			"{@type=korap:group, operation=operation:sequence, " +
-//			"operands=[" +
-//				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-//				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//			"], inOrder=true, distances=[" +
-//				"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=2, max=103}, min=2, max=103}" +
-//			"]}";
-//		ppt = new PoliqarpPlusTree("[base=der][]{1,102}[base=Mann]");
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(et8.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		// [base=geht][base=der][]*[base=Mann]
-//		String et9 = 
-//			"{@type=korap:group, operation=operation:sequence, operands=[" +
-//				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=geht, match=match:eq}}," +
-//				"{@type=korap:group, operation=operation:sequence, " +
-//				"operands=[" +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//				"], inOrder=true, distances=[" +
-//					"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1}, min=1}" +
-//				"]}" +
-//			"]}";
-//		ppt = new PoliqarpPlusTree("[base=geht][base=der][]*[base=Mann]");
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(et9.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		query = "[base=geht][base=der][]*[base=Mann][base=da]";
-//		expected = 
-//			"{@type=korap:group, operation=operation:sequence, operands=[" +
-//				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=geht, match=match:eq}}," +
-//				"{@type=korap:group, operation=operation:sequence, " +
-//				"operands=[" +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-//					"{@type=korap:group, operation=operation:sequence, operands=[" +
-//						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
-//						"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=da, match=match:eq}}" +
-//					"]}" +
-//				"], inOrder=true, distances=[" +
-//					"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1}, min=1}" +
-//				"]}" +
-//			"]}";
-//		ppt = new PoliqarpPlusTree(query);
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		query = "[base=geht][base=der][]*contains(<s>,<np>)";
-//		expected = 
-//			"{@type=korap:group, operation=operation:sequence, operands=[" +
-//				"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=geht, match=match:eq}}," +
-//				"{@type=korap:group, operation=operation:sequence, " +
-//				"operands=[" +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-//					"{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
-//					  "{@type=korap:span, key=s}," +
-//					  "{@type=korap:span, key=np}" +
-//					"], frame=frame:contains}" +
-//				"], inOrder=true, distances=[" +
-//					"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=1}, min=1}" +
-//				"]}" +
-//			"]}";
-//		ppt = new PoliqarpPlusTree(query);
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//	}
-//
-//	@Test
-//	public void testDistancesWithClass() throws QueryException {
-//		query = "[base=der]{1:[]}[base=Mann]";
-//		expected = 
-//				"{@type=korap:group, operation=operation:sequence, operands=[" +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-//					"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
-//						"{@type=korap:token}" +
-//					"]}," +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//				"]}";
-//		ppt = new PoliqarpPlusTree(query);
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		query = "{1:[]}[base=der][base=Mann]";
-//		expected = 
-//				"{@type=korap:group, operation=operation:sequence, operands=[" +
-//					"{@type=korap:group, operation=operation:class, class=1, classOut=1, operands=[" +
-//						"{@type=korap:token}" +
-//					"]}," +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=der, match=match:eq}}," +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//				"]}";
-//		ppt = new PoliqarpPlusTree(query);
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//	}
-//	
-//	@Test
-//	public void testLeadingTrailingEmptyTokens() throws QueryException {
-//		// startswith(<s>, [][base=Mann]
-//		String et1 = 
-//			"{@type=korap:group, operation=operation:position, frames=[frames:startswith], operands=[" +	
-//				"{@type=korap:span, key=s}," +
-//				"{@type=korap:group, operation=operation:sequence, operands=[" +
-//					"{@type=korap:token}," +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//				"]}" +
-//			"], frame=frame:startswith}";
-//		ppt = new PoliqarpPlusTree("startswith(<s>, [][base=Mann])");
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(et1.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		query = "[][base=Mann]";
-//		expected = 
-//				"{@type=korap:group, operation=operation:sequence, operands=[" +
-//					"{@type=korap:token}," +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//				"]}";
-//		ppt = new PoliqarpPlusTree(query);
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		query = "[][][base=Mann]";
-//		expected = 
-//				"{@type=korap:group, operation=operation:sequence, operands=[" +
-//					"{@type=korap:group, operation=operation:repetition, operands=[" +
-//						"{@type=korap:token}" +
-//					"], boundary={@type=korap:boundary, min=2, max=2}, min=2, max=2}," +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//				"]}";
-//		ppt = new PoliqarpPlusTree(query);
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		query = "[][]*[base=Mann]";
-//		expected = 
-//				"{@type=korap:group, operation=operation:sequence, operands=[" +
-//					"{@type=korap:group, operation=operation:repetition, operands=[" +
-//						"{@type=korap:token}" +
-//					"], boundary={@type=korap:boundary, min=1}, min=1}," +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}" +
-//				"]}";
-//		ppt = new PoliqarpPlusTree(query);
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		query = "[][]*[base=Mann][][]";
-//		expected = 
-//				"{@type=korap:group, operation=operation:sequence, operands=[" +
-//					"{@type=korap:group, operation=operation:repetition, operands=[" +
-//						"{@type=korap:token}" +
-//					"], boundary={@type=korap:boundary, min=1}, min=1}," +
-//					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
-//					"{@type=korap:group, operation=operation:repetition, operands=[" +
-//						"{@type=korap:token}" +
-//					"], boundary={@type=korap:boundary, min=2, max=2}, min=2, max=2}" +
-//				"]}";
-//		ppt = new PoliqarpPlusTree(query);
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
-//		
-//		query = "[][]*contains(<s>, <np>)[][]";
-//		expected = 
-//				"{@type=korap:group, operation=operation:sequence, operands=[" +
-//					"{@type=korap:group, operation=operation:repetition, operands=[" +
-//						"{@type=korap:token}" +
-//					"], boundary={@type=korap:boundary, min=1}, min=1}," +
-//					"{@type=korap:group, operation=operation:position, frames=[frames:contains], operands=[" +
-//					  "{@type=korap:span, key=s}," +
-//					  "{@type=korap:span, key=np}" +
-//					"], frame=frame:contains}," +
-//					"{@type=korap:group, operation=operation:repetition, operands=[" +
-//						"{@type=korap:token}" +
-//					"], boundary={@type=korap:boundary, min=2, max=2}, min=2, max=2}" +
-//				"]}";
-//		ppt = new PoliqarpPlusTree(query);
-//		map = ppt.getRequestMap().get("query").toString();
-//		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+
+	@Test
+	public void testDistancesWithClass() throws QueryException, JsonProcessingException, IOException {
+		query = "[base=der]{[]}[base=Mann]";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		assertEquals("korap:group", 		res.at("/query/@type").asText());
+		assertEquals("operation:sequence",	res.at("/query/operation").asText());
+		assertEquals(true,					res.at("/query/inOrder").isMissingNode());
+		assertEquals(true,					res.at("/query/distances").isMissingNode());
+		operands = Lists.newArrayList(res.at("/query/operands").elements());
+		assertEquals("der",					operands.get(0).at("/wrap/key").asText());
+		assertEquals("Mann",				operands.get(2).at("/wrap/key").asText());
+		assertEquals("korap:group",			operands.get(1).at("/@type").asText());
+		assertEquals("operation:class",		operands.get(1).at("/operation").asText());
+		assertEquals(1,						operands.get(1).at("/classOut").asInt());
+		operands = Lists.newArrayList(operands.get(1).at("/operands").elements());
+		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
+		assertEquals(true,					operands.get(0).at("/wrap").isMissingNode());
+		
+		query = "[base=der]{2:[]}[base=Mann]";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		operands = Lists.newArrayList(res.at("/query/operands").elements());
+		assertEquals("operation:class",		operands.get(1).at("/operation").asText());
+		assertEquals(2,						operands.get(1).at("/classOut").asInt());
+		
+		query = "{1:[]}[base=der][base=Mann]";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		operands = Lists.newArrayList(res.at("/query/operands").elements());
+		assertEquals("operation:class",		operands.get(0).at("/operation").asText());
+		assertEquals(1,						operands.get(0).at("/classOut").asInt());
+	}
+	
+	@Test
+	public void testLeadingTrailingEmptyTokens() throws QueryException, JsonProcessingException, IOException {
+		query = "[][base=Mann]";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		operands = Lists.newArrayList(res.at("/query/operands").elements());
+		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
+		assertEquals(true,					operands.get(0).at("/key").isMissingNode());
+		
+		query = "[][][base=Mann]";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		operands = Lists.newArrayList(res.at("/query/operands").elements());
+		assertEquals("korap:group",			operands.get(0).at("/@type").asText());
+		assertEquals("operation:repetition",operands.get(0).at("/operation").asText());
+		assertEquals(2,						operands.get(0).at("/boundary/min").asInt());
+		assertEquals(2,						operands.get(0).at("/boundary/max").asInt());
+		operands = Lists.newArrayList(operands.get(0).at("/operands").elements());
+		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
+		assertEquals(true,					operands.get(0).at("/key").isMissingNode());
+		
+		query = "startswith(<s>, [][base=Mann])";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		operands = Lists.newArrayList(res.at("/query/operands"));
+		operands = Lists.newArrayList(operands.get(1).at("/operands"));
+		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
+		assertEquals(true,					operands.get(0).at("/key").isMissingNode());
+	}
 //	}
 //	
 //	@Test
