@@ -38,6 +38,14 @@ public class CollectionQueryTreeTest {
 		cqt.process(query);
 		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "title~\"IDS Mannheim\"";
+		expected = 
+			"{@type=korap:doc, key=title, value=IDS Mannheim, match=match:contains}";
+		cqt = new CollectionQueryTree();
+		cqt.process(query);
+		map = cqt.getRequestMap().get("collection").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test

@@ -231,6 +231,12 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
     		String regex = valueNode.getChild(0).getChild(0).toStringTree(parser);
     		map.put("value", regex.substring(1, regex.length()-1));
     		map.put("type", "type:regex");
+    	} else if (getNodeCat(valueNode.getChild(0)).equals("multiword")) {
+    		String mw = "";
+    		for (int i=1; i<valueNode.getChild(0).getChildCount()-1; i++) {
+    			mw += valueNode.getChild(0).getChild(i).getText() + " ";
+    		}
+    		map.put("value", mw.substring(0, mw.length()-1));
     	} else if (getNodeCat(valueNode.getChild(0)).equals("date")) {
     		map.put("type", "type:date");
     		String value = valueNode.getChild(0).getChild(0).toStringTree(parser);
@@ -348,7 +354,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 			if (getNodeCat(keyNode.getChild(0)).equals("regex")) {
 				isRegex = true;
 				term.put("type", "type:regex");
-				key = key.substring(1, key.length()-1); // remove leading and trailing quotes
+				key = key.substring(1, key.length()-1); // remove leading and trailing slashes
 			}
 			if (mode.equals("span")) term.put("value", key);
 			else term.put("key", key);
@@ -437,8 +443,6 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         query = "1990<year<2010 & genre=Sport";
         query = "1990<year<2010";
         query = "pubDate<Sport";
-        query = "title~Hamburg";
-//        query = "foo=b-ar";
 //    	filter.verbose = true;
         CollectionQueryTree filter = null;
         try {

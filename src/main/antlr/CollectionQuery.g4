@@ -52,7 +52,7 @@ DATE
 NL                  : [\r\n] -> skip;
 ws                  : WS+;
 
-WORD                : ALPHABET* ALPHA ALPHABET*;  // needs to have at least one alphabetical letter
+WORD                : ALPHABET* ALPHA ALPHABET*;  // needs to have at least one alphabetical letter (non-numeric)
 
 /*
  * Regular expressions
@@ -139,9 +139,13 @@ field
 	
 value
 : WORD
-| '"' (WORD ws*)+'"'
+| multiword
 | date
 | regex
+;
+
+multiword
+: '"' WORD+ '"'
 ;
 
 relation
