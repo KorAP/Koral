@@ -118,7 +118,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void processNode(Tree node) {
+	private void processNode(Tree node) throws QueryException {
 
 		// Top-down processing
 		if (visited.contains(node)) return;
@@ -228,6 +228,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			LinkedHashMap<String, Object> fieldMap = null;
 			for (String morphterm : morphterms) {
 				String[] attrval = morphterm.split("=");
+				if (attrval.length == 1) {
+					log.error("MORPH() argument is not a layer-key pair, does not contain '=' operator.");
+					throw new QueryException("Please specify a layer and a search key, delimited by '=' or '!='.");
+				}
 				if (attrval[0].endsWith("!")) {
 					negate = !negate;
 					attrval[0] = attrval[0].replace("!", "");
@@ -1060,7 +1064,9 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			log.error("Invalid tree. Could not parse Cosmas query. Make sure it is well-formed.");
 			throw new RecognitionException();
 		}
-
+		if (verbose) {
+			System.out.println(tree.toStringTree());
+		}
 		return tree;
 	}
 
@@ -1111,22 +1117,26 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 				//        		"MORPH(V PRES IND)",
 				//                "wegen #OV(F) <s>"
 				//        		"Sonne /s0 Mond",
-				"Sonne /+w1:4 Mond /-w1:7 Sterne",
-				"Der:ta",
-				"&mond-",
-				"gehen /+w10 voran %w10 Beispiel",
-				"(gehen /+w10 voran) %w10 Beispiel",
-				"#BED(der Mann , sa,-pa)",
-				"MORPH(foundry/layer=key)",
-				"MORPH(f/l!=k &f/l!=k)",
+//				"Sonne /+w1:4 Mond /-w1:7 Sterne",
+//				"Der:ta",
+//				"&mond-",
+//				"gehen /+w10 voran %w10 Beispiel",
+//				"(gehen /+w10 voran) %w10 Beispiel",
+//				"#BED(der Mann , sa,-pa)",
+//				"MORPH(foundry/layer=key)",
+//				"MORPH(f/l!=k &f/l!=k)",
+//				"MORPH(p=aV)",
+				"MORPH(APPR) ",
+				"MORPH(APPR) ODER MORPH(APPRART)"
 		};
-		//		CosmasTree.verbose=true;
+				CosmasTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);
 				try {
 					CosmasTree act = new CosmasTree(q);
 					System.out.println(act.parseCosmasQuery(q).toStringTree());
+					System.out.println(act.getRequestMap().get("query"));
 				} catch (QueryException e) {
 					e.printStackTrace();
 				} catch (RecognitionException e) {
