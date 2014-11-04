@@ -308,9 +308,11 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 					log.error(msg);
 					throw new QueryException(msg);
 				}
-				// only allow class id up to 255
-				if (classId > 255) {
-					classId = 1;
+				// only allow class id up to 127
+				if (classId > 127) {
+					warnings.add("Only class IDs up to 127 are allowed. Your class "+classId+" has been set back to 127. "
+							+ "Check for possible conflict with other classes.");
+					classId = 127;
 				}
 			}
 			LinkedHashMap<String, Object> classGroup = makeSpanClass(classId, false);
