@@ -43,7 +43,7 @@ public class MetaQuerySerializationTest {
         System.out.println(query.toJSON());
     }
 
-    @Test
+//    @Test
     public void testDates() throws IOException {
         StringBuffer b = new StringBuffer();
         b.append("pubDate:>2013-04-01");
@@ -58,7 +58,7 @@ public class MetaQuerySerializationTest {
 //        System.out.println();
     }
 
-    @Test
+//    @Test
     public void testUntil() throws IOException {
         StringBuffer b = new StringBuffer();
         b.append("pubDate:>2013-12-10");
@@ -71,7 +71,7 @@ public class MetaQuerySerializationTest {
 //        System.out.println();
     }
 
-    @Test
+//    @Test
     public void testSince() throws IOException {
         StringBuffer b = new StringBuffer();
         b.append("pubDate:<2013-12-10");
@@ -85,7 +85,20 @@ public class MetaQuerySerializationTest {
         Assert.assertEquals("[{\"@type\":\"korap:meta-filter\",\"@value\":{\"@type\":\"korap:group\",\"relation\":\"and\",\"operands\":[{\"@type\":\"korap:term\",\"@field\":\"korap:field#author\",\"@value\":\"Kafka\"},{\"@type\":\"korap:group\",\"@field\":\"korap:field#pubDate\",\"relation\":\"since\",\"operands\":[{\"@type\":\"korap:date\",\"@value\":\"2013-12-10\"}]}]}}]", query.toJSON());
     }
 
+
     @Test
+    public void testMeta() {
+        QuerySerializer s = new QuerySerializer();
+        try {
+            s.setQuery("shrink({[base=foo]})", "poliqarp");
+            s.addMeta("2-token, 2-token", 10, 0);
+        } catch (QueryException e) {
+            e.printStackTrace();
+        }
+        System.out.println("THE RESULTING QUERY: " + s.toJSON());
+    }
+
+    //    @Test
     public void testGenerator() throws QueryException {
          /*
          * just for testing...

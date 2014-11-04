@@ -61,7 +61,8 @@ public class CollectionQueryTreeTest {
 		map = cqt.getRequestMap().get("collection").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
-	
+
+    //todo year type is not yet serialized!
 	@Test
 	public void testThreeConjuncts() throws QueryException {
 		query = "textClass=Sport & year=2014 & corpusID=WPD";

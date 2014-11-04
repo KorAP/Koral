@@ -55,7 +55,7 @@ public class CollectionQueryBuilder {
         return this;
     }
 
-    @Deprecated
+
     public CollectionQueryBuilder addMetaFilterQuery(String queries) {
         this.mfilter.putAll(resRel(queries));
         return this;
@@ -78,11 +78,11 @@ public class CollectionQueryBuilder {
         return this;
     }
 
-    @Deprecated
     public CollectionQueryBuilder addMetaExtendQuery(String queries) {
         this.mextension.putAll(resRel(queries));
         return this;
     }
+
 
     @Deprecated
     private List<Map> createFilter(Relation rel) {
@@ -254,9 +254,16 @@ public class CollectionQueryBuilder {
      */
     private Multimap<String, String> resRel(String queries) {
         Multimap<String, String> qmap = ArrayListMultimap.create();
-        String rel = queries.contains("AND") ? "AND" : "OR";
+        String op = null;
+        if (queries.contains("AND") | queries.contains("OR"))
+            op = queries.contains("AND") ? "AND" : "OR";
+        else if (queries.contains("&") | queries.contains("|"))
+            op = queries.contains("&") ? "&" : "|";
 
-        String[] spl = queries.trim().split(rel);
+        if (op == null)
+            return qmap;
+
+        String[] spl = queries.trim().split(op);
         for (String query : spl) {
             String[] q = query.split("=");
             if (q.length > 1) {

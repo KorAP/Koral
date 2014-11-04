@@ -16,8 +16,18 @@ import java.util.*;
 public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 
     private Parser parser;
-    private boolean verbose = false;
+    private boolean verbose;
     private List<ParseTree> visited = new ArrayList<ParseTree>();
+
+
+    public CollectionQueryTree() {
+        verbose = false;
+    }
+
+    public CollectionQueryTree(boolean verbose) {
+        this.verbose = verbose;
+    }
+
     /**
      * Keeps track of active object.
      */
@@ -31,10 +41,6 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
      */
     LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
     Integer stackedObjects = 0;
-
-    public CollectionQueryTree() {
-    	super();
-	}
     
     public CollectionQueryTree(String query) throws QueryException {
 		process(query);
@@ -57,6 +63,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         // Top-down processing
         String nodeCat = getNodeCat(node);
         openNodeCats.push(nodeCat);
+
 
         stackedObjects = 0;
 

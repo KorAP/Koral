@@ -51,7 +51,7 @@ public class MetaQueryBuilder {
         if (context.startsWith("s") | context.startsWith("p"))
             this.spanContext = new SpanContext(context);
         else {
-            String[] ct = context.split(",");
+            String[] ct = context.replaceAll("\\s+","").split(",");
             String[] lc = ct[0].split("-");
             String[] rc = ct[1].split("-");
             this.spanContext = new SpanContext(Integer.valueOf(lc[0]), lc[1], Integer.valueOf(rc[0]), rc[1]);

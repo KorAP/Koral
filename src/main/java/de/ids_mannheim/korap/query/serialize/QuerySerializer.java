@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,7 +22,7 @@ public class QuerySerializer {
 
     private AbstractSyntaxTree ast;
     private Object collection;
-    private Object meta;
+    private Map meta;
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(QuerySerializer.class);
 
@@ -41,9 +42,8 @@ public class QuerySerializer {
             queries = new String[]{
 
             };
-        } else {
+        } else
             queries = new String[]{args[0]};
-        }
 
         for (String q : queries) {
             i++;
@@ -143,16 +143,23 @@ public class QuerySerializer {
     }
 
     private Map raw() {
-        Map<String, Object> requestMap = ast.getRequestMap();
-        if (collection != null)
-            requestMap.put("collections", collection);
-        if (meta != null)
-            requestMap.put("meta", meta);
-        return requestMap;
+        if (ast != null) {
+            Map<String, Object> requestMap = ast.getRequestMap();
+            Map meta = (Map) requestMap.get("meta");
+            if (collection != null)
+                requestMap.put("collections", collection);
+            if (this.meta != null) {
+                meta.putAll(this.meta);
+                requestMap.put("meta", meta);
+            }
+
+            return requestMap;
+        }
+        return new HashMap<>();
     }
 
 
-    public QuerySerializer setMeta(
+    public QuerySerializer addMeta(
             String cli, String cri, int cls, int crs,
             int num, int pageIndex) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
@@ -163,15 +170,16 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer setMeta(String context, int num, int pageidx) {
+    public QuerySerializer addMeta(String context, int num, int pageidx) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
         meta.addEntry("startIndex", pageidx);
         meta.addEntry("count", num);
         meta.setSpanContext(context);
+        this.meta = meta.raw();
         return this;
     }
 
-    public QuerySerializer setMeta(MetaQueryBuilder meta) {
+    public QuerySerializer addMeta(MetaQueryBuilder meta) {
         this.meta = meta.raw();
         return this;
     }
