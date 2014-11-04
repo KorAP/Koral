@@ -227,26 +227,28 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			ArrayList<Object> terms = new ArrayList<Object>();
 			LinkedHashMap<String, Object> fieldMap = null;
 			for (String morphterm : morphterms) {
+				fieldMap = new LinkedHashMap<String, Object>();
 				String[] attrval = morphterm.split("=");
 				if (attrval.length == 1) {
-					log.error("MORPH() argument is not a layer-key pair, does not contain '=' operator.");
-					throw new QueryException("Please specify a layer and a search key, delimited by '=' or '!='.");
-				}
-				if (attrval[0].endsWith("!")) {
-					negate = !negate;
-					attrval[0] = attrval[0].replace("!", "");
-				}
-				String[] foundrylayer = attrval[0].split("/");
-				fieldMap = new LinkedHashMap<String, Object>();
-				fieldMap.put("@type", "korap:term");
-				//     			fieldMap.put("key", "morph:"+node.getChild(0).toString().replace(" ", "_"));
-				fieldMap.put("key", attrval[1]);
-				if (foundrylayer.length==1) {
-					fieldMap.put("layer", foundrylayer[0]);
+					fieldMap.put("key", morphterm);
 				} else {
-					fieldMap.put("foundry", foundrylayer[0]);
-					fieldMap.put("layer", foundrylayer[1]);
+					if (attrval[0].endsWith("!")) {
+						negate = !negate;
+						attrval[0] = attrval[0].replace("!", "");
+					}
+					String[] foundrylayer = attrval[0].split("/");
+					
+					fieldMap.put("@type", "korap:term");
+					//     			fieldMap.put("key", "morph:"+node.getChild(0).toString().replace(" ", "_"));
+					fieldMap.put("key", attrval[1]);
+					if (foundrylayer.length==1) {
+						fieldMap.put("layer", foundrylayer[0]);
+					} else {
+						fieldMap.put("foundry", foundrylayer[0]);
+						fieldMap.put("layer", foundrylayer[1]);
+					}
 				}
+				
 				
 				// make category-specific fieldMap entry
 				// negate field (see above)
@@ -1126,8 +1128,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //				"MORPH(foundry/layer=key)",
 //				"MORPH(f/l!=k &f/l!=k)",
 //				"MORPH(p=aV)",
-				"MORPH(APPR) ",
-				"MORPH(APPR) ODER MORPH(APPRART)"
+				"MORPH(APPR)",
+//				"MORPH(APPR) ODER MORPH(APPRART)"
 		};
 				CosmasTree.verbose=true;
 		for (String q : queries) {
