@@ -461,11 +461,11 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			else if (hasChild(repetitionTypeNode, ",")) min = 0;
 			else {
 				min = max;
-				warnings.add("Your query contains a segment of the form {n}, where n is some number. This expression is ambiguous. "
-						+ "It could mean a repetition (\"Repeat the previous element n times!\") or a word form that equals the number, "
-						+ "enclosed by a \"class\" (which is denoted by braces like '{x}', see the documentation on classes)."
-						+ "KorAP has by default interpreted the segment as a repetition statement. If you want to express the"
-						+ "number as a word form inside a class, use the non-shorthand form {[orth=n]}.");
+//				warnings.add("Your query contains a segment of the form {n}, where n is some number. This expression is ambiguous. "
+//						+ "It could mean a repetition (\"Repeat the previous element n times!\") or a word form that equals the number, "
+//						+ "enclosed by a \"class\" (which is denoted by braces like '{x}', see the documentation on classes)."
+//						+ "KorAP has by default interpreted the segment as a repetition statement. If you want to express the"
+//						+ "number as a word form inside a class, use the non-shorthand form {[orth=n]}.");
 			}
 		}
 		if (maxInfinite) {
