@@ -520,6 +520,18 @@ public class PoliqarpPlusTreeTest {
 		ppt = new PoliqarpPlusTree(query);
 		map = ppt.getRequestMap().get("query").toString();
 		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query = "[base=Mann][]{2}";
+		expected = 
+				"{@type=korap:group, operation=operation:sequence, operands=[" +
+					"{@type=korap:token, wrap={@type=korap:term, layer=lemma, key=Mann, match=match:eq}}," +
+					"{@type=korap:group, operation=operation:repetition, operands=[" +
+						"{@type=korap:token}" +
+					"], boundary={@type=korap:boundary, min=2, max=2}, min=2, max=2}" +
+				"]}";
+		ppt = new PoliqarpPlusTree(query);
+		map = ppt.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
