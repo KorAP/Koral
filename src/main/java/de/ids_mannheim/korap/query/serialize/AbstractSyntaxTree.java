@@ -226,6 +226,9 @@ public abstract class AbstractSyntaxTree {
 		}
 		group.put("classIn", Arrays.asList(classIn));
 		group.put("classOut", classOut);
+		group.put("class", classOut);
+		announcements.add("Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
+				"Classes are now defined using the 'classOut' attribute.");
 		group.put("operands", new ArrayList<Object>());
 		return group;
 	}

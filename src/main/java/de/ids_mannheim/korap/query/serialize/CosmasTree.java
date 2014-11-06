@@ -1129,7 +1129,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 //				"MORPH(f/l!=k &f/l!=k)",
 //				"MORPH(p=aV)",
 				"MORPH(APPR)",
-//				"MORPH(APPR) ODER MORPH(APPRART)"
+//				"MORPH(APPR) ODER MORPH(APPRART)",
+				"#ELEM(cnx/c=np)"
 		};
 				CosmasTree.verbose=true;
 		for (String q : queries) {

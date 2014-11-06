@@ -76,7 +76,7 @@ public class CosmasTreeTest {
 	
 	@Test
 	public void testMORPH() throws QueryException {
-		query="#MORPH(pos=V)";
+		query="MORPH(pos=V)";
 		String morph1 = 
 					"{@type=korap:token, wrap={@type=korap:term, key=V, layer=pos, match=match:eq}}";
 		ct = new CosmasTree(query);
@@ -575,7 +575,7 @@ public class CosmasTreeTest {
 		query="wegen #IN <s>";
 		String opin1 = 
 					"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:includes, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:includes, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -593,7 +593,7 @@ public class CosmasTreeTest {
 		query="wegen #IN(L) <s>"; 
 		String opin2 = 
 				"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:includes, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:includes, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -612,7 +612,7 @@ public class CosmasTreeTest {
 		query="wegen #IN(F) <s>";
 		String opin3= 
 				"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:includes, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:includes, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -630,7 +630,7 @@ public class CosmasTreeTest {
 		query="wegen #IN(FI) <s>";
 		String opin4= 
 				"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=[classRefCheck:unequals,classRefCheck:includes], classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=[classRefCheck:unequals,classRefCheck:includes], classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -648,7 +648,7 @@ public class CosmasTreeTest {
 		query="wegen #IN(FE) <s>";
 		String opin5= 
 				"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:equals, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:equals, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -666,7 +666,7 @@ public class CosmasTreeTest {
 		query="wegen #IN(%, L) <s>";
 		String opin6 = 
 				"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:includes, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:includes, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -681,10 +681,10 @@ public class CosmasTreeTest {
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(opin6.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
-		query="wegen #IN('FE,ALL,%,MIN') <s>";
+		query="wegen #IN(FE,ALL,%,MIN) <s>";
 		String opin7 = 
 				"{@type=korap:reference, operation=operation:focus, reset=true, operands=[" +	
-					"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:equals, classIn=[129,130], classOut=131, operands=[" +
+					"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:equals, classIn=[129,130], classOut=131, class=131, operands=[" +
 						"{@type=korap:group, operation=operation:position, operands=[" +
 							"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 								"{@type=korap:span, key=s}" +
@@ -707,7 +707,7 @@ public class CosmasTreeTest {
 		query="wegen #OV <s>";
 		String opov1 = 
 					"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:intersects, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:intersects, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -725,7 +725,7 @@ public class CosmasTreeTest {
 		query="wegen #OV(L) <s>";
 		String opov2 = 
 				"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:intersects, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:intersects, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -744,7 +744,7 @@ public class CosmasTreeTest {
 		String opov3= 
 				
 					"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:intersects, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:intersects, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -762,7 +762,7 @@ public class CosmasTreeTest {
 		query="wegen #OV(FI) <s>";
 		String opov4= 
 					"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:unequals, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:unequals, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -780,7 +780,7 @@ public class CosmasTreeTest {
 		query="wegen #OV(FE) <s>";
 		String opov5= 
 				"{@type=korap:reference, operation=operation:focus, classRef=[130], operands=[" +
-						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:equals, classIn=[129,130], classOut=131, operands=[" +
+						"{@type=korap:group, operation=operation:class, classRefCheck=classRefCheck:equals, classIn=[129,130], classOut=131, class=131, operands=[" +
 							"{@type=korap:group, operation=operation:position, operands=[" +
 								"{@type=korap:group, operation=operation:class, class=129, classOut=129, operands=[" +
 									"{@type=korap:span, key=s}" +
@@ -1336,7 +1336,7 @@ public class CosmasTreeTest {
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(col1.replaceAll(" ", ""), map.replaceAll(" ", ""));
 		
-		query = "Mann:sa,-pa,+te)";
+		query = "Mann:sa,-pa,+te";
 		String col2 = 
 				"{@type=korap:reference, operation=operation:focus, classRef=[129], operands=[" +
 					"{@type=korap:group, operation=operation:position, frames=[frames:matches], operands=[" +
