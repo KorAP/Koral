@@ -880,7 +880,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		posOptions.put("frames", positions);
 		posOptions.put("classRefCheck", classRefCheck);
 		posOptions.put("frame", "frame:"+frame);
-		announcements.add("Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
+		addMessage(303, "Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
 				"Position frames are now expressed through 'frames' and 'sharedClasses'");
 
 		if (exclnode != null) {
@@ -967,7 +967,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		posOptions.put("frames", positions);
 		posOptions.put("classRefCheck", classRefCheck);
 		posOptions.put("frame", "frame:"+frame);
-		announcements.add("Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
+		addMessage(303, "Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
 				"Position frames are now expressed through 'frames' and 'sharedClasses'");
 
 		if (exclnode != null) {

@@ -224,7 +224,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 		String type = (String) term.get("type");
 		if (type == null || type.equals("type:regex")) {
 			if (!(match.equals("match:eq") || match.equals("match:ne") || match.equals("match:contains"))) {
-				errorMsgs.add("You used an inequation operator with a string value.");
+				addError(302, "You used an inequation operator with a string value.");
 				System.err.println("You used an inequation operator with a string value.");
 				return 1;
 			}

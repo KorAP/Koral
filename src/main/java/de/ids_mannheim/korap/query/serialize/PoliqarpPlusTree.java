@@ -91,7 +91,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				quantGroup.put("boundary", makeBoundary(minmax[0], minmax[1]));
 				if (minmax[0] != null) quantGroup.put("min", minmax[0]);
 				if (minmax[1] != null) quantGroup.put("max", minmax[1]);
-				announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be " +
+				addMessage(303, "Deprecated 2014-07-24: 'min' and 'max' to be " +
 						"supported until 3 months from deprecation date.");
 				putIntoSuperObject(quantGroup);
 				objectStack.push(quantGroup);
@@ -310,7 +310,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				}
 				// only allow class id up to 127
 				if (classId > 127) {
-					warnings.add("Only class IDs up to 127 are allowed. Your class "+classId+" has been set back to 127. "
+					addWarning("Only class IDs up to 127 are allowed. Your class "+classId+" has been set back to 127. "
 							+ "Check for possible conflict with other classes.");
 					classId = 127;
 				}
@@ -338,7 +338,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 						} catch (NumberFormatException e) {
 							String err = "The specified class reference in the " +
 									"shrink/split-Operator is not a number.";
-							errorMsgs.add(err);
+							addError(302, err);
 							throw new QueryException(err);
 						}
 					}

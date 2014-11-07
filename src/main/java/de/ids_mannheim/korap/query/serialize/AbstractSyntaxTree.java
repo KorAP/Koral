@@ -53,18 +53,43 @@ public abstract class AbstractSyntaxTree {
 	public static boolean verbose = false;
 	ParseTree currentNode = null;
 	Integer stackedObjects = 0;
-	ArrayList<String> errorMsgs = new ArrayList<String>();
-	ArrayList<String> warnings = new ArrayList<String>();
-	ArrayList<String> announcements = new ArrayList<String>();
+	private ArrayList<List<Object>> errors = new ArrayList<List<Object>>();
+	private ArrayList<List<Object>> warnings = new ArrayList<List<Object>>();
+	private ArrayList<List<Object>> messages = new ArrayList<List<Object>>();
 	LinkedHashMap<String, Object> collection = new LinkedHashMap<String,Object>();
 	
 	AbstractSyntaxTree() {
 		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld");
-		requestMap.put("errors", errorMsgs);
+		requestMap.put("errors", errors);
 		requestMap.put("warnings", warnings);
-		requestMap.put("announcements", announcements);
+		requestMap.put("messages", messages);
 		requestMap.put("collection", collection);
 		requestMap.put("meta", new LinkedHashMap<String, Object>());
+	}
+	
+	public void addWarning(int code, String msg) {
+		List<Object> warning = Arrays.asList(new Object[]{code, msg}); 
+		warnings.add(warning);
+	}
+	
+	public void addWarning(String msg) {
+		List<Object> warning = Arrays.asList(new Object[]{msg}); 
+		warnings.add(warning);
+	}
+	
+	public void addMessage(int code, String msg) {
+		List<Object> message = Arrays.asList(new Object[]{code, msg}); 
+		messages.add(message);
+	}
+	
+	public void addMessage(String msg) {
+		List<Object> message = Arrays.asList(new Object[]{msg}); 
+		messages.add(message);
+	}
+	
+	public void addError(int code, String msg) {
+		List<Object> error = Arrays.asList(new Object[]{code, msg}); 
+		errors.add(error);
 	}
 	
 	public Map<String, Object> getRequestMap() {
@@ -133,7 +158,7 @@ public abstract class AbstractSyntaxTree {
 		if (max != null) {
 			group.put("max", max);
 		}
-		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
+		addMessage(303, "Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
 		return group;
 	}
 	
@@ -187,7 +212,7 @@ public abstract class AbstractSyntaxTree {
 			frame = "frame:contains";
 		}
 		group.put("frame", frame);
-		announcements.add("Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
+		addMessage(303, "Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
 				"Position frames are now expressed through 'frames'.");
 		return group;
 	}
@@ -203,13 +228,13 @@ public abstract class AbstractSyntaxTree {
 		if (setBySystem) {
 			group.put("class", 128+classCount);
 			group.put("classOut", 128+classCount);
-			announcements.add("A class has been introduced into the backend representation of " +
+			addMessage("A class has been introduced into the backend representation of " +
 					"your query for later reference to a part of the query. The class id is "+(128+classCount));
 		} else {
 			group.put("class", classCount);
 			group.put("classOut", classCount);
 		}
-		announcements.add("Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
+		addMessage(303, "Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
 				"Classes are now defined using the 'classOut' attribute.");
 		group.put("operands", new ArrayList<Object>());
 		return group;
@@ -227,7 +252,7 @@ public abstract class AbstractSyntaxTree {
 		group.put("classIn", Arrays.asList(classIn));
 		group.put("classOut", classOut);
 		group.put("class", classOut);
-		announcements.add("Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
+		addMessage(303, "Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
 				"Classes are now defined using the 'classOut' attribute.");
 		group.put("operands", new ArrayList<Object>());
 		return group;
@@ -281,7 +306,7 @@ public abstract class AbstractSyntaxTree {
 		if (max != null) {
 			group.put("max", max);
 		}
-		announcements.add("Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
+		addMessage(303, "Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
 		return group;
 	}
 	
@@ -359,7 +384,7 @@ public abstract class AbstractSyntaxTree {
 			number = MAXIMUM_DISTANCE; 
 			String warning = String.format("You specified a distance between two segments that is greater than " +
 					"the allowed max value of %d. Your query will be re-interpreted using a distance of %d.", MAXIMUM_DISTANCE, MAXIMUM_DISTANCE);
-			warnings.add(warning);
+			addWarning(warning);
 			log.warn("User warning: "+warning);
 		}
 		return number;
