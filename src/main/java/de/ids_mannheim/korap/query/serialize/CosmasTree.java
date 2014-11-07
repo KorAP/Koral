@@ -1083,6 +1083,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		 */
 		String[] queries = new String[]{
 				/* COSMAS 2 */
+				"Mann:sa,-pa,+te,se"
 		};
 //		CosmasTree.verbose=true;
 		for (String q : queries) {
