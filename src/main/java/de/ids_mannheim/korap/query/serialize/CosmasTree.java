@@ -767,10 +767,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	 */
 	private LinkedHashMap<String, Object> processPositionCondition(Tree cond, ArrayList<Object> distributedOperands, String mode) {
 		boolean negated = false;
-		String elem;
-		String position = "frames:matches";
-		Integer[] elemSpanRef = null;
-		Integer[] hitSpanRef = null;
+		String elem; // the 'span' (s/p/t)
+		String position = "frames:matches"; // default
+		Integer[] elemSpanRef = null; // spanRef to be used for the element ('span')
+		Integer[] hitSpanRef = null; // spanRef to be used for the subquery X 
 
 		String nodeString = cond.toStringTree();
 		if (nodeString.startsWith("-")) {
@@ -783,6 +783,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		elem = nodeString.substring(0, 1);
 		nodeString = nodeString.substring(1);
 
+		// in cases where the end of X shall match the beginning of the span, or vice versa, 
+		// we need to define spanRefs
 		if (mode.equals("beg")) {
 			if (nodeString.equals("a")) {
 				position = "frames:startswith";
@@ -798,7 +800,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 				elemSpanRef = new Integer[]{-1,1};
 			}
 		}
-
+		// Create the position group and add the span and the subquery as operands, possibly wrapped in spanRefs
 		LinkedHashMap<String, Object> positionGroup = makePosition(new String[]{position}, new String[0]);
 		if (negated) positionGroup.put("exclude", true);
 		ArrayList<Object> posOperands = new ArrayList<Object>();
@@ -821,8 +823,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		}
 		posOperands.add(span);
 		posOperands.add(classGroup);
-		
-
 		return positionGroup;
 	}
 
