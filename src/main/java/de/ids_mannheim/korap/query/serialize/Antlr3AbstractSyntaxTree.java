@@ -44,6 +44,14 @@ public abstract class Antlr3AbstractSyntaxTree extends AbstractSyntaxTree {
         return false;
     }
 
+    public static List<Tree> getChildren(Tree node) {
+        ArrayList<Tree> children = new ArrayList<Tree>();
+        for (int i = 0; i < node.getChildCount(); i++) {
+            children.add(node.getChild(i));
+        }
+        return children;
+    }
+
     public static List<Tree> getChildrenWithCat(Tree node, String nodeCat) {
         ArrayList<Tree> children = new ArrayList<Tree>();
         for (int i = 0; i < node.getChildCount(); i++) {

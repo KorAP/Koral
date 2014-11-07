@@ -320,6 +320,15 @@ public abstract class AbstractSyntaxTree {
 		return group;
 	}
 	
+	protected LinkedHashMap<String, Object> makeSpanReference(Integer[] spanRef, String operation) {
+		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
+		group.put("@type", "korap:reference");
+		group.put("operation", "operation:"+operation);
+		group.put("spanRef", Arrays.asList(spanRef));
+		group.put("operands", new ArrayList<Object>());
+		return group;
+	}
+	
 	protected void addOperandsToGroup(LinkedHashMap<String, Object> group) {
 		ArrayList<Object> operands = new ArrayList<Object>();
 		group.put("operands", operands);
@@ -356,71 +365,6 @@ public abstract class AbstractSyntaxTree {
 		return number;
 	}
 	
-    /**
-     * Returns the category (or 'label') of the root of a (sub-) ParseTree (ANTLR 3).
-     *
-     * @param node
-     * @return
-     */
-    public static String getNodeCat(Tree node) {
-        String nodeCat = node.toStringTree();
-        Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
-        Matcher m = p.matcher(node.toStringTree());
-        if (m.find()) {
-            nodeCat = m.group(1);
-        }
-        return nodeCat;
-    }
-
-
-    /**
-     * Tests whether a certain node has a child by a certain name
-     *
-     * @param node     The parent node.
-     * @param childCat The category of the potential child.
-     * @return true iff one or more children belong to the specified category
-     */
-    public static boolean hasChild(Tree node, String childCat) {
-        for (int i = 0; i < node.getChildCount(); i++) {
-            if (getNodeCat(node.getChild(i)).equals(childCat)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-
-
-    public static List<Tree> getChildrenWithCat(Tree node, String nodeCat) {
-        ArrayList<Tree> children = new ArrayList<Tree>();
-        for (int i = 0; i < node.getChildCount(); i++) {
-            if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
-                children.add(node.getChild(i));
-            }
-        }
-        return children;
-    }
-
-
-    public static List<ParseTree> getChildren(ParseTree node) {
-        ArrayList<ParseTree> children = new ArrayList<ParseTree>();
-        for (int i = 0; i < node.getChildCount(); i++) {
-                children.add(node.getChild(i));
-        }
-        return children;
-    }
-    
-    public static Tree getFirstChildWithCat(Tree node, String nodeCat) {
-        for (int i = 0; i < node.getChildCount(); i++) {
-            if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
-                return node.getChild(i);
-            }
-        }
-        return null;
-    }
-
-
-
     public static void checkUnbalancedPars(String q) throws QueryException {
         int openingPars = StringUtils.countMatches(q, "(");
         int closingPars = StringUtils.countMatches(q, ")");

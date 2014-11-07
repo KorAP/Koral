@@ -5,6 +5,7 @@ import de.ids_mannheim.korap.query.cosmas2.c2psParser;
 import de.ids_mannheim.korap.query.serialize.util.CosmasCondition;
 import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.util.QueryException;
+
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
@@ -75,7 +76,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	/**
 	 * A list of node categories that can be sequenced (i.e. which can be in a sequence with any number of other nodes in this list)
 	 */
-	private final List<String> sequentiableCats = Arrays.asList(new String[]{"OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND", "OPIN", "OPBED"});
+	private final List<String> sequentiableCats = Arrays.asList(new String[]{"OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND", "OPIN", "OPBED", "OPELEM"});
 	/**
 	 * Keeps track of sequenced nodes, i.e. nodes that implicitly govern  a sequence, as in (C2PQ (OPWF der) (OPWF Mann)).
 	 * This is necessary in order to know when to take the sequence off the object stack, as the sequence is introduced by the
@@ -160,17 +161,17 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 					if (nodeHasSequentiableSiblings) {
 						// Step I: create sequence
 						LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
-					sequence.put("@type", "korap:group");
-					sequence.put("operation", "operation:sequence");
-					sequence.put("operands", new ArrayList<Object>());
-					// push sequence on object stack but don't increment stackedObjects counter since
-					// we've got to wait until the parent node is processed - therefore, add the parent
-					// to the sequencedNodes list and remove the sequence from the stack when the parent
-					// has been processed
-					objectStack.push(sequence);
-					sequencedNodes.push(parent);
-					// Step II: decide where to put sequence
-					putIntoSuperObject(sequence, 1);
+						sequence.put("@type", "korap:group");
+						sequence.put("operation", "operation:sequence");
+						sequence.put("operands", new ArrayList<Object>());
+						// push sequence on object stack but don't increment stackedObjects counter since
+						// we've got to wait until the parent node is processed - therefore, add the parent
+						// to the sequencedNodes list and remove the sequence from the stack when the parent
+						// has been processed
+						objectStack.push(sequence);
+						sequencedNodes.push(parent);
+						// Step II: decide where to put sequence
+						putIntoSuperObject(sequence, 1);
 					}
 				}
 			}
@@ -237,7 +238,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 						attrval[0] = attrval[0].replace("!", "");
 					}
 					String[] foundrylayer = attrval[0].split("/");
-					
+
 					fieldMap.put("@type", "korap:term");
 					//     			fieldMap.put("key", "morph:"+node.getChild(0).toString().replace(" ", "_"));
 					fieldMap.put("key", attrval[1]);
@@ -248,8 +249,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 						fieldMap.put("layer", foundrylayer[1]);
 					}
 				}
-				
-				
+
+
 				// make category-specific fieldMap entry
 				// negate field (see above)
 				if (negate) {
@@ -600,85 +601,63 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			putIntoSuperObject(beggroup, 1);
 		}
 
-		if (nodeCat.equals("OPBED")) {
+		if (nodeCat.equals("OPBED")) { 
+			// Node structure is (OPBED X+ (OPTS (TPBEG tpos*) (TPEND tpos*)))   
+			// X is some segment, TPBEG or TPEND must be present (inclusive OR)
+			// tpos is a three-char string of the form "[+-]?[spt][ae]". s/p/t indicates span, a/e beginning/end, - means negation
+			// See C-II QL documentation for more detail: 
+			// http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/textpositionen.html
+			
 			// Step I: create group
 			int optsChild = node.getChildCount() - 1;
-			Tree conditions = node.getChild(optsChild).getChild(0);
+			Tree begConditions = getFirstChildWithCat(node.getChild(optsChild), "TPBEG");
+			Tree endConditions = getFirstChildWithCat(node.getChild(optsChild), "TPEND");
 
-			// create a containing group expressing the submatch constraint on the first argument
-			ArrayList<Integer> spanRef = new ArrayList<Integer>();
-			spanRef.add(1);
 			LinkedHashMap<String, Object> submatchgroup = makeReference(128+classCounter);
-			ArrayList<Object> submatchoperands = new ArrayList<Object>();
-			submatchgroup.put("operands", submatchoperands);
+			ArrayList<Object> submatchOperands = new ArrayList<Object>();
+			submatchgroup.put("operands", submatchOperands);
 			putIntoSuperObject(submatchgroup);
 
-			// Distinguish two cases. Normal case: query has just one condition, like #BED(X, sa) ...
-			if (conditions.getChildCount() == 1) {
-				CosmasCondition c = new CosmasCondition(conditions.getChild(0));
-
-				// create the group expressing the position constraint
-				String[] frames = new String[]{c.position};
-				String[] sharedClasses = new String[]{};  // OPBED only defines frame constraint, neglects intersection type
-				LinkedHashMap<String,Object> posgroup = makePosition(frames, sharedClasses);
-				//                LinkedHashMap<String, Object> posgroup = makePosition(c.position);
-				ArrayList<Object> operands = (ArrayList<Object>) posgroup.get("operands");
-				if (c.negated) posgroup.put("exclude", true);
-
-				// create span representing the element expressed in the condition
-				LinkedHashMap<String, Object> bedElem = new LinkedHashMap<String, Object>();
-				bedElem.put("@type", "korap:span");
-				bedElem.put("key", c.elem);
-
-				// create a class group containing the argument, in order to submatch the arg.
-				LinkedHashMap<String, Object> classGroup = makeSpanClass(classCounter++);
-				objectStack.push(classGroup);
-				stackedObjects++;
-				operands.add(bedElem);
-				operands.add(classGroup);
-				// Step II: decide where to put
-				submatchoperands.add(posgroup);
-
-				// ... or the query has several conditions specified, like #BED(XY, sa,-pa). In that case,
-				//     use 'focus' operations to create nested conditions
-			} else {
-				// node has several conditions (like 'sa, -pa')
-				// -> create identity position group and embed all position groups there
-				LinkedHashMap<String, Object> conjunct = makePosition(new String[]{"frames:matches"}, new String[]{"classRefCheck:equals"});
-				//                ArrayList<Object> distances = new ArrayList<Object>();
-				//                distances.add(makeDistance("w", 0,0));
-				//                conjunct.put("distances", distances);
-				ArrayList<Object> operands = new ArrayList<Object>();
-				conjunct.put("operands", operands);
-				ArrayList<Object> distributedOperands = new ArrayList<Object>();
-
-				for (int i = 0; i < conditions.getChildCount(); i++) {
-					// for each condition, create a position group containing a class group.
-					// make position group
-					CosmasCondition c = new CosmasCondition(conditions.getChild(i));
-					String[] frames = new String[]{c.position};
-					String[] sharedClasses = new String[]{};  // OPBED only defines frame constraint, neglects intersection type
-					LinkedHashMap<String,Object> posGroup = makePosition(frames, sharedClasses);
-					operands.add(posGroup);
-					if (c.negated) posGroup.put("exclude", "true");
-					ArrayList<Object> posOperands = new ArrayList<Object>();
-
-					// make class group
-					LinkedHashMap<String, Object> classGroup = makeSpanClass(classCounter++);
-					classGroup.put("operands", distributedOperands);
-
-					// put the span and the class group into the position group
-					posGroup.put("operands", posOperands);
-					LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
-					posOperands.add(span);
-					posOperands.add(classGroup);
-					span.put("@type", "korap:span");
-					span.put("key", c.elem);
-					objectStack.push(classGroup);
+			// Step II: collect all conditions, create groups for them in processPositionCondition()
+			ArrayList<Object> distributedOperands = new ArrayList<Object>();
+			ArrayList<LinkedHashMap<String, Object>> conditionGroups = new ArrayList<LinkedHashMap<String, Object>>(); 
+			if (begConditions != null) {
+				for (Tree condition : getChildren(begConditions)) {
+					conditionGroups.add(processPositionCondition(condition, distributedOperands, "beg"));
 				}
-				submatchoperands.add(conjunct);
 			}
-
+			if (endConditions != null) {
+				for (Tree condition : getChildren(endConditions)) {
+					conditionGroups.add(processPositionCondition(condition, distributedOperands, "end"));
+				}
+			}
+			// Step III: insert conditions. need to stack matches-groups because position groups may only have two operands
+			ArrayList<Object> currentLowestOperands = submatchOperands; // indicates where to insert next condition group
+			int conditionCount = 0;
+			for (LinkedHashMap<String,Object> conditionGroup : conditionGroups) {
+				conditionCount++;
+				if (conditionGroups.size()==1) {
+					submatchOperands.add(conditionGroup);
+				} else if (conditionCount < conditionGroups.size()) {
+					LinkedHashMap<String,Object> matchesGroup = makePosition(new String[]{"frames:matches"}, new String[0]);
+					ArrayList<Object> matchesOperands = (ArrayList<Object>) matchesGroup.get("operands");
+					matchesOperands.add(conditionGroup);
+					// matches groups that are embedded at the second or lower level receive an additional
+					// focus to grep out only the query term to which the constraint applies
+					if (conditionCount > 1) {
+						LinkedHashMap<String,Object> focus = makeReference(128+classCounter-2);
+						ArrayList<Object> focusOperands = new ArrayList<Object>();
+						focus.put("operands", focusOperands);
+						focusOperands.add(matchesGroup);
+						currentLowestOperands.add(focus);
+					} else {
+						currentLowestOperands.add(matchesGroup);
+					}
+					currentLowestOperands = matchesOperands;
+				} else {
+					currentLowestOperands.add(conditionGroup);
+				}
+			}
 		}
 		objectsToPop.push(stackedObjects);
 		toWrapsToPop.push(stackedToWrap);
@@ -733,7 +712,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	}
 
 	private void processSpanDistance(String meas, int min, int max) {
-		// TODO Do stuff here in case we'll decide one day to treat span distances in a special way.
+		// Do stuff here in case we'll decide one day to treat span distances in a special way.
+		// (see GDoc Special Distances Serialization)
 	}
 
 	/**
@@ -760,13 +740,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	}
 
 	private Object translateMorph(String layer) {
-		// todo: not very nicely solved! Does this require extension somehow? if not, why not use simple string comparison?!
-		//        LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
-		//        map.put("ANA", "pos");
-		//        if (map.containsKey(layer))
-		//            return map.get(layer);
-		//        else
-		//            return layer;
+		// might be extended...
 		if (layer.equals("ANA"))
 			return ResourceMapper.descriptor2policy("ANA");
 		else
@@ -775,6 +749,83 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	}
 
 	@SuppressWarnings("unchecked")
+	/**
+	 * Processes individual position conditions as provided in the OPTS node under the OPBEG node.
+	 * #BEG allows to specify position constrains that apply to the beginning or the end of the subquery X.
+	 * E.g., in #BEG(X, tpos/tpos), the 'tpos' constraints before the slash indicate conditions that apply 
+	 * to the beginning of X, those after the slash are conditions that apply to the end of X.
+	 * See the official C-II documentation for more details. <br/><br/>
+	 * What's important here is what follows: <br/>
+	 * Assume the query #BED(der Mann, sa/pa). This means that <b>the beginning<b/> of "der Mann" stands at
+	 * the beginning of a sentence and that <b>the end</b> (because this constraint comes after the slash) stands at the 
+	 * beginning of a paragraph. The "end" means the last item, here "Mann", so this token comes at the beginning
+	 * of a paragraph. To capture this, we choose spanRefs: The last item of X matches the first item of the span (here: P). 
+	 * @param cond
+	 * @param distributedOperands
+	 * @param mode
+	 * @return
+	 */
+	private LinkedHashMap<String, Object> processPositionCondition(Tree cond, ArrayList<Object> distributedOperands, String mode) {
+		boolean negated = false;
+		String elem;
+		String position = "frames:matches";
+		Integer[] elemSpanRef = null;
+		Integer[] hitSpanRef = null;
+
+		String nodeString = cond.toStringTree();
+		if (nodeString.startsWith("-")) {
+			negated = true;
+			nodeString = nodeString.substring(1);
+		} else if (nodeString.startsWith("+")) {
+			nodeString = nodeString.substring(1);
+		}
+
+		elem = nodeString.substring(0, 1);
+		nodeString = nodeString.substring(1);
+
+		if (mode.equals("beg")) {
+			if (nodeString.equals("a")) {
+				position = "frames:startswith";
+			} else if (nodeString.equals("e")) {
+				hitSpanRef = new Integer[]{0,1};
+				elemSpanRef = new Integer[]{-1,1};
+			}
+		} else if (mode.equals("end")) {
+			if (nodeString.equals("e")) {
+				position = "frames:endswith";
+			} else if (nodeString.equals("a")) {
+				hitSpanRef = new Integer[]{0,1};
+				elemSpanRef = new Integer[]{-1,1};
+			}
+		}
+
+		LinkedHashMap<String, Object> positionGroup = makePosition(new String[]{position}, new String[0]);
+		if (negated) positionGroup.put("exclude", true);
+		ArrayList<Object> posOperands = new ArrayList<Object>();
+		LinkedHashMap<String, Object> classGroup = makeSpanClass(classCounter++);
+		classGroup.put("operands", distributedOperands);
+		positionGroup.put("operands", posOperands);
+		LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
+		span.put("@type", "korap:span");
+		span.put("key", elem);
+		objectStack.push(classGroup);
+		if (hitSpanRef != null) {
+			LinkedHashMap<String, Object> spanRefAroundHit = makeSpanReference(hitSpanRef, "focus");
+			((ArrayList<Object>) spanRefAroundHit.get("operands")).add(classGroup);
+			classGroup = spanRefAroundHit; //re-assign after wrapping classGroup in spanRef
+		}
+		if (elemSpanRef != null) {
+			LinkedHashMap<String, Object> spanRefAroundSpan = makeSpanReference(elemSpanRef, "focus");
+			((ArrayList<Object>) spanRefAroundSpan.get("operands")).add(span);
+			span = spanRefAroundSpan; //re-assign after wrapping span in spanRef
+		}
+		posOperands.add(span);
+		posOperands.add(classGroup);
+		
+
+		return positionGroup;
+	}
+
 	private LinkedHashMap<String, Object> parseOPINOptions(Tree node) {
 		Tree posnode = getFirstChildWithCat(node, "POS");
 		Tree rangenode = getFirstChildWithCat(node, "RANGE");
@@ -955,78 +1006,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		return wrapCascade[i];
 	}
 
-	private LinkedHashMap<String,Object> processPositionOption(String posOption) {
-		LinkedHashMap<String,Object> posgroup = null;
-
-		if (posOption.equals("F") || posOption.equals("FI")) {
-			posgroup = makePosition("startswith");
-			LinkedHashMap<String, Object> endsWithPosition = makePosition("endswith");
-			((ArrayList<Object>) endsWithPosition.get("operands")).add(makeReference(classCounter+1));
-			LinkedHashMap<String,Object> innerFocus = makeReference(classCounter);
-			innerFocus.put("operands", new ArrayList<Object>());
-			LinkedHashMap<String,Object> outerFocus = makeReference(classCounter);
-			outerFocus.put("operands", new ArrayList<Object>());
-			LinkedHashMap[] toWrap = new LinkedHashMap[]{posgroup, innerFocus, endsWithPosition, outerFocus};
-			if (posOption.equals("FI")) {
-				LinkedHashMap<String, Object> noMatchPosition = makePosition("matches");
-				((ArrayList<Object>) noMatchPosition.get("operands")).add(makeReference(classCounter+1));
-				noMatchPosition.put("exclude", true);
-				LinkedHashMap<String,Object> outermostFocus = makeReference(classCounter);
-				outermostFocus.put("operands", new ArrayList<Object>());
-				toWrap = new LinkedHashMap[]{posgroup, innerFocus, endsWithPosition, outerFocus, noMatchPosition, outermostFocus};
-			}
-
-			toWrapStack.push(toWrap);
-			stackedToWrap++;
-			//    		wrapOperandInClass(node,1,classCounter+1);
-			//    		wrapOperandInClass(node,2,classCounter);
-			//    		wrapFirstOpInClass = classCounter+1;
-			//    		wrapSecondOpInClass = classCounter;
-		}
-
-		return posgroup;
-	}
-
-	//    /**
-	//     * Translates the text area specifications (position option arguments) to terms used in serialisation.
-	//     * For the allowed argument types and their values for OPIN and OPOV, see
-	//     * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/ARGUMENT_I.html or
-	//     * http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/ARGUMENT_O.html, respectively.
-	//     *
-	//     * @param argument
-	//     * @param mode
-	//     * @return
-	//     */
-	//    private ArrayList<String> translateTextAreaArgument(String argument, String mode) {
-	//    	ArrayList<String> positions = new ArrayList<String>();
-	//        // POSTYP	:	'L'|'l'|'R'|'r'|'F'|'f'|'FE'|'fe'|'FI'|'fi'|'N'|'n'|'X'|'x' ;
-	//        argument = argument.toUpperCase();
-	//        switch (argument) {
-	//            case "L":
-	//                if (mode.equals("in")) positions.add("startswith");
-	//                break;
-	//            case "R":
-	//                positions = mode.equals("in") ? "endswith" : "overlapsRight";
-	//                break;
-	//            case "F":
-	//                positions = "startswith";
-	//                break;
-	//            case "FE":
-	//                positions = "matches";
-	//                break;
-	//            case "FI":
-	//                positions = "startswith";
-	//                break;
-	//            case "N": // for OPIN only - exclusion constraint formulated in parseOPINOptions
-	//                positions = "leftrightmatch";
-	//                break;
-	//            case "X": // for OPOV only
-	//                positions = "residual";
-	//                break;
-	//        }
-	//        return positions;
-	//    }
-
 	LinkedList<ArrayList<Object>> nestedDistOperands = new LinkedList<ArrayList<Object>>();  
 
 	@SuppressWarnings("unchecked")
@@ -1104,35 +1083,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		 */
 		String[] queries = new String[]{
 				/* COSMAS 2 */
-				//                "wegen #OV(x) <s>",
-				//                "wegen #IN(L) <s>",
-				//                "#NHIT(gehen /w1:10 voran)",
-				//                "wegen #OV(FI) <s>",
-				//                "Sonne /+w4 Mond",
-				//                "#BEG(der /w3:5 Mann) /+w10 kommt",
-				//                "Sonne /s0 Mond"
-				//                "Sonne /+w4 Mond",
-				//                "#BED(der Mann , sa,-pa)",
-				//        		"Sonne /+w1:4 Mond /-w1:7 Sterne",
-				//        		"wegen #IN('FE,ALL,%,MIN') <s>",
-				//        		"#NHIT(gehen /w1:10 voran)"
-				//        		"MORPH(V PRES IND)",
-				//                "wegen #OV(F) <s>"
-				//        		"Sonne /s0 Mond",
-//				"Sonne /+w1:4 Mond /-w1:7 Sterne",
-//				"Der:ta",
-//				"&mond-",
-//				"gehen /+w10 voran %w10 Beispiel",
-//				"(gehen /+w10 voran) %w10 Beispiel",
-//				"#BED(der Mann , sa,-pa)",
-//				"MORPH(foundry/layer=key)",
-//				"MORPH(f/l!=k &f/l!=k)",
-//				"MORPH(p=aV)",
-				"MORPH(APPR)",
-//				"MORPH(APPR) ODER MORPH(APPRART)",
-				"#ELEM(cnx/c=np)"
 		};
-				CosmasTree.verbose=true;
+//		CosmasTree.verbose=true;
 		for (String q : queries) {
 			try {
 				System.out.println(q);
