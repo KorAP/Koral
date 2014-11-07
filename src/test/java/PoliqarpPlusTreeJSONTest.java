@@ -471,6 +471,15 @@ public class PoliqarpPlusTreeJSONTest {
 		operands = Lists.newArrayList(res.at("/query/operands").elements());
 		assertEquals("operation:class",		operands.get(0).at("/operation").asText());
 		assertEquals(1,						operands.get(0).at("/classOut").asInt());
+		
+		query = "{1:{2:der} {3:[]} Mann}";
+		qs.setQuery(query, "poliqarpplus");
+		res = mapper.readTree(qs.toJSON());
+		operands = Lists.newArrayList(res.at("/query/operands").elements());
+		assertEquals(1,	operands.size());  // class operation may only have one operand (the sequence)
+		operands = Lists.newArrayList(operands.get(0).at("/operands").elements());
+		assertEquals(3,	operands.size());  // the sequence has three operands ("der", "[]" and "Mann")
+		
 	}
 	
 	@Test
@@ -502,6 +511,9 @@ public class PoliqarpPlusTreeJSONTest {
 		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
 		assertEquals(true,					operands.get(0).at("/key").isMissingNode());
 	}
+	
+
+	
 //	}
 //	
 //	@Test
