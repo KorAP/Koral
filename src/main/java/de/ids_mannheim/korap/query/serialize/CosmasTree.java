@@ -645,7 +645,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 					// matches groups that are embedded at the second or lower level receive an additional
 					// focus to grep out only the query term to which the constraint applies
 					if (conditionCount > 1) {
-						LinkedHashMap<String,Object> focus = makeReference(128+classCounter-2);
+						LinkedHashMap<String,Object> focus = makeReference(128+classCounter-conditionGroups.size()+conditionCount-1);
 						ArrayList<Object> focusOperands = new ArrayList<Object>();
 						focus.put("operands", focusOperands);
 						focusOperands.add(matchesGroup);
