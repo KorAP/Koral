@@ -229,6 +229,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			LinkedHashMap<String, Object> fieldMap = null;
 			for (String morphterm : morphterms) {
 				fieldMap = new LinkedHashMap<String, Object>();
+				fieldMap.put("@type", "korap:term");
 				String[] attrval = morphterm.split("=");
 				if (attrval.length == 1) {
 					fieldMap.put("key", morphterm);
@@ -238,8 +239,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 						attrval[0] = attrval[0].replace("!", "");
 					}
 					String[] foundrylayer = attrval[0].split("/");
-
-					fieldMap.put("@type", "korap:term");
 					//     			fieldMap.put("key", "morph:"+node.getChild(0).toString().replace(" ", "_"));
 					fieldMap.put("key", attrval[1]);
 					if (foundrylayer.length==1) {
