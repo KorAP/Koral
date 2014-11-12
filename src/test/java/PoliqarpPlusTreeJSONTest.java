@@ -513,6 +513,20 @@ public class PoliqarpPlusTreeJSONTest {
 	}
 	
 
+    @Test
+    public void testGroupRepetition() throws QueryException, JsonProcessingException, IOException {
+      query = "contains(<s>, (der){3})";
+      qs.setQuery(query, "poliqarpplus");
+      res = mapper.readTree(qs.toJSON());
+      assertEquals("korap:group", res.at("/query/@type").asText());
+      assertEquals("operation:position", res.at("/query/operation").asText());
+      assertEquals("korap:span", res.at("/query/operands/0/@type").asText());
+      assertEquals("s", res.at("/query/operands/0/key").asText());
+      assertEquals("korap:group", res.at("/query/operands/1/@type").asText());
+      assertEquals("operation:repetition", res.at("/query/operands/1/operation").asText());
+    };
+
+
 	
 //	}
 //	
