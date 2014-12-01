@@ -76,7 +76,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	/**
 	 * A list of node categories that can be sequenced (i.e. which can be in a sequence with any number of other nodes in this list)
 	 */
-	private final List<String> sequentiableCats = Arrays.asList(new String[]{"OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND", "OPIN", "OPBED", "OPELEM"});
+	private final List<String> sequentiableCats = Arrays.asList(new String[]{"OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND", "OPIN", "OPBED", "OPELEM", "OPOR", "OPAND"});
 	/**
 	 * Keeps track of sequenced nodes, i.e. nodes that implicitly govern  a sequence, as in (C2PQ (OPWF der) (OPWF Mann)).
 	 * This is necessary in order to know when to take the sequence off the object stack, as the sequence is introduced by the
@@ -1082,7 +1082,8 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		 */
 		String[] queries = new String[]{
 				/* COSMAS 2 */
-				"Mann:sa,-pa,+te,se"
+				"Mann:sa,-pa,+te,se",
+				"d*r ($Baum oder $Wald)"
 		};
 //		CosmasTree.verbose=true;
 		for (String q : queries) {

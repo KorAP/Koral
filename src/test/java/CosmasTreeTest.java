@@ -82,6 +82,13 @@ public class CosmasTreeTest {
 		ct = new CosmasTree(query);
 		map = ct.getRequestMap().get("query").toString();
 		assertEquals(morph1.replaceAll(" ", ""), map.replaceAll(" ", ""));
+		
+		query="MORPH(V)";
+		expected = 
+					"{@type=korap:token, wrap={@type=korap:term, key=V, match=match:eq}}";
+		ct = new CosmasTree(query);
+		map = ct.getRequestMap().get("query").toString();
+		assertEquals(expected.replaceAll(" ", ""), map.replaceAll(" ", ""));
 	}
 	
 	@Test
