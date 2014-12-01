@@ -184,7 +184,7 @@ public abstract class AbstractSyntaxTree {
 		
 		if (allowedFrames.length==0 && classRefCheck[0]=="classRefCheck:includes") {
 			frame = "frame:contains";
-		} else if (allowedFrames.length==0 && classRefCheck[0]=="classRefCheck:intersects") {
+		} else if (allowedFrames[0]=="frames:overlapsLeft" && allowedFrames[1]=="frames:overlapsRight" && classRefCheck[0]=="classRefCheck:intersects") {
 			frame = "frame:overlaps";
 		} else if (allowedFrames[0]=="frames:startswith" && classRefCheck[0]=="classRefCheck:includes") {
 			frame = "frame:startswith";

@@ -527,6 +527,29 @@ public class PoliqarpPlusTreeJSONTest {
     };
 
 
+    @Test
+    public void testPositions() throws QueryException, JsonProcessingException, IOException {
+      query = "contains(<s>, der)";
+      qs.setQuery(query, "poliqarpplus");
+      res = mapper.readTree(qs.toJSON());
+      assertEquals("korap:group", res.at("/query/@type").asText());
+      assertEquals("operation:position", res.at("/query/operation").asText());
+      assertEquals("frame:contains", res.at("/query/frame").asText());
+      assertEquals("korap:span", res.at("/query/operands/0/@type").asText());
+      assertEquals("s", res.at("/query/operands/0/key").asText());
+      assertEquals("korap:token", res.at("/query/operands/1/@type").asText());
+      
+      query = "overlaps(<s>, der)";
+      qs.setQuery(query, "poliqarpplus");
+      res = mapper.readTree(qs.toJSON());
+      assertEquals("korap:group", res.at("/query/@type").asText());
+      assertEquals("operation:position", res.at("/query/operation").asText());
+      assertEquals("frame:overlaps", res.at("/query/frame").asText());
+      assertEquals("korap:span", res.at("/query/operands/0/@type").asText());
+      assertEquals("s", res.at("/query/operands/0/key").asText());
+      assertEquals("korap:token", res.at("/query/operands/1/@type").asText());
+    };
+
 	
 //	}
 //	
