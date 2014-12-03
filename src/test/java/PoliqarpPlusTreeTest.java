@@ -21,10 +21,6 @@ import de.ids_mannheim.korap.util.QueryException;
  */
 public class PoliqarpPlusTreeTest {
 
-	String map;
-	String expected;
-	String metaExpected;
-	String metaMap;
 	String query;
 	ArrayList<JsonNode> operands;
 

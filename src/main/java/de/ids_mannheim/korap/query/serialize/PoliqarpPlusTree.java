@@ -334,6 +334,12 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 					} else {
 						try {
 							int classRef = Integer.parseInt(ref);
+							// only allow class id up to 127
+							if (classRef > 127) {
+								addWarning("Only class references up to 127 are allowed. Your reference to class "+classRef+" has been set back to 127. "
+										+ "Check for possible conflict with other classes.");
+								classRef = 127;
+							}
 							classRefs.add(classRef);
 						} catch (NumberFormatException e) {
 							String err = "The specified class reference in the " +
