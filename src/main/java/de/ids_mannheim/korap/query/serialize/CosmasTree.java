@@ -222,35 +222,30 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
 		if (nodeCat.equals("OPMORPH")) {
 			//Step I: get info
-			String[] morphterms = node.getChild(0).toStringTree().split("&");
+			String[] morphterms = node.getChild(0).toStringTree().replace(" ", "").split("&");
 			LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
 			token.put("@type", "korap:token");
 			ArrayList<Object> terms = new ArrayList<Object>();
 			LinkedHashMap<String, Object> fieldMap = null;
 			for (String morphterm : morphterms) {
+				// regex group #2 is foundry, #4 layer, #5 operator #6 key, #8 value
+				Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(\\w+)(:(\\w+))?");    
+				Matcher m = p.matcher(morphterm);										  
+				if (! m.matches()) {
+					throw new QueryException();
+				}
+				
 				fieldMap = new LinkedHashMap<String, Object>();
 				fieldMap.put("@type", "korap:term");
-				String[] attrval = morphterm.split("=");
-				if (attrval.length == 1) {
-					fieldMap.put("key", morphterm);
-				} else {
-					if (attrval[0].endsWith("!")) {
-						negate = !negate;
-						attrval[0] = attrval[0].replace("!", "");
-					}
-					String[] foundrylayer = attrval[0].split("/");
-					//     			fieldMap.put("key", "morph:"+node.getChild(0).toString().replace(" ", "_"));
-					fieldMap.put("key", attrval[1]);
-					if (foundrylayer.length==1) {
-						fieldMap.put("layer", foundrylayer[0]);
-					} else {
-						fieldMap.put("foundry", foundrylayer[0]);
-						fieldMap.put("layer", foundrylayer[1]);
-					}
+				
+				if (m.group(2) != null) fieldMap.put("foundry", m.group(2));
+				if (m.group(4) != null) fieldMap.put("layer", m.group(4));
+				if (m.group(5) != null) {
+					if ("!=".equals(m.group(5))) negate = !negate; 
 				}
+				if (m.group(6) != null) fieldMap.put("key", m.group(6));
+				if (m.group(8) != null) fieldMap.put("value", m.group(8));
 
-
-				// make category-specific fieldMap entry
 				// negate field (see above)
 				if (negate) {
 					fieldMap.put("match", "match:ne");
@@ -337,6 +332,10 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 							}
 						}
 						if (getNodeCat(attrNode).equals("NOTEQ")) negate = true;
+					}
+					// possibly only one term was present throughout all nodes: extract it from the group
+					if (termGroupOperands.size()==1) {
+						termGroup = (LinkedHashMap<String, Object>) termGroupOperands.get(0);
 					}
 					span.put("attr", termGroup);
 				}
@@ -1082,8 +1081,20 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		 */
 		String[] queries = new String[]{
 				/* COSMAS 2 */
-				"Mann:sa,-pa,+te,se",
-				"d*r ($Baum oder $Wald)"
+//				"Mann:sa,-pa,+te,se",
+//				"d*r ($Baum oder $Wald)",
+//				"MORPH(mate/m=temp:pres)",
+//				"MORPH(V)",
+//				"MORPH(p!=V)",
+//				"MORPH(tt/p=V)",
+//				"MORPH(temp:pres)",
+//				"MORPH(a/m=temp:pres)",
+//				"Sonne nicht Mond nicht Sterne",
+//				"(Sonne nicht Mond) nicht Sterne",
+//				"Sonne nicht (Mond oder Sterne)",
+				"#ELEM(W ANA=N)",
+				 "#ELEM(W ANA=N FOO=BAR)",
+				 "#ELEM(W ANA='N V')",
 		};
 //		CosmasTree.verbose=true;
 		for (String q : queries) {
