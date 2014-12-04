@@ -1095,6 +1095,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 				"#ELEM(W ANA=N)",
 				 "#ELEM(W ANA=N FOO=BAR)",
 				 "#ELEM(W ANA='N V')",
+				 "#NHIT(a %w10 b)"
 		};
 //		CosmasTree.verbose=true;
 		for (String q : queries) {

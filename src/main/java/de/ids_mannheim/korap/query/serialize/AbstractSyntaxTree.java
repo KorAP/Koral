@@ -244,11 +244,7 @@ public abstract class AbstractSyntaxTree {
 		LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
 		group.put("@type", "korap:group");
 		group.put("operation", "operation:class");
-		if (check.size()==1) {
-			group.put("classRefCheck", check.get(0));
-		} else {
-			group.put("classRefCheck", check);
-		}
+		group.put("classRefCheck", check);
 		group.put("classIn", Arrays.asList(classIn));
 		group.put("classOut", classOut);
 		group.put("class", classOut);

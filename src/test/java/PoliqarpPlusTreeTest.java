@@ -923,20 +923,20 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("operation:class", 	res.at("/query/operands/0/operands/1/operation").asText());
 		assertEquals(1, 					res.at("/query/operands/0/operands/1/classOut").asInt());
 		assertEquals("Mann", 				res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-		
+
 		query = "focus([orth=Der]{[orth=Mann][orth=geht]})";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals("operation:sequence", 	res.at("/query/operands/0/operands/1/operands/0/operation").asText());
 		assertEquals("Mann", 				res.at("/query/operands/0/operands/1/operands/0/operands/0/wrap/key").asText());
 		assertEquals("geht", 				res.at("/query/operands/0/operands/1/operands/0/operands/1/wrap/key").asText());
-		
+
 		query = "focus(2:[orth=Der]{2:[orth=Mann][orth=geht]})";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals(2, 					res.at("/query/classRef/0").asInt());
 		assertEquals(2, 					res.at("/query/operands/0/operands/1/classOut").asInt());
-		
+
 		query = "focus(3:startswith(<s>,{3:<np>}))";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -947,13 +947,13 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("operation:class", 	res.at("/query/operands/0/operands/1/operation").asText());
 		assertEquals(3, 					res.at("/query/operands/0/operands/1/classOut").asInt());
 		assertEquals("frames:startswith", 	res.at("/query/operands/0/frames/0").asText());
-		
+
 		query = "focus(1000:startswith(<s>,{1000:<np>}))";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals(127, 					res.at("/query/classRef/0").asInt());
 		assertEquals(127, 					res.at("/query/operands/0/operands/1/classOut").asInt());
-		
+
 		query = "focus(3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}}))";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -970,7 +970,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("operation:sequence", 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/operation").asText());
 		assertEquals("operation:class", 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/operands/1/operation").asText());
 		assertEquals(2, 					res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/operands/1/classOut").asInt());
-		
+
 		query = "split(3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}}))";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -978,7 +978,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(true, 					res.at("/query/classRef/1").isMissingNode());
 		assertEquals("korap:reference", 	res.at("/query/@type").asText());
 		assertEquals("operation:split", 	res.at("/query/operation").asText());
-		
+
 		query = "split(2|3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}}))";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -987,7 +987,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("classRefOp:intersection", res.at("/query/classRefOp").asText());
 		assertEquals("korap:reference", 		res.at("/query/@type").asText());
 		assertEquals("operation:split", 		res.at("/query/operation").asText());
-		
+
 		query = "focus(1:{[base=der]}{1:[pos=ADJA]})";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -995,7 +995,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(1, 					res.at("/query/operands/0/operands/0/classOut").asInt());
 		assertEquals(1, 					res.at("/query/operands/0/operands/1/classOut").asInt());
 	}
-	
+
 	@Test
 	public void testSubmatch() throws QueryException, JsonProcessingException, IOException {
 		query = "submatch(1,:<s>)";
@@ -1006,7 +1006,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(1, 					res.at("/query/spanRef/0").asInt());
 		assertEquals(true, 					res.at("/query/spanRef/1").isMissingNode());
 		assertEquals("s", 					res.at("/query/operands/0/key").asText());
-		
+
 		query = "submatch(1,4:<s>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1014,7 +1014,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("operation:focus", 	res.at("/query/operation").asText());
 		assertEquals(1, 					res.at("/query/spanRef/0").asInt());
 		assertEquals(4, 					res.at("/query/spanRef/1").asInt());
-		
+
 		query = "submatch(1,4:contains(<s>,[base=Haus]))";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1036,7 +1036,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("korap:relation", 		res.at("/query/relation/@type").asText());
 		assertEquals("s", 					res.at("/query/operands/0/key").asText());
 		assertEquals("np", 					res.at("/query/operands/1/key").asText());
-		
+
 		query = "relatesTo([base=Baum],<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1045,13 +1045,13 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("korap:relation", 		res.at("/query/relation/@type").asText());
 		assertEquals("Baum", 				res.at("/query/operands/0/wrap/key").asText());
 		assertEquals("np", 					res.at("/query/operands/1/key").asText());
-		
+
 		query = "relatesTo(Baum,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals("orth", 				res.at("/query/operands/0/wrap/layer").asText());
 		assertEquals("Baum", 				res.at("/query/operands/0/wrap/key").asText());
-		
+
 		query = "relatesTo(mate/d=HEAD:<np>,[base=Baum])";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1061,7 +1061,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("mate", 				res.at("/query/relation/foundry").asText());
 		assertEquals("d", 					res.at("/query/relation/layer").asText());
 		assertEquals("HEAD", 				res.at("/query/relation/key").asText());
-		
+
 		query = "dominates(Baum,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1069,13 +1069,13 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("Baum", 				res.at("/query/operands/0/wrap/key").asText());
 		assertEquals("korap:relation", 		res.at("/query/relation/@type").asText());
 		assertEquals("c", 					res.at("/query/relation/layer").asText());
-		
+
 		query = "dominates(cnx/c:<vp>,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals("cnx", 				res.at("/query/relation/foundry").asText());
 		assertEquals("c", 					res.at("/query/relation/layer").asText());
-		
+
 		query = "dominates(cnx/c*:<vp>,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1083,26 +1083,26 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("c", 					res.at("/query/relation/layer").asText());
 		assertEquals(0, 					res.at("/query/relation/boundary/min").asInt());
 		assertEquals(true, 					res.at("/query/relation/boundary/max").isMissingNode());
-		
+
 		query = "dominates(cnx/c{1,5}:<vp>,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals(1, 					res.at("/query/relation/boundary/min").asInt());
 		assertEquals(5, 					res.at("/query/relation/boundary/max").asInt());
-		
+
 		query = "dominates(cnx/c{,5}:<vp>,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals(0, 					res.at("/query/relation/boundary/min").asInt());
 		assertEquals(5, 					res.at("/query/relation/boundary/max").asInt());
-		
+
 		query = "dominates(cnx/c{5}:<vp>,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals(5, 					res.at("/query/relation/boundary/min").asInt());
 		assertEquals(5, 					res.at("/query/relation/boundary/max").asInt());
 	}
-	
+
 	@Test
 	public void testAlign() throws QueryException, JsonProcessingException, IOException {
 		query = "[orth=der]^[orth=Mann]";
@@ -1113,7 +1113,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("operation:class", 	res.at("/query/operands/1/operation").asText());
 		assertEquals(129, 					res.at("/query/operands/1/classOut").asInt());
 		assertEquals(129, 					res.at("/meta/alignment").asInt());
-		
+
 		query = "[orth=der]^[orth=große][orth=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1124,7 +1124,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("Mann", 				res.at("/query/operands/1/operands/0/operands/1/wrap/key").asText());
 		assertEquals(129, 					res.at("/query/operands/1/classOut").asInt());
 		assertEquals(129, 					res.at("/meta/alignment").asInt());
-		
+
 		query = "([base=a]^[base=b])|[base=c]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1136,7 +1136,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("c", 					res.at("/query/operands/1/wrap/key").asText());
 		assertEquals(129, 					res.at("/query/operands/0/operands/1/classOut").asInt());
 		assertEquals(129, 					res.at("/meta/alignment").asInt());
-		
+
 		query = "([base=a]^[base=b][base=c])|[base=d]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1144,7 +1144,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("b", 					res.at("/query/operands/0/operands/1/operands/0/operands/0/wrap/key").asText());
 		assertEquals("c", 					res.at("/query/operands/0/operands/1/operands/0/operands/1/wrap/key").asText());
 		assertEquals("d", 					res.at("/query/operands/1/wrap/key").asText());
-		
+
 		query = "([base=a]^[base=b]^[base=c])|[base=d]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1155,7 +1155,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals(129, 					res.at("/meta/alignment/0").asInt());
 		assertEquals(130, 					res.at("/meta/alignment/1").asInt());
 	}
-	
+
 	@Test
 	public void testSimpleQueries() throws QueryException, JsonProcessingException, IOException {
 		query = "Baum";
@@ -1166,7 +1166,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("Baum",				res.at("/query/wrap/key").asText());
 		assertEquals("orth", 				res.at("/query/wrap/layer").asText());
 		assertEquals("match:eq",			res.at("/query/wrap/match").asText());
-		
+
 		query = "Der Baum";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1180,14 +1180,14 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("match:eq",			res.at("/query/operands/0/wrap/match").asText());
 		assertEquals("orth", 				res.at("/query/operands/1/wrap/layer").asText());
 		assertEquals("match:eq",			res.at("/query/operands/1/wrap/match").asText());
-		
+
 		query = "Der große Baum";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals("Der",					res.at("/query/operands/0/wrap/key").asText());
 		assertEquals("große",				res.at("/query/operands/1/wrap/key").asText());
 		assertEquals("Baum",				res.at("/query/operands/2/wrap/key").asText());
-		
+
 		query = "Der (große|kleine) Baum";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1196,7 +1196,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("große",				res.at("/query/operands/1/operands/0/wrap/key").asText());
 		assertEquals("kleine",				res.at("/query/operands/1/operands/1/wrap/key").asText());
 		assertEquals("Baum",				res.at("/query/operands/2/wrap/key").asText());
-		
+
 		query = "der große Baum | der kleine Baum";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1207,7 +1207,7 @@ public class PoliqarpPlusTreeTest {
 		assertEquals("der",					res.at("/query/operands/1/operands/0/wrap/key").asText());
 		assertEquals("kleine",				res.at("/query/operands/1/operands/1/wrap/key").asText());
 		assertEquals("Baum",				res.at("/query/operands/1/operands/2/wrap/key").asText());
-		
+
 		query = "Der [p=ADJA] Baum";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
