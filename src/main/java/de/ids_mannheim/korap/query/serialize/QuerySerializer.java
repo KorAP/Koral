@@ -2,14 +2,17 @@ package de.ids_mannheim.korap.query.serialize;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
 import de.ids_mannheim.korap.util.QueryException;
 import de.ids_mannheim.korap.utils.JsonUtils;
 import de.ids_mannheim.korap.utils.KorAPLogger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,6 +26,9 @@ public class QuerySerializer {
     private AbstractSyntaxTree ast;
     private Object collection;
     private Map meta;
+    private List errors;
+    private List warnings;
+    private List messages;
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(QuerySerializer.class);
 
@@ -40,16 +46,17 @@ public class QuerySerializer {
         String[] queries;
         if (args.length == 0) {
             queries = new String[]{
-
+            		"foo"
             };
         } else
             queries = new String[]{args[0]};
-
+        
         for (String q : queries) {
             i++;
             try {
                 System.out.println(q);
                 String ql = "cosmas2";
+                jg.setCollection("pubDate=2014");
                 jg.run(q, ql, System.getProperty("user.home") + "/" + ql + "_" + i + ".jsonld");
                 System.out.println();
             } catch (NullPointerException npe) {
@@ -92,7 +99,9 @@ public class QuerySerializer {
         } else {
             throw new QueryException(queryLanguage + " is not a supported query language!");
         }
+        toJSON();
         Map<String, Object> requestMap = ast.getRequestMap();
+        System.out.println(requestMap);
 //        mapper.writeValue(new File(outFile), requestMap);
     }
 
@@ -146,12 +155,28 @@ public class QuerySerializer {
         if (ast != null) {
             Map<String, Object> requestMap = ast.getRequestMap();
             Map meta = (Map) requestMap.get("meta");
+            List errors = (List) requestMap.get("errors");
+            List warnings = (List) requestMap.get("warnings");
+            List messages = (List) requestMap.get("messages");
             if (collection != null)
                 requestMap.put("collection", collection);
             if (this.meta != null) {
                 meta.putAll(this.meta);
                 requestMap.put("meta", meta);
             }
+            if (this.errors != null) {
+                errors.addAll(this.errors);
+                requestMap.put("errors", errors);
+            }
+            if (this.warnings != null) {
+                warnings.addAll(this.warnings);
+                requestMap.put("warnings", warnings);
+            }
+            if (this.messages != null) {
+            	messages.addAll(this.messages);
+                requestMap.put("messages", messages);
+            }
+            
 
             return requestMap;
         }
@@ -194,8 +219,12 @@ public class QuerySerializer {
 
     public QuerySerializer setCollection(String collection) throws QueryException {
         CollectionQueryTree tree = new CollectionQueryTree();
+        Map collectionRequest = tree.getRequestMap();
         tree.process(collection);
-        this.collection = tree.getRequestMap();
+        this.collection = collectionRequest.get("collection");
+        this.errors = (List) collectionRequest.get("errors");
+        this.warnings = (List) collectionRequest.get("warnings");
+        this.messages = (List) collectionRequest.get("messages");
         return this;
     }
 

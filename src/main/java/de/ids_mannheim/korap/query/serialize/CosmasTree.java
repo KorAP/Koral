@@ -113,7 +113,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			throw new QueryException("Your query could not be processed. Please make sure it is well-formed.");
 		}
 		log.info("Processing CosmasII query");
-		System.out.println("Processing Cosmas");
 		processNode(tree);
 		log.info(requestMap.toString());
 	}

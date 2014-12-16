@@ -6,9 +6,12 @@ import de.ids_mannheim.korap.util.QueryException;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author hanl, bingel
@@ -16,6 +19,7 @@ import java.util.*;
  */
 public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 
+	private static Logger log = LoggerFactory.getLogger(CollectionQueryTree.class);
     private Parser parser;
     private static boolean verbose;
     private List<ParseTree> visited = new ArrayList<ParseTree>();
@@ -53,7 +57,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         } else {
             throw new NullPointerException("Parser has not been instantiated!");
         }
-        System.out.println("Processing collection query");
+        log.info("Processing collection query");
         if (verbose) System.out.println(tree.toStringTree(parser));
         processNode(tree);
     }
@@ -98,6 +102,11 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
             if (checkOperatorValueConformance(term) == false) {
             	requestMap = new LinkedHashMap<String,Object>();
             	return;
+            }
+            if (checkDateValidity(valueNode)) {
+        		addWarning("The collection query contains a value that looks like a date ('"+valueNode.getText()+"')"
+        				+ " and an operator that is only defined for strings ('"+match+"'). The value is interpreted as "
+        						+ "a string, use a date operator to ensure the value is treated as a date");            	
             }
             putIntoSuperObject(term);
         }
@@ -201,7 +210,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 		String match = (String) term.get("match");
 		String type = (String) term.get("type");
 		if (type == null || type.equals("type:regex")) {
-			if (!(match.equals("match:eq") || match.equals("match:ne") || match.equals("match:contains"))) {
+			if (!(match.equals("match:eq") || match.equals("match:ne") || match.equals("match:contains") || match.equals("match:containsnot"))) {
 				addError(302, "You used an inequation operator with a string value.");
 				return false;
 			}
@@ -231,8 +240,10 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 		return map;
 	}
 
-	private void checkDateValidity(ParseTree valueNode) {
+	private boolean checkDateValidity(ParseTree valueNode) {
 		// TODO ensure month is <= 12, day is <= 31 etc.
+//		Pattern p = 
+		return true;
 	}
 
 	private String interpretMatchOperator(String match) {
@@ -260,7 +271,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
                 out = "contains";
                 break;    
             case "!~":
-                out = "notcontains";
+                out = "containsnot";
                 break;    
             case "in":
                 out = "eq";
@@ -312,8 +323,8 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
             ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
             topObjectOperands.add(object);
         } else {
-        	requestMap = object;
-//        	requestMap.put("collection", object);
+//        	requestMap = object;
+        	requestMap.put("collection", object);
         }
     }
 
@@ -428,12 +439,10 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
             // Get starting rule from parser
             Method startRule = CollectionQueryParser.class.getMethod("start");
             tree = (ParserRuleContext) startRule.invoke(parser, (Object[]) null);
-            System.out.println(tree.toStringTree(parser));
-
         }
         // Some things went wrong ...
         catch (Exception e) {
-            System.err.println("Parsing exception message: " + e.getMessage());
+            System.err.println("Parsing exception message: " + e);
         }
         if (tree == null) {
             throw new QueryException("Could not parse query. Make sure it is correct syntax.");
@@ -446,10 +455,9 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         String query = "foo=bar&c=d";
         query = "(1990<year<2010&genre=Sport)|textClass=politk";
         query = "(textClass=wissenschaft & textClass=politik) | textClass=ausland";
-        query = "1990<year<2010 & genre=Sport";
-        query = "1990<year<2010";
         query = "textClass=Sport & year=2014";
-        query = "textClass=0154";
+        query = "title!~mannheim";
+        query = "title=1984";
         CollectionQueryTree.verbose = true;
         CollectionQueryTree filter = null;
         try {
