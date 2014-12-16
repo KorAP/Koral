@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @version 1.0
  */
-
 public class CosmasTreeTest {
 
 

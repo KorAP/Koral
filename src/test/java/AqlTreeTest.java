@@ -167,6 +167,20 @@ public class AqlTreeTest {
 		res = mapper.readTree(qs.toJSON());
 		assertEquals(true,					res.at("/query/operands/1/key").isMissingNode());
 		assertEquals("np",					res.at("/query/operands/0/key").asText());
+		
+		query = "cat=/NP/ & cat=/PP/ > #1";
+		qs.setQuery(query, "annis");
+		res = mapper.readTree(qs.toJSON());
+		assertEquals("korap:group",			res.at("/query/@type").asText());
+		assertEquals("operation:relation",	res.at("/query/operation").asText());
+		assertEquals("korap:span",			res.at("/query/operands/0/@type").asText());
+		assertEquals("PP",					res.at("/query/operands/0/key").asText());
+		assertEquals("korap:span",			res.at("/query/operands/1/@type").asText());
+		assertEquals("NP",					res.at("/query/operands/1/key").asText());
+		assertEquals(true,					res.at("/query/operands/2").isMissingNode());
+		assertEquals("korap:relation",		res.at("/query/relation/@type").asText());
+		assertEquals("korap:term",			res.at("/query/relation/wrap/@type").asText());
+		assertEquals("c",					res.at("/query/relation/wrap/layer").asText());
 	}
 	
 	@Test
@@ -294,9 +308,11 @@ public class AqlTreeTest {
 		assertEquals(true,					res.at("/query/relation/boundary/max").isMissingNode());
 	}
 
-	//	
-//	@Test
-//	public void testMultipleDominance() throws QueryException {
+		
+	@Test
+	public void testMultipleDominance() throws QueryException {
+		
+	}
 //		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";
 //		String dom1 = 
 //				"{@type=korap:group, operation=operation:relation, operands=[" +

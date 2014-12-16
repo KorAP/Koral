@@ -42,7 +42,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	/**
 	 * Keeps track of explicitly (by #-var definition) or implicitly (number as reference) introduced entities (for later reference by #-operator)
 	 */
-	Map<String, LinkedHashMap<String,Object>> variableReferences = new LinkedHashMap<String, LinkedHashMap<String,Object>>(); 
+	Map<String, LinkedHashMap<String,Object>> nodeVariables = new LinkedHashMap<String, LinkedHashMap<String,Object>>(); 
 	/**
 	 * Counter for variable definitions.
 	 */
@@ -108,6 +108,12 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		if (verbose) System.out.println(tree.toStringTree(parser));
 		processNode(tree);
 		log.info(requestMap.toString());
+		
+		for (String ref : nodeVariables.keySet()) {
+			if (nodeReferencesTotal.get(ref) == null) {
+				System.err.println(ref);
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -177,12 +183,13 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 					}
 				}
 			}
+			System.err.println(nodeVariables);
 		}
 
 		if (nodeCat.equals("unary_linguistic_term")) {
 			LinkedHashMap<String, Object> unaryOperator = parseUnaryOperator(node);
 			String reference = node.getChild(0).toStringTree(parser).substring(1);
-			LinkedHashMap<String, Object> object = variableReferences.get(reference);
+			LinkedHashMap<String, Object> object = nodeVariables.get(reference);
 			object.putAll(unaryOperator);
 		}
 
@@ -191,62 +198,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		}
 
 		if (nodeCat.equals("variableExpr")) {
-			// simplex word or complex assignment (like qname = textSpec)?
-			String firstChildNodeCat = getNodeCat(node.getChild(0));
-			LinkedHashMap<String, Object> object = null;
-			if (firstChildNodeCat.equals("node")) {
-				object = makeSpan();
-			} else if (firstChildNodeCat.equals("tok")) {
-				object = makeToken();
-				if (node.getChildCount() > 1) { // empty tokens do not wrap a term
-					LinkedHashMap<String, Object> term = makeTerm();
-					term.put("layer", "orth");
-					object.put("wrap", term);
-				}
-			} else if (firstChildNodeCat.equals("qName")) {	// only (foundry/)?layer specified
-				// may be token or span, depending on indicated layer! (e.g. cnx/cat=NP vs mate/pos=NN)
-				// TODO generalize the list below -> look up layers associated with tokens rather than spans somewhere
-				HashMap<String, Object> qNameParse = parseQNameNode(node.getChild(0));
-				if (Arrays.asList(new String[]{"p", "lemma", "m", "orth"}).contains(qNameParse.get("layer"))) { 
-					object = makeToken();
-					LinkedHashMap<String, Object> term = makeTerm();
-					object.put("wrap", term);
-					term.putAll(qNameParse);
-				} else {
-					object = makeSpan();
-					object.putAll(qNameParse);
-				}
-			} else if (firstChildNodeCat.equals("textSpec")) {
-				object = makeToken();
-				LinkedHashMap<String, Object> term = makeTerm();
-				object.put("wrap", term);
-				term.put("layer", "orth");
-				term.putAll(parseTextSpec(node.getChild(0)));
-			}
-
-			if (node.getChildCount() == 3) {  			// (foundry/)?layer=key specification
-				if (object.get("@type").equals("korap:token")) {
-					HashMap<String, Object> term = (HashMap<String, Object>) object.get("wrap");
-					term.putAll(parseTextSpec(node.getChild(2)));
-					term.put("match", parseMatchOperator(getFirstChildWithCat(node, "eqOperator")));
-				} else {
-					object.putAll(parseTextSpec(node.getChild(2)));
-					object.put("match", parseMatchOperator(getFirstChildWithCat(node, "eqOperator")));
-				}
-			}
-
-			if (object != null) {
-				if (! operandOnlyNodeRefs.contains(variableCounter.toString())) {
-					putIntoSuperObject(object);
-				}
-				ParseTree parentsFirstChild = node.getParent().getChild(0);
-				if (getNodeCat(parentsFirstChild).endsWith("#")) {
-					variableReferences.put(getNodeCat(parentsFirstChild).replaceAll("#", ""), object);
-				}
-				variableReferences.put(variableCounter.toString(), object);
-				variableCounter++;
-				System.out.println(variableReferences);
-			}
+			processVariableExpr(node);
 		}
 
 		objectsToPop.push(stackedObjects);
@@ -278,24 +230,85 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 
 
 
+	private LinkedHashMap<String, Object> processVariableExpr(ParseTree node) {
+		// simplex word or complex assignment (like qname = textSpec)?
+		String firstChildNodeCat = getNodeCat(node.getChild(0));
+		LinkedHashMap<String, Object> object = null;
+		if (firstChildNodeCat.equals("node")) {
+			object = makeSpan();
+		} else if (firstChildNodeCat.equals("tok")) {
+			object = makeToken();
+			if (node.getChildCount() > 1) { // empty tokens do not wrap a term
+				LinkedHashMap<String, Object> term = makeTerm();
+				term.put("layer", "orth");
+				object.put("wrap", term);
+			}
+		} else if (firstChildNodeCat.equals("qName")) {	// only (foundry/)?layer specified
+			// may be token or span, depending on indicated layer! (e.g. cnx/cat=NP vs mate/pos=NN)
+			// TODO generalize the list below -> look up layers associated with tokens rather than spans somewhere
+			HashMap<String, Object> qNameParse = parseQNameNode(node.getChild(0));
+			if (Arrays.asList(new String[]{"p", "lemma", "m", "orth"}).contains(qNameParse.get("layer"))) { 
+				object = makeToken();
+				LinkedHashMap<String, Object> term = makeTerm();
+				object.put("wrap", term);
+				term.putAll(qNameParse);
+			} else {
+				object = makeSpan();
+				object.putAll(qNameParse);
+			}
+		} else if (firstChildNodeCat.equals("textSpec")) {
+			object = makeToken();
+			LinkedHashMap<String, Object> term = makeTerm();
+			object.put("wrap", term);
+			term.put("layer", "orth");
+			term.putAll(parseTextSpec(node.getChild(0)));
+		}
+
+		if (node.getChildCount() == 3) {  			// (foundry/)?layer=key specification
+			if (object.get("@type").equals("korap:token")) {
+				HashMap<String, Object> term = (HashMap<String, Object>) object.get("wrap");
+				term.putAll(parseTextSpec(node.getChild(2)));
+				term.put("match", parseMatchOperator(getFirstChildWithCat(node, "eqOperator")));
+			} else {
+				object.putAll(parseTextSpec(node.getChild(2)));
+				object.put("match", parseMatchOperator(getFirstChildWithCat(node, "eqOperator")));
+			}
+		}
+
+		if (object != null) {
+//			if (! operandOnlyNodeRefs.contains(variableCounter.toString())) {
+//				putIntoSuperObject(object);
+//			}
+			if (! getNodeCat(node.getParent().getParent()).equals("n_ary_linguistic_term")) {
+				putIntoSuperObject(object);
+			}
+			ParseTree parentsFirstChild = node.getParent().getChild(0);
+			if (getNodeCat(parentsFirstChild).endsWith("#")) {
+				nodeVariables.put(getNodeCat(parentsFirstChild).replaceAll("#", ""), object);
+			}
+			nodeVariables.put(variableCounter.toString(), object);
+			variableCounter++;
+		}
+		return object;
+	}
+
 	/**
 	 * Processes an operand node, creating a map for the operand containing all its information
-	 * given in the node definition (referenced via '#'). If this node has been referred to  and used earlier,
-	 * a korap:reference is created in its place. 
+	 * given in the node definition (referenced via '#'). If this node has been referred to and used earlier,
+	 * a reference is created in its place. 
 	 * The operand will be wrapped in a class group if necessary.
-	 * @param operandTree
+	 * @param operandNode
 	 * @return A map object with the appropriate CQLF representation of the operand 
 	 */
-	private LinkedHashMap<String, Object> retrieveOperand(ParseTree operandTree) {
+	private LinkedHashMap<String, Object> retrieveOperand(ParseTree operandNode) {
 		LinkedHashMap<String, Object> operand = null;
-		if (!getNodeCat(operandTree.getChild(0)).equals("variableExpr")) {
-			String ref = operandTree.getChild(0).toStringTree(parser).substring(1);
-			operand = variableReferences.get(ref);
+		if (!getNodeCat(operandNode.getChild(0)).equals("variableExpr")) {
+			String ref = operandNode.getChild(0).toStringTree(parser).substring(1);
+			operand = nodeVariables.get(ref);
 			if (nodeReferencesTotal.get(ref) > 1) {
 				if (nodeReferencesProcessed.get(ref)==0) {
 					refClassMapping.put(ref, classCounter);
 					operand = wrapInClass(operand, classCounter++);
-					nodeReferencesProcessed.put(ref, nodeReferencesProcessed.get(ref)+1);
 				} else if (nodeReferencesProcessed.get(ref)>0 && nodeReferencesTotal.get(ref)>1) {
 					try {
 						operand = wrapInReference(operandStack.pop(), refClassMapping.get(ref));
@@ -303,7 +316,10 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 						operand = makeReference(refClassMapping.get(ref));
 					}
 				}
+				nodeReferencesProcessed.put(ref, nodeReferencesProcessed.get(ref)+1);
 			}
+		} else {
+			operand = processVariableExpr(operandNode.getChild(0));
 		}
 		return operand;
 	}
@@ -324,7 +340,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			// Retrieve operands.
 			LinkedHashMap<String, Object> operand1 = retrieveOperand(operandTree1);
 			LinkedHashMap<String, Object> operand2 = retrieveOperand(operandTree2);
-
 			// 'Proper' n_ary_linguistic_operators receive a considerably different serialisation than 'commonparent' and 'commonancestor'.
 			// For the latter cases, a dummy span is introduced and declared as a span class that has a dominance relation towards
 			// the two operands, one after the other, thus resulting in two nested relations! A Poliqarp+ equivalent for A $ B would be
@@ -393,7 +408,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				
 				ParseTree leftChildSpec = getFirstChildWithCat(node.getChild(i).getChild(0), "@l");
 				ParseTree rightChildSpec = getFirstChildWithCat(node.getChild(i).getChild(0), "@r");
-				if (leftChildSpec != null || rightChildSpec != null) { //XXX
+				if (leftChildSpec != null || rightChildSpec != null) {
 					String frame = (leftChildSpec!=null) ? "frames:startswith" : "frames:endswith";
 					LinkedHashMap<String,Object> positionGroup = makePosition(new String[]{frame}, null);
 					operand2 = wrapInClass(operand2, ++classCounter);
@@ -480,8 +495,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		if (operator.equals("dominance")) {
 			relation = makeRelation();
 			relation.put("groupType", "relation");
-			ParseTree leftChildSpec = getFirstChildWithCat(operatorNode, "@l");
-			ParseTree rightChildSpec = getFirstChildWithCat(operatorNode, "@r");
 			ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
 			ParseTree edgeSpecNode = getFirstChildWithCat(operatorNode, "edgeSpec");
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
@@ -736,7 +749,9 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[] {
-				"cat=\"S\" & node & #1 >@l #2"
+				"cat=\"S\" & cat=/NP/ & cat=/PP/ > #2",
+				"pos & tok & #1 . node",
+				"cat=/S/ & cat=/NP/ & cat=/PP/ > #1",
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {
