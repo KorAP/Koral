@@ -179,7 +179,7 @@ public abstract class AbstractSyntaxTree {
 		group.put("frames", Arrays.asList(allowedFrames));
 		group.put("operands", new ArrayList<Object>());
 		// DEPRECATED 'frame'
-		if (classRefCheck.length==0) classRefCheck = new String[]{"classRefCheck:includes"};
+		if (classRefCheck == null || classRefCheck.length==0) classRefCheck = new String[]{"classRefCheck:includes"};
 		String frame = "";
 		
 		if (allowedFrames.length==0 && classRefCheck[0]=="classRefCheck:includes") {
@@ -320,16 +320,22 @@ public abstract class AbstractSyntaxTree {
 		return makeReference(classRefs, "focus");
 	}
 	
-	protected LinkedHashMap<String, Object> makeReference(int classRef, String operation) {
+	protected LinkedHashMap<String, Object> makeReference(int classRef, String operation, boolean setBySystem) {
 		ArrayList<Integer> classRefs = new ArrayList<Integer>();
+		if (setBySystem) classRef = classRef+128;
 		classRefs.add(classRef);
 		return makeReference(classRefs, operation);
 	}
 	
-	protected LinkedHashMap<String, Object> makeReference(int classRef) {
+	protected LinkedHashMap<String, Object> makeReference(int classRef, boolean setBySystem) {
 		ArrayList<Integer> classRefs = new ArrayList<Integer>();
+		if (setBySystem) classRef = classRef+128;
 		classRefs.add(classRef);
 		return makeReference(classRefs, "focus");
+	}
+	
+	protected LinkedHashMap<String, Object> makeReference(int classRef) {
+		return makeReference(classRef, false);
 	}
 	
 	protected LinkedHashMap<String, Object> makeResetReference() {

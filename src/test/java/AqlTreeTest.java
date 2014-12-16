@@ -237,22 +237,39 @@ public class AqlTreeTest {
 		assertEquals("MO"	,				res.at("/query/relation/wrap/operands/1/key").asText());
 		assertEquals("c",					res.at("/query/relation/wrap/operands/2/layer").asText());
 		
-		query = "cat=\"S\" & cat=\"NP\" & #1 >@l #2";  // all sentences starting with subject  -> wrap operands in startswith and retrieve 2nd operand with focus
+		query = "cat=\"S\" & cat=\"NP\" & #1 >@l #2";  // all sentences starting with NP  -> wrap relation in startswith and retrieve 2nd operand with focus
 		qs.setQuery(query, "annis");
 		res = mapper.readTree(qs.toJSON());
-		assertEquals("operation:relation",	res.at("/query/operation").asText());
-		assertEquals("operation:position",	res.at("/query/operands/0/operation").asText());
-		assertEquals("frames:startswith",	res.at("/query/operands/0/frames/0").asText());
+		assertEquals("operation:position",	res.at("/query/operation").asText());
+		assertEquals("operation:relation",	res.at("/query/operands/0/operation").asText());
+		assertEquals("frames:startswith",	res.at("/query/frames/0").asText());
 		assertEquals("korap:span",			res.at("/query/operands/0/operands/0/@type").asText());
 		assertEquals("S",					res.at("/query/operands/0/operands/0/key").asText());
 		assertEquals("korap:group",			res.at("/query/operands/0/operands/1/@type").asText());
 		assertEquals("operation:class",		res.at("/query/operands/0/operands/1/operation").asText());
-		assertEquals(128,					res.at("/query/operands/0/operands/1/classOut").asInt());
+		assertEquals(129,					res.at("/query/operands/0/operands/1/classOut").asInt());
 		assertEquals("korap:span",			res.at("/query/operands/0/operands/1/operands/0/@type").asText());
 		assertEquals("NP",					res.at("/query/operands/0/operands/1/operands/0/key").asText());
 		assertEquals("korap:reference",		res.at("/query/operands/1/@type").asText());
 		assertEquals("operation:focus",		res.at("/query/operands/1/operation").asText());
-		assertEquals(128,					res.at("/query/operands/1/classRef/0").asInt());
+		assertEquals(129,					res.at("/query/operands/1/classRef/0").asInt());
+		
+		query = "cat=\"S\" & cat=\"NP\" & #1 >@r #2";  
+		qs.setQuery(query, "annis");
+		res = mapper.readTree(qs.toJSON());
+		assertEquals("operation:position",	res.at("/query/operation").asText());
+		assertEquals("operation:relation",	res.at("/query/operands/0/operation").asText());
+		assertEquals("frames:endswith",		res.at("/query/frames/0").asText());
+		assertEquals("korap:span",			res.at("/query/operands/0/operands/0/@type").asText());
+		assertEquals("S",					res.at("/query/operands/0/operands/0/key").asText());
+		assertEquals("korap:group",			res.at("/query/operands/0/operands/1/@type").asText());
+		assertEquals("operation:class",		res.at("/query/operands/0/operands/1/operation").asText());
+		assertEquals(129,					res.at("/query/operands/0/operands/1/classOut").asInt());
+		assertEquals("korap:span",			res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+		assertEquals("NP",					res.at("/query/operands/0/operands/1/operands/0/key").asText());
+		assertEquals("korap:reference",		res.at("/query/operands/1/@type").asText());
+		assertEquals("operation:focus",		res.at("/query/operands/1/operation").asText());
+		assertEquals(129,					res.at("/query/operands/1/classRef/0").asInt());
 	}
 	
 	@Test

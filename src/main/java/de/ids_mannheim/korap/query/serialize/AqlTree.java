@@ -390,6 +390,18 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 					
 				// Get operands list before possible re-assignment of 'group' (see following 'if')
 				operands  = (ArrayList<Object>) group.get("operands");
+				
+				ParseTree leftChildSpec = getFirstChildWithCat(node.getChild(i).getChild(0), "@l");
+				ParseTree rightChildSpec = getFirstChildWithCat(node.getChild(i).getChild(0), "@r");
+				if (leftChildSpec != null || rightChildSpec != null) { //XXX
+					String frame = (leftChildSpec!=null) ? "frames:startswith" : "frames:endswith";
+					LinkedHashMap<String,Object> positionGroup = makePosition(new String[]{frame}, null);
+					operand2 = wrapInClass(operand2, ++classCounter);
+					((ArrayList<Object>) positionGroup.get("operands")).add(group);
+					((ArrayList<Object>) positionGroup.get("operands")).add(makeReference(classCounter,true));
+					group = positionGroup;
+				}
+				
 				// Wrap in reference object in case other relations are following
 				if (i < node.getChildCount()-2) {
 					group = wrapInReference(group, classCounter);
@@ -476,8 +488,6 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
 			LinkedHashMap<String,Object> term = makeTerm();
 			term.put("layer", "c");
-			if (leftChildSpec != null) relation.put("index", 0);
-			if (rightChildSpec != null) relation.put("index", -1);
 			if (qName != null) term = parseQNameNode(qName);
 			if (edgeSpecNode != null) {
 				LinkedHashMap<String,Object> edgeSpec = parseEdgeSpec(edgeSpecNode);
@@ -726,7 +736,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 * For testing
 		 */
 		String[] queries = new String[] {
-				"cat=\"S\" & node & #1 >@l[func=\"SB\"] #2"
+				"cat=\"S\" & node & #1 >@l #2"
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {
