@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -240,9 +241,27 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 		return map;
 	}
 
+	/**
+	 * Checks if a date 
+	 * @param valueNode
+	 * @return
+	 */
 	private boolean checkDateValidity(ParseTree valueNode) {
-		// TODO ensure month is <= 12, day is <= 31 etc.
-//		Pattern p = 
+		Pattern p = Pattern.compile("[0-9]{4}(-([0-9]{2})(-([0-9]{2}))?)?");
+		Matcher m = p.matcher(valueNode.getText());
+		
+		if (!m.find()) return false;
+		String month = m.group(2);
+		String day = m.group(4);
+		if (month != null) {
+			if (Integer.parseInt(month) > 12) {
+				return false;
+			} else if (day != null) {
+				if (Integer.parseInt(day) > 31) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
@@ -457,7 +476,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         query = "(textClass=wissenschaft & textClass=politik) | textClass=ausland";
         query = "textClass=Sport & year=2014";
         query = "title!~mannheim";
-        query = "title=1984";
+        query = "title=1984-14";
         CollectionQueryTree.verbose = true;
         CollectionQueryTree filter = null;
         try {

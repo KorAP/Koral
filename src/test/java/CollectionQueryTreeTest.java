@@ -108,6 +108,7 @@ public class CollectionQueryTreeTest {
 		assertEquals("2014",			res.at("/collection/operands/1/value").asText());
 		assertEquals(true,				res.at("/collection/operands/1/type").isMissingNode());
 		assertEquals("match:eq",		res.at("/collection/operands/1/match").asText());
+		assertEquals("",				res.at("/warnings/0/"));	
 	}
 
 	@Test
