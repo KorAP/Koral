@@ -3,6 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import de.ids_mannheim.korap.query.serialize.util.CollectionQueryLexer;
 import de.ids_mannheim.korap.query.serialize.util.CollectionQueryParser;
 import de.ids_mannheim.korap.util.QueryException;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -16,17 +17,8 @@ import java.util.*;
 public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 
     private Parser parser;
-    private boolean verbose;
+    private static boolean verbose;
     private List<ParseTree> visited = new ArrayList<ParseTree>();
-
-
-    public CollectionQueryTree() {
-        verbose = false;
-    }
-
-    public CollectionQueryTree(boolean verbose) {
-        this.verbose = verbose;
-    }
 
     /**
      * Keeps track of active object.
@@ -41,6 +33,13 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
      */
     LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
     Integer stackedObjects = 0;
+    
+    public CollectionQueryTree() {
+	}
+    
+    public CollectionQueryTree(boolean verbose) {
+    	CollectionQueryTree.verbose = verbose;
+	}
     
     public CollectionQueryTree(String query) throws QueryException {
 		process(query);
@@ -64,9 +63,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         String nodeCat = getNodeCat(node);
         openNodeCats.push(nodeCat);
 
-
         stackedObjects = 0;
-
         if (verbose) {
             System.err.println(" " + objectStack);
             System.out.println(openNodeCats);
@@ -88,59 +85,39 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
             stackedObjects++;
         }
 
-//        if (nodeCat.equals("orGroup")) {
-//            LinkedHashMap<String, Object> exprGroup = makeDocGroup("or");
-//            putIntoSuperObject(exprGroup);
-//            objectStack.push(exprGroup);
-//            stackedObjects++;
-//        }
-
-        if (nodeCat.equals("meta")) {
+        if (nodeCat.equals("constraint")) {
             ParseTree fieldNode = getFirstChildWithCat(node, "field");
             String field = fieldNode.getChild(0).toStringTree(parser);
-            List<ParseTree> operatorNodes = getChildrenWithCat(node, "operator");
-            List<ParseTree> valueNodes = getChildrenWithCat(node, "value");
-
-            if (valueNodes.size() == 1) {
-                LinkedHashMap<String, Object> term = makeDoc();
-                term.put("key", field);
-                term.putAll(parseValue(valueNodes.get(0)));
-                String match = operatorNodes.get(0).getText();
-                term.put("match", "match:" + interpretMatch(match));
-                if (checkOperatorValueConformance(term) == 1) {
-                	requestMap.put("collection", new LinkedHashMap<String,Object>());
-                	return;
-                }
-                putIntoSuperObject(term);
-            } else { // (valueNodes.size()==2)
-                LinkedHashMap<String, Object> termGroup = makeDocGroup("and");
-                ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup.get("operands");
-
-                LinkedHashMap<String, Object> term1 = makeDoc();
-                term1.put("key", field);
-                term1.putAll(parseValue(valueNodes.get(0)));
-                String match1 = operatorNodes.get(0).getText();
-                term1.put("match", "match:" + invertInequation(interpretMatch(match1)));
-                termGroupOperands.add(term1);
-                if (checkOperatorValueConformance(term1) == 1) {
-                	requestMap.put("collection", new LinkedHashMap<String,Object>());
-                	return;
-                }
-
-                LinkedHashMap<String, Object> term2 = makeDoc();
-                term2.put("key", field);
-                term2.putAll(parseValue(valueNodes.get(1)));
-                String match2 = operatorNodes.get(1).getText();
-                term2.put("match", "match:" + interpretMatch(match2));
-                termGroupOperands.add(term2);
-                if (checkOperatorValueConformance(term2) == 1) {
-                	requestMap.put("collection", new LinkedHashMap<String,Object>());
-                	return;
-                }
-
-                putIntoSuperObject(termGroup);
+            ParseTree operatorNode = getFirstChildWithCat(node, "operator");
+            ParseTree valueNode = getFirstChildWithCat(node, "value");
+            LinkedHashMap<String, Object> term = makeDoc();
+            term.put("key", field);
+            term.putAll(parseValue(valueNode));
+            String match = operatorNode.getText();
+            term.put("match", "match:" + interpretMatchOperator(match));
+            if (checkOperatorValueConformance(term) == false) {
+            	requestMap = new LinkedHashMap<String,Object>();
+            	return;
             }
+            putIntoSuperObject(term);
+        }
+        
+        if (nodeCat.equals("dateconstraint")) {
+            ParseTree fieldNode = getFirstChildWithCat(node, "field");
+            String field = fieldNode.getChild(0).toStringTree(parser);
+            ParseTree dateOpNode = getFirstChildWithCat(node, "dateOp");
+            ParseTree dateNode = getFirstChildWithCat(node, "date");
 
+            LinkedHashMap<String, Object> term = makeDoc();
+            term.put("key", field);
+            term.putAll(parseValue(dateNode));
+            String match = dateOpNode.getText();
+            term.put("match", "match:" + interpretMatchOperator(match));
+            if (checkOperatorValueConformance(term) == false) {
+            	requestMap = new LinkedHashMap<String,Object>();
+            	return;
+            }
+            putIntoSuperObject(term);
         }
         
         if (nodeCat.equals("token")) {
@@ -153,7 +130,6 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 			if (getNodeCat(node.getChild(0)).equals("key")) {
 				// no 'term' child, but direct key specification: process here
 				LinkedHashMap<String,Object> term = makeTerm();
-				
 				String key = node.getChild(0).getText();
 				if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
 					isRegex = true;
@@ -187,7 +163,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 			visited.add(node.getChild(0));
 			visited.add(node.getChild(2));
 		}
-        
+
         objectsToPop.push(stackedObjects);
 
 		/*
@@ -218,43 +194,48 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 
     }
 
-
-    private int checkOperatorValueConformance(LinkedHashMap<String, Object> term) {
+	/**
+	 * Checks whether the combination of operator and value is legal (inequation operators <,>,<=,>= may only be used with dates).
+	 */
+    private boolean checkOperatorValueConformance(LinkedHashMap<String, Object> term) {
 		String match = (String) term.get("match");
 		String type = (String) term.get("type");
 		if (type == null || type.equals("type:regex")) {
 			if (!(match.equals("match:eq") || match.equals("match:ne") || match.equals("match:contains"))) {
 				addError(302, "You used an inequation operator with a string value.");
-				System.err.println("You used an inequation operator with a string value.");
-				return 1;
+				return false;
 			}
 		}
-		return 0;
+		return true;
 	}
 
 	private LinkedHashMap<String, Object> parseValue(ParseTree valueNode) {
     	LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+    	if (getNodeCat(valueNode).equals("date")) {
+    		map.put("type", "type:date");
+    		checkDateValidity(valueNode);
+    	}
     	if (getNodeCat(valueNode.getChild(0)).equals("regex")) {
     		String regex = valueNode.getChild(0).getChild(0).toStringTree(parser);
     		map.put("value", regex.substring(1, regex.length()-1));
     		map.put("type", "type:regex");
     	} else if (getNodeCat(valueNode.getChild(0)).equals("multiword")) {
-    		String mw = "";
+    		String mw = ""; // multiword
     		for (int i=1; i<valueNode.getChild(0).getChildCount()-1; i++) {
     			mw += valueNode.getChild(0).getChild(i).getText() + " ";
     		}
     		map.put("value", mw.substring(0, mw.length()-1));
-    	} else if (getNodeCat(valueNode.getChild(0)).equals("date")) {
-    		map.put("type", "type:date");
-    		String value = valueNode.getChild(0).getChild(0).toStringTree(parser);
-    		map.put("value", value);
     	} else {
     		map.put("value", valueNode.getChild(0).toStringTree(parser));
     	}
 		return map;
 	}
 
-	private String interpretMatch(String match) {
+	private void checkDateValidity(ParseTree valueNode) {
+		// TODO ensure month is <= 12, day is <= 31 etc.
+	}
+
+	private String interpretMatchOperator(String match) {
         String out = null;
         switch (match) {
             case "<":
@@ -278,11 +259,30 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
             case "~":
                 out = "contains";
                 break;    
-               
+            case "!~":
+                out = "notcontains";
+                break;    
+            case "in":
+                out = "eq";
+                break;
+            case "on":
+                out = "eq";
+                break;
+            case "until":
+                out = "leq";
+                break;    
+            case "since":
+                out = "geq";
+                break;
+            default:
+            	out = match;
+            	addError(302, "Unknown operator '"+match+"'.");
+            	break;
         }
         return out;
     }
-
+	
+	@Deprecated
     private String invertInequation(String op) {
         String inv = null;
         switch (op) {
@@ -312,9 +312,8 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
             ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
             topObjectOperands.add(object);
         } else {
-            // I want the raw object, not a wrapped
-//            requestMap.put("filter", object);
-        	requestMap.put("collection", object);
+        	requestMap = object;
+//        	requestMap.put("collection", object);
         }
     }
 
@@ -449,11 +448,13 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         query = "(textClass=wissenschaft & textClass=politik) | textClass=ausland";
         query = "1990<year<2010 & genre=Sport";
         query = "1990<year<2010";
-        query = "pubDate<Sport";
-//    	filter.verbose = true;
+        query = "textClass=Sport & year=2014";
+        query = "textClass=0154";
+        CollectionQueryTree.verbose = true;
         CollectionQueryTree filter = null;
         try {
         	 filter = new CollectionQueryTree(query);
+        	 filter.verbose = true;
         } catch (QueryException e) {
             e.printStackTrace();
         }

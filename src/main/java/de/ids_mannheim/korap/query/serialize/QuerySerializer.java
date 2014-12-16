@@ -27,45 +27,45 @@ public class QuerySerializer {
             .getLogger(QuerySerializer.class);
 
 
-    /**
-     * @param args
-     * @throws QueryException
-     */
-    public static void main(String[] args) {
-        /*
-         * just for testing...
-		 */
-        QuerySerializer jg = new QuerySerializer();
-        int i = 0;
-        String[] queries;
-        if (args.length == 0) {
-            queries = new String[]{
-
-            };
-        } else
-            queries = new String[]{args[0]};
-
-        for (String q : queries) {
-            i++;
-            try {
-                System.out.println(q);
-                String ql = "cosmas2";
-                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + "_" + i + ".jsonld");
-                System.out.println();
-            } catch (NullPointerException npe) {
-                npe.printStackTrace();
-                System.out.println("null\n");
-            } catch (JsonGenerationException e) {
-                e.printStackTrace();
-            } catch (JsonMappingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (QueryException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    /**
+//     * @param args
+//     * @throws QueryException
+//     */
+//    public static void main(String[] args) {
+//        /*
+//         * just for testing...
+//		 */
+//        QuerySerializer jg = new QuerySerializer();
+//        int i = 0;
+//        String[] queries;
+//        if (args.length == 0) {
+//            queries = new String[]{
+//
+//            };
+//        } else
+//            queries = new String[]{args[0]};
+//
+//        for (String q : queries) {
+//            i++;
+//            try {
+//                System.out.println(q);
+//                String ql = "cosmas2";
+//                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + "_" + i + ".jsonld");
+//                System.out.println();
+//            } catch (NullPointerException npe) {
+//                npe.printStackTrace();
+//                System.out.println("null\n");
+//            } catch (JsonGenerationException e) {
+//                e.printStackTrace();
+//            } catch (JsonMappingException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (QueryException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     /**
      * Runs the QuerySerializer by initializing the relevant AbstractSyntaxTree implementation (depending on specified query language)
@@ -77,24 +77,24 @@ public class QuerySerializer {
      * @throws IOException
      * @throws QueryException
      */
-    public void run(String query, String queryLanguage, String outFile)
-            throws IOException, QueryException {
-        if (queryLanguage.equals("poliqarp")) {
-            ast = new PoliqarpPlusTree(query);
-        } else if (queryLanguage.toLowerCase().equals("cosmas2")) {
-            ast = new CosmasTree(query);
-        } else if (queryLanguage.toLowerCase().equals("poliqarpplus")) {
-            ast = new PoliqarpPlusTree(query);
-        } else if (queryLanguage.toLowerCase().equals("cql")) {
-            ast = new CQLTree(query);
-        } else if (queryLanguage.toLowerCase().equals("annis")) {
-            ast = new AqlTree(query);
-        } else {
-            throw new QueryException(queryLanguage + " is not a supported query language!");
-        }
-        Map<String, Object> requestMap = ast.getRequestMap();
-//        mapper.writeValue(new File(outFile), requestMap);
-    }
+//    public void run(String query, String queryLanguage, String outFile)
+//            throws IOException, QueryException {
+//        if (queryLanguage.equals("poliqarp")) {
+//            ast = new PoliqarpPlusTree(query);
+//        } else if (queryLanguage.toLowerCase().equals("cosmas2")) {
+//            ast = new CosmasTree(query);
+//        } else if (queryLanguage.toLowerCase().equals("poliqarpplus")) {
+//            ast = new PoliqarpPlusTree(query);
+//        } else if (queryLanguage.toLowerCase().equals("cql")) {
+//            ast = new CQLTree(query);
+//        } else if (queryLanguage.toLowerCase().equals("annis")) {
+//            ast = new AqlTree(query);
+//        } else {
+//            throw new QueryException(queryLanguage + " is not a supported query language!");
+//        }
+//        Map<String, Object> requestMap = ast.getRequestMap();
+////        mapper.writeValue(new File(outFile), requestMap);
+//    }
 
     public QuerySerializer setQuery(String query, String ql, String version)
             throws QueryException {
@@ -147,7 +147,7 @@ public class QuerySerializer {
             Map<String, Object> requestMap = ast.getRequestMap();
             Map meta = (Map) requestMap.get("meta");
             if (collection != null)
-                requestMap.put("collections", collection);
+                requestMap.put("collection", collection);
             if (this.meta != null) {
                 meta.putAll(this.meta);
                 requestMap.put("meta", meta);

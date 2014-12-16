@@ -38,13 +38,18 @@ SLASH				: '/';
 COLON				: ':';
 DASH				: '-';
 TILDE				: '~';
+SINCE				: 'since';
+UNTIL				: 'until';
+IN					: 'in';
+ON					: 'on';
 WS 					: ( ' ' | '\t' | '\r' | '\n' )+ -> skip ;
 fragment NO_RE      : ~[ \t\/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
                     | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' );
 fragment ALPHA		: [a-zA-Z];
-DIGIT				: [0-9];
 
+
+DIGIT		: [0-9];
 DATE
 : DIGIT DIGIT DIGIT DIGIT (DASH DIGIT DIGIT (DASH DIGIT DIGIT)?)?
 ;
@@ -52,7 +57,9 @@ DATE
 NL                  : [\r\n] -> skip;
 ws                  : WS+;
 
-WORD                : ALPHABET* ALPHA ALPHABET*;  // needs to have at least one alphabetical letter (non-numeric)
+WORD				: ALPHABET+;
+//WORD                : ALPHABET* ALPHA ALPHABET*;  // needs to have at least one alphabetical letter (non-numeric)
+
 
 /*
  * Regular expressions
@@ -82,16 +89,29 @@ date
 : DATE
 ;
 
+dateOp
+: SINCE
+| UNTIL
+| IN
+| ON
+;
+
 operator
 :	(NEG? EQ) | LT | GT | LEQ | GEQ | TILDE;
 
 expr
-: meta
+: constraint
+| dateconstraint
 | token
 ;
 
-meta
-: (value operator)? field operator value
+dateconstraint
+: field dateOp date
+//| date dateOp field dateOp date
+;
+
+constraint
+: field operator value
 ;
 
 token
@@ -139,8 +159,9 @@ field
 	
 value
 : WORD
+| DIGIT+
+| DATE
 | multiword
-| date
 | regex
 ;
 
