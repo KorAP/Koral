@@ -1,7 +1,9 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.CollectionQueryLexer;
 import de.ids_mannheim.korap.query.serialize.util.CollectionQueryParser;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.util.QueryException;
 
 import org.antlr.v4.runtime.*;
@@ -212,7 +214,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 		String type = (String) term.get("type");
 		if (type == null || type.equals("type:regex")) {
 			if (!(match.equals("match:eq") || match.equals("match:ne") || match.equals("match:contains") || match.equals("match:containsnot"))) {
-				addError(302, "You used an inequation operator with a string value.");
+				addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND, "You used an inequation operator with a string value.");
 				return false;
 			}
 		}
@@ -306,7 +308,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
                 break;
             default:
             	out = match;
-            	addError(302, "Unknown operator '"+match+"'.");
+            	addError(StatusCodes.UNKNOWN_QUERY_ELEMENT, "Unknown operator '"+match+"'.");
             	break;
         }
         return out;
@@ -440,27 +442,32 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
 		}
 	}
     
-    private ParserRuleContext parseCollectionQuery(String p) throws QueryException {
-        Lexer collectionQueryLexer = new CollectionQueryLexer((CharStream) null);
+    private ParserRuleContext parseCollectionQuery(String query) throws QueryException {
+        Lexer lexer = new CollectionQueryLexer((CharStream) null);
         ParserRuleContext tree = null;
+        Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(query);
         // Like p. 111
         try {
 
             // Tokenize input data
-            ANTLRInputStream input = new ANTLRInputStream(p);
-            collectionQueryLexer.setInputStream(input);
-            CommonTokenStream tokens = new CommonTokenStream(collectionQueryLexer);
+            ANTLRInputStream input = new ANTLRInputStream(query);
+            lexer.setInputStream(input);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
             parser = new CollectionQueryParser(tokens);
 
             // Don't throw out erroneous stuff
             parser.setErrorHandler(new BailErrorStrategy());
+            lexer.removeErrorListeners();
+            lexer.addErrorListener(errorListener);
             parser.removeErrorListeners();
+            parser.addErrorListener(errorListener);
             // Get starting rule from parser
             Method startRule = CollectionQueryParser.class.getMethod("start");
             tree = (ParserRuleContext) startRule.invoke(parser, (Object[]) null);
         }
         // Some things went wrong ...
         catch (Exception e) {
+        	System.err.println("ERROR: "+errorListener.generateFullErrorMsg());
             System.err.println("Parsing exception message: " + e);
         }
         if (tree == null) {
@@ -476,12 +483,11 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         query = "(textClass=wissenschaft & textClass=politik) | textClass=ausland";
         query = "textClass=Sport & year=2014";
         query = "title!~mannheim";
-        query = "title=1984-14";
+        query = "title = /ada\\)ad/";
         CollectionQueryTree.verbose = true;
         CollectionQueryTree filter = null;
         try {
         	 filter = new CollectionQueryTree(query);
-        	 filter.verbose = true;
         } catch (QueryException e) {
             e.printStackTrace();
         }

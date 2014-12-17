@@ -38,6 +38,7 @@ SLASH				: '/';
 COLON				: ':';
 DASH				: '-';
 TILDE				: '~';
+NEGTILDE			: '!~';
 SINCE				: 'since';
 UNTIL				: 'until';
 IN					: 'in';
@@ -97,7 +98,7 @@ dateOp
 ;
 
 operator
-:	(NEG? EQ) | LT | GT | LEQ | GEQ | TILDE;
+:	(NEG? EQ) | LT | GT | LEQ | GEQ | TILDE | NEGTILDE;
 
 expr
 : constraint

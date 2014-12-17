@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 
 import de.ids_mannheim.korap.query.annis.AqlLexer;
 import de.ids_mannheim.korap.query.annis.AqlParser;
+import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
 import de.ids_mannheim.korap.util.QueryException;
 
 /**
@@ -708,21 +709,25 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		}
 	}
 
-	private ParserRuleContext parseAnnisQuery (String p) throws QueryException {
-		Lexer poliqarpLexer = new AqlLexer((CharStream)null);
+	private ParserRuleContext parseAnnisQuery (String query) throws QueryException {
+		Lexer lexer = new AqlLexer((CharStream)null);
 		ParserRuleContext tree = null;
+		Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(query);
 		// Like p. 111
 		try {
 
 			// Tokenize input data
-			ANTLRInputStream input = new ANTLRInputStream(p);
-			poliqarpLexer.setInputStream(input);
-			CommonTokenStream tokens = new CommonTokenStream(poliqarpLexer);
+			ANTLRInputStream input = new ANTLRInputStream(query);
+			lexer.setInputStream(input);
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			parser = new AqlParser(tokens);
 
 			// Don't throw out erroneous stuff
 			parser.setErrorHandler(new BailErrorStrategy());
-			parser.removeErrorListeners();
+			lexer.removeErrorListeners();
+            lexer.addErrorListener(errorListener);
+            parser.removeErrorListeners();
+            parser.addErrorListener(errorListener);
 
 			// Get starting rule from parser
 			Method startRule = AqlParser.class.getMethod("start"); 
@@ -731,8 +736,8 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 
 		// Some things went wrong ...
 		catch (Exception e) {
+			System.err.println("ERROR: "+errorListener.generateFullErrorMsg());
 			log.error(e.getMessage());
-			System.err.println( e.getMessage() );
 		}
 
 		if (tree == null) {
@@ -752,6 +757,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 				"cat=\"S\" & cat=/NP/ & cat=/PP/ > #2",
 				"pos & tok & #1 . node",
 				"cat=/S/ & cat=/NP/ & cat=/PP/ > #1",
+				"(cat=\"a\" | cat=\"b\") & tok"
 		};
 		//		AqlTree.verbose=true;
 		for (String q : queries) {

@@ -2,7 +2,10 @@ package de.ids_mannheim.korap.query.serialize;
 
 import de.ids_mannheim.korap.query.poliqarp.PoliqarpPlusLexer;
 import de.ids_mannheim.korap.query.poliqarp.PoliqarpPlusParser;
+import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.util.QueryException;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
@@ -10,12 +13,11 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Map representation of Poliqarp syntax tree as returned by ANTLR
  *
- * @author joachim
+ * @author Joachim Bingel (bingel@ids-mannheim.de)
  */
 public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
@@ -91,7 +93,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				quantGroup.put("boundary", makeBoundary(minmax[0], minmax[1]));
 				if (minmax[0] != null) quantGroup.put("min", minmax[0]);
 				if (minmax[1] != null) quantGroup.put("max", minmax[1]);
-				addMessage(303, "Deprecated 2014-07-24: 'min' and 'max' to be " +
+				addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, "Deprecated 2014-07-24: 'min' and 'max' to be " +
 						"supported until 3 months from deprecation date.");
 				putIntoSuperObject(quantGroup);
 				objectStack.push(quantGroup);
@@ -219,7 +221,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		if (nodeCat.equals("span")) {
 			List<ParseTree> negations = getChildrenWithCat(node, "!");
 			boolean negated = false;
-			boolean isRegex = false;
 			if (negations.size() % 2 == 1) negated = true;
 			LinkedHashMap<String,Object> span = makeSpan();
 			ParseTree keyNode = getFirstChildWithCat(node, "key");
@@ -344,8 +345,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 						} catch (NumberFormatException e) {
 							String err = "The specified class reference in the " +
 									"shrink/split-Operator is not a number.";
-							addError(302, err);
-							throw new QueryException(err);
+							addError(StatusCodes.UNDEFINED_CLASS_REFERENCE, err);
 						}
 					}
 				}
@@ -361,8 +361,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				String warning = "Deprecated 2014-07-24: "+type + "() as a match reducer " +
 						"to a specific class is deprecated in favor of focus() and will " +
 						"only be supported for 3 months after deprecation date.";
-				log.warn(warning);
-				requestMap.put("warning", warning);
+				addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, warning);
 			}
 			if (classRefOp != null) {
 				referenceGroup.put("classRefOp", "classRefOp:" + classRefOp);
@@ -673,20 +672,23 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 
 
 	private ParserRuleContext parsePoliqarpQuery(String p) throws QueryException {
-		checkUnbalancedPars(p);
-		Lexer poliqarpLexer = new PoliqarpPlusLexer((CharStream) null);
+		Lexer lexer = new PoliqarpPlusLexer((CharStream) null);
 		ParserRuleContext tree = null;
+		Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(query);
 		// Like p. 111
 		try {
 			// Tokenize input data
 			ANTLRInputStream input = new ANTLRInputStream(p);
-			poliqarpLexer.setInputStream(input);
-			CommonTokenStream tokens = new CommonTokenStream(poliqarpLexer);
+			lexer.setInputStream(input);
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			parser = new PoliqarpPlusParser(tokens);
 
 			// Don't throw out erroneous stuff
 			parser.setErrorHandler(new BailErrorStrategy());
-			parser.removeErrorListeners();
+			lexer.removeErrorListeners();
+            lexer.addErrorListener(errorListener);
+            parser.removeErrorListeners();
+            parser.addErrorListener(errorListener);
 
 			// Get starting rule from parser
 			Method startRule = PoliqarpPlusParser.class.getMethod("request");

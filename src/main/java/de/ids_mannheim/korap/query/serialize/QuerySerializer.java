@@ -3,6 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import de.ids_mannheim.korap.query.poliqarp.PoliqarpPlusParser;
 import de.ids_mannheim.korap.util.QueryException;
 import de.ids_mannheim.korap.utils.JsonUtils;
 import de.ids_mannheim.korap.utils.KorAPLogger;
@@ -19,7 +20,22 @@ import java.util.Map;
  * @author bingel, hanl
  */
 public class QuerySerializer {
+	
+	public enum QueryLanguage {
+		POLIQARPPLUS, ANNIS, COSMAS2, CQL, CQP
+	}
+	
+	static HashMap<String, Class<? extends AbstractSyntaxTree>> qlProcessorAssignment;
 
+	static {
+		qlProcessorAssignment  = new HashMap<String, Class<? extends AbstractSyntaxTree>>();
+		qlProcessorAssignment.put("poliqarpplus", PoliqarpPlusTree.class);
+		qlProcessorAssignment.put("cosmas2", CosmasTree.class);
+		qlProcessorAssignment.put("annis", AqlTree.class);
+		qlProcessorAssignment.put("cql", CQLTree.class);
+	}
+	
+	
     private Logger qllogger = KorAPLogger.initiate("ql");
     public static String queryLanguageVersion;
 
@@ -31,7 +47,6 @@ public class QuerySerializer {
     private List messages;
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(QuerySerializer.class);
-
 
     /**
      * @param args
@@ -46,7 +61,6 @@ public class QuerySerializer {
         String[] queries;
         if (args.length == 0) {
             queries = new String[]{
-            		"foo"
             };
         } else
             queries = new String[]{args[0]};
@@ -100,9 +114,6 @@ public class QuerySerializer {
             throw new QueryException(queryLanguage + " is not a supported query language!");
         }
         toJSON();
-        Map<String, Object> requestMap = ast.getRequestMap();
-        System.out.println(requestMap);
-//        mapper.writeValue(new File(outFile), requestMap);
     }
 
     public QuerySerializer setQuery(String query, String ql, String version)

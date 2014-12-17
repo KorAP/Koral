@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.util.QueryException;
 
 public abstract class AbstractSyntaxTree {
@@ -209,7 +210,7 @@ public abstract class AbstractSyntaxTree {
 			frame = "frame:contains";
 		}
 		group.put("frame", frame);
-		addMessage(303, "Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
+		addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, "Deprecated 2014-09-22: 'frame' only to be supported until 3 months from deprecation date. " +
 				"Position frames are now expressed through 'frames'.");
 		return group;
 	}
@@ -231,7 +232,7 @@ public abstract class AbstractSyntaxTree {
 			group.put("class", classCount);
 			group.put("classOut", classCount);
 		}
-		addMessage(303, "Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
+		addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, "Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
 				"Classes are now defined using the 'classOut' attribute.");
 		group.put("operands", new ArrayList<Object>());
 		return group;
@@ -245,7 +246,7 @@ public abstract class AbstractSyntaxTree {
 		group.put("classIn", Arrays.asList(classIn));
 		group.put("classOut", classOut);
 		group.put("class", classOut);
-		addMessage(303, "Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
+		addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, "Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. " +
 				"Classes are now defined using the 'classOut' attribute.");
 		group.put("operands", new ArrayList<Object>());
 		return group;
@@ -299,7 +300,7 @@ public abstract class AbstractSyntaxTree {
 		if (max != null) {
 			group.put("max", max);
 		}
-		addMessage(303, "Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
+		addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, "Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
 		return group;
 	}
 	
@@ -388,20 +389,4 @@ public abstract class AbstractSyntaxTree {
 		}
 		return number;
 	}
-	
-    public static void checkUnbalancedPars(String q) throws QueryException {
-        int openingPars = StringUtils.countMatches(q, "(");
-        int closingPars = StringUtils.countMatches(q, ")");
-        int openingBrkts = StringUtils.countMatches(q, "[");
-        int closingBrkts = StringUtils.countMatches(q, "]");
-        int openingBrcs = StringUtils.countMatches(q, "{");
-        int closingBrcs = StringUtils.countMatches(q, "}");
-        if (openingPars != closingPars) throw new QueryException(
-                "Your query string contains an unbalanced number of parantheses.");
-        if (openingBrkts != closingBrkts) throw new QueryException(
-                "Your query string contains an unbalanced number of brackets.");
-        if (openingBrcs != closingBrcs) throw new QueryException(
-                "Your query string contains an unbalanced number of braces.");
-    }
-
 }
