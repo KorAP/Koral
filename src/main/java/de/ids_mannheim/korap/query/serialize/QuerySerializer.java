@@ -3,7 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import de.ids_mannheim.korap.query.poliqarp.PoliqarpPlusParser;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.util.QueryException;
 import de.ids_mannheim.korap.utils.JsonUtils;
 import de.ids_mannheim.korap.utils.KorAPLogger;
@@ -94,7 +94,7 @@ public class QuerySerializer {
      *
      * @param outFile       The file to which the serialization is written
      * @param query         The query string
-     * @param queryLanguage The query language. As of 13/11/20, this must be either 'poliqarp' or 'poliqarpplus'. Some extra maven stuff needs to done to support CosmasII ('cosmas') [that maven stuff would be to tell maven how to build the cosmas grammar and where to find the classes]
+     * @param queryLanguage The query language. As of 17 Dec 2014, this must be one of 'poliqarpplus', 'cosmas2', 'annis' or 'cql'. 
      * @throws IOException
      * @throws QueryException
      */
@@ -120,7 +120,7 @@ public class QuerySerializer {
             throws QueryException {
 
         if (query == null || query.isEmpty())
-            throw new QueryException(406, "No Content!");
+            throw new QueryException(StatusCodes.NO_QUERY, "No Content!");
 
         try {
             if (ql.equalsIgnoreCase("poliqarp")) {

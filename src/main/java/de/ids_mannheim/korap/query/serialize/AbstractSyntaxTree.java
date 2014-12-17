@@ -62,6 +62,7 @@ public abstract class AbstractSyntaxTree {
 		requestMap.put("warnings", warnings);
 		requestMap.put("messages", messages);
 		requestMap.put("collection", collection);
+		requestMap.put("query", new LinkedHashMap<String, Object>());
 		requestMap.put("meta", new LinkedHashMap<String, Object>());
 	}
 	
@@ -88,6 +89,10 @@ public abstract class AbstractSyntaxTree {
 	public void addError(int code, String msg) {
 		List<Object> error = Arrays.asList(new Object[]{code, msg}); 
 		errors.add(error);
+	}
+
+	public void addError(List<Object> fullErrorMsg) {
+		errors.add(fullErrorMsg);
 	}
 	
 	public Map<String, Object> getRequestMap() {

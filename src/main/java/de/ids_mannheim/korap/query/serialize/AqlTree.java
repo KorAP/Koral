@@ -104,16 +104,9 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			throw new NullPointerException("Parser has not been instantiated!"); 
 		}
 		log.info("Processing Annis query.");
-		log.info("AST is: "+tree.toStringTree(parser));
-		System.out.println("Processing Annis QL");
-		if (verbose) System.out.println(tree.toStringTree(parser));
-		processNode(tree);
-		log.info(requestMap.toString());
-		
-		for (String ref : nodeVariables.keySet()) {
-			if (nodeReferencesTotal.get(ref) == null) {
-				System.err.println(ref);
-			}
+		if (tree != null) {
+			log.debug("ANTLR parse tree: "+tree.toStringTree(parser));
+			processNode(tree);
 		}
 	}
 
@@ -733,19 +726,12 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 			Method startRule = AqlParser.class.getMethod("start"); 
 			tree = (ParserRuleContext) startRule.invoke(parser, (Object[])null);
 		}
-
 		// Some things went wrong ...
 		catch (Exception e) {
-			System.err.println("ERROR: "+errorListener.generateFullErrorMsg());
-			log.error(e.getMessage());
+			log.error("Could not parse query. Please make sure it is well-formed.");
+			log.error(errorListener.generateFullErrorMsg().toString());
+			addError(errorListener.generateFullErrorMsg());
 		}
-
-		if (tree == null) {
-			log.error("Could not parse query. Make sure it is correct ANNIS QL syntax.");
-			throw new QueryException("Could not parse query. Make sure it is correct ANNIS QL syntax.");
-		}
-
-		// Return the generated tree
 		return tree;
 	}
 }

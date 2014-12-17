@@ -2,7 +2,7 @@ package de.ids_mannheim.korap.query.serialize;
 
 import de.ids_mannheim.korap.query.cosmas2.c2psLexer;
 import de.ids_mannheim.korap.query.cosmas2.c2psParser;
-import de.ids_mannheim.korap.query.serialize.util.CosmasCondition;
+import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.util.QueryException;
@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -25,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * Map representation of CosmasII syntax tree as returned by ANTLR
  *
- * @author bingel
+ * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @version 0.2
  */
 public class CosmasTree extends Antlr3AbstractSyntaxTree {
@@ -106,16 +105,12 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	@Override
 	public void process(String query) throws QueryException {
 		Tree tree = null;
-		try {
-			tree = parseCosmasQuery(query);
-		} catch (RecognitionException e) {
-			throw new QueryException("Your query could not be processed. Please make sure it is well-formed.");
-		} catch (NullPointerException e) {
-			throw new QueryException("Your query could not be processed. Please make sure it is well-formed.");
-		}
+		tree = parseCosmasQuery(query);
 		log.info("Processing CosmasII query");
-		processNode(tree);
-		log.info(requestMap.toString());
+		if (tree != null) {
+			log.debug("ANTLR parse tree: "+tree.toStringTree());
+			processNode(tree);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1025,30 +1020,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		putIntoSuperObject(object, 0);
 	}
 
-
-	private Tree parseCosmasQuery(String q) throws RecognitionException {
-		q = rewritePositionQuery(q);
-
-		Tree tree = null;
-		ANTLRStringStream ss = new ANTLRStringStream(q);
-		c2psLexer lex = new c2psLexer(ss);
-		org.antlr.runtime.CommonTokenStream tokens = new org.antlr.runtime.CommonTokenStream(lex);  //v3
-		parser = new c2psParser(tokens);
-		c2psParser.c2ps_query_return c2Return = ((c2psParser) parser).c2ps_query();  // statt t().
-		// AST Tree anzeigen:
-		tree = (Tree) c2Return.getTree();
-
-		String treestring = tree.toStringTree();
-		if (treestring.contains("<mismatched token") || treestring.contains("<error") || treestring.contains("<unexpected")) {
-			log.error("Invalid tree. Could not parse Cosmas query. Make sure it is well-formed.");
-			throw new RecognitionException();
-		}
-		if (verbose) {
-			System.out.println(tree.toStringTree());
-		}
-		return tree;
-	}
-
 	/**
 	 * Normalises position operators to equivalents using #BED  
 	 */
@@ -1070,5 +1041,41 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			rewrittenQuery = rewrittenQuery.replace(match, replacement);
 		}
 		return rewrittenQuery;
+	}
+
+	private Tree parseCosmasQuery(String query) {
+		query = rewritePositionQuery(query);
+		Tree tree = null;
+		Antlr3DescriptiveErrorListener errorListener = new Antlr3DescriptiveErrorListener(query);
+		try {
+			ANTLRStringStream ss = new ANTLRStringStream(query);
+			c2psLexer lex = new c2psLexer(ss);
+			org.antlr.runtime.CommonTokenStream tokens = new org.antlr.runtime.CommonTokenStream(lex);  //v3
+			parser = new c2psParser(tokens);
+	
+			((c2psParser) parser).setErrorReporter(errorListener); // Use the custom error reporter
+			c2psParser.c2ps_query_return c2Return = ((c2psParser) parser).c2ps_query();  // statt t().
+			// AST Tree anzeigen:
+			tree = (Tree) c2Return.getTree();
+
+		} catch (RecognitionException e) {
+			log.error("Could not parse query. Please make sure it is well-formed.");
+			addError(StatusCodes.MALFORMED_QUERY, "Could not parse query. Please make sure it is well-formed.");
+		}
+		String treestring = tree.toStringTree();
+		
+		boolean erroneous = false;
+		if (parser.failed() || parser.getNumberOfSyntaxErrors() > 0) {
+			erroneous = true;
+			tree = null;
+		}
+
+		if (erroneous || treestring.contains("<mismatched token") || 
+				treestring.contains("<error") || treestring.contains("<unexpected")) {
+			log.error("Could not parse query. Please make sure it is well-formed.");
+			log.error(errorListener.generateFullErrorMsg().toString());
+			addError(errorListener.generateFullErrorMsg());
+		}
+		return tree;
 	}
 }

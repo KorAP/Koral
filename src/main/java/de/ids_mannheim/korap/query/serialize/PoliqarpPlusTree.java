@@ -35,7 +35,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 */
 	public PoliqarpPlusTree(String query) throws QueryException {
 		process(query);
-		System.out.println(">>> " + requestMap + " <<<");
 		log.info(">>> " + requestMap.get("query") + " <<<");
 	}
 
@@ -45,7 +44,10 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		tree = parsePoliqarpQuery(query);
 		super.parser = this.parser;
 		log.info("Processing PoliqarpPlus");
-		processNode(tree);
+		if (tree != null) {
+			log.debug("ANTLR parse tree: "+tree.toStringTree(parser));
+			processNode(tree);
+		}
 	}
 
 	/**
@@ -671,14 +673,14 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	}
 
 
-	private ParserRuleContext parsePoliqarpQuery(String p) throws QueryException {
+	private ParserRuleContext parsePoliqarpQuery(String query) throws QueryException {
 		Lexer lexer = new PoliqarpPlusLexer((CharStream) null);
 		ParserRuleContext tree = null;
 		Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(query);
 		// Like p. 111
 		try {
 			// Tokenize input data
-			ANTLRInputStream input = new ANTLRInputStream(p);
+			ANTLRInputStream input = new ANTLRInputStream(query);
 			lexer.setInputStream(input);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			parser = new PoliqarpPlusParser(tokens);
@@ -693,21 +695,13 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			// Get starting rule from parser
 			Method startRule = PoliqarpPlusParser.class.getMethod("request");
 			tree = (ParserRuleContext) startRule.invoke(parser, (Object[]) null);
-			log.debug(tree.toStringTree(parser));
 		}
 		// Some things went wrong ...
 		catch (Exception e) {
-			log.error("Could not parse query. Please make sure it is well-formed.");;
-			log.error("Underlying error is: "+e.getMessage());
-			System.err.println(e.getMessage());
+			log.error("Could not parse query. Please make sure it is well-formed.");
+			log.error(errorListener.generateFullErrorMsg().toString());
+			addError(errorListener.generateFullErrorMsg());
 		}
-
-		if (tree == null) {
-			throw new QueryException("The query you specified could not be processed. Please make sure it is well-formed.");
-		}
-		// Return the generated tree
-		log.info("ANTLR parse tree: "+tree.toStringTree(parser));
-		System.out.println("ANTLR parse tree: "+tree.toStringTree(parser));
 		return tree;
 	}
 }

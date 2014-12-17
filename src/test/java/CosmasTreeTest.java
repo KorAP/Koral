@@ -595,6 +595,14 @@ public class CosmasTreeTest {
 		assertEquals(true,							res.at("/query/operands/0/operands/0/frames/1").isMissingNode());
 		assertEquals(true,							res.at("/query/operands/0/operands/0/exclude").asBoolean());
 
+		query = "wegen #IN(FE,%,MIN) <s>";
+		qs.setQuery(query, "cosmas2");
+		res = mapper.readTree(qs.toJSON());
+		assertEquals(true,							res.at("/query/reset").isMissingNode());
+		assertEquals("classRefCheck:equals",		res.at("/query/operands/0/classRefCheck/0").asText());
+		assertEquals("frames:matches",				res.at("/query/operands/0/operands/0/frames/0").asText());
+		assertEquals(true,							res.at("/query/operands/0/operands/0/exclude").asBoolean());
+		
 		query = "wegen #IN(FE,ALL,%,MIN) <s>";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -602,7 +610,6 @@ public class CosmasTreeTest {
 		assertEquals("classRefCheck:equals",		res.at("/query/operands/0/classRefCheck/0").asText());
 		assertEquals("frames:matches",				res.at("/query/operands/0/operands/0/frames/0").asText());
 		assertEquals(true,							res.at("/query/operands/0/operands/0/exclude").asBoolean());
-
 	}
 
 	@Test
