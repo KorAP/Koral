@@ -748,29 +748,4 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		// Return the generated tree
 		return tree;
 	}
-
-	public static void main(String[] args) {
-		/*
-		 * For testing
-		 */
-		String[] queries = new String[] {
-				"cat=\"S\" & cat=/NP/ & cat=/PP/ > #2",
-				"pos & tok & #1 . node",
-				"cat=/S/ & cat=/NP/ & cat=/PP/ > #1",
-				"(cat=\"a\" | cat=\"b\") & tok"
-		};
-		//		AqlTree.verbose=true;
-		for (String q : queries) {
-			try {
-				System.out.println(q);
-				AqlTree at = new AqlTree(q);
-				System.out.println(at.parseAnnisQuery(q).toStringTree(at.parser));
-				System.out.println();
-
-			} catch (NullPointerException | QueryException npe) {
-				npe.printStackTrace();
-			}
-		}
-	}
-
 }

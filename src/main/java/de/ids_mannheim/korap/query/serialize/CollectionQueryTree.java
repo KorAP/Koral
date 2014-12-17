@@ -476,22 +476,4 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         // Return the generated tree
         return tree;
     }
-
-    public static void main(String[] args) {
-        String query = "foo=bar&c=d";
-        query = "(1990<year<2010&genre=Sport)|textClass=politk";
-        query = "(textClass=wissenschaft & textClass=politik) | textClass=ausland";
-        query = "textClass=Sport & year=2014";
-        query = "title!~mannheim";
-        query = "title = /ada\\)ad/";
-        CollectionQueryTree.verbose = true;
-        CollectionQueryTree filter = null;
-        try {
-        	 filter = new CollectionQueryTree(query);
-        } catch (QueryException e) {
-            e.printStackTrace();
-        }
-        System.out.println(filter.getRequestMap());
-
-    }
 }
