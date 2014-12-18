@@ -71,6 +71,11 @@
 			<artifactId>cql-java</artifactId>
 			<version>1.12</version>
 		</dependency>
+		<dependency>
+			<groupId>KorAP-modules</groupId>
+			<artifactId>KorAP-Entities</artifactId>
+			<version>1.1</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>

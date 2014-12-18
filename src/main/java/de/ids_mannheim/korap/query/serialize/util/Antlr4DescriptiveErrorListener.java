@@ -63,7 +63,10 @@ public class Antlr4DescriptiveErrorListener extends BaseErrorListener {
 			msg = unbalanced.getKey();
 			charPosition = unbalanced.getValue();
 		}
-		
+		// check if more more arguments expected before closing operator
+		if (String.valueOf(offendingSymbol).equals(")")) {
+			msg = "Early closing parenthesis. Possibly lacking arguments for operator.";
+		}
 		return msg;
 	}
 	

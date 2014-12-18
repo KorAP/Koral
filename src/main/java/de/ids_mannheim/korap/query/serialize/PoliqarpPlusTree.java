@@ -43,7 +43,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		ParseTree tree;
 		tree = parsePoliqarpQuery(query);
 		super.parser = this.parser;
-		log.info("Processing PoliqarpPlus");
+		log.info("Processing PoliqarpPlus query: "+query);
 		if (tree != null) {
 			log.debug("ANTLR parse tree: "+tree.toStringTree(parser));
 			processNode(tree);

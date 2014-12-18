@@ -60,7 +60,7 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
         } else {
             throw new NullPointerException("Parser has not been instantiated!");
         }
-        log.info("Processing collection query");
+        log.info("Processing collection query: "+query);
         if (verbose) System.out.println(tree.toStringTree(parser));
         processNode(tree);
     }

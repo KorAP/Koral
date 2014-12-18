@@ -26,11 +26,25 @@ tokens  {C2PQ; OPBED; OPTS; OPBEG; OPEND; OPNHIT; OPALL; OPLEM; OPPROX;
 @header {package de.ids_mannheim.korap.query.parse.cosmas;}
 @lexer::header {package de.ids_mannheim.korap.query.parse.cosmas;}
 
-@members {
+@lexer::members {
     private IErrorReporter errorReporter = null;
+    
     public void setErrorReporter(IErrorReporter errorReporter) {
         this.errorReporter = errorReporter;
     }
+    
+    public void emitErrorMessage(String msg) {
+        errorReporter.reportError(msg);
+    }
+}
+
+@parser::members {
+    private IErrorReporter errorReporter = null;
+    
+    public void setErrorReporter(IErrorReporter errorReporter) {
+        this.errorReporter = errorReporter;
+    }
+    
     public void emitErrorMessage(String msg) {
         errorReporter.reportError(msg);
     }

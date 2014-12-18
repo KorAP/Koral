@@ -1110,6 +1110,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			org.antlr.runtime.CommonTokenStream tokens = new org.antlr.runtime.CommonTokenStream(lex);  //v3
 			parser = new c2psParser(tokens);
 	
+			lex.setErrorReporter(errorListener); // Use the custom error reporter
 			((c2psParser) parser).setErrorReporter(errorListener); // Use the custom error reporter
 			c2psParser.c2ps_query_return c2Return = ((c2psParser) parser).c2ps_query();  // statt t().
 			// AST Tree anzeigen:
@@ -1129,7 +1130,6 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 
 		if (erroneous || treestring.contains("<mismatched token") || 
 				treestring.contains("<error") || treestring.contains("<unexpected")) {
-			log.error("Could not parse query. Please make sure it is well-formed.");
 			log.error(errorListener.generateFullErrorMsg().toString());
 			addError(errorListener.generateFullErrorMsg());
 		}
