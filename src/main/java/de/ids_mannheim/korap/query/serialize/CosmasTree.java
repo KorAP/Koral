@@ -106,14 +106,13 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	public void process(String query) throws QueryException {
 		Tree tree = null;
 		tree = parseCosmasQuery(query);
-		log.info("Processing CosmasII query");
+		log.info("Processing CosmasII query: "+query);
 		if (tree != null) {
 			log.debug("ANTLR parse tree: "+tree.toStringTree());
 			processNode(tree);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void processNode(Tree node) throws QueryException {
 
 		// Top-down processing
@@ -172,384 +171,43 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 			}
 		}
 
-		// Nodes introducing tokens. Process all in the same manner, except for the fieldMap entry
+		
 		if (nodeCat.equals("OPWF") || nodeCat.equals("OPLEM")) {
-
-			//Step I: get info
-			LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
-			token.put("@type", "korap:token");
-			objectStack.push(token);
-			stackedObjects++;
-			LinkedHashMap<String, Object> fieldMap = new LinkedHashMap<String, Object>();
-			token.put("wrap", fieldMap);
-
-			fieldMap.put("@type", "korap:term");
-			// make category-specific fieldMap entry
-			String attr = nodeCat.equals("OPWF") ? "orth" : "lemma";
-			String value = node.getChild(0).toStringTree().replaceAll("\"", "");
-			// check for wildcard string
-			Pattern p = Pattern.compile("[+*?]");
-			Matcher m = p.matcher(value);
-			if (m.find()) fieldMap.put("type", "type:wildcard");
-
-			if (value.startsWith("$")) {
-				value = value.substring(1);
-				fieldMap.put("caseInsensitive", true);
-			}
-
-			fieldMap.put("key", value);
-			fieldMap.put("layer", attr);
-
-			// negate field (see above)
-			if (negate) {
-				fieldMap.put("match", "match:ne");
-			} else {
-				fieldMap.put("match", "match:eq");
-			}
-			//Step II: decide where to put
-			if (!hasChild(node, "TPOS")) {
-				putIntoSuperObject(token, 1);
-				visited.add(node.getChild(0));
-			} else {
-				// TODO
-			}
+			processOPWF_OPLEM(node);
 		}
 
 		if (nodeCat.equals("OPMORPH")) {
-			//Step I: get info
-			String[] morphterms = node.getChild(0).toStringTree().replace(" ", "").split("&");
-			LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
-			token.put("@type", "korap:token");
-			ArrayList<Object> terms = new ArrayList<Object>();
-			LinkedHashMap<String, Object> fieldMap = null;
-			for (String morphterm : morphterms) {
-				// regex group #2 is foundry, #4 layer, #5 operator #6 key, #8 value
-				Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(\\w+)(:(\\w+))?");    
-				Matcher m = p.matcher(morphterm);										  
-				if (! m.matches()) {
-					throw new QueryException();
-				}
-				
-				fieldMap = new LinkedHashMap<String, Object>();
-				fieldMap.put("@type", "korap:term");
-				
-				if (m.group(2) != null) fieldMap.put("foundry", m.group(2));
-				if (m.group(4) != null) fieldMap.put("layer", m.group(4));
-				if (m.group(5) != null) {
-					if ("!=".equals(m.group(5))) negate = !negate; 
-				}
-				if (m.group(6) != null) fieldMap.put("key", m.group(6));
-				if (m.group(8) != null) fieldMap.put("value", m.group(8));
-
-				// negate field (see above)
-				if (negate) {
-					fieldMap.put("match", "match:ne");
-				} else {
-					fieldMap.put("match", "match:eq");
-				}
-				terms.add(fieldMap);
-			}
-			if (morphterms.length == 1) {
-				token.put("wrap", fieldMap);
-			} else {
-				LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
-				termGroup.put("operands", terms);
-				token.put("wrap", termGroup);
-			}
-			//Step II: decide where to put
-			putIntoSuperObject(token, 0);
-			visited.add(node.getChild(0));
+			processOPMORPH(node);
 		}
 
 		if (nodeCat.equals("OPELEM")) {
-			// Step I: create element
-			LinkedHashMap<String, Object> span = makeSpan();
-			if (node.getChild(0).toStringTree().equals("EMPTY")) {
-
-			} else {
-				int elname = 0;
-				Tree elnameNode = getFirstChildWithCat(node, "ELNAME");
-				if (elnameNode != null) {
-					span.put("key", elnameNode.getChild(0).toStringTree().toLowerCase());
-					elname = 1;
-				}
-				if (node.getChildCount() > elname) {
-					/*
-					 * Attributes can carry several values, like #ELEM(W ANA != 'N V'), 
-					 * denoting a word whose POS is neither N nor V.
-					 * When seeing this, create a sub-termGroup and put it into the top-level
-					 * term group, but only if there are other attributes in that group. If
-					 * not, put the several values as distinct attr-val-pairs into the
-					 * top-level group (in order to avoid a top-level group that only
-					 * contains a sub-group).
-					 */
-					LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
-					ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup.get("operands");
-					for (int i = elname; i < node.getChildCount(); i++) {
-						Tree attrNode = node.getChild(i);
-						if (attrNode.getChildCount() == 2) {
-							LinkedHashMap<String, Object> term = makeTerm();
-							termGroupOperands.add(term);
-							String layer = attrNode.getChild(0).toStringTree();
-							String[] splitted = layer.split("/");
-							if (splitted.length > 1) {
-								term.put("foundry", splitted[0]);
-								layer = splitted[1];
-							}
-							term.put("layer", translateMorph(layer));
-							term.put("key", attrNode.getChild(1).toStringTree());
-							String match = getNodeCat(attrNode).equals("EQ") ? "eq" : "ne";
-							term.put("match", "match:" + match);
-						} else {
-							LinkedHashMap<String, Object> subTermGroup = makeTermGroup("and");
-							ArrayList<Object> subTermGroupOperands = (ArrayList<Object>) subTermGroup.get("operands");
-							int j;
-							for (j = 1; j < attrNode.getChildCount(); j++) {
-								LinkedHashMap<String, Object> term = makeTerm();
-								String layer = attrNode.getChild(0).toStringTree();
-								String[] splitted = layer.split("/");
-								if (splitted.length > 1) {
-									term.put("foundry", splitted[0]);
-									layer = splitted[1];
-								}
-								term.put("layer", translateMorph(layer));
-								term.put("key", attrNode.getChild(j).toStringTree());
-								String match = getNodeCat(attrNode).equals("EQ") ? "eq" : "ne";
-								term.put("match", "match:" + match);
-								if (node.getChildCount() == elname + 1) {
-									termGroupOperands.add(term);
-								} else {
-									subTermGroupOperands.add(term);
-								}
-							}
-							if (node.getChildCount() > elname + 1) {
-								termGroupOperands.add(subTermGroup);
-							}
-						}
-						if (getNodeCat(attrNode).equals("NOTEQ")) negate = true;
-					}
-					// possibly only one term was present throughout all nodes: extract it from the group
-					if (termGroupOperands.size()==1) {
-						termGroup = (LinkedHashMap<String, Object>) termGroupOperands.get(0);
-					}
-					span.put("attr", termGroup);
-				}
-			}
-
-			//Step II: decide where to put
-			putIntoSuperObject(span);
+			processOPELEM(node);
 		}
 
 		if (nodeCat.equals("OPLABEL")) {
-			// Step I: create element
-			LinkedHashMap<String, Object> elem = new LinkedHashMap<String, Object>();
-			elem.put("@type", "korap:span");
-			elem.put("key", node.getChild(0).toStringTree().replaceAll("<|>", ""));
-			//Step II: decide where to put
-			putIntoSuperObject(elem);
+			processOPLABEL(node);
 		}
 
 		if (nodeCat.equals("OPAND") || nodeCat.equals("OPNOT")) {
-			// Step I: create group
-			LinkedHashMap<String, Object> distgroup = new LinkedHashMap<String, Object>();
-			distgroup.put("@type", "korap:group");
-			distgroup.put("operation", "operation:sequence");
-			ArrayList<Object> distances = new ArrayList<Object>();
-			LinkedHashMap<String, Object> zerodistance = new LinkedHashMap<String, Object>();
-			zerodistance.put("@type", "cosmas:distance");
-			zerodistance.put("key", "t");
-			zerodistance.put("min", 0);
-			zerodistance.put("max", 0);
-			if (nodeCat.equals("OPNOT")) zerodistance.put("exclude", true);
-			distances.add(zerodistance);
-			distgroup.put("distances", distances);
-			distgroup.put("operands", new ArrayList<Object>());
-			objectStack.push(distgroup);
-			stackedObjects++;
-			// Step II: decide where to put
-			putIntoSuperObject(distgroup, 1);
+			processOPAND_OPNOT(node);
 		}
 
 		if (nodeCat.equals("OPOR")) {
-			// Step I: create group
-			LinkedHashMap<String, Object> disjunction = new LinkedHashMap<String, Object>();
-			disjunction.put("@type", "korap:group");
-			disjunction.put("operation", "operation:or");
-			disjunction.put("operands", new ArrayList<Object>());
-			objectStack.push(disjunction);
-			stackedObjects++;
-			// Step II: decide where to put
-			putIntoSuperObject(disjunction, 1);
+			processOPOR(node);
 		}
 
 		if (nodeCat.equals("OPPROX")) {
-			// collect info
-			Tree prox_opts = node.getChild(0);
-			Tree typ = prox_opts.getChild(0);
-			Tree dist_list = prox_opts.getChild(1);
-			// Step I: create group
-			LinkedHashMap<String, Object> group = makeGroup("sequence");
-
-			ArrayList<Object> constraints = new ArrayList<Object>();
-			boolean exclusion = typ.getChild(0).toStringTree().equals("EXCL");
-
-			boolean inOrder = false;
-			boolean invertedOperands = false;
-
-			group.put("inOrder", inOrder);
-			group.put("distances", constraints);
-
-			boolean putIntoOverlapDisjunction = false;
-
-			int min = 0, max = 0;
-			// possibly several distance constraints
-			for (int i = 0; i < dist_list.getChildCount(); i++) {
-				String direction = dist_list.getChild(i).getChild(0).getChild(0).toStringTree().toLowerCase();
-				String minStr = dist_list.getChild(i).getChild(1).getChild(0).toStringTree();
-				String maxStr = dist_list.getChild(i).getChild(1).getChild(1).toStringTree();
-				String meas = dist_list.getChild(i).getChild(2).getChild(0).toStringTree();
-				if (minStr.equals("VAL0")) {
-					minStr = "0";
-				}
-				min = Integer.parseInt(minStr);
-				max = Integer.parseInt(maxStr);
-				// If zero word-distance, wrap this sequence in a disjunction along with an overlap position
-				// between the two operands
-				/*   
-     	XXX: This is currently deactivated. Uncomment to activate treatment of zero-word distances as overlap-alternatives
-     			(see google doc on special distances serialization)
-
-                if (meas.equals("w") && min == 0) {
-                	min = 1;
-                	putIntoOverlapDisjunction = true;
-                }
-				 */
-				if (!meas.equals("w") && min == 0 ) {
-					processSpanDistance(meas,min,max);
-				}
-				LinkedHashMap<String, Object> distance = makeDistance(meas,min,max);
-				if (exclusion) {
-					distance.put("exclude", true);
-				}
-				//                if (! openNodeCats.get(1).equals("OPNHIT")) {
-				constraints.add(distance);
-				//                }
-				if (i==0) {
-					if (direction.equals("plus")) {
-						inOrder = true;
-					} else if (direction.equals("minus")) {
-						inOrder = true;
-						invertedOperands = true;
-					} else if (direction.equals("both")) {
-						inOrder = false;
-					}
-				}
-			}
-			group.put("inOrder", inOrder);
-			LinkedHashMap<String, Object> embeddedSequence = group;
-
-			if (! (openNodeCats.get(1).equals("OPBEG") || openNodeCats.get(1).equals("OPEND") || inOPALL || openNodeCats.get(1).equals("OPNHIT"))) {
-				wrapOperandInClass(node,1,classCounter);
-				wrapOperandInClass(node,2,classCounter);
-				group = wrapInReference(group, 128+classCounter++);
-			} else if (openNodeCats.get(1).equals("OPNHIT")) {
-				LinkedHashMap<String,Object> repetition = makeRepetition(min, max);
-				((ArrayList<Object>) repetition.get("operands")).add(makeToken());
-				// TODO go on with this: put the repetition into a class and put it in between the operands
-				// -> what if there's several distance constraints. with different keys, like /w4,s0? 
-			}
-
-			LinkedHashMap<String,Object> sequence = null;
-			if (putIntoOverlapDisjunction) {
-				sequence = embeddedSequence;
-				group = makeGroup("or");
-				ArrayList<Object> disjOperands = (ArrayList<Object>) group.get("operands");
-				String[] sharedClasses = new String[]{"intersects"};
-				LinkedHashMap<String,Object> overlapsGroup = makePosition(new String[0], sharedClasses);
-
-				ArrayList<Object> overlapsOperands = (ArrayList<Object>) overlapsGroup.get("operands");
-				// this ensures identity of the operands lists and thereby a distribution of the operands for both created objects 
-				sequence.put("operands", overlapsOperands);
-				if (invertedOperands) {
-					invertedOperandsLists.push(overlapsOperands);
-				}
-				disjOperands.add(overlapsGroup);
-				disjOperands.add(wrapInReference(sequence, 0));
-				// Step II: decide where to put
-				putIntoSuperObject(group, 0);
-				objectStack.push(sequence);
-			}
-			else {
-				if (invertedOperands) {
-					ArrayList<Object> operands = (ArrayList<Object>) embeddedSequence.get("operands");
-					invertedOperandsLists.push(operands);
-				}
-				// Step II: decide where to put
-				putIntoSuperObject(group, 0);
-				objectStack.push(embeddedSequence);
-			}
-			stackedObjects++;
-			visited.add(node.getChild(0));
+			processOPPROX(node);
 		}
 
 		// inlcusion or overlap
 		if (nodeCat.equals("OPIN") || nodeCat.equals("OPOV")) {
-			// Step I: create group
-			wrapOperandInClass(node,2,classCounter++);
-			wrapOperandInClass(node,1,classCounter++);
-			//            LinkedHashMap<String, Object> posgroup = makePosition(null);
-			LinkedHashMap<String, Object> posgroup = makeGroup("position");
-			LinkedHashMap<String, Object> positionOptions;
-			//            posgroup
-			if (nodeCat.equals("OPIN")) {
-				positionOptions = parseOPINOptions(node);
-			} else {
-				positionOptions = parseOPOVOptions(node);
-			}
-			posgroup.put("frames", positionOptions.get("frames"));
-			posgroup.put("frame", positionOptions.get("frame"));
-			if (positionOptions.containsKey("exclude")) {
-				posgroup.put("exclude", positionOptions.get("exclude"));
-			}
-			if (positionOptions.containsKey("grouping")) {
-				posgroup.put("grouping", positionOptions.get("grouping"));
-			}
-			objectStack.push(posgroup);
-			// mark this an inverted operands object
-			invertedOperandsLists.push((ArrayList<Object>) posgroup.get("operands"));
-			stackedObjects++;
-			// Step II: wrap in reference and decide where to put
-			ArrayList<String> check = (ArrayList<String>) positionOptions.get("classRefCheck");
-			Integer[] classIn = new Integer[]{128+classCounter-2,128+classCounter-1};
-			LinkedHashMap<String, Object> classRefCheck = makeClassRefCheck(check, classIn, 128+classCounter);
-			((ArrayList<Object>) classRefCheck.get("operands")).add(posgroup);
-			LinkedHashMap<String, Object> focusGroup = null;
-			if ((boolean) positionOptions.get("matchall") == true) {
-				focusGroup = makeResetReference();
-				((ArrayList<Object>) focusGroup.get("operands")).add(classRefCheck);
-			} else { // match only first argument
-				focusGroup = wrapInReference(classRefCheck, 128+classCounter-1);
-			}
-			putIntoSuperObject(focusGroup, 1);
+			processOPIN_OPOV(node);
 		}
 
 		// Wrap the argument of an #IN operator in a previously defined container
 		if (nodeCat.equals("ARG1") || nodeCat.equals("ARG2"))  {
-			Tree parent = node.getParent();
-			//        	String child = getNodeCat(node.getChild(0));
-			//        	if (child.equals("OPWF") | child.equals("OPLEM") | child.equals("OPELEM") | child.equals("OPMOPRH") | child.equals("OPLABEL")) {
-			if (operandWrap.containsRow(parent)) {
-				// Step I: create group
-				int argNr = nodeCat.equals("ARG1") ? 1 : 2;
-				LinkedHashMap<String,Object> container = operandWrap.row(parent).get(argNr);
-				// Step II: ingest
-				if (container!=null) {
-					objectStack.push(container);
-					stackedObjects++;
-					putIntoSuperObject(container,1);
-				}
-			}
-			//        	}
+			processARG1_ARG2(node);
 		}
 
 		if (nodeCat.equals("OPALL")) {
@@ -557,100 +215,15 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		}
 
 		if (nodeCat.equals("OPNHIT")) {
-			Integer[] classRef = new Integer[]{128+classCounter+1, 128+classCounter+2}; 
-			//            classRef.add(classCounter + 1);  // yes, do this twice (two classes)!
-			LinkedHashMap<String, Object> group = makeReference(128+classCounter);
-			LinkedHashMap<String, Object> classRefCheck = makeClassRefOp("classRefOp:inversion", classRef, classCounter+128);
-			ArrayList<Object> operands = new ArrayList<Object>();
-			operands.add(classRefCheck);
-			group.put("operands", operands);
-			classCounter++;
-			wrapOperandInClass(node.getChild(0),1,classCounter++); // direct child is OPPROX
-			wrapOperandInClass(node.getChild(0),2,classCounter++);
-			objectStack.push(classRefCheck);
-			stackedObjects++;
-			putIntoSuperObject(group, 1);
+			processOPNHIT(node);
 		}
 
 		if (nodeCat.equals("OPEND") || nodeCat.equals("OPBEG")) {
-			// Step I: create group
-			LinkedHashMap<String, Object> beggroup = new LinkedHashMap<String, Object>();
-			beggroup.put("@type", "korap:reference");
-			beggroup.put("operation", "operation:focus");
-			ArrayList<Integer> spanRef = new ArrayList<Integer>();
-			if (nodeCat.equals("OPBEG")) {
-				spanRef.add(0);
-				spanRef.add(1);
-			} else if (nodeCat.equals("OPEND")) {
-				spanRef.add(-1);
-				spanRef.add(1);
-			}
-			beggroup.put("spanRef", spanRef);
-			beggroup.put("operands", new ArrayList<Object>());
-			objectStack.push(beggroup);
-			stackedObjects++;
-
-			// Step II: decide where to put
-			putIntoSuperObject(beggroup, 1);
+			processOPEND_OPBEG(node);
 		}
 
 		if (nodeCat.equals("OPBED")) { 
-			// Node structure is (OPBED X+ (OPTS (TPBEG tpos*) (TPEND tpos*)))   
-			// X is some segment, TPBEG or TPEND must be present (inclusive OR)
-			// tpos is a three-char string of the form "[+-]?[spt][ae]". s/p/t indicates span, a/e beginning/end, - means negation
-			// See C-II QL documentation for more detail: 
-			// http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/textpositionen.html
-			
-			// Step I: create group
-			int optsChild = node.getChildCount() - 1;
-			Tree begConditions = getFirstChildWithCat(node.getChild(optsChild), "TPBEG");
-			Tree endConditions = getFirstChildWithCat(node.getChild(optsChild), "TPEND");
-
-			LinkedHashMap<String, Object> submatchgroup = makeReference(128+classCounter);
-			ArrayList<Object> submatchOperands = new ArrayList<Object>();
-			submatchgroup.put("operands", submatchOperands);
-			putIntoSuperObject(submatchgroup);
-
-			// Step II: collect all conditions, create groups for them in processPositionCondition()
-			ArrayList<Object> distributedOperands = new ArrayList<Object>();
-			ArrayList<LinkedHashMap<String, Object>> conditionGroups = new ArrayList<LinkedHashMap<String, Object>>(); 
-			if (begConditions != null) {
-				for (Tree condition : getChildren(begConditions)) {
-					conditionGroups.add(processPositionCondition(condition, distributedOperands, "beg"));
-				}
-			}
-			if (endConditions != null) {
-				for (Tree condition : getChildren(endConditions)) {
-					conditionGroups.add(processPositionCondition(condition, distributedOperands, "end"));
-				}
-			}
-			// Step III: insert conditions. need to stack matches-groups because position groups may only have two operands
-			ArrayList<Object> currentLowestOperands = submatchOperands; // indicates where to insert next condition group
-			int conditionCount = 0;
-			for (LinkedHashMap<String,Object> conditionGroup : conditionGroups) {
-				conditionCount++;
-				if (conditionGroups.size()==1) {
-					submatchOperands.add(conditionGroup);
-				} else if (conditionCount < conditionGroups.size()) {
-					LinkedHashMap<String,Object> matchesGroup = makePosition(new String[]{"frames:matches"}, new String[0]);
-					ArrayList<Object> matchesOperands = (ArrayList<Object>) matchesGroup.get("operands");
-					matchesOperands.add(conditionGroup);
-					// matches groups that are embedded at the second or lower level receive an additional
-					// focus to grep out only the query term to which the constraint applies
-					if (conditionCount > 1) {
-						LinkedHashMap<String,Object> focus = makeReference(128+classCounter-conditionGroups.size()+conditionCount-1);
-						ArrayList<Object> focusOperands = new ArrayList<Object>();
-						focus.put("operands", focusOperands);
-						focusOperands.add(matchesGroup);
-						currentLowestOperands.add(focus);
-					} else {
-						currentLowestOperands.add(matchesGroup);
-					}
-					currentLowestOperands = matchesOperands;
-				} else {
-					currentLowestOperands.add(conditionGroup);
-				}
-			}
+			processOPBED(node);
 		}
 		objectsToPop.push(stackedObjects);
 		toWrapsToPop.push(stackedToWrap);
@@ -702,6 +275,490 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 		}
 
 		openNodeCats.pop();
+	}
+
+	private void processOPEND_OPBEG(Tree node) {
+		// Step I: create group
+		String nodeCat = getNodeCat(node);
+		LinkedHashMap<String, Object> beggroup = new LinkedHashMap<String, Object>();
+		beggroup.put("@type", "korap:reference");
+		beggroup.put("operation", "operation:focus");
+		ArrayList<Integer> spanRef = new ArrayList<Integer>();
+		if (nodeCat.equals("OPBEG")) {
+			spanRef.add(0);
+			spanRef.add(1);
+		} else if (nodeCat.equals("OPEND")) {
+			spanRef.add(-1);
+			spanRef.add(1);
+		}
+		beggroup.put("spanRef", spanRef);
+		beggroup.put("operands", new ArrayList<Object>());
+		objectStack.push(beggroup);
+		stackedObjects++;
+
+		// Step II: decide where to put
+		putIntoSuperObject(beggroup, 1);
+	}
+
+	private void processOPBED(Tree node) {
+		// Node structure is (OPBED X+ (OPTS (TPBEG tpos*) (TPEND tpos*)))   
+		// X is some segment, TPBEG or TPEND must be present (inclusive OR)
+		// tpos is a three-char string of the form "[+-]?[spt][ae]". s/p/t indicates span, a/e beginning/end, - means negation
+		// See C-II QL documentation for more detail: 
+		// http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/textpositionen.html
+		
+		// Step I: create group
+		int optsChild = node.getChildCount() - 1;
+		Tree begConditions = getFirstChildWithCat(node.getChild(optsChild), "TPBEG");
+		Tree endConditions = getFirstChildWithCat(node.getChild(optsChild), "TPEND");
+
+		LinkedHashMap<String, Object> submatchgroup = makeReference(128+classCounter);
+		ArrayList<Object> submatchOperands = new ArrayList<Object>();
+		submatchgroup.put("operands", submatchOperands);
+		putIntoSuperObject(submatchgroup);
+
+		// Step II: collect all conditions, create groups for them in processPositionCondition()
+		ArrayList<Object> distributedOperands = new ArrayList<Object>();
+		ArrayList<LinkedHashMap<String, Object>> conditionGroups = new ArrayList<LinkedHashMap<String, Object>>(); 
+		if (begConditions != null) {
+			for (Tree condition : getChildren(begConditions)) {
+				conditionGroups.add(processPositionCondition(condition, distributedOperands, "beg"));
+			}
+		}
+		if (endConditions != null) {
+			for (Tree condition : getChildren(endConditions)) {
+				conditionGroups.add(processPositionCondition(condition, distributedOperands, "end"));
+			}
+		}
+		// Step III: insert conditions. need to stack matches-groups because position groups may only have two operands
+		ArrayList<Object> currentLowestOperands = submatchOperands; // indicates where to insert next condition group
+		int conditionCount = 0;
+		for (LinkedHashMap<String,Object> conditionGroup : conditionGroups) {
+			conditionCount++;
+			if (conditionGroups.size()==1) {
+				submatchOperands.add(conditionGroup);
+			} else if (conditionCount < conditionGroups.size()) {
+				LinkedHashMap<String,Object> matchesGroup = makePosition(new String[]{"frames:matches"}, new String[0]);
+				@SuppressWarnings("unchecked")
+				ArrayList<Object> matchesOperands = (ArrayList<Object>) matchesGroup.get("operands");
+				matchesOperands.add(conditionGroup);
+				// matches groups that are embedded at the second or lower level receive an additional
+				// focus to grep out only the query term to which the constraint applies
+				if (conditionCount > 1) {
+					LinkedHashMap<String,Object> focus = makeReference(128+classCounter-conditionGroups.size()+conditionCount-1);
+					ArrayList<Object> focusOperands = new ArrayList<Object>();
+					focus.put("operands", focusOperands);
+					focusOperands.add(matchesGroup);
+					currentLowestOperands.add(focus);
+				} else {
+					currentLowestOperands.add(matchesGroup);
+				}
+				currentLowestOperands = matchesOperands;
+			} else {
+				currentLowestOperands.add(conditionGroup);
+			}
+		}
+	}
+
+	private void processOPNHIT(Tree node) {
+		Integer[] classRef = new Integer[]{128+classCounter+1, 128+classCounter+2}; 
+		//            classRef.add(classCounter + 1);  // yes, do this twice (two classes)!
+		LinkedHashMap<String, Object> group = makeReference(128+classCounter);
+		LinkedHashMap<String, Object> classRefCheck = makeClassRefOp("classRefOp:inversion", classRef, classCounter+128);
+		ArrayList<Object> operands = new ArrayList<Object>();
+		operands.add(classRefCheck);
+		group.put("operands", operands);
+		classCounter++;
+		wrapOperandInClass(node.getChild(0),1,classCounter++); // direct child is OPPROX
+		wrapOperandInClass(node.getChild(0),2,classCounter++);
+		objectStack.push(classRefCheck);
+		stackedObjects++;
+		putIntoSuperObject(group, 1);
+	}
+
+	private void processARG1_ARG2(Tree node) {
+		String nodeCat = getNodeCat(node);
+		Tree parent = node.getParent();
+		if (operandWrap.containsRow(parent)) {
+			// Step I: create group
+			int argNr = nodeCat.equals("ARG1") ? 1 : 2;
+			LinkedHashMap<String,Object> container = operandWrap.row(parent).get(argNr);
+			// Step II: ingest
+			if (container!=null) {
+				objectStack.push(container);
+				stackedObjects++;
+				putIntoSuperObject(container,1);
+			}
+		}
+	}
+	
+
+	@SuppressWarnings("unchecked")
+	private void processOPIN_OPOV(Tree node) {
+		// Step I: create group
+		String nodeCat = getNodeCat(node);
+		wrapOperandInClass(node,2,classCounter++);
+		wrapOperandInClass(node,1,classCounter++);
+		//            LinkedHashMap<String, Object> posgroup = makePosition(null);
+		LinkedHashMap<String, Object> posgroup = makeGroup("position");
+		LinkedHashMap<String, Object> positionOptions;
+		//            posgroup
+		if (nodeCat.equals("OPIN")) {
+			positionOptions = parseOPINOptions(node);
+		} else {
+			positionOptions = parseOPOVOptions(node);
+		}
+		posgroup.put("frames", positionOptions.get("frames"));
+		posgroup.put("frame", positionOptions.get("frame"));
+		if (positionOptions.containsKey("exclude")) {
+			posgroup.put("exclude", positionOptions.get("exclude"));
+		}
+		if (positionOptions.containsKey("grouping")) {
+			posgroup.put("grouping", positionOptions.get("grouping"));
+		}
+		objectStack.push(posgroup);
+		// mark this an inverted operands object
+		invertedOperandsLists.push((ArrayList<Object>) posgroup.get("operands"));
+		stackedObjects++;
+		// Step II: wrap in reference and decide where to put
+		ArrayList<String> check = (ArrayList<String>) positionOptions.get("classRefCheck");
+		Integer[] classIn = new Integer[]{128+classCounter-2,128+classCounter-1};
+		LinkedHashMap<String, Object> classRefCheck = makeClassRefCheck(check, classIn, 128+classCounter);
+		((ArrayList<Object>) classRefCheck.get("operands")).add(posgroup);
+		LinkedHashMap<String, Object> focusGroup = null;
+		if ((boolean) positionOptions.get("matchall") == true) {
+			focusGroup = makeResetReference();
+			((ArrayList<Object>) focusGroup.get("operands")).add(classRefCheck);
+		} else { // match only first argument
+			focusGroup = wrapInReference(classRefCheck, 128+classCounter-1);
+		}
+		putIntoSuperObject(focusGroup, 1);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void processOPPROX(Tree node) {
+		// collect info
+		Tree prox_opts = node.getChild(0);
+		Tree typ = prox_opts.getChild(0);
+		Tree dist_list = prox_opts.getChild(1);
+		// Step I: create group
+		LinkedHashMap<String, Object> group = makeGroup("sequence");
+
+		ArrayList<Object> constraints = new ArrayList<Object>();
+		boolean exclusion = typ.getChild(0).toStringTree().equals("EXCL");
+
+		boolean inOrder = false;
+		boolean invertedOperands = false;
+
+		group.put("inOrder", inOrder);
+		group.put("distances", constraints);
+
+		boolean putIntoOverlapDisjunction = false;
+
+		int min = 0, max = 0;
+		// possibly several distance constraints
+		for (int i = 0; i < dist_list.getChildCount(); i++) {
+			String direction = dist_list.getChild(i).getChild(0).getChild(0).toStringTree().toLowerCase();
+			String minStr = dist_list.getChild(i).getChild(1).getChild(0).toStringTree();
+			String maxStr = dist_list.getChild(i).getChild(1).getChild(1).toStringTree();
+			String meas = dist_list.getChild(i).getChild(2).getChild(0).toStringTree();
+			if (minStr.equals("VAL0")) {
+				minStr = "0";
+			}
+			min = Integer.parseInt(minStr);
+			max = Integer.parseInt(maxStr);
+			// If zero word-distance, wrap this sequence in a disjunction along with an overlap position
+			// between the two operands
+			/*   
+ 	XXX: This is currently deactivated. Uncomment to activate treatment of zero-word distances as overlap-alternatives
+ 			(see google doc on special distances serialization)
+
+            if (meas.equals("w") && min == 0) {
+            	min = 1;
+            	putIntoOverlapDisjunction = true;
+            }
+			 */
+			if (!meas.equals("w") && min == 0 ) {
+				processSpanDistance(meas,min,max);
+			}
+			LinkedHashMap<String, Object> distance = makeDistance(meas,min,max);
+			if (exclusion) {
+				distance.put("exclude", true);
+			}
+			//                if (! openNodeCats.get(1).equals("OPNHIT")) {
+			constraints.add(distance);
+			//                }
+			if (i==0) {
+				if (direction.equals("plus")) {
+					inOrder = true;
+				} else if (direction.equals("minus")) {
+					inOrder = true;
+					invertedOperands = true;
+				} else if (direction.equals("both")) {
+					inOrder = false;
+				}
+			}
+		}
+		group.put("inOrder", inOrder);
+		LinkedHashMap<String, Object> embeddedSequence = group;
+
+		if (! (openNodeCats.get(1).equals("OPBEG") || openNodeCats.get(1).equals("OPEND") || inOPALL || openNodeCats.get(1).equals("OPNHIT"))) {
+			wrapOperandInClass(node,1,classCounter);
+			wrapOperandInClass(node,2,classCounter);
+			group = wrapInReference(group, 128+classCounter++);
+		} else if (openNodeCats.get(1).equals("OPNHIT")) {
+			LinkedHashMap<String,Object> repetition = makeRepetition(min, max);
+			((ArrayList<Object>) repetition.get("operands")).add(makeToken());
+			// TODO go on with this: put the repetition into a class and put it in between the operands
+			// -> what if there's several distance constraints. with different keys, like /w4,s0? 
+		}
+
+		LinkedHashMap<String,Object> sequence = null;
+		if (putIntoOverlapDisjunction) {
+			sequence = embeddedSequence;
+			group = makeGroup("or");
+			ArrayList<Object> disjOperands = (ArrayList<Object>) group.get("operands");
+			String[] sharedClasses = new String[]{"intersects"};
+			LinkedHashMap<String,Object> overlapsGroup = makePosition(new String[0], sharedClasses);
+
+			ArrayList<Object> overlapsOperands = (ArrayList<Object>) overlapsGroup.get("operands");
+			// this ensures identity of the operands lists and thereby a distribution of the operands for both created objects 
+			sequence.put("operands", overlapsOperands);
+			if (invertedOperands) {
+				invertedOperandsLists.push(overlapsOperands);
+			}
+			disjOperands.add(overlapsGroup);
+			disjOperands.add(wrapInReference(sequence, 0));
+			// Step II: decide where to put
+			putIntoSuperObject(group, 0);
+			objectStack.push(sequence);
+		}
+		else {
+			if (invertedOperands) {
+				ArrayList<Object> operands = (ArrayList<Object>) embeddedSequence.get("operands");
+				invertedOperandsLists.push(operands);
+			}
+			// Step II: decide where to put
+			putIntoSuperObject(group, 0);
+			objectStack.push(embeddedSequence);
+		}
+		stackedObjects++;
+		visited.add(node.getChild(0));
+	}
+
+	private void processOPOR(Tree node) {
+		// Step I: create group
+		LinkedHashMap<String, Object> disjunction = new LinkedHashMap<String, Object>();
+		disjunction.put("@type", "korap:group");
+		disjunction.put("operation", "operation:or");
+		disjunction.put("operands", new ArrayList<Object>());
+		objectStack.push(disjunction);
+		stackedObjects++;
+		// Step II: decide where to put
+		putIntoSuperObject(disjunction, 1);
+	}
+
+	private void processOPAND_OPNOT(Tree node) {
+		// Step I: create group
+		String nodeCat = getNodeCat(node);
+		LinkedHashMap<String, Object> distgroup = new LinkedHashMap<String, Object>();
+		distgroup.put("@type", "korap:group");
+		distgroup.put("operation", "operation:sequence");
+		ArrayList<Object> distances = new ArrayList<Object>();
+		LinkedHashMap<String, Object> zerodistance = new LinkedHashMap<String, Object>();
+		zerodistance.put("@type", "cosmas:distance");
+		zerodistance.put("key", "t");
+		zerodistance.put("min", 0);
+		zerodistance.put("max", 0);
+		if (nodeCat.equals("OPNOT")) zerodistance.put("exclude", true);
+		distances.add(zerodistance);
+		distgroup.put("distances", distances);
+		distgroup.put("operands", new ArrayList<Object>());
+		objectStack.push(distgroup);
+		stackedObjects++;
+		// Step II: decide where to put
+		putIntoSuperObject(distgroup, 1);
+	}
+
+	private void processOPLABEL(Tree node) {
+		// Step I: create element
+		LinkedHashMap<String, Object> elem = new LinkedHashMap<String, Object>();
+		elem.put("@type", "korap:span");
+		elem.put("key", node.getChild(0).toStringTree().replaceAll("<|>", ""));
+		//Step II: decide where to put
+		putIntoSuperObject(elem);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void processOPELEM(Tree node) {
+		// Step I: create element
+		LinkedHashMap<String, Object> span = makeSpan();
+		if (node.getChild(0).toStringTree().equals("EMPTY")) {
+
+		} else {
+			int elname = 0;
+			Tree elnameNode = getFirstChildWithCat(node, "ELNAME");
+			if (elnameNode != null) {
+				span.put("key", elnameNode.getChild(0).toStringTree().toLowerCase());
+				elname = 1;
+			}
+			if (node.getChildCount() > elname) {
+				/*
+				 * Attributes can carry several values, like #ELEM(W ANA != 'N V'), 
+				 * denoting a word whose POS is neither N nor V.
+				 * When seeing this, create a sub-termGroup and put it into the top-level
+				 * term group, but only if there are other attributes in that group. If
+				 * not, put the several values as distinct attr-val-pairs into the
+				 * top-level group (in order to avoid a top-level group that only
+				 * contains a sub-group).
+				 */
+				LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
+				ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup.get("operands");
+				for (int i = elname; i < node.getChildCount(); i++) {
+					Tree attrNode = node.getChild(i);
+					if (attrNode.getChildCount() == 2) {
+						LinkedHashMap<String, Object> term = makeTerm();
+						termGroupOperands.add(term);
+						String layer = attrNode.getChild(0).toStringTree();
+						String[] splitted = layer.split("/");
+						if (splitted.length > 1) {
+							term.put("foundry", splitted[0]);
+							layer = splitted[1];
+						}
+						term.put("layer", translateMorph(layer));
+						term.put("key", attrNode.getChild(1).toStringTree());
+						String match = getNodeCat(attrNode).equals("EQ") ? "eq" : "ne";
+						term.put("match", "match:" + match);
+					} else {
+						LinkedHashMap<String, Object> subTermGroup = makeTermGroup("and");
+						ArrayList<Object> subTermGroupOperands = (ArrayList<Object>) subTermGroup.get("operands");
+						int j;
+						for (j = 1; j < attrNode.getChildCount(); j++) {
+							LinkedHashMap<String, Object> term = makeTerm();
+							String layer = attrNode.getChild(0).toStringTree();
+							String[] splitted = layer.split("/");
+							if (splitted.length > 1) {
+								term.put("foundry", splitted[0]);
+								layer = splitted[1];
+							}
+							term.put("layer", translateMorph(layer));
+							term.put("key", attrNode.getChild(j).toStringTree());
+							String match = getNodeCat(attrNode).equals("EQ") ? "eq" : "ne";
+							term.put("match", "match:" + match);
+							if (node.getChildCount() == elname + 1) {
+								termGroupOperands.add(term);
+							} else {
+								subTermGroupOperands.add(term);
+							}
+						}
+						if (node.getChildCount() > elname + 1) {
+							termGroupOperands.add(subTermGroup);
+						}
+					}
+					if (getNodeCat(attrNode).equals("NOTEQ")) negate = true;
+				}
+				// possibly only one term was present throughout all nodes: extract it from the group
+				if (termGroupOperands.size()==1) {
+					termGroup = (LinkedHashMap<String, Object>) termGroupOperands.get(0);
+				}
+				span.put("attr", termGroup);
+			}
+		}
+		//Step II: decide where to put
+		putIntoSuperObject(span);
+	}
+
+	private void processOPMORPH(Tree node) {
+		//Step I: get info
+		String[] morphterms = node.getChild(0).toStringTree().replace(" ", "").split("&");
+		LinkedHashMap<String, Object> token = makeToken();
+		ArrayList<Object> terms = new ArrayList<Object>();
+		LinkedHashMap<String, Object> fieldMap = null;
+		for (String morphterm : morphterms) {
+			// regex group #2 is foundry, #4 layer, #5 operator #6 key, #8 value
+			Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(\\w+)(:(\\w+))?");    
+			Matcher m = p.matcher(morphterm);										  
+			if (! m.matches()) {
+				addError(StatusCodes.UNKNOWN_QUERY_ERROR, "Something went wrong parsing the argument in MORPH().");
+				requestMap.put("query", new LinkedHashMap<String, Object>());
+				return;
+			}
+			
+			fieldMap = new LinkedHashMap<String, Object>();
+			fieldMap.put("@type", "korap:term");
+			
+			if (m.group(2) != null) fieldMap.put("foundry", m.group(2));
+			if (m.group(4) != null) fieldMap.put("layer", m.group(4));
+			if (m.group(5) != null) {
+				if ("!=".equals(m.group(5))) negate = !negate; 
+			}
+			if (m.group(6) != null) fieldMap.put("key", m.group(6));
+			if (m.group(8) != null) fieldMap.put("value", m.group(8));
+
+			// negate field (see above)
+			if (negate) {
+				fieldMap.put("match", "match:ne");
+			} else {
+				fieldMap.put("match", "match:eq");
+			}
+			terms.add(fieldMap);
+		}
+		if (morphterms.length == 1) {
+			token.put("wrap", fieldMap);
+		} else {
+			LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
+			termGroup.put("operands", terms);
+			token.put("wrap", termGroup);
+		}
+		//Step II: decide where to put
+		putIntoSuperObject(token, 0);
+		visited.add(node.getChild(0));
+	}
+
+	/**
+	 * Nodes introducing tokens. Process all in the same manner, except for the fieldMap entry
+	 * @param node
+	 */
+	private void processOPWF_OPLEM(Tree node) {
+		String nodeCat = getNodeCat(node);
+		//Step I: get info
+		LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
+		token.put("@type", "korap:token");
+		objectStack.push(token);
+		stackedObjects++;
+		LinkedHashMap<String, Object> fieldMap = new LinkedHashMap<String, Object>();
+		token.put("wrap", fieldMap);
+
+		fieldMap.put("@type", "korap:term");
+		// make category-specific fieldMap entry
+		String attr = nodeCat.equals("OPWF") ? "orth" : "lemma";
+		String value = node.getChild(0).toStringTree().replaceAll("\"", "");
+		// check for wildcard string
+		Pattern p = Pattern.compile("[+*?]");
+		Matcher m = p.matcher(value);
+		if (m.find()) fieldMap.put("type", "type:wildcard");
+
+		if (value.startsWith("$")) {
+			value = value.substring(1);
+			fieldMap.put("caseInsensitive", true);
+		}
+
+		fieldMap.put("key", value);
+		fieldMap.put("layer", attr);
+
+		// negate field (see above)
+		if (negate) {
+			fieldMap.put("match", "match:ne");
+		} else {
+			fieldMap.put("match", "match:eq");
+		}
+		//Step II: decide where to put
+		if (!hasChild(node, "TPOS")) {
+			putIntoSuperObject(token, 1);
+			visited.add(node.getChild(0));
+		} else {
+			// TODO
+		}
 	}
 
 	private void processSpanDistance(String meas, int min, int max) {

@@ -103,14 +103,13 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		} else {
 			throw new NullPointerException("Parser has not been instantiated!"); 
 		}
-		log.info("Processing Annis query.");
+		log.info("Processing Annis query: "+query);
 		if (tree != null) {
 			log.debug("ANTLR parse tree: "+tree.toStringTree(parser));
 			processNode(tree);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void processNode(ParseTree node) {
 		// Top-down processing
 		if (visited.contains(node)) return;
@@ -134,57 +133,15 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		 ****************************************************************
 		 */
 		if (nodeCat.equals("exprTop")) {
-			List<ParseTree> andTopExprs = getChildrenWithCat(node, "andTopExpr");
-			if (andTopExprs.size() > 1) {
-				LinkedHashMap<String, Object> topOr = makeGroup("or");
-				requestMap.put("query", topOr);
-				objectStack.push(topOr);
-			}
+			processExprTop(node);
 		}
 
 		if (nodeCat.equals("andTopExpr")) {
-			// Before processing any child expr node, check if it has one or more "*ary_linguistic_term" nodes.
-			// Those nodes may use references to earlier established operand nodes.
-			// Those operand nodes are not to be included into the query map individually but
-			// naturally as operands of the relations/groups introduced by the 
-			// *node. For that purpose, this section mines all used references
-			// and stores them in a list for later reference.
-			for (ParseTree exprNode : getChildrenWithCat(node,"expr")) {
-				// Pre-process any 'variableExpr' such that the variableReferences map can be filled
-				List<ParseTree> definitionNodes = new ArrayList<ParseTree>();
-				definitionNodes.addAll(getChildrenWithCat(exprNode, "variableExpr"));
-				for (ParseTree definitionNode : definitionNodes) {
-					processNode(definitionNode);
-				}
-				// Then, mine all relations between nodes
-				List<ParseTree> lingTermNodes = new ArrayList<ParseTree>();
-				lingTermNodes.addAll(getChildrenWithCat(exprNode, "n_ary_linguistic_term"));
-				globalLingTermNodes.addAll(lingTermNodes);
-				totalRelationCount  = globalLingTermNodes.size();
-				// Traverse refOrNode nodes under *ary_linguistic_term nodes and extract references
-				for (ParseTree lingTermNode : lingTermNodes) {
-					for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
-						String refOrNodeString = refOrNode.getChild(0).toStringTree(parser);
-						if (refOrNodeString.startsWith("#")) {
-							String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
-							if (nodeReferencesTotal.containsKey(ref)) {
-								nodeReferencesTotal.put(ref, nodeReferencesTotal.get(ref)+1);
-							} else {
-								nodeReferencesTotal.put(ref, 1);
-								nodeReferencesProcessed.put(ref, 0);
-							}
-						}
-					}
-				}
-			}
-			System.err.println(nodeVariables);
+			processAndTopExpr(node);
 		}
 
 		if (nodeCat.equals("unary_linguistic_term")) {
-			LinkedHashMap<String, Object> unaryOperator = parseUnaryOperator(node);
-			String reference = node.getChild(0).toStringTree(parser).substring(1);
-			LinkedHashMap<String, Object> object = nodeVariables.get(reference);
-			object.putAll(unaryOperator);
+			processUnary_linguistic_term(node);
 		}
 
 		if (nodeCat.equals("n_ary_linguistic_term")) {
@@ -222,7 +179,59 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 		openNodeCats.pop();
 	}
 
+	private void processAndTopExpr(ParseTree node) {
+		// Before processing any child expr node, check if it has one or more "*ary_linguistic_term" nodes.
+		// Those nodes may use references to earlier established operand nodes.
+		// Those operand nodes are not to be included into the query map individually but
+		// naturally as operands of the relations/groups introduced by the 
+		// *node. For that purpose, this section mines all used references
+		// and stores them in a list for later reference.
+		for (ParseTree exprNode : getChildrenWithCat(node,"expr")) {
+			// Pre-process any 'variableExpr' such that the variableReferences map can be filled
+			List<ParseTree> definitionNodes = new ArrayList<ParseTree>();
+			definitionNodes.addAll(getChildrenWithCat(exprNode, "variableExpr"));
+			for (ParseTree definitionNode : definitionNodes) {
+				processNode(definitionNode);
+			}
+			// Then, mine all relations between nodes
+			List<ParseTree> lingTermNodes = new ArrayList<ParseTree>();
+			lingTermNodes.addAll(getChildrenWithCat(exprNode, "n_ary_linguistic_term"));
+			globalLingTermNodes.addAll(lingTermNodes);
+			totalRelationCount  = globalLingTermNodes.size();
+			// Traverse refOrNode nodes under *ary_linguistic_term nodes and extract references
+			for (ParseTree lingTermNode : lingTermNodes) {
+				for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
+					String refOrNodeString = refOrNode.getChild(0).toStringTree(parser);
+					if (refOrNodeString.startsWith("#")) {
+						String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
+						if (nodeReferencesTotal.containsKey(ref)) {
+							nodeReferencesTotal.put(ref, nodeReferencesTotal.get(ref)+1);
+						} else {
+							nodeReferencesTotal.put(ref, 1);
+							nodeReferencesProcessed.put(ref, 0);
+						}
+					}
+				}
+			}
+		}
+		System.err.println(nodeVariables);
+	}
 
+	private void processUnary_linguistic_term(ParseTree node) {
+		LinkedHashMap<String, Object> unaryOperator = parseUnaryOperator(node);
+		String reference = node.getChild(0).toStringTree(parser).substring(1);
+		LinkedHashMap<String, Object> object = nodeVariables.get(reference);
+		object.putAll(unaryOperator);
+	}
+
+	private void processExprTop(ParseTree node) {
+		List<ParseTree> andTopExprs = getChildrenWithCat(node, "andTopExpr");
+		if (andTopExprs.size() > 1) {
+			LinkedHashMap<String, Object> topOr = makeGroup("or");
+			requestMap.put("query", topOr);
+			objectStack.push(topOr);
+		}
+	}
 
 	private LinkedHashMap<String, Object> processVariableExpr(ParseTree node) {
 		// simplex word or complex assignment (like qname = textSpec)?
@@ -260,6 +269,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 
 		if (node.getChildCount() == 3) {  			// (foundry/)?layer=key specification
 			if (object.get("@type").equals("korap:token")) {
+				@SuppressWarnings("unchecked")
 				HashMap<String, Object> term = (HashMap<String, Object>) object.get("wrap");
 				term.putAll(parseTextSpec(node.getChild(2)));
 				term.put("match", parseMatchOperator(getFirstChildWithCat(node, "eqOperator")));

@@ -60,7 +60,6 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 * @param node The currently processed node. The process(String query) method calls this method with the root.
 	 * @throws QueryException
 	 */
-	@SuppressWarnings("unchecked")
 	private void processNode(ParseTree node) throws QueryException {
 		// Top-down processing
 		if (visited.contains(node)) return;
@@ -85,330 +84,65 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		 ****************************************************************
 		 ****************************************************************
 		 */
-
+				
 		if (nodeCat.equals("segment")) {
-			// Cover possible quantification (i.e. repetition) of segment
-			ParseTree quantification = getFirstChildWithCat(node, "repetition");
-			if (quantification != null) {
-				LinkedHashMap<String,Object> quantGroup = makeGroup("repetition");
-				Integer[] minmax = parseRepetition(quantification);
-				quantGroup.put("boundary", makeBoundary(minmax[0], minmax[1]));
-				if (minmax[0] != null) quantGroup.put("min", minmax[0]);
-				if (minmax[1] != null) quantGroup.put("max", minmax[1]);
-				addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, "Deprecated 2014-07-24: 'min' and 'max' to be " +
-						"supported until 3 months from deprecation date.");
-				putIntoSuperObject(quantGroup);
-				objectStack.push(quantGroup);
-				stackedObjects++;
-			}
+			processSegment(node);
 		}
-
+		
 		if (nodeCat.equals("sequence")) {
-			LinkedHashMap<String,Object> sequence = makeGroup("sequence");
-			ParseTree distanceNode = getFirstChildWithCat(node, "distance");
-
-			if (distanceNode!=null) {
-				Integer[] minmax = parseDistance(distanceNode);
-				LinkedHashMap<String,Object> distance = makeDistance("w", minmax[0], minmax[1]);
-				sequence.put("inOrder", true);
-				ArrayList<Object> distances = new ArrayList<Object>();
-				distances.add(distance);
-				sequence.put("distances", distances);
-				visited.add(distanceNode.getChild(0)); // don't re-visit the emptyTokenSequence node
-			}
-			putIntoSuperObject(sequence);
-			objectStack.push(sequence);
-			stackedObjects++;
+			processSequence(node);
 		}
 
-		/*
-		 * empty tokens at beginning/end of sequence
-		 */
 		if (nodeCat.equals("emptyTokenSequence")) {
-			Integer[] minmax = parseEmptySegments(node);
-			// object will be either a repetition group or a single empty token
-			LinkedHashMap<String,Object> object; 
-			LinkedHashMap<String,Object> emptyToken = makeToken();
-			if (minmax[0] != 1 || minmax[1] == null || minmax[1] != 1) {
-				object = makeRepetition(minmax[0], minmax[1]);
-				((ArrayList<Object>) object.get("operands")).add(emptyToken);
-			} else {
-				object = emptyToken;
-			}
-			putIntoSuperObject(object);
-			objectStack.push(object);
-			stackedObjects++;
+			processEmptyTokenSequence(node);
 		}
 
 		if (nodeCat.equals("emptyTokenSequenceClass")) {
-			int classId = 1;
-			if (hasChild(node, "spanclass_id")) {
-				classId = Integer.parseInt(node.getChild(1).getChild(0).toStringTree(parser));
-			}
-			LinkedHashMap<String,Object> classGroup = makeSpanClass(classId, false);
-			putIntoSuperObject(classGroup);
-			objectStack.push(classGroup);
-			stackedObjects++;
+			processEmptyTokenSequenceClass(node);
 		}
 
-
 		if (nodeCat.equals("token")) {
-			LinkedHashMap<String,Object> token = makeToken();
-			// handle negation
-			List<ParseTree> negations = getChildrenWithCat(node, "!");
-			boolean negated = false;
-			boolean isRegex = false;
-			if (negations.size() % 2 == 1) negated = true;
-			if (getNodeCat(node.getChild(0)).equals("key")) {
-				// no 'term' child, but direct key specification: process here
-				LinkedHashMap<String,Object> term = makeTerm();
-
-				String key = node.getChild(0).getText();
-				if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
-					isRegex = true;
-					term.put("type", "type:regex");
-					key = key.substring(1,key.length()-1);
-				}
-				term.put("layer", "orth");
-				term.put("key", key);
-				String matches = negated ? "ne" : "eq";
-				term.put("match", "match:"+matches);
-				ParseTree flagNode = getFirstChildWithCat(node, "flag");
-				if (flagNode != null) {
-					// substring removes leading slash '/'
-					String flag = getNodeCat(flagNode.getChild(0)).substring(1);
-					if (flag.contains("i")) term.put("caseInsensitive", true);
-					else if (flag.contains("I")) term.put("caseInsensitive", false);
-					if (flag.contains("x")) {
-						term.put("type", "type:regex");
-						if (!isRegex) {
-							key = QueryUtils.escapeRegexSpecialChars(key); 
-						}
-						term.put("key", ".*?"+key+".*?"); // overwrite key
-					}
-				}
-				token.put("wrap", term);
-			} else {
-				// child is 'term' or 'termGroup' -> process in extra method 
-				LinkedHashMap<String,Object> termOrTermGroup = 
-						parseTermOrTermGroup(node.getChild(1), negated);
-				token.put("wrap", termOrTermGroup);
-			}
-			putIntoSuperObject(token);
-			visited.add(node.getChild(0));
-			visited.add(node.getChild(2));
+			processToken(node);
 		}
 
 		if (nodeCat.equals("alignment")) {
-			LinkedHashMap<String,Object> alignClass = makeSpanClass(++classCounter,false);
-			LinkedHashMap<String,Object> metaMap = (LinkedHashMap<String, Object>) requestMap.get("meta");
-			if (metaMap.containsKey("alignment")) {
-				ArrayList<Integer> alignedClasses = new ArrayList<Integer>();
-				try {
-					alignedClasses = (ArrayList<Integer>) metaMap.get("alignment"); 
-				} catch (ClassCastException cce) {
-					alignedClasses.add((Integer) metaMap.get("alignment"));
-				}
-				alignedClasses.add(classCounter);
-				metaMap.put("alignment", alignedClasses);
-			} else {
-				metaMap.put("alignment", classCounter);
-			}
-
-			putIntoSuperObject(alignClass);
-			objectStack.push(alignClass);
-			stackedObjects++;
+			processAlignment(node);
 		}
 
 		if (nodeCat.equals("span")) {
-			List<ParseTree> negations = getChildrenWithCat(node, "!");
-			boolean negated = false;
-			if (negations.size() % 2 == 1) negated = true;
-			LinkedHashMap<String,Object> span = makeSpan();
-			ParseTree keyNode = getFirstChildWithCat(node, "key");
-			ParseTree layerNode = getFirstChildWithCat(node, "layer");
-			ParseTree foundryNode = getFirstChildWithCat(node, "foundry");
-			ParseTree termOpNode = getFirstChildWithCat(node, "termOp");
-			ParseTree termNode = getFirstChildWithCat(node, "term");
-			ParseTree termGroupNode = getFirstChildWithCat(node, "termGroup");
-			if (foundryNode != null) span.put("foundry", foundryNode.getText());
-			if (layerNode != null) {
-				String layer = layerNode.getText();
-				if (layer.equals("base")) layer="lemma";
-				span.put("layer", layer);
-			}
-			span.put("key", keyNode.getText());
-			if (termOpNode != null) {
-				String termOp = termOpNode.getText();
-				if (termOp.equals("==")) span.put("match", "match:eq");
-				else if (termOp.equals("!=")) span.put("match", "match:ne");
-			}
-			if (termNode != null) {
-				LinkedHashMap<String,Object> termOrTermGroup = 
-						parseTermOrTermGroup(termNode, negated, "span");
-				span.put("attr", termOrTermGroup);
-			}
-			if (termGroupNode != null) {
-				LinkedHashMap<String,Object> termOrTermGroup = 
-						parseTermOrTermGroup(termGroupNode, negated, "span");
-				span.put("attr", termOrTermGroup);
-			}
-			putIntoSuperObject(span);
-			objectStack.push(span);
-			stackedObjects++;
+			processSpan(node);
 		}
 
 		if (nodeCat.equals("disjunction")) {
-			LinkedHashMap<String,Object> disjunction = makeGroup("or");
-			putIntoSuperObject(disjunction);
-			objectStack.push(disjunction);
-			stackedObjects++;
+			processDisjunction(node);
 		}
 
 		if (nodeCat.equals("position")) {
-			LinkedHashMap<String,Object> position = parseFrame(node.getChild(0));
-			putIntoSuperObject(position);
-			objectStack.push(position);
-			stackedObjects++;
+			processPosition(node);
 		}
 
 		if (nodeCat.equals("relation")) {
-			LinkedHashMap<String, Object> relationGroup = makeGroup("relation");
-			LinkedHashMap<String, Object> relation = makeRelation();
-			relationGroup.put("relation", relation);
-			if (node.getChild(0).getText().equals("dominates")) {
-				relation.put("layer", "c");
-			}
-			ParseTree relSpec = getFirstChildWithCat(node, "relSpec");
-			ParseTree repetition = getFirstChildWithCat(node, "repetition");
-			if (relSpec != null) {
-				ParseTree foundry = getFirstChildWithCat(relSpec, "foundry");
-				ParseTree layer = getFirstChildWithCat(relSpec, "layer");
-				ParseTree key = getFirstChildWithCat(relSpec, "key");
-				if (foundry != null) relation.put("foundry", foundry.getText());
-				if (layer != null) relation.put("layer", layer.getText());
-				if (key != null) relation.put("key", key.getText());
-			}
-			if (repetition != null) {
-				Integer[] minmax =  parseRepetition(repetition);
-				relation.put("boundary", makeBoundary(minmax[0], minmax[1]));
-			}
-			putIntoSuperObject(relationGroup);
-			objectStack.push(relationGroup);
-			stackedObjects++;
+			processRelation(node);
 		}
 
 		if (nodeCat.equals("spanclass")) {
-			// Step I: get info
-			int classId = 1;
-			if (getNodeCat(node.getChild(1)).equals("spanclass_id")) {
-				String ref = node.getChild(1).getChild(0).toStringTree(parser);
-				try {
-					classId = Integer.parseInt(ref);
-				} catch (NumberFormatException e) {
-					String msg = "The specified class reference in the " +
-							"focus/split-Operator is not a number: " + ref;
-					log.error(msg);
-					throw new QueryException(msg);
-				}
-				// only allow class id up to 127
-				if (classId > 127) {
-					addWarning("Only class IDs up to 127 are allowed. Your class "+classId+" has been set back to 127. "
-							+ "Check for possible conflict with other classes.");
-					classId = 127;
-				}
-			}
-			LinkedHashMap<String, Object> classGroup = makeSpanClass(classId, false);
-			putIntoSuperObject(classGroup);
-			objectStack.push(classGroup);
-			stackedObjects++;
+			processSpanclass(node);
 		}
 
 		if (nodeCat.equals("matching")) {
-			// Step I: get info
-			ArrayList<Integer> classRefs = new ArrayList<Integer>();
-			String classRefOp = null;
-			if (getNodeCat(node.getChild(2)).equals("spanclass_id")) {
-				ParseTree spanNode = node.getChild(2);
-				for (int i = 0; i < spanNode.getChildCount() - 1; i++) {
-					String ref = spanNode.getChild(i).getText();
-					if (ref.equals("|") || ref.equals("&")) {
-						classRefOp = ref.equals("|") ? "intersection" : "union";
-					} else {
-						try {
-							int classRef = Integer.parseInt(ref);
-							// only allow class id up to 127
-							if (classRef > 127) {
-								addWarning("Only class references up to 127 are allowed. Your reference to class "+classRef+" has been set back to 127. "
-										+ "Check for possible conflict with other classes.");
-								classRef = 127;
-							}
-							classRefs.add(classRef);
-						} catch (NumberFormatException e) {
-							String err = "The specified class reference in the " +
-									"shrink/split-Operator is not a number.";
-							addError(StatusCodes.UNDEFINED_CLASS_REFERENCE, err);
-						}
-					}
-				}
-			} else {
-				classRefs.add(1);
-			}
-			LinkedHashMap<String, Object> referenceGroup = makeReference(classRefs);
-
-			String type = node.getChild(0).toStringTree(parser);
-			// Default is focus(), if deviating catch here
-			if (type.equals("split")) referenceGroup.put("operation", "operation:split");
-			if (type.equals("submatch") || type.equals("shrink")) {
-				String warning = "Deprecated 2014-07-24: "+type + "() as a match reducer " +
-						"to a specific class is deprecated in favor of focus() and will " +
-						"only be supported for 3 months after deprecation date.";
-				addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, warning);
-			}
-			if (classRefOp != null) {
-				referenceGroup.put("classRefOp", "classRefOp:" + classRefOp);
-			}
-			ArrayList<Object> referenceOperands = new ArrayList<Object>();
-			referenceGroup.put("operands", referenceOperands);
-			// Step II: decide where to put the group
-			putIntoSuperObject(referenceGroup);
-			objectStack.push(referenceGroup);
-			stackedObjects++;
-			visited.add(node.getChild(0));
+			processMatching(node);
 		}
 
 		if (nodeCat.equals("submatch")) {
-			LinkedHashMap<String,Object> submatch = makeReference(null);
-			submatch.put("operands", new ArrayList<Object>());
-			ParseTree startpos = getFirstChildWithCat(node,"startpos");
-			ParseTree length = getFirstChildWithCat(node,"length");
-			ArrayList<Integer> spanRef = new ArrayList<Integer>();
-			spanRef.add(Integer.parseInt(startpos.getText()));
-			if (length != null) {
-				spanRef.add(Integer.parseInt(length.getText()));
-			}
-			submatch.put("spanRef", spanRef);
-			putIntoSuperObject(submatch);
-			objectStack.push(submatch);
-			stackedObjects++;
-			visited.add(node.getChild(0));
+			processSubmatch(node);
 		}
 
 		if (nodeCat.equals("meta")) {
-			LinkedHashMap<String, Object> metaFilter = new LinkedHashMap<String, Object>();
-			requestMap.put("meta", metaFilter);
-			metaFilter.put("@type", "korap:meta");
+			processMeta(node);
 		}
 
 		if (nodeCat.equals("within") && !getNodeCat(node.getParent()).equals("position")) {
-			ParseTree domainNode = node.getChild(2);
-			String domain = getNodeCat(domainNode);
-			LinkedHashMap<String, Object> curObject = 
-					(LinkedHashMap<String, Object>) objectStack.getFirst();
-			curObject.put("within", domain);
-			visited.add(node.getChild(0));
-			visited.add(node.getChild(1));
-			visited.add(domainNode);
+			processWithin(node);
 		}
 
 		objectsToPop.push(stackedObjects);
@@ -431,6 +165,343 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 		}
 		objectsToPop.pop();
 		openNodeCats.pop();
+	}
+
+	private void processSegment(ParseTree node) {
+		// Cover possible quantification (i.e. repetition) of segment
+		ParseTree quantification = getFirstChildWithCat(node, "repetition");
+		if (quantification != null) {
+			LinkedHashMap<String,Object> quantGroup = makeGroup("repetition");
+			Integer[] minmax = parseRepetition(quantification);
+			quantGroup.put("boundary", makeBoundary(minmax[0], minmax[1]));
+			if (minmax[0] != null) quantGroup.put("min", minmax[0]);
+			if (minmax[1] != null) quantGroup.put("max", minmax[1]);
+			addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, "Deprecated 2014-07-24: 'min' and 'max' to be " +
+					"supported until 3 months from deprecation date.");
+			putIntoSuperObject(quantGroup);
+			objectStack.push(quantGroup);
+			stackedObjects++;
+		}
+	}
+
+	private void processSequence(ParseTree node) {
+		LinkedHashMap<String,Object> sequence = makeGroup("sequence");
+		ParseTree distanceNode = getFirstChildWithCat(node, "distance");
+
+		if (distanceNode!=null) {
+			Integer[] minmax = parseDistance(distanceNode);
+			LinkedHashMap<String,Object> distance = makeDistance("w", minmax[0], minmax[1]);
+			sequence.put("inOrder", true);
+			ArrayList<Object> distances = new ArrayList<Object>();
+			distances.add(distance);
+			sequence.put("distances", distances);
+			visited.add(distanceNode.getChild(0)); // don't re-visit the emptyTokenSequence node
+		}
+		putIntoSuperObject(sequence);
+		objectStack.push(sequence);
+		stackedObjects++;
+	}
+
+	@SuppressWarnings("unchecked")
+	/**
+	 * empty tokens at beginning/end of sequence
+	 * @param node
+	 */
+	private void processEmptyTokenSequence(ParseTree node) {
+		Integer[] minmax = parseEmptySegments(node);
+		// object will be either a repetition group or a single empty token
+		LinkedHashMap<String,Object> object; 
+		LinkedHashMap<String,Object> emptyToken = makeToken();
+		if (minmax[0] != 1 || minmax[1] == null || minmax[1] != 1) {
+			object = makeRepetition(minmax[0], minmax[1]);
+			((ArrayList<Object>) object.get("operands")).add(emptyToken);
+		} else {
+			object = emptyToken;
+		}
+		putIntoSuperObject(object);
+		objectStack.push(object);
+		stackedObjects++;
+	}
+
+	private void processEmptyTokenSequenceClass(ParseTree node) {
+		int classId = 1;
+		if (hasChild(node, "spanclass_id")) {
+			classId = Integer.parseInt(node.getChild(1).getChild(0).toStringTree(parser));
+		}
+		LinkedHashMap<String,Object> classGroup = makeSpanClass(classId, false);
+		putIntoSuperObject(classGroup);
+		objectStack.push(classGroup);
+		stackedObjects++;
+	}
+
+	private void processToken(ParseTree node) {
+		LinkedHashMap<String,Object> token = makeToken();
+		// handle negation
+		List<ParseTree> negations = getChildrenWithCat(node, "!");
+		boolean negated = false;
+		boolean isRegex = false;
+		if (negations.size() % 2 == 1) negated = true;
+		if (getNodeCat(node.getChild(0)).equals("key")) {
+			// no 'term' child, but direct key specification: process here
+			LinkedHashMap<String,Object> term = makeTerm();
+
+			String key = node.getChild(0).getText();
+			if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
+				isRegex = true;
+				term.put("type", "type:regex");
+				key = key.substring(1,key.length()-1);
+			}
+			term.put("layer", "orth");
+			term.put("key", key);
+			String matches = negated ? "ne" : "eq";
+			term.put("match", "match:"+matches);
+			ParseTree flagNode = getFirstChildWithCat(node, "flag");
+			if (flagNode != null) {
+				// substring removes leading slash '/'
+				String flag = getNodeCat(flagNode.getChild(0)).substring(1);
+				if (flag.contains("i")) term.put("caseInsensitive", true);
+				else if (flag.contains("I")) term.put("caseInsensitive", false);
+				if (flag.contains("x")) {
+					term.put("type", "type:regex");
+					if (!isRegex) {
+						key = QueryUtils.escapeRegexSpecialChars(key); 
+					}
+					term.put("key", ".*?"+key+".*?"); // overwrite key
+				}
+			}
+			token.put("wrap", term);
+		} else {
+			// child is 'term' or 'termGroup' -> process in extra method 
+			LinkedHashMap<String,Object> termOrTermGroup = 
+					parseTermOrTermGroup(node.getChild(1), negated);
+			token.put("wrap", termOrTermGroup);
+		}
+		putIntoSuperObject(token);
+		visited.add(node.getChild(0));
+		visited.add(node.getChild(2));
+	}
+	
+
+	@SuppressWarnings("unchecked")
+	private void processAlignment(ParseTree node) {
+		LinkedHashMap<String,Object> alignClass = makeSpanClass(++classCounter,false);
+		LinkedHashMap<String,Object> metaMap = (LinkedHashMap<String, Object>) requestMap.get("meta");
+		if (metaMap.containsKey("alignment")) {
+			ArrayList<Integer> alignedClasses = new ArrayList<Integer>();
+			try {
+				alignedClasses = (ArrayList<Integer>) metaMap.get("alignment"); 
+			} catch (ClassCastException cce) {
+				alignedClasses.add((Integer) metaMap.get("alignment"));
+			}
+			alignedClasses.add(classCounter);
+			metaMap.put("alignment", alignedClasses);
+		} else {
+			metaMap.put("alignment", classCounter);
+		}
+
+		putIntoSuperObject(alignClass);
+		objectStack.push(alignClass);
+		stackedObjects++;
+	}
+
+	private void processSpan(ParseTree node) {
+		List<ParseTree> negations = getChildrenWithCat(node, "!");
+		boolean negated = false;
+		if (negations.size() % 2 == 1) negated = true;
+		LinkedHashMap<String,Object> span = makeSpan();
+		ParseTree keyNode = getFirstChildWithCat(node, "key");
+		ParseTree layerNode = getFirstChildWithCat(node, "layer");
+		ParseTree foundryNode = getFirstChildWithCat(node, "foundry");
+		ParseTree termOpNode = getFirstChildWithCat(node, "termOp");
+		ParseTree termNode = getFirstChildWithCat(node, "term");
+		ParseTree termGroupNode = getFirstChildWithCat(node, "termGroup");
+		if (foundryNode != null) span.put("foundry", foundryNode.getText());
+		if (layerNode != null) {
+			String layer = layerNode.getText();
+			if (layer.equals("base")) layer="lemma";
+			span.put("layer", layer);
+		}
+		span.put("key", keyNode.getText());
+		if (termOpNode != null) {
+			String termOp = termOpNode.getText();
+			if (termOp.equals("==")) span.put("match", "match:eq");
+			else if (termOp.equals("!=")) span.put("match", "match:ne");
+		}
+		if (termNode != null) {
+			LinkedHashMap<String,Object> termOrTermGroup = 
+					parseTermOrTermGroup(termNode, negated, "span");
+			span.put("attr", termOrTermGroup);
+		}
+		if (termGroupNode != null) {
+			LinkedHashMap<String,Object> termOrTermGroup = 
+					parseTermOrTermGroup(termGroupNode, negated, "span");
+			span.put("attr", termOrTermGroup);
+		}
+		putIntoSuperObject(span);
+		objectStack.push(span);
+		stackedObjects++;
+	}
+
+	private void processDisjunction(ParseTree node) {
+		LinkedHashMap<String,Object> disjunction = makeGroup("or");
+		putIntoSuperObject(disjunction);
+		objectStack.push(disjunction);
+		stackedObjects++;
+	}
+
+	private void processPosition(ParseTree node) {
+		LinkedHashMap<String,Object> position = parseFrame(node.getChild(0));
+		putIntoSuperObject(position);
+		objectStack.push(position);
+		stackedObjects++;
+	}
+
+	private void processRelation(ParseTree node) {
+		LinkedHashMap<String, Object> relationGroup = makeGroup("relation");
+		LinkedHashMap<String, Object> relation = makeRelation();
+		relationGroup.put("relation", relation);
+		if (node.getChild(0).getText().equals("dominates")) {
+			relation.put("layer", "c");
+		}
+		ParseTree relSpec = getFirstChildWithCat(node, "relSpec");
+		ParseTree repetition = getFirstChildWithCat(node, "repetition");
+		if (relSpec != null) {
+			ParseTree foundry = getFirstChildWithCat(relSpec, "foundry");
+			ParseTree layer = getFirstChildWithCat(relSpec, "layer");
+			ParseTree key = getFirstChildWithCat(relSpec, "key");
+			if (foundry != null) relation.put("foundry", foundry.getText());
+			if (layer != null) relation.put("layer", layer.getText());
+			if (key != null) relation.put("key", key.getText());
+		}
+		if (repetition != null) {
+			Integer[] minmax =  parseRepetition(repetition);
+			relation.put("boundary", makeBoundary(minmax[0], minmax[1]));
+		}
+		putIntoSuperObject(relationGroup);
+		objectStack.push(relationGroup);
+		stackedObjects++;
+	}
+
+	private void processSpanclass(ParseTree node) {
+		// Step I: get info
+		int classId = 1;
+		if (getNodeCat(node.getChild(1)).equals("spanclass_id")) {
+			String ref = node.getChild(1).getChild(0).toStringTree(parser);
+			try {
+				classId = Integer.parseInt(ref);
+			} catch (NumberFormatException e) {
+				String msg = "The specified class reference in the " +
+						"focus/split-Operator is not a number: " + ref;
+				log.error(msg);
+				addError(StatusCodes.UNDEFINED_CLASS_REFERENCE, msg);
+			}
+			// only allow class id up to 127
+			if (classId > 127) {
+				addWarning("Only class IDs up to 127 are allowed. Your class "+classId+" has been set back to 127. "
+						+ "Check for possible conflict with other classes.");
+				classId = 127;
+			}
+		}
+		LinkedHashMap<String, Object> classGroup = makeSpanClass(classId, false);
+		putIntoSuperObject(classGroup);
+		objectStack.push(classGroup);
+		stackedObjects++;
+		
+	}
+
+	private void processMatching(ParseTree node) {
+		// Step I: get info
+		ArrayList<Integer> classRefs = new ArrayList<Integer>();
+		String classRefOp = null;
+		if (getNodeCat(node.getChild(2)).equals("spanclass_id")) {
+			ParseTree spanNode = node.getChild(2);
+			for (int i = 0; i < spanNode.getChildCount() - 1; i++) {
+				String ref = spanNode.getChild(i).getText();
+				if (ref.equals("|") || ref.equals("&")) {
+					classRefOp = ref.equals("|") ? "intersection" : "union";
+				} else {
+					try {
+						int classRef = Integer.parseInt(ref);
+						// only allow class id up to 127
+						if (classRef > 127) {
+							addWarning("Only class references up to 127 are allowed. Your reference to class "+classRef+" has been set back to 127. "
+									+ "Check for possible conflict with other classes.");
+							classRef = 127;
+						}
+						classRefs.add(classRef);
+					} catch (NumberFormatException e) {
+						String err = "The specified class reference in the " +
+								"shrink/split-Operator is not a number.";
+						addError(StatusCodes.UNDEFINED_CLASS_REFERENCE, err);
+					}
+				}
+			}
+		} else {
+			classRefs.add(1);
+		}
+		LinkedHashMap<String, Object> referenceGroup = makeReference(classRefs);
+
+		String type = node.getChild(0).toStringTree(parser);
+		// Default is focus(), if deviating catch here
+		if (type.equals("split")) referenceGroup.put("operation", "operation:split");
+		if (type.equals("submatch") || type.equals("shrink")) {
+			String warning = "Deprecated 2014-07-24: "+type + "() as a match reducer " +
+					"to a specific class is deprecated in favor of focus() and will " +
+					"only be supported for 3 months after deprecation date.";
+			addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, warning);
+		}
+		if (classRefOp != null) {
+			referenceGroup.put("classRefOp", "classRefOp:" + classRefOp);
+		}
+		ArrayList<Object> referenceOperands = new ArrayList<Object>();
+		referenceGroup.put("operands", referenceOperands);
+		// Step II: decide where to put the group
+		putIntoSuperObject(referenceGroup);
+		objectStack.push(referenceGroup);
+		stackedObjects++;
+		visited.add(node.getChild(0));
+	}
+
+	private void processSubmatch(ParseTree node) {
+		LinkedHashMap<String,Object> submatch = makeReference(null);
+		submatch.put("operands", new ArrayList<Object>());
+		ParseTree startpos = getFirstChildWithCat(node,"startpos");
+		ParseTree length = getFirstChildWithCat(node,"length");
+		ArrayList<Integer> spanRef = new ArrayList<Integer>();
+		spanRef.add(Integer.parseInt(startpos.getText()));
+		if (length != null) {
+			spanRef.add(Integer.parseInt(length.getText()));
+		}
+		submatch.put("spanRef", spanRef);
+		putIntoSuperObject(submatch);
+		objectStack.push(submatch);
+		stackedObjects++;
+		visited.add(node.getChild(0));
+	}
+
+	/**
+	 * Creates meta field in requestMap, later filled by terms
+	 * @param node
+	 */
+	private void processMeta(ParseTree node) {
+		LinkedHashMap<String, Object> metaFilter = new LinkedHashMap<String, Object>();
+		requestMap.put("meta", metaFilter);
+		metaFilter.put("@type", "korap:meta");
+	}
+
+	/**
+	 * NB: requires that parent is not 'position'!
+	 * @param node
+	 */
+	private void processWithin(ParseTree node) {
+		ParseTree domainNode = node.getChild(2);
+		String domain = getNodeCat(domainNode);
+		LinkedHashMap<String, Object> curObject = 
+				(LinkedHashMap<String, Object>) objectStack.getFirst();
+		curObject.put("within", domain);
+		visited.add(node.getChild(0));
+		visited.add(node.getChild(1));
+		visited.add(domainNode);
 	}
 
 	/**
@@ -521,7 +592,8 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 */
 	@SuppressWarnings("unchecked")
 	private LinkedHashMap<String, Object> parseTermOrTermGroup(ParseTree node, boolean negatedGlobal, String mode) {
-		if (getNodeCat(node).equals("term")) {
+		String nodeCat = getNodeCat(node);
+		if (nodeCat.equals("term")) {
 			String key = null;
 			LinkedHashMap<String,Object> term = makeTerm();
 			// handle negation
@@ -577,7 +649,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 				}
 			}
 			return term;
-		} else {
+		} else if (nodeCat.equals("termGroup")) {
 			// For termGroups, establish a boolean relation between operands and recursively call this function with
 			// the term or termGroup operands
 			LinkedHashMap<String,Object> termGroup = null;
@@ -598,6 +670,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 			operands.add(parseTermOrTermGroup(rightOp, negatedGlobal, mode));
 			return termGroup;
 		}
+		return null;
 	}
 
 	/**
