@@ -1,7 +1,7 @@
 package de.ids_mannheim.korap.query.serialize;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.query.serialize.util.QueryException;
 import de.ids_mannheim.korap.utils.JsonUtils;
 
 import java.io.IOException;

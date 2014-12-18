@@ -15,9 +15,9 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import de.ids_mannheim.korap.query.annis.AqlLexer;
-import de.ids_mannheim.korap.query.annis.AqlParser;
-import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.query.parse.annis.AqlLexer;
+import de.ids_mannheim.korap.query.parse.annis.AqlParser;
+import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 /**
  * Map representation of syntax tree as returned by ANTLR

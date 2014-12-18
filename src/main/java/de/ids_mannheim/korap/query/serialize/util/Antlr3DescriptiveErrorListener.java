@@ -5,7 +5,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.ids_mannheim.korap.query.cosmas2.IErrorReporter;
+import de.ids_mannheim.korap.query.parse.cosmas.IErrorReporter;
 import de.ids_mannheim.korap.query.serialize.QueryUtils;
 
 /**

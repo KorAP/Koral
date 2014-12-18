@@ -8,11 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 public abstract class AbstractSyntaxTree {
 	

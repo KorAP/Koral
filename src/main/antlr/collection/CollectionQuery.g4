@@ -1,6 +1,6 @@
 grammar CollectionQuery;
 
-@header {package de.ids_mannheim.korap.query.serialize.util;}
+@header {package de.ids_mannheim.korap.query.parse.collection;}
 
 /*
  -- author: jbingel

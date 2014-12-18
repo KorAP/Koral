@@ -12,7 +12,7 @@ import com.google.common.collect.Lists;
 
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
-import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 /**
  * Tests for JSON-LD serialization of PoliqarpPlus queries. 

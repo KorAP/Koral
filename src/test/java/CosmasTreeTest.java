@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
-import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

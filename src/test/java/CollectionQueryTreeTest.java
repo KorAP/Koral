@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
-import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 import org.junit.Test;
 
@@ -108,7 +108,7 @@ public class CollectionQueryTreeTest {
 		assertEquals("2014",			res.at("/collection/operands/1/value").asText());
 		assertEquals(true,				res.at("/collection/operands/1/type").isMissingNode());
 		assertEquals("match:eq",		res.at("/collection/operands/1/match").asText());
-		assertEquals("",				res.at("/warnings/0/"));	
+		assertTrue(res.at("/warnings/0/0").asText().startsWith("The collection query contains a value that looks like a date"));
 	}
 
 	@Test

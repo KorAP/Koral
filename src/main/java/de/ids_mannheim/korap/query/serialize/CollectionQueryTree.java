@@ -1,10 +1,10 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import de.ids_mannheim.korap.query.parse.collection.CollectionQueryLexer;
+import de.ids_mannheim.korap.query.parse.collection.CollectionQueryParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
-import de.ids_mannheim.korap.query.serialize.util.CollectionQueryLexer;
-import de.ids_mannheim.korap.query.serialize.util.CollectionQueryParser;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;

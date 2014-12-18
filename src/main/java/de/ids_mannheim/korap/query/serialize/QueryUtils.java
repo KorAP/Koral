@@ -1,9 +1,5 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import de.ids_mannheim.korap.util.QueryException;
-
-import org.apache.commons.lang.StringUtils;
-
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +7,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Matcher;

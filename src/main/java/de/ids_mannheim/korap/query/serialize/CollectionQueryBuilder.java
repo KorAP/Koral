@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
+
 import de.ids_mannheim.korap.resource.Relation;
 import de.ids_mannheim.korap.utils.JsonUtils;
 

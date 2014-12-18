@@ -98,39 +98,39 @@ public class MetaQuerySerializationTest {
         System.out.println("THE RESULTING QUERY: " + s.toJSON());
     }
 
-    //    @Test
-    public void testGenerator() throws QueryException {
-         /*
-         * just for testing...
-		 */
-        QuerySerializer jg = new QuerySerializer();
-        int i = 0;
-        String[] queries;
-        queries = new String[]{
-                "shrink({[base=foo]})",
-                "shrink({[base=foo]}[orth=bar])",
-                "shrink(1:[base=Der]{1:[base=Mann]})",
-        };
-
-        for (String q : queries) {
-            i++;
-            try {
-                System.out.println(q);
-                jg.run(q, "poliqarp", System.getProperty("user.home") + "/bsp" + i + ".json");
-                System.out.println();
-            } catch (NullPointerException npe) {
-                npe.printStackTrace();
-                System.out.println("null\n");
-                System.out.println();
-            } catch (JsonGenerationException e) {
-                e.printStackTrace();
-            } catch (JsonMappingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    //    @Test
+//    public void testGenerator() throws QueryException {
+//         /*
+//         * just for testing...
+//		 */
+//        QuerySerializer jg = new QuerySerializer();
+//        int i = 0;
+//        String[] queries;
+//        queries = new String[]{
+//                "shrink({[base=foo]})",
+//                "shrink({[base=foo]}[orth=bar])",
+//                "shrink(1:[base=Der]{1:[base=Mann]})",
+//        };
+//
+//        for (String q : queries) {
+//            i++;
+//            try {
+//                System.out.println(q);
+//                jg.run(q, "poliqarp", System.getProperty("user.home") + "/bsp" + i + ".json");
+//                System.out.println();
+//            } catch (NullPointerException npe) {
+//                npe.printStackTrace();
+//                System.out.println("null\n");
+//                System.out.println();
+//            } catch (JsonGenerationException e) {
+//                e.printStackTrace();
+//            } catch (JsonMappingException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     @Test
     public void testLists() {

@@ -1,11 +1,11 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import de.ids_mannheim.korap.query.cosmas2.c2psLexer;
-import de.ids_mannheim.korap.query.cosmas2.c2psParser;
+import de.ids_mannheim.korap.query.parse.cosmas.c2psLexer;
+import de.ids_mannheim.korap.query.parse.cosmas.c2psParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.RecognitionException;

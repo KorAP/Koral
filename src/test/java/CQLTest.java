@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.CQLTree;
 import de.ids_mannheim.korap.query.serialize.CosmasTree;
-import de.ids_mannheim.korap.util.QueryException;
+import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 
 public class CQLTest {
