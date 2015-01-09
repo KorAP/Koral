@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-public abstract class Antlr4AbstractSyntaxTree extends AbstractSyntaxTree {
+public abstract class Antlr4AbstractQueryProcessor extends AbstractQueryProcessor {
 
 	/**
 	 * Parser object deriving the ANTLR parse tree.

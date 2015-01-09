@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import org.antlr.runtime.Parser;
 import org.antlr.runtime.tree.Tree;
 
-public abstract class Antlr3AbstractSyntaxTree extends AbstractSyntaxTree {
+public abstract class Antlr3AbstractQueryProcessor extends AbstractQueryProcessor {
 	
 	public Parser parser;
 

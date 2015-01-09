@@ -12,7 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class CollectionQueryTreeTest {
+public class CollectionQueryProcessorTest {
 
 	String query = "foo";
 	String ql = "poliqarpplus";

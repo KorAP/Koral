@@ -143,7 +143,7 @@ fragment MORPHEXPR
 	;
 	
 OP_MORPH:	'MORPH(' 
-				MORPHEXPR (' '* '&' ' '* MORPHEXPR)* 
+				MORPHEXPR (' '* '&' ' '* MORPHEXPR)* ' '* 
 			')' ;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

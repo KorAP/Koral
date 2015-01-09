@@ -68,7 +68,7 @@ public class CollectionQueryBuilder3 {
         if (!this.rq.isEmpty())
             list.addAll(this.rq);
         System.out.println("RAW QUERY " + this.builder.toString());
-        CollectionQueryTree tree = new CollectionQueryTree(this.verbose);
+        CollectionQueryProcessor tree = new CollectionQueryProcessor(this.verbose);
         tree.process(this.builder.toString());
         list.add(tree.getRequestMap());
         return list;

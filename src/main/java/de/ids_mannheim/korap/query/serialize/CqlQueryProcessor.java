@@ -13,7 +13,7 @@ import java.util.Map;
  * @author margaretha
  * @date 	09.05.14
  */
-public class CQLTree extends AbstractSyntaxTree {
+public class CqlQueryProcessor extends AbstractQueryProcessor {
 
     private static final String VERSION_1_1 = "1.1";
     private static final String VERSION_1_2 = "1.2";
@@ -31,15 +31,15 @@ public class CQLTree extends AbstractSyntaxTree {
     private String version;
     private boolean isCaseSensitive; // default true
     
-    public CQLTree(String query) throws QueryException {
+    public CqlQueryProcessor(String query) throws QueryException {
         this(query, VERSION_1_2, true);
     }
 
-    public CQLTree(String query, String version) throws QueryException {
+    public CqlQueryProcessor(String query, String version) throws QueryException {
         this(query, version, true);                
     }
 
-    public CQLTree(String query, String version, boolean isCaseSensitive) throws QueryException {
+    public CqlQueryProcessor(String query, String version, boolean isCaseSensitive) throws QueryException {
         this.version = version;
         this.isCaseSensitive = isCaseSensitive;
         this.requestMap = new LinkedHashMap<>();

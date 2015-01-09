@@ -19,9 +19,9 @@ import java.util.*;
  *
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  */
-public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
+public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
-	private static Logger log = LoggerFactory.getLogger(PoliqarpPlusTree.class);
+	private static Logger log = LoggerFactory.getLogger(PoliqarpPlusQueryProcessor.class);
 	private int classCounter = 128;
 
 	/**
@@ -33,7 +33,7 @@ public class PoliqarpPlusTree extends Antlr4AbstractSyntaxTree {
 	 * @param query The syntax tree as returned by ANTLR
 	 * @throws QueryException
 	 */
-	public PoliqarpPlusTree(String query) throws QueryException {
+	public PoliqarpPlusQueryProcessor(String query) throws QueryException {
 		process(query);
 		log.info(">>> " + requestMap.get("query") + " <<<");
 	}

@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
-public abstract class AbstractSyntaxTree {
+public abstract class AbstractQueryProcessor {
 	
 	public abstract void process(String query) throws QueryException;
 	
@@ -55,7 +55,7 @@ public abstract class AbstractSyntaxTree {
 	private ArrayList<List<Object>> messages = new ArrayList<List<Object>>();
 	LinkedHashMap<String, Object> collection = new LinkedHashMap<String,Object>();
 	
-	AbstractSyntaxTree() {
+	AbstractQueryProcessor() {
 		requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld");
 		requestMap.put("errors", errors);
 		requestMap.put("warnings", warnings);

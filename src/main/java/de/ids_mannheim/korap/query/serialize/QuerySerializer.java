@@ -25,21 +25,21 @@ public class QuerySerializer {
 		POLIQARPPLUS, ANNIS, COSMAS2, CQL, CQP
 	}
 	
-	static HashMap<String, Class<? extends AbstractSyntaxTree>> qlProcessorAssignment;
+	static HashMap<String, Class<? extends AbstractQueryProcessor>> qlProcessorAssignment;
 
 	static {
-		qlProcessorAssignment  = new HashMap<String, Class<? extends AbstractSyntaxTree>>();
-		qlProcessorAssignment.put("poliqarpplus", PoliqarpPlusTree.class);
-		qlProcessorAssignment.put("cosmas2", CosmasTree.class);
-		qlProcessorAssignment.put("annis", AqlTree.class);
-		qlProcessorAssignment.put("cql", CQLTree.class);
+		qlProcessorAssignment  = new HashMap<String, Class<? extends AbstractQueryProcessor>>();
+		qlProcessorAssignment.put("poliqarpplus", PoliqarpPlusQueryProcessor.class);
+		qlProcessorAssignment.put("cosmas2", Cosmas2QueryProcessor.class);
+		qlProcessorAssignment.put("annis", AnnisQueryProcessor.class);
+		qlProcessorAssignment.put("cql", CqlQueryProcessor.class);
 	}
 	
 	
     private Logger qllogger = KorAPLogger.initiate("ql");
     public static String queryLanguageVersion;
 
-    private AbstractSyntaxTree ast;
+    private AbstractQueryProcessor ast;
     private Object collection;
     private Map meta;
     private List errors;
@@ -101,15 +101,15 @@ public class QuerySerializer {
     public void run(String query, String queryLanguage, String outFile)
             throws IOException, QueryException {
         if (queryLanguage.equals("poliqarp")) {
-            ast = new PoliqarpPlusTree(query);
+            ast = new PoliqarpPlusQueryProcessor(query);
         } else if (queryLanguage.toLowerCase().equals("cosmas2")) {
-            ast = new CosmasTree(query);
+            ast = new Cosmas2QueryProcessor(query);
         } else if (queryLanguage.toLowerCase().equals("poliqarpplus")) {
-            ast = new PoliqarpPlusTree(query);
+            ast = new PoliqarpPlusQueryProcessor(query);
         } else if (queryLanguage.toLowerCase().equals("cql")) {
-            ast = new CQLTree(query);
+            ast = new CqlQueryProcessor(query);
         } else if (queryLanguage.toLowerCase().equals("annis")) {
-            ast = new AqlTree(query);
+            ast = new AnnisQueryProcessor(query);
         } else {
             throw new QueryException(queryLanguage + " is not a supported query language!");
         }
@@ -124,18 +124,18 @@ public class QuerySerializer {
 
         try {
             if (ql.equalsIgnoreCase("poliqarp")) {
-                ast = new PoliqarpPlusTree(query);
+                ast = new PoliqarpPlusQueryProcessor(query);
             } else if (ql.equalsIgnoreCase("cosmas2")) {
-                ast = new CosmasTree(query);
+                ast = new Cosmas2QueryProcessor(query);
             } else if (ql.equalsIgnoreCase("poliqarpplus")) {
-                ast = new PoliqarpPlusTree(query);
+                ast = new PoliqarpPlusQueryProcessor(query);
             } else if (ql.equalsIgnoreCase("cql")) {
                 if (version == null)
-                    ast = new CQLTree(query);
+                    ast = new CqlQueryProcessor(query);
                 else
-                    ast = new CQLTree(query, version);
+                    ast = new CqlQueryProcessor(query, version);
             } else if (ql.equalsIgnoreCase("annis")) {
-                ast = new AqlTree(query);
+                ast = new AnnisQueryProcessor(query);
             } else {
                 throw new QueryException(ql + " is not a supported query language!");
             }
@@ -229,7 +229,7 @@ public class QuerySerializer {
     }
 
     public QuerySerializer setCollection(String collection) throws QueryException {
-        CollectionQueryTree tree = new CollectionQueryTree();
+        CollectionQueryProcessor tree = new CollectionQueryProcessor();
         Map collectionRequest = tree.getRequestMap();
         tree.process(collection);
         this.collection = collectionRequest.get("collection");

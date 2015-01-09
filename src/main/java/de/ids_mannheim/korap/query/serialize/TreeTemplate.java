@@ -24,7 +24,7 @@ import de.ids_mannheim.korap.query.serialize.util.QueryException;
  * @author bingel
  *
  */
-public class TreeTemplate extends Antlr4AbstractSyntaxTree {
+public class TreeTemplate extends Antlr4AbstractQueryProcessor {
 	/**
 	 * Keeps track of open node categories
 	 */

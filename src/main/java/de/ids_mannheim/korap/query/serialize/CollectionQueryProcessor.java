@@ -20,9 +20,9 @@ import java.util.regex.Pattern;
  * @author hanl, bingel
  * @date 06/12/2013
  */
-public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
+public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 
-	private static Logger log = LoggerFactory.getLogger(CollectionQueryTree.class);
+	private static Logger log = LoggerFactory.getLogger(CollectionQueryProcessor.class);
     private Parser parser;
     private static boolean verbose;
     private List<ParseTree> visited = new ArrayList<ParseTree>();
@@ -41,14 +41,14 @@ public class CollectionQueryTree extends Antlr4AbstractSyntaxTree {
     LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
     Integer stackedObjects = 0;
     
-    public CollectionQueryTree() {
+    public CollectionQueryProcessor() {
 	}
     
-    public CollectionQueryTree(boolean verbose) {
-    	CollectionQueryTree.verbose = verbose;
+    public CollectionQueryProcessor(boolean verbose) {
+    	CollectionQueryProcessor.verbose = verbose;
 	}
     
-    public CollectionQueryTree(String query) throws QueryException {
+    public CollectionQueryProcessor(String query) throws QueryException {
 		process(query);
 	}
 

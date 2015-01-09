@@ -27,9 +27,9 @@ import java.util.regex.Pattern;
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @version 0.2
  */
-public class CosmasTree extends Antlr3AbstractSyntaxTree {
+public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
-	private static Logger log = LoggerFactory.getLogger(CosmasTree.class);
+	private static Logger log = LoggerFactory.getLogger(Cosmas2QueryProcessor.class);
 
 	LinkedList<LinkedHashMap[]> toWrapStack = new LinkedList<LinkedHashMap[]>();
 	/**
@@ -96,7 +96,7 @@ public class CosmasTree extends Antlr3AbstractSyntaxTree {
 	 * @param parser The ANTLR parser instance that generated the parse tree
 	 * @throws QueryException
 	 */
-	public CosmasTree(String query) throws QueryException {
+	public Cosmas2QueryProcessor(String query) throws QueryException {
 		this.query = query;
 		process(query);
 		log.info(">>> " + requestMap.get("query") + " <<<");

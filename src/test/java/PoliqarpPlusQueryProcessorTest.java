@@ -19,7 +19,7 @@ import de.ids_mannheim.korap.query.serialize.util.QueryException;
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @version 1.0
  */
-public class PoliqarpPlusTreeTest {
+public class PoliqarpPlusQueryProcessorTest {
 
 	String query;
 	ArrayList<JsonNode> operands;

@@ -8,12 +8,12 @@ import org.z3950.zing.cql.CQLParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.ids_mannheim.korap.query.serialize.CQLTree;
-import de.ids_mannheim.korap.query.serialize.CosmasTree;
+import de.ids_mannheim.korap.query.serialize.CqlQueryProcessor;
+import de.ids_mannheim.korap.query.serialize.Cosmas2QueryProcessor;
 import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 
-public class CQLTest {
+public class CqlQueryProcessorTest {
 	
 	String query;
 	String version ="1.2";
@@ -23,7 +23,7 @@ public class CQLTest {
 	public void testExceptions() throws CQLParseException, IOException {
 		query = "(Kuh) prox (Germ) ";
 		try {
-			CQLTree cqlTree = new CQLTree(query, version);
+			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
 		} catch (QueryException e) {
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(48,errorCode);
@@ -31,7 +31,7 @@ public class CQLTest {
 		
 		query = "(Kuh) or/rel.combine=sum (Germ) ";		
 		try {
-			CQLTree cqlTree = new CQLTree(query, version);
+			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
 		}catch (QueryException e) {			
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(20,errorCode);
@@ -39,7 +39,7 @@ public class CQLTest {
 		
 		query = "dc.title any Germ ";
 		try {
-			CQLTree cqlTree = new CQLTree(query, version);
+			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
 		} catch (QueryException e) {
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(16,errorCode);
@@ -47,7 +47,7 @@ public class CQLTest {
 		
 		query = "cql.serverChoice any Germ ";
 		try {
-			CQLTree cqlTree = new CQLTree(query, version);
+			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
 		} catch (QueryException e) {
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(19,errorCode);
@@ -55,7 +55,7 @@ public class CQLTest {
 		
 		query = "";
 		try {
-			CQLTree cqlTree = new CQLTree(query, version);
+			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
 		} catch (QueryException e) {
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(27,errorCode);
@@ -74,7 +74,7 @@ public class CQLTest {
 						"{@type : korap:token,wrap : {@type : korap:term,key : scheint,layer : orth,match : match:eq}" +
 					"}]}";
 			
-			CQLTree cqlTree = new CQLTree(query, version);		
+			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
 			String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 			assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 //			/System.out.println(serializedQuery);
@@ -96,7 +96,7 @@ public class CQLTest {
 					"]}," +
 					"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}" +
 			"]}";
-		CQLTree cqlTree = new CQLTree(query, version);		
+		CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
 		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
@@ -112,7 +112,7 @@ public class CQLTest {
 							"{@type:korap:token, wrap:{@type:korap:term, key:Mond, layer:orth, match:match:eq}}" +
 					"]}" +
 				"]}";
-		cqlTree = new CQLTree(query, version);		
+		cqlTree = new CqlQueryProcessor(query, version);		
 		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
@@ -127,7 +127,7 @@ public class CQLTest {
 				"{@type:korap:token, wrap:{@type:korap:term, key:Mond, layer:orth, match:match:eq}}" +
 			"]}";		
 		
-		CQLTree cqlTree = new CQLTree(query, version);		
+		CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
 		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
@@ -141,7 +141,7 @@ public class CQLTest {
 				"{@type:korap:token, wrap:{@type:korap:term, key:Mond, layer:orth, match:match:eq}}" +
 			"]}";
 		
-		cqlTree = new CQLTree(query, version);		
+		cqlTree = new CqlQueryProcessor(query, version);		
 		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 				
@@ -157,7 +157,7 @@ public class CQLTest {
 						"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}" +
 					"]}" +
 				"]}";
-		cqlTree = new CQLTree(query, version);		
+		cqlTree = new CqlQueryProcessor(query, version);		
 		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 	}
@@ -166,7 +166,7 @@ public class CQLTest {
 	public void testTermQuery() throws CQLParseException, IOException, QueryException{
 		query = "Sonne";		
 		String jsonLd = "{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}";		
-		CQLTree cqlTree = new CQLTree(query, version);		
+		CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
 		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));		
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 	}
@@ -180,7 +180,7 @@ public class CQLTest {
 				"{@type:korap:token, wrap:{@type:korap:term, key:Mann, layer:orth, match:match:eq}}" +
 			"]}";
 		
-		CQLTree cqlTree = new CQLTree(query, version);		
+		CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
 		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 		
@@ -193,7 +193,7 @@ public class CQLTest {
 				"{@type:korap:token, wrap:{@type:korap:term, key:schläft, layer:orth, match:match:eq}}" +
 			"]}";
 		
-		cqlTree = new CQLTree(query, version);		
+		cqlTree = new CqlQueryProcessor(query, version);		
 		serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
 	}	

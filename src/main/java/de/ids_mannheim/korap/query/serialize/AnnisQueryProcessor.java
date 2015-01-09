@@ -30,8 +30,8 @@ import de.ids_mannheim.korap.query.serialize.util.QueryException;
  * @author joachim
  *
  */
-public class AqlTree extends Antlr4AbstractSyntaxTree {
-	private static Logger log = LoggerFactory.getLogger(AqlTree.class);
+public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
+	private static Logger log = LoggerFactory.getLogger(AnnisQueryProcessor.class);
 	/**
 	 * Flag that indicates whether token fields or meta fields are currently being processed
 	 */
@@ -86,7 +86,7 @@ public class AqlTree extends Antlr4AbstractSyntaxTree {
 	 * @param tree The syntax tree as returned by ANTLR
 	 * @param parser The ANTLR parser instance that generated the parse tree
 	 */
-	public AqlTree(String query) {
+	public AnnisQueryProcessor(String query) {
 		try {
 			process(query);
 		} catch (QueryException e) {

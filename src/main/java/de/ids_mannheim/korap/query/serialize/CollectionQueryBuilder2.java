@@ -48,7 +48,7 @@ public class CollectionQueryBuilder2 {
     }
 
     public CollectionQueryBuilder2 setQuery(String query) throws QueryException {
-        CollectionQueryTree tree = new CollectionQueryTree();
+        CollectionQueryProcessor tree = new CollectionQueryProcessor();
         tree.process(query);
         this.groups = tree.getRequestMap();
         return this;
