@@ -3,6 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import de.ids_mannheim.korap.query.parse.poliqarpplus.PoliqarpPlusLexer;
 import de.ids_mannheim.korap.query.parse.poliqarpplus.PoliqarpPlusParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
+import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
@@ -34,6 +35,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 	 * @throws QueryException
 	 */
 	public PoliqarpPlusQueryProcessor(String query) throws QueryException {
+		CqlfObjectGenerator.setQueryProcessor(this);
 		process(query);
 		log.info(">>> " + requestMap.get("query") + " <<<");
 	}
@@ -171,9 +173,9 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 		// Cover possible quantification (i.e. repetition) of segment
 		ParseTree quantification = getFirstChildWithCat(node, "repetition");
 		if (quantification != null) {
-			LinkedHashMap<String,Object> quantGroup = makeGroup("repetition");
+			LinkedHashMap<String,Object> quantGroup = CqlfObjectGenerator.makeGroup("repetition");
 			Integer[] minmax = parseRepetition(quantification);
-			quantGroup.put("boundary", makeBoundary(minmax[0], minmax[1]));
+			quantGroup.put("boundary", CqlfObjectGenerator.makeBoundary(minmax[0], minmax[1]));
 			if (minmax[0] != null) quantGroup.put("min", minmax[0]);
 			if (minmax[1] != null) quantGroup.put("max", minmax[1]);
 			addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, "Deprecated 2014-07-24: 'min' and 'max' to be " +
@@ -185,12 +187,12 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 	}
 
 	private void processSequence(ParseTree node) {
-		LinkedHashMap<String,Object> sequence = makeGroup("sequence");
+		LinkedHashMap<String,Object> sequence = CqlfObjectGenerator.makeGroup("sequence");
 		ParseTree distanceNode = getFirstChildWithCat(node, "distance");
 
 		if (distanceNode!=null) {
 			Integer[] minmax = parseDistance(distanceNode);
-			LinkedHashMap<String,Object> distance = makeDistance("w", minmax[0], minmax[1]);
+			LinkedHashMap<String,Object> distance = CqlfObjectGenerator.makeDistance("w", minmax[0], minmax[1]);
 			sequence.put("inOrder", true);
 			ArrayList<Object> distances = new ArrayList<Object>();
 			distances.add(distance);
@@ -211,9 +213,9 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 		Integer[] minmax = parseEmptySegments(node);
 		// object will be either a repetition group or a single empty token
 		LinkedHashMap<String,Object> object; 
-		LinkedHashMap<String,Object> emptyToken = makeToken();
+		LinkedHashMap<String,Object> emptyToken = CqlfObjectGenerator.makeToken();
 		if (minmax[0] != 1 || minmax[1] == null || minmax[1] != 1) {
-			object = makeRepetition(minmax[0], minmax[1]);
+			object = CqlfObjectGenerator.makeRepetition(minmax[0], minmax[1]);
 			((ArrayList<Object>) object.get("operands")).add(emptyToken);
 		} else {
 			object = emptyToken;
@@ -228,14 +230,14 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 		if (hasChild(node, "spanclass_id")) {
 			classId = Integer.parseInt(node.getChild(1).getChild(0).toStringTree(parser));
 		}
-		LinkedHashMap<String,Object> classGroup = makeSpanClass(classId, false);
+		LinkedHashMap<String,Object> classGroup = CqlfObjectGenerator.makeSpanClass(classId, false);
 		putIntoSuperObject(classGroup);
 		objectStack.push(classGroup);
 		stackedObjects++;
 	}
 
 	private void processToken(ParseTree node) {
-		LinkedHashMap<String,Object> token = makeToken();
+		LinkedHashMap<String,Object> token = CqlfObjectGenerator.makeToken();
 		// handle negation
 		List<ParseTree> negations = getChildrenWithCat(node, "!");
 		boolean negated = false;
@@ -243,7 +245,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 		if (negations.size() % 2 == 1) negated = true;
 		if (getNodeCat(node.getChild(0)).equals("key")) {
 			// no 'term' child, but direct key specification: process here
-			LinkedHashMap<String,Object> term = makeTerm();
+			LinkedHashMap<String,Object> term = CqlfObjectGenerator.makeTerm();
 
 			String key = node.getChild(0).getText();
 			if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
@@ -284,7 +286,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 	@SuppressWarnings("unchecked")
 	private void processAlignment(ParseTree node) {
-		LinkedHashMap<String,Object> alignClass = makeSpanClass(++classCounter,false);
+		LinkedHashMap<String,Object> alignClass = CqlfObjectGenerator.makeSpanClass(++classCounter,false);
 		LinkedHashMap<String,Object> metaMap = (LinkedHashMap<String, Object>) requestMap.get("meta");
 		if (metaMap.containsKey("alignment")) {
 			ArrayList<Integer> alignedClasses = new ArrayList<Integer>();
@@ -308,7 +310,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 		List<ParseTree> negations = getChildrenWithCat(node, "!");
 		boolean negated = false;
 		if (negations.size() % 2 == 1) negated = true;
-		LinkedHashMap<String,Object> span = makeSpan();
+		LinkedHashMap<String,Object> span = CqlfObjectGenerator.makeSpan();
 		ParseTree keyNode = getFirstChildWithCat(node, "key");
 		ParseTree layerNode = getFirstChildWithCat(node, "layer");
 		ParseTree foundryNode = getFirstChildWithCat(node, "foundry");
@@ -343,7 +345,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 	}
 
 	private void processDisjunction(ParseTree node) {
-		LinkedHashMap<String,Object> disjunction = makeGroup("or");
+		LinkedHashMap<String,Object> disjunction = CqlfObjectGenerator.makeGroup("or");
 		putIntoSuperObject(disjunction);
 		objectStack.push(disjunction);
 		stackedObjects++;
@@ -357,8 +359,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 	}
 
 	private void processRelation(ParseTree node) {
-		LinkedHashMap<String, Object> relationGroup = makeGroup("relation");
-		LinkedHashMap<String, Object> relation = makeRelation();
+		LinkedHashMap<String, Object> relationGroup = CqlfObjectGenerator.makeGroup("relation");
+		LinkedHashMap<String, Object> relation = CqlfObjectGenerator.makeRelation();
 		relationGroup.put("relation", relation);
 		if (node.getChild(0).getText().equals("dominates")) {
 			relation.put("layer", "c");
@@ -375,7 +377,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 		}
 		if (repetition != null) {
 			Integer[] minmax =  parseRepetition(repetition);
-			relation.put("boundary", makeBoundary(minmax[0], minmax[1]));
+			relation.put("boundary", CqlfObjectGenerator.makeBoundary(minmax[0], minmax[1]));
 		}
 		putIntoSuperObject(relationGroup);
 		objectStack.push(relationGroup);
@@ -402,7 +404,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 				classId = 127;
 			}
 		}
-		LinkedHashMap<String, Object> classGroup = makeSpanClass(classId, false);
+		LinkedHashMap<String, Object> classGroup = CqlfObjectGenerator.makeSpanClass(classId, false);
 		putIntoSuperObject(classGroup);
 		objectStack.push(classGroup);
 		stackedObjects++;
@@ -439,7 +441,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 		} else {
 			classRefs.add(1);
 		}
-		LinkedHashMap<String, Object> referenceGroup = makeReference(classRefs);
+		LinkedHashMap<String, Object> referenceGroup = CqlfObjectGenerator.makeReference(classRefs);
 
 		String type = node.getChild(0).toStringTree(parser);
 		// Default is focus(), if deviating catch here
@@ -463,7 +465,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 	}
 
 	private void processSubmatch(ParseTree node) {
-		LinkedHashMap<String,Object> submatch = makeReference(null);
+		LinkedHashMap<String,Object> submatch = CqlfObjectGenerator.makeReference(null);
 		submatch.put("operands", new ArrayList<Object>());
 		ParseTree startpos = getFirstChildWithCat(node,"startpos");
 		ParseTree length = getFirstChildWithCat(node,"length");
@@ -574,7 +576,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 			classRefCheck = new String[]{"classRefCheck:intersects"};
 			break;
 		}
-		return makePosition(frames,classRefCheck);
+		return CqlfObjectGenerator.makePosition(frames,classRefCheck);
 	}
 
 
@@ -595,7 +597,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 		String nodeCat = getNodeCat(node);
 		if (nodeCat.equals("term")) {
 			String key = null;
-			LinkedHashMap<String,Object> term = makeTerm();
+			LinkedHashMap<String,Object> term = CqlfObjectGenerator.makeTerm();
 			// handle negation
 			boolean negated = negatedGlobal;
 			boolean isRegex = false;
@@ -663,7 +665,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 			// establish boolean relation
 			ParseTree boolOp = getFirstChildWithCat(node, "boolOp"); 
 			String operator = boolOp.getText().equals("&") ? "and" : "or";
-			termGroup = makeTermGroup(operator);
+			termGroup = CqlfObjectGenerator.makeTermGroup(operator);
 			ArrayList<Object> operands = (ArrayList<Object>) termGroup.get("operands");
 			// recursion with left/right operands
 			operands.add(parseTermOrTermGroup(leftOp, negatedGlobal, mode));

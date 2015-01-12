@@ -10,7 +10,7 @@ import org.antlr.runtime.tree.Tree;
 
 public abstract class Antlr3AbstractQueryProcessor extends AbstractQueryProcessor {
 	
-	public Parser parser;
+	protected Parser parser;
 
     /**
      * Returns the category (or 'label') of the root of a (sub-) ParseTree (ANTLR 3).
@@ -18,7 +18,7 @@ public abstract class Antlr3AbstractQueryProcessor extends AbstractQueryProcesso
      * @param node
      * @return
      */
-    public static String getNodeCat(Tree node) {
+    protected static String getNodeCat(Tree node) {
         String nodeCat = node.toStringTree();
         Pattern p = Pattern.compile("\\((.*?)\\s"); // from opening parenthesis to 1st whitespace
         Matcher m = p.matcher(node.toStringTree());
@@ -35,7 +35,7 @@ public abstract class Antlr3AbstractQueryProcessor extends AbstractQueryProcesso
      * @param childCat The category of the potential child.
      * @return true iff one or more children belong to the specified category
      */
-    public static boolean hasChild(Tree node, String childCat) {
+    protected static boolean hasChild(Tree node, String childCat) {
         for (int i = 0; i < node.getChildCount(); i++) {
             if (getNodeCat(node.getChild(i)).equals(childCat)) {
                 return true;
@@ -43,8 +43,21 @@ public abstract class Antlr3AbstractQueryProcessor extends AbstractQueryProcesso
         }
         return false;
     }
+    
+    protected boolean hasDescendant(Tree node, String childCat) {
+        for (int i = 0; i < node.getChildCount(); i++) {
+            Tree child = node.getChild(i);
+            if (getNodeCat(child).equals(childCat)) {
+                return true;
+            }
+            if (hasDescendant(child, childCat)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    public static List<Tree> getChildren(Tree node) {
+    protected static List<Tree> getChildren(Tree node) {
         ArrayList<Tree> children = new ArrayList<Tree>();
         for (int i = 0; i < node.getChildCount(); i++) {
             children.add(node.getChild(i));
@@ -52,7 +65,7 @@ public abstract class Antlr3AbstractQueryProcessor extends AbstractQueryProcesso
         return children;
     }
 
-    public static List<Tree> getChildrenWithCat(Tree node, String nodeCat) {
+    protected static List<Tree> getChildrenWithCat(Tree node, String nodeCat) {
         ArrayList<Tree> children = new ArrayList<Tree>();
         for (int i = 0; i < node.getChildCount(); i++) {
             if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
@@ -62,12 +75,20 @@ public abstract class Antlr3AbstractQueryProcessor extends AbstractQueryProcesso
         return children;
     }
     
-    public static Tree getFirstChildWithCat(Tree node, String nodeCat) {
-        for (int i = 0; i < node.getChildCount(); i++) {
-            if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
-                return node.getChild(i);
-            }
-        }
+    protected static Tree getFirstChildWithCat(Tree node, String nodeCat) {
+        return getNthChildWithCat(node, nodeCat, 1);
+    }
+    
+    protected static Tree getNthChildWithCat(Tree node, String nodeCat, int n) {
+    	int counter = 0;
+    	for (int i = 0; i < node.getChildCount(); i++) {
+    		if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
+    			counter++;
+    			if (counter == n) {
+    				return node.getChild(i);
+    			}
+    		}
+    	}
         return null;
     }
 }

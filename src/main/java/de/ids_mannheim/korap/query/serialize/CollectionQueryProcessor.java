@@ -3,6 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import de.ids_mannheim.korap.query.parse.collection.CollectionQueryLexer;
 import de.ids_mannheim.korap.query.parse.collection.CollectionQueryParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
+import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
@@ -42,14 +43,17 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
     Integer stackedObjects = 0;
     
     public CollectionQueryProcessor() {
+    	CqlfObjectGenerator.setQueryProcessor(this);
 	}
     
     public CollectionQueryProcessor(boolean verbose) {
+    	CqlfObjectGenerator.setQueryProcessor(this);
     	CollectionQueryProcessor.verbose = verbose;
 	}
     
     public CollectionQueryProcessor(String query) throws QueryException {
-		process(query);
+    	CqlfObjectGenerator.setQueryProcessor(this);
+    	process(query);
 	}
 
 	@Override
@@ -86,7 +90,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 
         if (nodeCat.equals("relation")) {
         	String operator = node.getChild(1).getChild(0).toStringTree(parser).equals("&") ? "and" : "or"; 
-            LinkedHashMap<String, Object> relationGroup = makeDocGroup(operator);
+            LinkedHashMap<String, Object> relationGroup = CqlfObjectGenerator.makeDocGroup(operator);
             putIntoSuperObject(relationGroup);
             objectStack.push(relationGroup);
             stackedObjects++;
@@ -97,7 +101,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             String field = fieldNode.getChild(0).toStringTree(parser);
             ParseTree operatorNode = getFirstChildWithCat(node, "operator");
             ParseTree valueNode = getFirstChildWithCat(node, "value");
-            LinkedHashMap<String, Object> term = makeDoc();
+            LinkedHashMap<String, Object> term = CqlfObjectGenerator.makeDoc();
             term.put("key", field);
             term.putAll(parseValue(valueNode));
             String match = operatorNode.getText();
@@ -120,7 +124,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             ParseTree dateOpNode = getFirstChildWithCat(node, "dateOp");
             ParseTree dateNode = getFirstChildWithCat(node, "date");
 
-            LinkedHashMap<String, Object> term = makeDoc();
+            LinkedHashMap<String, Object> term = CqlfObjectGenerator.makeDoc();
             term.put("key", field);
             term.putAll(parseValue(dateNode));
             String match = dateOpNode.getText();
@@ -133,7 +137,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         
         if (nodeCat.equals("token")) {
-			LinkedHashMap<String,Object> token = makeToken();
+			LinkedHashMap<String,Object> token = CqlfObjectGenerator.makeToken();
 			// handle negation
 			List<ParseTree> negations = getChildrenWithCat(node, "!");
 			boolean negated = false;
@@ -141,7 +145,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 			if (negations.size() % 2 == 1) negated = true;
 			if (getNodeCat(node.getChild(0)).equals("key")) {
 				// no 'term' child, but direct key specification: process here
-				LinkedHashMap<String,Object> term = makeTerm();
+				LinkedHashMap<String,Object> term = CqlfObjectGenerator.makeTerm();
 				String key = node.getChild(0).getText();
 				if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
 					isRegex = true;
@@ -365,7 +369,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 	private LinkedHashMap<String, Object> parseTermOrTermGroup(ParseTree node, boolean negatedGlobal, String mode) {
 		if (getNodeCat(node).equals("term")) {
 			String key = null;
-			LinkedHashMap<String,Object> term = makeTerm();
+			LinkedHashMap<String,Object> term = CqlfObjectGenerator.makeTerm();
 			// handle negation
 			boolean negated = negatedGlobal;
 			boolean isRegex = false;
@@ -433,7 +437,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 			// establish boolean relation
 			ParseTree boolOp = getFirstChildWithCat(node, "booleanOp"); 
 			String operator = boolOp.getText().equals("&") ? "and" : "or";
-			termGroup = makeTermGroup(operator);
+			termGroup = CqlfObjectGenerator.makeTermGroup(operator);
 			ArrayList<Object> operands = (ArrayList<Object>) termGroup.get("operands");
 			// recursion with left/right operands
 			operands.add(parseTermOrTermGroup(leftOp, negatedGlobal, mode));

@@ -3,6 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import de.ids_mannheim.korap.query.parse.cosmas.c2psLexer;
 import de.ids_mannheim.korap.query.parse.cosmas.c2psParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
+import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.query.serialize.util.QueryException;
@@ -97,6 +98,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 	 * @throws QueryException
 	 */
 	public Cosmas2QueryProcessor(String query) throws QueryException {
+		CqlfObjectGenerator.setQueryProcessor(this);
 		this.query = query;
 		process(query);
 		log.info(">>> " + requestMap.get("query") + " <<<");
@@ -312,7 +314,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 		Tree begConditions = getFirstChildWithCat(node.getChild(optsChild), "TPBEG");
 		Tree endConditions = getFirstChildWithCat(node.getChild(optsChild), "TPEND");
 
-		LinkedHashMap<String, Object> submatchgroup = makeReference(128+classCounter);
+		LinkedHashMap<String, Object> submatchgroup = CqlfObjectGenerator.makeReference(128+classCounter);
 		ArrayList<Object> submatchOperands = new ArrayList<Object>();
 		submatchgroup.put("operands", submatchOperands);
 		putIntoSuperObject(submatchgroup);
@@ -338,14 +340,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 			if (conditionGroups.size()==1) {
 				submatchOperands.add(conditionGroup);
 			} else if (conditionCount < conditionGroups.size()) {
-				LinkedHashMap<String,Object> matchesGroup = makePosition(new String[]{"frames:matches"}, new String[0]);
+				LinkedHashMap<String,Object> matchesGroup = CqlfObjectGenerator.makePosition(new String[]{"frames:matches"}, new String[0]);
 				@SuppressWarnings("unchecked")
 				ArrayList<Object> matchesOperands = (ArrayList<Object>) matchesGroup.get("operands");
 				matchesOperands.add(conditionGroup);
 				// matches groups that are embedded at the second or lower level receive an additional
 				// focus to grep out only the query term to which the constraint applies
 				if (conditionCount > 1) {
-					LinkedHashMap<String,Object> focus = makeReference(128+classCounter-conditionGroups.size()+conditionCount-1);
+					LinkedHashMap<String,Object> focus = CqlfObjectGenerator.makeReference(128+classCounter-conditionGroups.size()+conditionCount-1);
 					ArrayList<Object> focusOperands = new ArrayList<Object>();
 					focus.put("operands", focusOperands);
 					focusOperands.add(matchesGroup);
@@ -363,8 +365,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 	private void processOPNHIT(Tree node) {
 		Integer[] classRef = new Integer[]{128+classCounter+1, 128+classCounter+2}; 
 		//            classRef.add(classCounter + 1);  // yes, do this twice (two classes)!
-		LinkedHashMap<String, Object> group = makeReference(128+classCounter);
-		LinkedHashMap<String, Object> classRefCheck = makeClassRefOp("classRefOp:inversion", classRef, classCounter+128);
+		LinkedHashMap<String, Object> group = CqlfObjectGenerator.makeReference(128+classCounter);
+		LinkedHashMap<String, Object> classRefCheck = CqlfObjectGenerator.makeClassRefOp("classRefOp:inversion", classRef, classCounter+128);
 		ArrayList<Object> operands = new ArrayList<Object>();
 		operands.add(classRefCheck);
 		group.put("operands", operands);
@@ -400,7 +402,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 		wrapOperandInClass(node,2,classCounter++);
 		wrapOperandInClass(node,1,classCounter++);
 		//            LinkedHashMap<String, Object> posgroup = makePosition(null);
-		LinkedHashMap<String, Object> posgroup = makeGroup("position");
+		LinkedHashMap<String, Object> posgroup = CqlfObjectGenerator.makeGroup("position");
 		LinkedHashMap<String, Object> positionOptions;
 		//            posgroup
 		if (nodeCat.equals("OPIN")) {
@@ -423,14 +425,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 		// Step II: wrap in reference and decide where to put
 		ArrayList<String> check = (ArrayList<String>) positionOptions.get("classRefCheck");
 		Integer[] classIn = new Integer[]{128+classCounter-2,128+classCounter-1};
-		LinkedHashMap<String, Object> classRefCheck = makeClassRefCheck(check, classIn, 128+classCounter);
+		LinkedHashMap<String, Object> classRefCheck = CqlfObjectGenerator.makeClassRefCheck(check, classIn, 128+classCounter);
 		((ArrayList<Object>) classRefCheck.get("operands")).add(posgroup);
 		LinkedHashMap<String, Object> focusGroup = null;
 		if ((boolean) positionOptions.get("matchall") == true) {
-			focusGroup = makeResetReference();
+			focusGroup = CqlfObjectGenerator.makeResetReference();
 			((ArrayList<Object>) focusGroup.get("operands")).add(classRefCheck);
 		} else { // match only first argument
-			focusGroup = wrapInReference(classRefCheck, 128+classCounter-1);
+			focusGroup = CqlfObjectGenerator.wrapInReference(classRefCheck, 128+classCounter-1);
 		}
 		putIntoSuperObject(focusGroup, 1);
 	}
@@ -442,7 +444,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 		Tree typ = prox_opts.getChild(0);
 		Tree dist_list = prox_opts.getChild(1);
 		// Step I: create group
-		LinkedHashMap<String, Object> group = makeGroup("sequence");
+		LinkedHashMap<String, Object> group = CqlfObjectGenerator.makeGroup("sequence");
 
 		ArrayList<Object> constraints = new ArrayList<Object>();
 		boolean exclusion = typ.getChild(0).toStringTree().equals("EXCL");
@@ -481,7 +483,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 			if (!meas.equals("w") && min == 0 ) {
 				processSpanDistance(meas,min,max);
 			}
-			LinkedHashMap<String, Object> distance = makeDistance(meas,min,max);
+			LinkedHashMap<String, Object> distance = CqlfObjectGenerator.makeDistance(meas,min,max);
 			if (exclusion) {
 				distance.put("exclude", true);
 			}
@@ -505,10 +507,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 		if (! (openNodeCats.get(1).equals("OPBEG") || openNodeCats.get(1).equals("OPEND") || inOPALL || openNodeCats.get(1).equals("OPNHIT"))) {
 			wrapOperandInClass(node,1,classCounter);
 			wrapOperandInClass(node,2,classCounter);
-			group = wrapInReference(group, 128+classCounter++);
+			group = CqlfObjectGenerator.wrapInReference(group, 128+classCounter++);
 		} else if (openNodeCats.get(1).equals("OPNHIT")) {
-			LinkedHashMap<String,Object> repetition = makeRepetition(min, max);
-			((ArrayList<Object>) repetition.get("operands")).add(makeToken());
+			LinkedHashMap<String,Object> repetition = CqlfObjectGenerator.makeRepetition(min, max);
+			((ArrayList<Object>) repetition.get("operands")).add(CqlfObjectGenerator.makeToken());
 			// TODO go on with this: put the repetition into a class and put it in between the operands
 			// -> what if there's several distance constraints. with different keys, like /w4,s0? 
 		}
@@ -516,10 +518,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 		LinkedHashMap<String,Object> sequence = null;
 		if (putIntoOverlapDisjunction) {
 			sequence = embeddedSequence;
-			group = makeGroup("or");
+			group = CqlfObjectGenerator.makeGroup("or");
 			ArrayList<Object> disjOperands = (ArrayList<Object>) group.get("operands");
 			String[] sharedClasses = new String[]{"intersects"};
-			LinkedHashMap<String,Object> overlapsGroup = makePosition(new String[0], sharedClasses);
+			LinkedHashMap<String,Object> overlapsGroup = CqlfObjectGenerator.makePosition(new String[0], sharedClasses);
 
 			ArrayList<Object> overlapsOperands = (ArrayList<Object>) overlapsGroup.get("operands");
 			// this ensures identity of the operands lists and thereby a distribution of the operands for both created objects 
@@ -528,7 +530,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 				invertedOperandsLists.push(overlapsOperands);
 			}
 			disjOperands.add(overlapsGroup);
-			disjOperands.add(wrapInReference(sequence, 0));
+			disjOperands.add(CqlfObjectGenerator.wrapInReference(sequence, 0));
 			// Step II: decide where to put
 			putIntoSuperObject(group, 0);
 			objectStack.push(sequence);
@@ -592,7 +594,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 	@SuppressWarnings("unchecked")
 	private void processOPELEM(Tree node) {
 		// Step I: create element
-		LinkedHashMap<String, Object> span = makeSpan();
+		LinkedHashMap<String, Object> span = CqlfObjectGenerator.makeSpan();
 		if (node.getChild(0).toStringTree().equals("EMPTY")) {
 
 		} else {
@@ -612,12 +614,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 				 * top-level group (in order to avoid a top-level group that only
 				 * contains a sub-group).
 				 */
-				LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
+				LinkedHashMap<String, Object> termGroup = CqlfObjectGenerator.makeTermGroup("and");
 				ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup.get("operands");
 				for (int i = elname; i < node.getChildCount(); i++) {
 					Tree attrNode = node.getChild(i);
 					if (attrNode.getChildCount() == 2) {
-						LinkedHashMap<String, Object> term = makeTerm();
+						LinkedHashMap<String, Object> term = CqlfObjectGenerator.makeTerm();
 						termGroupOperands.add(term);
 						String layer = attrNode.getChild(0).toStringTree();
 						String[] splitted = layer.split("/");
@@ -630,11 +632,11 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 						String match = getNodeCat(attrNode).equals("EQ") ? "eq" : "ne";
 						term.put("match", "match:" + match);
 					} else {
-						LinkedHashMap<String, Object> subTermGroup = makeTermGroup("and");
+						LinkedHashMap<String, Object> subTermGroup = CqlfObjectGenerator.makeTermGroup("and");
 						ArrayList<Object> subTermGroupOperands = (ArrayList<Object>) subTermGroup.get("operands");
 						int j;
 						for (j = 1; j < attrNode.getChildCount(); j++) {
-							LinkedHashMap<String, Object> term = makeTerm();
+							LinkedHashMap<String, Object> term = CqlfObjectGenerator.makeTerm();
 							String layer = attrNode.getChild(0).toStringTree();
 							String[] splitted = layer.split("/");
 							if (splitted.length > 1) {
@@ -671,7 +673,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 	private void processOPMORPH(Tree node) {
 		//Step I: get info
 		String[] morphterms = node.getChild(0).toStringTree().replace(" ", "").split("&");
-		LinkedHashMap<String, Object> token = makeToken();
+		LinkedHashMap<String, Object> token = CqlfObjectGenerator.makeToken();
 		ArrayList<Object> terms = new ArrayList<Object>();
 		LinkedHashMap<String, Object> fieldMap = null;
 		for (String morphterm : morphterms) {
@@ -706,7 +708,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 		if (morphterms.length == 1) {
 			token.put("wrap", fieldMap);
 		} else {
-			LinkedHashMap<String, Object> termGroup = makeTermGroup("and");
+			LinkedHashMap<String, Object> termGroup = CqlfObjectGenerator.makeTermGroup("and");
 			termGroup.put("operands", terms);
 			token.put("wrap", termGroup);
 		}
@@ -774,7 +776,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 	 * @param cls The class id.
 	 */
 	private void wrapOperandInClass(Tree node, int arg, int cls) {
-		LinkedHashMap<String,Object> clsGroup = makeSpanClass(cls);
+		LinkedHashMap<String,Object> clsGroup = CqlfObjectGenerator.makeSpanClass(cls);
 		wrapOperand(node,arg,clsGroup);
 	}
 
@@ -851,10 +853,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 			}
 		}
 		// Create the position group and add the span and the subquery as operands, possibly wrapped in spanRefs
-		LinkedHashMap<String, Object> positionGroup = makePosition(new String[]{position}, new String[0]);
+		LinkedHashMap<String, Object> positionGroup = CqlfObjectGenerator.makePosition(new String[]{position}, new String[0]);
 		if (negated) positionGroup.put("exclude", true);
 		ArrayList<Object> posOperands = new ArrayList<Object>();
-		LinkedHashMap<String, Object> classGroup = makeSpanClass(classCounter++);
+		LinkedHashMap<String, Object> classGroup = CqlfObjectGenerator.makeSpanClass(classCounter++);
 		classGroup.put("operands", distributedOperands);
 		positionGroup.put("operands", posOperands);
 		LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
@@ -862,12 +864,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 		span.put("key", elem);
 		objectStack.push(classGroup);
 		if (hitSpanRef != null) {
-			LinkedHashMap<String, Object> spanRefAroundHit = makeSpanReference(hitSpanRef, "focus");
+			LinkedHashMap<String, Object> spanRefAroundHit = CqlfObjectGenerator.makeSpanReference(hitSpanRef, "focus");
 			((ArrayList<Object>) spanRefAroundHit.get("operands")).add(classGroup);
 			classGroup = spanRefAroundHit; //re-assign after wrapping classGroup in spanRef
 		}
 		if (elemSpanRef != null) {
-			LinkedHashMap<String, Object> spanRefAroundSpan = makeSpanReference(elemSpanRef, "focus");
+			LinkedHashMap<String, Object> spanRefAroundSpan = CqlfObjectGenerator.makeSpanReference(elemSpanRef, "focus");
 			((ArrayList<Object>) spanRefAroundSpan.get("operands")).add(span);
 			span = spanRefAroundSpan; //re-assign after wrapping span in spanRef
 		}
