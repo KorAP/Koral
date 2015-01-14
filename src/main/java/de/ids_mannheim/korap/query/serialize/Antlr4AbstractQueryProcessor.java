@@ -47,13 +47,13 @@ public abstract class Antlr4AbstractQueryProcessor extends AbstractQueryProcesso
         return false;
     }
 
-    protected boolean hasDescendant(ParseTree node, String childCat) {
+    protected boolean hasDescendantWithCat(ParseTree node, String childCat) {
         for (int i = 0; i < node.getChildCount(); i++) {
             ParseTree child = node.getChild(i);
             if (getNodeCat(child).equals(childCat)) {
                 return true;
             }
-            if (hasDescendant(child, childCat)) {
+            if (hasDescendantWithCat(child, childCat)) {
                 return true;
             }
         }
@@ -61,7 +61,7 @@ public abstract class Antlr4AbstractQueryProcessor extends AbstractQueryProcesso
     }
     
 
-    protected static List<ParseTree> getChildren(ParseTree node) {
+    protected List<ParseTree> getChildren(ParseTree node) {
         ArrayList<ParseTree> children = new ArrayList<ParseTree>();
         for (int i = 0; i < node.getChildCount(); i++) {
                 children.add(node.getChild(i));

@@ -6,7 +6,6 @@ import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener
 import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.RecognitionException;
@@ -77,7 +76,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 	/**
 	 * A list of node categories that can be sequenced (i.e. which can be in a sequence with any number of other nodes in this list)
 	 */
-	private final List<String> sequentiableCats = Arrays.asList(new String[]{"OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND", "OPIN", "OPBED", "OPELEM", "OPOR", "OPAND"});
+	private final List<String> sequentiableNodeTypes = Arrays.asList(new String[]{"OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND", "OPIN", "OPBED", "OPELEM", "OPOR", "OPAND"});
 	/**
 	 * Keeps track of sequenced nodes, i.e. nodes that implicitly govern  a sequence, as in (C2PQ (OPWF der) (OPWF Mann)).
 	 * This is necessary in order to know when to take the sequence off the object stack, as the sequence is introduced by the
@@ -97,7 +96,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 	 * @param parser The ANTLR parser instance that generated the parse tree
 	 * @throws QueryException
 	 */
-	public Cosmas2QueryProcessor(String query) throws QueryException {
+	public Cosmas2QueryProcessor(String query) {
 		CqlfObjectGenerator.setQueryProcessor(this);
 		this.query = query;
 		process(query);
@@ -105,7 +104,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 	}
 
 	@Override
-	public void process(String query) throws QueryException {
+	public void process(String query) {
 		Tree tree = null;
 		tree = parseCosmasQuery(query);
 		log.info("Processing CosmasII query: "+query);
@@ -115,8 +114,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 		}
 	}
 
-	private void processNode(Tree node) throws QueryException {
-
+	private void processNode(Tree node) {
 		// Top-down processing
 		if (visited.contains(node)) return;
 		else visited.add(node);
@@ -141,7 +139,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
 		// Check for potential implicit sequences as in (C2PQ (OPWF der) (OPWF Mann)). The sequence is introduced
 		// by the first child if it (and its siblings) is sequentiable.
-		if (sequentiableCats.contains(nodeCat)) {
+		if (sequentiableNodeTypes.contains(nodeCat)) {
 			// for each node, check if parent has more than one child (-> could be implicit sequence)
 			Tree parent = node.getParent();
 			if (parent.getChildCount() > 1) {
@@ -149,7 +147,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 				if (node == parent.getChild(0)) {
 					nodeHasSequentiableSiblings = false;
 					for (int i = 1; i < parent.getChildCount(); i++) {
-						if (sequentiableCats.contains(getNodeCat(parent.getChild(i)))) {
+						if (sequentiableNodeTypes.contains(getNodeCat(parent.getChild(i)))) {
 							nodeHasSequentiableSiblings = true;
 							continue;
 						}
@@ -172,7 +170,6 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 				}
 			}
 		}
-
 		
 		if (nodeCat.equals("OPWF") || nodeCat.equals("OPLEM")) {
 			processOPWF_OPLEM(node);

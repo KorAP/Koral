@@ -5,7 +5,6 @@ import de.ids_mannheim.korap.query.parse.poliqarpplus.PoliqarpPlusParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -34,14 +33,14 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 	 * @param query The syntax tree as returned by ANTLR
 	 * @throws QueryException
 	 */
-	public PoliqarpPlusQueryProcessor(String query) throws QueryException {
+	public PoliqarpPlusQueryProcessor(String query) {
 		CqlfObjectGenerator.setQueryProcessor(this);
 		process(query);
 		log.info(">>> " + requestMap.get("query") + " <<<");
 	}
 
 	@Override
-	public void process(String query) throws QueryException {
+	public void process(String query) {
 		ParseTree tree;
 		tree = parsePoliqarpQuery(query);
 		super.parser = this.parser;
@@ -49,6 +48,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 		if (tree != null) {
 			log.debug("ANTLR parse tree: "+tree.toStringTree(parser));
 			processNode(tree);
+		} else {
+			addError(StatusCodes.MALFORMED_QUERY, "Could not parse query >>> "+query+" <<<.");
 		}
 	}
 
@@ -62,7 +63,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 	 * @param node The currently processed node. The process(String query) method calls this method with the root.
 	 * @throws QueryException
 	 */
-	private void processNode(ParseTree node) throws QueryException {
+	private void processNode(ParseTree node) {
 		// Top-down processing
 		if (visited.contains(node)) return;
 		else visited.add(node);
@@ -748,7 +749,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 	}
 
 
-	private ParserRuleContext parsePoliqarpQuery(String query) throws QueryException {
+	private ParserRuleContext parsePoliqarpQuery(String query) {
 		Lexer lexer = new PoliqarpPlusLexer((CharStream) null);
 		ParserRuleContext tree = null;
 		Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(query);

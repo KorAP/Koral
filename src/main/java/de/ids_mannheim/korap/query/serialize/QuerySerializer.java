@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 import de.ids_mannheim.korap.utils.JsonUtils;
 import de.ids_mannheim.korap.utils.KorAPLogger;
 
@@ -82,8 +81,6 @@ public class QuerySerializer {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (QueryException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -99,56 +96,49 @@ public class QuerySerializer {
      * @throws QueryException
      */
     public void run(String query, String queryLanguage, String outFile)
-            throws IOException, QueryException {
-        if (queryLanguage.equals("poliqarp")) {
+            throws IOException {
+        if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        } else if (queryLanguage.toLowerCase().equals("cosmas2")) {
+        } else if (queryLanguage.equalsIgnoreCase("cosmas2")) {
             ast = new Cosmas2QueryProcessor(query);
-        } else if (queryLanguage.toLowerCase().equals("poliqarpplus")) {
+        } else if (queryLanguage.equalsIgnoreCase("poliqarpplus")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        } else if (queryLanguage.toLowerCase().equals("cql")) {
+        } else if (queryLanguage.equalsIgnoreCase("cql")) {
             ast = new CqlQueryProcessor(query);
-        } else if (queryLanguage.toLowerCase().equals("annis")) {
+        } else if (queryLanguage.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
         } else {
-            throw new QueryException(queryLanguage + " is not a supported query language!");
+            throw new IllegalArgumentException(queryLanguage + " is not a supported query language!");
         }
         toJSON();
     }
 
-    public QuerySerializer setQuery(String query, String ql, String version)
-            throws QueryException {
-
-        if (query == null || query.isEmpty())
-            throw new QueryException(StatusCodes.NO_QUERY, "No Content!");
-
-        try {
-            if (ql.equalsIgnoreCase("poliqarp")) {
-                ast = new PoliqarpPlusQueryProcessor(query);
-            } else if (ql.equalsIgnoreCase("cosmas2")) {
-                ast = new Cosmas2QueryProcessor(query);
-            } else if (ql.equalsIgnoreCase("poliqarpplus")) {
-                ast = new PoliqarpPlusQueryProcessor(query);
-            } else if (ql.equalsIgnoreCase("cql")) {
-                if (version == null)
-                    ast = new CqlQueryProcessor(query);
-                else
-                    ast = new CqlQueryProcessor(query, version);
-            } else if (ql.equalsIgnoreCase("annis")) {
-                ast = new AnnisQueryProcessor(query);
-            } else {
-                throw new QueryException(ql + " is not a supported query language!");
-            }
-        } catch (QueryException e) {
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new QueryException("UNKNOWN: Query could not be parsed (" + query + ")");
+    public QuerySerializer setQuery(String query, String ql, String version) {
+    	ast = new DummyQueryProcessor();
+    	if (query == null || query.isEmpty()) {
+			ast.addError(StatusCodes.NO_QUERY, "You did not specify a query!");
+		} else if (ql == null || ql.isEmpty()){
+            ast.addError(StatusCodes.NO_QUERY, "You did not specify any query language!");
+        } else if (ql.equalsIgnoreCase("poliqarp")) {
+            ast = new PoliqarpPlusQueryProcessor(query);
+        } else if (ql.equalsIgnoreCase("cosmas2")) {
+            ast = new Cosmas2QueryProcessor(query);
+        } else if (ql.equalsIgnoreCase("poliqarpplus")) {
+            ast = new PoliqarpPlusQueryProcessor(query);
+        } else if (ql.equalsIgnoreCase("cql")) {
+            if (version == null)
+                ast = new CqlQueryProcessor(query);
+            else
+                ast = new CqlQueryProcessor(query, version);
+        } else if (ql.equalsIgnoreCase("annis")) {
+            ast = new AnnisQueryProcessor(query);
+        } else {
+        	ast.addError(StatusCodes.UNKNOWN_QL, ql + " is not a supported query language!");
         }
         return this;
     }
 
-    public QuerySerializer setQuery(String query, String ql) throws QueryException {
+    public QuerySerializer setQuery(String query, String ql) {
         return setQuery(query, ql, "");
     }
 
@@ -228,7 +218,7 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer setCollection(String collection) throws QueryException {
+    public QuerySerializer setCollection(String collection) {
         CollectionQueryProcessor tree = new CollectionQueryProcessor();
         Map collectionRequest = tree.getRequestMap();
         tree.process(collection);

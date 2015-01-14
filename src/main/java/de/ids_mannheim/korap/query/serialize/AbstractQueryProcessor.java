@@ -10,12 +10,9 @@ import java.util.Map;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 
-import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
-
 public abstract class AbstractQueryProcessor {
 	
-	public abstract void process(String query) throws QueryException;
+	public abstract void process(String query);
 	
 	Logger log;
 	/**

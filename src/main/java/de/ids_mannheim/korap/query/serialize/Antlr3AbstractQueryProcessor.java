@@ -44,13 +44,13 @@ public abstract class Antlr3AbstractQueryProcessor extends AbstractQueryProcesso
         return false;
     }
     
-    protected boolean hasDescendant(Tree node, String childCat) {
+    protected static boolean hasDescendantWithCat(Tree node, String childCat) {
         for (int i = 0; i < node.getChildCount(); i++) {
             Tree child = node.getChild(i);
             if (getNodeCat(child).equals(childCat)) {
                 return true;
             }
-            if (hasDescendant(child, childCat)) {
+            if (hasDescendantWithCat(child, childCat)) {
                 return true;
             }
         }

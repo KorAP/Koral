@@ -1,6 +1,7 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+
 import org.z3950.zing.cql.*;
 
 import java.io.IOException;
@@ -31,15 +32,15 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
     private String version;
     private boolean isCaseSensitive; // default true
     
-    public CqlQueryProcessor(String query) throws QueryException {
+    public CqlQueryProcessor(String query) {
         this(query, VERSION_1_2, true);
     }
 
-    public CqlQueryProcessor(String query, String version) throws QueryException {
+    public CqlQueryProcessor(String query, String version) {
         this(query, version, true);                
     }
 
-    public CqlQueryProcessor(String query, String version, boolean isCaseSensitive) throws QueryException {
+    public CqlQueryProcessor(String query, String version, boolean isCaseSensitive) {
         this.version = version;
         this.isCaseSensitive = isCaseSensitive;
         this.requestMap = new LinkedHashMap<>();
@@ -54,9 +55,9 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
     }
 
     @Override
-    public void process(String query) throws QueryException {    	
+    public void process(String query) {    	
     	 if ((query == null) || query.isEmpty()) 
-             throw new QueryException(301, "SRU diagnostic 27: An empty query is unsupported.");
+             addError(StatusCodes.MALFORMED_QUERY, "SRU diagnostic 27: An empty query is unsupported.");
     	
         CQLNode cqlNode = parseQuerytoCQLNode(query);
         Map<String,Object> queryMap = parseCQLNode(cqlNode);
@@ -82,7 +83,7 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
     	return map;
     }
     
-    private CQLNode parseQuerytoCQLNode(String query) throws QueryException {
+    private CQLNode parseQuerytoCQLNode(String query) {
         try {
             int compat = -1;
             switch (version) {
@@ -95,11 +96,12 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
             return new CQLParser(compat).parse(query);
 
         } catch (CQLParseException | IOException e) {
-            throw new QueryException("Error parsing CQL");
+            addError(StatusCodes.MALFORMED_QUERY, "Error parsing CQL");
+            return null;
         }
     }
 
-    private Map<String,Object> parseCQLNode(CQLNode node) throws QueryException {    	
+    private Map<String,Object> parseCQLNode(CQLNode node) {    	
     	    	
         if (node instanceof CQLTermNode) {
             return parseTermNode((CQLTermNode) node);
@@ -108,16 +110,18 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         } else if (node instanceof CQLOrNode) {
             return parseOrNode((CQLOrNode) node);
         } else {
-            throw new QueryException(105, "SRU diagnostic 48: Only basic search including term-only " +
+            addError(StatusCodes.UNKNOWN_QUERY_ELEMENT, "SRU diagnostic 48: Only basic search including term-only " +
                     "and boolean (AND,OR) operator queries are currently supported.");
+            return new LinkedHashMap<String,Object>();
         }
     }
 
-    private Map<String,Object> parseTermNode(CQLTermNode node) throws QueryException {
+    private Map<String,Object> parseTermNode(CQLTermNode node) {
         checkTermNode(node);
         final String term = node.getTerm();
         if ((term == null) || term.isEmpty()) {
-            throw new QueryException(301, "SRU diagnostic 27: An empty term is unsupported.");
+            addError(StatusCodes.NO_QUERY, "SRU diagnostic 27: An empty term is unsupported.");
+            return new LinkedHashMap<String,Object>();
         } else if (term.contains(" ")) {
             return writeSequence(term);
         } else {
@@ -125,7 +129,7 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         }
     }
 
-    private Map<String,Object> parseAndNode(CQLAndNode node) throws QueryException {
+    private Map<String,Object> parseAndNode(CQLAndNode node) {
         checkBooleanModifier(node);
         
         Map<String, Object> map = new LinkedHashMap<String,Object>();
@@ -150,7 +154,7 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         return map;
     }
 
-    private Map<String,Object> parseOrNode(CQLOrNode node) throws QueryException {
+    private Map<String,Object> parseOrNode(CQLOrNode node) {
     	checkBooleanModifier(node);
     	
     	Map<String, Object> map = new LinkedHashMap<String,Object>();
@@ -196,20 +200,20 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
     	return tokenMap;
     }
 
-    private void checkBooleanModifier(CQLBooleanNode node) throws QueryException {
+    private void checkBooleanModifier(CQLBooleanNode node) {
         List<Modifier> modifiers = node.getModifiers();
         if ((modifiers != null) && !modifiers.isEmpty()) {
             Modifier modifier = modifiers.get(0);
-            throw new QueryException(105, "SRU diagnostic 20: Relation modifier " +
+            addError(105, "SRU diagnostic 20: Relation modifier " +
                     modifier.toCQL() + " is not supported.");
         }
     }
 
-    private void checkTermNode(CQLTermNode node) throws QueryException {
+    private void checkTermNode(CQLTermNode node) {
         // only allow "cql.serverChoice" and "words" index
         if (!(INDEX_CQL_SERVERCHOICE.equals(node.getIndex()) ||
                 INDEX_WORDS.equals(node.getIndex()))) {
-            throw new QueryException(105, "SRU diagnostic 16: Index " + node.getIndex() + " is not supported.");
+            addError(105, "SRU diagnostic 16: Index " + node.getIndex() + " is not supported.");
         }
         // only allow "=" relation without any modifiers
         CQLRelation relation = node.getRelation();
@@ -217,13 +221,13 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         if (!(TERM_RELATION_CQL_1_1.equals(baseRel) ||
                 TERM_RELATION_CQL_1_2.equals(baseRel) ||
                 SUPPORTED_RELATION_EXACT.equals(baseRel))) {
-            throw new QueryException(105, "SRU diagnostic 19: Relation " +
+            addError(105, "SRU diagnostic 19: Relation " +
                     relation.getBase() + " is not supported.");
         }
         List<Modifier> modifiers = relation.getModifiers();
         if ((modifiers != null) && !modifiers.isEmpty()) {
             Modifier modifier = modifiers.get(0);
-            throw new QueryException(105, "SRU diagnostic 20: Relation modifier " +
+            addError(105, "SRU diagnostic 20: Relation modifier " +
                     modifier.getValue() + " is not supported.");
         }
     }

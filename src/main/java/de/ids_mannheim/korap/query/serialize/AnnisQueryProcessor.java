@@ -24,7 +24,6 @@ import de.ids_mannheim.korap.query.parse.annis.AqlLexer;
 import de.ids_mannheim.korap.query.parse.annis.AqlParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 /**
  * Map representation of ANNIS QL syntax tree as returned by ANTLR
@@ -88,16 +87,12 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 	 */
 	public AnnisQueryProcessor(String query) {
 		CqlfObjectGenerator.setQueryProcessor(this);
-		try {
-			process(query);
-		} catch (QueryException e) {
-			e.printStackTrace();
-		}
+		process(query);
 		System.out.println(">>> "+requestMap.get("query")+" <<<");
 	}
 
 	@Override
-	public void process(String query) throws QueryException {
+	public void process(String query) {
 		ParseTree tree = parseAnnisQuery(query);
 		if (this.parser != null) {
 			super.parser = this.parser;
@@ -713,7 +708,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 		}
 	}
 
-	private ParserRuleContext parseAnnisQuery (String query) throws QueryException {
+	private ParserRuleContext parseAnnisQuery (String query) {
 		Lexer lexer = new AqlLexer((CharStream)null);
 		ParserRuleContext tree = null;
 		Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(query);

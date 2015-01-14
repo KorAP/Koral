@@ -1,6 +1,5 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 import de.ids_mannheim.korap.utils.JsonUtils;
 
 import java.io.IOException;
@@ -63,7 +62,7 @@ public class CollectionQueryBuilder3 {
         return this;
     }
 
-    public List getRequest() throws QueryException {
+    public List getRequest() {
         List list = new ArrayList();
         if (!this.rq.isEmpty())
             list.addAll(this.rq);
@@ -74,7 +73,7 @@ public class CollectionQueryBuilder3 {
         return list;
     }
 
-    public String toJSON() throws QueryException {
+    public String toJSON() {
         return JsonUtils.toJSON(getRequest());
     }
 

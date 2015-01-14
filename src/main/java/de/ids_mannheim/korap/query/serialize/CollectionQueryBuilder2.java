@@ -1,7 +1,6 @@
 package de.ids_mannheim.korap.query.serialize;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 import de.ids_mannheim.korap.utils.JsonUtils;
 
 import java.io.IOException;
@@ -47,7 +46,7 @@ public class CollectionQueryBuilder2 {
         return this;
     }
 
-    public CollectionQueryBuilder2 setQuery(String query) throws QueryException {
+    public CollectionQueryBuilder2 setQuery(String query) {
         CollectionQueryProcessor tree = new CollectionQueryProcessor();
         tree.process(query);
         this.groups = tree.getRequestMap();

@@ -5,7 +5,6 @@ import de.ids_mannheim.korap.query.parse.collection.CollectionQueryParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
@@ -51,13 +50,13 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
     	CollectionQueryProcessor.verbose = verbose;
 	}
     
-    public CollectionQueryProcessor(String query) throws QueryException {
+    public CollectionQueryProcessor(String query) {
     	CqlfObjectGenerator.setQueryProcessor(this);
     	process(query);
 	}
 
 	@Override
-    public void process(String query) throws QueryException {
+    public void process(String query) {
         ParseTree tree = parseCollectionQuery(query);
         if (this.parser != null) {
             super.parser = this.parser;
@@ -66,7 +65,12 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         log.info("Processing collection query: "+query);
         if (verbose) System.out.println(tree.toStringTree(parser));
-        processNode(tree);
+        if (tree != null) {
+			log.debug("ANTLR parse tree: "+tree.toStringTree(parser));
+			processNode(tree);
+		} else {
+			addError(StatusCodes.MALFORMED_QUERY, "Could not parse query >>> "+query+" <<<.");
+		}
     }
 
     private void processNode(ParseTree node) {
@@ -446,7 +450,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 		}
 	}
     
-    private ParserRuleContext parseCollectionQuery(String query) throws QueryException {
+    private ParserRuleContext parseCollectionQuery(String query) {
         Lexer lexer = new CollectionQueryLexer((CharStream) null);
         ParserRuleContext tree = null;
         Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(query);
@@ -473,9 +477,6 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         catch (Exception e) {
         	System.err.println("ERROR: "+errorListener.generateFullErrorMsg());
             System.err.println("Parsing exception message: " + e);
-        }
-        if (tree == null) {
-            throw new QueryException("Could not parse query. Make sure it is correct syntax.");
         }
         // Return the generated tree
         return tree;
