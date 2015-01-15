@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 /**
  * Tests for JSON-LD serialization of ANNIS QL queries. 
@@ -27,7 +26,7 @@ public class AnnisQueryProcessorTest {
 	JsonNode res;
 
 	@Test
-	public void testContext() throws QueryException, JsonProcessingException, IOException {
+	public void testContext() throws JsonProcessingException, IOException {
 		String contextUrl = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld";
 		query = "foo";
 		qs.setQuery(query, "annis");
@@ -36,7 +35,7 @@ public class AnnisQueryProcessorTest {
 	}
 	
 	@Test
-	public void testSingleTokens() throws QueryException, JsonProcessingException, IOException {
+	public void testSingleTokens() throws JsonProcessingException, IOException {
 		query = "\"Mann\"";
 		qs.setQuery(query, "annis");
 		res = mapper.readTree(qs.toJSON());
@@ -68,7 +67,7 @@ public class AnnisQueryProcessorTest {
 	}
 	
 	@Test 
-	public void testSpans() throws QueryException, JsonProcessingException, IOException {
+	public void testSpans() throws JsonProcessingException, IOException {
 		query = "node"; // special keyword for general span
 		qs.setQuery(query, "annis");
 		res = mapper.readTree(qs.toJSON());
@@ -90,7 +89,7 @@ public class AnnisQueryProcessorTest {
 	}
 	
 	@Test
-	public void testRegex() throws QueryException, JsonProcessingException, IOException {
+	public void testRegex() throws JsonProcessingException, IOException {
 		query = "/Mann/";  
 		qs.setQuery(query, "annis");
 		res = mapper.readTree(qs.toJSON());
@@ -109,7 +108,7 @@ public class AnnisQueryProcessorTest {
 	}
 
 	@Test
-	public void testFoundriesLayers() throws QueryException, JsonProcessingException, IOException {
+	public void testFoundriesLayers() throws JsonProcessingException, IOException {
 		query = "c=\"np\"";  
 		qs.setQuery(query, "annis");
 		res = mapper.readTree(qs.toJSON());
@@ -136,7 +135,7 @@ public class AnnisQueryProcessorTest {
 	}
 	
 	@Test
-	public void testDirectDeclarationRelations() throws QueryException, JsonProcessingException, IOException {
+	public void testDirectDeclarationRelations() throws JsonProcessingException, IOException {
 		query = "node > node";  
 		qs.setQuery(query, "annis");
 		res = mapper.readTree(qs.toJSON());
@@ -184,7 +183,7 @@ public class AnnisQueryProcessorTest {
 	}
 	
 	@Test
-	public void testDefPredicationInversion() throws QueryException, JsonProcessingException, IOException {
+	public void testDefPredicationInversion() throws JsonProcessingException, IOException {
 		query = "#1 > #2 & cnx/cat=\"vp\" & cnx/cat=\"np\"";  
 		qs.setQuery(query, "annis");
 		res = mapper.readTree(qs.toJSON());
@@ -205,7 +204,7 @@ public class AnnisQueryProcessorTest {
 	}
 	
 	@Test
-	public void testSimpleDominance() throws QueryException, JsonProcessingException, IOException {
+	public void testSimpleDominance() throws JsonProcessingException, IOException {
 		query = "node & node & #2 > #1";  
 		qs.setQuery(query, "annis");
 		res = mapper.readTree(qs.toJSON());
@@ -287,7 +286,7 @@ public class AnnisQueryProcessorTest {
 	}
 	
 	@Test
-	public void testIndirectDominance() throws QueryException, JsonProcessingException, IOException {
+	public void testIndirectDominance() throws JsonProcessingException, IOException {
 		query = "node & node & #1 >2,4 #2";  
 		qs.setQuery(query, "annis");
 		res = mapper.readTree(qs.toJSON());
@@ -310,8 +309,26 @@ public class AnnisQueryProcessorTest {
 
 		
 	@Test
-	public void testMultipleDominance() throws QueryException {
-		
+	public void testMultipleDominance() throws JsonProcessingException, IOException {
+		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";  
+		qs.setQuery(query, "annis");
+		res = mapper.readTree(qs.toJSON());
+		assertEquals("korap:group",			res.at("/query/@type").asText());
+		assertEquals("operation:relation",	res.at("/query/operation").asText());
+		assertEquals("korap:reference",		res.at("/query/operands/0/@type").asText());
+		assertEquals("operation:focus",		res.at("/query/operands/0/operation").asText());
+		assertEquals(128,					res.at("/query/operands/0/classRef/0").asInt());
+		assertEquals("korap:group",			res.at("/query/operands/0/operands/0/@type").asText());
+		assertEquals("operation:relation",	res.at("/query/operands/0/operands/0/operation").asText());
+		assertEquals("korap:relation",		res.at("/query/operands/0/operands/0/relation/@type").asText());
+		assertEquals("c",					res.at("/query/operands/0/operands/0/relation/wrap/layer").asText());
+		assertEquals("korap:span",			res.at("/query/operands/0/operands/0/operands/0/@type").asText());
+		assertEquals("c",					res.at("/query/operands/0/operands/0/operands/0/layer").asText());
+		assertEquals("CP",					res.at("/query/operands/0/operands/0/operands/0/key").asText());
+		assertEquals("korap:group",			res.at("/query/operands/0/operands/0/operands/1/@type").asText());
+		assertEquals("operation:class",		res.at("/query/operands/0/operands/0/operands/1/operation").asText());
+		assertEquals(128,					res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+		assertEquals("VP",					res.at("/query/operands/0/operands/0/operands/1/operands/0/key").asText());
 	}
 //		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";
 //		String dom1 = 
@@ -358,7 +375,7 @@ public class AnnisQueryProcessorTest {
 //	}
 //	
 //	@Test
-//	public void testPointingRelations() throws QueryException {
+//	public void testPointingRelations() throws Exception {
 //		query = "node & node & #2 ->coref[val=\"true\"] #1";
 //		String dom1 = 
 //				"{@type=korap:group, operation=operation:relation, operands=[" +
@@ -383,7 +400,7 @@ public class AnnisQueryProcessorTest {
 //	}
 //	
 //	@Test
-//	public void testSequence() throws QueryException {
+//	public void testSequence() throws Exception {
 //		query = "node & node & #1 . #2";
 //		String seq1 = 
 //				"{@type=korap:group, operation=operation:sequence, " +
@@ -424,30 +441,38 @@ public class AnnisQueryProcessorTest {
 //		
 //	}
 //	
-//	@Test
-//	public void testMultipleSequence() throws QueryException {
-//		query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & #1 .0,2 #2 .0,4 #3";
-//		String seq4 = 
-//				"{@type=korap:group, operation=operation:sequence," +
-//					"operands=[" +
-//						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
-//							"{@type=korap:group, operation=operation:sequence, operands=[" +
-//								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
-//								"{@type=korap:group, operation=operation:class, class=128, classOut=128, operands=[" +
-//									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
-//								"]}" +
-//							"], distances=[" +
-//								"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=2}, min=0, max=2}" +
-//							"], inOrder=true}" +
-//						"]}," +	
-//						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
-//					"],distances=[" +
-//						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=4}, min=0, max=4}" +
-//					"], inOrder=true" +
-//				"}";
-//		aqlt = new AqlTree(query);
-//		map = aqlt.getRequestMap().get("query").toString();
-//		assertEquals(seq4.replaceAll(" ", ""), map.replaceAll(" ", ""));
+	@Test
+	public void testMultipleSequence() throws Exception {
+		query = "tok=\"a\" & tok=\"b\" & tok=\"c\" & #1 . #2 & #2 . #3";
+		String seq4 = 
+				"{@type=korap:group, operation=operation:sequence," +
+					"operands=[" +
+						"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
+							"{@type=korap:group, operation=operation:sequence, operands=[" +
+								"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sonne, match=match:eq}}," +
+								"{@type=korap:group, operation=operation:class, class=128, classOut=128, operands=[" +
+									"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Mond, match=match:eq}}" +
+								"]}" +
+							"], distances=[" +
+								"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=2}, min=0, max=2}" +
+							"], inOrder=true}" +
+						"]}," +	
+						"{@type=korap:token, wrap={@type=korap:term, layer=orth, key=Sterne, match=match:eq}}" +
+					"],distances=[" +
+						"{@type=korap:distance, key=w, boundary={@type=korap:boundary, min=0, max=4}, min=0, max=4}" +
+					"], inOrder=true" +
+				"}";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:group",         res.at("/query/@type").asText());
+        assertEquals("operation:sequence",  res.at("/query/operation").asText());
+        assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
+        assertEquals(128,                   res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(res.at("/query/operands/0/classRef/0").asInt(), 
+                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+	}
+
+        
 //		
 //		query = "node & node & node & #1 . #2 .1,3 #3";
 //		String seq5 = 
@@ -499,7 +524,7 @@ public class AnnisQueryProcessorTest {
 //	}
 //	
 //	@Test
-//	public void testMultipleMixedOperators() throws QueryException {
+//	public void testMultipleMixedOperators() throws Exception {
 //		query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & #1 > #2 .0,4 #3";
 //		String seq4 = 
 //					"{@type=korap:group, operation=operation:sequence, operands=[" +
@@ -568,7 +593,7 @@ public class AnnisQueryProcessorTest {
 //	}
 //	/*
 //	@Test
-//	public void testMultipleOperatorsWithSameOperands() throws QueryException {
+//	public void testMultipleOperatorsWithSameOperands() throws Exception {
 //		
 //		query = "cat=\"NP\" > cat=\"VP\" & #1 _l_ #2";
 //		String eq2 =
@@ -590,7 +615,7 @@ public class AnnisQueryProcessorTest {
 //	}
 //	*/
 //	@Test
-//	public void testPositions() throws QueryException {
+//	public void testPositions() throws Exception {
 //		query = "node & node & #2 _=_ #1";
 //		String pos1 = 
 //				"{@type=korap:group, operation=operation:position, frames=[frames:matches], operands=[" +
@@ -647,7 +672,7 @@ public class AnnisQueryProcessorTest {
 //	}
 //	
 //	@Test
-//	public void testMultiplePredications() throws QueryException {
+//	public void testMultiplePredications() throws Exception {
 //		// a noun before a verb before a preposition
 //		query = "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 . #2 & #2 . #3"; 
 //		String mult1 = 
@@ -733,7 +758,7 @@ public class AnnisQueryProcessorTest {
 //	}	
 //	
 //	@Test
-//	public void testUnaryRelations() throws QueryException {
+//	public void testUnaryRelations() throws Exception {
 //		query = "node & #1:tokenarity=2";
 //		String unary1 = 
 //				"{@type=korap:span, attr={@type=korap:term, tokenarity={@type=korap:boundary,min=2,max=2}}}";
@@ -768,7 +793,7 @@ public class AnnisQueryProcessorTest {
 //	}	
 //	
 //	@Test
-//	public void testCommonParent() throws QueryException {
+//	public void testCommonParent() throws Exception {
 //		query = "cat=\"NP\" & cat=\"VP\" & #1 $ #2";
 //		String cp1 =
 //				"{@type=korap:group, operation=operation:relation, operands=[" +
@@ -861,7 +886,7 @@ public class AnnisQueryProcessorTest {
 	
 	/*		
 	@Test
-	public void testEqualNotequalValue() throws QueryException {
+	public void testEqualNotequalValue() throws Exception {
 		query = "cat=\"NP\" & cat=\"VP\" & #1 == #2";
 		String eq1 =
 				"{}"; // ???

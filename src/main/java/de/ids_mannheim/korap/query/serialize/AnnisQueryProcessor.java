@@ -77,18 +77,19 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 	 * spans to refer back to previously established classes for entities.
 	 */
 	private LinkedHashMap<String, Integer> refClassMapping = new LinkedHashMap<String, Integer>();
+	/**
+	 * Keeps track of the number of references to a node/token by means of #n. E.g. in the query 
+	 * <tt>tok="x" & tok="y" & tok="z" & #1 . #2 & #2 . #3</tt>, the 2nd token ("y") is referenced twice, the others once.
+	 */
 	private LinkedHashMap<String, Integer> nodeReferencesTotal = new LinkedHashMap<String, Integer>();
+	/**
+	 * Keeps track of the number of references to a node/token that have already been processed.
+	 */
 	private LinkedHashMap<String, Integer> nodeReferencesProcessed = new LinkedHashMap<String, Integer>();
 
-	/**
-	 * 
-	 * @param tree The syntax tree as returned by ANTLR
-	 * @param parser The ANTLR parser instance that generated the parse tree
-	 */
 	public AnnisQueryProcessor(String query) {
 		CqlfObjectGenerator.setQueryProcessor(this);
 		process(query);
-		System.out.println(">>> "+requestMap.get("query")+" <<<");
 	}
 
 	@Override
@@ -210,7 +211,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 				}
 			}
 		}
-		System.err.println(nodeVariables);
+		if (verbose) System.err.println(nodeVariables);
 	}
 
 	private void processUnary_linguistic_term(ParseTree node) {
@@ -311,7 +312,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 					operand = CqlfObjectGenerator.wrapInClass(operand, classCounter++);
 				} else if (nodeReferencesProcessed.get(ref)>0 && nodeReferencesTotal.get(ref)>1) {
 					try {
-						operand = CqlfObjectGenerator.wrapInReference(operandStack.pop(), refClassMapping.get(ref));
+						operand = CqlfObjectGenerator.wrapInReference(operandStack.pop(), refClassMapping.get(ref), true);
 					} catch (NoSuchElementException e) {
 						operand = CqlfObjectGenerator.makeReference(refClassMapping.get(ref));
 					}
@@ -365,7 +366,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 					innerOperands.add(CqlfObjectGenerator.wrapInClass(CqlfObjectGenerator.makeSpan(), classCounter));
 					// add the first operand and wrap the whole group in a focusing reference 
 					innerOperands.add(operand1);
-					innerGroup = CqlfObjectGenerator.wrapInReference(innerGroup, classCounter);
+					innerGroup = CqlfObjectGenerator.wrapInReference(innerGroup, classCounter, true);
 					outerOperands.add(innerGroup);
 				} else {
 					outerOperands.add(operandStack.pop());
@@ -378,7 +379,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 				// Wrap in another reference object in case other relations are following
 				if (i < node.getChildCount()-2) {
-					group = CqlfObjectGenerator.wrapInReference(group, classCounter);
+					group = CqlfObjectGenerator.wrapInReference(group, classCounter, true);
 				}
 				// All other n-ary linguistic relations have special 'relation' attributes defined in CQLF and can be
 				// handled more easily...
@@ -419,7 +420,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 				
 				// Wrap in reference object in case other relations are following
 				if (i < node.getChildCount()-2) {
-					group = CqlfObjectGenerator.wrapInReference(group, classCounter);
+					group = CqlfObjectGenerator.wrapInReference(group, classCounter, true);
 				}
 
 				// Inject operands.
@@ -714,20 +715,17 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 		Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(query);
 		// Like p. 111
 		try {
-
 			// Tokenize input data
 			ANTLRInputStream input = new ANTLRInputStream(query);
 			lexer.setInputStream(input);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			parser = new AqlParser(tokens);
-
 			// Don't throw out erroneous stuff
 			parser.setErrorHandler(new BailErrorStrategy());
 			lexer.removeErrorListeners();
             lexer.addErrorListener(errorListener);
             parser.removeErrorListeners();
             parser.addErrorListener(errorListener);
-
 			// Get starting rule from parser
 			Method startRule = AqlParser.class.getMethod("start"); 
 			tree = (ParserRuleContext) startRule.invoke(parser, (Object[])null);

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,7 +27,7 @@ public class Cosmas2QueryProcessorTest {
 	JsonNode res;
 
 	@Test
-	public void testContext() throws QueryException, JsonProcessingException, IOException {
+	public void testContext() throws JsonProcessingException, IOException {
 		String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld";
 		query = "foo";
 		qs.setQuery(query, "cosmas2");
@@ -38,7 +37,7 @@ public class Cosmas2QueryProcessorTest {
 
 
 	@Test
-	public void testSingleToken() throws QueryException, JsonProcessingException, IOException {
+	public void testSingleToken() throws JsonProcessingException, IOException {
 		query = "der";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -61,7 +60,7 @@ public class Cosmas2QueryProcessorTest {
 
 
 	@Test
-	public void testWildcardToken() throws QueryException, JsonProcessingException, IOException {
+	public void testWildcardToken() throws JsonProcessingException, IOException {
 		query = "*der";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -78,7 +77,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 	//	
 	@Test
-	public void testCaseSensitivityFlag() throws QueryException, JsonProcessingException, IOException {
+	public void testCaseSensitivityFlag() throws JsonProcessingException, IOException {
 		query = "$deutscher";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -103,7 +102,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testMORPH() throws QueryException, JsonProcessingException, IOException {
+	public void testMORPH() throws JsonProcessingException, IOException {
 		query = "MORPH(p=V)";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -159,7 +158,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testSequence() throws QueryException, JsonProcessingException, IOException {
+	public void testSequence() throws JsonProcessingException, IOException {
 		query = "der Mann";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -224,7 +223,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testOPOR() throws QueryException, JsonProcessingException, IOException {
+	public void testOPOR() throws JsonProcessingException, IOException {
 		query = "Sonne oder Mond";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -263,7 +262,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testOPORAND() throws QueryException, JsonProcessingException, IOException {
+	public void testOPORAND() throws JsonProcessingException, IOException {
 		query = "(Sonne oder Mond) und scheint";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -321,7 +320,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testOPNOT() throws QueryException, JsonProcessingException, IOException {
+	public void testOPNOT() throws JsonProcessingException, IOException {
 		query = "Sonne nicht Mond";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -382,7 +381,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testOPPROX() throws QueryException, JsonProcessingException, IOException {
+	public void testOPPROX() throws JsonProcessingException, IOException {
 		query = "Sonne /+w1:4 Mond";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -461,7 +460,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testOPPROXNested() throws QueryException, JsonProcessingException, IOException {	
+	public void testOPPROXNested() throws JsonProcessingException, IOException {	
 		query = "Sonne /+w1:4 Mond /+w1:7 Sterne";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -532,7 +531,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testOPIN() throws QueryException, JsonProcessingException, IOException {
+	public void testOPIN() throws JsonProcessingException, IOException {
 		query = "wegen #IN <s>";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -613,7 +612,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testOPOV() throws QueryException, JsonProcessingException, IOException {
+	public void testOPOV() throws JsonProcessingException, IOException {
 		query = "wegen #OV <s>";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -668,7 +667,7 @@ public class Cosmas2QueryProcessorTest {
 
 
 	@Test
-	public void testBEG_END() throws QueryException, JsonProcessingException, IOException {
+	public void testBEG_END() throws JsonProcessingException, IOException {
 		query = "#BEG(der /w3:5 Mann)";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -777,7 +776,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testELEM() throws QueryException, JsonProcessingException, IOException {
+	public void testELEM() throws JsonProcessingException, IOException {
 		query = "#ELEM(S)";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -847,7 +846,7 @@ public class Cosmas2QueryProcessorTest {
 		assertEquals("match:ne",		res.at("/query/attr/operands/1/operands/1/match").asText());
 	}
 	@Test
-	public void testOPALL() throws QueryException, JsonProcessingException, IOException {
+	public void testOPALL() throws JsonProcessingException, IOException {
 		query = "#ALL(gehen /w1:10 voran)";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -883,7 +882,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testOPNHIT() throws QueryException, JsonProcessingException, IOException {
+	public void testOPNHIT() throws JsonProcessingException, IOException {
 		query = "#NHIT(gehen /w1:10 voran)";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -944,7 +943,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testOPBED() throws QueryException, JsonProcessingException, IOException {
+	public void testOPBED() throws JsonProcessingException, IOException {
 		query = "#BED(der , sa)";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -1026,7 +1025,7 @@ public class Cosmas2QueryProcessorTest {
 	}
 
 	@Test
-	public void testColonSeparatedConditions() throws QueryException, JsonProcessingException, IOException {
+	public void testColonSeparatedConditions() throws JsonProcessingException, IOException {
 		query = "der:sa";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());

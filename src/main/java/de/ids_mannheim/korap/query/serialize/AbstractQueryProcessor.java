@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 
 public abstract class AbstractQueryProcessor {
 	
-	public abstract void process(String query);
-	
 	Logger log;
 	/**
 	 *  The query
@@ -59,6 +57,8 @@ public abstract class AbstractQueryProcessor {
 		requestMap.put("query", new LinkedHashMap<String, Object>());
 		requestMap.put("meta", new LinkedHashMap<String, Object>());
 	}
+	
+	public abstract void process(String query);
 	
 	public void addWarning(int code, String msg) {
 		List<Object> warning = Arrays.asList(new Object[]{code, msg}); 

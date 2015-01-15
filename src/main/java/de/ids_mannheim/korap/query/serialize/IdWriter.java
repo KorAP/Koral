@@ -9,15 +9,15 @@ import java.util.Iterator;
 /**
  * @author hanl
  * @date 04/06/2014
- * <p/>
- * create idn for korap:token
+ *       <p/>
+ *       create idn for korap:token
  */
 public class IdWriter {
 
     private JsonNode node;
     private int counter;
 
-    public IdWriter(String json) {
+    public IdWriter (String json) {
         node = JsonUtils.readTree(json);
         counter = 0;
     }
@@ -32,7 +32,8 @@ public class IdWriter {
             Iterator<JsonNode> operands = node.path("operands").elements();
             while (operands.hasNext())
                 process(operands.next());
-        } else if (node.path("@type").asText().equals("korap:token"))
+        }
+        else if (node.path("@type").asText().equals("korap:token"))
             addId(node);
     }
 

@@ -19,22 +19,22 @@ import java.util.Map;
  * @author bingel, hanl
  */
 public class QuerySerializer {
-	
-	public enum QueryLanguage {
-		POLIQARPPLUS, ANNIS, COSMAS2, CQL, CQP
-	}
-	
-	static HashMap<String, Class<? extends AbstractQueryProcessor>> qlProcessorAssignment;
 
-	static {
-		qlProcessorAssignment  = new HashMap<String, Class<? extends AbstractQueryProcessor>>();
-		qlProcessorAssignment.put("poliqarpplus", PoliqarpPlusQueryProcessor.class);
-		qlProcessorAssignment.put("cosmas2", Cosmas2QueryProcessor.class);
-		qlProcessorAssignment.put("annis", AnnisQueryProcessor.class);
-		qlProcessorAssignment.put("cql", CqlQueryProcessor.class);
-	}
-	
-	
+    public enum QueryLanguage {
+        POLIQARPPLUS, ANNIS, COSMAS2, CQL, CQP
+    }
+
+    static HashMap<String, Class<? extends AbstractQueryProcessor>> qlProcessorAssignment;
+
+    static {
+        qlProcessorAssignment = 
+                new HashMap<String, Class<? extends AbstractQueryProcessor>>();
+        qlProcessorAssignment.put("poliqarpplus", PoliqarpPlusQueryProcessor.class);
+        qlProcessorAssignment.put("cosmas2", Cosmas2QueryProcessor.class);
+        qlProcessorAssignment.put("annis", AnnisQueryProcessor.class);
+        qlProcessorAssignment.put("cql", CqlQueryProcessor.class);
+    }
+
     private Logger qllogger = KorAPLogger.initiate("ql");
     public static String queryLanguageVersion;
 
@@ -54,44 +54,55 @@ public class QuerySerializer {
     public static void main(String[] args) {
         /*
          * just for testing...
-		 */
+         */
         QuerySerializer jg = new QuerySerializer();
         int i = 0;
         String[] queries;
         if (args.length == 0) {
-            queries = new String[]{
-            };
-        } else
-            queries = new String[]{args[0]};
-        
+            queries = new String[] {};
+        }
+        else
+            queries = new String[] { args[0] };
+
         for (String q : queries) {
             i++;
             try {
                 System.out.println(q);
                 String ql = "cosmas2";
                 jg.setCollection("pubDate=2014");
-                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + "_" + i + ".jsonld");
+                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + "_"
+                        + i + ".jsonld");
                 System.out.println();
-            } catch (NullPointerException npe) {
+            }
+            catch (NullPointerException npe) {
                 npe.printStackTrace();
                 System.out.println("null\n");
-            } catch (JsonGenerationException e) {
+            }
+            catch (JsonGenerationException e) {
                 e.printStackTrace();
-            } catch (JsonMappingException e) {
+            }
+            catch (JsonMappingException e) {
                 e.printStackTrace();
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
     /**
-     * Runs the QuerySerializer by initializing the relevant AbstractSyntaxTree implementation (depending on specified query language)
-     * and transforms and writes the tree's requestMap to the specified output file.
+     * Runs the QuerySerializer by initializing the relevant
+     * AbstractSyntaxTree implementation (depending on specified query
+     * language) and transforms and writes the tree's requestMap to
+     * the specified output file.
      *
-     * @param outFile       The file to which the serialization is written
-     * @param query         The query string
-     * @param queryLanguage The query language. As of 17 Dec 2014, this must be one of 'poliqarpplus', 'cosmas2', 'annis' or 'cql'. 
+     * @param outFile
+     *            The file to which the serialization is written
+     * @param query
+     *            The query string
+     * @param queryLanguage
+     *            The query language. As of 17 Dec 2014, this must be
+     *            one of 'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
      * @throws IOException
      * @throws QueryException
      */
@@ -99,41 +110,56 @@ public class QuerySerializer {
             throws IOException {
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        } else if (queryLanguage.equalsIgnoreCase("cosmas2")) {
+        }
+        else if (queryLanguage.equalsIgnoreCase("cosmas2")) {
             ast = new Cosmas2QueryProcessor(query);
-        } else if (queryLanguage.equalsIgnoreCase("poliqarpplus")) {
+        }
+        else if (queryLanguage.equalsIgnoreCase("poliqarpplus")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        } else if (queryLanguage.equalsIgnoreCase("cql")) {
+        }
+        else if (queryLanguage.equalsIgnoreCase("cql")) {
             ast = new CqlQueryProcessor(query);
-        } else if (queryLanguage.equalsIgnoreCase("annis")) {
+        }
+        else if (queryLanguage.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
-        } else {
-            throw new IllegalArgumentException(queryLanguage + " is not a supported query language!");
+        }
+        else {
+            throw new IllegalArgumentException(queryLanguage
+                    + " is not a supported query language!");
         }
         toJSON();
     }
 
     public QuerySerializer setQuery(String query, String ql, String version) {
-    	ast = new DummyQueryProcessor();
-    	if (query == null || query.isEmpty()) {
-			ast.addError(StatusCodes.NO_QUERY, "You did not specify a query!");
-		} else if (ql == null || ql.isEmpty()){
-            ast.addError(StatusCodes.NO_QUERY, "You did not specify any query language!");
-        } else if (ql.equalsIgnoreCase("poliqarp")) {
+        ast = new DummyQueryProcessor();
+        if (query == null || query.isEmpty()) {
+            ast.addError(StatusCodes.NO_QUERY, "You did not specify a query!");
+        }
+        else if (ql == null || ql.isEmpty()) {
+            ast.addError(StatusCodes.NO_QUERY,
+                    "You did not specify any query language!");
+        }
+        else if (ql.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        } else if (ql.equalsIgnoreCase("cosmas2")) {
+        }
+        else if (ql.equalsIgnoreCase("cosmas2")) {
             ast = new Cosmas2QueryProcessor(query);
-        } else if (ql.equalsIgnoreCase("poliqarpplus")) {
+        }
+        else if (ql.equalsIgnoreCase("poliqarpplus")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        } else if (ql.equalsIgnoreCase("cql")) {
+        }
+        else if (ql.equalsIgnoreCase("cql")) {
             if (version == null)
                 ast = new CqlQueryProcessor(query);
             else
                 ast = new CqlQueryProcessor(query, version);
-        } else if (ql.equalsIgnoreCase("annis")) {
+        }
+        else if (ql.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
-        } else {
-        	ast.addError(StatusCodes.UNKNOWN_QL, ql + " is not a supported query language!");
+        }
+        else {
+            ast.addError(StatusCodes.UNKNOWN_QL, ql
+                    + " is not a supported query language!");
         }
         return this;
     }
@@ -174,19 +200,16 @@ public class QuerySerializer {
                 requestMap.put("warnings", warnings);
             }
             if (this.messages != null) {
-            	messages.addAll(this.messages);
+                messages.addAll(this.messages);
                 requestMap.put("messages", messages);
             }
-            
 
             return requestMap;
         }
         return new HashMap<>();
     }
 
-
-    public QuerySerializer addMeta(
-            String cli, String cri, int cls, int crs,
+    public QuerySerializer addMeta(String cli, String cri, int cls, int crs,
             int num, int pageIndex) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
         meta.setSpanContext(cls, cli, crs, cri);
@@ -234,7 +257,8 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer setDeprCollection(CollectionQueryBuilder collections) {
+    public QuerySerializer setDeprCollection
+            (CollectionQueryBuilder collections) {
         this.collection = collections.raw();
         return this;
     }

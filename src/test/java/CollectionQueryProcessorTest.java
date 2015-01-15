@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 import org.junit.Test;
 
@@ -24,7 +23,7 @@ public class CollectionQueryProcessorTest {
 	JsonNode res;
 	
 	@Test
-	public void testContext() throws QueryException, JsonProcessingException, IOException {
+	public void testContext() throws JsonProcessingException, IOException {
 		collection = "textClass=politik";
 		String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld";
 		qs.setQuery(query,ql);
@@ -34,7 +33,7 @@ public class CollectionQueryProcessorTest {
 	}
 	
 	@Test
-	public void testSimple() throws QueryException, JsonProcessingException, IOException {
+	public void testSimple() throws JsonProcessingException, IOException {
 		collection = "textClass=politik";
 		qs.setQuery(query,ql);
 		qs.setCollection(collection);
@@ -55,7 +54,7 @@ public class CollectionQueryProcessorTest {
 	}
 	
 	@Test
-	public void testContains() throws QueryException, JsonProcessingException, IOException {
+	public void testContains() throws JsonProcessingException, IOException {
 		collection = "title~Mannheim";
 		qs.setQuery(query,ql);
 		qs.setCollection(collection);
@@ -76,7 +75,7 @@ public class CollectionQueryProcessorTest {
 	}
 	
 	@Test
-	public void testTwoConjuncts() throws QueryException, JsonProcessingException, IOException {
+	public void testTwoConjuncts() throws JsonProcessingException, IOException {
 		collection = "textClass=Sport & pubDate in 2014";
 		qs.setQuery(query,ql);
 		qs.setCollection(collection);
@@ -112,7 +111,7 @@ public class CollectionQueryProcessorTest {
 	}
 
 	@Test
-	public void testThreeConjuncts() throws QueryException, JsonProcessingException, IOException {
+	public void testThreeConjuncts() throws JsonProcessingException, IOException {
 		collection = "textClass=Sport & pubDate in 2014 & corpusId=WPD";
 		qs.setQuery(query,ql);
 		qs.setCollection(collection);
@@ -136,7 +135,7 @@ public class CollectionQueryProcessorTest {
 		assertEquals("match:eq",		res.at("/collection/operands/1/operands/1/match").asText());
 	}
 	@Test
-	public void testTwoDisjuncts() throws QueryException, JsonProcessingException, IOException {
+	public void testTwoDisjuncts() throws JsonProcessingException, IOException {
 		collection = "textClass=Sport | pubDate in 2014";
 		qs.setQuery(query,ql);
 		qs.setCollection(collection);
@@ -155,7 +154,7 @@ public class CollectionQueryProcessorTest {
 	}
 	
 	@Test
-	public void testThreeDisjuncts() throws QueryException, JsonProcessingException, IOException {
+	public void testThreeDisjuncts() throws JsonProcessingException, IOException {
 		collection = "textClass=Sport | pubDate in 2014 | corpusId=WPD";
 		qs.setQuery(query,ql);
 		qs.setCollection(collection);
@@ -180,7 +179,7 @@ public class CollectionQueryProcessorTest {
 	}
 	
 	@Test
-	public void testMixed() throws QueryException, JsonProcessingException, IOException {
+	public void testMixed() throws JsonProcessingException, IOException {
 		collection = "textClass=Sport | (pubDate in 2014 & corpusId=WPD)";
 		qs.setQuery(query,ql);
 		qs.setCollection(collection);
@@ -291,7 +290,7 @@ public class CollectionQueryProcessorTest {
 	}
 
 	@Test
-	public void testDateYear() throws QueryException, JsonProcessingException, IOException {
+	public void testDateYear() throws JsonProcessingException, IOException {
 		collection = "pubDate in 2000";
 		qs.setQuery(query,ql);
 		qs.setCollection(collection);
@@ -334,7 +333,7 @@ public class CollectionQueryProcessorTest {
 	}
 	
 	@Test
-	public void testDateMonthDay() throws QueryException, JsonProcessingException, IOException {
+	public void testDateMonthDay() throws JsonProcessingException, IOException {
 		collection = "pubDate in 2000-02";
 		qs.setQuery(query,ql);
 		qs.setCollection(collection);

@@ -16,7 +16,7 @@ public class MetaQueryBuilder {
     private Map meta;
     private SpanContext spanContext;
 
-    public MetaQueryBuilder() {
+    public MetaQueryBuilder () {
         this.meta = new LinkedHashMap();
     }
 
@@ -31,7 +31,7 @@ public class MetaQueryBuilder {
      * @return
      */
     public MetaQueryBuilder setSpanContext(Integer left, String leftType,
-                                           Integer right, String rightType) {
+            Integer right, String rightType) {
         this.spanContext = new SpanContext(left, leftType, right, rightType);
         return this;
     }
@@ -41,8 +41,9 @@ public class MetaQueryBuilder {
     }
 
     /**
-     * context if of type paragraph or sentence where left and right size delimiters are irrelevant; or 2-token, 2-char
-     * p/paragraph, s/sentence or token, char
+     * context if of type paragraph or sentence where left and right
+     * size delimiters are irrelevant; or 2-token, 2-char p/paragraph,
+     * s/sentence or token, char
      *
      * @param context
      * @return
@@ -51,17 +52,17 @@ public class MetaQueryBuilder {
         if (context.startsWith("s") | context.startsWith("p"))
             this.spanContext = new SpanContext(context);
         else {
-            String[] ct = context.replaceAll("\\s+","").split(",");
+            String[] ct = context.replaceAll("\\s+", "").split(",");
             String[] lc = ct[0].split("-");
             String[] rc = ct[1].split("-");
-            this.spanContext = new SpanContext(Integer.valueOf(lc[0]), lc[1], Integer.valueOf(rc[0]), rc[1]);
+            this.spanContext = new SpanContext(Integer.valueOf(lc[0]), lc[1],
+                    Integer.valueOf(rc[0]), rc[1]);
         }
         return this;
     }
 
     public MetaQueryBuilder fillMeta(Integer pageIndex, Integer pageInteger,
-                                     Integer pageLength,
-                                     String ctx, Boolean cutoff) {
+            Integer pageLength, String ctx, Boolean cutoff) {
         if (pageIndex != null)
             this.addEntry("startIndex", pageIndex);
         if (pageIndex == null && pageInteger != null)
@@ -74,7 +75,6 @@ public class MetaQueryBuilder {
             this.addEntry("cutOff", cutoff);
         return this;
     }
-
 
     public MetaQueryBuilder addEntry(String name, Object value) {
         meta.put(name, value);
@@ -95,7 +95,6 @@ public class MetaQueryBuilder {
         private int right_size;
         private String context = null;
 
-
         /**
          * context segment if context is either of type char or token.
          * size can differ for left and right span
@@ -106,14 +105,14 @@ public class MetaQueryBuilder {
          * @param rt
          * @return
          */
-        public SpanContext(int ls, String lt, int rs, String rt) {
+        public SpanContext (int ls, String lt, int rs, String rt) {
             this.left_type = lt;
             this.left_size = ls;
             this.right_type = rt;
             this.right_size = rs;
         }
 
-        public SpanContext(String context) {
+        public SpanContext (String context) {
             this.context = context;
         }
 
@@ -130,7 +129,8 @@ public class MetaQueryBuilder {
                 r.add(this.right_size);
                 map.put("right", r);
                 meta.put("context", map);
-            } else
+            }
+            else
                 meta.put("context", this.context);
             return meta;
         }

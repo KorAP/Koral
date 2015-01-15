@@ -117,7 +117,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             if (checkDateValidity(valueNode)) {
         		addWarning("The collection query contains a value that looks like a date ('"+valueNode.getText()+"')"
         				+ " and an operator that is only defined for strings ('"+match+"'). The value is interpreted as "
-        						+ "a string, use a date operator to ensure the value is treated as a date");            	
+        						+ "a string. Use a date operator to ensure the value is treated as a date");            	
             }
             putIntoSuperObject(term);
         }

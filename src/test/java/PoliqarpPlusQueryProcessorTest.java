@@ -12,7 +12,6 @@ import com.google.common.collect.Lists;
 
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 /**
  * Tests for JSON-LD serialization of PoliqarpPlus queries. 
@@ -29,7 +28,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	JsonNode res;
 
 	@Test
-	public void testContext() throws QueryException, JsonProcessingException, IOException {
+	public void testContext() throws JsonProcessingException, IOException {
 		query = "foo";
 		String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld";
 		qs.setQuery(query, "poliqarpplus");
@@ -38,7 +37,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testSingleTokens() throws QueryException, JsonProcessingException, IOException {
+	public void testSingleTokens() throws JsonProcessingException, IOException {
 		query = "[base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -82,7 +81,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testValue() throws QueryException, JsonProcessingException, IOException {
+	public void testValue() throws JsonProcessingException, IOException {
 		query = "[mate/m=temp:pres]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -96,7 +95,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testRegex() throws QueryException, JsonProcessingException, IOException {
+	public void testRegex() throws JsonProcessingException, IOException {
 		query = "[orth=\"M(a|ä)nn(er)?\"]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -140,7 +139,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testCaseSensitivityFlag() throws QueryException, JsonProcessingException, IOException {
+	public void testCaseSensitivityFlag() throws JsonProcessingException, IOException {
 		query = "[orth=deutscher/i]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -207,7 +206,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testSpans() throws QueryException, JsonProcessingException, IOException {
+	public void testSpans() throws JsonProcessingException, IOException {
 		query = "<s>";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -283,7 +282,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testDistances() throws QueryException, JsonProcessingException, IOException {
+	public void testDistances() throws JsonProcessingException, IOException {
 		query = "[base=der][][base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -439,7 +438,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testDistancesWithClass() throws QueryException, JsonProcessingException, IOException {
+	public void testDistancesWithClass() throws JsonProcessingException, IOException {
 		query = "[base=der]{[]}[base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -482,7 +481,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testLeadingTrailingEmptyTokens() throws QueryException, JsonProcessingException, IOException {
+	public void testLeadingTrailingEmptyTokens() throws JsonProcessingException, IOException {
 		query = "[][base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -512,7 +511,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testRepetition() throws QueryException, JsonProcessingException, IOException {
+	public void testRepetition() throws JsonProcessingException, IOException {
 		query = "der{3}";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -554,7 +553,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	};
 
 	@Test
-	public void testGroupRepetition() throws QueryException, JsonProcessingException, IOException {
+	public void testGroupRepetition() throws JsonProcessingException, IOException {
 		query = "contains(<s>, (der){3})";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -591,7 +590,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	};
 
 	@Test
-	public void testPositions() throws QueryException, JsonProcessingException, IOException {
+	public void testPositions() throws JsonProcessingException, IOException {
 		query = "contains(<s>, der)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -674,7 +673,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	};
 
 	@Test
-	public void testCoordinatedFields() throws QueryException, JsonProcessingException, IOException {
+	public void testCoordinatedFields() throws JsonProcessingException, IOException {
 		query = "[base=Mann&(cas=N|cas=A)]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -705,7 +704,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testTokenSequence() throws QueryException, JsonProcessingException, IOException {
+	public void testTokenSequence() throws JsonProcessingException, IOException {
 		query = "[base=Mann][orth=Frau]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -730,7 +729,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testDisjSegments() throws QueryException, JsonProcessingException, IOException {
+	public void testDisjSegments() throws JsonProcessingException, IOException {
 		query = "[base=der]|[base=das]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -822,7 +821,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testTokenSpanSequence() throws QueryException, JsonProcessingException, IOException {
+	public void testTokenSpanSequence() throws JsonProcessingException, IOException {
 		query = "[base=Mann]<vp>";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -857,7 +856,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test 
-	public void testClasses() throws QueryException, JsonProcessingException, IOException {
+	public void testClasses() throws JsonProcessingException, IOException {
 		query = "{[base=Mann]}";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -912,7 +911,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testFocusSplit() throws QueryException, JsonProcessingException, IOException {
+	public void testFocusSplit() throws JsonProcessingException, IOException {
 		query = "focus([orth=Der]{[orth=Mann]})";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -997,7 +996,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testSubmatch() throws QueryException, JsonProcessingException, IOException {
+	public void testSubmatch() throws JsonProcessingException, IOException {
 		query = "submatch(1,:<s>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1027,7 +1026,7 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("Haus", 				res.at("/query/operands/0/operands/1/wrap/key").asText());
 	}
 	@Test
-	public void testRelations() throws QueryException, JsonProcessingException, IOException {
+	public void testRelations() throws JsonProcessingException, IOException {
 		query = "relatesTo(<s>,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1104,7 +1103,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testAlign() throws QueryException, JsonProcessingException, IOException {
+	public void testAlign() throws JsonProcessingException, IOException {
 		query = "[orth=der]^[orth=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1157,7 +1156,7 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 
 	@Test
-	public void testSimpleQueries() throws QueryException, JsonProcessingException, IOException {
+	public void testSimpleQueries() throws JsonProcessingException, IOException {
 		query = "Baum";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());

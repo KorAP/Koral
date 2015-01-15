@@ -20,6 +20,7 @@ public class CosmasCondition {
 		elem = nodeString.substring(0, 1);
 		nodeString = nodeString.substring(1);
 		
-		position = nodeString.equals("a") ? "frames:startswith" : "frames:endswith";
+		position = nodeString.equals("a") ? 
+		        "frames:startswith" : "frames:endswith";
 	}
 }

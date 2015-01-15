@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.CqlQueryProcessor;
 import de.ids_mannheim.korap.query.serialize.Cosmas2QueryProcessor;
-import de.ids_mannheim.korap.query.serialize.util.QueryException;
 
 
 public class CqlQueryProcessorTest {
@@ -24,7 +23,7 @@ public class CqlQueryProcessorTest {
 		query = "(Kuh) prox (Germ) ";
 		try {
 			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
-		} catch (QueryException e) {
+		} catch (Exception e) {
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(48,errorCode);
 		}
@@ -32,7 +31,7 @@ public class CqlQueryProcessorTest {
 		query = "(Kuh) or/rel.combine=sum (Germ) ";		
 		try {
 			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
-		}catch (QueryException e) {			
+		}catch (Exception e) {			
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(20,errorCode);
 		}
@@ -40,7 +39,7 @@ public class CqlQueryProcessorTest {
 		query = "dc.title any Germ ";
 		try {
 			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
-		} catch (QueryException e) {
+		} catch (Exception e) {
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(16,errorCode);
 		}
@@ -48,7 +47,7 @@ public class CqlQueryProcessorTest {
 		query = "cql.serverChoice any Germ ";
 		try {
 			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
-		} catch (QueryException e) {
+		} catch (Exception e) {
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(19,errorCode);
 		}
@@ -56,14 +55,14 @@ public class CqlQueryProcessorTest {
 		query = "";
 		try {
 			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);
-		} catch (QueryException e) {
+		} catch (Exception e) {
 			int errorCode = Integer.parseInt(e.getMessage().split(":")[0].replace("SRU diagnostic ", ""));
 			assertEquals(27,errorCode);
 		}
 	}
 	
 	@Test
-	public void testAndQuery() throws CQLParseException, IOException, QueryException{
+	public void testAndQuery() throws CQLParseException, IOException, Exception{
 		query="(Sonne) and (scheint)";	
 		String jsonLd = 
 			"{@type : korap:group, operation : operation:sequence, inOrder : false," +		
@@ -84,7 +83,7 @@ public class CqlQueryProcessorTest {
 	}
 	
 	@Test
-	public void testBooleanQuery() throws CQLParseException, IOException, QueryException{		
+	public void testBooleanQuery() throws CQLParseException, IOException, Exception{		
 		query="((Sonne) or (Mond)) and (scheint)";		
 		String jsonLd = 
 			"{@type:korap:group, operation:operation:sequence, inOrder : false, distances:[" +
@@ -119,7 +118,7 @@ public class CqlQueryProcessorTest {
 	}
 	
 	@Test
-	public void testOrQuery() throws CQLParseException, IOException, QueryException{
+	public void testOrQuery() throws CQLParseException, IOException, Exception{
 		query = "(Sonne) or (Mond)";		
 		String jsonLd = 
 			"{@type:korap:group, operation:operation:or, operands:[" +
@@ -163,7 +162,7 @@ public class CqlQueryProcessorTest {
 	}
 	
 	@Test
-	public void testTermQuery() throws CQLParseException, IOException, QueryException{
+	public void testTermQuery() throws CQLParseException, IOException, Exception{
 		query = "Sonne";		
 		String jsonLd = "{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}";		
 		CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
@@ -172,7 +171,7 @@ public class CqlQueryProcessorTest {
 	}
 	
 	@Test
-	public void testPhraseQuery() throws CQLParseException, IOException, QueryException{
+	public void testPhraseQuery() throws CQLParseException, IOException, Exception{
 		query="\"der Mann\"";				
 		String jsonLd = 
 			"{@type:korap:group, operation:operation:sequence, operands:[" +
