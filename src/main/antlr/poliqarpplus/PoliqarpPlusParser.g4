@@ -212,6 +212,9 @@ query
 : segment | sequence | disjunction
 ;
 
+within
+: WITHIN WORD
+;
 
 /**
  === META section ===
@@ -225,4 +228,4 @@ metaTermGroup	   : ( term | termGroup )+;
     Entry point for all requests. Linguistic query is obligatory, metadata filtering
     is optional.
 */
-request            : query meta? EOF;
+request            : query within? meta? EOF;

@@ -35,6 +35,7 @@ POSITION_OP : ('contains' | 'startswith' | 'startsWith' | 'endswith' | 'endsWith
 RELATION_OP	: ('dominates' | 'relatesTo');
 MATCH_OP 	: ('focus' | 'shrink' | 'split');  // submatch and shrink are deprecated!
 SUBMATCH_OP	: 'submatch';
+WITHIN		: 'within';
 META		: 'meta';
 
 /*

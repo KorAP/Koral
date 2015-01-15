@@ -547,25 +547,26 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      * @param node
      */
     private void processMeta(ParseTree node) {
-        LinkedHashMap<String, Object> metaFilter = new LinkedHashMap<String, Object>();
-        requestMap.put("meta", metaFilter);
-        metaFilter.put("@type", "korap:meta");
+        addWarning("You used the 'meta' keyword in a PoliqarpPlus query. This"
+                + " feature is currently not supported. Please use virtual "
+                + "collections to restrict documents by metadata.");
+        for (ParseTree child : getChildren(node)) {
+            visited.add(child);
+        }
     }
 
-    /**
-     * NB: requires that parent is not 'position'!
-     * 
-     * @param node
-     */
     private void processWithin(ParseTree node) {
-        ParseTree domainNode = node.getChild(2);
+        ParseTree domainNode = node.getChild(1);
         String domain = getNodeCat(domainNode);
-        LinkedHashMap<String, Object> curObject = (LinkedHashMap<String, Object>) objectStack
-                .getFirst();
-        curObject.put("within", domain);
+        LinkedHashMap<String, Object> span = CqlfObjectGenerator.makeSpan(domain);
+        LinkedHashMap<String, Object> queryObj = (LinkedHashMap<String, Object>) requestMap.get("query");
+        LinkedHashMap<String, Object> contains = CqlfObjectGenerator.makePosition(new String[]{"frames:contains"}, null);
+        ArrayList<Object> operands = (ArrayList<Object>) contains.get("operands");
+        operands.add(span);
+        operands.add(queryObj);
+        requestMap.put("query", contains);
         visited.add(node.getChild(0));
         visited.add(node.getChild(1));
-        visited.add(domainNode);
     }
 
     /**
