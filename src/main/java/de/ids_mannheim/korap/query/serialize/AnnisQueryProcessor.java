@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import de.ids_mannheim.korap.query.parse.annis.AqlLexer;
 import de.ids_mannheim.korap.query.parse.annis.AqlParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
-import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
+import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 
 /**
  * Map representation of ANNIS QL syntax tree as returned by ANTLR
@@ -88,7 +88,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 	private LinkedHashMap<String, Integer> nodeReferencesProcessed = new LinkedHashMap<String, Integer>();
 
 	public AnnisQueryProcessor(String query) {
-		CqlfObjectGenerator.setQueryProcessor(this);
+		KoralObjectGenerator.setQueryProcessor(this);
 		process(query);
 	}
 
@@ -119,6 +119,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 		if (verbose) {
 			System.err.println(" "+objectStack);
+			System.err.println(" "+operandStack);
 			System.out.println(openNodeCats);
 		}
 
@@ -224,7 +225,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 	private void processExprTop(ParseTree node) {
 		List<ParseTree> andTopExprs = getChildrenWithCat(node, "andTopExpr");
 		if (andTopExprs.size() > 1) {
-			LinkedHashMap<String, Object> topOr = CqlfObjectGenerator.makeGroup("or");
+			LinkedHashMap<String, Object> topOr = KoralObjectGenerator.makeGroup("or");
 			requestMap.put("query", topOr);
 			objectStack.push(topOr);
 		}
@@ -235,11 +236,11 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 		String firstChildNodeCat = getNodeCat(node.getChild(0));
 		LinkedHashMap<String, Object> object = null;
 		if (firstChildNodeCat.equals("node")) {
-			object = CqlfObjectGenerator.makeSpan();
+			object = KoralObjectGenerator.makeSpan();
 		} else if (firstChildNodeCat.equals("tok")) {
-			object = CqlfObjectGenerator.makeToken();
+			object = KoralObjectGenerator.makeToken();
 			if (node.getChildCount() > 1) { // empty tokens do not wrap a term
-				LinkedHashMap<String, Object> term = CqlfObjectGenerator.makeTerm();
+				LinkedHashMap<String, Object> term = KoralObjectGenerator.makeTerm();
 				term.put("layer", "orth");
 				object.put("wrap", term);
 			}
@@ -248,17 +249,17 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 			// TODO generalize the list below -> look up layers associated with tokens rather than spans somewhere
 			HashMap<String, Object> qNameParse = parseQNameNode(node.getChild(0));
 			if (Arrays.asList(new String[]{"p", "lemma", "m", "orth"}).contains(qNameParse.get("layer"))) { 
-				object = CqlfObjectGenerator.makeToken();
-				LinkedHashMap<String, Object> term = CqlfObjectGenerator.makeTerm();
+				object = KoralObjectGenerator.makeToken();
+				LinkedHashMap<String, Object> term = KoralObjectGenerator.makeTerm();
 				object.put("wrap", term);
 				term.putAll(qNameParse);
 			} else {
-				object = CqlfObjectGenerator.makeSpan();
+				object = KoralObjectGenerator.makeSpan();
 				object.putAll(qNameParse);
 			}
 		} else if (firstChildNodeCat.equals("textSpec")) {
-			object = CqlfObjectGenerator.makeToken();
-			LinkedHashMap<String, Object> term = CqlfObjectGenerator.makeTerm();
+			object = KoralObjectGenerator.makeToken();
+			LinkedHashMap<String, Object> term = KoralObjectGenerator.makeTerm();
 			object.put("wrap", term);
 			term.put("layer", "orth");
 			term.putAll(parseTextSpec(node.getChild(0)));
@@ -309,12 +310,12 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 			if (nodeReferencesTotal.get(ref) > 1) {
 				if (nodeReferencesProcessed.get(ref)==0) {
 					refClassMapping.put(ref, classCounter);
-					operand = CqlfObjectGenerator.wrapInClass(operand, classCounter++);
+					operand = KoralObjectGenerator.wrapInClass(operand, classCounter++);
 				} else if (nodeReferencesProcessed.get(ref)>0 && nodeReferencesTotal.get(ref)>1) {
 					try {
-						operand = CqlfObjectGenerator.wrapInReference(operandStack.pop(), refClassMapping.get(ref), true);
+						operand = KoralObjectGenerator.wrapInReference(operandStack.pop(), refClassMapping.get(ref), true);
 					} catch (NoSuchElementException e) {
-						operand = CqlfObjectGenerator.makeReference(refClassMapping.get(ref));
+						operand = KoralObjectGenerator.makeReference(refClassMapping.get(ref), true);
 					}
 				}
 				nodeReferencesProcessed.put(ref, nodeReferencesProcessed.get(ref)+1);
@@ -348,14 +349,14 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 			// This is modeled here...
 			if (reltype.equals("commonparent") || reltype.equals("commonancestor")) {
 				// make an (outer) group and an inner group containing the dummy node or previous relations
-				group = CqlfObjectGenerator.makeGroup("relation");
-				LinkedHashMap<String,Object> innerGroup = CqlfObjectGenerator.makeGroup("relation");
-				LinkedHashMap<String,Object> relation = CqlfObjectGenerator.makeRelation();
-				LinkedHashMap<String,Object> term = CqlfObjectGenerator.makeTerm();
+				group = KoralObjectGenerator.makeGroup("relation");
+				LinkedHashMap<String,Object> innerGroup = KoralObjectGenerator.makeGroup("relation");
+				LinkedHashMap<String,Object> relation = KoralObjectGenerator.makeRelation();
+				LinkedHashMap<String,Object> term = KoralObjectGenerator.makeTerm();
 				term.put("layer", "c");
 				relation.put("wrap", term);
 				// commonancestor is an indirect commonparent relation
-				if (reltype.equals("commonancestor")) relation.put("boundary", CqlfObjectGenerator.makeBoundary(1, null));
+				if (reltype.equals("commonancestor")) relation.put("boundary", KoralObjectGenerator.makeBoundary(1, null));
 				group.put("relation", relation);
 				innerGroup.put("relation", relation);
 				// Get operands list before possible re-assignment of 'group' (see following 'if')
@@ -363,23 +364,23 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 				ArrayList<Object> innerOperands  = (ArrayList<Object>) innerGroup.get("operands");
 				// for lowest level, add the underspecified node as first operand and wrap it in a class group
 				if (i == 1) {
-					innerOperands.add(CqlfObjectGenerator.wrapInClass(CqlfObjectGenerator.makeSpan(), classCounter));
+					innerOperands.add(KoralObjectGenerator.wrapInClass(KoralObjectGenerator.makeSpan(), classCounter));
 					// add the first operand and wrap the whole group in a focusing reference 
 					innerOperands.add(operand1);
-					innerGroup = CqlfObjectGenerator.wrapInReference(innerGroup, classCounter, true);
+					innerGroup = KoralObjectGenerator.wrapInReference(innerGroup, classCounter, true);
 					outerOperands.add(innerGroup);
 				} else {
 					outerOperands.add(operandStack.pop());
 				}
 				// Lookahead: if next operator is not commonparent or commonancestor, wrap in class for accessibility
 				if (i < node.getChildCount()-2 && !getNodeCat(node.getChild(i+2).getChild(0)).startsWith("common")) {
-					operand2 = CqlfObjectGenerator.wrapInClass(operand2, ++classCounter);
+					operand2 = KoralObjectGenerator.wrapInClass(operand2, ++classCounter);
 				}
 				outerOperands.add(operand2);
 
 				// Wrap in another reference object in case other relations are following
 				if (i < node.getChildCount()-2) {
-					group = CqlfObjectGenerator.wrapInReference(group, classCounter, true);
+					group = KoralObjectGenerator.wrapInReference(group, classCounter, true);
 				}
 				// All other n-ary linguistic relations have special 'relation' attributes defined in CQLF and can be
 				// handled more easily...
@@ -392,12 +393,12 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 					groupType = "relation";
 				}
 				if (groupType.equals("relation") || groupType.equals("treeRelation")) {
-					group = CqlfObjectGenerator.makeGroup(groupType);
+					group = KoralObjectGenerator.makeGroup(groupType);
 					LinkedHashMap<String, Object> relation = new LinkedHashMap<String, Object>();
 					putAllButGroupType(relation, operatorGroup);
 					group.put("relation", relation);
 				} else if (groupType.equals("sequence")) {
-					group = CqlfObjectGenerator.makeGroup(groupType);
+					group = KoralObjectGenerator.makeGroup(groupType);
 					putAllButGroupType(group, operatorGroup);
 				} else if (groupType.equals("position")) {
 					group = new LinkedHashMap<String,Object>();
@@ -411,16 +412,16 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 				ParseTree rightChildSpec = getFirstChildWithCat(node.getChild(i).getChild(0), "@r");
 				if (leftChildSpec != null || rightChildSpec != null) {
 					String frame = (leftChildSpec!=null) ? "frames:startswith" : "frames:endswith";
-					LinkedHashMap<String,Object> positionGroup = CqlfObjectGenerator.makePosition(new String[]{frame}, null);
-					operand2 = CqlfObjectGenerator.wrapInClass(operand2, ++classCounter);
+					LinkedHashMap<String,Object> positionGroup = KoralObjectGenerator.makePosition(new String[]{frame}, null);
+					operand2 = KoralObjectGenerator.wrapInClass(operand2, ++classCounter);
 					((ArrayList<Object>) positionGroup.get("operands")).add(group);
-					((ArrayList<Object>) positionGroup.get("operands")).add(CqlfObjectGenerator.makeReference(classCounter,true));
+					((ArrayList<Object>) positionGroup.get("operands")).add(KoralObjectGenerator.makeReference(classCounter,true));
 					group = positionGroup;
 				}
 				
 				// Wrap in reference object in case other relations are following
 				if (i < node.getChildCount()-2) {
-					group = CqlfObjectGenerator.wrapInReference(group, classCounter, true);
+					group = KoralObjectGenerator.wrapInReference(group, classCounter, true);
 				}
 
 				// Inject operands.
@@ -436,14 +437,14 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 					if (i == 1) {
 						// for the first operator, include both operands
 						if (operand1 != null) operands.add(operand1);
-						if (operand2 != null) operands.add(CqlfObjectGenerator.wrapInClass(operand2, classCounter++));
+						if (operand2 != null) operands.add(KoralObjectGenerator.wrapInClass(operand2, classCounter++));
 						// Don't put this into the super object directly but store on operandStack 
 						// (because this group will have to be an operand of a subsequent operator)
 						operandStack.push(group);
 						// for all subsequent operators, only take the 2nd operand (first was already added by previous operator)
 					} else if (i < node.getChildCount()-2) {
 						// for all intermediate operators, include other previous groups and 2nd operand. Store this on the operandStack, too.
-						if (operand2 != null) operands.add(CqlfObjectGenerator.wrapInClass(operand2, classCounter++));
+						if (operand2 != null) operands.add(KoralObjectGenerator.wrapInClass(operand2, classCounter++));
 						operands.add(0, operandStack.pop());
 						operandStack.push(group);
 					} else if (i == node.getChildCount()-2) {
@@ -453,6 +454,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 				}
 			}
 			// Final step: decide what to do with the 'group' object, depending on whether all relations have been processed
+			System.err.println(i == node.getChildCount()-2 && relationCounter == totalRelationCount);
 			if (i == node.getChildCount()-2 && relationCounter == totalRelationCount) {
 				putIntoSuperObject(group);
 				if (!operandStack.isEmpty()) {
@@ -476,7 +478,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 	 */
 	private LinkedHashMap<String, Object> parseUnaryOperator(ParseTree node) {
 		LinkedHashMap<String, Object> attr = new LinkedHashMap<String, Object>();
-		LinkedHashMap<String, Object> term = CqlfObjectGenerator.makeTerm();
+		LinkedHashMap<String, Object> term = KoralObjectGenerator.makeTerm();
 		String op = node.getChild(1).toStringTree(parser).substring(1);
 		if (op.equals("arity") || op.equals("tokenarity")) {
 			LinkedHashMap<String, Object> boundary = boundaryFromRangeSpec(node.getChild(3), false);
@@ -494,13 +496,13 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 		String operator = getNodeCat(operatorNode);
 		// DOMINANCE
 		if (operator.equals("dominance")) {
-			relation = CqlfObjectGenerator.makeRelation();
+			relation = KoralObjectGenerator.makeRelation();
 			relation.put("groupType", "relation");
 			ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
 			ParseTree edgeSpecNode = getFirstChildWithCat(operatorNode, "edgeSpec");
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
 			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
-			LinkedHashMap<String,Object> term = CqlfObjectGenerator.makeTerm();
+			LinkedHashMap<String,Object> term = KoralObjectGenerator.makeTerm();
 			term.put("layer", "c");
 			if (qName != null) term = parseQNameNode(qName);
 			if (edgeSpecNode != null) {
@@ -510,31 +512,31 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 					((ArrayList<Object>) edgeSpec.get("operands")).add(term);
 					term = edgeSpec;
 				} else {
-					term = CqlfObjectGenerator.makeTermGroup("and");
+					term = KoralObjectGenerator.makeTermGroup("and");
 					ArrayList<Object> termGroupOperands = (ArrayList<Object>) term.get("operands");
 					termGroupOperands.add(edgeSpec);
-					LinkedHashMap<String,Object> constTerm = CqlfObjectGenerator.makeTerm();
+					LinkedHashMap<String,Object> constTerm = KoralObjectGenerator.makeTerm();
 					constTerm.put("layer", "c");
 					termGroupOperands.add(constTerm);
 				}
 			}
-			if (star != null) relation.put("boundary", CqlfObjectGenerator.makeBoundary(0, null));
+			if (star != null) relation.put("boundary", KoralObjectGenerator.makeBoundary(0, null));
 			if (rangeSpec != null) relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
 			relation.put("wrap", term);
 		}
 		else if (operator.equals("pointing")) {
 			//			String reltype = operatorNode.getChild(1).toStringTree(parser);
-			relation = CqlfObjectGenerator.makeRelation();
+			relation = KoralObjectGenerator.makeRelation();
 			relation.put("groupType", "relation");
 			ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
 			ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
 			ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
 			//			if (qName != null) relation.putAll(parseQNameNode(qName));
-			LinkedHashMap<String,Object> term = CqlfObjectGenerator.makeTerm();
+			LinkedHashMap<String,Object> term = KoralObjectGenerator.makeTerm();
 			if (qName != null) term.putAll(parseQNameNode(qName));
 			if (edgeSpec != null) term.putAll(parseEdgeSpec(edgeSpec));
-			if (star != null) relation.put("boundary", CqlfObjectGenerator.makeBoundary(0, null));
+			if (star != null) relation.put("boundary", KoralObjectGenerator.makeBoundary(0, null));
 			if (rangeSpec != null) relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
 			relation.put("wrap", term);
 		}
@@ -545,7 +547,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 			ParseTree star = getFirstChildWithCat(operatorNode, "*");
 			ArrayList<Object> distances = new ArrayList<Object>();
 			if (star != null) {
-				distances.add(CqlfObjectGenerator.makeDistance("w", 0, null));
+				distances.add(KoralObjectGenerator.makeDistance("w", 0, null));
 				relation.put("distances", distances);
 			}
 			if (rangeSpec != null) {
@@ -583,7 +585,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 			}
 //			relation.put("frames", frames);
 //			relation.put("sharedClasses", sharedClasses);
-			relation = CqlfObjectGenerator.makePosition(frames, new String[]{});
+			relation = KoralObjectGenerator.makePosition(frames, new String[]{});
 			relation.put("groupType", "position");
 		}
 		else if (operator.equals("identity")) {
@@ -603,7 +605,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 		List<ParseTree> annos = getChildrenWithCat(edgeSpec, "edgeAnno");
 		if (annos.size() == 1) return parseEdgeAnno(annos.get(0));
 		else {
-			LinkedHashMap<String,Object> termGroup = CqlfObjectGenerator.makeTermGroup("and");
+			LinkedHashMap<String,Object> termGroup = KoralObjectGenerator.makeTermGroup("and");
 			ArrayList<Object> operands = (ArrayList<Object>) termGroup.get("operands");
 			for (ParseTree anno : annos) {
 				operands.add(parseEdgeAnno(anno));
@@ -636,7 +638,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 		if (expandToMax) max = null;
 		if (rangeSpec.getChildCount()==3) 
 			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
-		return CqlfObjectGenerator.makeBoundary(min, max);
+		return KoralObjectGenerator.makeBoundary(min, max);
 	}
 
 	private LinkedHashMap<String, Object> parseDistance(ParseTree rangeSpec) {
@@ -644,7 +646,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 		Integer max = null;
 		if (rangeSpec.getChildCount()==3) 
 			max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
-		return CqlfObjectGenerator.makeDistance("w", min, max);
+		return KoralObjectGenerator.makeDistance("w", min, max);
 	}
 
 	private LinkedHashMap<String, Object> parseTextSpec(ParseTree node) {

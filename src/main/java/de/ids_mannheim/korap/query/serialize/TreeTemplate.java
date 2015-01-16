@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import de.ids_mannheim.korap.query.parse.annis.AqlLexer;
 //TODO replace AqlParser with parser for your Antlr4 grammar!
 import de.ids_mannheim.korap.query.parse.annis.AqlParser;
-import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
+import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 /**
@@ -34,7 +34,7 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
 	 * @param parser The ANTLR parser instance that generated the parse tree
 	 */
 	public TreeTemplate(String query) {
-		CqlfObjectGenerator.setQueryProcessor(this);
+		KoralObjectGenerator.setQueryProcessor(this);
 		process(query);
 	}
 

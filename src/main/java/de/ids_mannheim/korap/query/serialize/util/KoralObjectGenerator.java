@@ -6,13 +6,13 @@ import java.util.LinkedHashMap;
 
 import de.ids_mannheim.korap.query.serialize.AbstractQueryProcessor;
 
-public class CqlfObjectGenerator {
+public class KoralObjectGenerator {
 
     protected static final Integer MAXIMUM_DISTANCE = 100;
     private static AbstractQueryProcessor qp;
 
     public static void setQueryProcessor(AbstractQueryProcessor qp) {
-        CqlfObjectGenerator.qp = qp;
+        KoralObjectGenerator.qp = qp;
     }
 
     public static LinkedHashMap<String, Object> makeSpan() {
