@@ -130,6 +130,18 @@ public class Cosmas2QueryProcessorTest {
 		assertEquals("tt",					res.at("/query/wrap/foundry").asText());
 		assertEquals("match:eq",			res.at("/query/wrap/match").asText());
 
+		query = "MORPH(tt/p=\"V.*\")";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:token",         res.at("/query/@type").asText());
+        assertEquals("korap:term",          res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex",          res.at("/query/wrap/type").asText());
+        assertEquals("V.*",                 res.at("/query/wrap/key").asText());
+        assertEquals("p",                   res.at("/query/wrap/layer").asText());
+        assertEquals("tt",                  res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq",            res.at("/query/wrap/match").asText());
+
+		
 		query = "MORPH(mate/m=temp:pres)";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());

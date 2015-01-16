@@ -1,16 +1,17 @@
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //												//
 // 	COSMAS II zeilenorientierten Suchanfragesprache (C2 plain syntax)			//
 // 	globale Grammatik (ruft lokale c2ps_x.g Grammatiken auf).				//
 //	17.12.12/FB										//
 //      v-0.6											//
 // TODO:											//
-// - se1: Einsetzen des Default-Operators in den kummulierten AST.				//
+// - se1: Einsetzen des Default-Operators in den kumulierten AST.				//
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 grammar c2ps;
+//import c2ps_regex;
 
-options {output=AST; backtrack=true; }
+options { output=AST; backtrack=true; k=5;}
 tokens  {C2PQ; OPBED; OPTS; OPBEG; OPEND; OPNHIT; OPALL; OPLEM; OPPROX;
 	 ARG1; ARG2; 
 	 OPWF; OPLEM; OPANNOT;
@@ -130,17 +131,40 @@ fragment WORD
 	:	~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
                     | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' )+;
 
-// "#ELEM()" nur fÃ¼r Fehlerbehandlung, ansonsten sinnlose Anfrage.
+fragment FOCC       : '{'( ('0'..'9')*  ',' ('0'..'9')+ | ('0'..'9')+  ','? )  '}';
+
+/* Regular expressions and Regex queries */
+fragment RE_char     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']'
+                     | '(' | ')' | '|' | '"' | ':' | '\'' | '\\');
+fragment RE_alter    : ( ( RE_char | RE_chgroup ) '|' RE_expr )+;
+fragment RE_chgroup  : '[' RE_char+ ']';
+fragment RE_chars    : (RE_char | RE_chgroup | ( '(' RE_expr ')')) (('+'|'*'|FOCC)'?'? |'?')? ;
+//fragment RE_expr   : (RE_char | RE_alter | RE_chgroup | RE_group)+;
+fragment RE_expr   : (RE_alter | RE_chars)+;
+fragment REGEX       : '"'  (RE_expr | '\'' | ':' )* '"';
+
+// "#ELEM()" nur fuer Fehlerbehandlung, ansonsten sinnlose Anfrage.
 OP_ELEM	:	'#ELEM(' EAVEXPR ')' | '#ELEM(' ')';
 
-// EAVEXPR ist streng genommen nicht der korrekte Labelname fÃ¼r den Inhalt von MORPH(),
-// hat aber die gleiche Syntax und kann an dieser Stelle eingesetzt werden.
-
 fragment MORPHEXPR
-	: WORD (':' WORD)?
-	| WORD '!'? '=' WORD (':' WORD)?
-	| WORD '/' WORD '!'? '=' WORD (':' WORD)?
+	: (WORD|REGEX)
+	| WORD ':' (WORD|REGEX)
+	| WORD '!'? '=' (WORD|REGEX) 
+	| WORD '!'? '=' WORD ':' (WORD|REGEX)
+	| WORD '/' WORD '!'? '=' (WORD|REGEX)
+	| WORD '/' WORD '!'? '=' WORD ':' (WORD|REGEX)
 	;
+
+/*
+fragment MORPHEXPR
+	: (WORD|regex)
+	| WORD ':' (WORD|regex)
+	| WORD '!'? '=' (WORD|regex) 
+	| WORD '!'? '=' WORD ':' (WORD|regex)
+	| WORD '/' WORD '!'? '=' (WORD|regex)
+	| WORD '/' WORD '!'? '=' WORD ':' (WORD|regex)
+	;
+*/
 	
 OP_MORPH:	'MORPH(' 
 				MORPHEXPR (' '* '&' ' '* MORPHEXPR)* ' '* 
@@ -152,8 +176,6 @@ OP_MORPH:	'MORPH('
 //
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-
-// options {backtrack=true; k=5;}
 
 c2ps_query 
 	:	searchExpr EOF -> ^(C2PQ searchExpr);

@@ -168,6 +168,10 @@ public class QuerySerializer {
         return setQuery(query, ql, "");
     }
 
+    public void setVerbose(boolean verbose) {
+        AbstractQueryProcessor.verbose = verbose;
+    }
+    
     public final String toJSON() {
         String ser = JsonUtils.toJSON(raw());
         qllogger.info("Serialized query: " + ser);

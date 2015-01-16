@@ -3,7 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import de.ids_mannheim.korap.query.parse.cosmas.c2psLexer;
 import de.ids_mannheim.korap.query.parse.cosmas.c2psParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
-import de.ids_mannheim.korap.query.serialize.util.CqlfObjectGenerator;
+import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
@@ -32,7 +32,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private static Logger log = LoggerFactory
             .getLogger(Cosmas2QueryProcessor.class);
 
-    LinkedList<LinkedHashMap[]> toWrapStack = new LinkedList<LinkedHashMap[]>();
+    LinkedList<LinkedHashMap<String, Object>[]> toWrapStack = 
+            new LinkedList<LinkedHashMap<String,Object>[]>();
     /**
      * Field for repetition query (Kleene + or * operations, or
      * min/max queries: {2,4}
@@ -42,7 +43,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * Global control structure for fieldGroups, keeps track of open
      * fieldGroups.
      */
-    LinkedList<ArrayList<Object>> openFieldGroups = new LinkedList<ArrayList<Object>>();
+    LinkedList<ArrayList<Object>> openFieldGroups = 
+            new LinkedList<ArrayList<Object>>();
     /**
      * Keeps track of how many toWrap objects there are to pop after
      * every recursion of {@link #processNode(ParseTree)}
@@ -72,8 +74,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * parent node of the argument, the number of the argument and an
      * object in whose operands list the argument shall be wrapped.
      */
-    Table<Tree, Integer, LinkedHashMap<String, Object>> operandWrap = HashBasedTable
-            .create();
+    Table<Tree, Integer, LinkedHashMap<String, Object>> operandWrap = 
+            HashBasedTable.create();
 
     /**
      * Keeps track of all visited nodes in a tree
@@ -105,7 +107,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * inverted order (e.g. the IN() operator) compared to their AST
      * representation.
      */
-    private LinkedList<ArrayList<Object>> invertedOperandsLists = new LinkedList<ArrayList<Object>>();
+    private LinkedList<ArrayList<Object>> invertedOperandsLists = 
+            new LinkedList<ArrayList<Object>>();
 
     /**
      * @param tree
@@ -116,7 +119,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * @throws QueryException
      */
     public Cosmas2QueryProcessor (String query) {
-        CqlfObjectGenerator.setQueryProcessor(this);
+        KoralObjectGenerator.setQueryProcessor(this);
         this.query = query;
         process(query);
         log.info(">>> " + requestMap.get("query") + " <<<");
@@ -177,10 +180,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     }
                     if (nodeHasSequentiableSiblings) {
                         // Step I: create sequence
-                        LinkedHashMap<String, Object> sequence = new LinkedHashMap<String, Object>();
-                        sequence.put("@type", "korap:group");
-                        sequence.put("operation", "operation:sequence");
-                        sequence.put("operands", new ArrayList<Object>());
+                        LinkedHashMap<String, Object> sequence = 
+                                KoralObjectGenerator.makeGroup("sequence");
                         // push sequence on object stack but don't
                         // increment stackedObjects counter since
                         // we've got to wait until the parent node is
@@ -351,7 +352,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 "TPEND");
 
         LinkedHashMap<String, Object> submatchgroup = 
-                CqlfObjectGenerator.makeReference(128 + classCounter);
+                KoralObjectGenerator.makeReference(128 + classCounter);
         ArrayList<Object> submatchOperands = new ArrayList<Object>();
         submatchgroup.put("operands", submatchOperands);
         putIntoSuperObject(submatchgroup);
@@ -384,7 +385,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 submatchOperands.add(conditionGroup);
             }
             else if (conditionCount < conditionGroups.size()) {
-                LinkedHashMap<String, Object> matchesGroup = CqlfObjectGenerator
+                LinkedHashMap<String, Object> matchesGroup = KoralObjectGenerator
                         .makePosition(new String[] { "frames:matches" },
                                 new String[0]);
                 @SuppressWarnings("unchecked")
@@ -397,7 +398,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 // constraint applies
                 if (conditionCount > 1) {
                     LinkedHashMap<String, Object> focus = 
-                            CqlfObjectGenerator.makeReference(128 + classCounter - 2);
+                            KoralObjectGenerator.makeReference(128 + classCounter - 2);
                     ArrayList<Object> focusOperands = new ArrayList<Object>();
                     focus.put("operands", focusOperands);
                     focusOperands.add(matchesGroup);
@@ -420,9 +421,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // classRef.add(classCounter + 1); // yes, do this twice (two
         // classes)!
         LinkedHashMap<String, Object> group = 
-                CqlfObjectGenerator.makeReference(128 + classCounter);
+                KoralObjectGenerator.makeReference(128 + classCounter);
         LinkedHashMap<String, Object> classRefCheck = 
-                CqlfObjectGenerator.makeClassRefOp("classRefOp:inversion", classRef,
+                KoralObjectGenerator.makeClassRefOp("classRefOp:inversion", classRef,
                         classCounter + 128);
         ArrayList<Object> operands = new ArrayList<Object>();
         operands.add(classRefCheck);
@@ -461,7 +462,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         wrapOperandInClass(node, 1, classCounter++);
         // LinkedHashMap<String, Object> posgroup =
         // makePosition(null);
-        LinkedHashMap<String, Object> posgroup = CqlfObjectGenerator
+        LinkedHashMap<String, Object> posgroup = KoralObjectGenerator
                 .makeGroup("position");
         LinkedHashMap<String, Object> positionOptions;
         // posgroup
@@ -489,15 +490,15 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         Integer[] classIn = 
                 new Integer[] { 128 + classCounter - 2, 128 + classCounter - 1 };
         LinkedHashMap<String, Object> classRefCheck = 
-                CqlfObjectGenerator.makeClassRefCheck(check, classIn, 128 + classCounter);
+                KoralObjectGenerator.makeClassRefCheck(check, classIn, 128 + classCounter);
         ((ArrayList<Object>) classRefCheck.get("operands")).add(posgroup);
         LinkedHashMap<String, Object> focusGroup = null;
         if ((boolean) positionOptions.get("matchall") == true) {
-            focusGroup = CqlfObjectGenerator.makeResetReference();
+            focusGroup = KoralObjectGenerator.makeResetReference();
             ((ArrayList<Object>) focusGroup.get("operands")).add(classRefCheck);
         }
         else { // match only first argument
-            focusGroup = CqlfObjectGenerator.wrapInReference(classRefCheck,
+            focusGroup = KoralObjectGenerator.wrapInReference(classRefCheck,
                     128 + classCounter - 1);
         }
         putIntoSuperObject(focusGroup, 1);
@@ -510,7 +511,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         Tree typ = prox_opts.getChild(0);
         Tree dist_list = prox_opts.getChild(1);
         // Step I: create group
-        LinkedHashMap<String, Object> group = CqlfObjectGenerator
+        LinkedHashMap<String, Object> group = KoralObjectGenerator
                 .makeGroup("sequence");
 
         ArrayList<Object> constraints = new ArrayList<Object>();
@@ -555,7 +556,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             if (!meas.equals("w") && min == 0) {
                 processSpanDistance(meas, min, max);
             }
-            LinkedHashMap<String, Object> distance = CqlfObjectGenerator
+            LinkedHashMap<String, Object> distance = KoralObjectGenerator
                     .makeDistance(meas, min, max);
             if (exclusion) {
                 distance.put("exclude", true);
@@ -585,14 +586,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 || openNodeCats.get(1).equals("OPNHIT"))) {
             wrapOperandInClass(node, 1, classCounter);
             wrapOperandInClass(node, 2, classCounter);
-            group = CqlfObjectGenerator.wrapInReference(group,
+            group = KoralObjectGenerator.wrapInReference(group,
                     128 + classCounter++);
         }
         else if (openNodeCats.get(1).equals("OPNHIT")) {
-            LinkedHashMap<String, Object> repetition = CqlfObjectGenerator
+            LinkedHashMap<String, Object> repetition = KoralObjectGenerator
                     .makeRepetition(min, max);
             ((ArrayList<Object>) repetition.get("operands"))
-                    .add(CqlfObjectGenerator.makeToken());
+                    .add(KoralObjectGenerator.makeToken());
             // TODO go on with this: put the repetition into a class
             // and put it in between the operands
             // -> what if there's several distance constraints. with
@@ -602,11 +603,11 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         LinkedHashMap<String, Object> sequence = null;
         if (putIntoOverlapDisjunction) {
             sequence = embeddedSequence;
-            group = CqlfObjectGenerator.makeGroup("or");
+            group = KoralObjectGenerator.makeGroup("or");
             ArrayList<Object> disjOperands = 
                     (ArrayList<Object>) group.get("operands");
             String[] sharedClasses = new String[] { "intersects" };
-            LinkedHashMap<String, Object> overlapsGroup = CqlfObjectGenerator
+            LinkedHashMap<String, Object> overlapsGroup = KoralObjectGenerator
                     .makePosition(new String[0], sharedClasses);
 
             ArrayList<Object> overlapsOperands = 
@@ -618,7 +619,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 invertedOperandsLists.push(overlapsOperands);
             }
             disjOperands.add(overlapsGroup);
-            disjOperands.add(CqlfObjectGenerator.wrapInReference(sequence, 0));
+            disjOperands.add(KoralObjectGenerator.wrapInReference(sequence, 0));
             // Step II: decide where to put
             putIntoSuperObject(group, 0);
             objectStack.push(sequence);
@@ -684,9 +685,11 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     @SuppressWarnings("unchecked")
     private void processOPELEM(Tree node) {
         // Step I: create element
-        LinkedHashMap<String, Object> span = CqlfObjectGenerator.makeSpan();
+        LinkedHashMap<String, Object> span = KoralObjectGenerator.makeSpan();
         if (node.getChild(0).toStringTree().equals("EMPTY")) {
-
+            addError(StatusCodes.MALFORMED_QUERY, "Empty #ELEM() operator."
+                    + " Please specify a valid element key (like 's' for sentence).");
+            return;
         }
         else {
             int elname = 0;
@@ -709,14 +712,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                  * sub-group).
                  */
                 LinkedHashMap<String, Object> termGroup = 
-                        CqlfObjectGenerator.makeTermGroup("and");
+                        KoralObjectGenerator.makeTermGroup("and");
                 ArrayList<Object> termGroupOperands = 
                         (ArrayList<Object>) termGroup.get("operands");
                 for (int i = elname; i < node.getChildCount(); i++) {
                     Tree attrNode = node.getChild(i);
                     if (attrNode.getChildCount() == 2) {
                         LinkedHashMap<String, Object> term = 
-                                CqlfObjectGenerator.makeTerm();
+                                KoralObjectGenerator.makeTerm();
                         termGroupOperands.add(term);
                         String layer = attrNode.getChild(0).toStringTree();
                         String[] splitted = layer.split("/");
@@ -730,14 +733,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                         term.put("match", "match:" + match);
                     }
                     else {
-                        LinkedHashMap<String, Object> subTermGroup = CqlfObjectGenerator
-                                .makeTermGroup("and");
+                        LinkedHashMap<String, Object> subTermGroup = 
+                                KoralObjectGenerator.makeTermGroup("and");
                         ArrayList<Object> subTermGroupOperands = 
                                 (ArrayList<Object>) subTermGroup.get("operands");
                         int j;
                         for (j = 1; j < attrNode.getChildCount(); j++) {
                             LinkedHashMap<String, Object> term = 
-                                    CqlfObjectGenerator.makeTerm();
+                                    KoralObjectGenerator.makeTerm();
                             String layer = attrNode.getChild(0).toStringTree();
                             String[] splitted = layer.split("/");
                             if (splitted.length > 1) {
@@ -780,14 +783,15 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // Step I: get info
         String[] morphterms = 
                 node.getChild(0).toStringTree().replace(" ", "").split("&");
-        LinkedHashMap<String, Object> token = CqlfObjectGenerator.makeToken();
+        LinkedHashMap<String, Object> token = KoralObjectGenerator.makeToken();
         ArrayList<Object> terms = new ArrayList<Object>();
         LinkedHashMap<String, Object> fieldMap = null;
         for (String morphterm : morphterms) {
-            // regex group #2 is foundry, #4 layer, #5 operator #6
-            // key, #8 value
+            // regex group #2 is foundry, #4 layer, #5 operator,
+            // #6 key, #8 value
+            String wordOrRegex = "\\w+|\".*?\"";
             Pattern p = Pattern
-                    .compile("((\\w+)/)?((\\w*)(!?=))?(\\w+)(:(\\w+))?");
+                    .compile("((\\w+)/)?((\\w*)(!?=))?("+wordOrRegex+")(:("+wordOrRegex+"))?");
             Matcher m = p.matcher(morphterm);
             if (!m.matches()) {
                 addError(StatusCodes.UNKNOWN_QUERY_ERROR,
@@ -807,10 +811,23 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 if ("!=".equals(m.group(5)))
                     negate = !negate;
             }
-            if (m.group(6) != null)
-                fieldMap.put("key", m.group(6));
-            if (m.group(8) != null)
-                fieldMap.put("value", m.group(8));
+            if (m.group(6) != null) {
+                String key = m.group(6);
+                if (key.startsWith("\"") && key.endsWith("\"")) {
+                    key = key.substring(1, key.length()-1);
+                    fieldMap.put("type", "type:regex");
+                }
+                fieldMap.put("key", key);
+            }
+                
+            if (m.group(8) != null) {
+                String value = m.group(8);
+                if (value.startsWith("\"") && value.endsWith("\"")) {
+                    value = value.substring(1, value.length()-1);
+                    fieldMap.put("type", "type:regex");
+                }
+                fieldMap.put("value", value);
+            }
 
             // negate field (see above)
             if (negate) {
@@ -826,7 +843,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else {
             LinkedHashMap<String, Object> termGroup = 
-                    CqlfObjectGenerator.makeTermGroup("and");
+                    KoralObjectGenerator.makeTermGroup("and");
             termGroup.put("operands", terms);
             token.put("wrap", termGroup);
         }
@@ -908,7 +925,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      */
     private void wrapOperandInClass(Tree node, int arg, int cls) {
         LinkedHashMap<String, Object> clsGroup = 
-                CqlfObjectGenerator.makeSpanClass(cls);
+                KoralObjectGenerator.makeSpanClass(cls);
         wrapOperand(node, arg, clsGroup);
     }
 
@@ -1000,13 +1017,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         // Create the position group and add the span and the subquery
         // as operands, possibly wrapped in spanRefs
-        LinkedHashMap<String, Object> positionGroup = CqlfObjectGenerator
+        LinkedHashMap<String, Object> positionGroup = KoralObjectGenerator
                 .makePosition(new String[] { position }, new String[0]);
         if (negated)
             positionGroup.put("exclude", true);
         ArrayList<Object> posOperands = new ArrayList<Object>();
         LinkedHashMap<String, Object> classGroup = 
-                CqlfObjectGenerator.makeSpanClass(classCounter++);
+                KoralObjectGenerator.makeSpanClass(classCounter++);
         classGroup.put("operands", distributedOperands);
         positionGroup.put("operands", posOperands);
         LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
@@ -1015,7 +1032,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         objectStack.push(classGroup);
         if (hitSpanRef != null) {
             LinkedHashMap<String, Object> spanRefAroundHit = 
-                    CqlfObjectGenerator.makeSpanReference(hitSpanRef, "focus");
+                    KoralObjectGenerator.makeSpanReference(hitSpanRef, "focus");
             ((ArrayList<Object>) spanRefAroundHit.get("operands"))
                     .add(classGroup);
          // re-assign after wrapping classGroup in spanRef
@@ -1023,7 +1040,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         if (elemSpanRef != null) {
             LinkedHashMap<String, Object> spanRefAroundSpan = 
-                    CqlfObjectGenerator.makeSpanReference(elemSpanRef, "focus");
+                    KoralObjectGenerator.makeSpanReference(elemSpanRef, "focus");
             ((ArrayList<Object>) spanRefAroundSpan.get("operands")).add(span);
          // re-assign after wrapping span in spanRef
             span = spanRefAroundSpan; 
@@ -1212,7 +1229,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     }
 
     @SuppressWarnings({ "unchecked" })
-    private LinkedHashMap<String, Object> wrap(LinkedHashMap[] wrapCascade) {
+    private LinkedHashMap<String, Object> wrap(LinkedHashMap<String, Object>[] wrapCascade) {
         int i;
         for (i = 0; i < wrapCascade.length - 1; i++) {
             ArrayList<Object> containerOperands = (ArrayList<Object>) wrapCascade[i + 1]
