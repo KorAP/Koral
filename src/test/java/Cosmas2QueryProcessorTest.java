@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -141,7 +142,6 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("tt",                  res.at("/query/wrap/foundry").asText());
         assertEquals("match:eq",            res.at("/query/wrap/match").asText());
 
-		
 		query = "MORPH(mate/m=temp:pres)";
 		qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
@@ -1135,5 +1135,29 @@ public class Cosmas2QueryProcessorTest {
 		assertEquals("operation:class",				res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/operation").asText());
 		assertEquals(131,							res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/classOut").asInt());
 		assertEquals("der",							res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/operands/0/wrap/key").asText());
+	}
+	
+	@Test
+	public void testErrors() throws JsonProcessingException, IOException {
+	    query = "MORPH(tt/p=\"\")";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals(true,         res.at("/query/@type").isMissingNode());
+        assertEquals(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,          res.at("/errors/0/0").asInt());
+        assertTrue(res.at("/errors/0/1").asText().startsWith("Something went wrong parsing the argument in MORPH()"));
+        
+        query = "MORPH(tt/p=\"foo)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals(true,         res.at("/query/@type").isMissingNode());
+        assertEquals(StatusCodes.MALFORMED_QUERY,          res.at("/errors/0/0").asInt());
+        assertTrue(res.at("/errors/0/1").asText().startsWith("Early closing parenthesis"));
+        
+        query = "MORPH(tt/p=)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals(true,         res.at("/query/@type").isMissingNode());
+        assertEquals(StatusCodes.MALFORMED_QUERY,          res.at("/errors/0/0").asInt());
+        assertTrue(res.at("/errors/0/1").asText().startsWith("Early closing parenthesis"));
 	}
 }

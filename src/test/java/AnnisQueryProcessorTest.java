@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 /**
  * Tests for JSON-LD serialization of ANNIS QL queries. 
@@ -573,6 +574,13 @@ public class AnnisQueryProcessorTest {
         assertEquals("D",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/key").asText());
         assertEquals("E",                   res.at("/query/operands/0/operands/0/operands/1/operands/0/key").asText());
         assertEquals("F",                   res.at("/query/operands/1/key").asText());
+        
+        query = "cat=\"A\" & cat=\"B\" & cat=\"C\" & cat=\"D\" & #1 . #2 & #3 . #4";  
+        // the resulting query should be equivalent to PQ+:  focus(2:dominates(focus(1:{1:<A>}<B>),{2:<C>}))<D> 
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals(true,         res.at("/query/@type").isMissingNode());
+        assertEquals(StatusCodes.UNBOUND_ANNIS_RELATION,   res.at("/errors/0/0").asInt());
     }
 	
 //	@Test

@@ -1215,6 +1215,29 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("p",					res.at("/query/operands/1/wrap/layer").asText());
 		assertEquals("Baum",				res.at("/query/operands/2/wrap/key").asText());
 	}
+	
+	@Test
+    public void testMeta() throws JsonProcessingException, IOException {
+        query = "x meta textClass=Sport";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("x",                   res.at("/query/wrap/key").asText());
+        assertEquals("korap:doc",           res.at("/collection/@type").asText());
+        assertEquals("textClass",           res.at("/collection/key").asText());
+        assertEquals("Sport",               res.at("/collection/value").asText());
+        
+        query = "x meta textClass=Sport";
+        qs.setQuery(query, "poliqarpplus");
+        qs.setCollection("author=Smith");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("x",                   res.at("/query/wrap/key").asText());
+        assertEquals("korap:docGroup",      res.at("/collection/@type").asText());
+        assertEquals("operation:and",       res.at("/collection/operation").asText());
+        assertEquals("textClass",           res.at("/collection/operands/0/key").asText());
+        assertEquals("Sport",               res.at("/collection/operands/0/value").asText());
+        assertEquals("author",              res.at("/collection/operands/1/key").asText());
+        assertEquals("Smith",               res.at("/collection/operands/1/value").asText());
+        
+        // TODO more tests
+	}
 }
-
-

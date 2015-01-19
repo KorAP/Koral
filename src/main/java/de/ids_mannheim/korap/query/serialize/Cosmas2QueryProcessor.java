@@ -788,14 +788,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         LinkedHashMap<String, Object> fieldMap = null;
         // regex group #2 is foundry, #4 layer, #5 operator,
         // #6 key, #8 value
-        String wordOrRegex = "\\w+|\".*?\"";
+        String wordOrRegex = "\\w+|\".+?\"";
         Pattern p = Pattern
                 .compile("((\\w+)/)?((\\w*)(!?=))?("+wordOrRegex+")(:("+wordOrRegex+"))?");
         Matcher m;
         for (String morphterm : morphterms) {
             m = p.matcher(morphterm);
             if (!m.matches()) {
-                addError(StatusCodes.UNKNOWN_QUERY_ERROR,
+                addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
                         "Something went wrong parsing the argument in MORPH().");
                 requestMap.put("query", new LinkedHashMap<String, Object>());
                 return;
