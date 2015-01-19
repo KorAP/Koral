@@ -786,13 +786,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         LinkedHashMap<String, Object> token = KoralObjectGenerator.makeToken();
         ArrayList<Object> terms = new ArrayList<Object>();
         LinkedHashMap<String, Object> fieldMap = null;
+        // regex group #2 is foundry, #4 layer, #5 operator,
+        // #6 key, #8 value
+        String wordOrRegex = "\\w+|\".*?\"";
+        Pattern p = Pattern
+                .compile("((\\w+)/)?((\\w*)(!?=))?("+wordOrRegex+")(:("+wordOrRegex+"))?");
+        Matcher m;
         for (String morphterm : morphterms) {
-            // regex group #2 is foundry, #4 layer, #5 operator,
-            // #6 key, #8 value
-            String wordOrRegex = "\\w+|\".*?\"";
-            Pattern p = Pattern
-                    .compile("((\\w+)/)?((\\w*)(!?=))?("+wordOrRegex+")(:("+wordOrRegex+"))?");
-            Matcher m = p.matcher(morphterm);
+            m = p.matcher(morphterm);
             if (!m.matches()) {
                 addError(StatusCodes.UNKNOWN_QUERY_ERROR,
                         "Something went wrong parsing the argument in MORPH().");

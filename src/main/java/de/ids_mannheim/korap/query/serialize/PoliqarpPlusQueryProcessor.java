@@ -158,6 +158,10 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (nodeCat.equals("meta")) {
             processMeta(node);
         }
+        
+//        if (nodeCat.equals("term") || nodeCat.equals("termGroup")) {
+//            if (inMeta ) putIntoSuperObject(parseTermOrTermGroup(node, false));
+//        }
 
         if (nodeCat.equals("within")
                 && !getNodeCat(node.getParent()).equals("position")) {
@@ -550,11 +554,14 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         addWarning("You used the 'meta' keyword in a PoliqarpPlus query. This"
                 + " feature is currently not supported. Please use virtual "
                 + "collections to restrict documents by metadata.");
+        CollectionQueryProcessor cq = new CollectionQueryProcessor(node.getChild(1).getText());
+        requestMap.put("collection", cq.getRequestMap().get("collection"));
         for (ParseTree child : getChildren(node)) {
             visited.add(child);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void processWithin(ParseTree node) {
         ParseTree domainNode = node.getChild(1);
         String domain = getNodeCat(domainNode);

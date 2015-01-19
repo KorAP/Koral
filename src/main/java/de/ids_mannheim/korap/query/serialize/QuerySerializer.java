@@ -3,6 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.utils.JsonUtils;
 import de.ids_mannheim.korap.utils.KorAPLogger;
@@ -11,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +22,6 @@ import java.util.Map;
  * @author bingel, hanl
  */
 public class QuerySerializer {
-
-    public enum QueryLanguage {
-        POLIQARPPLUS, ANNIS, COSMAS2, CQL, CQP
-    }
 
     static HashMap<String, Class<? extends AbstractQueryProcessor>> qlProcessorAssignment;
 
@@ -39,11 +38,11 @@ public class QuerySerializer {
     public static String queryLanguageVersion;
 
     private AbstractQueryProcessor ast;
-    private Object collection;
-    private Map meta;
-    private List errors;
-    private List warnings;
-    private List messages;
+    private Map<String, Object> collection;
+    private Map<String, Object> meta;
+    private List<Object> errors;
+    private List<Object> warnings;
+    private List<Object> messages;
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(QuerySerializer.class);
 
@@ -59,7 +58,10 @@ public class QuerySerializer {
         int i = 0;
         String[] queries;
         if (args.length == 0) {
-            queries = new String[] {};
+            queries = new String[] {
+                    "tok=\"corpus\" & tok=\"query\" & tok=\"language\"& #2 . #3 & #1 . #2 "
+                    
+            };
         }
         else
             queries = new String[] { args[0] };
@@ -70,8 +72,7 @@ public class QuerySerializer {
                 System.out.println(q);
                 String ql = "cosmas2";
                 jg.setCollection("pubDate=2014");
-                jg.run(q, ql, System.getProperty("user.home") + "/" + ql + "_"
-                        + i + ".jsonld");
+                jg.run(q, ql);
                 System.out.println();
             }
             catch (NullPointerException npe) {
@@ -106,7 +107,7 @@ public class QuerySerializer {
      * @throws IOException
      * @throws QueryException
      */
-    public void run(String query, String queryLanguage, String outFile)
+    public void run(String query, String queryLanguage)
             throws IOException {
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
@@ -186,11 +187,12 @@ public class QuerySerializer {
         if (ast != null) {
             Map<String, Object> requestMap = ast.getRequestMap();
             Map meta = (Map) requestMap.get("meta");
+            Map collection = (Map) requestMap.get("collection");
             List errors = (List) requestMap.get("errors");
             List warnings = (List) requestMap.get("warnings");
             List messages = (List) requestMap.get("messages");
-            if (collection != null)
-                requestMap.put("collection", collection);
+            this.collection = mergeCollection(collection, this.collection);
+            requestMap.put("collection", this.collection);
             if (this.meta != null) {
                 meta.putAll(this.meta);
                 requestMap.put("meta", meta);
@@ -213,6 +215,20 @@ public class QuerySerializer {
         return new HashMap<>();
     }
 
+    private Map<String, Object> mergeCollection(Map<String, Object> collection1, Map<String, Object> collection2) {
+        LinkedHashMap<String, Object> docGroup = KoralObjectGenerator.makeDocGroup("and");
+        ArrayList<Object> operands = (ArrayList<Object>) docGroup.get("operands");
+        if (collection1 == null || collection1.isEmpty()) {
+            return collection2;
+        } else if (collection2 == null || collection2.isEmpty()) {
+            return collection1;
+        } else {
+            operands.add(collection1);
+            operands.add(collection2);
+            return docGroup;   
+        }
+    }
+    
     public QuerySerializer addMeta(String cli, String cri, int cls, int crs,
             int num, int pageIndex) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
@@ -241,15 +257,15 @@ public class QuerySerializer {
     public QuerySerializer setCollectionSimple(String collection) {
         CollectionQueryBuilder qobj = new CollectionQueryBuilder();
         qobj.addResource(collection);
-        this.collection = qobj.raw();
+        this.collection = (Map<String, Object>) qobj.raw();
         return this;
     }
 
     public QuerySerializer setCollection(String collection) {
         CollectionQueryProcessor tree = new CollectionQueryProcessor();
-        Map collectionRequest = tree.getRequestMap();
+        Map<String, Object> collectionRequest = tree.getRequestMap();
         tree.process(collection);
-        this.collection = collectionRequest.get("collection");
+        this.collection = (Map<String, Object>) collectionRequest.get("collection");
         this.errors = (List) collectionRequest.get("errors");
         this.warnings = (List) collectionRequest.get("warnings");
         this.messages = (List) collectionRequest.get("messages");
@@ -257,13 +273,13 @@ public class QuerySerializer {
     }
 
     public QuerySerializer setCollection(CollectionQueryBuilder2 collections) {
-        this.collection = collections.raw();
+        this.collection = (Map<String, Object>) collections.raw();
         return this;
     }
 
     public QuerySerializer setDeprCollection
             (CollectionQueryBuilder collections) {
-        this.collection = collections.raw();
+        this.collection = (Map<String, Object>) collections.raw();
         return this;
     }
 }

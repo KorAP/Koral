@@ -24,6 +24,7 @@ import de.ids_mannheim.korap.query.parse.annis.AqlLexer;
 import de.ids_mannheim.korap.query.parse.annis.AqlParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 /**
  * Map representation of ANNIS QL syntax tree as returned by ANTLR
@@ -87,11 +88,6 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
      */
     private LinkedHashMap<String, Integer> nodeReferencesProcessed = new LinkedHashMap<String, Integer>();
     /**
-     * Keeps track of the operand references in the previously processed relation. Needed for the decision whether to postpone
-     * the processing of a relation (in case it does not share any operands with the previous relation).
-     */
-    private ArrayList<String> previousRelationOperandRefs = new ArrayList<String>();
-    /**
      * Keeps track of queued relations. Relations sometimes cannot be processed directly, namely in case it does not share 
      * any operands with the previous relation. Then wait until a relation with a shared operand has been processed.
      */
@@ -116,9 +112,15 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             processNode(tree);
             // Last check to see if all relations have left the queue
             if (!queuedRelations.isEmpty()) {
-                ParseTree queued = queuedRelations.getFirst();
+                ParseTree queued = queuedRelations.pop();
                 if (verbose) System.out.println("Taking off queue (last rel): "+ queued.getText());
-                processNode(queuedRelations.pop());   
+                if (checkOperandsProcessedPreviously(queued)) {
+                    processNode(queued);
+                } else {
+                    addError(StatusCodes.UNBOUND_ANNIS_RELATION, "The relation "+queued.getText()
+                            +" is not bound to any other relations.");
+                    requestMap.put("query", new LinkedHashMap<String, Object>());
+                }
             }
         }
     }
@@ -309,9 +311,9 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 
         if (object != null) {
             ParseTree grandparent = node.getParent().getParent();
+            // query: object only, no relation
             if (getNodeCat(grandparent).equals("andTopExpr") && 
                     grandparent.getChildCount()==1) { 
-                // query: object only, no relation
                 putIntoSuperObject(object);
             }
             ParseTree parentsFirstChild = node.getParent().getChild(0);
@@ -393,8 +395,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             LinkedHashMap<String,Object> group = null;
             ArrayList<Object> operands = null;
             // make sure one of the operands has already been put into a 
-            // relation (if this is not the 1st relation). If it is,
-            // queue this relation for later processing.
+            // relation (if this is not the 1st relation). If none of the
+            // operands has been ingested at a lower level (and is therefore
+            // unavailable for refrencing), queue this relation for later 
+            // processing.
             if (relationCounter != 1) {
                 if (! checkOperandsProcessedPreviously(node)) {
                     queuedRelations.add(node);
