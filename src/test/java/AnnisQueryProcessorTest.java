@@ -523,6 +523,58 @@ public class AnnisQueryProcessorTest {
 //		assertEquals(seq6.replaceAll(" ", ""), map.replaceAll(" ", ""));
 //	}
 //	
+	/**
+	 * Tests the (rather difficult) serialization of queries where two subsequent relations
+	 * do not share any common operand. Makes it impossible to wrap 2nd relation around 1st. 
+	 * Must therefore re-order relations (or postpone processing of 2nd).
+	 * @throws JsonProcessingException
+	 * @throws IOException
+	 */
+	@Test
+    public void testNoSharedOperand() throws JsonProcessingException, IOException {
+	    query = "cat=\"A\" & cat=\"B\" & cat=\"C\" & cat=\"D\" & #1 . #2 & #3 . #4 & #1 > #3";  
+	    // the resulting query should be equivalent to PQ+:  focus(2:dominates(focus(1:{1:<A>}<B>),{2:<C>}))<D> 
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:group",         res.at("/query/@type").asText());
+        assertEquals("operation:sequence",  res.at("/query/operation").asText());
+        assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
+        assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
+        assertEquals("korap:reference",     res.at("/query/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("operation:focus",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
+        assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("operation:sequence",  res.at("/query/operands/0/operands/0/operands/0/operands/0/operation").asText());
+        assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operation").asText());
+        assertEquals("A",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/key").asText());
+        assertEquals("B",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/key").asText());
+        assertEquals("C",                   res.at("/query/operands/0/operands/0/operands/1/operands/0/key").asText());
+        assertEquals("D",                   res.at("/query/operands/1/key").asText());
+        
+        query = "cat=\"A\" & cat=\"B\" & cat=\"C\" & cat=\"D\" & cat=\"E\" & cat=\"F\" & #1 . #2 & #3 . #4 & #5 . #6 & #1 > #3 & #3 > #5";  
+        // the resulting query should be equivalent to PQ+:   focus(3:dominates(focus(2:dominates(focus(1:{1:<A>}<B>),{2:<C>}))<D>,{3:<E>}))<F> 
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:group",         res.at("/query/@type").asText());
+        assertEquals("operation:sequence",  res.at("/query/operation").asText());
+        assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
+        assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
+        assertEquals("korap:reference",     res.at("/query/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("operation:focus",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
+        assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("operation:sequence",  res.at("/query/operands/0/operands/0/operands/0/operands/0/operation").asText());
+        assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operation").asText());
+        assertEquals("A",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/key").asText());
+        assertEquals("B",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/1/key").asText());
+        assertEquals("C",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/1/operands/0/key").asText());
+        assertEquals("D",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/key").asText());
+        assertEquals("E",                   res.at("/query/operands/0/operands/0/operands/1/operands/0/key").asText());
+        assertEquals("F",                   res.at("/query/operands/1/key").asText());
+    }
+	
 //	@Test
 //	public void testMultipleMixedOperators() throws Exception {
 //		query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & #1 > #2 .0,4 #3";
