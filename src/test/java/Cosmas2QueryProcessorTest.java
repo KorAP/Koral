@@ -621,6 +621,15 @@ public class Cosmas2QueryProcessorTest {
 		assertEquals("classRefCheck:equals",		res.at("/query/operands/0/classRefCheck/0").asText());
 		assertEquals("frames:matches",				res.at("/query/operands/0/operands/0/frames/0").asText());
 		assertEquals(true,							res.at("/query/operands/0/operands/0/exclude").asBoolean());
+		
+		query = "wegen #IN(FE,ALL,%,MAX) <s>";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("operation:merge",             res.at("/query/operation").asText());
+        assertEquals(true,                          res.at("/query/operands/0/reset").asBoolean());
+        assertEquals("classRefCheck:equals",        res.at("/query/operands/0/operands/0/classRefCheck/0").asText());
+        assertEquals("frames:matches",              res.at("/query/operands/0/operands/0/operands/0/frames/0").asText());
+        assertEquals(true,                          res.at("/query/operands/0/operands/0/operands/0/exclude").asBoolean());
 	}
 
 	@Test

@@ -477,20 +477,18 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         if (positionOptions.containsKey("exclude")) {
             posgroup.put("exclude", positionOptions.get("exclude"));
         }
-        if (positionOptions.containsKey("grouping")) {
-            posgroup.put("grouping", positionOptions.get("grouping"));
-        }
         objectStack.push(posgroup);
         // mark this an inverted operands object
         invertedOperandsLists.push((ArrayList<Object>) posgroup.get("operands"));
         stackedObjects++;
-        // Step II: wrap in reference and decide where to put
+        // Step II: wrap in focus and decide where to put
         ArrayList<String> check = 
                 (ArrayList<String>) positionOptions.get("classRefCheck");
         Integer[] classIn = 
                 new Integer[] { 128 + classCounter - 2, 128 + classCounter - 1 };
         LinkedHashMap<String, Object> classRefCheck = 
-                KoralObjectGenerator.makeClassRefCheck(check, classIn, 128 + classCounter);
+                KoralObjectGenerator.makeClassRefCheck(check, classIn,
+                        128 + classCounter);
         ((ArrayList<Object>) classRefCheck.get("operands")).add(posgroup);
         LinkedHashMap<String, Object> focusGroup = null;
         if ((boolean) positionOptions.get("matchall") == true) {
@@ -500,6 +498,17 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         else { // match only first argument
             focusGroup = KoralObjectGenerator.wrapInReference(classRefCheck,
                     128 + classCounter - 1);
+        }
+        System.err.println(positionOptions);
+        // wrap in 'merge' operation if grouping option is set
+        if (positionOptions.containsKey("grouping")) {
+            if (positionOptions.get("grouping").equals(true)) {
+                LinkedHashMap<String, Object> mergeOperation = 
+                        KoralObjectGenerator.makeGroup("merge");
+                ArrayList<Object> mergeOperands = (ArrayList<Object>) mergeOperation.get("operands");
+                mergeOperands.add(focusGroup);
+                focusGroup = mergeOperation;
+            }
         }
         putIntoSuperObject(focusGroup, 1);
     }
@@ -1128,14 +1137,17 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
 
         if (negatePosition) {
-            posOptions.put("exclude", "true");
+            posOptions.put("exclude", true);
         }
 
+        boolean grouping = false;
         if (groupnode != null) {
-            String grouping = groupnode.getChild(0).toStringTree()
-                    .equals("max") ? "true" : "false";
-            posOptions.put("grouping", grouping);
-        }
+            if (groupnode.getChild(0).toStringTree().equalsIgnoreCase("max")) {
+                grouping = true;
+            }
+        } 
+        posOptions.put("grouping", grouping);
+        
         return posOptions;
     }
 
@@ -1220,12 +1232,15 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         if (negatePosition) {
             posOptions.put("exclude", "true");
         }
-
+        
+        boolean grouping = false;
         if (groupnode != null) {
-            String grouping = groupnode.getChild(0).toStringTree()
-                    .equals("max") ? "true" : "false";
-            posOptions.put("grouping", grouping);
-        }
+            if (groupnode.getChild(0).toStringTree().equalsIgnoreCase("max")) {
+                grouping = true;
+            }
+        } 
+        posOptions.put("grouping", grouping);
+        
         return posOptions;
     }
 
