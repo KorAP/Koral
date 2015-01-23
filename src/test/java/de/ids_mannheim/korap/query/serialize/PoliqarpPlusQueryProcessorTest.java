@@ -1,3 +1,4 @@
+package de.ids_mannheim.korap.query.serialize;
 import static org.junit.Assert.*;
 
 import java.io.IOException;

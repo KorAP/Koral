@@ -492,14 +492,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         ((ArrayList<Object>) classRefCheck.get("operands")).add(posgroup);
         LinkedHashMap<String, Object> focusGroup = null;
         if ((boolean) positionOptions.get("matchall") == true) {
-            focusGroup = KoralObjectGenerator.makeResetReference();
+            focusGroup = KoralObjectGenerator.makeClassRefOp("classRefOp:delete", 
+                    new Integer[]{128+classCounter++}, 128+classCounter);
             ((ArrayList<Object>) focusGroup.get("operands")).add(classRefCheck);
         }
         else { // match only first argument
             focusGroup = KoralObjectGenerator.wrapInReference(classRefCheck,
-                    128 + classCounter - 1);
+                    128 + classCounter);
         }
-        System.err.println(positionOptions);
         // wrap in 'merge' operation if grouping option is set
         if (positionOptions.containsKey("grouping")) {
             if (positionOptions.get("grouping").equals(true)) {

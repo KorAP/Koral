@@ -237,6 +237,7 @@ public class KoralObjectGenerator {
         return makeReference(classRef, false);
     }
 
+    @Deprecated
     public static LinkedHashMap<String, Object> makeResetReference() {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "korap:reference");
