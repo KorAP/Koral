@@ -1028,12 +1028,13 @@ public class PoliqarpPlusQueryProcessorTest {
 	}
 	@Test
 	public void testRelations() throws JsonProcessingException, IOException {
-		query = "relatesTo(<s>,<np>)";
+		query = "dominates(<s>,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		assertEquals("korap:group", 		res.at("/query/@type").asText());
 		assertEquals("operation:relation", 	res.at("/query/operation").asText());
 		assertEquals("korap:relation", 		res.at("/query/relation/@type").asText());
+		assertEquals("c",                   res.at("/query/relation/wrap/layer").asText());
 		assertEquals("s", 					res.at("/query/operands/0/key").asText());
 		assertEquals("np", 					res.at("/query/operands/1/key").asText());
 
@@ -1058,9 +1059,9 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("lemma", 				res.at("/query/operands/1/wrap/layer").asText());
 		assertEquals("Baum", 				res.at("/query/operands/1/wrap/key").asText());
 		assertEquals("korap:relation", 		res.at("/query/relation/@type").asText());
-		assertEquals("mate", 				res.at("/query/relation/foundry").asText());
-		assertEquals("d", 					res.at("/query/relation/layer").asText());
-		assertEquals("HEAD", 				res.at("/query/relation/key").asText());
+		assertEquals("mate", 				res.at("/query/relation/wrap/foundry").asText());
+		assertEquals("d", 					res.at("/query/relation/wrap/layer").asText());
+		assertEquals("HEAD", 				res.at("/query/relation/wrap/key").asText());
 
 		query = "dominates(Baum,<np>)";
 		qs.setQuery(query, "poliqarpplus");
@@ -1068,19 +1069,19 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("orth", 				res.at("/query/operands/0/wrap/layer").asText());
 		assertEquals("Baum", 				res.at("/query/operands/0/wrap/key").asText());
 		assertEquals("korap:relation", 		res.at("/query/relation/@type").asText());
-		assertEquals("c", 					res.at("/query/relation/layer").asText());
+		assertEquals("c", 					res.at("/query/relation/wrap/layer").asText());
 
 		query = "dominates(cnx/c:<vp>,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
-		assertEquals("cnx", 				res.at("/query/relation/foundry").asText());
-		assertEquals("c", 					res.at("/query/relation/layer").asText());
+		assertEquals("cnx", 				res.at("/query/relation/wrap/foundry").asText());
+		assertEquals("c", 					res.at("/query/relation/wrap/layer").asText());
 
 		query = "dominates(cnx/c*:<vp>,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
-		assertEquals("cnx", 				res.at("/query/relation/foundry").asText());
-		assertEquals("c", 					res.at("/query/relation/layer").asText());
+		assertEquals("cnx", 				res.at("/query/relation/wrap/foundry").asText());
+		assertEquals("c", 					res.at("/query/relation/wrap/layer").asText());
 		assertEquals(0, 					res.at("/query/relation/boundary/min").asInt());
 		assertEquals(true, 					res.at("/query/relation/boundary/max").isMissingNode());
 

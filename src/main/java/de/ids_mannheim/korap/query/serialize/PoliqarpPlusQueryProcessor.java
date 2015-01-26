@@ -407,9 +407,12 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 KoralObjectGenerator.makeGroup("relation");
         LinkedHashMap<String, Object> relation = 
                 KoralObjectGenerator.makeRelation();
+        LinkedHashMap<String, Object> term = 
+                KoralObjectGenerator.makeTerm();
         relationGroup.put("relation", relation);
+        relation.put("wrap", term);
         if (node.getChild(0).getText().equals("dominates")) {
-            relation.put("layer", "c");
+            term.put("layer", "c");
         }
         ParseTree relSpec = getFirstChildWithCat(node, "relSpec");
         ParseTree repetition = getFirstChildWithCat(node, "repetition");
@@ -418,11 +421,11 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             ParseTree layer = getFirstChildWithCat(relSpec, "layer");
             ParseTree key = getFirstChildWithCat(relSpec, "key");
             if (foundry != null)
-                relation.put("foundry", foundry.getText());
+                term.put("foundry", foundry.getText());
             if (layer != null)
-                relation.put("layer", layer.getText());
+                term.put("layer", layer.getText());
             if (key != null)
-                relation.put("key", key.getText());
+                term.put("key", key.getText());
         }
         if (repetition != null) {
             Integer[] minmax = parseRepetition(repetition);
