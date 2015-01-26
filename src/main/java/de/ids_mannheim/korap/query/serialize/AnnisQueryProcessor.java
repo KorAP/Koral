@@ -28,7 +28,7 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 /**
  * Map representation of ANNIS QL syntax tree as returned by ANTLR
- * @author joachim
+ * @author Joachim Bingel (bingel@ids-mannheim.de)
  *
  */
 public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
@@ -48,7 +48,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     /**
      * Counter for variable definitions.
      */
-    Integer variableCounter = 1;
+    Integer variableCount = 1;
     /**
      * Marks the currently active token in order to know where to add flags (might already have been taken away from token stack).
      */
@@ -71,8 +71,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
      * but are to be integrated into the AqlTree at a later point (namely as operands of the respective group). Therefore, store references to these
      * nodes here and exclude the operands from being written into the query map individually.   
      */
-    private List<ParseTree> globalLingTermNodes = new ArrayList<ParseTree>();
-    private int totalRelationCount;
+    private int totalRelationCount = 0;
     /**
      * Keeps a record of reference-class-mapping, i.e. which 'class' has been assigned to which #n reference. This is important when introducing korap:reference 
      * spans to refer back to previously established classes for entities.
@@ -92,6 +91,13 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
      * any operands with the previous relation. Then wait until a relation with a shared operand has been processed.
      */
     private LinkedList<ParseTree> queuedRelations = new LinkedList<ParseTree>();
+    /**
+     * For some objects, it may be decided in the initial scan (processAndTopExpr()) that they
+     * need to be wrapped in a class operation when retrieved later. This map stores this information.
+     * More precisely, it stores for every node in the tree which class ID its derived Koral
+     * object will receive.
+     */
+    private LinkedHashMap<ParseTree, Integer> objectsToWrapInClass = new LinkedHashMap<ParseTree, Integer>();
 
     public AnnisQueryProcessor(String query) {
         KoralObjectGenerator.setQueryProcessor(this);
@@ -216,35 +222,49 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         // naturally as operands of the relations/groups introduced by the 
         // *node. For that purpose, this section mines all used references
         // and stores them in a list for later reference.
-        for (ParseTree exprNode : getChildrenWithCat(node,"expr")) {
-            // Pre-process any 'variableExpr' such that the variableReferences map can be filled
-            List<ParseTree> definitionNodes = new ArrayList<ParseTree>();
-            definitionNodes.addAll(getChildrenWithCat(exprNode, "variableExpr"));
-            for (ParseTree definitionNode : definitionNodes) {
-                processNode(definitionNode);
-            }
-            // Then, mine all relations between nodes
-            List<ParseTree> lingTermNodes = new ArrayList<ParseTree>();
-            lingTermNodes.addAll(getChildrenWithCat(exprNode, "n_ary_linguistic_term"));
-            globalLingTermNodes.addAll(lingTermNodes);
-            totalRelationCount  = globalLingTermNodes.size();
-            // Traverse refOrNode nodes under *ary_linguistic_term nodes and extract references
-            for (ParseTree lingTermNode : lingTermNodes) {
-                for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
-                    String refOrNodeString = refOrNode.getChild(0).toStringTree(parser);
-                    if (refOrNodeString.startsWith("#")) {
-                        String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
-                        if (nodeReferencesTotal.containsKey(ref)) {
-                            nodeReferencesTotal.put(ref, nodeReferencesTotal.get(ref)+1);
-                        } else {
-                            nodeReferencesTotal.put(ref, 1);
-                            nodeReferencesProcessed.put(ref, 0);
-                        }
+        for (ParseTree lingTermNode : getDescendantsWithCat(node, "n_ary_linguistic_term")) {
+            for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
+                String refOrNodeString = refOrNode.getChild(0).toStringTree(parser);
+                if (refOrNodeString.startsWith("#")) {
+                    String ref = refOrNode.getChild(0).toStringTree(parser).substring(1);
+                    if (nodeReferencesTotal.containsKey(ref)) {
+                        nodeReferencesTotal.put(ref, nodeReferencesTotal.get(ref)+1);
+                    } else {
+                        nodeReferencesTotal.put(ref, 1);
+                        nodeReferencesProcessed.put(ref, 0);   
                     }
                 }
             }
+            totalRelationCount++;
         }
-        if (verbose) System.err.println(nodeVariables);
+        // Then, mine all object definitions. 
+        for (ParseTree variableExprNode : getDescendantsWithCat(node, "variableExpr")) {
+            LinkedHashMap<String,Object> object = processVariableExpr(variableExprNode);
+            String ref = variableCount.toString();
+            // Check if this object definition is part of a "direct declaration relation", 
+            // i.e. a relation which declares its operands directly rather than using
+            // references to earlier declared objects. These objects must still be
+            // available for later reference, handle this here. 
+            // Direct declaration relation is present when grandparent is n_ary_linguistic_term node.
+            if (getNodeCat(variableExprNode.getParent().getParent()).equals("n_ary_linguistic_term")) {
+                if (nodeReferencesTotal.containsKey(ref)) {
+                    nodeReferencesTotal.put(ref, nodeReferencesTotal.get(ref)+1);
+                } else {
+                    nodeReferencesTotal.put(ref, 1);
+                }
+                // This is important for later relations wrapping the present relation.
+                // If the object isn't registered as processed, it won't be available
+                // for referencing.
+                nodeReferencesProcessed.put(ref, 1);  
+                // Register this node for latter wrapping in class.
+                if (nodeReferencesTotal.get(ref) > 1) {
+                    refClassMapping.put(ref, classCounter);
+                    objectsToWrapInClass.put(variableExprNode, classCounter++);    
+                }
+            }
+            nodeVariables.put(ref, object);
+            variableCount++;
+        }
     }
 
     private void processUnary_linguistic_term(ParseTree node) {
@@ -320,8 +340,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             if (getNodeCat(parentsFirstChild).endsWith("#")) {
                 nodeVariables.put(getNodeCat(parentsFirstChild).replaceAll("#", ""), object);
             }
-            nodeVariables.put(variableCounter.toString(), object);
-            variableCounter++;
+            if (objectsToWrapInClass.containsKey(node)) {
+                int classId = objectsToWrapInClass.get(node);
+                object = KoralObjectGenerator.wrapInClass(object, classId);
+            }
         }
         return object;
     }
@@ -332,7 +354,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
      * a reference is created in its place. 
      * The operand will be wrapped in a class group if necessary.
      * @param operandNode
-     * @return A map object with the appropriate CQLF representation of the operand 
+     * @return A map object with the appropriate Koral representation of the operand 
      */
     private LinkedHashMap<String, Object> retrieveOperand(ParseTree operandNode) {
         LinkedHashMap<String, Object> operand = null;
@@ -373,6 +395,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (operandRef1.startsWith("#") && operandRef2.startsWith("#")) {
             operandRef1 = operandRef1.substring(1, operandRef1.length());
             operandRef2 = operandRef2.substring(1, operandRef2.length());
+            if (verbose) {
+                System.out.println(operandRef1);
+                System.out.println(nodeReferencesProcessed);   
+            }
             if (nodeReferencesProcessed.get(operandRef1) > 0 || 
                     nodeReferencesProcessed.get(operandRef2) > 0) {
                 return true;

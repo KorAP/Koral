@@ -78,6 +78,17 @@ public abstract class Antlr4AbstractQueryProcessor extends AbstractQueryProcesso
         }
         return children;
     }
+    
+    protected List<ParseTree> getDescendantsWithCat(ParseTree node, String nodeCat) {
+        ArrayList<ParseTree> descendants = new ArrayList<ParseTree>();
+        for (ParseTree child : getChildren(node)) {
+            if (getNodeCat(child).equals(nodeCat)) {
+                descendants.add(child);
+            }
+            descendants.addAll(getDescendantsWithCat(child, nodeCat));
+        }
+        return descendants;
+    }
 
     protected ParseTree getFirstChildWithCat(ParseTree node, String nodeCat) {
         return getNthChildWithCat(node, nodeCat, 1);

@@ -663,14 +663,22 @@ public class AnnisQueryProcessorTest {
         assertEquals("korap:group",         res.at("/query/@type").asText());
         assertEquals("operation:position",  res.at("/query/operation").asText());
         assertEquals("frames:startswith",   res.at("/query/frames/0").asText());
-        assertEquals("korap:group",         res.at("/query/operands/0/@type").asText());
-        assertEquals("operation:relation",  res.at("/query/operands/0/operation").asText());
-        // following can't be correct, would need class around and also reference around the relation to be accessed by the position
-        assertEquals("korap:span",          res.at("/query/operands/0/operands/0/@type").asText());
-        assertEquals("NP",                  res.at("/query/operands/0/operands/0/key").asText());
-        assertEquals("VP",                  res.at("/query/operands/0/operands/1/key").asText());
+        assertEquals("korap:reference",         res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:focus",  res.at("/query/operands/0/operation").asText());
+        assertEquals(128,  res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
+        assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
+        assertEquals(128,                   res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
+        assertEquals("korap:span",          res.at("/query/operands/0/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("NP",                  res.at("/query/operands/0/operands/0/operands/0/operands/0/key").asText());
+        assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/1/operation").asText());
+        assertEquals(129,                   res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals("VP",                  res.at("/query/operands/0/operands/0/operands/1/operands/0/key").asText());
         assertEquals("korap:reference",     res.at("/query/operands/1/@type").asText());
-
+        assertEquals("operation:focus",     res.at("/query/operands/1/operation").asText());
+        assertEquals(129,  res.at("/query/operands/1/classRef/0").asInt());
+        
         String eq2 =
                 "{@type=korap:group, operation=operation:position, frames=[frame:startswith], sharedClasses=[sharedClasses:includes], operands=[" +
                         "{@type=korap:group, operation=operation:relation, operands=[" +

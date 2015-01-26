@@ -38,7 +38,7 @@ public class QuerySerializer {
     public static String queryLanguageVersion;
 
     private AbstractQueryProcessor ast;
-    private Map<String, Object> collection;
+    private Map<String, Object> collection = new LinkedHashMap<String, Object>();
     private Map<String, Object> meta;
     private List<Object> errors;
     private List<Object> warnings;
