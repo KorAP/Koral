@@ -388,19 +388,25 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         // We can assume two operands.
         ParseTree operand1 = node.getChild(0);
         ParseTree operand2 = node.getChild(2);
+        if (checkOperandProcessedPreviously(operand1) || checkOperandProcessedPreviously(operand2)) {
+            return true;
+        }
+        return false;
+    }
 
-        String operandRef1 = operand1.getText();
-        String operandRef2 = operand2.getText();
-        // only if they're both references...
-        if (operandRef1.startsWith("#") && operandRef2.startsWith("#")) {
-            operandRef1 = operandRef1.substring(1, operandRef1.length());
-            operandRef2 = operandRef2.substring(1, operandRef2.length());
+    /**
+     * @param operand 
+     * @return
+     */
+    private boolean checkOperandProcessedPreviously(ParseTree operand) {
+        String operandRef = operand.getText();
+        if (operandRef.startsWith("#")) {
+            operandRef = operandRef.substring(1, operandRef.length());
             if (verbose) {
-                System.out.println(operandRef1);
+                System.out.println(operandRef);
                 System.out.println(nodeReferencesProcessed);   
             }
-            if (nodeReferencesProcessed.get(operandRef1) > 0 || 
-                    nodeReferencesProcessed.get(operandRef2) > 0) {
+            if (nodeReferencesProcessed.get(operandRef) > 0) {
                 return true;
             }
         }
@@ -429,7 +435,12 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 if (! checkOperandsProcessedPreviously(node)) {
                     queuedRelations.add(node);
                     relationCounter--;
-                    if (verbose) System.out.println("Adding to queue: "+node.getText());
+                    if (verbose) {
+                        System.out.println(operandTree1.toStringTree(parser));
+                        System.out.println(operandTree2.toStringTree(parser));
+                        System.out.println(nodeReferencesProcessed);
+                        System.out.println("Adding to queue: "+node.getText());
+                    }
                     objectsToPop.push(stackedObjects);
                     return;
                 }
