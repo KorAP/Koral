@@ -745,27 +745,27 @@ public class AnnisQueryProcessorTest {
             query = "node & \"Mann\" & #2 _o_ #1";
             qs.setQuery(query, "annis");
             res = mapper.readTree(qs.toJSON());
-            assertEquals("frames:overlapsLeft",   res.at("/query/frames/0").asText());
-            assertEquals("frames:overlapsRight",     res.at("/query/frames/1").asText());
-            assertEquals("korap:span",          res.at("/query/operands/1/@type").asText());
-            assertEquals("korap:token",         res.at("/query/operands/0/@type").asText());
-            assertEquals("Mann",                res.at("/query/operands/0/wrap/key").asText());
+            assertEquals("frames:overlapsLeft",     res.at("/query/frames/0").asText());
+            assertEquals("frames:overlapsRight",    res.at("/query/frames/1").asText());
+            assertEquals("korap:span",              res.at("/query/operands/1/@type").asText());
+            assertEquals("korap:token",             res.at("/query/operands/0/@type").asText());
+            assertEquals("Mann",                    res.at("/query/operands/0/wrap/key").asText());
             
             query = "node & \"Mann\" & #2 _ol_ #1";
             qs.setQuery(query, "annis");
             res = mapper.readTree(qs.toJSON());
             assertEquals("frames:overlapsLeft",     res.at("/query/frames/0").asText());
-            assertEquals("korap:span",          res.at("/query/operands/1/@type").asText());
-            assertEquals("korap:token",         res.at("/query/operands/0/@type").asText());
-            assertEquals("Mann",                res.at("/query/operands/0/wrap/key").asText());
+            assertEquals("korap:span",              res.at("/query/operands/1/@type").asText());
+            assertEquals("korap:token",             res.at("/query/operands/0/@type").asText());
+            assertEquals("Mann",                    res.at("/query/operands/0/wrap/key").asText());
             
             query = "node & \"Mann\" & #2 _or_ #1";
             qs.setQuery(query, "annis");
             res = mapper.readTree(qs.toJSON());
-            assertEquals("frames:overlapsRight",     res.at("/query/frames/0").asText());
-            assertEquals("korap:span",          res.at("/query/operands/1/@type").asText());
-            assertEquals("korap:token",         res.at("/query/operands/0/@type").asText());
-            assertEquals("Mann",                res.at("/query/operands/0/wrap/key").asText());
+            assertEquals("frames:overlapsRight",    res.at("/query/frames/0").asText());
+            assertEquals("korap:span",              res.at("/query/operands/1/@type").asText());
+            assertEquals("korap:token",             res.at("/query/operands/0/@type").asText());
+            assertEquals("Mann",                    res.at("/query/operands/0/wrap/key").asText());
     	}
     	
     	@Test
@@ -802,26 +802,42 @@ public class AnnisQueryProcessorTest {
             assertEquals(128,                   res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
             assertEquals("V",                   res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
             assertEquals("P",                   res.at("/query/operands/1/wrap/key").asText());
+            
+            query = "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 > #2 & #1 > #3";
+            qs.setQuery(query, "annis");
+            res = mapper.readTree(qs.toJSON());
+            assertEquals("operation:relation",  res.at("/query/operation").asText());
+            assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
+            assertEquals(128,                   res.at("/query/operands/0/classRef/0").asInt());
+            assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
+            assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
+            assertEquals(128,                   res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
+            assertEquals("N",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
+            assertEquals("V",                   res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
+            assertEquals("P",                   res.at("/query/operands/1/wrap/key").asText());
+            
+            query = "cat=\"NP\" & pos=\"V\" & pos=\"P\" & #1 > #2 & #1 > #3 & #2 . #3";
+            qs.setQuery(query, "annis");
+            res = mapper.readTree(qs.toJSON());
+            assertEquals("operation:sequence",  res.at("/query/operation").asText());
+            assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
+            assertEquals(129,                   res.at("/query/operands/0/classRef/0").asInt());
+            assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
+            assertEquals("operation:focus",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
+            assertEquals(128,                   res.at("/query/operands/0/operands/0/operands/0/classRef/0").asInt());
+            assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operands/0/operands/0/operation").asText());
+            assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operation").asText());
+            assertEquals(128,                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/classOut").asInt());
+            assertEquals("NP",                  res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/key").asText());
+            assertEquals(129,                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/classOut").asInt());
+            assertEquals("V",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
+            assertEquals(130,                   res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+            assertEquals("P",                   res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
+            assertEquals("operation:focus",     res.at("/query/operands/1/operation").asText());
+            assertEquals(130,                   res.at("/query/operands/1/classRef/0").asInt());
+            assertEquals(true,                  res.at("/query/operands/1/operands").isMissingNode());
     	}
     		
-    //
-    //		query = "pos=\"N\" & pos=\"V\" & pos=\"P\" & #1 > #2 & #1 > #3";
-    //		String mult3 = 
-    //			"{@type=korap:group, operation=operation:relation, operands=[" +
-    //				"{@type=korap:reference, operation=operation:focus, classRef=[0], operands=[" +
-    //					"{@type=korap:group, operation=operation:relation, operands=[" +
-    //						"{@type=korap:group, operation=operation:class, class=128, classOut=128, operands=[" +
-    //							"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=N, match=match:eq}}" +
-    //						"]}," +
-    //						"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=V, match=match:eq}}" +
-    //					"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}" +
-    //				"]}," +
-    //				"{@type=korap:token, wrap={@type=korap:term, layer=pos, key=P, match=match:eq}}" +
-    //			"], relation={@type=korap:relation, wrap={@type=korap:term, layer=c}}}";
-    //		aqlt = new AqlTree(query);
-    //		map = aqlt.getRequestMap().get("query").toString();
-    //		assertEquals(mult3.replaceAll(" ", ""), map.replaceAll(" ", ""));
-    //		
     //		query = "cat=\"NP\" & pos=\"V\" & pos=\"P\" & #1 > #2 & #1 > #3 & #2 . #3";
     //		String mult4 = 
     //				"{@type=korap:group, operation=operation:sequence, operands=[" +
