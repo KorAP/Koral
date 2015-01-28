@@ -29,8 +29,7 @@ tokenVocab=AqlLexer;
 // trouble with "qName operator textSpec" specifications at the end of the input (see variableExpr rule), while "TOK operator textSpec"
 // works fine, for a  strange reason. Until this is further investigated, go without EOF
 start           
-: exprTop 
-| regex
+: (exprTop | regex) EOF
 ;
 
 regex : REGEX;
@@ -159,8 +158,12 @@ variableExpr
 | NODE # NodeExpr
 ;
 
+varDef
+: VAR_DEF
+;
+
 expr
-: VAR_DEF variableExpr # NamedVariableTermExpr
+: varDef variableExpr # NamedVariableTermExpr
 | variableExpr # VariableTermExpr
 |	unary_linguistic_term # UnaryTermExpr
 |	n_ary_linguistic_term # BinaryTermExpr

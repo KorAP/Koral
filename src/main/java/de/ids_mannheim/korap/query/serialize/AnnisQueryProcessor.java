@@ -44,7 +44,11 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     /**
      * Keeps track of explicitly (by #-var definition) or implicitly (number as reference) introduced entities (for later reference by #-operator)
      */
-    Map<String, LinkedHashMap<String,Object>> nodeVariables = new LinkedHashMap<String, LinkedHashMap<String,Object>>(); 
+    Map<String, LinkedHashMap<String,Object>> nodeVariables = new LinkedHashMap<String, LinkedHashMap<String,Object>>();
+    /**
+     * Keeps track of explicitly (by #-var definition) or implicitly (number as reference) introduced entities (for later reference by #-operator)
+     */
+    Map<ParseTree, String> nodes2refs= new LinkedHashMap<ParseTree, String>(); 
     /**
      * Counter for variable definitions.
      */
@@ -77,6 +81,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
      * spans to refer back to previously established classes for entities.
      */
     private LinkedHashMap<String, Integer> refClassMapping = new LinkedHashMap<String, Integer>();
+    /**
+     * Keeps a record of unary relations on spans/tokens.
+     */
+    private LinkedHashMap<String, ParseTree> unaryRelations = new LinkedHashMap<String, ParseTree>();
     /**
      * Keeps track of the number of references to a node/token by means of #n. E.g. in the query 
      * <tt>tok="x" & tok="y" & tok="z" & #1 . #2 & #2 . #3</tt>, the 2nd token ("y") is referenced twice, the others once.
@@ -155,7 +163,6 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 
         if (verbose) {
             System.err.println(" "+objectStack);
-            System.err.println(" "+operandStack);
             System.out.println(openNodeCats);
         }
 
@@ -174,9 +181,9 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             processAndTopExpr(node);
         }
 
-        if (nodeCat.equals("unary_linguistic_term")) {
-            processUnary_linguistic_term(node);
-        }
+//        if (nodeCat.equals("unary_linguistic_term")) {
+//            processUnary_linguistic_term(node);
+//        }
 
         if (nodeCat.equals("n_ary_linguistic_term")) {
             processN_ary_linguistic_term(node);
@@ -222,6 +229,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         // naturally as operands of the relations/groups introduced by the 
         // *node. For that purpose, this section mines all used references
         // and stores them in a list for later reference.
+        for (ParseTree unaryTermNode : getDescendantsWithCat(node, "unary_linguistic_term")) {
+            String ref = getNodeCat(unaryTermNode.getChild(0)).substring(1);
+            unaryRelations.put(ref, unaryTermNode);
+        }
         for (ParseTree lingTermNode : getDescendantsWithCat(node, "n_ary_linguistic_term")) {
             for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
                 String refOrNodeString = refOrNode.getChild(0).toStringTree(parser);
@@ -239,8 +250,18 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         // Then, mine all object definitions. 
         for (ParseTree variableExprNode : getDescendantsWithCat(node, "variableExpr")) {
+            String ref;
+            // might be a ref label rather than a counting number
+            ParseTree varDef = getFirstChildWithCat(variableExprNode.getParent(), "varDef");
+            if (varDef != null) {
+                ref = varDef.getText().replaceFirst("#", ""); // remove trailing #
+            } else {
+                ref = variableCount.toString();
+            }
+            nodes2refs.put(variableExprNode, ref);
             LinkedHashMap<String,Object> object = processVariableExpr(variableExprNode);
-            String ref = variableCount.toString();
+            nodeVariables.put(ref, object);            
+            variableCount++;
             // Check if this object definition is part of a "direct declaration relation", 
             // i.e. a relation which declares its operands directly rather than using
             // references to earlier declared objects. These objects must still be
@@ -262,8 +283,6 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     objectsToWrapInClass.put(variableExprNode, classCounter++);    
                 }
             }
-            nodeVariables.put(ref, object);
-            variableCount++;
         }
     }
 
@@ -329,11 +348,21 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
         }
 
+        // Check if there's a unary relation defined for this node
+        // If yes, parse and retrieve it and put it in the object. 
+        String ref = nodes2refs.get(node);
+        System.err.println(ref);
+        System.err.println(unaryRelations);
+        if (unaryRelations.containsKey(ref)) {
+            object.put("attr", 
+                    parseUnaryOperator(unaryRelations.get(ref)));
+        }
+        System.err.println(object);
+        System.err.println(nodeVariables);
+        
         if (object != null) {
-            ParseTree grandparent = node.getParent().getParent();
             // query: object only, no relation
-            if (getNodeCat(grandparent).equals("andTopExpr") && 
-                    grandparent.getChildCount()==1) { 
+            if (totalRelationCount == 0) {
                 putIntoSuperObject(object);
             }
             ParseTree parentsFirstChild = node.getParent().getChild(0);
@@ -582,7 +611,6 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
      * @return A map containing the attr key, to be inserted into korap:span 
      */
     private LinkedHashMap<String, Object> parseUnaryOperator(ParseTree node) {
-        LinkedHashMap<String, Object> attr = new LinkedHashMap<String, Object>();
         LinkedHashMap<String, Object> term = KoralObjectGenerator.makeTerm();
         String op = node.getChild(1).toStringTree(parser).substring(1);
         if (op.equals("arity") || op.equals("tokenarity")) {
@@ -591,8 +619,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         } else {
             term.put(op, true);
         }
-        attr.put("attr", term);
-        return attr;
+        return term;
     }
 
     @SuppressWarnings("unchecked")
