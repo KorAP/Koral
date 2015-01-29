@@ -65,7 +65,6 @@ public class QuerySerializer {
             try {
                 System.out.println(q);
                 String ql = "cosmas2";
-                jg.setCollection("pubDate=2014");
                 jg.run(q, ql);
                 System.out.println();
             }
@@ -253,12 +252,12 @@ public class QuerySerializer {
         return this;
     }
 
-    @Deprecated public QuerySerializer setCollectionSimple(String collection) {
-        CollectionQueryBuilder qobj = new CollectionQueryBuilder();
-        qobj.addResource(collection);
-        this.collection = (Map<String, Object>) qobj.raw();
-        return this;
-    }
+//    @Deprecated public QuerySerializer setCollectionSimple(String collection) {
+//        CollectionQueryBuilder qobj = new CollectionQueryBuilder();
+//        qobj.addResource(collection);
+//        this.collection = (Map<String, Object>) qobj.raw();
+//        return this;
+//    }
 
     public QuerySerializer setCollection(String collection) {
         CollectionQueryProcessor tree = new CollectionQueryProcessor();
@@ -272,14 +271,14 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer setCollection(CollectionQueryBuilder2 collections) {
-        this.collection = (Map<String, Object>) collections.raw();
-        return this;
-    }
-
-    public QuerySerializer setDeprCollection(
-            CollectionQueryBuilder collections) {
-        this.collection = (Map<String, Object>) collections.raw();
-        return this;
-    }
+//    public QuerySerializer setCollection(CollectionQueryBuilder2 collections) {
+    //        this.collection = (Map<String, Object>) collections.raw();
+    //        return this;
+    //    }
+    //
+    //    public QuerySerializer setDeprCollection(
+    //            CollectionQueryBuilder collections) {
+    //        this.collection = (Map<String, Object>) collections.raw();
+    //        return this;
+    //    }
 }

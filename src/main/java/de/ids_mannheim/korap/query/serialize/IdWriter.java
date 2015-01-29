@@ -1,24 +1,26 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import de.ids_mannheim.korap.utils.JsonUtils;
 
 import java.util.Iterator;
 
 /**
  * @author hanl
  * @date 04/06/2014
- *       <p/>
- *       create idn for korap:token
+ * <p/>
+ * create idn for korap:token
  */
 public class IdWriter {
 
     private JsonNode node;
     private int counter;
+    private ObjectMapper mapper = new ObjectMapper();
 
-    public IdWriter (String json) {
-        node = JsonUtils.readTree(json);
+    public IdWriter(String json) {
+        node = mapper.valueToTree(json);
         counter = 0;
     }
 
@@ -63,13 +65,17 @@ public class IdWriter {
 
     }
 
-    @Deprecated
-    public JsonNode getFinalNode() {
+    @Deprecated public JsonNode getFinalNode() {
         return this.node;
     }
 
     public String toJSON() {
-        return JsonUtils.toJSON(node);
+        try {
+            return mapper.writeValueAsString(node);
+        }
+        catch (JsonProcessingException e) {
+            return "";
+        }
     }
 
 }
