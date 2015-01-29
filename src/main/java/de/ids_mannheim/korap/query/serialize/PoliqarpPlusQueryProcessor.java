@@ -23,7 +23,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     private static Logger log = LoggerFactory
             .getLogger(PoliqarpPlusQueryProcessor.class);
-    private int classCounter = 128;
+    private int classCounter = 1;
 
     /**
      * Most centrally, this class maintains a set of nested maps and
@@ -82,8 +82,6 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             return;
         else
             visited.add(node);
-
-        currentNode = node;
 
         String nodeCat = getNodeCat(node);
         openNodeCats.push(nodeCat);
@@ -261,7 +259,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                     .toStringTree(parser));
         }
         LinkedHashMap<String, Object> classGroup = 
-                KoralObjectGenerator.makeSpanClass(classId, false);
+                KoralObjectGenerator.makeSpanClass(classId);
+        addHighlightClass(classId);
         putIntoSuperObject(classGroup);
         objectStack.push(classGroup);
         stackedObjects++;
@@ -321,7 +320,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     @SuppressWarnings("unchecked")
     private void processAlignment(ParseTree node) {
         LinkedHashMap<String, Object> alignClass = 
-                KoralObjectGenerator.makeSpanClass(++classCounter, false);
+                KoralObjectGenerator.makeSpanClass(classCounter);
         LinkedHashMap<String, Object> metaMap = 
                 (LinkedHashMap<String, Object>) requestMap.get("meta");
         if (metaMap.containsKey("alignment")) {
@@ -338,7 +337,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         else {
             metaMap.put("alignment", classCounter);
         }
-
+        classCounter++;
         putIntoSuperObject(alignClass);
         objectStack.push(alignClass);
         stackedObjects++;
@@ -413,6 +412,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         relation.put("wrap", term);
         if (node.getChild(0).getText().equals("dominates")) {
             term.put("layer", "c");
+        } else if (node.getChild(0).getText().equals("dependency")) {
+            term.put("layer", "d");
         }
         ParseTree relSpec = getFirstChildWithCat(node, "relSpec");
         ParseTree repetition = getFirstChildWithCat(node, "repetition");
@@ -452,15 +453,16 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 addError(StatusCodes.UNDEFINED_CLASS_REFERENCE, msg);
             }
             // only allow class id up to 127
-            if (classId > 127) {
-                addWarning("Only class IDs up to 127 are allowed. Your class "
-                        + classId + " has been set back to 127. "
+            if (classId > 128) {
+                addWarning("Only class IDs up to 128 are allowed. Your class "
+                        + classId + " has been set back to 128. "
                         + "Check for possible conflict with other classes.");
-                classId = 127;
+                classId = 128;
             }
         }
         LinkedHashMap<String, Object> classGroup = 
-                KoralObjectGenerator.makeSpanClass(classId, false);
+                KoralObjectGenerator.makeSpanClass(classId);
+        addHighlightClass(classId);
         putIntoSuperObject(classGroup);
         objectStack.push(classGroup);
         stackedObjects++;
@@ -481,14 +483,14 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 else {
                     try {
                         int classRef = Integer.parseInt(ref);
-                        // only allow class id up to 127
-                        if (classRef > 127) {
-                            addWarning("Only class references up to 127 are "
+                        // only allow class id up to 128
+                        if (classRef > 128) {
+                            addWarning("Only class references up to 128 are "
                                     + "allowed. Your reference to class "
-                                    + classRef + " has been set back to 127. "
+                                    + classRef + " has been set back to 128. "
                                     + "Check for possible conflict with "
                                     + "other classes.");
-                            classRef = 127;
+                            classRef = 128;
                         }
                         classRefs.add(classRef);
                     }
@@ -677,6 +679,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      *            negated, e.g. through a negation operator preceding
      *            the related token like "![base=foo]". Global
      *            negation affects the term's "match" parameter.
+     * @param mode 'token' or 'span' (tokens and spans are treated 
+     *            differently).
      * @return A term or termGroup object, depending on input
      */
     @SuppressWarnings("unchecked")
@@ -706,12 +710,17 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             // process layer: map "base" -> "lemma"
             if (layerNode != null) {
                 String layer = layerNode.getText();
-                if (layer.equals("base"))
-                    layer = "lemma";
-                if (mode.equals("span"))
+                if (mode.equals("span")) {
                     term.put("key", layer);
-                else
+                } else if (mode.equals("token")) {
+                    if (layer.equals("base")) {
+                        layer = "lemma"; }
+                    else if (layer.equals("punct")) {
+                        layer = "orth";
+                        term.put("type", "type:punct");
+                    }   
                     term.put("layer", layer);
+                }
             }
             // process key: 'normal' or regex?
             key = keyNode.getText();

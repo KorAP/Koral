@@ -99,9 +99,10 @@ public class KoralObjectGenerator {
     }
 
     public static LinkedHashMap<String, Object> makeSpanClass(int classCount) {
-        return makeSpanClass(classCount, true);
+        return makeSpanClass(classCount, false);
     }
 
+    @Deprecated
     public static LinkedHashMap<String, Object> makeSpanClass(int classId,
             boolean setBySystem) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
@@ -215,6 +216,7 @@ public class KoralObjectGenerator {
         return makeReference(classRefs, "focus");
     }
 
+    @Deprecated
     public static LinkedHashMap<String, Object> makeReference(int classRef,
             String operation, boolean setBySystem) {
         ArrayList<Integer> classRefs = new ArrayList<Integer>();
@@ -224,6 +226,7 @@ public class KoralObjectGenerator {
         return makeReference(classRefs, operation);
     }
 
+    @Deprecated
     public static LinkedHashMap<String, Object> makeReference(int classRef,
             boolean setBySystem) {
         ArrayList<Integer> classRefs = new ArrayList<Integer>();
@@ -270,7 +273,7 @@ public class KoralObjectGenerator {
     public static LinkedHashMap<String, Object> wrapInReference(
             LinkedHashMap<String, Object> group, Integer classId, 
             boolean setBySystem) {
-        LinkedHashMap<String, Object> refGroup = makeReference(classId, setBySystem);
+        LinkedHashMap<String, Object> refGroup = makeReference(classId);
         ArrayList<Object> operands = new ArrayList<Object>();
         operands.add(group);
         refGroup.put("operands", operands);
@@ -280,7 +283,7 @@ public class KoralObjectGenerator {
     @SuppressWarnings("unchecked")
     public static LinkedHashMap<String, Object> wrapInClass(
             LinkedHashMap<String, Object> group, Integer classId) {
-        LinkedHashMap<String, Object> classGroup = makeSpanClass(classId, true);
+        LinkedHashMap<String, Object> classGroup = makeSpanClass(classId);
         ((ArrayList<Object>) classGroup.get("operands")).add(group);
         return classGroup;
     }

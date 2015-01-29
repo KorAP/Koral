@@ -65,7 +65,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     /**
      * Keeps track of operation:class numbers.
      */
-    int classCounter = 0;
+    int classCounter = 1;
     /**
      * Keeps track of numers of relations processed (important when dealing with multiple predications).
      */
@@ -285,13 +285,13 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
         }
     }
-
-    private void processUnary_linguistic_term(ParseTree node) {
-        LinkedHashMap<String, Object> unaryOperator = parseUnaryOperator(node);
-        String reference = node.getChild(0).toStringTree(parser).substring(1);
-        LinkedHashMap<String, Object> object = nodeVariables.get(reference);
-        object.putAll(unaryOperator);
-    }
+//
+//    private void processUnary_linguistic_term(ParseTree node) {
+//        LinkedHashMap<String, Object> unaryOperator = parseUnaryOperator(node);
+//        String reference = node.getChild(0).toStringTree(parser).substring(1);
+//        LinkedHashMap<String, Object> object = nodeVariables.get(reference);
+//        object.putAll(unaryOperator);
+//    }
 
     private void processExprTop(ParseTree node) {
         List<ParseTree> andTopExprs = getChildrenWithCat(node, "andTopExpr");
@@ -398,7 +398,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     try {
                         operand = KoralObjectGenerator.wrapInReference(operandStack.pop(), refClassMapping.get(ref), true);
                     } catch (NoSuchElementException e) {
-                        operand = KoralObjectGenerator.makeReference(refClassMapping.get(ref), true);
+                        operand = KoralObjectGenerator.makeReference(refClassMapping.get(ref));
                     }
                 }
                 nodeReferencesProcessed.put(ref, nodeReferencesProcessed.get(ref)+1);
@@ -550,7 +550,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     LinkedHashMap<String,Object> positionGroup = KoralObjectGenerator.makePosition(new String[]{frame}, null);
                     operand2 = KoralObjectGenerator.wrapInClass(operand2, ++classCounter);
                     ((ArrayList<Object>) positionGroup.get("operands")).add(group);
-                    ((ArrayList<Object>) positionGroup.get("operands")).add(KoralObjectGenerator.makeReference(classCounter,true));
+                    ((ArrayList<Object>) positionGroup.get("operands")).add(KoralObjectGenerator.makeReference(classCounter));
                     group = positionGroup;
                 }
 
@@ -719,6 +719,22 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             //			relation.put("sharedClasses", sharedClasses);
             relation = KoralObjectGenerator.makePosition(frames, new String[]{});
             relation.put("groupType", "position");
+        } 
+        else if (operator.equals("near")) {
+            relation = new LinkedHashMap<String, Object>();
+            relation.put("groupType", "sequence");
+            ParseTree rangeSpec = getFirstChildWithCat(operatorNode, "rangeSpec");
+            ParseTree star = getFirstChildWithCat(operatorNode, "*");
+            ArrayList<Object> distances = new ArrayList<Object>();
+            if (star != null) {
+                distances.add(KoralObjectGenerator.makeDistance("w", 0, null));
+                relation.put("distances", distances);
+            }
+            if (rangeSpec != null) {
+                distances.add(parseDistance(rangeSpec));
+                relation.put("distances", distances);
+            }
+            relation.put("inOrder", false);
         }
         else if (operator.equals("identity")) {
             //TODO since ANNIS v. 3.1.6

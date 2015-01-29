@@ -32,7 +32,7 @@ Todo: tags can be splittet at ':' in case the fieldname is 'tag'
 */
 
 POSITION_OP : ('contains' | 'startswith' | 'startsWith' | 'endswith' | 'endsWith' | 'matches' | 'overlaps') ;
-RELATION_OP	: ('dominates' | 'relatesTo');
+RELATION_OP	: ('dominates' | 'dependency' | 'relatesTo');
 MATCH_OP 	: ('focus' | 'shrink' | 'split');  // submatch and shrink are deprecated!
 SUBMATCH_OP	: 'submatch';
 WITHIN		: 'within';

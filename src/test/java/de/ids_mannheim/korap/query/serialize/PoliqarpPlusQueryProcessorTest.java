@@ -136,9 +136,21 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("type:regex",			res.at("/query/wrap/type").asText());
 		assertEquals("orth", 				res.at("/query/wrap/layer").asText());
 		assertEquals("match:eq",			res.at("/query/wrap/match").asText());
-
 	}
 
+	@Test
+    public void testPunct() throws JsonProcessingException, IOException {
+        query = "[punct=.]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:token",         res.at("/query/@type").asText());
+        assertEquals("korap:term",          res.at("/query/wrap/@type").asText());
+        assertEquals(".",                   res.at("/query/wrap/key").asText());
+        assertEquals("type:punct",          res.at("/query/wrap/type").asText());
+        assertEquals("orth",                res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq",            res.at("/query/wrap/match").asText());
+	}
+	
 	@Test
 	public void testCaseSensitivityFlag() throws JsonProcessingException, IOException {
 		query = "[orth=deutscher/i]";
@@ -456,13 +468,15 @@ public class PoliqarpPlusQueryProcessorTest {
 		operands = Lists.newArrayList(operands.get(1).at("/operands").elements());
 		assertEquals("korap:token",			operands.get(0).at("/@type").asText());
 		assertEquals(true,					operands.get(0).at("/wrap").isMissingNode());
-
+		assertEquals(1,                     res.at("/meta/highlight/0").asInt());
+		
 		query = "[base=der]{2:[]}[base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
 		operands = Lists.newArrayList(res.at("/query/operands").elements());
 		assertEquals("operation:class",		operands.get(1).at("/operation").asText());
 		assertEquals(2,						operands.get(1).at("/classOut").asInt());
+		assertEquals(2,                     res.at("/meta/highlight/0").asInt());
 
 		query = "{1:[]}[base=der][base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
@@ -470,6 +484,7 @@ public class PoliqarpPlusQueryProcessorTest {
 		operands = Lists.newArrayList(res.at("/query/operands").elements());
 		assertEquals("operation:class",		operands.get(0).at("/operation").asText());
 		assertEquals(1,						operands.get(0).at("/classOut").asInt());
+		assertEquals(1,                     res.at("/meta/highlight/0").asInt());
 
 		query = "{1:{2:der} {3:[]} Mann}";
 		qs.setQuery(query, "poliqarpplus");
@@ -478,7 +493,9 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals(1,	operands.size());  // class operation may only have one operand (the sequence)
 		operands = Lists.newArrayList(operands.get(0).at("/operands").elements());
 		assertEquals(3,	operands.size());  // the sequence has three operands ("der", "[]" and "Mann")
-
+		assertEquals(1,                     res.at("/meta/highlight/0").asInt());
+		assertEquals(2,                     res.at("/meta/highlight/1").asInt());
+		assertEquals(3,                     res.at("/meta/highlight/2").asInt());
 	}
 
 	@Test
@@ -900,7 +917,8 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals(true, 					res.at("/query/operands/0/classIn").isMissingNode());
 		assertEquals("Mann", 				res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
 		assertEquals("Frau", 				res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-
+		assertEquals(1,                     res.at("/meta/highlight/0").asInt());
+		
 		query = "{2:{1:[tt/p=ADJA]}[mate/p=NN]}";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -909,6 +927,8 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("operation:sequence", 	res.at("/query/operands/0/operation").asText());
 		assertEquals(2, 					res.at("/query/classOut").asInt());
 		assertEquals(1, 					res.at("/query/operands/0/operands/0/classOut").asInt());
+		assertEquals(2,                     res.at("/meta/highlight/0").asInt());
+		assertEquals(1,                     res.at("/meta/highlight/1").asInt());
 	}
 
 	@Test
@@ -923,7 +943,8 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("operation:class", 	res.at("/query/operands/0/operands/1/operation").asText());
 		assertEquals(1, 					res.at("/query/operands/0/operands/1/classOut").asInt());
 		assertEquals("Mann", 				res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-
+		assertEquals(1,                     res.at("/meta/highlight/0").asInt());
+		
 		query = "focus([orth=Der]{[orth=Mann][orth=geht]})";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -936,7 +957,8 @@ public class PoliqarpPlusQueryProcessorTest {
 		res = mapper.readTree(qs.toJSON());
 		assertEquals(2, 					res.at("/query/classRef/0").asInt());
 		assertEquals(2, 					res.at("/query/operands/0/operands/1/classOut").asInt());
-
+		assertEquals(2,                     res.at("/meta/highlight/0").asInt());
+		
 		query = "focus(3:startswith(<s>,{3:<np>}))";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -947,12 +969,14 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("operation:class", 	res.at("/query/operands/0/operands/1/operation").asText());
 		assertEquals(3, 					res.at("/query/operands/0/operands/1/classOut").asInt());
 		assertEquals("frames:startswith", 	res.at("/query/operands/0/frames/0").asText());
-
+		assertEquals(3,                     res.at("/meta/highlight/0").asInt());
+		
 		query = "focus(1000:startswith(<s>,{1000:<np>}))";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
-		assertEquals(127, 					res.at("/query/classRef/0").asInt());
-		assertEquals(127, 					res.at("/query/operands/0/operands/1/classOut").asInt());
+		assertEquals(128, 					res.at("/query/classRef/0").asInt());
+		assertEquals(128, 					res.at("/query/operands/0/operands/1/classOut").asInt());
+		assertEquals(128,                     res.at("/meta/highlight/0").asInt());
 
 		query = "focus(3: startswith(<s>, {3:[base=der]{1:[mate/p=ADJA]{2:[tt/p=NN]}}}))";
 		qs.setQuery(query, "poliqarpplus");
@@ -987,6 +1011,9 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("classRefOp:intersection", res.at("/query/classRefOp").asText());
 		assertEquals("korap:reference", 		res.at("/query/@type").asText());
 		assertEquals("operation:split", 		res.at("/query/operation").asText());
+		assertEquals(3,                     res.at("/meta/highlight/0").asInt());
+		assertEquals(1,                     res.at("/meta/highlight/1").asInt());
+		assertEquals(2,                     res.at("/meta/highlight/2").asInt());
 
 		query = "focus(1:{[base=der]}{1:[pos=ADJA]})";
 		qs.setQuery(query, "poliqarpplus");
@@ -1063,6 +1090,16 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("d", 					res.at("/query/relation/wrap/layer").asText());
 		assertEquals("HEAD", 				res.at("/query/relation/wrap/key").asText());
 
+        query = "dependency([base=fällen],[base=Baum])";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("lemma",               res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("fällen",              res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("lemma",               res.at("/query/operands/1/wrap/layer").asText());
+        assertEquals("Baum",                res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("korap:relation",      res.at("/query/relation/@type").asText());
+        assertEquals("d",                   res.at("/query/relation/wrap/layer").asText());
+
 		query = "dominates(Baum,<np>)";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
@@ -1112,8 +1149,8 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("operation:sequence", 	res.at("/query/operation").asText());
 		assertEquals("der", 				res.at("/query/operands/0/wrap/key").asText());
 		assertEquals("operation:class", 	res.at("/query/operands/1/operation").asText());
-		assertEquals(129, 					res.at("/query/operands/1/classOut").asInt());
-		assertEquals(129, 					res.at("/meta/alignment").asInt());
+		assertEquals(1,   					res.at("/query/operands/1/classOut").asInt());
+		assertEquals(1,   					res.at("/meta/alignment").asInt());
 
 		query = "[orth=der]^[orth=große][orth=Mann]";
 		qs.setQuery(query, "poliqarpplus");
@@ -1123,8 +1160,8 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("operation:sequence", 	res.at("/query/operands/1/operands/0/operation").asText());
 		assertEquals("große", 				res.at("/query/operands/1/operands/0/operands/0/wrap/key").asText());
 		assertEquals("Mann", 				res.at("/query/operands/1/operands/0/operands/1/wrap/key").asText());
-		assertEquals(129, 					res.at("/query/operands/1/classOut").asInt());
-		assertEquals(129, 					res.at("/meta/alignment").asInt());
+		assertEquals(1,   					res.at("/query/operands/1/classOut").asInt());
+		assertEquals(1,   					res.at("/meta/alignment").asInt());
 
 		query = "([base=a]^[base=b])|[base=c]";
 		qs.setQuery(query, "poliqarpplus");
@@ -1135,8 +1172,8 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("a", 					res.at("/query/operands/0/operands/0/wrap/key").asText());
 		assertEquals("b", 					res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
 		assertEquals("c", 					res.at("/query/operands/1/wrap/key").asText());
-		assertEquals(129, 					res.at("/query/operands/0/operands/1/classOut").asInt());
-		assertEquals(129, 					res.at("/meta/alignment").asInt());
+		assertEquals(1,   					res.at("/query/operands/0/operands/1/classOut").asInt());
+		assertEquals(1,   					res.at("/meta/alignment").asInt());
 
 		query = "([base=a]^[base=b][base=c])|[base=d]";
 		qs.setQuery(query, "poliqarpplus");
@@ -1153,8 +1190,8 @@ public class PoliqarpPlusQueryProcessorTest {
 		assertEquals("b", 					res.at("/query/operands/0/operands/1/operands/0/operands/0/wrap/key").asText());
 		assertEquals("c", 					res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/wrap/key").asText());
 		assertEquals("d", 					res.at("/query/operands/1/wrap/key").asText());
-		assertEquals(129, 					res.at("/meta/alignment/0").asInt());
-		assertEquals(130, 					res.at("/meta/alignment/1").asInt());
+		assertEquals(1,   					res.at("/meta/alignment/0").asInt());
+		assertEquals(2,   					res.at("/meta/alignment/1").asInt());
 	}
 
 	@Test

@@ -118,6 +118,12 @@ notequalvalue
 : NEQ
 ;
 
+near
+: NEAR (layer)? # DirectNear
+| NEAR (layer)? STAR # IndirectNear
+| NEAR (layer COMMA?)? rangeSpec #RangeNear
+;
+
 operator
 : precedence
 | spanrelation
@@ -128,6 +134,7 @@ operator
 | identity
 | equalvalue
 | notequalvalue
+| near
 ;
 
 foundry
