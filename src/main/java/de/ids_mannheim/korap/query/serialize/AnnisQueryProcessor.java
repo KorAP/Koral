@@ -342,7 +342,6 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 
         if (node.getChildCount() == 3) {  			// (foundry/)?layer=key specification
             if (object.get("@type").equals("korap:token")) {
-                @SuppressWarnings("unchecked")
                 HashMap<String, Object> term = (HashMap<String, Object>) object.get("wrap");
                 term.putAll(parseTextSpec(node.getChild(2)));
                 term.put("match", parseMatchOperator(getFirstChildWithCat(node, "eqOperator")));
@@ -818,9 +817,9 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
      */
     private String parseMatchOperator(ParseTree node) {
         if (node.getChildCount()>0) {
-            return node.getChild(0).toStringTree(parser).equals("=") ? "match:eq" : "match:ne";
+            return node.getChild(0).getText().equals("=") ? "match:eq" : "match:ne";
         }
-        return null;
+        return "match:eq";
     }
 
     private LinkedHashMap<String, Object> parseQNameNode(ParseTree node) {

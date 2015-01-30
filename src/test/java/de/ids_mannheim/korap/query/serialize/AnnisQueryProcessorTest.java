@@ -883,6 +883,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("cnx",             res.at("/query/foundry").asText());
         assertEquals("c",               res.at("/query/layer").asText());
         assertEquals("NP",              res.at("/query/key").asText());
+        assertEquals("match:eq",        res.at("/query/match").asText());
         assertEquals("korap:term",      res.at("/query/attr/@type").asText());
         assertEquals(true,              res.at("/query/attr/root").asBoolean());
         

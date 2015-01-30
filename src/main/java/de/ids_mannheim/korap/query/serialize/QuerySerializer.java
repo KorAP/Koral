@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+
+import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,23 +51,26 @@ public class QuerySerializer {
         /*
          * just for testing...
          */
+        BasicConfigurator.configure();
         QuerySerializer jg = new QuerySerializer();
         int i = 0;
         String[] queries;
-        if (args.length == 0) {
+        String ql = "poliqarpplus";
+        if (args.length < 2) {
             queries = new String[] {
-                    "tok=\"corpus\" & tok=\"query\" & tok=\"language\"& #2 . #3 & #1 . #2 "
+//                    "tok=\"corpus\" & tok=\"query\" & tok=\"language\"& #2 . #3 & #1 . #2 "
+                    "[] Mann"
 
             };
         }
-        else
+        else {
             queries = new String[] { args[0] };
-
+            ql  = args[1];
+        }
         for (String q : queries) {
             i++;
             try {
                 System.out.println(q);
-                String ql = "cosmas2";
                 jg.run(q, ql);
                 System.out.println();
             }
