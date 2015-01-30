@@ -478,6 +478,19 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals(2,						operands.get(1).at("/classOut").asInt());
         assertEquals(2,                     res.at("/meta/highlight/0").asInt());
 
+        query = "[base=der]{3:{2:[]}}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        operands = Lists.newArrayList(res.at("/query/operands").elements());
+        assertEquals("operation:class",		operands.get(1).at("/operation").asText());
+        assertEquals(3,						operands.get(1).at("/classOut").asInt());
+        assertEquals(3,                     res.at("/meta/highlight/0").asInt());
+        assertEquals("operation:class",		operands.get(1).at("/operands/0/operation").asText());
+        assertEquals(2,						operands.get(1).at("/operands/0/classOut").asInt());
+        assertEquals(3,                     res.at("/meta/highlight/0").asInt());
+        assertEquals(2,                     res.at("/meta/highlight/1").asInt());
+
+
         query = "{1:[]}[base=der][base=Mann]";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
