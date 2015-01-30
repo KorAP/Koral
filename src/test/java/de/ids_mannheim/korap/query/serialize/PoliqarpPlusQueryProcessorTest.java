@@ -500,6 +500,11 @@ public class PoliqarpPlusQueryProcessorTest {
 
 	@Test
 	public void testLeadingTrailingEmptyTokens() throws JsonProcessingException, IOException {
+		query = "[]";
+		qs.setQuery(query, "poliqarpplus");
+		assertEquals("korap:token",			res.at("/query/@type").asText());
+		assertEquals(true,					res.at("/query/key").isMissingNode());
+
 		query = "[][base=Mann]";
 		qs.setQuery(query, "poliqarpplus");
 		res = mapper.readTree(qs.toJSON());
