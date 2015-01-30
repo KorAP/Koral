@@ -208,6 +208,11 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
     private void processSequence(ParseTree node) {
+        // skipe in case of emptyTokenSequence or emptyTokenSequenceClass
+        if (node.getChildCount() == 1 && 
+                getNodeCat(node.getChild(0)).startsWith("emptyTokenSequence"))  {
+            return; 
+        }
         LinkedHashMap<String, Object> sequence = 
                 KoralObjectGenerator.makeGroup("sequence");
         ParseTree distanceNode = getFirstChildWithCat(node, "distance");

@@ -197,9 +197,9 @@ segment
 ; 
 
 sequence
-: segment+ (emptyTokenSequence|emptyTokenSequenceClass)		// ordering important! this subrule must precede any 'distance'-subrules to give precedence to repetition-interpretation of numbers in braces (could be mistaken for number tokens in spanclass), e.g. {2}.
-| segment segment+ 
+: segment* (emptyTokenSequence|emptyTokenSequenceClass)		// ordering important! this subrule must precede any 'distance'-subrules to give precedence to repetition-interpretation of numbers in braces (could be mistaken for number tokens in spanclass), e.g. {2}.
 | (emptyTokenSequence|emptyTokenSequenceClass) (segment+ | sequence) (emptyTokenSequence|emptyTokenSequenceClass)?
+| segment segment+ 
 | segment (distance|emptyTokenSequenceClass) segment 
 | segment (distance|emptyTokenSequenceClass)? sequence
 | segment+ alignment
