@@ -885,7 +885,22 @@ public class AnnisQueryProcessorTest {
         assertEquals("NP",              res.at("/query/key").asText());
         assertEquals("korap:term",      res.at("/query/attr/@type").asText());
         assertEquals(true,              res.at("/query/attr/root").asBoolean());
-
+        
+        query = "cnx/cat=\"NP\" & #1:root & #1:arity=2";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:span",      res.at("/query/@type").asText());
+        assertEquals("cnx",             res.at("/query/foundry").asText());
+        assertEquals("c",               res.at("/query/layer").asText());
+        assertEquals("NP",              res.at("/query/key").asText());
+        assertEquals("korap:termGroup", res.at("/query/attr/@type").asText());
+        assertEquals("korap:term",      res.at("/query/attr/operands/0/@type").asText());
+        assertEquals(true,              res.at("/query/attr/operands/0/root").asBoolean());
+        assertEquals("korap:term",      res.at("/query/attr/operands/1/@type").asText());
+        assertEquals("korap:boundary",  res.at("/query/attr/operands/1/arity/@type").asText());
+        assertEquals(2,                 res.at("/query/attr/operands/1/arity/min").asInt());
+        assertEquals(2,                 res.at("/query/attr/operands/1/arity/max").asInt());
+        
         query = "cnx/cat=\"NP\" & node & #1>#2 & #1:tokenarity=2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());

@@ -84,7 +84,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     /**
      * Keeps a record of unary relations on spans/tokens.
      */
-    private LinkedHashMap<String, ParseTree> unaryRelations = new LinkedHashMap<String, ParseTree>();
+    private LinkedHashMap<String, ArrayList<ParseTree>> unaryRelations = new LinkedHashMap<String, ArrayList<ParseTree>>();
     /**
      * Keeps track of the number of references to a node/token by means of #n. E.g. in the query 
      * <tt>tok="x" & tok="y" & tok="z" & #1 . #2 & #2 . #3</tt>, the 2nd token ("y") is referenced twice, the others once.
@@ -231,7 +231,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         // and stores them in a list for later reference.
         for (ParseTree unaryTermNode : getDescendantsWithCat(node, "unary_linguistic_term")) {
             String ref = getNodeCat(unaryTermNode.getChild(0)).substring(1);
-            unaryRelations.put(ref, unaryTermNode);
+            ArrayList<ParseTree> unaryTermsForRef = unaryRelations.get(ref);
+            if (unaryTermsForRef == null) unaryTermsForRef = new ArrayList<ParseTree>();
+            unaryTermsForRef.add(unaryTermNode);
+            unaryRelations.put(ref, unaryTermsForRef);
         }
         for (ParseTree lingTermNode : getDescendantsWithCat(node, "n_ary_linguistic_term")) {
             for (ParseTree refOrNode : getChildrenWithCat(lingTermNode, "refOrNode")) {
@@ -302,6 +305,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private LinkedHashMap<String, Object> processVariableExpr(ParseTree node) {
         // simplex word or complex assignment (like qname = textSpec)?
         String firstChildNodeCat = getNodeCat(node.getChild(0));
@@ -351,15 +355,20 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         // Check if there's a unary relation defined for this node
         // If yes, parse and retrieve it and put it in the object. 
         String ref = nodes2refs.get(node);
-        System.err.println(ref);
-        System.err.println(unaryRelations);
         if (unaryRelations.containsKey(ref)) {
-            object.put("attr", 
-                    parseUnaryOperator(unaryRelations.get(ref)));
+            ArrayList<ParseTree> unaryTermsForRef = unaryRelations.get(ref);
+            if (unaryTermsForRef.size() == 1) {
+                object.put("attr", 
+                        parseUnaryOperator(unaryTermsForRef.get(0)));   
+            } else {
+                LinkedHashMap<String, Object> termGroup = KoralObjectGenerator.makeTermGroup("and");
+                ArrayList<Object> operands = (ArrayList<Object>) termGroup.get("operands");
+                for (ParseTree unaryTerm : unaryTermsForRef) {
+                    operands.add(parseUnaryOperator(unaryTerm));
+                }
+                object.put("attr", termGroup);
+            }
         }
-        System.err.println(object);
-        System.err.println(nodeVariables);
-        
         if (object != null) {
             // query: object only, no relation
             if (totalRelationCount == 0) {
@@ -431,10 +440,6 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         String operandRef = operand.getText();
         if (operandRef.startsWith("#")) {
             operandRef = operandRef.substring(1, operandRef.length());
-            if (verbose) {
-                System.out.println(operandRef);
-                System.out.println(nodeReferencesProcessed);   
-            }
             if (nodeReferencesProcessed.get(operandRef) > 0) {
                 return true;
             }
@@ -465,9 +470,6 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     queuedRelations.add(node);
                     relationCounter--;
                     if (verbose) {
-                        System.out.println(operandTree1.toStringTree(parser));
-                        System.out.println(operandTree2.toStringTree(parser));
-                        System.out.println(nodeReferencesProcessed);
                         System.out.println("Adding to queue: "+node.getText());
                     }
                     objectsToPop.push(stackedObjects);
