@@ -498,7 +498,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else { // match only first argument
             focusGroup = KoralObjectGenerator.wrapInReference(classRefCheck,
-                    classCounter);
+                    classCounter-1);
+            classCounter++;
         }
         // wrap in 'merge' operation if grouping option is set
         if (positionOptions.containsKey("grouping")) {
@@ -595,8 +596,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 || openNodeCats.get(1).equals("OPNHIT"))) {
             wrapOperandInClass(node, 1, classCounter);
             wrapOperandInClass(node, 2, classCounter);
-            group = KoralObjectGenerator.wrapInReference(group,
-                    classCounter++);
+            // Deactivated, uncomment to wrap sequence in reference.
+//            group = KoralObjectGenerator.wrapInReference(group,
+//                    classCounter++);
+            classCounter++;
         }
         else if (openNodeCats.get(1).equals("OPNHIT")) {
             LinkedHashMap<String, Object> repetition = KoralObjectGenerator
