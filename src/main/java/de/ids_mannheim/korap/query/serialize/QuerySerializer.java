@@ -54,14 +54,11 @@ public class QuerySerializer {
         BasicConfigurator.configure();
         QuerySerializer jg = new QuerySerializer();
         int i = 0;
-        String[] queries;
+        String[] queries = null;
         String ql = "poliqarpplus";
         if (args.length < 2) {
-            queries = new String[] {
-//                    "tok=\"corpus\" & tok=\"query\" & tok=\"language\"& #2 . #3 & #1 . #2 "
-                    "[] Mann"
-
-            };
+            System.err.println("Usage: QuerySerializer \"query\" queryLanguage");
+            System.exit(1);
         }
         else {
             queries = new String[] { args[0] };
@@ -70,7 +67,6 @@ public class QuerySerializer {
         for (String q : queries) {
             i++;
             try {
-                System.out.println(q);
                 jg.run(q, ql);
                 System.out.println();
             }

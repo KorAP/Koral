@@ -557,8 +557,9 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("classRefCheck:includes",		res.at("/query/operands/0/classRefCheck/0").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/operands/0/frames/0").asText());
-        assertEquals(true,							res.at("/query/operands/0/operands/0/frames/1").isMissingNode());
+        assertEquals("frames:startswith",           res.at("/query/operands/0/operands/0/frames/0").asText());
+        assertEquals("frames:matches",              res.at("/query/operands/0/operands/0/frames/1").asText());
+        assertEquals(true,							res.at("/query/operands/0/operands/0/frames/2").isMissingNode());
 
         query = "wegen #IN(F) <s>";
         qs.setQuery(query, "cosmas2");
@@ -587,15 +588,16 @@ public class Cosmas2QueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("classRefCheck:includes",		res.at("/query/operands/0/classRefCheck/0").asText());
         assertEquals("frames:startswith",			res.at("/query/operands/0/operands/0/frames/0").asText());
-        assertEquals(true,							res.at("/query/operands/0/operands/0/frames/1").isMissingNode());
-        assertEquals(true,							res.at("/query/operands/0/operands/0/exclude").asBoolean());
-
+        assertEquals("frames:matches",				res.at("/query/operands/0/operands/0/frames/1").asText());
+//        assertEquals(true,                          res.at("/query/operands/0/operands/0/exclude").isMissingNode());
+        
         query = "wegen #IN(FE,%,MIN) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("classRefCheck:equals",		res.at("/query/operands/0/classRefCheck/0").asText());
         assertEquals("frames:matches",				res.at("/query/operands/0/operands/0/frames/0").asText());
-        assertEquals(true,							res.at("/query/operands/0/operands/0/exclude").asBoolean());
+        assertEquals("frames:matches",              res.at("/query/operands/0/operands/0/frames/0").asText());
+//        assertEquals(true,							res.at("/query/operands/0/operands/0/exclude").isMissingNode());
 
         query = "wegen #IN(FE,ALL,%,MIN) <s>";
         qs.setQuery(query, "cosmas2");

@@ -8,10 +8,10 @@
 	</parent>
 
 	<groupId>KorAP-modules</groupId>
-	<artifactId>KorAP-querySerialization</artifactId>
-	<version>0.02</version>
+	<artifactId>Koral</artifactId>
+	<version>1.0</version>
 	<packaging>jar</packaging>
-	<name>KorAP-querySerialization</name>
+	<name>Koral</name>
 	<url>http://maven.apache.org</url>
 	<repositories>
 		<repository>
@@ -93,6 +93,34 @@
 					<compilerSource>1.7</compilerSource>
 					<compilerCompliance>1.7</compilerCompliance>
 					<compilerTargetPlatform>1.7</compilerTargetPlatform>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/../lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>../lib/</classpathPrefix>
+							<mainClass>de.ids_mannheim.korap.query.serialize.QuerySerializer</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 			</plugin>
 			<plugin>

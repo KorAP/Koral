@@ -1080,11 +1080,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             switch (posOption) {
                 case "L":
                     positions.add("frames:startswith");
+                    positions.add("frames:matches");
                     classRefCheck.add("classRefCheck:includes");
                     frame = "startswith";
                     break;
                 case "R":
                     positions.add("frames:endswith");
+                    positions.add("frames:matches");
                     classRefCheck.add("classRefCheck:includes");
                     frame = "endswith";
                     break;
@@ -1172,12 +1174,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 case "L":
                     positions.add("frames:startswith");
                     positions.add("frames:overlapsLeft");
+                    positions.add("frames:matches");
                     classRefCheck.add("classRefCheck:intersects");
                     frame = "overlapsLeft";
                     break;
                 case "R":
                     positions.add("frames:endswith");
                     positions.add("frames:overlapsRight");
+                    positions.add("frames:matches");
                     classRefCheck.add("classRefCheck:intersects");
                     frame = "overlapsRight";
                     break;
