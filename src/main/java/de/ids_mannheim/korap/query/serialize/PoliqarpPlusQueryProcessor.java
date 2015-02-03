@@ -710,21 +710,6 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             // process foundry
             if (foundryNode != null)
                 term.put("foundry", foundryNode.getText());
-            // process layer: map "base" -> "lemma"
-            if (layerNode != null) {
-                String layer = layerNode.getText();
-                if (mode.equals("span")) {
-                    term.put("key", layer);
-                } else if (mode.equals("token")) {
-                    if (layer.equals("base")) {
-                        layer = "lemma"; }
-                    else if (layer.equals("punct")) {
-                        layer = "orth";
-                        term.put("type", "type:punct");
-                    }   
-                    term.put("layer", layer);
-                }
-            }
             // process key: 'normal' or regex?
             key = keyNode.getText();
             if (getNodeCat(keyNode.getChild(0)).equals("regex")) {
@@ -737,6 +722,22 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 term.put("value", key);
             else
                 term.put("key", key);
+            // process layer: map "base" -> "lemma"
+            if (layerNode != null) {
+                String layer = layerNode.getText();
+                if (mode.equals("span")) {
+                    term.put("key", layer);
+                } else if (mode.equals("token")) {
+                    if (layer.equals("base")) {
+                        layer = "lemma"; }
+                    else if (layer.equals("punct")) {
+                        layer = "orth";
+                        // will override "type":"type:regex"
+                        term.put("type", "type:punct"); 
+                    }   
+                    term.put("layer", layer);
+                }
+            }
             // process value
             if (valueNode != null)
                 term.put("value", valueNode.getText());

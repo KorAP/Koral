@@ -142,7 +142,7 @@ relSpec
 ;
 
 submatch
-: SUBMATCH_OP LRPAREN startpos COMMA (length)? COLON (segment|sequence) RRPAREN
+: SUBMATCH_OP LRPAREN startpos (COMMA length)? COLON (segment|sequence) RRPAREN
 ;
 
 matching

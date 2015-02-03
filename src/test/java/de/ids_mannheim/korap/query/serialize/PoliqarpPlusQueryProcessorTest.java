@@ -149,6 +149,16 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("type:punct",          res.at("/query/wrap/type").asText());
         assertEquals("orth",                res.at("/query/wrap/layer").asText());
         assertEquals("match:eq",            res.at("/query/wrap/match").asText());
+        
+        query = "[punct=\".\"]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:token",         res.at("/query/@type").asText());
+        assertEquals("korap:term",          res.at("/query/wrap/@type").asText());
+        assertEquals(".",                   res.at("/query/wrap/key").asText());
+        assertEquals("type:punct",          res.at("/query/wrap/type").asText());
+        assertEquals("orth",                res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq",            res.at("/query/wrap/match").asText());
     }
 
     @Test
