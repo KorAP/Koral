@@ -556,23 +556,36 @@ public class Cosmas2QueryProcessorTest {
         query = "wegen #IN(L) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("classRefCheck:includes",		res.at("/query/operands/0/classRefCheck/0").asText());
-        assertEquals("frames:startswith",           res.at("/query/operands/0/operands/0/frames/0").asText());
-        assertEquals("frames:matches",              res.at("/query/operands/0/operands/0/frames/1").asText());
-        assertEquals(true,							res.at("/query/operands/0/operands/0/frames/2").isMissingNode());
+        assertEquals("korap:reference",             res.at("/query/@type").asText());
+        assertEquals("operation:focus",             res.at("/query/operation").asText());
+        assertEquals(2,                             res.at("/query/classRef/0").asInt());
+        assertEquals("korap:group",                 res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position",          res.at("/query/operands/0/operation").asText());
+        assertEquals("frames:startsWith",           res.at("/query/operands/0/frames/0").asText());
+        assertEquals("frames:matches",              res.at("/query/operands/0/frames/1").asText());
+        assertEquals(true,                          res.at("/query/operands/0/frames/2").isMissingNode());
+        assertEquals("korap:group",                 res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:class",             res.at("/query/operands/0/operands/0/operation").asText());
+        assertEquals(1,                             res.at("/query/operands/0/operands/0/classOut").asInt());
+        assertEquals("korap:span",                  res.at("/query/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("s",                           res.at("/query/operands/0/operands/0/operands/0/key").asText());
+        assertEquals("korap:group",                 res.at("/query/operands/0/operands/1/@type").asText());
+        assertEquals("operation:class",             res.at("/query/operands/0/operands/1/operation").asText());
+        assertEquals(2,                             res.at("/query/operands/0/operands/1/classOut").asInt());
+        assertEquals("korap:token",                 res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("wegen",                       res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
 
         query = "wegen #IN(F) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("classRefCheck:includes",		res.at("/query/operands/0/classRefCheck/0").asText());
-        assertEquals("frames:matches",				res.at("/query/operands/0/operands/0/frames/0").asText());
-        assertEquals(true,							res.at("/query/operands/0/operands/0/frames/1").isMissingNode());
+        assertEquals(true,                  		res.at("/query/operands/0/classRefCheck").isMissingNode());
+        assertEquals("frames:matches",				res.at("/query/operands/0/frames/0").asText());
+        assertEquals(true,							res.at("/query/operands/0/frames/1").isMissingNode());
 
         query = "wegen #IN(FI) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("classRefCheck:unequals",		res.at("/query/operands/0/classRefCheck/0").asText());
-        assertEquals("classRefCheck:includes",		res.at("/query/operands/0/classRefCheck/1").asText());
         assertEquals("frames:matches",				res.at("/query/operands/0/operands/0/frames/0").asText());
         assertEquals(true,							res.at("/query/operands/0/operands/0/frames/1").isMissingNode());
 
@@ -586,18 +599,16 @@ public class Cosmas2QueryProcessorTest {
         query = "wegen #IN(%, L) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("classRefCheck:includes",		res.at("/query/operands/0/classRefCheck/0").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/operands/0/frames/0").asText());
-        assertEquals("frames:matches",				res.at("/query/operands/0/operands/0/frames/1").asText());
-//        assertEquals(true,                          res.at("/query/operands/0/operands/0/exclude").isMissingNode());
-        
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/frames/0").asText());
+        assertEquals("frames:matches",				res.at("/query/operands/0/frames/1").asText());
+        //        assertEquals(true,                          res.at("/query/operands/0/operands/0/exclude").isMissingNode());
+
         query = "wegen #IN(FE,%,MIN) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("classRefCheck:equals",		res.at("/query/operands/0/classRefCheck/0").asText());
         assertEquals("frames:matches",				res.at("/query/operands/0/operands/0/frames/0").asText());
-        assertEquals("frames:matches",              res.at("/query/operands/0/operands/0/frames/0").asText());
-//        assertEquals(true,							res.at("/query/operands/0/operands/0/exclude").isMissingNode());
+        //        assertEquals(true,							res.at("/query/operands/0/operands/0/exclude").isMissingNode());
 
         query = "wegen #IN(FE,ALL,%,MIN) <s>";
         qs.setQuery(query, "cosmas2");
@@ -654,8 +665,9 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("classRefCheck:intersects",	res.at("/query/operands/0/classRefCheck/0").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/operands/0/frames/0").asText());
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/operands/0/frames/0").asText());
         assertEquals("frames:overlapsLeft",			res.at("/query/operands/0/operands/0/frames/1").asText());
+        assertEquals("frames:matches",              res.at("/query/operands/0/operands/0/frames/2").asText());
 
         query = "wegen #OV(F) <s>";
         qs.setQuery(query, "cosmas2");
@@ -938,7 +950,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(2,  					res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
         assertEquals("gehen",				res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
         assertEquals(3,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
-//        assertEquals("classRefOp:merge",    res.at("/query/operands/0/operands/0/operands/1/classRefOp").asText());
+        //        assertEquals("classRefOp:merge",    res.at("/query/operands/0/operands/0/operands/1/classRefOp").asText());
         assertEquals("operation:sequence",	res.at("/query/operands/0/operands/0/operands/1/operands/0/operation").asText());
         assertEquals(4,  					res.at("/query/operands/0/operands/0/operands/1/operands/0/operands/0/classOut").asInt());
         assertEquals("voran",				res.at("/query/operands/0/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/key").asText());
@@ -957,7 +969,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(1,  							res.at("/query/classRef/0").asInt());
         assertEquals("korap:group",					res.at("/query/operands/0/@type").asText());
         assertEquals("operation:position",			res.at("/query/operands/0/operation").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/frames/0").asText());
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/frames/0").asText());
         assertEquals("korap:group",					res.at("/query/operands/0/@type").asText());
         assertEquals("operation:class",				res.at("/query/operands/0/operands/1/operation").asText());
         assertEquals(1,  							res.at("/query/operands/0/operands/1/classOut").asInt());
@@ -1004,7 +1016,7 @@ public class Cosmas2QueryProcessorTest {
 
         assertEquals("korap:group",					res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:position",			res.at("/query/operands/0/operands/0/operation").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/operands/0/frames/0").asText());
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/operands/0/frames/0").asText());
         assertEquals("korap:span",					res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("s",							res.at("/query/operands/0/operands/0/operands/0/key").asText());
         assertEquals("korap:group",					res.at("/query/operands/0/operands/0/operands/1/@type").asText());
@@ -1016,7 +1028,7 @@ public class Cosmas2QueryProcessorTest {
 
         assertEquals("korap:group",					res.at("/query/operands/0/operands/1/@type").asText());
         assertEquals("operation:position",			res.at("/query/operands/0/operands/1/operation").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/operands/1/frames/0").asText());
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/operands/1/frames/0").asText());
         assertEquals(true,							res.at("/query/operands/0/operands/1/exclude").asBoolean());
         assertEquals("korap:span",					res.at("/query/operands/0/operands/1/operands/0/@type").asText());
         assertEquals("p",							res.at("/query/operands/0/operands/1/operands/0/key").asText());
@@ -1039,7 +1051,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(1,  							res.at("/query/classRef/0").asInt());
         assertEquals("korap:group",					res.at("/query/operands/0/@type").asText());
         assertEquals("operation:position",			res.at("/query/operands/0/operation").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/frames/0").asText());
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/frames/0").asText());
         assertEquals("korap:group",					res.at("/query/operands/0/@type").asText());
         assertEquals("operation:class",				res.at("/query/operands/0/operands/1/operation").asText());
         assertEquals(1,  							res.at("/query/operands/0/operands/1/classOut").asInt());
@@ -1059,7 +1071,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("frames:matches",				res.at("/query/operands/0/frames/0").asText());
         assertEquals("korap:group",					res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:position",			res.at("/query/operands/0/operands/0/operation").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/operands/0/frames/0").asText());
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/operands/0/frames/0").asText());
         assertEquals("korap:span",					res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("s",							res.at("/query/operands/0/operands/0/operands/0/key").asText());
         assertEquals("korap:group",					res.at("/query/operands/0/operands/0/operands/1/@type").asText());
@@ -1068,7 +1080,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("der",							res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
         assertEquals("korap:group",					res.at("/query/operands/0/operands/1/@type").asText());
         assertEquals("operation:position",			res.at("/query/operands/0/operands/1/operation").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/operands/1/frames/0").asText());
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/operands/1/frames/0").asText());
         assertEquals(true,							res.at("/query/operands/0/operands/1/exclude").asBoolean());
         assertEquals("korap:span",					res.at("/query/operands/0/operands/1/operands/0/@type").asText());
         assertEquals("p",							res.at("/query/operands/0/operands/1/operands/0/key").asText());
@@ -1088,7 +1100,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("frames:matches",				res.at("/query/operands/0/frames/0").asText());
         assertEquals("korap:group",					res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:position",			res.at("/query/operands/0/operands/0/operation").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/operands/0/frames/0").asText());
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/operands/0/frames/0").asText());
         assertEquals("korap:span",					res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("s",							res.at("/query/operands/0/operands/0/operands/0/key").asText());
         assertEquals("korap:group",					res.at("/query/operands/0/operands/0/operands/1/@type").asText());
@@ -1103,7 +1115,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("frames:matches",				res.at("/query/operands/0/operands/1/operands/0/frames/0").asText());
         assertEquals("korap:group",					res.at("/query/operands/0/operands/1/operands/0/operands/0/@type").asText());
         assertEquals("operation:position",			res.at("/query/operands/0/operands/1/operands/0/operands/0/operation").asText());
-        assertEquals("frames:startswith",			res.at("/query/operands/0/operands/1/operands/0/operands/0/frames/0").asText());
+        assertEquals("frames:startsWith",			res.at("/query/operands/0/operands/1/operands/0/operands/0/frames/0").asText());
         assertEquals(true,							res.at("/query/operands/0/operands/1/operands/0/operands/0/exclude").asBoolean());
         assertEquals("korap:span",					res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("p",							res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/key").asText());

@@ -524,7 +524,7 @@ public class PoliqarpPlusQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group",         res.at("/query/@type").asText());
         assertEquals("operation:position",  res.at("/query/operation").asText());
-        assertEquals("frames:contains",     res.at("/query/frames/0").asText());
+        assertEquals("frames:isAround",     res.at("/query/frames/0").asText());
         assertEquals(true,                  res.at("/query/frames/1").isMissingNode());
         assertEquals("korap:span",          res.at("/query/operands/0/@type").asText());
         assertEquals("s",                   res.at("/query/operands/0/key").asText());
@@ -668,7 +668,7 @@ public class PoliqarpPlusQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group", 		res.at("/query/@type").asText());
         assertEquals("operation:position", 	res.at("/query/operation").asText());
-        assertEquals("frames:contains",		res.at("/query/frames/0").asText());
+        assertEquals("frames:isAround",		res.at("/query/frames/0").asText());
         assertEquals(true, 					res.at("/query/frames/1").isMissingNode());
         assertEquals("korap:span", 			res.at("/query/operands/0/@type").asText());
         assertEquals("s", 					res.at("/query/operands/0/key").asText());
@@ -685,7 +685,7 @@ public class PoliqarpPlusQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group", 			res.at("/query/@type").asText());
         assertEquals("operation:position", 		res.at("/query/operation").asText());
-        assertEquals("frames:contains", 		res.at("/query/frames/0").asText());
+        assertEquals("frames:isAround", 		res.at("/query/frames/0").asText());
         assertEquals("s", 						res.at("/query/operands/0/key").asText());
         assertEquals("korap:group", 			res.at("/query/operands/1/@type").asText());
         assertEquals("operation:sequence", 		res.at("/query/operands/1/operation").asText());
@@ -697,7 +697,7 @@ public class PoliqarpPlusQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group", 			res.at("/query/@type").asText());
         assertEquals("operation:position", 		res.at("/query/operation").asText());
-        assertEquals("frames:contains", 		res.at("/query/frames/0").asText());
+        assertEquals("frames:isAround", 		res.at("/query/frames/0").asText());
         assertEquals("s", 						res.at("/query/operands/0/key").asText());
         assertEquals("korap:group", 			res.at("/query/operands/1/@type").asText());
         assertEquals("operation:sequence", 		res.at("/query/operands/1/operation").asText());
@@ -712,7 +712,7 @@ public class PoliqarpPlusQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("s", 						res.at("/query/operands/0/key").asText());
         assertEquals("korap:group", 			res.at("/query/operands/1/@type").asText());
-        assertEquals("frames:startswith", 		res.at("/query/operands/1/frames/0").asText());
+        assertEquals("frames:startsWith", 		res.at("/query/operands/1/frames/0").asText());
         assertEquals("operation:position", 		res.at("/query/operands/1/operation").asText());
         assertEquals("np", 						res.at("/query/operands/1/operands/0/key").asText());
         assertEquals("pp", 						res.at("/query/operands/1/operands/1/key").asText());
@@ -1022,7 +1022,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("operation:position", 	res.at("/query/operands/0/operation").asText());
         assertEquals("operation:class", 	res.at("/query/operands/0/operands/1/operation").asText());
         assertEquals(3, 					res.at("/query/operands/0/operands/1/classOut").asInt());
-        assertEquals("frames:startswith", 	res.at("/query/operands/0/frames/0").asText());
+        assertEquals("frames:startsWith", 	res.at("/query/operands/0/frames/0").asText());
         assertEquals(3,                     res.at("/meta/highlight/0").asInt());
 
         query = "focus(1000:startswith(<s>,{1000:<np>}))";
@@ -1039,7 +1039,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("korap:reference", 	res.at("/query/@type").asText());
         assertEquals("operation:focus", 	res.at("/query/operation").asText());
         assertEquals("operation:position", 	res.at("/query/operands/0/operation").asText());
-        assertEquals("frames:startswith", 	res.at("/query/operands/0/frames/0").asText());
+        assertEquals("frames:startsWith", 	res.at("/query/operands/0/frames/0").asText());
         assertEquals("operation:class", 	res.at("/query/operands/0/operands/1/operation").asText());
         assertEquals(3, 					res.at("/query/operands/0/operands/1/classOut").asInt());
         assertEquals("operation:sequence", 	res.at("/query/operands/0/operands/1/operands/0/operation").asText());
@@ -1103,7 +1103,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("operation:focus", 	res.at("/query/operation").asText());
         assertEquals(1, 					res.at("/query/spanRef/0").asInt());
         assertEquals(4, 					res.at("/query/spanRef/1").asInt());
-        assertEquals("frames:contains", 	res.at("/query/operands/0/frames/0").asText());
+        assertEquals("frames:isAround", 	res.at("/query/operands/0/frames/0").asText());
         assertEquals("s", 					res.at("/query/operands/0/operands/0/key").asText());
         assertEquals("Haus", 				res.at("/query/operands/0/operands/1/wrap/key").asText());
     }
@@ -1315,7 +1315,7 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:position",  res.at("/query/operation").asText());
-        assertEquals("frames:contains",     res.at("/query/frames/0").asText());
+        assertEquals("frames:isAround",     res.at("/query/frames/0").asText());
         assertEquals("s",                   res.at("/query/operands/0/key").asText());
         assertEquals("VVFIN",               res.at("/query/operands/1/wrap/key").asText());
     }

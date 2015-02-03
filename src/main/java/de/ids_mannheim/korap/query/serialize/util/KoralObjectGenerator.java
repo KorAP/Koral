@@ -89,7 +89,7 @@ public class KoralObjectGenerator {
     }
 
     public static LinkedHashMap<String, Object> makePosition(
-            String[] allowedFrames, String[] classRefCheck) {
+            String[] allowedFrames) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "korap:group");
         group.put("operation", "operation:position");

@@ -577,7 +577,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         String domain = getNodeCat(domainNode);
         LinkedHashMap<String, Object> span = KoralObjectGenerator.makeSpan(domain);
         LinkedHashMap<String, Object> queryObj = (LinkedHashMap<String, Object>) requestMap.get("query");
-        LinkedHashMap<String, Object> contains = KoralObjectGenerator.makePosition(new String[]{"frames:contains"}, null);
+        LinkedHashMap<String, Object> contains = KoralObjectGenerator.makePosition(new String[]{"frames:isAround"});
         ArrayList<Object> operands = (ArrayList<Object>) contains.get("operands");
         operands.add(span);
         operands.add(queryObj);
@@ -647,27 +647,25 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     private LinkedHashMap<String, Object> parseFrame(ParseTree node) {
         String operator = node.toStringTree(parser).toLowerCase();
         String[] frames = new String[] { "" };
-        String[] classRefCheck = new String[] { "classRefCheck:includes" };
         switch (operator) {
             case "contains":
-                frames = new String[] { "frames:contains" };
+                frames = new String[] { "frames:isAround" };
                 break;
             case "matches":
                 frames = new String[] { "frames:matches" };
                 break;
             case "startswith":
-                frames = new String[] { "frames:startswith" };
+                frames = new String[] { "frames:startsWith", "frames:matches" };
                 break;
             case "endswith":
-                frames = new String[] { "frames:endswith" };
+                frames = new String[] { "frames:endsWith", "frames:matches" };
                 break;
             case "overlaps":
                 frames = new String[] { "frames:overlapsLeft",
                         "frames:overlapsRight" };
-                classRefCheck = new String[] { "classRefCheck:intersects" };
                 break;
         }
-        return KoralObjectGenerator.makePosition(frames, classRefCheck);
+        return KoralObjectGenerator.makePosition(frames);
     }
 
     private LinkedHashMap<String, Object> parseTermOrTermGroup(ParseTree node,

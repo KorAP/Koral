@@ -547,8 +547,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 ParseTree leftChildSpec = getFirstChildWithCat(node.getChild(i).getChild(0), "@l");
                 ParseTree rightChildSpec = getFirstChildWithCat(node.getChild(i).getChild(0), "@r");
                 if (leftChildSpec != null || rightChildSpec != null) {
-                    String frame = (leftChildSpec!=null) ? "frames:startswith" : "frames:endswith";
-                    LinkedHashMap<String,Object> positionGroup = KoralObjectGenerator.makePosition(new String[]{frame}, null);
+                    String frame = (leftChildSpec!=null) ? "frames:startsWith" : "frames:endsWith";
+                    LinkedHashMap<String,Object> positionGroup = KoralObjectGenerator.makePosition(new String[]{frame});
                     operand2 = KoralObjectGenerator.wrapInClass(operand2, ++classCounter);
                     ((ArrayList<Object>) positionGroup.get("operands")).add(group);
                     ((ArrayList<Object>) positionGroup.get("operands")).add(KoralObjectGenerator.makeReference(classCounter));
@@ -699,13 +699,14 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     frames = new String[]{"frames:matches"}; 
                     break;
                 case "_l_":
-                    frames = new String[]{"frames:startswith"};
+                    frames = new String[]{"frames:startsWith", "frames:matches"};
                     break;
                 case "_r_":
-                    frames = new String[]{"frames:endswith"};
+                    frames = new String[]{"frames:endsWith", "frames:matches"};
                     break;
                 case "_i_":
-                    frames = new String[]{"frames:contains"};break;
+                    frames = new String[]{"frames:isAround"};
+                    break;
                 case "_o_":
                     frames = new String[]{"frames:overlapsLeft", "frames:overlapsRight"};
                     break;
@@ -718,7 +719,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
             //			relation.put("frames", frames);
             //			relation.put("sharedClasses", sharedClasses);
-            relation = KoralObjectGenerator.makePosition(frames, new String[]{});
+            relation = KoralObjectGenerator.makePosition(frames);
             relation.put("groupType", "position");
         } 
         else if (operator.equals("near")) {
