@@ -1089,7 +1089,7 @@ public class PoliqarpPlusQueryProcessorTest {
 
     @Test
     public void testSubmatch() throws JsonProcessingException, IOException {
-        query = "submatch(1,:<s>)";
+        query = "submatch(1:<s>)";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:reference", 	res.at("/query/@type").asText());

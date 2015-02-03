@@ -517,14 +517,6 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         // Default is focus(), if deviating catch here
         if (type.equals("split"))
             referenceGroup.put("operation", "operation:split");
-        if (type.equals("submatch") || type.equals("shrink")) {
-            String warning = "Deprecated 2014-07-24: "
-                    + type
-                    + "() as a match reducer "
-                    + "to a specific class is deprecated in favor of focus() and will "
-                    + "only be supported for 3 months after deprecation date.";
-            addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT, warning);
-        }
         if (classRefOp != null) {
             referenceGroup.put("classRefOp", "classRefOp:" + classRefOp);
         }

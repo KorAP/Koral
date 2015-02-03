@@ -146,7 +146,7 @@ submatch
 ;
 
 matching
-: (SUBMATCH_OP|MATCH_OP) LRPAREN spanclass_id? (segment|sequence)? RRPAREN
+: MATCH_OP LRPAREN spanclass_id? (segment|sequence)? RRPAREN
 ;
 
 alignment
