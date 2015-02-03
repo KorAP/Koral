@@ -1,0 +1,66 @@
+
+# /
+/target
+
+# /src/main/antlr/cosmas/
+/src/main/antlr/cosmas/c2ps_regex.g
+
+# /src/main/java/
+/src/main/java/QuerySerialization.ucls
+
+# /src/main/java/de/ids_mannheim/korap/query/parse/annis/
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/AqlParser.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/RawAqlPreParserListener.java
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/RawAqlPreParserBaseListener.java
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/AqlParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/AqlLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/AqlLexer.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/RawAqlPreParser.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/RawAqlPreParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/AqlParserListener.java
+/src/main/java/de/ids_mannheim/korap/query/parse/annis/AqlParserBaseListener.java
+
+# /src/main/java/de/ids_mannheim/korap/query/parse/collection/
+/src/main/java/de/ids_mannheim/korap/query/parse/collection/CollectionQueryBaseListener.java
+/src/main/java/de/ids_mannheim/korap/query/parse/collection/CollectionQuery.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/collection/CollectionQueryLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/collection/CollectionQueryLexer.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/collection/CollectionQueryParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/collection/CollectionQueryListener.java
+
+# /src/main/java/de/ids_mannheim/korap/query/parse/cosmas/
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opOV.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opINParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2psParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opPROX.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2psLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opWFLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opELEMLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opPROXParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opOVLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opWF.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opBEDLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opBEDParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opBED.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_optCaseLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opELEM.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opINLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opPROXLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_optCaseParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opWFParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opELEMParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opIN.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opOVParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_optCase.tokens
+
+# /src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/
+/src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/PoliqarpPlusLexer.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/PoliqarpPlusParserBaseListener.java
+/src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/PoliqarpPlusParser.java
+/src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/PoliqarpPlusParserListener.java
+/src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/PoliqarpPlusParser.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/PoliqarpPlusLexer.java
+
+# /src/main/java/de/ids_mannheim/korap/query/serialize/
+/src/main/java/de/ids_mannheim/korap/query/serialize/SerializationSandbox.java
