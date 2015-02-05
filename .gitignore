@@ -64,3 +64,5 @@
 
 # /src/main/java/de/ids_mannheim/korap/query/serialize/
 /src/main/java/de/ids_mannheim/korap/query/serialize/SerializationSandbox.java
+/lib/
+/bin/

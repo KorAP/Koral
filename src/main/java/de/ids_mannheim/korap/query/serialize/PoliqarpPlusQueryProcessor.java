@@ -454,8 +454,9 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             catch (NumberFormatException e) {
                 String msg = "The specified class reference in the "
                         + "focus/split-Operator is not a number: " + ref;
+                classId = 0;
                 log.error(msg);
-                addError(StatusCodes.UNDEFINED_CLASS_REFERENCE, msg);
+                addError(StatusCodes.INVALID_CLASS_REFERENCE, msg);
             }
             // only allow class id up to 127
             if (classId > 128) {
@@ -464,7 +465,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                         + "Check for possible conflict with other classes.");
                 classId = 128;
             }
-        }
+        } 
         LinkedHashMap<String, Object> classGroup = 
                 KoralObjectGenerator.makeSpanClass(classId);
         addHighlightClass(classId);
@@ -502,13 +503,13 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                     catch (NumberFormatException e) {
                         String err = "The specified class reference in the "
                                 + "shrink/split-Operator is not a number.";
-                        addError(StatusCodes.UNDEFINED_CLASS_REFERENCE, err);
+                        addError(StatusCodes.INVALID_CLASS_REFERENCE, err);
                     }
                 }
             }
         }
         else {
-            classRefs.add(1);
+            classRefs.add(1); // default
         }
         LinkedHashMap<String, Object> referenceGroup = 
                 KoralObjectGenerator.makeReference(classRefs);

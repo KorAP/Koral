@@ -958,6 +958,19 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("Mann", 				res.at("/query/operands/0/operands/0/wrap/key").asText());
         assertEquals("Frau", 				res.at("/query/operands/0/operands/1/wrap/key").asText());
 
+        query = "{[base=Mann]}{[orth=Frau]}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:group",         res.at("/query/@type").asText());
+        assertEquals("operation:sequence",  res.at("/query/operation").asText());
+        assertEquals("operation:class",     res.at("/query/operands/0/operation").asText());
+        assertEquals(1,                     res.at("/query/operands/0/classOut").asInt());
+        assertEquals("operation:class",     res.at("/query/operands/1/operation").asText());
+        assertEquals(1,                     res.at("/query/operands/1/classOut").asInt());
+        assertEquals(true,                  res.at("/query/classIn").isMissingNode());
+        assertEquals("Mann",                res.at("/query/operands/0/operands/0/wrap/key").asText());
+        assertEquals("Frau",                res.at("/query/operands/1/operands/0/wrap/key").asText());
+        
         query = "[p=NN]{[base=Mann][orth=Frau]}";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());

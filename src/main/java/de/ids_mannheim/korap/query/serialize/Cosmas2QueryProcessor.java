@@ -352,7 +352,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                         "TPEND");
 
                 LinkedHashMap<String, Object> submatchgroup = 
-                        KoralObjectGenerator.makeReference(classCounter);
+                        KoralObjectGenerator.makeReference(classCounter+128);
                 ArrayList<Object> submatchOperands = new ArrayList<Object>();
                 submatchgroup.put("operands", submatchOperands);
                 putIntoSuperObject(submatchgroup);
@@ -397,7 +397,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                         // constraint applies
                         if (conditionCount > 1) {
                             LinkedHashMap<String, Object> focus = 
-                                    KoralObjectGenerator.makeReference(classCounter - 2);
+                                    KoralObjectGenerator.makeReference(classCounter +128 - 2);
                             ArrayList<Object> focusOperands = new ArrayList<Object>();
                             focus.put("operands", focusOperands);
                             focusOperands.add(matchesGroup);
@@ -415,22 +415,22 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             }
 
             private void processOPNHIT(Tree node) {
-                Integer[] classRef = new Integer[] { classCounter + 1,
-                        classCounter + 2 };
+                Integer[] classRef = new Integer[] { classCounter + 128 + 1,
+                        classCounter + 128 + 2 };
                 // classRef.add(classCounter + 1); // yes, do this twice (two
                 // classes)!
                 LinkedHashMap<String, Object> group = 
-                        KoralObjectGenerator.makeReference(classCounter);
+                        KoralObjectGenerator.makeReference(classCounter+128);
                 LinkedHashMap<String, Object> classRefCheck = 
                         KoralObjectGenerator.makeClassRefOp("classRefOp:inversion", classRef,
-                                classCounter);
+                                classCounter+128);
                 ArrayList<Object> operands = new ArrayList<Object>();
                 operands.add(classRefCheck);
                 group.put("operands", operands);
                 classCounter++;
                 // direct child is OPPROX
-                wrapOperandInClass(node.getChild(0), 1, classCounter++); 
-                wrapOperandInClass(node.getChild(0), 2, classCounter++);
+                wrapOperandInClass(node.getChild(0), 1, 128+classCounter++); 
+                wrapOperandInClass(node.getChild(0), 2, 128+classCounter++);
                 objectStack.push(classRefCheck);
                 stackedObjects++;
                 putIntoSuperObject(group, 1);
@@ -457,8 +457,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             private void processOPIN_OPOV(Tree node) {
                 // Step I: create group
                 String nodeCat = getNodeCat(node);
-                wrapOperandInClass(node, 2, classCounter++);
-                wrapOperandInClass(node, 1, classCounter++);
+                wrapOperandInClass(node, 2, 128+classCounter++);
+                wrapOperandInClass(node, 1, 128+classCounter++);
                 // LinkedHashMap<String, Object> posgroup =
                 // makePosition(null);
                 LinkedHashMap<String, Object> posGroup = KoralObjectGenerator
@@ -484,13 +484,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 ArrayList<String> check = 
                         (ArrayList<String>) positionOptions.get("classRefCheck");
                 Integer[] classIn = 
-                        new Integer[] { classCounter - 2, classCounter - 1 };
+                        new Integer[] { classCounter+128-2, classCounter+128-1 };
                 LinkedHashMap<String, Object> topGroup;
                 if (! check.isEmpty()) {
                     // wrap position in a classRefCheck
                     topGroup = 
                             KoralObjectGenerator.makeClassRefCheck(check, classIn,
-                                    classCounter);
+                                    classCounter+128);
                     ((ArrayList<Object>) topGroup.get("operands")).add(posGroup);
                 } else {
                     topGroup = posGroup;
@@ -498,12 +498,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 LinkedHashMap<String, Object> focusGroup = null;
                 if ((boolean) positionOptions.get("matchall") == true) {
                     focusGroup = KoralObjectGenerator.makeClassRefOp("classRefOp:delete", 
-                            new Integer[]{classCounter++}, classCounter);
+                            new Integer[]{128+classCounter++}, 128+classCounter);
                     ((ArrayList<Object>) focusGroup.get("operands")).add(topGroup);
                 }
                 else { // match only first argument
                     focusGroup = KoralObjectGenerator.wrapInReference(topGroup,
-                            classCounter-1);
+                            classCounter+128-1);
                     classCounter++;
                 }
                 // wrap in 'merge' operation if grouping option is set
@@ -599,8 +599,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                         || openNodeCats.get(1).equals("OPEND") 
                         || inOPALL 
                         || openNodeCats.get(1).equals("OPNHIT"))) {
-                    wrapOperandInClass(node, 1, classCounter);
-                    wrapOperandInClass(node, 2, classCounter);
+                    System.err.println(classCounter);
+                    wrapOperandInClass(node, 1, 128+classCounter);
+                    wrapOperandInClass(node, 2, 128+classCounter);
+                    System.err.println(classCounter);
                     // Deactivated, uncomment to wrap sequence in reference.
                     //            group = KoralObjectGenerator.wrapInReference(group,
                     //                    classCounter++);
@@ -1040,7 +1042,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     positionGroup.put("exclude", true);
                 ArrayList<Object> posOperands = new ArrayList<Object>();
                 LinkedHashMap<String, Object> classGroup = 
-                        KoralObjectGenerator.makeSpanClass(classCounter++);
+                        KoralObjectGenerator.makeSpanClass(128+classCounter++);
                 classGroup.put("operands", distributedOperands);
                 positionGroup.put("operands", posOperands);
                 LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();

@@ -114,12 +114,7 @@ public class KoralObjectGenerator {
                     + "your query for later reference to a part of the query. The class id is "
                     + classId);
         }
-        group.put("class", classId);
         group.put("classOut", classId);
-        qp.addMessage(
-                StatusCodes.DEPRECATED_QUERY_ELEMENT,
-                "Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. "
-                        + "Classes are now defined using the 'classOut' attribute.");
         group.put("operands", new ArrayList<Object>());
         return group;
     }
@@ -132,11 +127,6 @@ public class KoralObjectGenerator {
         group.put("classRefCheck", check);
         group.put("classIn", Arrays.asList(classIn));
         group.put("classOut", classOut);
-        group.put("class", classOut);
-        qp.addMessage(
-                StatusCodes.DEPRECATED_QUERY_ELEMENT,
-                "Deprecated 2014-10-07: 'class' only to be supported until 3 months from deprecation date. "
-                        + "Classes are now defined using the 'classOut' attribute.");
         group.put("operands", new ArrayList<Object>());
         return group;
     }

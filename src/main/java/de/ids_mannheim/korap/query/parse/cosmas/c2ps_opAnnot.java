@@ -1,10 +1,5 @@
 package de.ids_mannheim.korap.query.parse.cosmas;
 
-import java.io.*;
-import org.antlr.runtime.*;
-import org.antlr.runtime.debug.DebugEventSocketProxy;
-import org.antlr.runtime.tree.*;
-
 /* COSMAS II Plain Syntax (c2ps).
  * lokale Grammatik für Optionen von #IN(Opts).
  * 12.12.12/FB
