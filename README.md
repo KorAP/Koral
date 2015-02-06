@@ -118,7 +118,7 @@ Carsten Schnober for their valuable input.
 
 ## License
 
-Koral is published under the Perl [Artistic License](http://opensource.org/licenses/artistic-license-2.0).
+Koral is published under the BSD-2 License.
 See also the attached LICENSE.
 
 The [ANNIS grammar](https://github.com/korpling/ANNIS/tree/develop/annis-service/src/main/antlr4/annis/ql) is licensed under the Apache License 2.0.
