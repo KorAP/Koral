@@ -599,10 +599,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                         || openNodeCats.get(1).equals("OPEND") 
                         || inOPALL 
                         || openNodeCats.get(1).equals("OPNHIT"))) {
-                    System.err.println(classCounter);
                     wrapOperandInClass(node, 1, 128+classCounter);
                     wrapOperandInClass(node, 2, 128+classCounter);
-                    System.err.println(classCounter);
                     // Deactivated, uncomment to wrap sequence in reference.
                     //            group = KoralObjectGenerator.wrapInReference(group,
                     //                    classCounter++);
