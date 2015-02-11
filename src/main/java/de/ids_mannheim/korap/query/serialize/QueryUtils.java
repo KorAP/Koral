@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author hanl
+ * @author Joachim Bingel (bingel@ids-mannheim.de), Michael Hanl (hanl@ids-mannheim.de)
  * @date 10/12/2013
  */
 public class QueryUtils {
@@ -255,11 +255,8 @@ public class QueryUtils {
                 .compile("\\.|\\^|\\$|\\||\\?|\\*|\\+|\\(|\\)|\\[|\\]|\\{|\\}");
         Matcher m = p.matcher(key);
         while (m.find()) {
-            System.out.println(m.group(0));
             String match = m.group();
-            System.out.println(key);
             key = m.replaceAll("\\\\" + match);
-            System.out.println(" > " + key);
         }
         return key;
     }

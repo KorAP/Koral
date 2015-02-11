@@ -188,10 +188,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (nodeCat.equals("n_ary_linguistic_term")) {
             processN_ary_linguistic_term(node);
         }
-
-        if (nodeCat.equals("variableExpr")) {
-            processVariableExpr(node);
-        }
+//
+//        if (nodeCat.equals("variableExpr")) {
+//            processVariableExpr(node);
+//        }
 
         objectsToPop.push(stackedObjects);
 
@@ -299,7 +299,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     private void processExprTop(ParseTree node) {
         List<ParseTree> andTopExprs = getChildrenWithCat(node, "andTopExpr");
         if (andTopExprs.size() > 1) {
-            LinkedHashMap<String, Object> topOr = KoralObjectGenerator.makeGroup("or");
+            LinkedHashMap<String, Object> topOr = KoralObjectGenerator.makeGroup("disjunction");
             requestMap.put("query", topOr);
             objectStack.push(topOr);
         }

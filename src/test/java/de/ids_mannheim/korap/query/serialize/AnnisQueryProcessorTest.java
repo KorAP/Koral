@@ -956,6 +956,22 @@ public class AnnisQueryProcessorTest {
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
     }
+    
+    @Test
+    public void testDisjunction() throws Exception {
+        query = "cat=\"NP\" | cat=\"VP\"";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:group",         res.at("/query/@type").asText());
+        assertEquals("operation:disjunction",  res.at("/query/operation").asText());
+        assertEquals("korap:span",          res.at("/query/operands/0/@type").asText());
+        assertEquals("NP",                  res.at("/query/operands/0/key").asText());
+        assertEquals("c",                   res.at("/query/operands/0/layer").asText());
+        assertEquals("korap:span",          res.at("/query/operands/1/@type").asText());
+        assertEquals("VP",                  res.at("/query/operands/1/key").asText());
+        assertEquals("c",                   res.at("/query/operands/1/layer").asText());
+    }
+    
     //		
     //		query = "cat=\"NP\" & cat=\"VP\" & cat=\"PP\" & #1 $ #2 $ #3";
     //		String cp2 =

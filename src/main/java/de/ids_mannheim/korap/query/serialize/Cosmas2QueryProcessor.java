@@ -656,10 +656,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
             private void processOPOR(Tree node) {
                 // Step I: create group
-                LinkedHashMap<String, Object> disjunction = new LinkedHashMap<String, Object>();
-                disjunction.put("@type", "korap:group");
-                disjunction.put("operation", "operation:or");
-                disjunction.put("operands", new ArrayList<Object>());
+                LinkedHashMap<String, Object> disjunction = 
+                        KoralObjectGenerator.makeGroup("disjunction");
                 objectStack.push(disjunction);
                 stackedObjects++;
                 // Step II: decide where to put
@@ -669,15 +667,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             private void processOPAND_OPNOT(Tree node) {
                 // Step I: create group
                 String nodeCat = getNodeCat(node);
-                LinkedHashMap<String, Object> distgroup = new LinkedHashMap<String, Object>();
-                distgroup.put("@type", "korap:group");
-                distgroup.put("operation", "operation:sequence");
+                LinkedHashMap<String, Object> distgroup = KoralObjectGenerator.makeGroup("sequence");
                 ArrayList<Object> distances = new ArrayList<Object>();
-                LinkedHashMap<String, Object> zerodistance = new LinkedHashMap<String, Object>();
-                zerodistance.put("@type", "cosmas:distance");
-                zerodistance.put("key", "t");
-                zerodistance.put("min", 0);
-                zerodistance.put("max", 0);
+                LinkedHashMap<String, Object> zerodistance =  KoralObjectGenerator.makeDistance("t", 0, 0);
+                zerodistance.put("@type", "cosmas:distance"); // overwrite @type: cosmas:distance! 
                 if (nodeCat.equals("OPNOT"))
                     zerodistance.put("exclude", true);
                 distances.add(zerodistance);

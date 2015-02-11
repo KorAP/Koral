@@ -82,6 +82,17 @@ public class PoliqarpPlusQueryProcessorTest {
     }
 
     @Test
+    public void testNegatedTokens() throws JsonProcessingException, IOException {
+        query = "![p!=NN]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:token",         res.at("/query/@type").asText());
+        assertEquals("NN",                  res.at("/query/wrap/key").asText());
+        assertEquals("p",                   res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq",            res.at("/query/wrap/match").asText());
+    }
+    
+    @Test
     public void testValue() throws JsonProcessingException, IOException {
         query = "[mate/m=temp:pres]";
         qs.setQuery(query, "poliqarpplus");
@@ -816,7 +827,7 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group", 		res.at("/query/@type").asText());
-        assertEquals("operation:or", 		res.at("/query/operation").asText());
+        assertEquals("operation:disjunction", 		res.at("/query/operation").asText());
         assertEquals("korap:token", 		res.at("/query/operands/0/@type").asText());
         assertEquals("korap:token", 		res.at("/query/operands/1/@type").asText());
         assertEquals("der", 				res.at("/query/operands/0/wrap/key").asText());
@@ -831,20 +842,20 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("operation:sequence", 	res.at("/query/operation").asText());
         assertEquals("Schild", 				res.at("/query/operands/1/wrap/key").asText());
         assertEquals("korap:group", 		res.at("/query/operands/0/@type").asText());
-        assertEquals("operation:or", 		res.at("/query/operands/0/operation").asText());
+        assertEquals("operation:disjunction", 		res.at("/query/operands/0/operation").asText());
 
         query = "[base=Schild]([base=der]|[base=das])";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("Schild", 				res.at("/query/operands/0/wrap/key").asText());
         assertEquals("korap:group", 		res.at("/query/operands/1/@type").asText());
-        assertEquals("operation:or", 		res.at("/query/operands/1/operation").asText());
+        assertEquals("operation:disjunction", 		res.at("/query/operands/1/operation").asText());
 
         query = "([orth=der][base=katze])|([orth=eine][base=baum])";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group", 		res.at("/query/@type").asText());
-        assertEquals("operation:or", 		res.at("/query/operation").asText());
+        assertEquals("operation:disjunction", 		res.at("/query/operation").asText());
         assertEquals("korap:group", 		res.at("/query/operands/0/@type").asText());
         assertEquals("operation:sequence", 	res.at("/query/operands/0/operation").asText());
         assertEquals("korap:token", 		res.at("/query/operands/0/operands/0/@type").asText());
@@ -857,7 +868,7 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group", 		res.at("/query/@type").asText());
-        assertEquals("operation:or", 		res.at("/query/operation").asText());
+        assertEquals("operation:disjunction", 		res.at("/query/operation").asText());
         assertEquals("korap:group", 		res.at("/query/operands/0/@type").asText());
         assertEquals("operation:sequence", 	res.at("/query/operands/0/operation").asText());
         assertEquals("korap:token", 		res.at("/query/operands/0/operands/0/@type").asText());
@@ -872,7 +883,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("korap:group", 		res.at("/query/@type").asText());
         assertEquals("operation:sequence", 	res.at("/query/operation").asText());
         assertEquals("korap:group", 		res.at("/query/operands/1/@type").asText());
-        assertEquals("operation:or", 		res.at("/query/operands/1/operation").asText());
+        assertEquals("operation:disjunction", 		res.at("/query/operands/1/operation").asText());
         assertEquals("korap:token", 		res.at("/query/operands/0/@type").asText());
         assertEquals("korap:token", 		res.at("/query/operands/2/@type").asText());
         assertEquals("der", 				res.at("/query/operands/0/wrap/key").asText());
@@ -892,7 +903,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("korap:group", 		res.at("/query/@type").asText());
         assertEquals("operation:sequence", 	res.at("/query/operation").asText());
         assertEquals("korap:group", 		res.at("/query/operands/1/@type").asText());
-        assertEquals("operation:or", 		res.at("/query/operands/1/operation").asText());
+        assertEquals("operation:disjunction", 		res.at("/query/operands/1/operation").asText());
         assertEquals("korap:token", 		res.at("/query/operands/0/@type").asText());
         assertEquals("korap:token", 		res.at("/query/operands/1/operands/0/@type").asText());
         assertEquals("korap:token", 		res.at("/query/operands/1/operands/1/@type").asText());
@@ -1243,7 +1254,7 @@ public class PoliqarpPlusQueryProcessorTest {
         query = "([base=a]^[base=b])|[base=c]";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("operation:or", 		res.at("/query/operation").asText());
+        assertEquals("operation:disjunction", 		res.at("/query/operation").asText());
         assertEquals("operation:sequence", 	res.at("/query/operands/0/operation").asText());
         assertEquals("operation:class", 	res.at("/query/operands/0/operands/1/operation").asText());
         assertEquals("a", 					res.at("/query/operands/0/operands/0/wrap/key").asText());
@@ -1307,7 +1318,7 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("Der",					res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("operation:or",		res.at("/query/operands/1/operation").asText());
+        assertEquals("operation:disjunction",		res.at("/query/operands/1/operation").asText());
         assertEquals("große",				res.at("/query/operands/1/operands/0/wrap/key").asText());
         assertEquals("kleine",				res.at("/query/operands/1/operands/1/wrap/key").asText());
         assertEquals("Baum",				res.at("/query/operands/2/wrap/key").asText());
@@ -1315,7 +1326,7 @@ public class PoliqarpPlusQueryProcessorTest {
         query = "der große Baum | der kleine Baum";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("operation:or",		res.at("/query/operation").asText());
+        assertEquals("operation:disjunction",		res.at("/query/operation").asText());
         assertEquals("der",					res.at("/query/operands/0/operands/0/wrap/key").asText());
         assertEquals("große",				res.at("/query/operands/0/operands/1/wrap/key").asText());
         assertEquals("Baum",				res.at("/query/operands/0/operands/2/wrap/key").asText());

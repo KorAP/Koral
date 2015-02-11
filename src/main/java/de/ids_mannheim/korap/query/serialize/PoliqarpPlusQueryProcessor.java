@@ -275,10 +275,15 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         LinkedHashMap<String, Object> token = KoralObjectGenerator.makeToken();
         // handle negation
         List<ParseTree> negations = getChildrenWithCat(node, "!");
+        int termOrTermGroupChildId = 1;
         boolean negated = false;
         boolean isRegex = false;
-        if (negations.size() % 2 == 1)
+        if (negations.size() % 2 == 1) {
             negated = true;
+            termOrTermGroupChildId += negations.size();
+        }
+            
+        System.err.println(negated);
         if (getNodeCat(node.getChild(0)).equals("key")) {
             // no 'term' child, but direct key specification: process here
             LinkedHashMap<String, Object> term = KoralObjectGenerator.makeTerm();
@@ -314,12 +319,12 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         else {
             // child is 'term' or 'termGroup' -> process in extra method
             LinkedHashMap<String, Object> termOrTermGroup = 
-                    parseTermOrTermGroup(node.getChild(1), negated);
+                    parseTermOrTermGroup(node.getChild(termOrTermGroupChildId),
+                            negated);
             token.put("wrap", termOrTermGroup);
         }
         putIntoSuperObject(token);
-        visited.add(node.getChild(0));
-        visited.add(node.getChild(2));
+        visited.addAll(getChildren(node));
     }
 
     @SuppressWarnings("unchecked")
@@ -393,7 +398,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     private void processDisjunction(ParseTree node) {
         LinkedHashMap<String, Object> disjunction = 
-                KoralObjectGenerator.makeGroup("or");
+                KoralObjectGenerator.makeGroup("disjunction");
         putIntoSuperObject(disjunction);
         objectStack.push(disjunction);
         stackedObjects++;

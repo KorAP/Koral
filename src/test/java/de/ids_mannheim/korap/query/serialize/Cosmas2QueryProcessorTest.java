@@ -241,7 +241,7 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group",			res.at("/query/@type").asText());
-        assertEquals("operation:or",		res.at("/query/operation").asText());
+        assertEquals("operation:disjunction",		res.at("/query/operation").asText());
         assertEquals("Sonne",				res.at("/query/operands/0/wrap/key").asText());
         assertEquals("Mond",				res.at("/query/operands/1/wrap/key").asText());
         assertEquals(true,					res.at("/query/operands/2").isMissingNode());
@@ -250,7 +250,7 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group",			res.at("/query/@type").asText());
-        assertEquals("operation:or",		res.at("/query/operation").asText());
+        assertEquals("operation:disjunction",		res.at("/query/operation").asText());
         assertEquals("korap:group",			res.at("/query/operands/0/@type").asText());
         assertEquals("operation:sequence",	res.at("/query/operands/0/operation").asText());
         assertEquals("Sonne",				res.at("/query/operands/0/operands/0/wrap/key").asText());
@@ -262,7 +262,7 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:group",			res.at("/query/@type").asText());
-        assertEquals("operation:or",		res.at("/query/operation").asText());
+        assertEquals("operation:disjunction",		res.at("/query/operation").asText());
         assertEquals("korap:group",			res.at("/query/operands/0/@type").asText());
         assertEquals("operation:sequence",	res.at("/query/operands/0/operation").asText());
         assertEquals("korap:group",			res.at("/query/operands/1/@type").asText());
@@ -286,7 +286,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(0,						res.at("/query/distances/0/min").asInt());
         assertEquals(0,						res.at("/query/distances/0/max").asInt());
         assertEquals("korap:group",			res.at("/query/operands/0/@type").asText());
-        assertEquals("operation:or",		res.at("/query/operands/0/operation").asText());
+        assertEquals("operation:disjunction",		res.at("/query/operands/0/operation").asText());
         assertEquals("Sonne",				res.at("/query/operands/0/operands/0/wrap/key").asText());
         assertEquals("Mond",				res.at("/query/operands/0/operands/1/wrap/key").asText());
         assertEquals("korap:token",			res.at("/query/operands/1/@type").asText());
@@ -304,7 +304,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("korap:token",			res.at("/query/operands/0/@type").asText());
         assertEquals("scheint",				res.at("/query/operands/0/wrap/key").asText());
         assertEquals("korap:group",			res.at("/query/operands/1/@type").asText());
-        assertEquals("operation:or",		res.at("/query/operands/1/operation").asText());
+        assertEquals("operation:disjunction",		res.at("/query/operands/1/operation").asText());
         assertEquals("Sonne",				res.at("/query/operands/1/operands/0/wrap/key").asText());
         assertEquals("Mond",				res.at("/query/operands/1/operands/1/wrap/key").asText());
 
@@ -327,7 +327,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(0,						res.at("/query/operands/1/distances/0/max").asInt());
         assertEquals("scheint",				res.at("/query/operands/1/operands/0/wrap/key").asText());
         assertEquals("korap:group",			res.at("/query/operands/1/operands/1/@type").asText());
-        assertEquals("operation:or",		res.at("/query/operands/1/operands/1/operation").asText());
+        assertEquals("operation:disjunction",		res.at("/query/operands/1/operands/1/operation").asText());
         assertEquals("Sonne",				res.at("/query/operands/1/operands/1/operands/0/wrap/key").asText());
         assertEquals("Mond",				res.at("/query/operands/1/operands/1/operands/1/wrap/key").asText());
     }
