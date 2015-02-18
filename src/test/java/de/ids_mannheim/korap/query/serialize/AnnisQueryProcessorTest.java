@@ -262,12 +262,12 @@ public class AnnisQueryProcessorTest {
         assertEquals("S",					res.at("/query/operands/0/operands/0/key").asText());
         assertEquals("korap:group",			res.at("/query/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",		res.at("/query/operands/0/operands/1/operation").asText());
-        assertEquals(2,					    res.at("/query/operands/0/operands/1/classOut").asInt());
+        assertEquals(130,				    res.at("/query/operands/0/operands/1/classOut").asInt());
         assertEquals("korap:span",			res.at("/query/operands/0/operands/1/operands/0/@type").asText());
         assertEquals("NP",					res.at("/query/operands/0/operands/1/operands/0/key").asText());
         assertEquals("korap:reference",		res.at("/query/operands/1/@type").asText());
         assertEquals("operation:focus",		res.at("/query/operands/1/operation").asText());
-        assertEquals(2,					    res.at("/query/operands/1/classRef/0").asInt());
+        assertEquals(130,				    res.at("/query/operands/1/classRef/0").asInt());
 
         query = "cat=\"S\" & cat=\"NP\" & #1 >@r #2";  
         qs.setQuery(query, "annis");
@@ -279,12 +279,12 @@ public class AnnisQueryProcessorTest {
         assertEquals("S",					res.at("/query/operands/0/operands/0/key").asText());
         assertEquals("korap:group",			res.at("/query/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",		res.at("/query/operands/0/operands/1/operation").asText());
-        assertEquals(2,					    res.at("/query/operands/0/operands/1/classOut").asInt());
+        assertEquals(130,					res.at("/query/operands/0/operands/1/classOut").asInt());
         assertEquals("korap:span",			res.at("/query/operands/0/operands/1/operands/0/@type").asText());
         assertEquals("NP",					res.at("/query/operands/0/operands/1/operands/0/key").asText());
         assertEquals("korap:reference",		res.at("/query/operands/1/@type").asText());
         assertEquals("operation:focus",		res.at("/query/operands/1/operation").asText());
-        assertEquals(2,					    res.at("/query/operands/1/classRef/0").asInt());
+        assertEquals(130,					res.at("/query/operands/1/classRef/0").asInt());
     }
 
     @Test
@@ -319,7 +319,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:relation",	res.at("/query/operation").asText());
         assertEquals("korap:reference",		res.at("/query/operands/0/@type").asText());
         assertEquals("operation:focus",		res.at("/query/operands/0/operation").asText());
-        assertEquals(1,					    res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,   			    res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("korap:group",			res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:relation",	res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("korap:relation",		res.at("/query/operands/0/operands/0/relation/@type").asText());
@@ -329,7 +329,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("CP",					res.at("/query/operands/0/operands/0/operands/0/key").asText());
         assertEquals("korap:group",			res.at("/query/operands/0/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",		res.at("/query/operands/0/operands/0/operands/1/operation").asText());
-        assertEquals(1,					    res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(129,   			    res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("VP",					res.at("/query/operands/0/operands/0/operands/1/operands/0/key").asText());
     }
     //		query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";
@@ -479,7 +479,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("korap:group",         res.at("/query/@type").asText());
         assertEquals("operation:sequence",  res.at("/query/operation").asText());
         assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/classRef/0").asInt());
         assertEquals(res.at("/query/operands/0/classRef/0").asInt(), 
                 res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
     }
@@ -603,14 +603,14 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:sequence",  res.at("/query/operation").asText());
         assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("korap:token",         res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("Sonne",               res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/1/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("Mond",                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
         assertEquals("Sterne",              res.at("/query/operands/1/wrap/key").asText());
         assertEquals("w",                   res.at("/query/distances/0/key").asText());
@@ -624,14 +624,14 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:sequence",  res.at("/query/operation").asText());
         assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("korap:token",         res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("Sonne",               res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/1/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("Mond",                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
         assertEquals("Sterne",              res.at("/query/operands/1/wrap/key").asText());
         assertEquals("w",                   res.at("/query/distances/0/key").asText());
@@ -645,21 +645,21 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:relation",  res.at("/query/operation").asText());
         assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(2,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(130,                   res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("korap:reference",     res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/0/classRef/0").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/operands/0/operands/0/classRef/0").asInt());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operands/0/operands/0/operation").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/classOut").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/classOut").asInt());
         assertEquals("korap:span",          res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("NP",                  res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/key").asText());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/1/operation").asText());
-        assertEquals(2,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(130,                   res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("VP",                  res.at("/query/operands/0/operands/0/operands/1/operands/0/key").asText());
         assertEquals("PP",                  res.at("/query/operands/1/key").asText());
 
@@ -674,19 +674,19 @@ public class AnnisQueryProcessorTest {
         assertEquals("frames:startsWith",   res.at("/query/frames/0").asText());
         assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
         assertEquals("korap:span",          res.at("/query/operands/0/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("NP",                  res.at("/query/operands/0/operands/0/operands/0/operands/0/key").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/1/operation").asText());
-        assertEquals(2,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(130,                   res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("VP",                  res.at("/query/operands/0/operands/0/operands/1/operands/0/key").asText());
         assertEquals("korap:reference",     res.at("/query/operands/1/@type").asText());
         assertEquals("operation:focus",     res.at("/query/operands/1/operation").asText());
-        assertEquals(2,  res.at("/query/operands/1/classRef/0").asInt());
+        assertEquals(130,                   res.at("/query/operands/1/classRef/0").asInt());
 
     }
     @Test
@@ -744,12 +744,12 @@ public class AnnisQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("frames:startsWith",   res.at("/query/frames/0").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("frames:endsWith",     res.at("/query/operands/0/operands/0/frames/0").asText());
         assertEquals("korap:span",          res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/1/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("VP",                  res.at("/query/operands/0/operands/0/operands/1/operands/0/key").asText());
         assertEquals("NP",                  res.at("/query/operands/1/key").asText());
 
@@ -787,14 +787,14 @@ public class AnnisQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:sequence",  res.at("/query/operation").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("operation:sequence",  res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("korap:token",         res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("p",                   res.at("/query/operands/0/operands/0/operands/0/wrap/layer").asText());
         assertEquals("N",                   res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/1/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(129,                   res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("V",                   res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
         assertEquals("P",                   res.at("/query/operands/1/wrap/key").asText());
 
@@ -803,14 +803,14 @@ public class AnnisQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:sequence",  res.at("/query/operation").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                     res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("operation:sequence",  res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("korap:token",         res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("p",                   res.at("/query/operands/0/operands/0/operands/0/wrap/layer").asText());
         assertEquals("N",                   res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/1/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(129,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("V",                   res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
         assertEquals("P",                   res.at("/query/operands/1/wrap/key").asText());
 
@@ -819,10 +819,10 @@ public class AnnisQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:relation",  res.at("/query/operation").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                     res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
+        assertEquals(129,                     res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
         assertEquals("N",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
         assertEquals("V",                   res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
         assertEquals("P",                   res.at("/query/operands/1/wrap/key").asText());
@@ -832,20 +832,20 @@ public class AnnisQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:sequence",  res.at("/query/operation").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(2,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(130,                     res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/0/classRef/0").asInt());
+        assertEquals(129,                     res.at("/query/operands/0/operands/0/operands/0/classRef/0").asInt());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operands/0/operands/0/operation").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/classOut").asInt());
+        assertEquals(129,                     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/classOut").asInt());
         assertEquals("NP",                  res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/key").asText());
-        assertEquals(2,                     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(130,                     res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("V",                   res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
-        assertEquals(3,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
+        assertEquals(131,                     res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
         assertEquals("P",                   res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
         assertEquals("operation:focus",     res.at("/query/operands/1/operation").asText());
-        assertEquals(3,                     res.at("/query/operands/1/classRef/0").asInt());
+        assertEquals(131,                     res.at("/query/operands/1/classRef/0").asInt());
         assertEquals(true,                  res.at("/query/operands/1/operands").isMissingNode());
     }
 
@@ -930,12 +930,12 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:relation",  res.at("/query/operation").asText());
         assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                     res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/operands/0/@type").asText());
         assertEquals("operation:class",     res.at("/query/operands/0/operands/0/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
+        assertEquals(129,                     res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
         assertEquals("korap:span",          res.at("/query/operands/0/operands/0/operands/0/operands/0/@type").asText());
         assertEquals(true,                  res.at("/query/operands/0/operands/0/operands/0/operands/0/key").isMissingNode());
         assertEquals("korap:span",          res.at("/query/operands/0/operands/0/operands/1/@type").asText());
@@ -952,7 +952,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:relation",  res.at("/query/operation").asText());
         assertEquals("korap:reference",     res.at("/query/operands/0/@type").asText());
         assertEquals("operation:focus",     res.at("/query/operands/0/operation").asText());
-        assertEquals(1,                     res.at("/query/operands/0/classRef/0").asInt());
+        assertEquals(129,                     res.at("/query/operands/0/classRef/0").asInt());
         assertEquals("korap:group",         res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("operation:relation",  res.at("/query/operands/0/operands/0/operation").asText());
     }

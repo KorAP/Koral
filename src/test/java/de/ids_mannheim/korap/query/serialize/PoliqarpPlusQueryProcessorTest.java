@@ -246,6 +246,13 @@ public class PoliqarpPlusQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("korap:span", 			res.at("/query/@type").asText());
         assertEquals("s",					res.at("/query/key").asText());
+        
+        query = "<\".*\">";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("korap:span",          res.at("/query/@type").asText());
+        assertEquals(".*",                  res.at("/query/key").asText());
+        assertEquals("type:regex",          res.at("/query/type").asText());
 
         query = "<vp>";
         qs.setQuery(query, "poliqarpplus");
