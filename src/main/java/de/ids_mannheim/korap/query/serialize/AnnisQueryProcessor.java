@@ -98,7 +98,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     /**
      * Keeps a record of reference-class-mapping, i.e. which 'class' has been 
      * assigned to which #n reference. This is important when introducing 
-     * korap:reference spans to refer back to previously established classes for 
+     * koral:reference spans to refer back to previously established classes for 
      * entities.
      */
     private LinkedHashMap<String, Integer> refClassMapping = 
@@ -393,7 +393,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         if (node.getChildCount() == 3) {  			
             // (foundry/)?layer=key specification
-            if (object.get("@type").equals("korap:token")) {
+            if (object.get("@type").equals("koral:token")) {
                 HashMap<String, Object> term = (HashMap<String, Object>) 
                         object.get("wrap");
                 term.putAll(parseTextSpec(node.getChild(2)));
@@ -722,10 +722,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     /**
      * Parses a unary_linguistic_operator node. Possible operators are: 
-     * root, arity, tokenarity. Operators are embedded into a korap:term,
-     * in turn wrapped by an 'attr' property in a korap:span.
+     * root, arity, tokenarity. Operators are embedded into a koral:term,
+     * in turn wrapped by an 'attr' property in a koral:span.
      * @param node The unary_linguistic_operator node
-     * @return A map containing the attr key, to be inserted into korap:span 
+     * @return A map containing the attr key, to be inserted into koral:span 
      */
     private LinkedHashMap<String, Object> parseUnaryOperator(ParseTree node) {
         LinkedHashMap<String, Object> term = KoralObjectGenerator.makeTerm();
@@ -763,7 +763,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 LinkedHashMap<String,Object> edgeSpec = 
                         parseEdgeSpec(edgeSpecNode);
                 String edgeSpecType = (String) edgeSpec.get("@type");
-                if (edgeSpecType.equals("korap:termGroup")) {
+                if (edgeSpecType.equals("koral:termGroup")) {
                     ((ArrayList<Object>) edgeSpec.get("operands")).add(term);
                     term = edgeSpec;
                 } else {
@@ -899,9 +899,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     private LinkedHashMap<String, Object> parseEdgeAnno(
             ParseTree edgeAnnoSpec) {
-        LinkedHashMap<String, Object> edgeAnno =
-                new LinkedHashMap<String, Object>();
-        edgeAnno.put("@type", "korap:term");
+        LinkedHashMap<String, Object> edgeAnno = 
+                KoralObjectGenerator.makeTerm();
         ParseTree textSpecNode= getFirstChildWithCat(edgeAnnoSpec, "textSpec");
         ParseTree layerNode = getFirstChildWithCat(edgeAnnoSpec, "layer");
         ParseTree foundryNode = getFirstChildWithCat(edgeAnnoSpec, "foundry");

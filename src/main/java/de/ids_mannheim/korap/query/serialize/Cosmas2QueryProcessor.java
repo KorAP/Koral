@@ -314,7 +314,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 // Step I: create group
                 String nodeCat = getNodeCat(node);
                 LinkedHashMap<String, Object> beggroup = new LinkedHashMap<String, Object>();
-                beggroup.put("@type", "korap:reference");
+                beggroup.put("@type", "koral:reference");
                 beggroup.put("operation", "operation:focus");
                 ArrayList<Integer> spanRef = new ArrayList<Integer>();
                 if (nodeCat.equals("OPBEG")) {
@@ -684,9 +684,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
             private void processOPLABEL(Tree node) {
                 // Step I: create element
-                LinkedHashMap<String, Object> elem = new LinkedHashMap<String, Object>();
-                elem.put("@type", "korap:span");
-                elem.put("key", node.getChild(0).toStringTree().replaceAll("<|>", ""));
+                String key = node.getChild(0).toStringTree().replaceAll("<|>", "");
+                LinkedHashMap<String, Object> elem = KoralObjectGenerator.makeSpan(key);
                 // Step II: decide where to put
                 putIntoSuperObject(elem);
             }
@@ -810,8 +809,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                         return;
                     }
 
-                    fieldMap = new LinkedHashMap<String, Object>();
-                    fieldMap.put("@type", "korap:term");
+                    fieldMap = KoralObjectGenerator.makeTerm();
 
                     if (m.group(2) != null)
                         fieldMap.put("foundry", m.group(2));
@@ -871,16 +869,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             private void processOPWF_OPLEM(Tree node) {
                 String nodeCat = getNodeCat(node);
                 // Step I: get info
-                LinkedHashMap<String, Object> token = 
-                        new LinkedHashMap<String, Object>();
-                token.put("@type", "korap:token");
+                LinkedHashMap<String, Object> token = KoralObjectGenerator.makeToken();
                 objectStack.push(token);
                 stackedObjects++;
                 LinkedHashMap<String, Object> fieldMap = 
-                        new LinkedHashMap<String, Object>();
+                        KoralObjectGenerator.makeTerm();
                 token.put("wrap", fieldMap);
-
-                fieldMap.put("@type", "korap:term");
                 // make category-specific fieldMap entry
                 String attr = nodeCat.equals("OPWF") ? "orth" : "lemma";
                 String value = node.getChild(0).toStringTree().replaceAll("\"", "");
@@ -1036,9 +1030,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                         KoralObjectGenerator.makeSpanClass(128+classCounter++);
                 classGroup.put("operands", distributedOperands);
                 positionGroup.put("operands", posOperands);
-                LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
-                span.put("@type", "korap:span");
-                span.put("key", elem);
+                LinkedHashMap<String, Object> span = KoralObjectGenerator.makeSpan(elem);
                 objectStack.push(classGroup);
                 if (hitSpanRef != null) {
                     LinkedHashMap<String, Object> spanRefAroundHit = 

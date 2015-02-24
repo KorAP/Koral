@@ -71,12 +71,12 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
 
     private Map<String, Object> sentenceWrapper(Map<String, Object> m) {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "korap:group");
+        map.put("@type", "koral:group");
         map.put("operation", OPERATION_POSITION);
         map.put("frame", "frame:contains");
 
         Map<String, Object> sentence = new LinkedHashMap<String, Object>();
-        sentence.put("@type", "korap:span");
+        sentence.put("@type", "koral:span");
         sentence.put("key", "s");
 
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -146,13 +146,13 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         checkBooleanModifier(node);
 
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "korap:group");
+        map.put("@type", "koral:group");
         map.put("operation", OPERATION_SEQUENCE);
         map.put("inOrder", false);
 
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         Map<String, Object> distanceMap = new LinkedHashMap<String, Object>();
-        distanceMap.put("@type", "korap:distance");
+        distanceMap.put("@type", "koral:distance");
         distanceMap.put("key", "s");
         distanceMap.put("min", "0");
         distanceMap.put("max", "0");
@@ -171,7 +171,7 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         checkBooleanModifier(node);
 
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "korap:group");
+        map.put("@type", "koral:group");
         map.put("operation", OPERATION_OR);
 
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -184,7 +184,7 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
 
     private Map<String, Object> writeSequence(String str) {
         Map<String, Object> sequenceMap = new LinkedHashMap<String, Object>();
-        sequenceMap.put("@type", "korap:group");
+        sequenceMap.put("@type", "koral:group");
         sequenceMap.put("operation", OPERATION_SEQUENCE);
 
         List<Map<String, Object>> termList = new ArrayList<Map<String, Object>>();
@@ -199,7 +199,7 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
 
     private Map<String, Object> writeTerm(String term) {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "korap:term");
+        map.put("@type", "koral:term");
         if (!isCaseSensitive) {
             map.put("caseInsensitive", "true");
         }
@@ -208,7 +208,7 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         map.put("match", "match:eq");
 
         Map<String, Object> tokenMap = new LinkedHashMap<String, Object>();
-        tokenMap.put("@type", "korap:token");
+        tokenMap.put("@type", "koral:token");
         tokenMap.put("wrap", map);
         return tokenMap;
     }

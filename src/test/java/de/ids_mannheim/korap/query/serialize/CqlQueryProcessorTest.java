@@ -66,12 +66,12 @@ public class CqlQueryProcessorTest {
 	public void testAndQuery() throws CQLParseException, IOException, Exception{
 		query="(Sonne) and (scheint)";	
 		String jsonLd = 
-			"{@type : korap:group, operation : operation:sequence, inOrder : false," +		
+			"{@type : koral:group, operation : operation:sequence, inOrder : false," +		
 			"distances:[ "+
-				"{@type : korap:distance, key : s, min : 0, max : 0 } ],"+
+				"{@type : koral:distance, key : s, min : 0, max : 0 } ],"+
 					"operands : ["+
-						"{@type : korap:token, wrap : {@type : korap:term,key : Sonne, layer : orth, match : match:eq}}," + 
-						"{@type : korap:token,wrap : {@type : korap:term,key : scheint,layer : orth,match : match:eq}" +
+						"{@type : koral:token, wrap : {@type : koral:term,key : Sonne, layer : orth, match : match:eq}}," + 
+						"{@type : koral:token,wrap : {@type : koral:term,key : scheint,layer : orth,match : match:eq}" +
 					"}]}";
 			
 			CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
@@ -87,14 +87,14 @@ public class CqlQueryProcessorTest {
 	public void testBooleanQuery() throws CQLParseException, IOException, Exception{		
 		query="((Sonne) or (Mond)) and (scheint)";		
 		String jsonLd = 
-			"{@type:korap:group, operation:operation:sequence, inOrder : false, distances:[" +
-				"{@type:korap:distance, key:s, min:0, max:0}" +
+			"{@type:koral:group, operation:operation:sequence, inOrder : false, distances:[" +
+				"{@type:koral:distance, key:s, min:0, max:0}" +
 				"], operands:[" +
-					"{@type:korap:group, operation:operation:or, operands:[" +
-						"{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}," +
-						"{@type:korap:token, wrap:{@type:korap:term, key:Mond, layer:orth, match:match:eq}}" +
+					"{@type:koral:group, operation:operation:or, operands:[" +
+						"{@type:koral:token, wrap:{@type:koral:term, key:Sonne, layer:orth, match:match:eq}}," +
+						"{@type:koral:token, wrap:{@type:koral:term, key:Mond, layer:orth, match:match:eq}}" +
 					"]}," +
-					"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}" +
+					"{@type:koral:token, wrap:{@type:koral:term, key:scheint, layer:orth, match:match:eq}}" +
 			"]}";
 		CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
 		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));
@@ -103,13 +103,13 @@ public class CqlQueryProcessorTest {
 		
 		query="(scheint) and ((Sonne) or (Mond))";
 		jsonLd = 
-				"{@type:korap:group, operation:operation:sequence, inOrder : false, distances:[" +
-						"{@type:korap:distance, key:s, min:0, max:0}" +
+				"{@type:koral:group, operation:operation:sequence, inOrder : false, distances:[" +
+						"{@type:koral:distance, key:s, min:0, max:0}" +
 					"], operands:[" +
-						"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}," +
-						"{@type:korap:group, operation:operation:or, operands:[" +
-							"{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}," +
-							"{@type:korap:token, wrap:{@type:korap:term, key:Mond, layer:orth, match:match:eq}}" +
+						"{@type:koral:token, wrap:{@type:koral:term, key:scheint, layer:orth, match:match:eq}}," +
+						"{@type:koral:group, operation:operation:or, operands:[" +
+							"{@type:koral:token, wrap:{@type:koral:term, key:Sonne, layer:orth, match:match:eq}}," +
+							"{@type:koral:token, wrap:{@type:koral:term, key:Mond, layer:orth, match:match:eq}}" +
 					"]}" +
 				"]}";
 		cqlTree = new CqlQueryProcessor(query, version);		
@@ -122,9 +122,9 @@ public class CqlQueryProcessorTest {
 	public void testOrQuery() throws CQLParseException, IOException, Exception{
 		query = "(Sonne) or (Mond)";		
 		String jsonLd = 
-			"{@type:korap:group, operation:operation:or, operands:[" +
-				"{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}," +
-				"{@type:korap:token, wrap:{@type:korap:term, key:Mond, layer:orth, match:match:eq}}" +
+			"{@type:koral:group, operation:operation:or, operands:[" +
+				"{@type:koral:token, wrap:{@type:koral:term, key:Sonne, layer:orth, match:match:eq}}," +
+				"{@type:koral:token, wrap:{@type:koral:term, key:Mond, layer:orth, match:match:eq}}" +
 			"]}";		
 		
 		CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
@@ -133,12 +133,12 @@ public class CqlQueryProcessorTest {
 		
 		query="(\"Sonne scheint\") or (Mond)";		
 		jsonLd = 
-			"{@type:korap:group, operation:operation:or, operands:[" +
-				"{@type:korap:group, operation:operation:sequence, operands:[" +
-					"{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}," +
-					"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}" +
+			"{@type:koral:group, operation:operation:or, operands:[" +
+				"{@type:koral:group, operation:operation:sequence, operands:[" +
+					"{@type:koral:token, wrap:{@type:koral:term, key:Sonne, layer:orth, match:match:eq}}," +
+					"{@type:koral:token, wrap:{@type:koral:term, key:scheint, layer:orth, match:match:eq}}" +
 				"]}," +
-				"{@type:korap:token, wrap:{@type:korap:term, key:Mond, layer:orth, match:match:eq}}" +
+				"{@type:koral:token, wrap:{@type:koral:term, key:Mond, layer:orth, match:match:eq}}" +
 			"]}";
 		
 		cqlTree = new CqlQueryProcessor(query, version);		
@@ -147,14 +147,14 @@ public class CqlQueryProcessorTest {
 				
 		query="(\"Sonne scheint\") or (\"Mond scheint\")";		
 		jsonLd = 
-			"{@type:korap:group, operation:operation:or, operands:[" +
-					"{@type:korap:group, operation:operation:sequence, operands:[" +
-						"{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}," +
-						"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}" +
+			"{@type:koral:group, operation:operation:or, operands:[" +
+					"{@type:koral:group, operation:operation:sequence, operands:[" +
+						"{@type:koral:token, wrap:{@type:koral:term, key:Sonne, layer:orth, match:match:eq}}," +
+						"{@type:koral:token, wrap:{@type:koral:term, key:scheint, layer:orth, match:match:eq}}" +
 					"]}," +
-					"{@type:korap:group, operation:operation:sequence, operands:[" +
-						"{@type:korap:token, wrap:{@type:korap:term, key:Mond, layer:orth, match:match:eq}}," +
-						"{@type:korap:token, wrap:{@type:korap:term, key:scheint, layer:orth, match:match:eq}}" +
+					"{@type:koral:group, operation:operation:sequence, operands:[" +
+						"{@type:koral:token, wrap:{@type:koral:term, key:Mond, layer:orth, match:match:eq}}," +
+						"{@type:koral:token, wrap:{@type:koral:term, key:scheint, layer:orth, match:match:eq}}" +
 					"]}" +
 				"]}";
 		cqlTree = new CqlQueryProcessor(query, version);		
@@ -165,7 +165,7 @@ public class CqlQueryProcessorTest {
 	@Test
 	public void testTermQuery() throws CQLParseException, IOException, Exception{
 		query = "Sonne";		
-		String jsonLd = "{@type:korap:token, wrap:{@type:korap:term, key:Sonne, layer:orth, match:match:eq}}";		
+		String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:Sonne, layer:orth, match:match:eq}}";		
 		CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
 		String serializedQuery = mapper.writeValueAsString(cqlTree.getRequestMap().get("query"));		
 		assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
@@ -175,9 +175,9 @@ public class CqlQueryProcessorTest {
 	public void testPhraseQuery() throws CQLParseException, IOException, Exception{
 		query="\"der Mann\"";				
 		String jsonLd = 
-			"{@type:korap:group, operation:operation:sequence, operands:[" +
-				"{@type:korap:token, wrap:{@type:korap:term, key:der, layer:orth, match:match:eq}}," +
-				"{@type:korap:token, wrap:{@type:korap:term, key:Mann, layer:orth, match:match:eq}}" +
+			"{@type:koral:group, operation:operation:sequence, operands:[" +
+				"{@type:koral:token, wrap:{@type:koral:term, key:der, layer:orth, match:match:eq}}," +
+				"{@type:koral:token, wrap:{@type:koral:term, key:Mann, layer:orth, match:match:eq}}" +
 			"]}";
 		
 		CqlQueryProcessor cqlTree = new CqlQueryProcessor(query, version);		
@@ -187,10 +187,10 @@ public class CqlQueryProcessorTest {
 		
 		query="der Mann schläft";
 		jsonLd = 
-			"{@type:korap:group, operation:operation:sequence, operands:[" +
-				"{@type:korap:token, wrap:{@type:korap:term, key:der, layer:orth, match:match:eq}}," +
-				"{@type:korap:token, wrap:{@type:korap:term, key:Mann, layer:orth, match:match:eq}}," +
-				"{@type:korap:token, wrap:{@type:korap:term, key:schläft, layer:orth, match:match:eq}}" +
+			"{@type:koral:group, operation:operation:sequence, operands:[" +
+				"{@type:koral:token, wrap:{@type:koral:term, key:der, layer:orth, match:match:eq}}," +
+				"{@type:koral:token, wrap:{@type:koral:term, key:Mann, layer:orth, match:match:eq}}," +
+				"{@type:koral:token, wrap:{@type:koral:term, key:schläft, layer:orth, match:match:eq}}" +
 			"]}";
 		
 		cqlTree = new CqlQueryProcessor(query, version);		
