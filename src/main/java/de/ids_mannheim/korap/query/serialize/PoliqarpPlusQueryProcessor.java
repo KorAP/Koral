@@ -15,9 +15,11 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Map representation of Poliqarp syntax tree as returned by ANTLR
+ * Map representation of PoliqarpPlus syntax tree as returned by ANTLR
  *
  * @author Joachim Bingel (bingel@ids-mannheim.de)
+ * @version 0.3.0
+ * @since 0.1.0
  */
 public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
@@ -373,7 +375,14 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 layer = "lemma";
             span.put("layer", layer);
         }
-        span.put("key", keyNode.getText());
+        String key = keyNode.getText();
+        // check if key is regular expression
+        if (hasChild(keyNode, "regex")) {
+            // remove leading/trailing double quotes
+            key = key.substring(1, key.length()-1); 
+            span.put("type", "type:regex");
+        }
+        span.put("key", key);
         if (termOpNode != null) {
             String termOp = termOpNode.getText();
             if (termOp.equals("=="))

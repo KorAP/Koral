@@ -16,7 +16,10 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * @author bingel, hanl
+ * Main class for Koral, serializes queries from concrete QLs to KoralQuery
+ * @author Joachim Bingel (bingel@ids-mannheim.de), Michael Hanl (hanl@ids-mannheim.de)
+ * @version 0.3.0
+ * @since 0.1.0
  */
 public class QuerySerializer {
 

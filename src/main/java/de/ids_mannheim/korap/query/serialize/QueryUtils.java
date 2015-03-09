@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 /**
  * @author Joachim Bingel (bingel@ids-mannheim.de), Michael Hanl (hanl@ids-mannheim.de)
  * @date 10/12/2013
+ * @version 0.3.0
+ * @since 0.1.0
  */
 public class QueryUtils {
 

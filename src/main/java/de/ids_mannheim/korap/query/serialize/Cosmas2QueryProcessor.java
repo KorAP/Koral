@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * Map representation of CosmasII syntax tree as returned by ANTLR
  *
  * @author Joachim Bingel (bingel@ids-mannheim.de)
- * @version 0.2
+ * @version 0.3
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 

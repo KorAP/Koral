@@ -35,7 +35,7 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
  * @see http://annis-tools.org/aql.html
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
- * @version 0.1.0
+ * @version 0.3.0
  * @since 0.1.0
  */
 public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {

@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * 
  * @author Michael Hanl (hanl@ids-mannheim.de)
  * @author Joachim Bingel (bingel@ids-mannheim.de)
- * @version 0.1.0
+ * @version 0.3.0
  * @since 0.1.0
  */
 public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {

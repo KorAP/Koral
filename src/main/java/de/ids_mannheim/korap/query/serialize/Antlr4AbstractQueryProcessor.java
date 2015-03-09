@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
  * for some node. 
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
- * @version 0.1.0
+ * @version 0.3.0
  * @since 0.1.0
  */
 public abstract class Antlr4AbstractQueryProcessor extends  

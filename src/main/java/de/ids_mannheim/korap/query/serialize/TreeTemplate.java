@@ -24,7 +24,8 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 /**
  * Map representation of syntax tree as returned by ANTLR
  * @author Joachim Bingel (bingel@ids-mannheim.de)
- *
+ * @version 0.3.0
+ * @since 0.1.0
  */
 public class TreeTemplate extends Antlr4AbstractQueryProcessor {
 	private static Logger log = LoggerFactory.getLogger(TreeTemplate.class);

@@ -18,7 +18,7 @@ import org.slf4j.Logger;
  * JSON-LD tree for that query. 
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
- * @version 0.1.0
+ * @version 0.3.0
  * @since 0.1.0
  */
 public abstract class AbstractQueryProcessor {
@@ -86,8 +86,8 @@ public abstract class AbstractQueryProcessor {
     private ArrayList<Integer> highlightClasses = new ArrayList<Integer>();
 
     AbstractQueryProcessor() {
-        requestMap.put("@context", "http://ids-mannheim.de/ns/KorAP/json-ld/"
-                + "v0.2/context.jsonld");
+        requestMap.put("@context",
+                "http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld");
         requestMap.put("errors", errors);
         requestMap.put("warnings", warnings);
         requestMap.put("messages", messages);

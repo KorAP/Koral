@@ -31,7 +31,7 @@ public class PoliqarpPlusQueryProcessorTest {
     @Test
     public void testContext() throws JsonProcessingException, IOException {
         query = "foo";
-        String contextString = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld";
+        String contextString = "http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals(contextString, res.get("@context").asText());
