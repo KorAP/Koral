@@ -85,7 +85,7 @@ public class Cosmas2QueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:term", 			res.at("/query/wrap/@type").asText());
         assertEquals("deutscher",			res.at("/query/wrap/key").asText());
-        assertEquals(true,					res.at("/query/wrap/caseInsensitive").asBoolean());
+        assertEquals("flags:caseInsensitive",     res.at("/query/wrap/flags/0").asText());
         assertEquals("orth", 				res.at("/query/wrap/layer").asText());
         assertEquals("match:eq",			res.at("/query/wrap/match").asText());
 
@@ -96,11 +96,10 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("operation:sequence",	res.at("/query/operation").asText());
         assertEquals("koral:term", 			res.at("/query/operands/0/wrap/@type").asText());
         assertEquals("deutscher",			res.at("/query/operands/0/wrap/key").asText());
-        assertEquals(true,					res.at("/query/operands/0/wrap/caseInsensitive").asBoolean());
+        assertEquals("flags:caseInsensitive",     res.at("/query/operands/0/wrap/flags/0").asText());
         assertEquals("orth", 				res.at("/query/operands/0/wrap/layer").asText());
         assertEquals("match:eq",			res.at("/query/operands/0/wrap/match").asText());
         assertEquals("Bundestag",			res.at("/query/operands/1/wrap/key").asText());
-        assertEquals(true,					res.at("/query/operands/1/wrap/caseInsensitive").isMissingNode());
     }
 
     @Test

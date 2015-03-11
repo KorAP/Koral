@@ -1,5 +1,8 @@
 
 # /
+/.project
+/.classpath
+/.settings/org.eclipse.jdt.core.prefs
 /target
 
 # /src/main/antlr/cosmas/

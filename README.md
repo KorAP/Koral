@@ -37,35 +37,35 @@ operands, an *s* span and a sequence of two tokens.
 
 ```json
 {
-    "@context": "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld",
+    "@context": "http://korap.ids-mannheim.de/ns/KoralQuery/v0.2/context.jsonld",
     "query": {
-        "@type": "korap:group",
+        "@type": "koral:group",
         "operation": "operation:position",
         "frames": [
             "frames:isAround"
         ],
         "operands": [
             {
-                "@type": "korap:span",
+                "@type": "koral:span",
                 "key": "s"
             },
             {
-                "@type": "korap:group",
+                "@type": "koral:group",
                 "operation": "operation:sequence",
                 "operands": [
                     {
-                        "@type": "korap:token",
+                        "@type": "koral:token",
                         "wrap": {
-                            "@type": "korap:term",
+                            "@type": "koral:term",
                             "layer": "orth",
                             "key": "zu",
                             "match": "match:eq"
                         }
                     },
                     {
-                        "@type": "korap:token",
+                        "@type": "koral:token",
                         "wrap": {
-                            "@type": "korap:term",
+                            "@type": "koral:term",
                             "layer": "pos",
                             "key": "ADJA",
                             "match": "match:eq"
