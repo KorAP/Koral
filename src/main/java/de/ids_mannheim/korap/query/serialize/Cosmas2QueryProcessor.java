@@ -886,7 +886,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
                 if (value.startsWith("$")) {
                     value = value.substring(1);
-                    fieldMap.put("caseInsensitive", true);
+                    ArrayList<String> flags = new ArrayList<String>();
+                    flags.add("caseInsensitive");
+                    fieldMap.put("flags", flags);
                 }
 
                 fieldMap.put("key", value);
