@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>KoralQuery (Draft)</title>
+    <link href="/misc/style.css" type="text/css" rel="stylesheet" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="shortcut icon" href="/misc/favicon.ico"/> 
+    <meta name="robots" content="none" />
+  </head>
+  <body class="specification draft">
+    <div id="banner"><span>Draft 0.3</span></div>
+
+    <div class="h-entry hentry">
+      <h1 class="p-name"><span>KoralQuery</span></h1>
+      <div id="reference">
+	<p><span class="p-author h-card"><span class="p-name fn"><a rel="author" class="u-url" href="http://nils-diewald.de">Nils Diewald</a></span>,
+	    <span class="p-org">IDS</span>, <span class="p-locality">Mannheim</span>
+	</p>
+	<p><span class="h-card p-author"><span class="p-name fn"><a rel="author" href="http://www.cl.uni-heidelberg.de/~bingel">Joachim Bingel</a></span>,
+	    <span class="p-org">IDS</span> <span class="p-locality">Mannheim</span>
+	</p>
+	<p>Published: <time class="dt-published" datetime="2015-03-xx">2015/03/16</time></p>
+	<p>Last update: <time class="dt-updated" datetime="2015-03-xx">2015/03/16</time></p>
+      </div>
+
+      <nav>
+	<ul>
+	  <li>Collection Objects
+	    <ul>
+	      <li><a href="#terms">Terms</a></li>
+	    </ul>
+	  </li>
+	</ul>
+      </nav>
+
+      <summary class="p-summary">
+	<h2>Abstract</h2>
+	<p>KoralQuery is a general corpus query protocol, serialized in <a href="http://json-ld.org/">JSON-LD</a>. KoralQuery focusses on simplicity of implementation rather than human readibility and writability. <a href="#fn-jsonldrecommendation" id="ref-jsonldrecommendation">[1]</a></p>
+	<pre>
+{
+  "@type" : "KoralQuery",
+  "@context" : "...",
+  "collection" : { ... },
+  "query" : { ... },
+  "meta" : { ... }
+}
+	</pre>
+      </summary>
+
+      <main class="e-content">
+	<section>
+	  <h2>Introduction</h2>
+	  <p>JSON-LD is ...</p>
+	  <p>In KoralQuery corpus search is divided in multiple separated query concepts:
+	    <dl>
+	      <dt>Collection Objects</dt>
+	      <dd>Define a document collection by certain conditions. The expected result of a collection object is a subset of the corpus collection that meet the conditions. The empty set is valid.</dd>
+	      <dt>Query Objects</dt>
+	      <dd>Define an occurrence collection by certain conditions. The expected result of a query object is a collection of substrings in documents of the document collection, that meet the conditions. The empty set is valid.</dd>
+	      <dt>Report Objects</dt>
+	      <dd>Report errors, warnings and further messages regarding the processing of the query.</dd>
+	      <dt>Meta Objects</dt>
+	      <dd>Define further adjustments to the query execution or the processing of search results.</dd>
+	    </dl>
+	  </p>
+	  <p>Further undefined objects are allowed.</p>
+	  <p>This document specifies collection objects and query objects. The definition of meta objects is dependent on the implementation of KoralQuery and not part of this specification. For common meta information with recommended definitions, refer to <a href="#appendix-a">appendix x</a></p>
+	</section>
+	<section>
+	  <h2>Status of this draft</h2>
+	  <p>KoralQuery is not meant to be complete, but to be extensible and forward compatible. Extensibility is granted by support of embedded <code>@context</code> objects. Forward compatibility is tried to be ensured by describing implementation advices for incompatibility fallbacks.</p>
+	  <h3>Extensibility</h3>
+	  <h3>Minimum requirements</h3>
+	  <p>Implementations do not need to implement all described features to be called &quot;KoralQuery compliant&quot;.</p>
+	</section>
+	<section>
+	  <h2>Definitions</h2>
+	  <h3>Requrements Language</h3>
+	  <h3>Table Description</h3>
+	  <p>In this document, attributes as part of KoralQuery objects are represent as tables, listing all defined attributes as key value pairs. Optional keys have a trailing question mark, mandatory keys are unmarked.</p>
+	</section>
+	<section>
+	  <h2>Error, Warning, and Message objects</h2>
+	  <p>KoralQuery is meant to be future proof by being upwards compatible. That means, new features official introduced or supported by third party software (using external context files) should be either treated as intended, be intendendly ignored or be rejected.</p>
+	  <p>Incompatibilities with query objects and collection objects should be treated as documented in the implementation guide section of each object.</p>
+	  <p>To inform the user on certain incompatibilities, KoralQuery has three different mechanisms for raising awareness. These mechanisms may also be used by query rewrite processors, to inject errors, warnings, and messages.</p>
+
+	  <section>
+	    <h3>Errors</h3>
+	    <p>Errors will inform the user of a reason a query was rejected. This may originate from the KoralQuery processing, but may also be injected for other reasons, like access restrictions.</p>
+	  </section>
+
+	  <section>
+	    <h3>Warnings</h3>
+	    <p>Warnings will inform the user of probably unexpected behaviour of the KoralQuery process. This may originate from the KoralQuery processing, but may also be injected for other reasons, like limitations of the query result set by time out.</p>
+	  </section>
+
+	  <section>
+	    <h3>Messages</h3>
+	    <p>Messages will inform the user of useful information that don't effect the results of the query. This may originate from the KoralQuery processing, for example to inform about future incompatibilities, but may also be injected for other reasons, like deprecation of certain endpoints in the query service.</p>
+	  </section>
+
+	  <section class="guide">
+	    <h3>Implementation Guide</h3>
+	    <p>KoralQuery processors will always pass errors, warnings, and messages injected by prior processing systems. A final processing filter may decide, which errors, warnings and messages may be of interest to present to the user and which errors, warnings and messages may only be of interest for intermediate processing.</p>
+	  </section>
+
+	</section>
+	<section>
+	  <h2>Collection Objects</h2>
+	</section>
+	
+	<section>
+	  <h2>Query Objects</h2>
+
+	  <p>For KoralQuery a document is represented as a series of tokens.
+	    A series of tokens is called a substring of the document.</p>
+	  <p>Query objects define conditions regarding the constellation of tokens and token-bound features that have to be in place to make a substring a valid occurrence of the query object in a document.</p>
+	  <p>These conditions may have syntagmatic or paradigmatic character.</p>
+	  <p>In addition to the substring, results of a query object may contain so-called classes as markers for substrings of the result substring.</p>
+
+	  <p>The result of a KoralQuery object may be an operand of another object, that may filter, enrich, combine or alter the results of nested objects.</p>
+
+	  <h3><a name="terms" id="terms">Terms</a></h3>
+	  <pre>
+{
+  "@type" : "koral:term",
+  "foundry" : "Treetagger",
+  "layer" : "pos",
+  "key" : "ADJD",
+}
+	  </pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Value and Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>@type</td>
+      <td>@id</td>
+      <td>koral:term</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>key</td>
+      <td>string</td>
+      <td></td>
+      <td>The term key</d>
+    </tr>
+    <tr>
+      <td class="opt">value</td>
+      <td>string</td>
+      <td></td>
+      <td>The term value</d>
+    </tr>
+    <tr>
+      <td class="opt">foundry</td>
+      <td>string</td>
+      <td></td>
+      <td>The annotation foundry</d>
+    </tr>
+    <tr>
+      <td class="opt">layer</td>
+      <td>string</td>
+      <td>surface layer</td>
+      <td>The annotation layer</d>
+    </tr>
+    <tr>
+      <td class="opt">type</td>
+      <td>@id</td>
+      <td>type:string</td>
+      <td>type:string<br/>type:regex<br/>type:wildcard<br/>type:punct</d>
+    </tr>
+    <tr>
+      <td class="opt">match</td>
+      <td>@id</td>
+      <td>match:eq</td>
+      <td>match:eq<br />match:ne</d>
+    </tr>
+    <tr>
+      <td class="opt">flag</td>
+      <td>[@id]</td>
+      <td></td>
+      <td>flag:caseInsensitive<br/>flag:diacriticInsensitive</d>
+    </tr>
+  </tbody>
+</table>
+	  <p>To specify a term, KoralQuery provides four attributes: <code class="att">foundry</code>, <code class="att">layer</code>, <code class="att">key</code>, and <code class="att">value</code>. The concrete definition of these attributes relies on the annotation model of the corpus and the implementation of the search system. As an abstract definition, the attributes have a hierarchical structure for annotations, meaning a foundry may bundle multiple layers. A layer may bundle multiple keys and a key may bundle multiple values. An annotation or a system may not need all of these attributes to define a term, only the <code class="att">key</code> attribute is mandatory.</p>
+
+	  <p>The <code class="att">key</code> attribute represents a single annotation like the part-of-speech tag <code>noun</code> or <code>verb</code>, or the surface token <code>Tree</code>. Sometimes, annotations have to be represented as key and value pairs, for example in morphological annotations a key of the term may be <code>number</code> and the value of the key may be <code>plural</code>. In that case, the <code class="att">key</code> attribute will hold the term <code>number</code> and the <code class="att">value</code> attribute will hold the value <code>plural</code>.</p>
+
+	  <p>The <code class="att">layer</code> attribute may define the annotation level of the term, for example <code>tokenization</code>, <code>part-of-speech</code> or <code>lemma</code>. In case the <code class="att">layer</code> information is ommitted, the layer defaults to the tokenization layer, irrespective of the implementation specific word for that layer.</p>
+
+	  <p>The <code class="att">foundry</code> attribute may define the origin of the annotation, for example the name of the human annotator or the automated tool. Or it may serve as an umbrella for layers with common characteristics (for example bundling several models for named entities). <a href="#fn-foundrylayerdef" id="ref-foundrylayerdef">[2]</a></p>
+
+	  <p>In most implementations the foundry term may not be relevant, but it is important to deal with conflicting annotations, for example, in case the corpus provides multiple part-of-speech annotations.</p>
+
+	  <p>The attribute <code class="att">type</code> defines the treatment of <code class="att">key</code> and <code class="att">value</code>. </p>
+
+	  <p>Currently supported types are <code>string</code>,
+	    indicating that <code class="att">key</code> and <code class="att">value</code>
+	    should be treated as a sequence of characters.
+	    The type <code>regex</code>
+	    indicates that <code class="att">key</code> and
+	    <code class="att">value</code> should be treated as
+	    regular expressions.
+	    (The concrete treatment of regular expressions is up to
+	    the implementator of the search engine and not part of the specification.)
+	    The type <code>wildcard</code> indicates that <code class="att">key</code>
+	    and <code class="att">value</code> should be treated as
+	    character sequences with allowed gaps.
+	    Characters representing gaps are
+	    the question mark <code>?</code> for a single character gap
+	    and the star symbol <code>*</code>
+	    for an arbitrary long gap.
+	    The <code>punct</code> type defines that the <code class="att">key</code>
+	    attribute will be treated as a character class of punctuation symbols.
+	    In case the <code>punct</code> type is defined,
+	    the treatment of the <code class="att">value</code> attribute is undefined. 
+	    The default value for the type attribute is <code>string</code>.
+	    Support for types different than strings for <code class="att">foundry</code>
+	    and <code class="att">layer</code> is not supported yet.</p>
+
+
+	  <p>The term defined by <code class="att">foundry</code>,
+	  <code class="att">layer</code>, <code class="att">key</code>
+	  and <code class="att">value</code> represents the
+	  condition of the term object.
+	  The <code class="att">match</code> attribute can be used
+	  to invert the condition, saying a substring of a text holds true
+	  for the condition, in case it fails.
+	  Therefore the <code class="att">match</code> attribute can hold
+	  the value <code>eq</code>, meaning the term
+	  has to match exactly as defined, or the value may be <code>ne</code>,
+	  meaning the term has to be not equal to the defined condition.
+	  The default value for match is <code>eq</code>.</p>
+
+	  <aside>In the current version of KoralQuery the
+	    <code class="att">match</code> attribute of terms
+	    is limited to the same functionality as
+	    <a href="#"><code class="att">exclude</code></a>
+	    in operations.
+	    As match may support further operators, it is used in favor
+	    of <a href="#"><code class="att">exclude</code></a>
+	    in this context.</aside>
+	  	  
+	  <p>The matching may further be modified by certain flags,
+	    using the <code class="att">flag</code> attribute.
+	    Multiple flags are supported.
+	    In case, order is of relevance, the flag operations
+	    are processed from left to right.
+	    Currently there are two flags supported by KoralQuery:
+	    <code>caseInsensitive</code> means,
+	    the matching will ignore a difference between
+	    small and capital letters in the
+	    <code class="att">key</code> and <code class="att">value</code>
+	    attributes, as well as in the term index.
+	    <code>diacriticInsensitive</code> means,
+	    the match will ignore diacritic symbols in
+	    the <code class="att">key</code> and
+	    <code class="att">value</code> attributes,
+	    as well as in the term index.</p>
+
+<pre>
+{
+  "@type" : "koral:term",
+  "key" : "Tausendsassa",
+  "flag" : ["flag:caseInsensitive"]
+}
+</pre>
+
+	  <section class="guide">
+	    <h4>Implementation Guide</h4>
+	    <p>The <code class="att">key</code> attribute in
+	      terms is mandatory. If the attribute is missing,
+	      the query has to be rejected and an error has to be raised.</p>
+	    <p>If the <code class="att">type</code> attribute contains an
+	      undefined identifier,
+	      a warning has to be raised and the default type has to be assumed.</p>
+	    <p>If the <code class="att">match</code> attribute contains
+	      an undefined identifier,
+	      a warning has to be raised and the default match has to be assumed.</p>
+	    <p>If the <code class="att">flag</code> attribute contains
+	      an undefined identifier,
+	      a warning has to be raised. The flag will be ignored.</p>
+	    <p>All other attributes may silently be ignored.</p>
+
+	  </section>
+	</section>
+	<section>
+	  <h2>Implementations</h2>
+	  <p>KoralQuery is the base communication protocol of KorAP.
+	    The Koral query serializer can translate queries formulated
+	    in Poliqarp, Cosmas-II, Annis, and CQL to KoralQuery.
+	    Kustvakt is a Policy service, using Koral to translate queries and
+	    to rewrite the query based on access restrictions and user settings.
+	    Krill is a corpus search service, that consumes KoralQuery and
+	    creates KoralQuery compatible responses.
+	  </p>
+	</section>
+	<section class="footnotes">
+	  <!-- http://www.w3.org/TR/html5/common-idioms.html -->
+	  <p id="fn-jsonldrecommendation"><a href="#ref-jsonldrecommendation">[1]</a> JSON-LD was chosen to be compatible with LAPPS recommendations from <a href="http://lapps.anc.org/web-service-exchange-vocabulary/141-2/">ISO TC37 SC4 WG1-EP</a>, suggested by Piotr Bański.</p>
+	  <p id="fn-foundrylayerdef"><a href="#ref-foundrylayerdef">[2]</a> Thanks to Piotr Bański for the definition of foundry and layer.</p>
+	</section>
+	<section id="appendix-a">
+	  <h2>Recommended Attributes for Meta Objects</h2>
+	  <p>Following the specification of OpenSearch and PortableContacts ...</p>
+	</section>
+	<section>
+	  <h2>Copyright</h2>
+
+	  <p>Copyright (c) 2015, IDS Mannheim, Germany, and the authors.</p>
+
+	  <a href="http://creativecommons.org/licenses/by/2.0/"
+	     rel="license">XYZ</a>
+
+	  <p>The authors want to thank Eliza Margaretha for her help on implementing
+	    the reference implementation of KoralQuery, and
+	    Piotr Bański, Elena Frick, and Michael Hanl for their valuable input.</p>
+
+	  <p>KoralQuery is developed as part of the
+	    <a href="https://github.com/KorAP/Koral">Koral</a>
+	    query processing software,
+	    that is one component of the
+	    <a href="http://korap.ids-mannheim.de/">KorAP</a>
+	    Corpus Analysis Platform at the Institute
+	    for German Language (<a href="http://www1.ids-mannheim.de/">IDS</a>),
+	    funded by the <a href="http://www.leibniz-gemeinschaft.de/en/about-us/leibniz-competition/projekte-2011/2011-funding-line-2/">Leibniz-Gemeinschaft</a>,
+	    and supported by the <a href="http://www.kobra.tu-dortmund.de">KobRA</a> project,
+	    funded by the Federal Ministry of Education and Research
+	    (<a href="http://www.bmbf.de/en/">BMBF</a>).</p>
+
+	</section>
+      </main>
+      <div class="changes"><pre>
+CHANGES:
+0.3 2015-03-16
+    - Initial publication on GitHub
+      Versions prior to 0.3 were used internally only
+      </pre></div>
+    </div>
+  </body>
+</html>

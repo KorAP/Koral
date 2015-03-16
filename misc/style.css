@@ -1,0 +1,214 @@
+body, html {
+  font-family: "Helvetica Neue", Helvetica, tahoma, verdana, arial, sans-serif
+}
+
+a {
+  color: #ffa501;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  color: #9f3700;
+  transition: color 0.3s ease;
+}
+
+body {
+  margin: 0;
+  font-size: 12pt;
+  line-height: 1.6em;
+  width: 100%;
+  background-color: #7ba400;
+}
+
+div.hentry {
+  color: #444;
+  background-color: #fafafa;
+  margin: 0;
+  margin: 0 auto;
+  padding: 2em;
+  width: 72%;
+  min-width: 640px;
+  max-width: 960px;
+  border-left: 1px solid #496000;
+  border-right: 1px solid #496000;
+  -moz-box-shadow:    1px 1px 5px 1px #496000;
+  -webkit-box-shadow: 1px 1px 5px 1px #496000;
+  -ms-box-shadow:     1px 1px 5px 1px #496000;
+  box-shadow:         1px 1px 5px 1px #496000; 
+}
+
+#banner {
+  position: fixed;
+  width: 149px;
+  height: 149px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  right: 0px;
+  margin-right: -37px;
+  top: 0;
+}
+
+#banner > span {
+  display: block;
+  overflow: hidden;
+  width: 190px;
+  font-size: 11pt;
+  font-weight: bold;
+  word-spacing: 2px;
+  text-decoration: none;
+  position: relative;
+  left: 20px;
+  top: -37px;
+  text-align: center;
+
+  -moz-transform-origin: 0 0 ;
+  -moz-transform:rotate(45deg);
+
+  -webkit-transform-origin: 0 0 ;
+  -webkit-transform:rotate(45deg);
+
+  -ms-transform-origin: 0 0 ;
+  -ms-transform:rotate(45deg);
+
+  transform-origin: 0 0 ;
+  transform:rotate(45deg);
+
+  color: #9f3700;
+  background-color: #ffa501;
+  border: 2px solid #9f3700;
+}
+
+h1, h2, h3, h4 {
+  padding: 0;
+  margin: 0;
+  margin-bottom: 5pt;
+  clear: both;
+}
+
+h1 {
+  background-image: url("/misc/logo-koralquery.svg");
+  background-position: left center;
+  background-repeat: no-repeat;
+  height: 3em;
+}
+
+table {
+  width: 100%;
+  empty-cells: show;
+  border-collapse: collapse;
+  vertical-align: top;
+}
+
+table thead {
+  background-color: #ffa501;
+  border: 2px solid #9f3700;
+  border-bottom-width: 0;
+}
+
+table td {
+  border: 2px solid #9f3700;
+  padding: .3em 1em;
+}
+
+table td.opt {
+  font-style: italic;
+}
+
+table td.opt:after {
+  content: "?"
+}
+
+h1 > span {
+  margin-left: -3000px;
+}
+
+nav {
+  display: none;
+}
+
+p {
+  padding: 0;
+  margin: 0;
+  margin-bottom: 2em;
+  text-indent: 0;
+}
+
+p.todo, pre, main section.guide {
+  padding: 10px;
+  border-radius: 10px;
+}
+
+code.att, pre {
+  color: white;
+  background-color: #7ba400;
+  border: 1px solid #496000;
+}
+
+pre {
+  border-width: 2px;
+}
+
+dl > dt {
+  font-weight: bold;
+}
+
+
+h1 { font-size: 250%; }
+h2 { font-size: 180%; }
+h3 { font-size: 150%; }
+h4 { font-size: 120%; }
+
+main section.guide {
+  border: 2px solid black;
+  background-color: #ddd;
+}
+
+div.h-entry > div {
+  font-size: 70%;
+  text-align: right;
+}
+
+div.h-entry > div p {
+  line-height: 1.2em;
+  padding: 0;
+  margin: 0;
+}
+
+p.todo {
+  font-size: 9pt;
+  margin: .5em;
+  float: right;
+  width: 10em;
+  border: 2px dashed orange;
+  color: red;
+  background-color: yellow;
+}
+
+code {
+  font-family: Consolas, "Lucida Console", "DejaVu Sans Mono", monospace;
+}
+
+code.att {
+  font-weight: bold;
+  border-radius: 4px;
+  padding-left: 4pt;
+  padding-right: 4pt;
+}
+
+code:not(.att):before {
+  content: "\"";
+}
+
+code:not(.att):after {
+  content: "\"";
+}
+
+aside {
+  color: #bbb;
+}
+
+section {
+  clear: both;
+}
