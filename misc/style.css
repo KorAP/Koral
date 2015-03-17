@@ -2,7 +2,7 @@ body, html {
   font-family: "Helvetica Neue", Helvetica, tahoma, verdana, arial, sans-serif
 }
 
-a {
+a:link {
   color: #ffa501;
   text-decoration: none;
   font-weight: bold;
@@ -22,6 +22,7 @@ body {
 }
 
 div.hentry {
+  position: relative;
   color: #444;
   background-color: #fafafa;
   margin: 0;
@@ -54,7 +55,7 @@ div.hentry {
   display: block;
   overflow: hidden;
   width: 190px;
-  font-size: 11pt;
+  font-size: 10pt;
   font-weight: bold;
   word-spacing: 2px;
   text-decoration: none;
@@ -65,25 +66,17 @@ div.hentry {
 
   -moz-transform-origin: 0 0 ;
   -moz-transform:rotate(45deg);
-
   -webkit-transform-origin: 0 0 ;
   -webkit-transform:rotate(45deg);
-
   -ms-transform-origin: 0 0 ;
   -ms-transform:rotate(45deg);
-
   transform-origin: 0 0 ;
   transform:rotate(45deg);
-
-  color: #9f3700;
-  background-color: #ffa501;
-  border: 2px solid #9f3700;
 }
 
 h1, h2, h3, h4 {
   padding: 0;
-  margin: 0;
-  margin-bottom: 5pt;
+  margin-bottom: 3pt 0 5pt 0;
   clear: both;
 }
 
@@ -92,6 +85,14 @@ h1 {
   background-position: left center;
   background-repeat: no-repeat;
   height: 3em;
+  margin: 0 !important;
+}
+
+#reference {
+  position: absolute;
+  top: 20pt;
+  right: 20pt;
+  z-index: 22;
 }
 
 table {
@@ -131,38 +132,52 @@ nav {
 p {
   padding: 0;
   margin: 0;
-  margin-bottom: 2em;
+  margin-bottom: 1.3em;
   text-indent: 0;
 }
 
 p.todo, pre, main section.guide {
-  padding: 10px;
+  padding: 10pt;
   border-radius: 10px;
 }
 
 code.att, pre {
   color: white;
   background-color: #7ba400;
-  border: 1px solid #496000;
+  border: 2px solid #496000;
 }
 
 pre {
-  border-width: 2px;
+  box-shadow: inset 1px 1px 5px 1px #496000;
 }
+
+code:not(.att), #banner > span {
+  color: #9f3700;
+  background-color: #ffa501;
+  border: 2px solid #9f3700;
+}
+
 
 dl > dt {
   font-weight: bold;
 }
-
 
 h1 { font-size: 250%; }
 h2 { font-size: 180%; }
 h3 { font-size: 150%; }
 h4 { font-size: 120%; }
 
+section.guide h4, section.guide h3 {
+  margin-top: 0;
+}
+
 main section.guide {
   border: 2px solid black;
   background-color: #ddd;
+}
+
+section.guide p:last-of-type {
+  margin-bottom: 0;
 }
 
 div.h-entry > div {
@@ -188,10 +203,6 @@ p.todo {
 
 code {
   font-family: Consolas, "Lucida Console", "DejaVu Sans Mono", monospace;
-}
-
-code.att {
-  font-weight: bold;
   border-radius: 4px;
   padding-left: 4pt;
   padding-right: 4pt;
@@ -206,9 +217,18 @@ code:not(.att):after {
 }
 
 aside {
-  color: #bbb;
+  filter: grayscale(100%);
+  border: 2px dashed #888;
+  color: #888;
+  padding: 10pt;
+  border-radius: 10px;
+  margin-bottom: 10pt;
 }
 
 section {
   clear: both;
+}
+
+div.changes pre {
+  text-align: left;
 }
