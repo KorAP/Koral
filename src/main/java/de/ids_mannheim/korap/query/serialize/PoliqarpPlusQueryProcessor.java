@@ -15,7 +15,16 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Map representation of PoliqarpPlus syntax tree as returned by ANTLR
+ * Map representation of PoliqarpPlus syntax tree as returned by ANTLR.
+ * Most centrally, this class maintains a set of nested maps and
+ * lists which represent the JSON tree, which is built by the JSON
+ * serialiser on basis of the {@link #requestMap} at the root of
+ * the tree. <br/>
+ * The class further maintains a set of stacks which effectively
+ * keep track of which objects to embed in which containing
+ * objects.
+ * 
+ * This class expects the Poliqarp+ ANTLR grammar shipped with Koral v0.3.0.
  *
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @version 0.3.0
@@ -27,15 +36,10 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             .getLogger(PoliqarpPlusQueryProcessor.class);
     private int classCounter = 1;
 
+    LinkedHashMap<ParseTree, Integer> classWrapRegistry = new LinkedHashMap<ParseTree, Integer>();
+    
     /**
-     * Most centrally, this class maintains a set of nested maps and
-     * lists which represent the JSON tree, which is built by the JSON
-     * serialiser on basis of the {@link #requestMap} at the root of
-     * the tree. <br/>
-     * The class further maintains a set of stacks which effectively
-     * keep track of which objects to embed in which containing
-     * objects.
-     *
+     * Constructor
      * @param query
      *            The syntax tree as returned by ANTLR
      * @throws QueryException
@@ -95,6 +99,17 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             System.out.println(openNodeCats);
         }
 
+        // Check if (the translation of) this node is registered to be wrapped
+        // in a class, e.g. by an alignment operation
+        if (classWrapRegistry.containsKey(node)) {
+            Integer classId = classWrapRegistry.get(node);
+            LinkedHashMap<String, Object> spanClass = 
+                    KoralObjectGenerator.makeSpanClass(classId);
+            putIntoSuperObject(spanClass);
+            objectStack.push(spanClass);
+            stackedObjects++;
+        }
+        
         /*
          ****************************************************************
          **************************************************************** 
@@ -158,12 +173,6 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             processMeta(node);
         }
 
-        // if (nodeCat.equals("term") || nodeCat.equals("termGroup"))
-        // {
-        // if (inMeta ) putIntoSuperObject(parseTermOrTermGroup(node,
-        // false));
-        // }
-
         if (nodeCat.equals("within")
                 && !getNodeCat(node.getParent()).equals("position")) {
             processWithin(node);
@@ -191,6 +200,10 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         openNodeCats.pop();
     }
 
+    /**
+     * Processes a 'segment' node.
+     * @param node
+     */
     private void processSegment(ParseTree node) {
         // Cover possible quantification (i.e. repetition) of segment
         ParseTree quantification = getFirstChildWithCat(node, "repetition");
@@ -206,12 +219,27 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
     }
 
+    /**
+     * Process a 'sequence' node.
+     * @param node
+     */
     private void processSequence(ParseTree node) {
         // skip in case of emptyTokenSequence or emptyTokenSequenceClass
         if (node.getChildCount() == 1
                 && getNodeCat(node.getChild(0))
                         .startsWith("emptyTokenSequence")) {
             return;
+        }
+        // skip in case this sequence is just a container for an alignment 
+        // node with just one child
+        if (node.getChildCount() == 1
+                && getNodeCat(node.getChild(0))
+                        .equals("alignment")) {
+            ParseTree alignmentNode = node.getChild(0);
+            if (alignmentNode.getChildCount() == 2) { // one child is the 
+                // alignment operator (^), the other a segment
+                return;
+            }
         }
         LinkedHashMap<String, Object> sequence = KoralObjectGenerator
                 .makeGroup("sequence");
@@ -328,30 +356,47 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         visited.addAll(getChildren(node));
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Processes an 'alignment' node. These nodes represent alignment anchors
+     * which introduce an alignment ruler in KWIC display. The serialization
+     * for this expects the two segments to the left and to the right of each
+     * anchor to be wrapped in classes, then these classes are referenced in
+     * the <tt>alignment</tt> array of the request tree.
+     * @param node
+     */
     private void processAlignment(ParseTree node) {
-        LinkedHashMap<String, Object> alignClass = KoralObjectGenerator
-                .makeSpanClass(classCounter);
-        LinkedHashMap<String, Object> metaMap = 
-                (LinkedHashMap<String, Object>) requestMap.get("meta");
-        if (metaMap.containsKey("alignment")) {
-            ArrayList<Integer> alignedClasses = new ArrayList<Integer>();
-            try {
-                alignedClasses = (ArrayList<Integer>) metaMap.get("alignment");
-            }
-            catch (ClassCastException cce) {
-                alignedClasses.add((Integer) metaMap.get("alignment"));
-            }
-            alignedClasses.add(classCounter);
-            metaMap.put("alignment", alignedClasses);
+        int i=1;
+        if (node.getChild(0).getText().equals("^")) {
+            i = 0; // if there is no first child (anchor is at extreme left or
+                   // right of segment), start counting at 0 in the loop
         }
-        else {
-            metaMap.put("alignment", classCounter);
+        // for every alignment anchor, get its left and right child and register
+        // these to be wrapped in classes.
+        for (; i<node.getChildCount(); i+=2) {
+            int alignmentFirstArg = -1;
+            int alignmentSecondArg = -1;
+            ParseTree leftChild = node.getChild(i-1);
+            ParseTree rightChild = node.getChild(i+1);
+            if (leftChild != null) {
+                System.out.println(leftChild.getText());
+                if (! classWrapRegistry.containsKey(leftChild)) {
+                    alignmentFirstArg = classCounter++;
+                    classWrapRegistry.put(leftChild, alignmentFirstArg);
+                } else {
+                    alignmentFirstArg = classWrapRegistry.get(leftChild);
+                }
+            }
+            if (rightChild != null) {
+                System.out.println(rightChild.getText());
+                if (! classWrapRegistry.containsKey(rightChild)) {
+                    alignmentSecondArg = classCounter++;
+                    classWrapRegistry.put(rightChild, alignmentSecondArg);
+                } else {
+                    alignmentSecondArg = classWrapRegistry.get(rightChild);
+                }
+            }
+            addAlignment(alignmentFirstArg, alignmentSecondArg);
         }
-        classCounter++;
-        putIntoSuperObject(alignClass);
-        objectStack.push(alignClass);
-        stackedObjects++;
     }
 
     private void processSpan(ParseTree node) {

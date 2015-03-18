@@ -84,6 +84,11 @@ public abstract class AbstractQueryProcessor {
      * Indicates which classes are to be highlighted in KWIC view.
      */
     private ArrayList<Integer> highlightClasses = new ArrayList<Integer>();
+    
+    /**
+     * Indicates positions of alignment rulers in KWIC view.
+     */
+    private ArrayList<List<Integer>> alignments = new ArrayList<List<Integer>>();
 
     AbstractQueryProcessor() {
         requestMap.put("@context",
@@ -167,6 +172,12 @@ public abstract class AbstractQueryProcessor {
     public void addHighlightClass(int classId) {
         highlightClasses.add(classId);
         meta.put("highlight", highlightClasses);
+    }
+    
+    public void addAlignment(int leftClassId, int rightClassId) {
+        List<Integer> alignment = Arrays.asList(new Integer[]{leftClassId, rightClassId});
+        alignments.add(alignment);
+        meta.put("alignment", alignments);
     }
 
     /**
