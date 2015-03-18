@@ -98,8 +98,8 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeSpanClass(int classCount) {
-        return makeSpanClass(classCount, false);
+    public static LinkedHashMap<String, Object> makeSpanClass(int classId) {
+        return makeSpanClass(classId, false);
     }
 
     @Deprecated
