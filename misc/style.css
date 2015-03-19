@@ -232,3 +232,14 @@ section {
 div.changes pre {
   text-align: left;
 }
+
+div.values {
+  display:none;
+}
+
+div.values:target {
+  display:block;
+  padding:1em;
+}
+
+

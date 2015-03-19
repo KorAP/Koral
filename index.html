@@ -11,6 +11,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
   <link rel="shortcut icon" href="misc/favicon.ico" />
   <meta name="robots" content="none" />
+
 </head>
 
 <body class="specification draft">
@@ -40,9 +41,8 @@
 
     <ul>
       <li>Collection Type Objects
-
         <ul>
-          <li><a href="#terms">Terms</a></li>
+          <li>The <a href="#term">term</a> type</li>
         </ul>
       </li>
     </ul>
@@ -177,8 +177,7 @@
     <pre>
 {
   "@type" : "koral:doc",
-  }
-          
+}
 </pre>
 
     <table>
@@ -241,7 +240,7 @@
 
           <td>eq</td>
 
-          <td><code>eq</code> <br/>
+          <td><code>eq</code> ... <br/>
 	      <code>ne</code> <br/>
 	      <code>geq</code> <br/>
 	      <code>leq</code> <br/>
@@ -260,8 +259,7 @@
     <pre>
 {
   "@type" : "koral:docGroup",
-  }
-          
+}
 </pre>
 
     <table>
@@ -323,7 +321,7 @@
 
     <h3><i>Basic span types</i></h3>
 
-    <h4><a name="token" id="terms">koral:token</a></h4>
+    <h4><a name="token" id="token">koral:token</a></h4>
     <pre>
 {
   "@type" : "koral:token",
@@ -381,7 +379,6 @@
   "layer" : "c",
   "key" : "np"
 }
-          
 </pre>
 
     <table>
@@ -445,7 +442,7 @@
 
           <td></td>
 
-          <td>Specifies agreement between search key and annotation</td>
+          <td>Specifies agreement between search key and annotation. <a href="#span_match">Show available values</a></td>
         </tr>
         
          <tr>
@@ -455,10 +452,39 @@
 
           <td></td>
 
-          <td>Span attributes</td>
+          <td>Span attributes.</td>
         </tr>
       </tbody>
     </table>
+
+	    <div class="values" id="span_match">
+	    <table>
+	      <thead>
+		<tr>
+		  <th>Value</th>
+
+		  <th>Description</th>
+
+		</tr>
+	      </thead>
+
+	      <tbody>
+		<tr>
+		  <td>eq</td>
+
+		  <td>The search key matches the annotation.</td>
+		</tr>
+
+		<tr>
+		  <td>ne</td>
+
+		  <td>The search key does not match the annotation.</td>
+		</tr>
+	      </tbody>
+	    </table>
+	    
+	      <a href="#span">return and hide</a>
+	    </div>
 
     <h3><i>Complex span types</i></h3>
 
@@ -468,8 +494,7 @@
   "@type" : "koral:group",
   "operation" : "operation:sequence",
   "operands" : []
-}
-          
+} 
 </pre>
 
     <table>
@@ -503,7 +528,7 @@
 
           <td></td>
 
-          <td>Defines the operation on the operands</td>
+          <td>Defines the operation on the operands. <a href="#group_operation">Show available values</a></td>
         </tr>
 
         <tr>
@@ -517,9 +542,56 @@
         </tr>
       </tbody>
     </table>
+
+	    <div class="values" id="group_operation">
+	    <table>
+	      <thead>
+		<tr>
+		  <th>Value</th>
+
+		  <th>Description</th>
+
+		</tr>
+	      </thead>
+
+	      <tbody>
+		<tr>
+		  <td>position</td>
+		  <td>The operands are in a positional relation. <a href="#operation_position">See specifications</a></td>
+		</tr>
+		<tr>
+		  <td>sequence</td>
+		  <td>The operands are in sequence. <a href="#operation_sequence">See specifications</a></td>
+		</tr>
+		<tr>
+		  <td>relation</td>
+		  <td>There is a linguistic relation between the operands. <a href="#operation_relation">See specifications</a></td>
+		</tr>
+		<tr>
+		  <td>disjunction</td>
+		  <td>Treat operands as alternatives. <a href="#operation_disjunction">See specifications</a></td>
+		</tr>
+		<tr>
+		  <td>repetition</td>
+		  <td>The operand is sequentially repeated. <a href="#operation_repetition">See specifications</a></td>
+		</tr>
+		<tr>
+		  <td>class</td>
+		  <td>Introduce a class on the operand or perform class operations. <a href="#operation_class">See specifications</a></td>
+		</tr>
+		<tr>
+		  <td>merge</td>
+		  <td>Condense result set. <a href="#operation_merge">See specifications</a></td>
+		</tr>
+	      </tbody>
+	    </table>
+	    
+	      <a href="#group">return and hide</a>
+	    </div><br/>
+
     
     <h5><i>Group operations</i></h5>
-        <h6>The <code class="att">position</code> operation</h6>
+        <h6 id="operation_position">The <code class="att">position</code> operation</h6>
 
 	    <table>
 	      <thead>
