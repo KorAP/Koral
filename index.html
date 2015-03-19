@@ -380,6 +380,26 @@
 
           <td>The search key (span type)</td>
         </tr>
+        
+         <tr>
+          <td class="opt">match</td>
+
+          <td>@id</td>
+
+          <td></td>
+
+          <td>Specifies agreement between search key and annotation</td>
+        </tr>
+        
+         <tr>
+          <td class="opt">attr</td>
+
+          <td>term or termGroup</td>
+
+          <td></td>
+
+          <td>Span attributes</td>
+        </tr>
       </tbody>
     </table>
 
@@ -388,10 +408,9 @@
     <h4><a name="group" id="group">koral:group</a></h4>
     <pre>
 {
-  "@type" : "koral:span",
-  "foundry" : "cnx",
-  "layer" : "c",
-  "key" : "np"
+  "@type" : "koral:group",
+  "operation" : "operation:sequence",
+  "operands" : []
 }
           
 </pre>
@@ -442,9 +461,98 @@
       </tbody>
     </table>
     
-    TODO: list operations
+    <h5><i>Group operations</i></h5>
+        <h6>The <code class="att">position</code> operation</h6>
+    
+        <h6>The <code class="att">sequence</code> operation</h6>
+        
+        <h6>The <code class="att">relation</code> operation</h6>
 
-    <h4><a name="koralreference" id="koralreference">koral:reference</a></h4>TODO
+        <h6>The <code class="att">disjunction</code> operation</h6>
+        
+        <h6>The <code class="att">repetition</code> operation</h6>
+        
+        <h6>The <code class="att">class</code> operation</h6>
+        
+        <h6>The <code class="att">merge</code> operation</h6>                
+
+    <h4><a name="koralreference" id="koralreference">koral:reference</a></h4>
+    <pre>
+{
+  "@type" : "koral:reference",
+  "classRef" : [1],
+  "operation" : "operation:focus",
+  "operands" : [ ... ]
+}        
+</pre>
+ <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+
+          <th>Type</th>
+
+          <th>Default</th>
+
+          <th>Value and Description</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>@type</td>
+
+          <td>@id</td>
+
+          <td>koral:reference</td>
+
+          <td></td>
+        </tr>
+
+        <tr>
+          <td>operation</td>
+
+          <td>@id</td>
+
+          <td></td>
+
+          <td>Defines the operation on the operands</td>
+        </tr>
+
+        <tr>
+          <td class="opt">classRef</td>
+
+          <td>[@id]</td>
+
+          <td></td>
+
+          <td>Classes on which the operation is applied</td>
+        </tr>
+        
+        <tr>
+          <td class="opt">spanRef</td>
+
+          <td>[@id]</td>
+
+          <td></td>
+
+          <td>Subspan to which the operand is reduced</td>
+        </tr>
+        
+
+        <tr>
+          <td class="opt">operands</td>
+
+          <td>[span types]</td>
+
+          <td></td>
+
+          <td>Arguments of the operation. Number depends on respective operation</td>
+        </tr>
+      </tbody>
+    </table>
+
+
 
     <h2>Parametric Type Objects</h2>
 
@@ -452,7 +560,7 @@
 
     <h4><a name="term" id="term">koral:term</a></h4>
     <pre>
-          {
+{
   "@type" : "koral:term",
   "foundry" : "Treetagger",
   "layer" : "pos",
@@ -696,6 +804,45 @@
 
           <td></td>
         </tr>
+        <tr>
+          <td>key</td>
+
+          <td>xsd:string</td>
+
+          <td>w</td>
+
+          <td>Measure of distance</td>
+        </tr>
+        
+        <tr>
+          <td class="opt">foundry</td>
+
+          <td>xsd:string</td>
+
+          <td></td>
+
+          <td>Foundry in which distance measure (<code class="att">key</code>) is annotated</td>
+        </tr>        
+        <tr>
+          <td class="opt">layer</td>
+
+          <td>xsd:string</td>
+
+          <td></td>
+
+          <td>Layer in which distance measure (<code class="att">key</code>) is annotated</td>
+        </tr>    
+        <tr>
+          <td>boundray</td>
+
+          <td><code class="att">boundary</code>) </td>
+
+          <td></td>
+
+          <td>Specified degree of distance</td>
+        </tr>            
+        
+        
       </tbody>
     </table>
 
@@ -705,8 +852,7 @@
   "@type" : "koral:boundary",
   "min" : 0,
   "max" : "3",
-  }
-          
+}      
 </pre>
 
     <table>
@@ -731,6 +877,26 @@
           <td>koral:boundary</td>
 
           <td></td>
+        </tr>
+        
+        <tr>
+          <td>min</td>
+
+          <td>xsd:integer</td>
+
+          <td></td>
+
+          <td>Minimal value.</td>
+        </tr>
+        
+        <tr>
+          <td>max</td>
+
+          <td>xsd:integer</td>
+
+          <td></td>
+
+          <td>Maximal value.</td>
         </tr>
       </tbody>
     </table>
