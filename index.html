@@ -32,7 +32,7 @@
 
       <p>Published: 2015/03/16</p>
 
-      <p>Last update: 2015/03/16</p>
+      <p>Last update: 2015/03/19</p>
     </div>
 
     <p style="color: red">This draft is in preparation! Expected first usable version at
@@ -204,6 +204,52 @@
 
           <td></td>
         </tr>
+	<tr>
+          <td>key</td>
+
+          <td>xsd:string</td>
+
+          <td></td>
+
+          <td>Metadata attribute (e.g. <code>textClass</code></td>
+        </tr>
+	<tr>
+          <td>value</td>
+
+          <td>xsd:string</td>
+
+          <td></td>
+
+          <td>Metadata value (e.g. <code>Sport</code></td>
+        </tr>
+	<tr>
+          <td class="opt">type</td>
+
+          <td>@id</td>
+
+          <td>string</td>
+
+          <td><code>string</code> <br/>
+	      <code>regex</code> <br/>
+	      <code>date</code> 
+	  </td>
+        </tr>
+	<tr>
+          <td class="opt">match</td>
+
+          <td>@id</td>
+
+          <td>eq</td>
+
+          <td><code>eq</code> <br/>
+	      <code>ne</code> <br/>
+	      <code>geq</code> <br/>
+	      <code>leq</code> <br/>
+	      <code>contains</code> <br/>
+	      <code>excludes</code> 
+	  </td>
+        </tr>
+
 
       </tbody>
     </table>
@@ -240,6 +286,17 @@
           <td>koral:docGroup</td>
 
           <td></td>
+        </tr>
+	<tr>
+          <td>operation</td>
+
+          <td>@id</td>
+
+          <td></td>
+
+          <td><code>and</code> <br/>
+	      <code>or</code> 
+	  </td>
         </tr>
 
       </tbody>
@@ -463,18 +520,251 @@
     
     <h5><i>Group operations</i></h5>
         <h6>The <code class="att">position</code> operation</h6>
-    
+
+	    <table>
+	      <thead>
+		<tr>
+		  <th>Key</th>
+
+		  <th>Type</th>
+
+		  <th>Value and Description</th>
+		</tr>
+	      </thead>
+
+	      <tbody>
+		<tr>
+		  <td>frames</td>
+
+		  <td>[@id]</td>
+
+		  <td>Lists the allowed positional relations between the operands</td>
+		</tr>
+
+		<tr>
+		  <td class="opt">exclude</td>
+
+		  <td>boolean</td>
+
+		  <td>If true, negate positional relations</td>
+		</tr>
+
+		<tr>
+		  <td>operands</td>
+
+		  <td>[span types]</td>
+
+		  <td>No. of operands: 2</td>
+		</tr>
+	      </tbody>
+	    </table>
+	    
         <h6>The <code class="att">sequence</code> operation</h6>
+
+	    <table>
+	      <thead>
+		<tr>
+		  <th>Key</th>
+
+		  <th>Type</th>
+
+		  <th>Value and Description</th>
+		</tr>
+	      </thead>
+
+	      <tbody>
+		<tr>
+		  <td class="opt">distances</td>
+
+		  <td>[distance]</td>
+
+		  <td>Distance constraints between operands (pertaining to different keys).</td>
+		</tr>
+
+		<tr>
+		  <td class="opt">inOrder</td>
+
+		  <td>boolean</td>
+
+		  <td>If true, ordering of operands matters</td>
+		</tr>
+
+		<tr>
+		  <td>operands</td>
+
+		  <td>[span types]</td>
+
+		  <td>No. of operands: 2+</td>
+		</tr>
+	      </tbody>
+	    </table>
+
         
         <h6>The <code class="att">relation</code> operation</h6>
+	    <table>
+	      <thead>
+		<tr>
+		  <th>Key</th>
+
+		  <th>Type</th>
+
+		  <th>Value and Description</th>
+		</tr>
+	      </thead>
+
+	      <tbody>
+		<tr>
+		  <td class="opt">relType</td>
+
+		  <td>relation</td>
+
+		  <td>Specifies relation between operands</td>
+		</tr>
+
+		<tr>
+		  <td>operands</td>
+
+		  <td>[span types]</td>
+
+		  <td>No. of operands: 2</td>
+		</tr>
+	      </tbody>
+	    </table>
+
 
         <h6>The <code class="att">disjunction</code> operation</h6>
+	    <table>
+	      <thead>
+		<tr>
+		  <th>Key</th>
+
+		  <th>Type</th>
+
+		  <th>Value and Description</th>
+		</tr>
+	      </thead>
+
+		<tr>
+		  <td>operands</td>
+
+		  <td>[span types]</td>
+
+		  <td>No. of operands: 2+</td>
+		</tr>
+	      </tbody>
+	    </table>
+
         
         <h6>The <code class="att">repetition</code> operation</h6>
+	    <table>
+	      <thead>
+		<tr>
+		  <th>Key</th>
+
+		  <th>Type</th>
+
+		  <th>Value and Description</th>
+		</tr>
+	      </thead>
+
+	      <tbody>
+		<tr>
+		  <td>boundary</td>
+
+		  <td>boundary</td>
+
+		  <td>Specifies operand's mininmum and maximum repetition</td>
+		</tr>
+
+		<tr>
+		  <td>operands</td>
+
+		  <td>[span types]</td>
+
+		  <td>No. of operands: 1</td>
+		</tr>
+	      </tbody>
+	    </table>
+
         
         <h6>The <code class="att">class</code> operation</h6>
+	    <table>
+	      <thead>
+		<tr>
+		  <th>Key</th>
+
+		  <th>Type</th>
+
+		  <th>Value and Description</th>
+		</tr>
+	      </thead>
+
+	      <tbody>
+		<tr>
+		  <td>classOut</td>
+
+		  <td>int</td>
+
+		  <td>The ID for the defined class.</td>
+		</tr>
+
+		<tr>
+		  <td class="opt">classIn</td>
+
+		  <td>[int]</td>
+
+		  <td>Specifies classes on which <code>classRefCheck</code> or <code>classRefOp</code> works.</td>
+		</tr>
+		<tr>
+		  <td class="opt">classRefCheck</td>
+
+		  <td>[@id]</td>
+
+		  <td>Set-theoretic condition on input classes. Results that do not fulfil this
+condition are excluded from the result set.</td>
+		</tr>
+		<tr>
+		  <td class="opt">classRefOp</td>
+
+		  <td>@id</td>
+
+		  <td>Set-theoretic operation on input classes, creates new output class</td>
+		</tr>
+		<tr>
+		  <td>operands</td>
+
+		  <td>[span types]</td>
+
+		  <td>No. of operands: 1</td>
+		</tr>
+
+	      </tbody>
+	    </table>
+
         
-        <h6>The <code class="att">merge</code> operation</h6>                
+        <h6>The <code class="att">merge</code> operation</h6> 
+	    <table>
+	      <thead>
+		<tr>
+		  <th>Key</th>
+
+		  <th>Type</th>
+
+		  <th>Value and Description</th>
+		</tr>
+	      </thead>
+
+	      <tbody>
+		<tr>
+		  <td>operands</td>
+
+		  <td>[span types]</td>
+
+		  <td>No. of operands: 1</td>
+		</tr>
+
+	      </tbody>
+	    </table>        
 
     <h4><a name="koralreference" id="koralreference">koral:reference</a></h4>
     <pre>
@@ -776,9 +1066,9 @@
     <pre>
 {
   "@type" : "koral:distance",
-
-  }
-          
+  "key" : "w",
+  "boundary" : {...}
+}          
 </pre>
 
     <table>
@@ -851,7 +1141,7 @@
 {
   "@type" : "koral:boundary",
   "min" : 0,
-  "max" : "3",
+  "max" : "3"
 }      
 </pre>
 
@@ -905,9 +1195,8 @@
     <pre>
 {
   "@type" : "koral:relation",
-
-  }
-          
+  "wrap" : {...}
+}
 </pre>
 
     <table>
@@ -933,6 +1222,16 @@
 
           <td></td>
         </tr>
+
+	<tr>
+          <td>wrap</td>
+
+          <td>term or termGroup</td>
+
+          <td></td>
+
+          <td>Holds information on key, foundry, layer, value</td>
+        </tr>
       </tbody>
     </table>
 
@@ -942,8 +1241,9 @@
     <pre>
 {
   "@type" : "koral:termGroup",
-}
-          
+  "relation" : "relation:and",
+  "operands" : [...]
+}       
 </pre>
 
     <table>
@@ -969,6 +1269,19 @@
 
           <td></td>
         </tr>
+
+        <tr>
+          <td>relation</td>
+
+          <td>@id</td>
+
+          <td></td>
+
+          <td><code>and</code> Conjunction of constraints<br/>
+	      <code>or</code> Disjunction of constraints<br/>
+          </td>
+        </tr>
+
       </tbody>
     </table>
 
@@ -979,8 +1292,7 @@
     <pre>
 {
   "@type" : "koral:rewrite",
-  }
-          
+}    
 </pre>
 
     <table>
@@ -1007,6 +1319,35 @@
           <td></td>
         </tr>
 
+	<tr>
+          <td>operation</td>
+
+          <td>@id</td>
+
+          <td></td>
+
+          <td>Specifies the performed rewrite action</td>
+        </tr>
+
+	<tr>
+          <td>src</td>
+
+          <td>xsd:string</td>
+
+          <td></td>
+
+          <td>Specifies the component responsible for the rewrite</td>
+        </tr>
+
+	<tr>
+          <td class="opt">scope</td>
+
+          <td>xsd:string</td>
+
+          <td></td>
+
+          <td>Specifies which object/attribute has been rewritten</td>
+        </tr>
       </tbody>
     </table>
 
