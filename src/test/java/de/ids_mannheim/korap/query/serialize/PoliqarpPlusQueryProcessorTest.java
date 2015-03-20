@@ -334,8 +334,8 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
         assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
         assertEquals("koral:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
-        assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
-        assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
+        assertEquals(1,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+        assertEquals(1,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         assertEquals("koral:token",			operands.get(0).at("/@type").asText());
         assertEquals("der",					operands.get(0).at("/wrap/key").asText());
@@ -355,8 +355,8 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
         assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
         assertEquals("koral:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
-        assertEquals(3,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
-        assertEquals(3,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
+        assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+        assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         assertEquals("koral:token",			operands.get(0).at("/@type").asText());
         assertEquals("der",					operands.get(0).at("/wrap/key").asText());
@@ -376,8 +376,8 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
         assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
         assertEquals("koral:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
-        assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
-        assertEquals(3,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
+        assertEquals(1,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+        assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         assertEquals("koral:token",			operands.get(0).at("/@type").asText());
         assertEquals("der",					operands.get(0).at("/wrap/key").asText());
@@ -397,7 +397,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
         assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
         assertEquals("koral:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
-        assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+        assertEquals(1,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
         assertEquals(true,					res.at("/query/distances").elements().next().at("/boundary/max").isMissingNode());
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         assertEquals("koral:token",			operands.get(0).at("/@type").asText());
@@ -418,7 +418,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
         assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
         assertEquals("koral:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
-        assertEquals(1,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+        assertEquals(0,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
         assertEquals(true,					res.at("/query/distances").elements().next().at("/boundary/max").isMissingNode());
 
         query = "[base=der][]{2,5}[base=Mann][]?[][base=Frau]";
@@ -430,8 +430,8 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:distance",		res.at("/query/distances").elements().next().at("/@type").asText());
         assertEquals("w",					res.at("/query/distances").elements().next().at("/key").asText());
         assertEquals("koral:boundary",		res.at("/query/distances").elements().next().at("/boundary/@type").asText());
-        assertEquals(3,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
-        assertEquals(6,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
+        assertEquals(2,						res.at("/query/distances").elements().next().at("/boundary/min").asInt());
+        assertEquals(5,						res.at("/query/distances").elements().next().at("/boundary/max").asInt());
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         assertEquals("koral:token",			operands.get(0).at("/@type").asText());
         assertEquals("der",					operands.get(0).at("/wrap/key").asText());
@@ -442,8 +442,8 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:distance",		operands.get(1).get("distances").elements().next().at("/@type").asText());
         assertEquals("w",					operands.get(1).get("distances").elements().next().at("/key").asText());
         assertEquals("koral:boundary",		operands.get(1).get("distances").elements().next().at("/boundary/@type").asText());
-        assertEquals(2,						operands.get(1).get("distances").elements().next().at("/boundary/min").asInt());
-        assertEquals(3,						operands.get(1).get("distances").elements().next().at("/boundary/max").asInt());
+        assertEquals(1,						operands.get(1).get("distances").elements().next().at("/boundary/min").asInt());
+        assertEquals(2,						operands.get(1).get("distances").elements().next().at("/boundary/max").asInt());
         operands = Lists.newArrayList(operands.get(1).get("operands").elements());
         assertEquals("Mann",				operands.get(0).at("/wrap/key").asText());
         assertEquals("lemma",				operands.get(0).at("/wrap/layer").asText());
@@ -469,7 +469,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:distance",		operands.get(1).get("distances").elements().next().at("/@type").asText());
         assertEquals("w",					operands.get(1).get("distances").elements().next().at("/key").asText());
         assertEquals("koral:boundary",		operands.get(1).get("distances").elements().next().at("/boundary/@type").asText());
-        assertEquals(1,						operands.get(1).get("distances").elements().next().at("/boundary/min").asInt());
+        assertEquals(0,						operands.get(1).get("distances").elements().next().at("/boundary/min").asInt());
         assertEquals(true,					operands.get(1).get("distances").elements().next().at("/boundary/max").isMissingNode());
         operands = Lists.newArrayList(operands.get(1).get("operands").elements());
         assertEquals("der",					operands.get(0).at("/wrap/key").asText());

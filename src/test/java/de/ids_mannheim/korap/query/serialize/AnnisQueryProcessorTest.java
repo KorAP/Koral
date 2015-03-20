@@ -424,8 +424,22 @@ public class AnnisQueryProcessorTest {
         assertEquals(true,                  res.at("/query/operands/2").isMissingNode());
         assertEquals("koral:distance",      res.at("/query/distances/0/@type").asText());
         assertEquals("koral:boundary",      res.at("/query/distances/0/boundary/@type").asText());
-        assertEquals(2,                     res.at("/query/distances/0/boundary/min").asInt());
-        assertEquals(3,                     res.at("/query/distances/0/boundary/max").asInt());
+        assertEquals(1,                     res.at("/query/distances/0/boundary/min").asInt());
+        assertEquals(2,                     res.at("/query/distances/0/boundary/max").asInt());
+        
+        query = "tok=\"der\" & tok=\"die\" & #1 .2 #2";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:group",         res.at("/query/@type").asText());
+        assertEquals("operation:sequence",  res.at("/query/operation").asText());
+        assertEquals("der",                 res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("die",                 res.at("/query/operands/1/wrap/key").asText());
+        assertEquals(true,                  res.at("/query/inOrder").asBoolean());
+        assertEquals(true,                  res.at("/query/operands/2").isMissingNode());
+        assertEquals("koral:distance",      res.at("/query/distances/0/@type").asText());
+        assertEquals("koral:boundary",      res.at("/query/distances/0/boundary/@type").asText());
+        assertEquals(1,                     res.at("/query/distances/0/boundary/min").asInt());
+        assertEquals(true,                  res.at("/query/distances/0/boundary/max").isMissingNode());
 
         query = "tok=\"der\" & tok=\"die\" & #1 .* #2";
         qs.setQuery(query, "annis");
@@ -458,8 +472,8 @@ public class AnnisQueryProcessorTest {
         assertEquals(true,                  res.at("/query/operands/2").isMissingNode());
         assertEquals("koral:distance",      res.at("/query/distances/0/@type").asText());
         assertEquals("koral:boundary",      res.at("/query/distances/0/boundary/@type").asText());
-        assertEquals(2,                     res.at("/query/distances/0/boundary/min").asInt());
-        assertEquals(3,                     res.at("/query/distances/0/boundary/max").asInt());
+        assertEquals(1,                     res.at("/query/distances/0/boundary/min").asInt());
+        assertEquals(2,                     res.at("/query/distances/0/boundary/max").asInt());
 
         query = "tok=\"der\" & tok=\"die\" & #1 ^* #2";
         qs.setQuery(query, "annis");
@@ -596,7 +610,7 @@ public class AnnisQueryProcessorTest {
 
     @Test
     public void testMultipleMixedOperators() throws Exception {
-        query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & #1 > #2 .0,4 #3";
+        query = "tok=\"Sonne\" & tok=\"Mond\" & tok=\"Sterne\" & #1 > #2 .1,4 #3";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group",         res.at("/query/@type").asText());
@@ -615,9 +629,9 @@ public class AnnisQueryProcessorTest {
         assertEquals("Sterne",              res.at("/query/operands/1/wrap/key").asText());
         assertEquals("w",                   res.at("/query/distances/0/key").asText());
         assertEquals(0,                     res.at("/query/distances/0/boundary/min").asInt());
-        assertEquals(4,                     res.at("/query/distances/0/boundary/max").asInt());
+        assertEquals(3,                     res.at("/query/distances/0/boundary/max").asInt());
 
-        query = "tok=\"Sonne\" & tok=\"Mond\" & #1 > #2 .0,4  tok=\"Sterne\"";
+        query = "tok=\"Sonne\" & tok=\"Mond\" & #1 > #2 .1,4  tok=\"Sterne\"";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group",         res.at("/query/@type").asText());
@@ -636,7 +650,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("Sterne",              res.at("/query/operands/1/wrap/key").asText());
         assertEquals("w",                   res.at("/query/distances/0/key").asText());
         assertEquals(0,                     res.at("/query/distances/0/boundary/min").asInt());
-        assertEquals(4,                     res.at("/query/distances/0/boundary/max").asInt());
+        assertEquals(3,                     res.at("/query/distances/0/boundary/max").asInt());
 
         query = "cat=\"NP\" & cat=\"VP\" & cat=\"PP\" & #1 $ #2 > #3";
         qs.setQuery(query, "annis");

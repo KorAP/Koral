@@ -933,11 +933,20 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
     private LinkedHashMap<String, Object> parseDistance(ParseTree rangeSpec) {
-        Integer min = 
-                Integer.parseInt(rangeSpec.getChild(0).toStringTree(parser));
+        String minString = rangeSpec.getChild(0).toStringTree(parser);
+        String maxString = null; // not always given, prevent NPE
+        if (minString.equals("0")) {
+            addError(StatusCodes.MALFORMED_QUERY, "Distance may not be 0!");
+            return KoralObjectGenerator.makeDistance("w", 0, 0);
+        }
+        // decrease by 1 to account for disparity between ANNIS distance and 
+        // koral:distance (ANNIS "x .1,3 y" means distance range 0,2 in KoralQ)
+        Integer min = Integer.parseInt(minString)-1; 
         Integer max = null;
-        if (rangeSpec.getChildCount()==3) 
-            max = Integer.parseInt(rangeSpec.getChild(2).toStringTree(parser));
+        if (rangeSpec.getChildCount() == 3) {
+            maxString = rangeSpec.getChild(2).toStringTree(parser);
+            max = Integer.parseInt(maxString)-1;
+        }
         return KoralObjectGenerator.makeDistance("w", min, max);
     }
 

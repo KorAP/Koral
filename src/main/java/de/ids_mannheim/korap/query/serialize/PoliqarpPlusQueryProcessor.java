@@ -378,7 +378,6 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             ParseTree leftChild = node.getChild(i-1);
             ParseTree rightChild = node.getChild(i+1);
             if (leftChild != null) {
-                System.out.println(leftChild.getText());
                 if (! classWrapRegistry.containsKey(leftChild)) {
                     alignmentFirstArg = classCounter++;
                     classWrapRegistry.put(leftChild, alignmentFirstArg);
@@ -387,7 +386,6 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 }
             }
             if (rightChild != null) {
-                System.out.println(rightChild.getText());
                 if (! classWrapRegistry.containsKey(rightChild)) {
                     alignmentSecondArg = classCounter++;
                     classWrapRegistry.put(rightChild, alignmentSecondArg);
@@ -893,10 +891,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     /**
      * Parses the min and max attributes for a boundary object as defined in 
-     * a distance node. Increases the min and max counters by 1 in order to
-     * reflect the disparity between the <i>distance</i> of operands (which is
-     * 1 in the case of directly succeeding tokens) and the Poliqarpish
-     * <i>number of intermediate tokens</i> (which is 0). 
+     * a distance node. 
      * 
      * @param distanceNode A node of category 'distance'
      * @return An array of two fields, where the first is the min value and the
@@ -909,9 +904,9 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 .getChild(emptyTokenSeqIndex));
         Integer min = minmax[0];
         Integer max = minmax[1];
-        min++;
-        if (max != null)
-            max++;
+//        min++;
+//        if (max != null)
+//            max++;
         return new Integer[] { min, max };
     }
 
