@@ -573,6 +573,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     }
                     LinkedHashMap<String, Object> distance = KoralObjectGenerator
                             .makeDistance(meas, min, max);
+                    // override @type, min/max to be treated according to 
+                    // Cosmas particularities
+                    distance.put("@type", "cosmas:distance"); 
                     if (exclusion) {
                         distance.put("exclude", true);
                     }
