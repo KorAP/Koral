@@ -76,7 +76,6 @@ div.hentry {
 
 h1, h2, h3, h4 {
   padding: 0;
-  margin-bottom: 3pt 0 5pt 0;
   clear: both;
 }
 
@@ -85,7 +84,6 @@ h1 {
   background-position: left center;
   background-repeat: no-repeat;
   height: 3em;
-  margin: 0 !important;
 }
 
 #reference {
@@ -95,30 +93,43 @@ h1 {
   z-index: 22;
 }
 
+
+/**
+ * Table definitions.
+ */
 table {
   width: 100%;
   empty-cells: show;
   border-collapse: collapse;
   vertical-align: top;
+  font-size: 11pt;
 }
 
-table thead {
+thead {
   background-color: #ffa501;
-  border: 2px solid #9f3700;
+  border: 2px solid #ffa501;
   border-bottom-width: 0;
+  color: white;
 }
 
-table td {
-  border: 2px solid #9f3700;
+td {
+  border: 2px solid #ffa501;
   padding: .3em 1em;
 }
 
-table td.opt {
+td.opt:after {
+  vertical-align: super;
+  content: "(?)";
   font-style: italic;
+  font-size: 80%;
 }
 
-table td.opt:after {
-  content: "?"
+tbody tr {
+  background-color: #ffd080;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #f4eebb;
 }
 
 h1 > span {
@@ -131,49 +142,69 @@ nav {
 
 p {
   padding: 0;
-  margin: 0;
-  margin-bottom: 1.3em;
+  margin-bottom: .8em;
   text-indent: 0;
+  text-align: justify;
 }
 
-p.todo, pre, main section.guide {
+p.todo, pre {
   padding: 10pt;
   border-radius: 10px;
 }
 
-code.att, pre {
+pre {
   color: white;
   background-color: #7ba400;
   border: 2px solid #496000;
+  font-size: 11pt;
+  line-height: 1.3em;
 }
 
-pre {
-  box-shadow: inset 1px 1px 5px 1px #496000;
-}
-
-code:not(.att), #banner > span {
+#banner > span {
   color: #9f3700;
   background-color: #ffa501;
   border: 2px solid #9f3700;
 }
 
 
+dl {
+  margin-left: 2em;
+}
+
 dl > dt {
+  margin-left: 0;
   font-weight: bold;
 }
 
-h1 { font-size: 250%; }
-h2 { font-size: 180%; }
-h3 { font-size: 150%; }
+dl > dd {
+  margin-left: 2em;
+  margin-right: 2em;
+}
+
+table dl {
+  margin-left: 0;
+}
+
+table dl > dt {
+  font-weight: inherit;
+}
+
+
+h1 { font-size: 250%; margin: 0; }
+h2 { font-size: 180%; margin: .8em 0 .1em 0; }
+h3 { font-size: 150%; margin: .6em 0 .05em 0; }
 h4 { font-size: 120%; }
 
-section.guide h4, section.guide h3 {
+section.guide h4,
+section.guide h3 {
   margin-top: 0;
 }
 
+
 main section.guide {
-  border: 2px solid black;
-  background-color: #ddd;
+  border: 5pt solid #ffa501;
+  padding: 1em 1em;
+  background-color: #ffd080;
 }
 
 section.guide p:last-of-type {
@@ -191,6 +222,7 @@ div.h-entry > div p {
   margin: 0;
 }
 
+
 p.todo {
   font-size: 9pt;
   margin: .5em;
@@ -201,11 +233,25 @@ p.todo {
   background-color: yellow;
 }
 
-code {
+table.koral-type tbody td:nth-of-type(1),
+table.koral-type tbody td:nth-of-type(2),
+table.koral-type tbody td:nth-of-type(3) {
+  font-family: Consolas, "Lucida Console", "DejaVu Sans Mono", monospace;
+}
+
+
+code, h4.koral-type {
   font-family: Consolas, "Lucida Console", "DejaVu Sans Mono", monospace;
   border-radius: 4px;
-  padding-left: 4pt;
-  padding-right: 4pt;
+  padding-left: 5pt;
+  padding-right: 5pt;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+h4.koral-type {
+  font-weight: bold;
+  display: inline-block;
+  padding: .15em 2em;
 }
 
 code:not(.att):before {

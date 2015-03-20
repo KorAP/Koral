@@ -1,328 +1,256 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for Linux/x86 (vers 25 March 2009), see www.w3.org" />
-
   <title>KoralQuery (Draft in preparation)</title>
   <link href="misc/style.css" type="text/css" rel="stylesheet" />
   <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
   <link rel="shortcut icon" href="misc/favicon.ico" />
   <meta name="robots" content="none" />
-
 </head>
 
 <body class="specification draft">
-  <div id="banner">
-    <span>In preparation</span>
-  </div>
-
+  <div id="banner"><span>In preparation</span></div>
   <div class="h-entry hentry">
     <h1 class="p-name"><span>KoralQuery</span></h1>
-
     <div id="reference">
-      <p><span class="p-author h-card"><span class="p-name fn"><a rel="author" class=
-      "u-url" href="http://nils-diewald.de">Nils Diewald</a></span></span>, <span class=
-      "p-org">IDS</span>, <span class="p-locality">Mannheim</span></p>
-
-      <p><span class="h-card p-author"><span class="p-name fn"><a rel="author" href=
-      "http://www.cl.uni-heidelberg.de/~bingel">Joachim Bingel</a></span></span>,
-      <span class="p-org">IDS</span>, <span class="p-locality">Mannheim</span></p>
-
-      <p>Published: 2015/03/16</p>
-
-      <p>Last update: 2015/03/19</p>
+      <p>
+	<span class="p-author h-card">
+	  <span class="p-name fn">
+	    <a rel="author"
+	       class="u-url"
+	       href="http://nils-diewald.de">Nils Diewald</a></span></span>,
+	<span class="p-org">IDS</span>,
+	<span class="p-locality">Mannheim</span></p>
+      <p>
+	<span class="h-card p-author">
+	  <span class="p-name fn">
+	    <a rel="author"
+	       href="http://www.cl.uni-heidelberg.de/~bingel">Joachim Bingel</a></span></span>,
+      <span class="p-org">IDS</span>,
+      <span class="p-locality">Mannheim</span></p>
+      <p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
+      <p>Last update: <time class="dt-updated" datetime="2015-03-20">2015/03/20</time></p>
     </div>
 
-    <p style="color: red">This draft is in preparation! Expected first usable version at
-    the end of march 2015.</p>
+    <p style="color: red">This draft is in preparation! Expected first usable version at the end of march 2015.</p>
 
-    <ul>
-      <li>Collection Type Objects
-        <ul>
-          <li>The <a href="#term">term</a> type</li>
-        </ul>
-      </li>
-    </ul>
+    <nav>
+      <ul>
+	<li>Collection Type Objects
+          <ul>
+            <li>The <a href="#term">term</a> type</li>
+          </ul>
+	</li>
+      </ul>
+    </nav>
 
-    <h2>Abstract</h2>
+    <summary>
+      <h2>Abstract</h2>
+      <p>KoralQuery is a general corpus query protocol, serialized in <a href="http://json-ld.org/">JSON-LD</a>. KoralQuery focuses on simplicity of implementation rather than human readibility and writability <a href="#fn-jsonldrecommendation" id="ref-jsonldrecommendation" name="ref-jsonldrecommendation">[1]</a>.</p>
+      <pre>{
+  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld",
+  "collection" : { ... },
+  "query" : { ... },
+  "meta" : { ... }
+}</pre>
+    </summary>
 
-    <p>KoralQuery is a general corpus query protocol, serialized in <a href=
-    "http://json-ld.org/">JSON-LD</a>. KoralQuery focuses on simplicity of implementation
-    rather than human readibility and writability <a href="#fn-jsonldrecommendation" id=
-    "ref-jsonldrecommendation" name="ref-jsonldrecommendation">[1]</a>.</p>
-    <pre>
-{
-"@context" : "http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld",
-"collection" : { ... },
-"query" : { ... },
-"meta" : { ... }
-}
-</pre>
+    <main class="e-content">
+      <section>
+	<h2>Introduction</h2>
+	<!--
+	    <p>JSON-LD is ...</p>
+	<p>The JSON-LD context file is available under <a href="http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld">http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld</a>
+	  -->
+	<p>In KoralQuery corpus search is divided in multiple separated query concepts:</p>
+	<dl>
+	  <dt><a href="#coll-type">Collection Type Objects</a></dt>
+	  <dd>Define a document collection by certain constraints. The expected result of a
+	    collection type object is a subset of the corpus collection that meet the
+	    conditions. The empty set is valid.</dd>
+	  <dt><a href="#span-type">Span Type Objects</a></dt>
+	  <dd>Define an occurrence collection by certain conditions. The expected result of a
+	    span type object is a collection of substrings in documents of the document
+	    collection, that meet the conditions. The empty set is valid.</dd>
+	  <dt><a href="#para-type">Parametric Type Objects</a></dt>
+	  <dd>Specify further constraints for embedding collection type object or span type
+	    objects as parameters. The expected result of a parametric type object is a
+	    refinement of the parental collection type object or span type object.</dd>
+	  <dt><a href="#report-type">Report Type Objects</a></dt>
+	  <dd>Report modifications of a query object (<em>rewrites</em>) as part of the
+	    query; or report errors, warnings and further messages regarding the processing of
+	    the query. Report types do not alter the expected result of a query.</dd>
+	</dl>
+	<p>Further undefined objects are allowed, but are unspecified.
+	  The definition of <code>meta</code> objects, that define further adjustments to
+	  the query execution or the processing of search results, is dependent on the
+	  implementation of KoralQuery and not part of this specification. 
+	  <!-- For common meta information with recommended definitions, refer to <a href="#appendix-a">appendix x</a> --></p>
+      </section>
 
-    <h2>Introduction</h2><!--
-<p>JSON-LD is ...</p>
-<p>The JSON-LD context file is available under <a href="http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld">http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld</a>
--->
+      <section>
+	<h2>Status of this draft</h2>
+	<p style="color: red">This draft is in preparation! Expected first usable version at
+	  the end of march 2015.</p>
+	<p>KoralQuery is not meant to be complete, but to be extensible and forward
+	  compatible. Extensibility is granted by support of embedded <code>@context</code>
+	  objects. Forward compatibility is tried to be ensured by describing implementation
+	  advices for incompatibility fallbacks.</p>
 
-    <p>In KoralQuery corpus search is divided in multiple separated query concepts:</p>
+	<!--
+	    <h3>Extensibility</h3>
+	    <h3>Minimum requirements</h3>
+	<p>Implementations do not need to implement all described features to be called
+	  "KoralQuery compliant".</p>
+	-->
+      </section>
 
-    <dl>
-      <dt>Collection Type Objects</dt>
+      <section>
+	<h2>Definitions</h2>
+	<!--<h3>Requrements Language</h3>-->
+	<h3>Table Description</h3>
+	<p>In this document, attributes as part of KoralQuery objects are represent as
+	  tables, listing all defined attributes as key value pairs. Optional keys have a
+	  trailing question mark, mandatory keys are unmarked.</p>
+      </section>
 
-      <dd>Define a document collection by certain constraints. The expected result of a
-      collection type object is a subset of the corpus collection that meet the
-      conditions. The empty set is valid.</dd>
+      <section>
+	<h2>Error, Warning, and Message objects</h2>
+	<p>KoralQuery is meant to be future proof by being upwards compatible. That means, new features official introduced or supported by third party software (using external context files) should be either treated as intended, be intendendly ignored or be rejected.</p>
+	<p>Incompatibilities with query objects and collection objects should be treated as documented in the implementation guide section of each object.</p>
+	<p>To inform the user on certain incompatibilities, KoralQuery has three different mechanisms for raising awareness. These mechanisms may also be used by query rewrite processors, to inject errors, warnings, and messages.</p>
+	<dl>
+	  <dt>Errors</dt>
+	  <dd>Errors will inform the user of a reason a query was rejected. This may originate from the KoralQuery processing, but may also be injected for other reasons, like access restrictions.</dd>
+	  <dt>Warnings</dt>
+	  <dd>Warnings will inform the user of probably unexpected behaviour of the KoralQuery process. This may originate from the KoralQuery processing, but may also be injected for other reasons, like limitations of the query result set by time out.</dd>
 
-      <dt>Span Type Objects</dt>
+	  <dt>Messages</dt>
+	  <dd>Messages will inform the user of useful information that don't effect the results of the query. This may originate from the KoralQuery processing, for example to inform about future incompatibilities, but may also be injected for other reasons, like deprecation of certain endpoints in the query service.</dd>
+	</dl>
+	<section class="guide">
+	  <h3>Implementation Guide</h3>
+	  <p>KoralQuery processors will always pass errors, warnings, and messages injected by prior processing systems. A final processing filter may decide, which errors, warnings and messages may be of interest to present to the user and which errors, warnings and messages may only be of interest for intermediate processing.</p>
+	</section>
+      </section>
 
-      <dd>Define an occurrence collection by certain conditions. The expected result of a
-      span type object is a collection of substrings in documents of the document
-      collection, that meet the conditions. The empty set is valid.</dd>
 
-      <dt>Parametric Type Objects</dt>
+      <section>
+	<h2><a id="coll-type" name="coll-type">Collection Type Objects</a></h2>
+	<h3>Basic collection types</h3>
 
-      <dd>Specify further constraints for embedding collection type object or span type
-      objects as parameters. The expected result of a parametric type object is a
-      refinement of the parental collection type object or span type object.</dd>
-
-      <dt>Report Type Objects</dt>
-
-      <dd>Report modifications of a query object (<em>rewrites</em>) as part of the
-      query; or report errors, warnings and further messages regarding the processing of
-      the query. Report types do not alter the expected result of a query.</dd>
-    </dl>
-
-    <p>Further undefined objects are allowed, but are unspecified.</p>
-
-    <p>The definition of <code>meta</code> objects, that define further adjustments to
-    the query execution or the processing of search results, is dependent on the
-    implementation of KoralQuery and not part of this specification. 
-    <!-- For common meta information with recommended definitions, refer to <a href="#appendix-a">appendix x</a> --></p>
-
-    <h2>Status of this draft</h2>
-
-    <p style="color: red">This draft is in preparation! Expected first usable version at
-    the end of march 2015.</p>
-
-    <p>KoralQuery is not meant to be complete, but to be extensible and forward
-    compatible. Extensibility is granted by support of embedded <code>@context</code>
-    objects. Forward compatibility is tried to be ensured by describing implementation
-    advices for incompatibility fallbacks.</p>
-
-    <h3>Extensibility</h3>
-
-    <h3>Minimum requirements</h3>
-
-    <p>Implementations do not need to implement all described features to be called
-    "KoralQuery compliant".</p>
-
-    <h2>Definitions</h2>
-
-    <h3>Requrements Language</h3>
-
-    <h3>Table Description</h3>
-
-    <p>In this document, attributes as part of KoralQuery objects are represent as
-    tables, listing all defined attributes as key value pairs. Optional keys have a
-    trailing question mark, mandatory keys are unmarked.</p>
-
-    <h2>Error, Warning, and Message objects</h2>
-
-    <p>KoralQuery is meant to be future proof by being upwards compatible. That means,
-    new features official introduced or supported by third party software (using external
-    context files) should be either treated as intended, be intendendly ignored or be
-    rejected.</p>
-
-    <p>Incompatibilities with query objects and collection objects should be treated as
-    documented in the implementation guide section of each object.</p>
-
-    <p>To inform the user on certain incompatibilities, KoralQuery has three different
-    mechanisms for raising awareness. These mechanisms may also be used by query rewrite
-    processors, to inject errors, warnings, and messages.</p>
-
-    <h3>Errors</h3>
-
-    <p>Errors will inform the user of a reason a query was rejected. This may originate
-    from the KoralQuery processing, but may also be injected for other reasons, like
-    access restrictions.</p>
-
-    <h3>Warnings</h3>
-
-    <p>Warnings will inform the user of probably unexpected behaviour of the KoralQuery
-    process. This may originate from the KoralQuery processing, but may also be injected
-    for other reasons, like limitations of the query result set by time out.</p>
-
-    <h3>Messages</h3>
-
-    <p>Messages will inform the user of useful information that don't effect the results
-    of the query. This may originate from the KoralQuery processing, for example to
-    inform about future incompatibilities, but may also be injected for other reasons,
-    like deprecation of certain endpoints in the query service.</p>
-
-    <h3>Implementation Guide</h3>
-
-    <p>KoralQuery processors will always pass errors, warnings, and messages injected by
-    prior processing systems. A final processing filter may decide, which errors,
-    warnings and messages may be of interest to present to the user and which errors,
-    warnings and messages may only be of interest for intermediate processing.</p>
-
-    <h2>Collection Type Objects</h2>
-
-    <h3><i>Basic collection types</i></h3>
-
-    <h4><a name="doc" id="doc">koral:doc</a></h4>
-    <pre>
+	<h4 class="koral-type"><a name="koral-doc" id="koral-doc">koral:doc</a></h4>
+	<pre>
 {
   "@type" : "koral:doc",
-}
-</pre>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:doc</td>
-
-          <td></td>
-        </tr>
-	<tr>
-          <td>key</td>
-
-          <td>xsd:string</td>
-
-          <td></td>
-
-          <td>Metadata attribute (e.g. <code>textClass</code></td>
-        </tr>
-	<tr>
-          <td>value</td>
-
-          <td>xsd:string</td>
-
-          <td></td>
-
-          <td>Metadata value (e.g. <code>Sport</code></td>
-        </tr>
-	<tr>
-          <td class="opt">type</td>
-
-          <td>@id</td>
-
-          <td>string</td>
-
-          <td><code>string</code> <br/>
-	      <code>regex</code> <br/>
-	      <code>date</code> 
-	  </td>
-        </tr>
-	<tr>
-          <td class="opt">match</td>
-
-          <td>@id</td>
-
-          <td>eq</td>
-
-          <td><code>eq</code> ... <br/>
-	      <code>ne</code> <br/>
-	      <code>geq</code> <br/>
-	      <code>leq</code> <br/>
-	      <code>contains</code> <br/>
-	      <code>excludes</code> 
-	  </td>
-        </tr>
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+	      <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+              <td>@id</td>
+	      <td>koral:doc</td>
+              <td></td>
+            </tr>
+	    <tr>
+              <td>key</td>
+              <td>xsd:string</td>
+	      <td></td>
+              <td>Metadata attribute (e.g. <code>textClass</code>)</td>
+            </tr>
+	    <tr>
+              <td>value</td>
+              <td>xsd:string</td>
+	      <td></td>
+              <td>Metadata value (e.g. <code>Sport</code>)</td>
+            </tr>
+	    <tr>
+              <td class="opt">type</td>
+              <td>@id</td>
+	      <td>string</td>
+              <td>
+		<dl>
+		  <dt><code class="att">type:string</code></dt>
+		  <dd>The value is treated as a character sequence.</dd>
+		  <dt><code class="att">type:regex</code></dt>
+		  <dd>The value is treated as a <a href="#appendix-regex">regular expression</a>.</dd>
+		  <dt><code class="att">type:date</code></dt>
+		  <dd>The value is treated as a date format, following <a href="http://www.w3.org/TR/NOTE-datetime">W3C Date and Time Formats</a> with day granualarity (e.g. <code>2015-03-19</code>).</dd>
+	      </td>
+            </tr>
+	    <tr>
+              <td class="opt">match</td>
+              <td>@id</td>
+	      <td>eq</td>
+	      <td>
+		<dl>
+		  <dt><code class="att">match:eq</code></dt>
+		  <dt><code class="att">match:ne</code></dt>
+		  <dt><code class="att">match:geq</code></dt>
+		  <dt><code class="att">match:leq</code></dt>
+		  <dt><code class="att">match:contains</code></dt>
+		  <dt><code class="att">match:excludes</code></dt>
+		</dl>
+	      </td>
+            </tr>
+	  </tbody>
+	</table>
 
 
-      </tbody>
-    </table>
-
-<h3><i>Complex collection types</i></h3>
-
-    <h4><a name="docGroup" id="docGroup">koral:docGroup</a></h4>
-    <pre>
+	<h3>Complex collection types</h3>
+	<h4 class="koral-type"><a name="koral-docGroup" id="koral-docGroup">koral:docGroup</a></h4>
+	<pre>
 {
   "@type" : "koral:docGroup",
-}
-</pre>
+}</pre>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:docGroup</td>
-
-          <td></td>
-        </tr>
-	<tr>
-          <td>operation</td>
-
-          <td>@id</td>
-
-          <td></td>
-
-          <td><code>and</code> <br/>
-	      <code>or</code> 
-	  </td>
-        </tr>
-
-      </tbody>
-    </table>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+	      <th>Type</th>
+              <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+              <td>@id</td>
+	      <td>koral:docGroup</td>
+              <td></td>
+            </tr>
+	    <tr>
+              <td>operation</td>
+	      <td>@id</td>
+	      <td></td>
+	      <td><code>and</code> <br/>
+		<code>or</code> 
+	      </td>
+            </tr>
+	  </tbody>
+	</table>
+      </section>
 
 
+      <section>
+	<h2><a name="span-type" id="span-type">Span Type Objects</a></h2>
+	<p>For KoralQuery a document is represented as a series of tokens. A series of tokens is called a <em>substring</em> of the document.</p>
+	<p>Query objects define conditions regarding the constellation of tokens and token-bound features that have to be in place to make a substring a valid occurrence of the query object in a document. These conditions may have syntagmatic or paradigmatic character.</p>
+	<p>In addition to the substring, results of a query object may contain so-called <em>classes</em> as markers for substrings of the result substring.</p>
+	<p>The result of a KoralQuery object may be an operand of another object, that may filter, enrich, combine or alter the results of nested objects.</p>
 
-    <h2>Span Type Objects</h2>
-
-    <p>For KoralQuery a document is represented as a series of tokens. A series of tokens
-    is called a substring of the document.</p>
-
-    <p>Query objects define conditions regarding the constellation of tokens and
-    token-bound features that have to be in place to make a substring a valid occurrence
-    of the query object in a document.</p>
-
-    <p>These conditions may have syntagmatic or paradigmatic character.</p>
-
-    <p>In addition to the substring, results of a query object may contain so-called
-    classes as markers for substrings of the result substring.</p>
-
-    <p>The result of a KoralQuery object may be an operand of another object, that may
-    filter, enrich, combine or alter the results of nested objects.</p>
-
-    <h3><i>Basic span types</i></h3>
-
-    <h4><a name="token" id="token">koral:token</a></h4>
-    <pre>
+	<h3>Basic span types</h3>
+	<h4 class="koral-type"><a name="token" id="token">koral:token</a></h4>
+	<pre>
 {
   "@type" : "koral:token",
   "wrap" : {
@@ -331,1153 +259,880 @@
     "layer" : "pos",
     "key" : "ADJD",
   }
-}
-          
-</pre>
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+	      <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+	      <td>@id</td>
+              <td>koral:token</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="opt">wrap</td>
+              <td>term or termGroup</td>
+	      <td></td>
+              <td>Holds information on search key, foundry, layer, value</td>
+            </tr>
+	  </tbody>
+	</table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:token</td>
-
-          <td></td>
-        </tr>
-
-        <tr>
-          <td class="opt">wrap</td>
-
-          <td>term or termGroup</td>
-
-          <td></td>
-
-          <td>Holds information on search key, foundry, layer, value</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h4><a name="span" id="span">koral:span</a></h4>
-    <pre>
+	<h4 class="koral-type"><a name="koral-span" id="koral-span">koral:span</a></h4>
+	<pre>
 {
   "@type" : "koral:span",
   "foundry" : "cnx",
   "layer" : "c",
   "key" : "np"
-}
-</pre>
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+              <td>@id</td>
+              <td>koral:span</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="opt">foundry</td>
+              <td>xsd:string</td>
+              <td></td>
+              <td>The annotation source</td>
+            </tr>
+            <tr>
+              <td class="opt">layer</td>
+              <td>xsd:string</td>
+              <td></td>
+              <td>The annotation layer</td>
+            </tr>
+            <tr>
+              <td class="opt">key</td>
+              <td>xsd:string</td>
+	      <td></td>
+              <td>The search key (span type)</td>
+            </tr>
+            <tr>
+              <td class="opt">match</td>
+              <td>@id</td>
+	      <td></td>
+              <td>Specifies agreement between search key and annotation. <a href="#span-match">Show available values</a></td>
+            </tr>
+            <tr>
+              <td class="opt">attr</td>
+              <td>term or termGroup</td>
+              <td></td>
+              <td>Span attributes.</td>
+            </tr>
+	  </tbody>
+	</table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:span</td>
-
-          <td></td>
-        </tr>
-
-        <tr>
-          <td class="opt">foundry</td>
-
-          <td>xsd:string</td>
-
-          <td></td>
-
-          <td>The annotation source</td>
-        </tr>
-
-        <tr>
-          <td class="opt">layer</td>
-
-          <td>xsd:string</td>
-
-          <td></td>
-
-          <td>The annotation layer</td>
-        </tr>
-
-        <tr>
-          <td class="opt">key</td>
-
-          <td>xsd:string</td>
-
-          <td></td>
-
-          <td>The search key (span type)</td>
-        </tr>
-        
-         <tr>
-          <td class="opt">match</td>
-
-          <td>@id</td>
-
-          <td></td>
-
-          <td>Specifies agreement between search key and annotation. <a href="#span_match">Show available values</a></td>
-        </tr>
-        
-         <tr>
-          <td class="opt">attr</td>
-
-          <td>term or termGroup</td>
-
-          <td></td>
-
-          <td>Span attributes.</td>
-        </tr>
-      </tbody>
-    </table>
-
-	    <div class="values" id="span_match">
-	    <table>
-	      <thead>
-		<tr>
-		  <th>Value</th>
-
-		  <th>Description</th>
-
-		</tr>
-	      </thead>
-
-	      <tbody>
-		<tr>
-		  <td>eq</td>
-
-		  <td>The search key matches the annotation.</td>
-		</tr>
-
-		<tr>
-		  <td>ne</td>
-
-		  <td>The search key does not match the annotation.</td>
-		</tr>
-	      </tbody>
-	    </table>
+	<div class="values" id="span-match">
+	  <table>
+	    <thead>
+	      <tr>
+		<th>Value</th>
+		<th>Description</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr>
+		<td>eq</td>
+		<td>The search key matches the annotation.</td>
+	      </tr>
+	      <tr>
+		<td>ne</td>
+		<td>The search key does not match the annotation.</td>
+	      </tr>
+	    </tbody>
+	  </table>
 	    
-	      <a href="#span">return and hide</a>
-	    </div>
+	  <a href="#koral-span">return and hide</a>
+	</div>
 
-    <h3><i>Complex span types</i></h3>
 
-    <h4><a name="group" id="group">koral:group</a></h4>
-    <pre>
+	<h3>Complex span types</h3>
+	<h4 class="koral-type"><a name="koralgroup" id="koral-group">koral:group</a></h4>
+	<pre>
 {
   "@type" : "koral:group",
   "operation" : "operation:sequence",
   "operands" : []
-} 
-</pre>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:group</td>
-
-          <td></td>
-        </tr>
-
-        <tr>
-          <td>operation</td>
-
-          <td>@id</td>
-
-          <td></td>
-
-          <td>Defines the operation on the operands. <a href="#group_operation">Show available values</a></td>
-        </tr>
-
-        <tr>
-          <td>operands</td>
-
-          <td>[span types]</td>
-
-          <td></td>
-
-          <td>Arguments of the operation. Number depends on respective operation</td>
-        </tr>
-      </tbody>
-    </table>
-
-	    <div class="values" id="group_operation">
-	    <table>
-	      <thead>
-		<tr>
-		  <th>Value</th>
-
-		  <th>Description</th>
-
-		</tr>
-	      </thead>
-
-	      <tbody>
-		<tr>
-		  <td>position</td>
-		  <td>The operands are in a positional relation. <a href="#operation_position">See specifications</a></td>
-		</tr>
-		<tr>
-		  <td>sequence</td>
-		  <td>The operands are in sequence. <a href="#operation_sequence">See specifications</a></td>
-		</tr>
-		<tr>
-		  <td>relation</td>
-		  <td>There is a linguistic relation between the operands. <a href="#operation_relation">See specifications</a></td>
-		</tr>
-		<tr>
-		  <td>disjunction</td>
-		  <td>Treat operands as alternatives. <a href="#operation_disjunction">See specifications</a></td>
-		</tr>
-		<tr>
-		  <td>repetition</td>
-		  <td>The operand is sequentially repeated. <a href="#operation_repetition">See specifications</a></td>
-		</tr>
-		<tr>
-		  <td>class</td>
-		  <td>Introduce a class on the operand or perform class operations. <a href="#operation_class">See specifications</a></td>
-		</tr>
-		<tr>
-		  <td>merge</td>
-		  <td>Condense result set. <a href="#operation_merge">See specifications</a></td>
-		</tr>
-	      </tbody>
-	    </table>
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+	      <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+              <td>@id</td>
+	      <td>koral:group</td>
+	      <td></td>
+            </tr>
+            <tr>
+              <td>operation</td>
+              <td>@id</td>
+              <td></td>
+              <td>Defines the operation on the operands. <a href="#group-operation">Show available values</a></td>
+            </tr>
+            <tr>
+              <td>operands</td>
+              <td>[span types]</td>
+	      <td></td>
+              <td>Arguments of the operation. Number depends on respective operation</td>
+            </tr>
+	  </tbody>
+	</table>
+	<div class="values" id="group-operation">
+	  <table>
+	    <thead>
+	      <tr>
+		<th>Value</th>
+		<th>Description</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr>
+		<td>position</td>
+		<td>The operands are in a positional relation. <a href="#operation-position">See specifications</a></td>
+	      </tr>
+	      <tr>
+		<td>sequence</td>
+		<td>The operands are in sequence. <a href="#operation-sequence">See specifications</a></td>
+	      </tr>
+	      <tr>
+		<td>relation</td>
+		<td>There is a linguistic relation between the operands. <a href="#operation_relation">See specifications</a></td>
+	      </tr>
+	      <tr>
+		<td>disjunction</td>
+		<td>Treat operands as alternatives. <a href="#operation-disjunction">See specifications</a></td>
+	      </tr>
+	      <tr>
+		<td>repetition</td>
+		<td>The operand is sequentially repeated. <a href="#operation-repetition">See specifications</a></td>
+	      </tr>
+	      <tr>
+		<td>class</td>
+		<td>Introduce a class on the operand or perform class operations. <a href="#operation-class">See specifications</a></td>
+	      </tr>
+	      <tr>
+		<td>merge</td>
+		<td>Condense result set. <a href="#operation-merge">See specifications</a></td>
+	      </tr>
+	    </tbody>
+	  </table>
 	    
-	      <a href="#group">return and hide</a>
-	    </div><br/>
+	  <a href="#koral-group">return and hide</a>
+	</div>
 
-    
-    <h5><i>Group operations</i></h5>
-        <h6 id="operation_position">The <code class="att">position</code> operation</h6>
-
-	    <table>
-	      <thead>
-		<tr>
-		  <th>Key</th>
-
-		  <th>Type</th>
-
-		  <th>Value and Description</th>
-		</tr>
-	      </thead>
-
-	      <tbody>
-		<tr>
-		  <td>frames</td>
-
-		  <td>[@id]</td>
-
-		  <td>Lists the allowed positional relations between the operands</td>
-		</tr>
-
-		<tr>
-		  <td class="opt">exclude</td>
-
-		  <td>boolean</td>
-
-		  <td>If true, negate positional relations</td>
-		</tr>
-
-		<tr>
-		  <td>operands</td>
-
-		  <td>[span types]</td>
-
-		  <td>No. of operands: 2</td>
-		</tr>
-	      </tbody>
-	    </table>
+        <h5>Group operations</h5>
+        <h6 id="operation-position">The <code class="att">position</code> operation</h6>
+	<table>
+	  <thead>
+	    <tr>
+	      <th>Key</th>
+	      <th>Type</th>
+	      <th>Value and Description</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <tr>
+	      <td>frames</td>
+	      <td>[@id]</td>
+	      <td>Lists the allowed positional relations between the operands</td>
+	    </tr>
+	    <tr>
+	      <td class="opt">exclude</td>
+	      <td>boolean</td>
+	      <td>If true, negate positional relations</td>
+	    </tr>
+	    <tr>
+	      <td>operands</td>
+	      <td>[span types]</td>
+	      <td>No. of operands: 2</td>
+	    </tr>
+	  </tbody>
+	</table>
 	    
         <h6>The <code class="att">sequence</code> operation</h6>
 
-	    <table>
-	      <thead>
-		<tr>
-		  <th>Key</th>
-
-		  <th>Type</th>
-
-		  <th>Value and Description</th>
-		</tr>
-	      </thead>
-
-	      <tbody>
-		<tr>
-		  <td class="opt">distances</td>
-
-		  <td>[distance]</td>
-
-		  <td>Distance constraints between operands (pertaining to different keys).</td>
-		</tr>
-
-		<tr>
-		  <td class="opt">inOrder</td>
-
-		  <td>boolean</td>
-
-		  <td>If true, ordering of operands matters</td>
-		</tr>
-
-		<tr>
-		  <td>operands</td>
-
-		  <td>[span types]</td>
-
-		  <td>No. of operands: 2+</td>
-		</tr>
-	      </tbody>
-	    </table>
-
-        
+	<table>
+	  <thead>
+	    <tr>
+	      <th>Key</th>
+	      <th>Type</th>
+	      <th>Value and Description</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <tr>
+	      <td class="opt">distances</td>
+	      <td>[distance]</td>
+	      <td>Distance constraints between operands (pertaining to different keys).</td>
+	    </tr>
+	    <tr>
+	      <td class="opt">inOrder</td>
+	      <td>boolean</td>
+	      <td>If true, ordering of operands matters</td>
+	    </tr>
+	    <tr>
+	      <td>operands</td>
+	      <td>[span types]</td>
+	      <td>No. of operands: 2+</td>
+	    </tr>
+	  </tbody>
+	</table>
+       
         <h6>The <code class="att">relation</code> operation</h6>
-	    <table>
-	      <thead>
-		<tr>
-		  <th>Key</th>
-
-		  <th>Type</th>
-
-		  <th>Value and Description</th>
-		</tr>
-	      </thead>
-
-	      <tbody>
-		<tr>
-		  <td class="opt">relType</td>
-
-		  <td>relation</td>
-
-		  <td>Specifies relation between operands</td>
-		</tr>
-
-		<tr>
-		  <td>operands</td>
-
-		  <td>[span types]</td>
-
-		  <td>No. of operands: 2</td>
-		</tr>
-	      </tbody>
-	    </table>
-
+	<table>
+	  <thead>
+	    <tr>
+	      <th>Key</th>
+	      <th>Type</th>
+	      <th>Value and Description</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <tr>
+	      <td class="opt">relType</td>
+	      <td>relation</td>
+	      <td>Specifies relation between operands</td>
+	    </tr>
+	    <tr>
+	      <td>operands</td>
+	      <td>[span types]</td>
+	      <td>No. of operands: 2</td>
+	    </tr>
+	  </tbody>
+	</table>
 
         <h6>The <code class="att">disjunction</code> operation</h6>
-	    <table>
-	      <thead>
-		<tr>
-		  <th>Key</th>
+	<table>
+	  <thead>
+	    <tr>
+	      <th>Key</th>
+	      <th>Type</th>
+	      <th>Value and Description</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <tr>
+	      <td>operands</td>
+	      <td>[span types]</td>
+	      <td>No. of operands: 2+</td>
+	    </tr>
+	  </tbody>
+	</table>
 
-		  <th>Type</th>
+	<h6>The <code class="att">repetition</code> operation</h6>
+	<table>
+	  <thead>
+	    <tr>
+	      <th>Key</th>
+	      <th>Type</th>
+	      <th>Value and Description</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <tr>
+	      <td>boundary</td>
+	      <td>boundary</td>
+	      <td>Specifies operand's mininmum and maximum repetition</td>
+	    </tr>
+	    <tr>
+	      <td>operands</td>
+	      <td>[span types]</td>
+	      <td>No. of operands: 1</td>
+	    </tr>
+	  </tbody>
+	</table>
 
-		  <th>Value and Description</th>
-		</tr>
-	      </thead>
-
-		<tr>
-		  <td>operands</td>
-
-		  <td>[span types]</td>
-
-		  <td>No. of operands: 2+</td>
-		</tr>
-	      </tbody>
-	    </table>
-
+	<h6>The <code class="att">class</code> operation</h6>
+	<table>
+	  <thead>
+	    <tr>
+	      <th>Key</th>
+	      <th>Type</th>
+	      <th>Value and Description</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <tr>
+	      <td>classOut</td>
+	      <td>int</td>
+	      <td>The ID for the defined class.</td>
+	    </tr>
+	    <tr>
+	      <td class="opt">classIn</td>
+	      <td>[int]</td>
+	      <td>Specifies classes on which <code>classRefCheck</code> or <code>classRefOp</code> works.</td>
+	    </tr>
+	    <tr>
+	      <td class="opt">classRefCheck</td>
+	      <td>[@id]</td>
+	      <td>Set-theoretic condition on input classes. Results that do not fulfil this condition are excluded from the result set.</td>
+	    </tr>
+	    <tr>
+	      <td class="opt">classRefOp</td>
+	      <td>@id</td>
+	      <td>Set-theoretic operation on input classes, creates new output class</td>
+	    </tr>
+	    <tr>
+	      <td>operands</td>
+	      <td>[span types]</td>
+	      <td>No. of operands: 1</td>
+	    </tr>
+	  </tbody>
+	</table>
         
-        <h6>The <code class="att">repetition</code> operation</h6>
-	    <table>
-	      <thead>
-		<tr>
-		  <th>Key</th>
+	<h6>The <code class="att">merge</code> operation</h6> 
+	<table>
+	  <thead>
+	    <tr>
+	      <th>Key</th>
+	      <th>Type</th>
+	      <th>Value and Description</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <tr>
+	      <td>operands</td>
+	      <td>[span types]</td>
+	      <td>No. of operands: 1</td>
+	    </tr>
+	  </tbody>
+	</table>        
 
-		  <th>Type</th>
-
-		  <th>Value and Description</th>
-		</tr>
-	      </thead>
-
-	      <tbody>
-		<tr>
-		  <td>boundary</td>
-
-		  <td>boundary</td>
-
-		  <td>Specifies operand's mininmum and maximum repetition</td>
-		</tr>
-
-		<tr>
-		  <td>operands</td>
-
-		  <td>[span types]</td>
-
-		  <td>No. of operands: 1</td>
-		</tr>
-	      </tbody>
-	    </table>
-
-        
-        <h6>The <code class="att">class</code> operation</h6>
-	    <table>
-	      <thead>
-		<tr>
-		  <th>Key</th>
-
-		  <th>Type</th>
-
-		  <th>Value and Description</th>
-		</tr>
-	      </thead>
-
-	      <tbody>
-		<tr>
-		  <td>classOut</td>
-
-		  <td>int</td>
-
-		  <td>The ID for the defined class.</td>
-		</tr>
-
-		<tr>
-		  <td class="opt">classIn</td>
-
-		  <td>[int]</td>
-
-		  <td>Specifies classes on which <code>classRefCheck</code> or <code>classRefOp</code> works.</td>
-		</tr>
-		<tr>
-		  <td class="opt">classRefCheck</td>
-
-		  <td>[@id]</td>
-
-		  <td>Set-theoretic condition on input classes. Results that do not fulfil this
-condition are excluded from the result set.</td>
-		</tr>
-		<tr>
-		  <td class="opt">classRefOp</td>
-
-		  <td>@id</td>
-
-		  <td>Set-theoretic operation on input classes, creates new output class</td>
-		</tr>
-		<tr>
-		  <td>operands</td>
-
-		  <td>[span types]</td>
-
-		  <td>No. of operands: 1</td>
-		</tr>
-
-	      </tbody>
-	    </table>
-
-        
-        <h6>The <code class="att">merge</code> operation</h6> 
-	    <table>
-	      <thead>
-		<tr>
-		  <th>Key</th>
-
-		  <th>Type</th>
-
-		  <th>Value and Description</th>
-		</tr>
-	      </thead>
-
-	      <tbody>
-		<tr>
-		  <td>operands</td>
-
-		  <td>[span types]</td>
-
-		  <td>No. of operands: 1</td>
-		</tr>
-
-	      </tbody>
-	    </table>        
-
-    <h4><a name="koralreference" id="koralreference">koral:reference</a></h4>
-    <pre>
+	<h4 class="koral-type"><a name="koral-reference" id="koral-reference">koral:reference</a></h4>
+	<pre>
 {
   "@type" : "koral:reference",
   "classRef" : [1],
   "operation" : "operation:focus",
   "operands" : [ ... ]
-}        
-</pre>
- <table>
-      <thead>
-        <tr>
-          <th>Key</th>
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+	      <td>@id</td>
+	      <td>koral:reference</td>
+	      <td></td>
+            </tr>
+            <tr>
+              <td>operation</td>
+              <td>@id</td>
+	      <td></td>
+              <td>Defines the operation on the operands</td>
+            </tr>
+            <tr>
+              <td class="opt">classRef</td>
+              <td>[@id]</td>
+              <td></td>
+              <td>Classes on which the operation is applied</td>
+            </tr>
+            <tr>
+              <td class="opt">spanRef</td>
+              <td>[@id]</td>
+              <td></td>
+              <td>Subspan to which the operand is reduced</td>
+            </tr>
+            <tr>
+              <td class="opt">operands</td>
+              <td>[span types]</td>
+              <td></td>
+	      <td>Arguments of the operation. Number depends on respective operation</td>
+            </tr>
+	  </tbody>
+	</table>
+      </section>
 
-          <th>Type</th>
+      <section>
+	<h2><a id="para-type" name="para-type">Parametric Type Objects</a></h2>
 
-          <th>Default</th>
+	<h3>Basic parametric types</h3>
 
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:reference</td>
-
-          <td></td>
-        </tr>
-
-        <tr>
-          <td>operation</td>
-
-          <td>@id</td>
-
-          <td></td>
-
-          <td>Defines the operation on the operands</td>
-        </tr>
-
-        <tr>
-          <td class="opt">classRef</td>
-
-          <td>[@id]</td>
-
-          <td></td>
-
-          <td>Classes on which the operation is applied</td>
-        </tr>
-        
-        <tr>
-          <td class="opt">spanRef</td>
-
-          <td>[@id]</td>
-
-          <td></td>
-
-          <td>Subspan to which the operand is reduced</td>
-        </tr>
-        
-
-        <tr>
-          <td class="opt">operands</td>
-
-          <td>[span types]</td>
-
-          <td></td>
-
-          <td>Arguments of the operation. Number depends on respective operation</td>
-        </tr>
-      </tbody>
-    </table>
-
-
-
-    <h2>Parametric Type Objects</h2>
-
-    <h3><i>Basic parametric types</i></h3>
-
-    <h4><a name="term" id="term">koral:term</a></h4>
-    <pre>
+	<h4 class="koral-type"><a name="koral-term" id="koral-term">koral:term</a></h4>
+	<pre>
 {
   "@type" : "koral:term",
   "foundry" : "Treetagger",
   "layer" : "pos",
   "key" : "ADJD",
-}
-          
-</pre>
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+              <td>@id</td>
+	      <td>koral:term</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>key</td>
+              <td>string</td>
+              <td></td>
+              <td>The term key</td>
+            </tr>
+            <tr>
+              <td class="opt">value</td>
+              <td>string</td>
+              <td></td>
+              <td>The term value</td>
+            </tr>
+            <tr>
+              <td class="opt">foundry</td>
+              <td>string</td>
+              <td></td>
+              <td>The annotation foundry</td>
+            </tr>
+            <tr>
+              <td class="opt">layer</td>
+              <td>string</td>
+	      <td>surface layer</td>
+              <td>The annotation layer</td>
+            </tr>
+            <tr>
+              <td class="opt">type</td>
+              <td>@id</td>
+	      <td>type:string</td>
+	      <td>type:string<br />
+		type:regex<br />
+		type:wildcard<br />
+		type:punct</td>
+            </tr>
+            <tr>
+              <td class="opt">match</td>
+	      <td>@id</td>
+              <td>match:eq</td>
+	      <td>match:eq<br />
+		match:ne</td>
+            </tr>
+            <tr>
+              <td class="opt">flags</td>
+              <td>[@id]</td>
+              <td></td>
+              <td>flags:caseInsensitive<br />
+		flags:diacriticInsensitive</td>
+            </tr>
+	  </tbody>
+	</table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
+	<p>To specify a term, KoralQuery provides four attributes: <code class="att">foundry</code>, <code class="att">layer</code>, <code class="att">key</code>,
+	  and <code class="att">value</code>. The concrete definition of these attributes
+	  relies on the annotation model of the corpus and the implementation of the search
+	  system. As an abstract definition, the attributes have a hierarchical structure for
+	  annotations, meaning a foundry may bundle multiple layers. A layer may bundle
+	  multiple keys and a key may bundle multiple values. An annotation or a system may not
+	  need all of these attributes to define a term, only the <code class="att">key</code>
+	  attribute is mandatory.</p>
 
-          <th>Type</th>
+	<p>The <code class="att">key</code> attribute represents a single annotation like the
+	  part-of-speech tag <code>noun</code> or <code>verb</code>, or the surface token
+	  <code>Tree</code>. Sometimes, annotations have to be represented as key and value
+	  pairs, for example in morphological annotations a key of the term may be
+	  <code>number</code> and the value of the key may be <code>plural</code>. In that
+	  case, the <code class="att">key</code> attribute will hold the term
+	  <code>number</code> and the <code class="att">value</code> attribute will hold the
+	  value <code>plural</code>.</p>
 
-          <th>Default</th>
+	<p>The <code class="att">layer</code> attribute may define the annotation level of
+	  the term, for example <code>tokenization</code>, <code>part-of-speech</code> or
+	  <code>lemma</code>. In case the <code class="att">layer</code> information is
+	  ommitted, the layer defaults to the tokenization layer, irrespective of the
+	  implementation specific word for that layer.</p>
+	
+	<p>The <code class="att">foundry</code> attribute may define the origin of the
+	  annotation, for example the name of the human annotator or the automated tool. Or it
+	  may serve as an umbrella for layers with common characteristics (for example bundling
+	  several models for named entities).
+	  <a href="#fn-foundrylayerdef"
+	     id="ref-foundrylayerdef"
+	     name="ref-foundrylayerdef">[2]</a></p>
 
-          <th>Value and Description</th>
-        </tr>
-      </thead>
+	<p>In most implementations the foundry term may not be relevant, but it is important
+	  to deal with conflicting annotations, for example, in case the corpus provides
+	  multiple part-of-speech annotations.</p>
 
-      <tbody>
-        <tr>
-          <td>@type</td>
+	<p>The attribute <code class="att">type</code> defines the treatment of
+	  <code class="att">key</code> and <code class="att">value</code>.</p>
+	<p>Currently supported types are <code>string</code>, indicating that
+	  <code class="att">key</code> and <code class="att">value</code>
+	  should be treated as a sequence
+	  of characters. The type <code>regex</code> indicates that
+	  <code class="att">key</code> and <code class="att">value</code>
+	  should be treated as <a href="appendix">regular
+	  expressions.</a> The type
+	  <code>wildcard</code> indicates that <code class="att">key</code> and
+	  <code class="att">value</code> should be treated as character sequences with allowed gaps.
+	  Characters representing gaps are the question mark <code>?</code> for a single
+	  character gap and the star symbol <code>*</code> for an arbitrary long gap. The
+	  <code>punct</code> type defines that the <code class="att">key</code> attribute will
+	  be treated as a character class of punctuation symbols. In case the
+	  <code>punct</code> type is defined, the treatment of the
+	  <code class="att">value</code> attribute is undefined.
+	  The default value for the type attribute
+	  is <code>string</code>.
+	  Support for types different than strings for <code class="att">foundry</code>
+	  and <code class="att">layer</code> is not supported yet.</p>
 
-          <td>@id</td>
-
-          <td>koral:term</td>
-
-          <td></td>
-        </tr>
-
-        <tr>
-          <td>key</td>
-
-          <td>string</td>
-
-          <td></td>
-
-          <td>The term key</td>
-        </tr>
-
-        <tr>
-          <td class="opt">value</td>
-
-          <td>string</td>
-
-          <td></td>
-
-          <td>The term value</td>
-        </tr>
-
-        <tr>
-          <td class="opt">foundry</td>
-
-          <td>string</td>
-
-          <td></td>
-
-          <td>The annotation foundry</td>
-        </tr>
-
-        <tr>
-          <td class="opt">layer</td>
-
-          <td>string</td>
-
-          <td>surface layer</td>
-
-          <td>The annotation layer</td>
-        </tr>
-
-        <tr>
-          <td class="opt">type</td>
-
-          <td>@id</td>
-
-          <td>type:string</td>
-
-          <td>type:string<br />
-          type:regex<br />
-          type:wildcard<br />
-          type:punct</td>
-        </tr>
-
-        <tr>
-          <td class="opt">match</td>
-
-          <td>@id</td>
-
-          <td>match:eq</td>
-
-          <td>match:eq<br />
-          match:ne</td>
-        </tr>
-
-        <tr>
-          <td class="opt">flags</td>
-
-          <td>[@id]</td>
-
-          <td></td>
-
-          <td>flags:caseInsensitive<br />
-          flags:diacriticInsensitive</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p>To specify a term, KoralQuery provides four attributes: <code class=
-    "att">foundry</code>, <code class="att">layer</code>, <code class="att">key</code>,
-    and <code class="att">value</code>. The concrete definition of these attributes
-    relies on the annotation model of the corpus and the implementation of the search
-    system. As an abstract definition, the attributes have a hierarchical structure for
-    annotations, meaning a foundry may bundle multiple layers. A layer may bundle
-    multiple keys and a key may bundle multiple values. An annotation or a system may not
-    need all of these attributes to define a term, only the <code class="att">key</code>
-    attribute is mandatory.</p>
-
-    <p>The <code class="att">key</code> attribute represents a single annotation like the
-    part-of-speech tag <code>noun</code> or <code>verb</code>, or the surface token
-    <code>Tree</code>. Sometimes, annotations have to be represented as key and value
-    pairs, for example in morphological annotations a key of the term may be
-    <code>number</code> and the value of the key may be <code>plural</code>. In that
-    case, the <code class="att">key</code> attribute will hold the term
-    <code>number</code> and the <code class="att">value</code> attribute will hold the
-    value <code>plural</code>.</p>
-
-    <p>The <code class="att">layer</code> attribute may define the annotation level of
-    the term, for example <code>tokenization</code>, <code>part-of-speech</code> or
-    <code>lemma</code>. In case the <code class="att">layer</code> information is
-    ommitted, the layer defaults to the tokenization layer, irrespective of the
-    implementation specific word for that layer.</p>
-
-    <p>The <code class="att">foundry</code> attribute may define the origin of the
-    annotation, for example the name of the human annotator or the automated tool. Or it
-    may serve as an umbrella for layers with common characteristics (for example bundling
-    several models for named entities). <a href="#fn-foundrylayerdef" id=
-    "ref-foundrylayerdef" name="ref-foundrylayerdef">[2]</a></p>
-
-    <p>In most implementations the foundry term may not be relevant, but it is important
-    to deal with conflicting annotations, for example, in case the corpus provides
-    multiple part-of-speech annotations.</p>
-
-    <p>The attribute <code class="att">type</code> defines the treatment of <code class=
-    "att">key</code> and <code class="att">value</code>.</p>
-
-    <p>Currently supported types are <code>string</code>, indicating that <code class=
-    "att">key</code> and <code class="att">value</code> should be treated as a sequence
-    of characters. The type <code>regex</code> indicates that <code class=
-    "att">key</code> and <code class="att">value</code> should be treated as regular
-    expressions. (The concrete treatment of regular expressions is up to the
-    implementator of the search engine and not part of the specification.) The type
-    <code>wildcard</code> indicates that <code class="att">key</code> and <code class=
-    "att">value</code> should be treated as character sequences with allowed gaps.
-    Characters representing gaps are the question mark <code>?</code> for a single
-    character gap and the star symbol <code>*</code> for an arbitrary long gap. The
-    <code>punct</code> type defines that the <code class="att">key</code> attribute will
-    be treated as a character class of punctuation symbols. In case the
-    <code>punct</code> type is defined, the treatment of the <code class=
-    "att">value</code> attribute is undefined. The default value for the type attribute
-    is <code>string</code>. Support for types different than strings for <code class=
-    "att">foundry</code> and <code class="att">layer</code> is not supported yet.</p>
-
-    <p>The term defined by <code class="att">foundry</code>, <code class=
-    "att">layer</code>, <code class="att">key</code> and <code class="att">value</code>
-    represents the condition of the term object. The <code class="att">match</code>
-    attribute can be used to invert the condition, saying a substring of a text holds
-    true for the condition, in case it fails. Therefore the <code class=
-    "att">match</code> attribute can hold the value <code>eq</code>, meaning the term has
-    to match exactly as defined, or the value may be <code>ne</code>, meaning the term
-    has to be not equal to the defined condition. The default value for match is
-    <code>eq</code>.</p>In the current version of KoralQuery the <code class=
-    "att">match</code> attribute of terms is limited to the same functionality as
-    <a href="#"><code class="att">exclude</code></a> in operations. As match may support
-    further operators, it is used in favor of <a href="#"><code class=
-    "att">exclude</code></a> in this context.
-
-    <p>The matching may further be modified by certain flags, using the <code class=
-    "att">flag</code> attribute. Multiple flags are supported. In case, order is of
-    relevance, the flag operations are processed from left to right. Currently there are
-    two flags supported by KoralQuery: <code>caseInsensitive</code> means, the matching
-    will ignore a difference between small and capital letters in the <code class=
-    "att">key</code> and <code class="att">value</code> attributes, as well as in the
-    term index. <code>diacriticInsensitive</code> means, the match will ignore diacritic
-    symbols in the <code class="att">key</code> and <code class="att">value</code>
-    attributes, as well as in the term index.</p>
-    <pre>
+	<p>The term defined by <code class="att">foundry</code>,
+	  <code class="att">layer</code>, <code class="att">key</code> and
+	  <code class="att">value</code>
+	  represents the condition of the term object. The <code class="att">match</code>
+	  attribute can be used to invert the condition, saying a substring of a text holds
+	  true for the condition, in case it fails. Therefore the
+	  <code class="att">match</code> attribute can hold the value <code>eq</code>,
+	  meaning the term has
+	  to match exactly as defined, or the value may be <code>ne</code>, meaning the term
+	  has to be not equal to the defined condition. The default value for match is
+	  <code>eq</code>.</p>In the current version of KoralQuery the
+	<code class="att">match</code> attribute of terms is limited to the same functionality as
+	<a href="#"><code class="att">exclude</code></a> in operations. As match may support
+	further operators, it is used in favor of
+	<a href="#"><code class="att">exclude</code></a> in this context.
+	<p>The matching may further be modified by certain flags, using the
+	  <code class="att">flag</code> attribute. Multiple flags are supported.
+	  In case, order is of
+	  relevance, the flag operations are processed from left to right. Currently there are
+	  two flags supported by KoralQuery: <code>caseInsensitive</code> means, the matching
+	  will ignore a difference between small and capital letters in the
+	  <code class="att">key</code> and <code class="att">value</code> attributes, as well as in the
+	  term index. <code>diacriticInsensitive</code> means, the match will ignore diacritic
+	  symbols in the <code class="att">key</code> and <code class="att">value</code>
+	  attributes, as well as in the term index.</p>
+	<pre>
 {
   "@type" : "koral:term",
   "key" : "Octopus",
   "flags" : ["flags:caseInsensitive"]
-}
-</pre>
+}</pre>
+	
+	<section class="guide">
+	  <h4>Implementation Guide</h4>
+	  <p>The <code class="att">key</code> attribute in terms is mandatory. If the attribute
+	    is missing, the query has to be rejected and an error has to be raised.</p>
+	  <p>If the <code class="att">type</code> attribute contains an undefined identifier, a
+	    warning has to be raised and the default type has to be assumed.</p>
+	  <p>If the <code class="att">match</code> attribute contains an undefined identifier,
+	    a warning has to be raised and the default match has to be assumed.</p>
+	  <p>If the <code class="att">flag</code> attribute contains an undefined identifier, a
+	    warning has to be raised. The flag will be ignored.</p>
+	  <p>All other attributes may silently be ignored.</p>
+	</section>
 
-    <h4>Implementation Guide</h4>
-
-    <p>The <code class="att">key</code> attribute in terms is mandatory. If the attribute
-    is missing, the query has to be rejected and an error has to be raised.</p>
-
-    <p>If the <code class="att">type</code> attribute contains an undefined identifier, a
-    warning has to be raised and the default type has to be assumed.</p>
-
-    <p>If the <code class="att">match</code> attribute contains an undefined identifier,
-    a warning has to be raised and the default match has to be assumed.</p>
-
-    <p>If the <code class="att">flag</code> attribute contains an undefined identifier, a
-    warning has to be raised. The flag will be ignored.</p>
-
-    <p>All other attributes may silently be ignored.</p>
-
-    <h4><a name="distance" id="distance">koral:distance</a></h4>
-    <pre>
+	<h4 class="koral-type"><a name="koral-distance" id="koral-distance">koral:distance</a></h4>
+	<pre>
 {
   "@type" : "koral:distance",
   "key" : "w",
   "boundary" : {...}
-}          
-</pre>
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+	      <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+              <td>@id</td>
+	      <td>koral:distance</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>key</td>
+              <td>xsd:string</td>
+	      <td>w</td>
+              <td>Measure of distance</td>
+            </tr>
+            <tr>
+              <td class="opt">foundry</td>
+              <td>xsd:string</td>
+              <td></td>
+              <td>Foundry in which distance measure (<code class="att">key</code>) is annotated</td>
+            </tr>        
+            <tr>
+              <td class="opt">layer</td>
+              <td>xsd:string</td>
+              <td></td>
+	      <td>Layer in which distance measure (<code class="att">key</code>) is annotated</td>
+            </tr>    
+            <tr>
+              <td>boundary</td>
+              <td><code class="att">boundary</code>) </td>
+              <td></td>
+              <td>Specified degree of distance</td>
+            </tr>            
+          </tbody>
+	</table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:distance</td>
-
-          <td></td>
-        </tr>
-        <tr>
-          <td>key</td>
-
-          <td>xsd:string</td>
-
-          <td>w</td>
-
-          <td>Measure of distance</td>
-        </tr>
-        
-        <tr>
-          <td class="opt">foundry</td>
-
-          <td>xsd:string</td>
-
-          <td></td>
-
-          <td>Foundry in which distance measure (<code class="att">key</code>) is annotated</td>
-        </tr>        
-        <tr>
-          <td class="opt">layer</td>
-
-          <td>xsd:string</td>
-
-          <td></td>
-
-          <td>Layer in which distance measure (<code class="att">key</code>) is annotated</td>
-        </tr>    
-        <tr>
-          <td>boundray</td>
-
-          <td><code class="att">boundary</code>) </td>
-
-          <td></td>
-
-          <td>Specified degree of distance</td>
-        </tr>            
-        
-        
-      </tbody>
-    </table>
-
-    <h4><a name="boundary" id="boundary">koral:boundary</a></h4>
-    <pre>
+	<h4 class="koral-type"><a name="koral-boundary" id="koral-boundary">koral:boundary</a></h4>
+	<pre>
 {
   "@type" : "koral:boundary",
   "min" : 0,
   "max" : "3"
-}      
-</pre>
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+	      <td>@id</td>
+              <td>koral:boundary</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>min</td>
+              <td>xsd:integer</td>
+              <td></td>
+              <td>Minimal value.</td>
+            </tr>
+            <tr>
+              <td>max</td>
+	      <td>xsd:integer</td>
+              <td></td>
+              <td>Maximal value.</td>
+            </tr>
+	  </tbody>
+	</table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:boundary</td>
-
-          <td></td>
-        </tr>
-        
-        <tr>
-          <td>min</td>
-
-          <td>xsd:integer</td>
-
-          <td></td>
-
-          <td>Minimal value.</td>
-        </tr>
-        
-        <tr>
-          <td>max</td>
-
-          <td>xsd:integer</td>
-
-          <td></td>
-
-          <td>Maximal value.</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h4><a name="relation" id="relation">koral:relation</a></h4>
-    <pre>
+	<h4 class="koral-type"><a name="koral-relation" id="koral-relation">koral:relation</a></h4>
+	<pre>
 {
   "@type" : "koral:relation",
   "wrap" : {...}
-}
-</pre>
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+              <td>@id</td>
+	      <td>koral:relation</td>
+              <td></td>
+            </tr>
+	    <tr>
+              <td>wrap</td>
+	      <td>term or termGroup</td>
+              <td></td>
+              <td>Holds information on key, foundry, layer, value</td>
+            </tr>
+	  </tbody>
+	</table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:relation</td>
-
-          <td></td>
-        </tr>
-
-	<tr>
-          <td>wrap</td>
-
-          <td>term or termGroup</td>
-
-          <td></td>
-
-          <td>Holds information on key, foundry, layer, value</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3><i>Complex parametric types</i></h3>
-
-    <h4><a name="termGroup" id="termGroup">koral:termGroup</a></h4>
-    <pre>
+	<h3>Complex parametric types</h3>
+	<h4 class="koral-type"><a name="koral-termGroup" id="koral-termGroup">koral:termGroup</a></h4>
+	<pre>
 {
   "@type" : "koral:termGroup",
   "relation" : "relation:and",
   "operands" : [...]
 }       
 </pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+	      <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+              <td>@id</td>
+              <td>koral:termGroup</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>relation</td>
+              <td>@id</td>
+              <td></td>
+              <td><code>and</code> Conjunction of constraints<br/>
+		<code>or</code> Disjunction of constraints<br/>
+              </td>
+            </tr>
+	  </tbody>
+	</table>
+      </section>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:termGroup</td>
-
-          <td></td>
-        </tr>
-
-        <tr>
-          <td>relation</td>
-
-          <td>@id</td>
-
-          <td></td>
-
-          <td><code>and</code> Conjunction of constraints<br/>
-	      <code>or</code> Disjunction of constraints<br/>
-          </td>
-        </tr>
-
-      </tbody>
-    </table>
-
-
-<h2>Rewrite Type Objects</h2>
-
-    <h4><a name="rewrite" id="rewrite">koral:rewrite</a></h4>
-    <pre>
+      <section>
+	<h2><a id="report-type" name="report-type">Report Type Objects</a></h2>
+	<h4 class="koral-type"><a name="koral-rewrite" id="koral-rewrite">koral:rewrite</a></h4>
+	<pre>
 {
   "@type" : "koral:rewrite",
-}    
-</pre>
+  "operation" : "operation:injection",
+  "src" : "Kustvakt"
+}</pre>
+	<table class="koral-type">
+	  <thead>
+            <tr>
+              <th>Key</th>
+              <th>Type</th>
+	      <th>Default</th>
+              <th>Value and Description</th>
+            </tr>
+	  </thead>
+	  <tbody>
+            <tr>
+              <td>@type</td>
+              <td>@id</td>
+	      <td>koral:rewrite</td>
+              <td></td>
+            </tr>
+	    <tr>
+              <td>operation</td>
+              <td>@id</td>
+              <td></td>
+              <td>Specifies the performed rewrite action</td>
+            </tr>
+	    <tr>
+              <td>src</td>
+	      <td>xsd:string</td>
+              <td></td>
+              <td>Specifies the component responsible for the rewrite</td>
+            </tr>
+	    <tr>
+              <td class="opt">scope</td>
+              <td>xsd:string</td>
+	      <td></td>
+              <td>Specifies which object/attribute has been rewritten</td>
+            </tr>
+	  </tbody>
+	</table>
+      </section>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-
-          <th>Type</th>
-
-          <th>Default</th>
-
-          <th>Value and Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>@type</td>
-
-          <td>@id</td>
-
-          <td>koral:rewrite</td>
-
-          <td></td>
-        </tr>
-
-	<tr>
-          <td>operation</td>
-
-          <td>@id</td>
-
-          <td></td>
-
-          <td>Specifies the performed rewrite action</td>
-        </tr>
-
-	<tr>
-          <td>src</td>
-
-          <td>xsd:string</td>
-
-          <td></td>
-
-          <td>Specifies the component responsible for the rewrite</td>
-        </tr>
-
-	<tr>
-          <td class="opt">scope</td>
-
-          <td>xsd:string</td>
-
-          <td></td>
-
-          <td>Specifies which object/attribute has been rewritten</td>
-        </tr>
-      </tbody>
-    </table>
-
-
-    <h2>Implementations</h2>
-
-    <p>KoralQuery is the base communication protocol of <a href=
-    "http://korap.ids-mannheim.de/">KorAP</a>. The <a href=
-    "http://github.com/KorAP/Koral">Koral</a> query serializer can translate queries
-    formulated in Poliqarp, Cosmas-II, Annis, and CQL to KoralQuery. Kustvakt is a Policy
-    service, using <a href="http://github.com/KorAP/Koral">Koral</a> to translate queries
-    and to rewrite the query based on access restrictions and user settings. <a href=
-    "http://github.com/KorAP/Krill">Krill</a> is a corpus search service, that consumes
-    KoralQuery and creates KoralQuery compatible responses.</p>
-    <!-- http://www.w3.org/TR/html5/common-idioms.html -->
-
-    <p id="fn-jsonldrecommendation"><a href="#ref-jsonldrecommendation">[1]</a> JSON-LD
-    was chosen to be compatible with LAPPS recommendations from <a href=
-    "http://lapps.anc.org/web-service-exchange-vocabulary/141-2/">ISO TC37 SC4
-    WG1-EP</a>, suggested by Piotr Ba&#324;ski.</p>
-
-    <p id="fn-foundrylayerdef"><a href="#ref-foundrylayerdef">[2]</a> Thanks to Piotr
-    Ba&#324;ski for the definition of foundry and layer.</p>
-
-    <h2>Recommended Attributes for Meta Objects</h2>
-
-    <p>Following the specification of OpenSearch and PortableContacts ...</p>
-
-    <h2>Copyright</h2>
-
-    <p>Copyright (c) 2015, <a href="http://ids-mannheim.de/">IDS Mannheim</a>, Germany,
-    and the authors.</p><!--
-<a href="http://creativecommons.org/licenses/by/2.0/"
-rel="license">XYZ</a>
+      <section>
+<!--
+	<h2>Recommended Attributes for Meta Objects</h2>
+	<p>Following the specification of OpenSearch and PortableContacts ...</p>
 -->
 
-    <p>The authors want to thank Eliza Margaretha for her help on implementing the
-    reference implementation of KoralQuery, and Piotr Ba&#324;ski, Elena Frick, and
-    Michael Hanl for their valuable input.</p>
+        <h3><a id="appendix-regex" name="appendix-regex">Regular Expressions</a></h3>
+	<p>The definition of the supported regular expressions is out of scope of this specification and depends on the implementation.</p>
+      </section>
 
-    <p>KoralQuery is developed as part of the <a href=
-    "https://github.com/KorAP/Koral">Koral</a> query processing software, that is one
-    component of the <a href="http://korap.ids-mannheim.de/">KorAP</a> Corpus Analysis
-    Platform at the Institute for German Language (<a href=
-    "http://ids-mannheim.de/">IDS</a>), funded by the <a href=
-    "http://www.leibniz-gemeinschaft.de/en/about-us/leibniz-competition/projekte-2011/2011-funding-line-2/">
-    Leibniz-Gemeinschaft</a>, and supported by the <a href=
-    "http://www.kobra.tu-dortmund.de">KobRA</a> project, funded by the Federal Ministry
-    of Education and Research (<a href="http://www.bmbf.de/en/">BMBF</a>).</p>
+      <section>
+	<h2>Implementations</h2>
 
+	<p>KoralQuery is the base communication protocol of
+	  <a href="http://korap.ids-mannheim.de/">KorAP</a>.
+	  The <a href="http://github.com/KorAP/Koral">Koral</a>
+	  query serializer can translate queries
+	  formulated in Poliqarp, Cosmas-II, Annis, and CQL to KoralQuery.
+	  Kustvakt is a Policy
+	  service, using <a href="http://github.com/KorAP/Koral">Koral</a> to
+	  translate queries
+	  and to rewrite the query based on access restrictions and user settings.
+	  <a href="http://github.com/KorAP/Krill">Krill</a> is a corpus search service,
+	  that consumes
+	  KoralQuery and creates KoralQuery compatible responses.</p>
+	<!-- http://www.w3.org/TR/html5/common-idioms.html -->
+
+      </section>
+
+      <section>
+	<h2>Footnotes</h2>
+	<p id="fn-jsonldrecommendation"><a href="#ref-jsonldrecommendation">[1]</a> JSON-LD
+	  was chosen to be compatible with LAPPS recommendations from
+	  <a href="http://lapps.anc.org/web-service-exchange-vocabulary/141-2/">ISO TC37 SC4
+	    WG1-EP</a>, suggested by Piotr Ba&#324;ski.</p>
+	<p id="fn-foundrylayerdef"><a href="#ref-foundrylayerdef">[2]</a> Thanks to Piotr
+	  Ba&#324;ski for the definition of foundry and layer.</p>
+
+      </section>
+
+      <section>
+	<h2>Copyright</h2>
+	<p>Copyright (c) 2015, <a href="http://ids-mannheim.de/">IDS Mannheim</a>, Germany,
+	  and the authors.</p>
+	<!--
+	    <a href="http://creativecommons.org/licenses/by/2.0/"
+	       rel="license">XYZ</a>
+	    -->
+	<p>The authors want to thank Eliza Margaretha for her help on implementing the
+	  reference implementation of KoralQuery, and Piotr Ba&#324;ski, Elena Frick, and
+	  Michael Hanl for their valuable input.</p>
+
+	<p>KoralQuery is developed as part of the
+	  <a href="https://github.com/KorAP/Koral">Koral</a>
+	  query processing software, that is one
+	  component of the <a href="http://korap.ids-mannheim.de/">KorAP</a>
+	  Corpus Analysis Platform at the Institute for German Language
+	  (<a href="http://ids-mannheim.de/">IDS</a>),
+	  funded by the <a href="http://www.leibniz-gemeinschaft.de/en/about-us/leibniz-competition/projekte-2011/2011-funding-line-2/">Leibniz-Gemeinschaft</a>,
+	  and supported by the <a href="http://www.kobra.tu-dortmund.de">KobRA</a>
+	  project, funded by the Federal Ministry
+	  of Education and Research (<a href="http://www.bmbf.de/en/">BMBF</a>).</p>
+      </section>
+
+    </main>
     <div class="changes">
       <pre>
 CHANGES:
 0.3 2015-03-16
 - Initial publication on GitHub
-Versions prior to 0.3 were used internally only
-            
-</pre>
+Versions prior to 0.3 were used internally only</pre>
     </div>
   </div>
 </body>
