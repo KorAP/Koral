@@ -16,12 +16,14 @@ public class Antlr4DescriptiveErrorListener extends BaseErrorListener {
     int line;
     int charPosition;
 
+
     public Antlr4DescriptiveErrorListener (String query) {
         this.query = query;
     };
 
+
     @Override
-    public void syntaxError(Recognizer<?, ?> recognizer,
+    public void syntaxError (Recognizer<?, ?> recognizer,
             Object offendingSymbol, int line, int charPositionInLine,
             String msg, RecognitionException e) {
         this.message = msg;
@@ -29,19 +31,23 @@ public class Antlr4DescriptiveErrorListener extends BaseErrorListener {
         this.charPosition = charPositionInLine;
     }
 
-    public String getMessage() {
+
+    public String getMessage () {
         return message;
     }
 
-    public int getLine() {
+
+    public int getLine () {
         return line;
     }
 
-    public int getCharPosition() {
+
+    public int getCharPosition () {
         return charPosition;
     }
 
-    public ArrayList<Object> generateFullErrorMsg() {
+
+    public ArrayList<Object> generateFullErrorMsg () {
         ArrayList<Object> errorSpecs = new ArrayList<Object>();
         String msg = getDetailedErrorMessage();
         errorSpecs.add(StatusCodes.MALFORMED_QUERY);
@@ -50,7 +56,8 @@ public class Antlr4DescriptiveErrorListener extends BaseErrorListener {
         return errorSpecs;
     }
 
-    private String getDetailedErrorMessage() {
+
+    private String getDetailedErrorMessage () {
         // default message, in case no detailed info is available;
         String msg = "Malformed query. Could not parse.";
         char offendingSymbol = query.charAt(0);

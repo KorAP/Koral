@@ -14,7 +14,7 @@ import de.ids_mannheim.korap.query.serialize.QueryUtils;
  * (generated source directory).
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
- *
+ * 
  */
 public class Antlr3DescriptiveErrorListener implements IErrorReporter {
 
@@ -23,12 +23,14 @@ public class Antlr3DescriptiveErrorListener implements IErrorReporter {
     private String expected;
     private int charPosition;
 
+
     public Antlr3DescriptiveErrorListener (String query) {
         this.query = query;
     };
 
+
     @Override
-    public void reportError(String error) {
+    public void reportError (String error) {
         String charPositionStr = null;
         String offendingSymbol = null;
         String expected = null;
@@ -48,7 +50,8 @@ public class Antlr3DescriptiveErrorListener implements IErrorReporter {
             this.expected = expected;
     }
 
-    public ArrayList<Object> generateFullErrorMsg() {
+
+    public ArrayList<Object> generateFullErrorMsg () {
         ArrayList<Object> errorSpecs = new ArrayList<Object>();
         String msg = getDetailedErrorMessage();
         errorSpecs.add(StatusCodes.MALFORMED_QUERY);
@@ -57,7 +60,8 @@ public class Antlr3DescriptiveErrorListener implements IErrorReporter {
         return errorSpecs;
     }
 
-    private String getDetailedErrorMessage() {
+
+    private String getDetailedErrorMessage () {
         // default message, in case no detailed info is available;
         String msg = "Malformed query. Could not parse.";
         char offendingSymbol = query.charAt(0);
@@ -87,7 +91,8 @@ public class Antlr3DescriptiveErrorListener implements IErrorReporter {
         return msg;
     }
 
-    public int getCharPosition() {
+
+    public int getCharPosition () {
         return charPosition;
     }
 

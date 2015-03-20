@@ -16,8 +16,10 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Main class for Koral, serializes queries from concrete QLs to KoralQuery
- * @author Joachim Bingel (bingel@ids-mannheim.de), 
+ * Main class for Koral, serializes queries from concrete QLs to
+ * KoralQuery
+ * 
+ * @author Joachim Bingel (bingel@ids-mannheim.de),
  *         Michael Hanl (hanl@ids-mannheim.de)
  * @version 0.3.0
  * @since 0.1.0
@@ -28,8 +30,8 @@ public class QuerySerializer {
 
     static {
         qlProcessorAssignment = new HashMap<String, Class<? extends AbstractQueryProcessor>>();
-        qlProcessorAssignment
-                .put("poliqarpplus", PoliqarpPlusQueryProcessor.class);
+        qlProcessorAssignment.put("poliqarpplus",
+                PoliqarpPlusQueryProcessor.class);
         qlProcessorAssignment.put("cosmas2", Cosmas2QueryProcessor.class);
         qlProcessorAssignment.put("annis", AnnisQueryProcessor.class);
         qlProcessorAssignment.put("cql", CqlQueryProcessor.class);
@@ -48,10 +50,11 @@ public class QuerySerializer {
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(QuerySerializer.class);
 
+
     /**
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main (String[] args) {
         /*
          * just for testing...
          */
@@ -61,12 +64,13 @@ public class QuerySerializer {
         String[] queries = null;
         String ql = "poliqarpplus";
         if (args.length < 2) {
-            System.err.println("Usage: QuerySerializer \"query\" queryLanguage");
+            System.err
+                    .println("Usage: QuerySerializer \"query\" queryLanguage");
             System.exit(1);
         }
         else {
             queries = new String[] { args[0] };
-            ql  = args[1];
+            ql = args[1];
         }
         for (String q : queries) {
             i++;
@@ -90,19 +94,23 @@ public class QuerySerializer {
         }
     }
 
+
     /**
      * Runs the QuerySerializer by initializing the relevant
      * AbstractSyntaxTree implementation (depending on specified query
      * language) and transforms and writes the tree's requestMap to
      * the specified output file.
-     *
-     * @param outFile       The file to which the serialization is written
-     * @param query         The query string
-     * @param queryLanguage The query language. As of 17 Dec 2014, this must be
-     *                      one of 'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
+     * 
+     * @param outFile
+     *            The file to which the serialization is written
+     * @param query
+     *            The query string
+     * @param queryLanguage
+     *            The query language. As of 17 Dec 2014, this must be
+     *            one of 'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
      * @throws IOException
      */
-    public void run(String query, String queryLanguage) throws IOException {
+    public void run (String query, String queryLanguage) throws IOException {
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
         }
@@ -119,13 +127,14 @@ public class QuerySerializer {
             ast = new AnnisQueryProcessor(query);
         }
         else {
-            throw new IllegalArgumentException(
-                    queryLanguage + " is not a supported query language!");
+            throw new IllegalArgumentException(queryLanguage
+                    + " is not a supported query language!");
         }
         toJSON();
     }
 
-    public QuerySerializer setQuery(String query, String ql, String version) {
+
+    public QuerySerializer setQuery (String query, String ql, String version) {
         ast = new DummyQueryProcessor();
         if (query == null || query.isEmpty()) {
             ast.addError(StatusCodes.NO_QUERY, "You did not specify a query!");
@@ -153,21 +162,24 @@ public class QuerySerializer {
             ast = new AnnisQueryProcessor(query);
         }
         else {
-            ast.addError(StatusCodes.UNKNOWN_QL,
-                    ql + " is not a supported query language!");
+            ast.addError(StatusCodes.UNKNOWN_QL, ql
+                    + " is not a supported query language!");
         }
         return this;
     }
 
-    public QuerySerializer setQuery(String query, String ql) {
+
+    public QuerySerializer setQuery (String query, String ql) {
         return setQuery(query, ql, "");
     }
 
-    public void setVerbose(boolean verbose) {
+
+    public void setVerbose (boolean verbose) {
         AbstractQueryProcessor.verbose = verbose;
     }
 
-    public final String toJSON() {
+
+    public final String toJSON () {
         String ser;
         try {
             ser = mapper.writeValueAsString(raw());
@@ -179,11 +191,13 @@ public class QuerySerializer {
         return ser;
     }
 
-    public final Map build() {
+
+    public final Map build () {
         return raw();
     }
 
-    private Map raw() {
+
+    private Map raw () {
         if (ast != null) {
             Map<String, Object> requestMap = ast.getRequestMap();
             Map meta = (Map) requestMap.get("meta");
@@ -215,8 +229,9 @@ public class QuerySerializer {
         return new HashMap<>();
     }
 
-    private Map<String, Object> mergeCollection(Map<String, Object> collection1,
-            Map<String, Object> collection2) {
+
+    private Map<String, Object> mergeCollection (
+            Map<String, Object> collection1, Map<String, Object> collection2) {
         LinkedHashMap<String, Object> docGroup = KoralObjectGenerator
                 .makeDocGroup("and");
         ArrayList<Object> operands = (ArrayList<Object>) docGroup
@@ -234,7 +249,8 @@ public class QuerySerializer {
         }
     }
 
-    public QuerySerializer addMeta(String cli, String cri, int cls, int crs,
+
+    public QuerySerializer addMeta (String cli, String cri, int cls, int crs,
             int num, int pageIndex) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
         meta.setSpanContext(cls, cli, crs, cri);
@@ -244,7 +260,8 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer addMeta(String context, int num, int pageidx) {
+
+    public QuerySerializer addMeta (String context, int num, int pageidx) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
         meta.addEntry("startIndex", pageidx);
         meta.addEntry("count", num);
@@ -253,19 +270,21 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer addMeta(MetaQueryBuilder meta) {
+
+    public QuerySerializer addMeta (MetaQueryBuilder meta) {
         this.meta = meta.raw();
         return this;
     }
 
-//    @Deprecated public QuerySerializer setCollectionSimple(String collection) {
-//        CollectionQueryBuilder qobj = new CollectionQueryBuilder();
-//        qobj.addResource(collection);
-//        this.collection = (Map<String, Object>) qobj.raw();
-//        return this;
-//    }
 
-    public QuerySerializer setCollection(String collection) {
+    //    @Deprecated public QuerySerializer setCollectionSimple(String collection) {
+    //        CollectionQueryBuilder qobj = new CollectionQueryBuilder();
+    //        qobj.addResource(collection);
+    //        this.collection = (Map<String, Object>) qobj.raw();
+    //        return this;
+    //    }
+
+    public QuerySerializer setCollection (String collection) {
         CollectionQueryProcessor tree = new CollectionQueryProcessor();
         Map<String, Object> collectionRequest = tree.getRequestMap();
         tree.process(collection);
@@ -277,7 +296,7 @@ public class QuerySerializer {
         return this;
     }
 
-//    public QuerySerializer setCollection(CollectionQueryBuilder2 collections) {
+    //    public QuerySerializer setCollection(CollectionQueryBuilder2 collections) {
     //        this.collection = (Map<String, Object>) collections.raw();
     //        return this;
     //    }

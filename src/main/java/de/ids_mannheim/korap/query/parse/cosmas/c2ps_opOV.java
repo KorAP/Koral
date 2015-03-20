@@ -20,61 +20,50 @@ public class c2ps_opOV
 
 {
 
- public static Tree check(String input, int index)
- 	{
-	ANTLRStringStream
-		ss = new ANTLRStringStream(input);
-	c2ps_opOVLexer
-		lex = new c2ps_opOVLexer(ss);
-	CommonTokenStream tokens = 
-  		new CommonTokenStream(lex);
-	c2ps_opOVParser 
-		g = new c2ps_opOVParser(tokens);
-	c2ps_opOVParser.opOV_return
-		c2PQReturn = null;
+    public static Tree check (String input, int index) {
+        ANTLRStringStream ss = new ANTLRStringStream(input);
+        c2ps_opOVLexer lex = new c2ps_opOVLexer(ss);
+        CommonTokenStream tokens = new CommonTokenStream(lex);
+        c2ps_opOVParser g = new c2ps_opOVParser(tokens);
+        c2ps_opOVParser.opOV_return c2PQReturn = null;
 
-	try 
-		{
-		c2PQReturn = g.opOV();
-		}
-	catch (RecognitionException e) 
-		{
-		e.printStackTrace();
-		}
+        try {
+            c2PQReturn = g.opOV();
+        }
+        catch (RecognitionException e) {
+            e.printStackTrace();
+        }
 
-	// AST Tree anzeigen:
-	Tree tree = (Tree)c2PQReturn.getTree();
-	// System.out.println("opOV: " + tree.toStringTree() );
+        // AST Tree anzeigen:
+        Tree tree = (Tree) c2PQReturn.getTree();
+        // System.out.println("opOV: " + tree.toStringTree() );
 
-	return tree;
-	}
+        return tree;
+    }
 
- /*
-  * main: testprogram:
-  */
 
- // TODOO: input "OV()" führt zu unendlichem loop... 19.12.12/FB
- // TODOO: input "#OV(FI,ALL)" -> loop, weil ALL nicht bekannter Token...
+    /*
+     * main: testprogram:
+     */
 
- public static void main(String args[]) throws Exception 
-  {
-   String[]
-		input = {"#OV", "#OV()", "#OV(L)", "#OV(FE,min)", "#OV(R,% , max)"};  
-	Tree
-		tree;
+    // TODOO: input "OV()" führt zu unendlichem loop... 19.12.12/FB
+    // TODOO: input "#OV(FI,ALL)" -> loop, weil ALL nicht bekannter Token...
 
-	System.out.println("Tests von #OV-Optionen:\n");
+    public static void main (String args[]) throws Exception {
+        String[] input = { "#OV", "#OV()", "#OV(L)", "#OV(FE,min)",
+                "#OV(R,% , max)" };
+        Tree tree;
 
-	for(int i=0; i<input.length; i++)
-		{
-		System.out.println("#OV: input: " + input[i]);
-		tree = check(input[i], 0);
-		System.out.println("#OV: AST  : " + tree.toStringTree() + "\n");
-		}
+        System.out.println("Tests von #OV-Optionen:\n");
 
-	System.out.println("Tests von #OV-Optionen: quit.\n");
-	System.out.flush();
-  } // main
+        for (int i = 0; i < input.length; i++) {
+            System.out.println("#OV: input: " + input[i]);
+            tree = check(input[i], 0);
+            System.out.println("#OV: AST  : " + tree.toStringTree() + "\n");
+        }
 
-} 
+        System.out.println("Tests von #OV-Optionen: quit.\n");
+        System.out.flush();
+    } // main
 
+}

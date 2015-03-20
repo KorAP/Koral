@@ -11,30 +11,35 @@ public class KoralObjectGenerator {
     protected static final Integer MAXIMUM_DISTANCE = 100;
     private static AbstractQueryProcessor qp;
 
-    public static void setQueryProcessor(AbstractQueryProcessor qp) {
+
+    public static void setQueryProcessor (AbstractQueryProcessor qp) {
         KoralObjectGenerator.qp = qp;
     }
 
-    public static LinkedHashMap<String, Object> makeSpan() {
+
+    public static LinkedHashMap<String, Object> makeSpan () {
         LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
         span.put("@type", "koral:span");
         return span;
     }
 
-    public static LinkedHashMap<String, Object> makeSpan(String key) {
+
+    public static LinkedHashMap<String, Object> makeSpan (String key) {
         LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
         span.put("@type", "koral:span");
         span.put("key", key);
         return span;
     }
 
-    public static LinkedHashMap<String, Object> makeTerm() {
+
+    public static LinkedHashMap<String, Object> makeTerm () {
         LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
         term.put("@type", "koral:term");
         return term;
     }
 
-    public static LinkedHashMap<String, Object> makeTermGroup(String relation) {
+
+    public static LinkedHashMap<String, Object> makeTermGroup (String relation) {
         LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
         term.put("@type", "koral:termGroup");
         term.put("relation", "relation:" + relation);
@@ -42,13 +47,15 @@ public class KoralObjectGenerator {
         return term;
     }
 
-    public static LinkedHashMap<String, Object> makeDoc() {
+
+    public static LinkedHashMap<String, Object> makeDoc () {
         LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
         term.put("@type", "koral:doc");
         return term;
     }
 
-    public static LinkedHashMap<String, Object> makeDocGroup(String relation) {
+
+    public static LinkedHashMap<String, Object> makeDocGroup (String relation) {
         LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
         term.put("@type", "koral:docGroup");
         term.put("operation", "operation:" + relation);
@@ -56,13 +63,15 @@ public class KoralObjectGenerator {
         return term;
     }
 
-    public static LinkedHashMap<String, Object> makeToken() {
+
+    public static LinkedHashMap<String, Object> makeToken () {
         LinkedHashMap<String, Object> token = new LinkedHashMap<String, Object>();
         token.put("@type", "koral:token");
         return token;
     }
 
-    public static LinkedHashMap<String, Object> makeGroup(String operation) {
+
+    public static LinkedHashMap<String, Object> makeGroup (String operation) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:group");
         group.put("operation", "operation:" + operation);
@@ -70,7 +79,8 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeRepetition(Integer min,
+
+    public static LinkedHashMap<String, Object> makeRepetition (Integer min,
             Integer max) {
         LinkedHashMap<String, Object> group = makeGroup("repetition");
         group.put("boundary", makeBoundary(min, max));
@@ -78,8 +88,9 @@ public class KoralObjectGenerator {
         return group;
     }
 
+
     @Deprecated
-    public static LinkedHashMap<String, Object> makePosition(String frame) {
+    public static LinkedHashMap<String, Object> makePosition (String frame) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:group");
         group.put("operation", "operation:position");
@@ -88,7 +99,8 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makePosition(
+
+    public static LinkedHashMap<String, Object> makePosition (
             String[] allowedFrames) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:group");
@@ -98,12 +110,14 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeSpanClass(int classId) {
+
+    public static LinkedHashMap<String, Object> makeSpanClass (int classId) {
         return makeSpanClass(classId, false);
     }
 
+
     @Deprecated
-    public static LinkedHashMap<String, Object> makeSpanClass(int classId,
+    public static LinkedHashMap<String, Object> makeSpanClass (int classId,
             boolean setBySystem) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:group");
@@ -119,7 +133,8 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeClassRefCheck(
+
+    public static LinkedHashMap<String, Object> makeClassRefCheck (
             ArrayList<String> check, Integer[] classIn, int classOut) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:group");
@@ -131,7 +146,8 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeClassRefOp(
+
+    public static LinkedHashMap<String, Object> makeClassRefOp (
             String operation, Integer[] classIn, int classOut) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:group");
@@ -143,8 +159,9 @@ public class KoralObjectGenerator {
         return group;
     }
 
+
     @Deprecated
-    public static LinkedHashMap<String, Object> makeTreeRelation(String reltype) {
+    public static LinkedHashMap<String, Object> makeTreeRelation (String reltype) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:treeRelation");
         if (reltype != null)
@@ -152,13 +169,15 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeRelation() {
+
+    public static LinkedHashMap<String, Object> makeRelation () {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:relation");
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeBoundary(Integer min,
+
+    public static LinkedHashMap<String, Object> makeBoundary (Integer min,
             Integer max) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:boundary");
@@ -169,7 +188,8 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeDistance(String key,
+
+    public static LinkedHashMap<String, Object> makeDistance (String key,
             Integer min, Integer max) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         if (key.equals("w")) {
@@ -190,7 +210,8 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeReference(
+
+    public static LinkedHashMap<String, Object> makeReference (
             ArrayList<Integer> classRefs, String operation) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:reference");
@@ -201,13 +222,15 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeReference(
+
+    public static LinkedHashMap<String, Object> makeReference (
             ArrayList<Integer> classRefs) {
         return makeReference(classRefs, "focus");
     }
 
+
     @Deprecated
-    public static LinkedHashMap<String, Object> makeReference(int classRef,
+    public static LinkedHashMap<String, Object> makeReference (int classRef,
             String operation, boolean setBySystem) {
         ArrayList<Integer> classRefs = new ArrayList<Integer>();
         if (setBySystem)
@@ -216,8 +239,9 @@ public class KoralObjectGenerator {
         return makeReference(classRefs, operation);
     }
 
+
     @Deprecated
-    public static LinkedHashMap<String, Object> makeReference(int classRef,
+    public static LinkedHashMap<String, Object> makeReference (int classRef,
             boolean setBySystem) {
         ArrayList<Integer> classRefs = new ArrayList<Integer>();
         if (setBySystem)
@@ -226,12 +250,14 @@ public class KoralObjectGenerator {
         return makeReference(classRefs, "focus");
     }
 
-    public static LinkedHashMap<String, Object> makeReference(int classRef) {
+
+    public static LinkedHashMap<String, Object> makeReference (int classRef) {
         return makeReference(classRef, false);
     }
 
+
     @Deprecated
-    public static LinkedHashMap<String, Object> makeResetReference() {
+    public static LinkedHashMap<String, Object> makeResetReference () {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:reference");
         group.put("operation", "operation:focus");
@@ -240,7 +266,8 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static LinkedHashMap<String, Object> makeSpanReference(
+
+    public static LinkedHashMap<String, Object> makeSpanReference (
             Integer[] spanRef, String operation) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:reference");
@@ -250,12 +277,14 @@ public class KoralObjectGenerator {
         return group;
     }
 
-    public static void addOperandsToGroup(LinkedHashMap<String, Object> group) {
+
+    public static void addOperandsToGroup (LinkedHashMap<String, Object> group) {
         ArrayList<Object> operands = new ArrayList<Object>();
         group.put("operands", operands);
     }
-  
-    public static LinkedHashMap<String, Object> wrapInReference(
+
+
+    public static LinkedHashMap<String, Object> wrapInReference (
             LinkedHashMap<String, Object> group, Integer classId) {
         LinkedHashMap<String, Object> refGroup = makeReference(classId);
         ArrayList<Object> operands = new ArrayList<Object>();
@@ -263,10 +292,11 @@ public class KoralObjectGenerator {
         refGroup.put("operands", operands);
         return refGroup;
     }
-    
+
+
     @Deprecated
-    public static LinkedHashMap<String, Object> wrapInReference(
-            LinkedHashMap<String, Object> group, Integer classId, 
+    public static LinkedHashMap<String, Object> wrapInReference (
+            LinkedHashMap<String, Object> group, Integer classId,
             boolean setBySystem) {
         LinkedHashMap<String, Object> refGroup = makeReference(classId);
         ArrayList<Object> operands = new ArrayList<Object>();
@@ -275,13 +305,15 @@ public class KoralObjectGenerator {
         return refGroup;
     }
 
+
     @SuppressWarnings("unchecked")
-    public static LinkedHashMap<String, Object> wrapInClass(
+    public static LinkedHashMap<String, Object> wrapInClass (
             LinkedHashMap<String, Object> group, Integer classId) {
         LinkedHashMap<String, Object> classGroup = makeSpanClass(classId);
         ((ArrayList<Object>) classGroup.get("operands")).add(group);
         return classGroup;
     }
+
 
     /**
      * Ensures that a distance or quantification value does not exceed
@@ -291,7 +323,7 @@ public class KoralObjectGenerator {
      * @return The input number if it is below the allowed maximum
      *         value, else the maximum value.
      */
-    public static int cropToMaxValue(int number) {
+    public static int cropToMaxValue (int number) {
         if (number > MAXIMUM_DISTANCE) {
             number = MAXIMUM_DISTANCE;
             String warning = String

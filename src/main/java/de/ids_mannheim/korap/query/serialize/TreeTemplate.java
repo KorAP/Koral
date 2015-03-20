@@ -31,6 +31,7 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 public class TreeTemplate extends Antlr4AbstractQueryProcessor {
     private static Logger log = LoggerFactory.getLogger(TreeTemplate.class);
 
+
     /**
      * 
      * @param tree
@@ -44,8 +45,9 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
         process(query);
     }
 
+
     @Override
-    public void process(String query) {
+    public void process (String query) {
         ParseTree tree = parseQuery(query);
         super.parser = this.parser;
         if (tree != null) {
@@ -58,7 +60,8 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
         }
     }
 
-    private void processNode(ParseTree node) {
+
+    private void processNode (ParseTree node) {
         // Top-down processing
         if (visited.contains(node))
             return;
@@ -74,7 +77,7 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
             System.err.println(" " + objectStack);
             System.out.println(openNodeCats);
         }
-        
+
         /*
          ****************************************************************
          **************************************************************** 
@@ -111,13 +114,15 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
 
     }
 
+
     @SuppressWarnings("unused")
-    private void putIntoSuperObject(LinkedHashMap<String, Object> object) {
+    private void putIntoSuperObject (LinkedHashMap<String, Object> object) {
         putIntoSuperObject(object, 0);
     }
 
+
     @SuppressWarnings({ "unchecked" })
-    private void putIntoSuperObject(LinkedHashMap<String, Object> object,
+    private void putIntoSuperObject (LinkedHashMap<String, Object> object,
             int objStackPosition) {
         if (objectStack.size() > objStackPosition) {
             ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack
@@ -130,7 +135,8 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
         }
     }
 
-    private ParserRuleContext parseQuery(String q) {
+
+    private ParserRuleContext parseQuery (String q) {
         // TODO replace AqlLexer with lexer for your Antlr4 grammar!
         Lexer qlLexer = new AqlLexer((CharStream) null);
         ParserRuleContext tree = null;

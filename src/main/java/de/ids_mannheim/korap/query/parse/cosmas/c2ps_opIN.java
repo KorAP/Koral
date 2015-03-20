@@ -21,61 +21,50 @@ public class c2ps_opIN
 
 {
 
- public static Tree check(String input, int index)
- 	{
-	ANTLRStringStream
-		ss = new ANTLRStringStream(input);
-	c2ps_opINLexer
-		lex = new c2ps_opINLexer(ss);
-	CommonTokenStream tokens = 
-  		new CommonTokenStream(lex);
-	c2ps_opINParser 
-		g = new c2ps_opINParser(tokens);
-	c2ps_opINParser.opIN_return
-		c2PQReturn = null;
+    public static Tree check (String input, int index) {
+        ANTLRStringStream ss = new ANTLRStringStream(input);
+        c2ps_opINLexer lex = new c2ps_opINLexer(ss);
+        CommonTokenStream tokens = new CommonTokenStream(lex);
+        c2ps_opINParser g = new c2ps_opINParser(tokens);
+        c2ps_opINParser.opIN_return c2PQReturn = null;
 
-  /*
-  System.out.println("check opIN:" + index + ": " + input);
-  System.out.flush();
-  */
+        /*
+        System.out.println("check opIN:" + index + ": " + input);
+        System.out.flush();
+        */
 
-	try 
-		{
-		c2PQReturn = g.opIN();
-		}
-	catch (RecognitionException e) 
-		{
-		e.printStackTrace();
-		}
+        try {
+            c2PQReturn = g.opIN();
+        }
+        catch (RecognitionException e) {
+            e.printStackTrace();
+        }
 
-	// AST Tree anzeigen:
-	Tree tree = (Tree)c2PQReturn.getTree();
-	// System.out.println("opIN: " + tree.toStringTree() );
+        // AST Tree anzeigen:
+        Tree tree = (Tree) c2PQReturn.getTree();
+        // System.out.println("opIN: " + tree.toStringTree() );
 
-	return tree;
-	}
+        return tree;
+    }
 
- /*
-  * main: testprogram:
-  */
 
- public static void main(String args[]) throws Exception 
-  {
-   String[]
-		input = {"#IN", "#IN()", "#IN(L)", "#IN(FE,min)", "#IN(R,%,max)", "#IN(FI,ALL)", 
-					"#IN(FE,ALL,%,MIN)"};  
-	Tree
-		tree;
+    /*
+     * main: testprogram:
+     */
 
-	System.out.println("Tests von #IN-Optionen:\n");
+    public static void main (String args[]) throws Exception {
+        String[] input = { "#IN", "#IN()", "#IN(L)", "#IN(FE,min)",
+                "#IN(R,%,max)", "#IN(FI,ALL)", "#IN(FE,ALL,%,MIN)" };
+        Tree tree;
 
-	for(int i=0; i<input.length; i++)
-		{
-		tree = check(input[i], 0);
-		System.out.println("#IN: input: " + input[i]);
-		System.out.println("#IN: AST  : " + tree.toStringTree() + "\n");
-		}
+        System.out.println("Tests von #IN-Optionen:\n");
 
-  } // main
+        for (int i = 0; i < input.length; i++) {
+            tree = check(input[i], 0);
+            System.out.println("#IN: input: " + input[i]);
+            System.out.println("#IN: AST  : " + tree.toStringTree() + "\n");
+        }
 
-} 
+    } // main
+
+}

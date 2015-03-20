@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author Joachim Bingel (bingel@ids-mannheim.de), 
+ * @author Joachim Bingel (bingel@ids-mannheim.de),
  *         Michael Hanl (hanl@ids-mannheim.de)
  * @date 10/12/2013
  * @version 0.3.0
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class QueryUtils {
 
-    public static SimpleEntry<String, Integer> checkUnbalancedPars(String q) {
+    public static SimpleEntry<String, Integer> checkUnbalancedPars (String q) {
         Map<Character, Character> brackets = new HashMap<Character, Character>();
         brackets.put('[', ']');
         brackets.put('{', '}');
@@ -51,13 +51,15 @@ public class QueryUtils {
         return null;
     }
 
-    public static List<String> parseMorph(String stringTree) {
+
+    public static List<String> parseMorph (String stringTree) {
 
         ArrayList<String> morph = new ArrayList<String>();
         return morph;
     }
 
-    public static String buildCypherQuery(String cypher, String ctypel,
+
+    public static String buildCypherQuery (String cypher, String ctypel,
             String ctyper, int cl, int cr, int page, int limit) {
         // todo: implies that there is only one type allowed!
         String sctypel = "", sctyper = "";
@@ -108,7 +110,8 @@ public class QueryUtils {
         return buffer.toString();
     }
 
-    public static String buildDotQuery(long sid, String graphdb_id) {
+
+    public static String buildDotQuery (long sid, String graphdb_id) {
         StringBuffer b = new StringBuffer();
         b.append("<query>");
         b.append("<sentenceId>");
@@ -130,7 +133,8 @@ public class QueryUtils {
         return b.toString();
     }
 
-    public String buildaggreQuery(String query) {
+
+    public String buildaggreQuery (String query) {
         StringBuffer b = new StringBuffer();
         b.append("<query><cypher><![CDATA[");
         b.append(query);
@@ -159,9 +163,10 @@ public class QueryUtils {
         return b.toString();
     }
 
+
     @Deprecated
-    public static Map addParameters(Map request, int page, int num, String cli,
-            String cri, int cls, int crs, boolean cutoff) {
+    public static Map addParameters (Map request, int page, int num,
+            String cli, String cri, int cls, int crs, boolean cutoff) {
         Map ctx = new LinkedHashMap();
         List left = new ArrayList();
         left.add(cli);
@@ -180,7 +185,8 @@ public class QueryUtils {
         return request;
     }
 
-    public static String escapeRegexSpecialChars(String key) {
+
+    public static String escapeRegexSpecialChars (String key) {
         key.replace("\\", "\\\\");
         Pattern p = Pattern
                 .compile("\\.|\\^|\\$|\\||\\?|\\*|\\+|\\(|\\)|\\[|\\]|\\{|\\}");

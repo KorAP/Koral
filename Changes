@@ -1,0 +1,7 @@
+0.2 2015-06-15
+        - Switch to "koral:" prefix.
+	- Coverage of KoralQuery 0.3
+	  (see http://korap.github.io/Koral/)
+
+0.1 2015-02-10
+        - First version published to GitHub.
