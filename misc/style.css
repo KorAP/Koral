@@ -8,7 +8,9 @@ a:link {
   font-weight: bold;
 }
 
-a:hover {
+a:link:hover,
+a:active,
+a:visited {
   color: #9f3700;
   transition: color 0.3s ease;
 }
@@ -19,6 +21,10 @@ body {
   line-height: 1.6em;
   width: 100%;
   background-color: #7ba400;
+}
+
+.koral-type a:link {
+  color: inherit;
 }
 
 div.hentry {
@@ -101,8 +107,8 @@ table {
   width: 100%;
   empty-cells: show;
   border-collapse: collapse;
-  vertical-align: top;
   font-size: 11pt;
+  line-height: 1.3em;
 }
 
 thead {
@@ -115,12 +121,13 @@ thead {
 td {
   border: 2px solid #ffa501;
   padding: .3em 1em;
+  vertical-align: top;
 }
 
 td.opt:after {
   vertical-align: super;
-  content: "(?)";
-  font-style: italic;
+  content: '\e811';
+  font-family: koral-fontello;
   font-size: 80%;
 }
 
@@ -179,6 +186,7 @@ dl > dt {
 dl > dd {
   margin-left: 2em;
   margin-right: 2em;
+  text-align: justify;
 }
 
 table dl {
@@ -189,6 +197,9 @@ table dl > dt {
   font-weight: inherit;
 }
 
+table dl > dd {
+  margin-bottom: .5em;
+}
 
 h1 { font-size: 250%; margin: 0; }
 h2 { font-size: 180%; margin: .8em 0 .1em 0; }

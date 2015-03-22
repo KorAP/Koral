@@ -2,7 +2,9 @@
 <html>
 <head>
   <title>KoralQuery (Draft in preparation)</title>
-  <link href="misc/style.css" type="text/css" rel="stylesheet" />
+  <link rel="stylesheet" href="misc/font/koral-fontello.css">
+  <!--[if IE 7]><link rel="stylesheet" href="misc/font/koral-fontello-ie7.css"><![endif]-->
+  <link rel="stylesheet" href="misc/style.css" type="text/css" />
   <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
   <link rel="shortcut icon" href="misc/favicon.ico" />
   <meta name="robots" content="none" />
@@ -29,7 +31,7 @@
       <span class="p-org">IDS</span>,
       <span class="p-locality">Mannheim</span></p>
       <p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-      <p>Last update: <time class="dt-updated" datetime="2015-03-20">2015/03/20</time></p>
+      <p>Last update: <time class="dt-updated" datetime="2015-03-22">2015/03/22</time></p>
     </div>
 
     <p style="color: red">This draft is in preparation! Expected first usable version at the end of march 2015.</p>
@@ -112,6 +114,49 @@
 	<p>In this document, attributes as part of KoralQuery objects are represent as
 	  tables, listing all defined attributes as key value pairs. Optional keys have a
 	  trailing question mark, mandatory keys are unmarked.</p>
+	<p>The type documenting tables have four columns:</p>
+	<dl>
+	  <dt>Key</dt>
+	  <dd>The key string in the JSON object for this attribute.
+	    In running text these keys are marked as <code class="att">keys</code>.</dd>
+	  <dt>Type</dt>
+	  <dd>The type of values allowed for this attribute.
+	    Defined types include:
+	    <dl>
+	      <dt>xsd:string</dt>
+	      <dd>Arbitrary character sequence, represented as a
+		<a href="#ref-json">JSON</a> string.</dd>
+	      <dt>xsd:boolean</dt>
+	      <dd>Either <code>true</code> or <code>false</code>.</dd>
+	      <dt>xsd:integer</dt>
+	      <dd>A signed integer, represented as a <a href="#ref-json">JSON</a> number.
+		The valid range of the integer is described in the
+		<em>Values</em> column.</dd>
+	      <dt>@id</dt>
+	      <dd>An identifier that represents a valid JSON-LD type,
+		represented as a
+		<a href="#ref-json">JSON</a> string.
+		The supported types are listed under values.</dd>
+	    </dl>
+	    In addition to these types,
+	    KoralQuery type objects may be listed.
+	    These may be represented by their identifier
+	    (e.g. <code class="att">koral:termGroup</code>) or by their category
+	    (e.g. &quot;span type&quot;).
+	    Multiple supported types are listed comma separated.
+	    If the value is expected to be a list of values,
+	    the valid types are enclosed in brackets (e.g. &quot;[@id]&quot;).
+	    If the list is expected to have a certain number of members,
+	    this is described in the <em>Values</em> column.
+	  </dd>
+	  <dt>Default</dt>
+	  <dd>The default value of this attribute in case it is not given.</dd>
+	  <dt>Values</dt>
+	  <dd>Gives a list of valid values,
+	    constraints on this attribute,
+	    consequences for other attributes,
+	    and examples with descriptions.</dd>
+	</dl>
       </section>
 
       <section>
@@ -139,7 +184,9 @@
 	<h2><a id="coll-type" name="coll-type">Collection Type Objects</a></h2>
 	<h3>Basic collection types</h3>
 
-	<h4 class="koral-type"><a name="koral-doc" id="koral-doc">koral:doc</a></h4>
+	<h4 class="koral-type"><a name="koral-doc"
+				  id="koral-doc"
+				  href="#koral-doc">koral:doc</a></h4>
 	<pre>
 {
   "@type" : "koral:doc",
@@ -150,15 +197,15 @@
               <th>Key</th>
               <th>Type</th>
 	      <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
               <td>@id</td>
-	      <td>koral:doc</td>
-              <td></td>
+	      <td></td>
+              <td><code class="att">koral:doc</code></td>
             </tr>
 	    <tr>
               <td>key</td>
@@ -175,7 +222,7 @@
 	    <tr>
               <td class="opt">type</td>
               <td>@id</td>
-	      <td>string</td>
+	      <td><code class="att">type:string</code></td>
               <td>
 		<dl>
 		  <dt><code class="att">type:string</code></dt>
@@ -183,21 +230,37 @@
 		  <dt><code class="att">type:regex</code></dt>
 		  <dd>The value is treated as a <a href="#appendix-regex">regular expression</a>.</dd>
 		  <dt><code class="att">type:date</code></dt>
-		  <dd>The value is treated as a date format, following <a href="http://www.w3.org/TR/NOTE-datetime">W3C Date and Time Formats</a> with day granualarity (e.g. <code>2015-03-19</code>).</dd>
+		  <dd>The value is treated as a date format, following <a href="#ref-w3cdates">W3C Date and Time Formats</a> with day granualarity (e.g. <code>2015-03-19</code>).</dd>
 	      </td>
             </tr>
 	    <tr>
               <td class="opt">match</td>
               <td>@id</td>
-	      <td>eq</td>
+	      <td><code class="att">match:eq</code></td>
 	      <td>
 		<dl>
 		  <dt><code class="att">match:eq</code></dt>
+		  <dd>The key attribute has to match the value attribute exactly.</dd>
 		  <dt><code class="att">match:ne</code></dt>
+		  <dd>The key attribute has to match anything but the value.</dd>
 		  <dt><code class="att">match:geq</code></dt>
+		  <dd>The key attribute has to match anything that is equal or greater than the value attribute.
+		    In case of the type attribute being <code class="att">type:date</code>,
+		    this expects a document having a field value with the name of the key attribute giving a date starting with the date given by the value attribute.
+		    In case the type attribute being <code class="att">type:string</code>,
+		    this expects a document having a field value with the name of the key attribute either matching or being alphabetically following.
+		    This match attribute is undefined for the type attribute being <code class="att">type:regex</code>.</dd>
 		  <dt><code class="att">match:leq</code></dt>
+		  <dd>The key attribute has to match anything that is equal or littler than the value attribute.
+		    In case of the type attribute being <code class="att">type:date</code>,
+		    this expects a document having a field value with the name of the key attribute giving a date ending with the date given by the value attribute.
+		    In case the type attribute being <code class="att">type:string</code>,
+		    this expects a document having a field value with the name of the key attribute either matching or being alphabetically preceding.
+		    This match attribute is undefined for the type attribute being <code class="att">type:regex</code>.</dd>
 		  <dt><code class="att">match:contains</code></dt>
+		  <dd>The key attribute has to match the value attribute as a substring.</dd>
 		  <dt><code class="att">match:excludes</code></dt>
+		  <dd>The key attribute has to match anything but field values containing the value attribute as a substring.</dd>
 		</dl>
 	      </td>
             </tr>
@@ -206,7 +269,9 @@
 
 
 	<h3>Complex collection types</h3>
-	<h4 class="koral-type"><a name="koral-docGroup" id="koral-docGroup">koral:docGroup</a></h4>
+	<h4 class="koral-type"><a name="koral-docGroup"
+				  id="koral-docGroup"
+				  href="#koral-docGroup">koral:docGroup</a></h4>
 	<pre>
 {
   "@type" : "koral:docGroup",
@@ -218,15 +283,15 @@
               <th>Key</th>
 	      <th>Type</th>
               <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
               <td>@id</td>
-	      <td>koral:docGroup</td>
-              <td></td>
+	      <td></td>
+              <td><code class="att">koral:docGroup</code></td>
             </tr>
 	    <tr>
               <td>operation</td>
@@ -249,7 +314,9 @@
 	<p>The result of a KoralQuery object may be an operand of another object, that may filter, enrich, combine or alter the results of nested objects.</p>
 
 	<h3>Basic span types</h3>
-	<h4 class="koral-type"><a name="token" id="token">koral:token</a></h4>
+	<h4 class="koral-type"><a name="koral-token"
+				  id="koral-token"
+				  href="#koral-token">koral:token</a></h4>
 	<pre>
 {
   "@type" : "koral:token",
@@ -266,26 +333,28 @@
               <th>Key</th>
               <th>Type</th>
 	      <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
 	      <td>@id</td>
-              <td>koral:token</td>
               <td></td>
+              <td><code class="att">koral:token</code></td>
             </tr>
             <tr>
               <td class="opt">wrap</td>
-              <td>term or termGroup</td>
+              <td><code class="att">koral:term</code>, <code class="att">koral:termGroup</code></td>
 	      <td></td>
               <td>Holds information on search key, foundry, layer, value</td>
             </tr>
 	  </tbody>
 	</table>
 
-	<h4 class="koral-type"><a name="koral-span" id="koral-span">koral:span</a></h4>
+	<h4 class="koral-type"><a name="koral-span"
+				  id="koral-span"
+				  href="#koral-span">koral:span</a></h4>
 	<pre>
 {
   "@type" : "koral:span",
@@ -299,15 +368,15 @@
               <th>Key</th>
               <th>Type</th>
               <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
               <td>@id</td>
-              <td>koral:span</td>
               <td></td>
+              <td><code class="att">koral:span</code></td>
             </tr>
             <tr>
               <td class="opt">foundry</td>
@@ -335,7 +404,7 @@
             </tr>
             <tr>
               <td class="opt">attr</td>
-              <td>term or termGroup</td>
+              <td><code class="att">koral:term</code>, <code class="att">koral:termGroup</code></td>
               <td></td>
               <td>Span attributes.</td>
             </tr>
@@ -367,7 +436,9 @@
 
 
 	<h3>Complex span types</h3>
-	<h4 class="koral-type"><a name="koralgroup" id="koral-group">koral:group</a></h4>
+	<h4 class="koral-type"><a name="koral-group"
+				  id="koral-group"
+				  href="#koral-group">koral:group</a></h4>
 	<pre>
 {
   "@type" : "koral:group",
@@ -380,15 +451,15 @@
               <th>Key</th>
               <th>Type</th>
 	      <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
               <td>@id</td>
-	      <td>koral:group</td>
 	      <td></td>
+	      <td><code class="att">koral:group</code></td>
             </tr>
             <tr>
               <td>operation</td>
@@ -398,7 +469,7 @@
             </tr>
             <tr>
               <td>operands</td>
-              <td>[span types]</td>
+              <td>[span type]</td>
 	      <td></td>
               <td>Arguments of the operation. Number depends on respective operation</td>
             </tr>
@@ -454,7 +525,7 @@
 	    <tr>
 	      <th>Key</th>
 	      <th>Type</th>
-	      <th>Value and Description</th>
+	      <th>Values</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -465,12 +536,12 @@
 	    </tr>
 	    <tr>
 	      <td class="opt">exclude</td>
-	      <td>boolean</td>
+	      <td>xsd:boolean</td>
 	      <td>If true, negate positional relations</td>
 	    </tr>
 	    <tr>
 	      <td>operands</td>
-	      <td>[span types]</td>
+	      <td>[span type]</td>
 	      <td>No. of operands: 2</td>
 	    </tr>
 	  </tbody>
@@ -483,7 +554,7 @@
 	    <tr>
 	      <th>Key</th>
 	      <th>Type</th>
-	      <th>Value and Description</th>
+	      <th>Values</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -494,12 +565,12 @@
 	    </tr>
 	    <tr>
 	      <td class="opt">inOrder</td>
-	      <td>boolean</td>
+	      <td>xsd:boolean</td>
 	      <td>If true, ordering of operands matters</td>
 	    </tr>
 	    <tr>
 	      <td>operands</td>
-	      <td>[span types]</td>
+	      <td>[span type]</td>
 	      <td>No. of operands: 2+</td>
 	    </tr>
 	  </tbody>
@@ -511,7 +582,7 @@
 	    <tr>
 	      <th>Key</th>
 	      <th>Type</th>
-	      <th>Value and Description</th>
+	      <th>Values</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -522,7 +593,7 @@
 	    </tr>
 	    <tr>
 	      <td>operands</td>
-	      <td>[span types]</td>
+	      <td>[span type]</td>
 	      <td>No. of operands: 2</td>
 	    </tr>
 	  </tbody>
@@ -534,13 +605,13 @@
 	    <tr>
 	      <th>Key</th>
 	      <th>Type</th>
-	      <th>Value and Description</th>
+	      <th>Values</th>
 	    </tr>
 	  </thead>
 	  <tbody>
 	    <tr>
 	      <td>operands</td>
-	      <td>[span types]</td>
+	      <td>[span type]</td>
 	      <td>No. of operands: 2+</td>
 	    </tr>
 	  </tbody>
@@ -552,7 +623,7 @@
 	    <tr>
 	      <th>Key</th>
 	      <th>Type</th>
-	      <th>Value and Description</th>
+	      <th>Values</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -563,7 +634,7 @@
 	    </tr>
 	    <tr>
 	      <td>operands</td>
-	      <td>[span types]</td>
+	      <td>[span type]</td>
 	      <td>No. of operands: 1</td>
 	    </tr>
 	  </tbody>
@@ -575,18 +646,18 @@
 	    <tr>
 	      <th>Key</th>
 	      <th>Type</th>
-	      <th>Value and Description</th>
+	      <th>Values</th>
 	    </tr>
 	  </thead>
 	  <tbody>
 	    <tr>
 	      <td>classOut</td>
-	      <td>int</td>
+	      <td>xsd:integer</td>
 	      <td>The ID for the defined class.</td>
 	    </tr>
 	    <tr>
 	      <td class="opt">classIn</td>
-	      <td>[int]</td>
+	      <td>[xsd:integer]</td>
 	      <td>Specifies classes on which <code>classRefCheck</code> or <code>classRefOp</code> works.</td>
 	    </tr>
 	    <tr>
@@ -601,7 +672,7 @@
 	    </tr>
 	    <tr>
 	      <td>operands</td>
-	      <td>[span types]</td>
+	      <td>[span type]</td>
 	      <td>No. of operands: 1</td>
 	    </tr>
 	  </tbody>
@@ -613,19 +684,21 @@
 	    <tr>
 	      <th>Key</th>
 	      <th>Type</th>
-	      <th>Value and Description</th>
+	      <th>Values</th>
 	    </tr>
 	  </thead>
 	  <tbody>
 	    <tr>
 	      <td>operands</td>
-	      <td>[span types]</td>
+	      <td>[span type]</td>
 	      <td>No. of operands: 1</td>
 	    </tr>
 	  </tbody>
 	</table>        
 
-	<h4 class="koral-type"><a name="koral-reference" id="koral-reference">koral:reference</a></h4>
+	<h4 class="koral-type"><a name="koral-reference"
+				  id="koral-reference"
+				  href="#koral-reference">koral:reference</a></h4>
 	<pre>
 {
   "@type" : "koral:reference",
@@ -639,15 +712,15 @@
               <th>Key</th>
               <th>Type</th>
               <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
 	      <td>@id</td>
-	      <td>koral:reference</td>
 	      <td></td>
+	      <td><code class="att">koral:reference</code></td>
             </tr>
             <tr>
               <td>operation</td>
@@ -669,7 +742,7 @@
             </tr>
             <tr>
               <td class="opt">operands</td>
-              <td>[span types]</td>
+              <td>[span type]</td>
               <td></td>
 	      <td>Arguments of the operation. Number depends on respective operation</td>
             </tr>
@@ -682,7 +755,9 @@
 
 	<h3>Basic parametric types</h3>
 
-	<h4 class="koral-type"><a name="koral-term" id="koral-term">koral:term</a></h4>
+	<h4 class="koral-type"><a name="koral-term"
+				  id="koral-term"
+				  href="#koral-term">koral:term</a></h4>
 	<pre>
 {
   "@type" : "koral:term",
@@ -696,15 +771,15 @@
               <th>Key</th>
               <th>Type</th>
               <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
               <td>@id</td>
-	      <td>koral:term</td>
-              <td></td>
+	      <td></td>
+              <td><code class="att">koral:term</code></td>
             </tr>
             <tr>
               <td>key</td>
@@ -726,7 +801,7 @@
             </tr>
             <tr>
               <td class="opt">layer</td>
-              <td>string</td>
+              <td><code>type:string</code></td>
 	      <td>surface layer</td>
               <td>The annotation layer</td>
             </tr>
@@ -756,7 +831,8 @@
 	  </tbody>
 	</table>
 
-	<p>To specify a term, KoralQuery provides four attributes: <code class="att">foundry</code>, <code class="att">layer</code>, <code class="att">key</code>,
+	<p>To specify a term, KoralQuery provides four attributes:
+	  <code class="att">foundry</code>, <code class="att">layer</code>, <code class="att">key</code>,
 	  and <code class="att">value</code>. The concrete definition of these attributes
 	  relies on the annotation model of the corpus and the implementation of the search
 	  system. As an abstract definition, the attributes have a hierarchical structure for
@@ -859,7 +935,9 @@
 	  <p>All other attributes may silently be ignored.</p>
 	</section>
 
-	<h4 class="koral-type"><a name="koral-distance" id="koral-distance">koral:distance</a></h4>
+	<h4 class="koral-type"><a name="koral-distance"
+				  id="koral-distance"
+				  href="#koral-distance">koral:distance</a></h4>
 	<pre>
 {
   "@type" : "koral:distance",
@@ -872,15 +950,15 @@
               <th>Key</th>
               <th>Type</th>
 	      <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
               <td>@id</td>
-	      <td>koral:distance</td>
-              <td></td>
+	      <td></td>
+              <td><code class="att">koral:distance</code></td>
             </tr>
             <tr>
               <td>key</td>
@@ -909,7 +987,9 @@
           </tbody>
 	</table>
 
-	<h4 class="koral-type"><a name="koral-boundary" id="koral-boundary">koral:boundary</a></h4>
+	<h4 class="koral-type"><a name="koral-boundary"
+				  id="koral-boundary"
+				  href="#koral-boundary">koral:boundary</a></h4>
 	<pre>
 {
   "@type" : "koral:boundary",
@@ -922,15 +1002,15 @@
               <th>Key</th>
               <th>Type</th>
               <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
 	      <td>@id</td>
-              <td>koral:boundary</td>
               <td></td>
+              <td><code class="att">koral:boundary</code></td>
             </tr>
             <tr>
               <td>min</td>
@@ -947,7 +1027,9 @@
 	  </tbody>
 	</table>
 
-	<h4 class="koral-type"><a name="koral-relation" id="koral-relation">koral:relation</a></h4>
+	<h4 class="koral-type"><a name="koral-relation"
+				  id="koral-relation"
+				  href="#koral-relation">koral:relation</a></h4>
 	<pre>
 {
   "@type" : "koral:relation",
@@ -959,19 +1041,19 @@
               <th>Key</th>
               <th>Type</th>
               <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
               <td>@id</td>
-	      <td>koral:relation</td>
-              <td></td>
+	      <td></td>
+              <td><code class="att">koral:relation</code></td>
             </tr>
 	    <tr>
               <td>wrap</td>
-	      <td>term or termGroup</td>
+	      <td><code class="att">koral:term</code>, <code class="att">koral:termGroup</code></td>
               <td></td>
               <td>Holds information on key, foundry, layer, value</td>
             </tr>
@@ -979,7 +1061,9 @@
 	</table>
 
 	<h3>Complex parametric types</h3>
-	<h4 class="koral-type"><a name="koral-termGroup" id="koral-termGroup">koral:termGroup</a></h4>
+	<h4 class="koral-type"><a name="koral-termGroup"
+				  id="koral-termGroup"
+				  href="#koral-termGroup">koral:termGroup</a></h4>
 	<pre>
 {
   "@type" : "koral:termGroup",
@@ -993,15 +1077,15 @@
               <th>Key</th>
               <th>Type</th>
 	      <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
               <td>@id</td>
-              <td>koral:termGroup</td>
               <td></td>
+              <td><code class="att">koral:termGroup</code></td>
             </tr>
             <tr>
               <td>relation</td>
@@ -1017,7 +1101,9 @@
 
       <section>
 	<h2><a id="report-type" name="report-type">Report Type Objects</a></h2>
-	<h4 class="koral-type"><a name="koral-rewrite" id="koral-rewrite">koral:rewrite</a></h4>
+	<h4 class="koral-type"><a name="koral-rewrite"
+				  id="koral-rewrite"
+				  href="#koral-rewrite">koral:rewrite</a></h4>
 	<pre>
 {
   "@type" : "koral:rewrite",
@@ -1030,15 +1116,15 @@
               <th>Key</th>
               <th>Type</th>
 	      <th>Default</th>
-              <th>Value and Description</th>
+              <th>Values</th>
             </tr>
 	  </thead>
 	  <tbody>
             <tr>
               <td>@type</td>
               <td>@id</td>
-	      <td>koral:rewrite</td>
-              <td></td>
+	      <td></td>
+              <td><code class="att">koral:rewrite</code></td>
             </tr>
 	    <tr>
               <td>operation</td>
@@ -1099,13 +1185,19 @@
 	    WG1-EP</a>, suggested by Piotr Ba&#324;ski.</p>
 	<p id="fn-foundrylayerdef"><a href="#ref-foundrylayerdef">[2]</a> Thanks to Piotr
 	  Ba&#324;ski for the definition of foundry and layer.</p>
+      </section>
 
+      <section>
+	<h2>References</h2>
+	<p id="ref-json" name="ref-json">ECMA (2003): <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf">The JSON Data Interchange Format</a>, ECMA-404, ECMA Standard.</p>
+	<p id="ref-w3cdates" name="ref-w3cdates">
+	  Wolf, Misha and Charles Wicksteed (1997): <a href="http://www.w3.org/TR/NOTE-datetime">Date and Time Formats</a>, W3C Standard.</p>
       </section>
 
       <section>
 	<h2>Copyright</h2>
-	<p>Copyright (c) 2015, <a href="http://ids-mannheim.de/">IDS Mannheim</a>, Germany,
-	  and the authors.</p>
+	<p>Copyright (c) 2015, <a href="http://www.ids-mannheim.de/">IDS Mannheim</a>,
+	  Germany, and the authors.</p>
 	<!--
 	    <a href="http://creativecommons.org/licenses/by/2.0/"
 	       rel="license">XYZ</a>
@@ -1130,9 +1222,9 @@
     <div class="changes">
       <pre>
 CHANGES:
-0.3 2015-03-16
+0.3 2015-03-22
 - Initial publication on GitHub
-Versions prior to 0.3 were used internally only</pre>
+  Versions prior to 0.3 were used internally only</pre>
     </div>
   </div>
 </body>
