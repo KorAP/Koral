@@ -27,10 +27,20 @@ body {
   color: inherit;
 }
 
+#reference {
+  position: absolute;
+  background-color: rgba(245,245,245,0.75);
+  padding: 5pt;
+  border-radius: 9px;
+  top: 15pt;
+  right: 15pt;
+  z-index: 22;
+}
+
 div.hentry {
   position: relative;
   color: #444;
-  background-color: #fafafa;
+  background-color: rgb(245, 245, 245);
   margin: 0;
   margin: 0 auto;
   padding: 2em;
@@ -92,12 +102,6 @@ h1 {
   height: 3em;
 }
 
-#reference {
-  position: absolute;
-  top: 20pt;
-  right: 20pt;
-  z-index: 22;
-}
 
 
 /**
