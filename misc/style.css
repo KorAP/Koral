@@ -190,7 +190,7 @@ dl > dd {
 }
 
 table dl {
-  margin-left: 0;
+  margin: 0;
 }
 
 table dl > dt {
@@ -200,6 +200,23 @@ table dl > dt {
 table dl > dd {
   margin-bottom: .5em;
 }
+
+span.valid-parameters:after {
+  font-family: koral-fontello;
+  content: ' \e80e';
+  cursor: pointer;
+}
+
+span.valid-parameters.filtered:after {
+  color: #7ba400;
+  content: ' \e80a';
+}
+
+dt.chosen code {
+  background-color: #7ba400;
+}
+
+
 
 h1 { font-size: 250%; margin: 0; }
 h2 { font-size: 180%; margin: .8em 0 .1em 0; }

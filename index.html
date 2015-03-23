@@ -8,6 +8,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
   <link rel="shortcut icon" href="misc/favicon.ico" />
   <meta name="robots" content="none" />
+  <script type="text/javascript" src="misc/dynamic.js"></script>
 </head>
 
 <body class="specification draft">
@@ -190,6 +191,9 @@
 	<pre>
 {
   "@type" : "koral:doc",
+  "key" : "textClass",
+  "value" : "novel",
+  "match" : "match:eq"
 }</pre>
 	<table class="koral-type">
 	  <thead>
@@ -211,13 +215,13 @@
               <td>key</td>
               <td>xsd:string</td>
 	      <td></td>
-              <td>Metadata attribute (e.g. <code>textClass</code>)</td>
+              <td>The metadata field.</td>
             </tr>
 	    <tr>
               <td>value</td>
               <td>xsd:string</td>
 	      <td></td>
-              <td>Metadata value (e.g. <code>Sport</code>)</td>
+              <td>The metadata value</td>
             </tr>
 	    <tr>
               <td class="opt">type</td>
@@ -230,7 +234,7 @@
 		  <dt><code class="att">type:regex</code></dt>
 		  <dd>The value is treated as a <a href="#appendix-regex">regular expression</a>.</dd>
 		  <dt><code class="att">type:date</code></dt>
-		  <dd>The value is treated as a date format, following <a href="#ref-w3cdates">W3C Date and Time Formats</a> with day granualarity (e.g. <code>2015-03-19</code>).</dd>
+		  <dd>The value is treated as a date format.</dd>
 	      </td>
             </tr>
 	    <tr>
@@ -244,19 +248,9 @@
 		  <dt><code class="att">match:ne</code></dt>
 		  <dd>The key attribute has to match anything but the value.</dd>
 		  <dt><code class="att">match:geq</code></dt>
-		  <dd>The key attribute has to match anything that is equal or greater than the value attribute.
-		    In case of the type attribute being <code class="att">type:date</code>,
-		    this expects a document having a field value with the name of the key attribute giving a date starting with the date given by the value attribute.
-		    In case the type attribute being <code class="att">type:string</code>,
-		    this expects a document having a field value with the name of the key attribute either matching or being alphabetically following.
-		    This match attribute is undefined for the type attribute being <code class="att">type:regex</code>.</dd>
+		  <dd>The key attribute has to match anything that is equal or greater than the value attribute.</dd>
 		  <dt><code class="att">match:leq</code></dt>
-		  <dd>The key attribute has to match anything that is equal or littler than the value attribute.
-		    In case of the type attribute being <code class="att">type:date</code>,
-		    this expects a document having a field value with the name of the key attribute giving a date ending with the date given by the value attribute.
-		    In case the type attribute being <code class="att">type:string</code>,
-		    this expects a document having a field value with the name of the key attribute either matching or being alphabetically preceding.
-		    This match attribute is undefined for the type attribute being <code class="att">type:regex</code>.</dd>
+		  <dd>The key attribute has to match anything that is equal or littler than the value attribute.</dd>
 		  <dt><code class="att">match:contains</code></dt>
 		  <dd>The key attribute has to match the value attribute as a substring.</dd>
 		  <dt><code class="att">match:excludes</code></dt>
@@ -267,6 +261,30 @@
 	  </tbody>
 	</table>
 
+<!--
+The metadata attribute (e.g. <code>textClass</code>)
+
+The metadata value  (e.g. <code>Sport</code>)
+
+If , following <a href="#ref-w3cdates">W3C Date and Time Formats</a> with day granualarity (e.g. <code>2015-03-19</code>)
+
+
+match:geq
+		    In case of the type attribute being <code class="att">type:date</code>,
+		    this expects a document having a field value with the name of the key attribute giving a date starting with the date given by the value attribute.
+		    In case the type attribute being <code class="att">type:string</code>,
+		    this expects a document having a field value with the name of the key attribute either matching or being alphabetically following.
+		    This match attribute is undefined for the type attribute being <code class="att">type:regex</code>.
+
+
+match:leq
+
+		    In case of the type attribute being <code class="att">type:date</code>,
+		    this expects a document having a field value with the name of the key attribute giving a date ending with the date given by the value attribute.
+		    In case the type attribute being <code class="att">type:string</code>,
+		    this expects a document having a field value with the name of the key attribute either matching or being alphabetically preceding.
+		    This match attribute is undefined for the type attribute being <code class="att">type:regex</code>.
+-->
 
 	<h3>Complex collection types</h3>
 	<h4 class="koral-type"><a name="koral-docGroup"
@@ -462,239 +480,118 @@
 	      <td><code class="att">koral:group</code></td>
             </tr>
             <tr>
-              <td>operation</td>
-              <td>@id</td>
-              <td></td>
-              <td>Defines the operation on the operands. <a href="#group-operation">Show available values</a></td>
-            </tr>
-            <tr>
               <td>operands</td>
               <td>[span type]</td>
 	      <td></td>
-              <td>Arguments of the operation. Number depends on respective operation</td>
+              <td>Arguments of the operation. Number depends on respective operation.</td>
             </tr>
-	  </tbody>
-	</table>
-	<div class="values" id="group-operation">
-	  <table>
-	    <thead>
-	      <tr>
-		<th>Value</th>
-		<th>Description</th>
-	      </tr>
-	    </thead>
-	    <tbody>
-	      <tr>
-		<td>position</td>
-		<td>The operands are in a positional relation. <a href="#operation-position">See specifications</a></td>
-	      </tr>
-	      <tr>
-		<td>sequence</td>
-		<td>The operands are in sequence. <a href="#operation-sequence">See specifications</a></td>
-	      </tr>
-	      <tr>
-		<td>relation</td>
-		<td>There is a linguistic relation between the operands. <a href="#operation_relation">See specifications</a></td>
-	      </tr>
-	      <tr>
-		<td>disjunction</td>
-		<td>Treat operands as alternatives. <a href="#operation-disjunction">See specifications</a></td>
-	      </tr>
-	      <tr>
-		<td>repetition</td>
-		<td>The operand is sequentially repeated. <a href="#operation-repetition">See specifications</a></td>
-	      </tr>
-	      <tr>
-		<td>class</td>
-		<td>Introduce a class on the operand or perform class operations. <a href="#operation-class">See specifications</a></td>
-	      </tr>
-	      <tr>
-		<td>merge</td>
-		<td>Condense result set. <a href="#operation-merge">See specifications</a></td>
-	      </tr>
-	    </tbody>
-	  </table>
-	    
-	  <a href="#koral-group">return and hide</a>
-	</div>
-
-        <h5>Group operations</h5>
-        <h6 id="operation-position">The <code class="att">position</code> operation</h6>
-	<table>
-	  <thead>
+            <tr>
+              <td>operation</td>
+              <td>@id</td>
+              <td></td>
+	      <td>
+		<dl>
+		  <dt><code class="att">operation:sequence</code></dt>
+		  <dd>Operands take part in a sequence.<br />
+		    Expects &ge; 2 operands.<br/>
+		    <span class="valid-parameters">Parameters: <code>inOrder</code>, <code>distances</code></span>
+		  </dd>
+		  <dt><code class="att">operation:position</code></dt>
+		  <dd>The operands take part in a positional relation.<br />
+		    Expects 2 operands.<br />
+		    <span class="valid-parameters">Parameters: <code>frames</code>, <code>exclude</code></span>
+		  </dd>
+		  <dt><code class="att">operation:relation</code></dt>
+		  <dd>The operands take part in an arbitrary relation.<br />
+		    Expects 2 operands.<br />
+		    <span class="valid-parameters">Parameters: <code>relType</code></span>
+		  </dd>
+		  <dt><code class="att">operation:disjunction</code></dt>
+		  <dd>The operands are treated as alternatives.<br />
+		    Expects &ge; 2 operands.<br />
+		    <span class="valid-parameters">Parameters: none</span>
+		  </dd>
+		  <dt><code class="att">operation:repetition</code></dt>
+		  <dd>The operand is sequentially repeated a defined time.<br />
+		    Expects 1 operand.<br />
+		    <span class="valid-parameters">Parameters: <code>boundary</code></span>
+		  </dd>
+		  <dt><code class="att">operation:class</code></dt>
+		  <dd>Define a class span based on the operand.<br />
+		    Expects 1 operand.<br />
+		    <span class="valid-parameters">Parameters: <code>classOut</code>, <code>classIn</code>, <code>classRefCheck</code>, <code>classRefOp</code></span>
+		  </dd>
+		  <dt><code class="att">operation:merge</code></dt>
+		  <dd>Condense the result set.<br />
+		    Expects &ge; 1 operand.<br />
+		    <span class="valid-parameters">Parameters: none</span>
+		  </dd>
+		</dl>
+	      </td>
+            </tr>
 	    <tr>
-	      <th>Key</th>
-	      <th>Type</th>
-	      <th>Values</th>
-	    </tr>
-	  </thead>
-	  <tbody>
-	    <tr>
-	      <td>frames</td>
-	      <td>[@id]</td>
-	      <td>Lists the allowed positional relations between the operands</td>
-	    </tr>
-	    <tr>
-	      <td class="opt">exclude</td>
-	      <td>xsd:boolean</td>
-	      <td>If true, negate positional relations</td>
-	    </tr>
-	    <tr>
-	      <td>operands</td>
-	      <td>[span type]</td>
-	      <td>No. of operands: 2</td>
-	    </tr>
-	  </tbody>
-	</table>
-	    
-        <h6>The <code class="att">sequence</code> operation</h6>
-
-	<table>
-	  <thead>
-	    <tr>
-	      <th>Key</th>
-	      <th>Type</th>
-	      <th>Values</th>
-	    </tr>
-	  </thead>
-	  <tbody>
-	    <tr>
-	      <td class="opt">distances</td>
-	      <td>[distance]</td>
-	      <td>Distance constraints between operands (pertaining to different keys).</td>
-	    </tr>
-	    <tr>
-	      <td class="opt">inOrder</td>
-	      <td>xsd:boolean</td>
-	      <td>If true, ordering of operands matters</td>
-	    </tr>
-	    <tr>
-	      <td>operands</td>
-	      <td>[span type]</td>
-	      <td>No. of operands: 2+</td>
-	    </tr>
-	  </tbody>
-	</table>
-       
-        <h6>The <code class="att">relation</code> operation</h6>
-	<table>
-	  <thead>
-	    <tr>
-	      <th>Key</th>
-	      <th>Type</th>
-	      <th>Values</th>
-	    </tr>
-	  </thead>
-	  <tbody>
-	    <tr>
-	      <td class="opt">relType</td>
-	      <td>relation</td>
-	      <td>Specifies relation between operands</td>
-	    </tr>
-	    <tr>
-	      <td>operands</td>
-	      <td>[span type]</td>
-	      <td>No. of operands: 2</td>
-	    </tr>
-	  </tbody>
-	</table>
-
-        <h6>The <code class="att">disjunction</code> operation</h6>
-	<table>
-	  <thead>
-	    <tr>
-	      <th>Key</th>
-	      <th>Type</th>
-	      <th>Values</th>
-	    </tr>
-	  </thead>
-	  <tbody>
-	    <tr>
-	      <td>operands</td>
-	      <td>[span type]</td>
-	      <td>No. of operands: 2+</td>
-	    </tr>
-	  </tbody>
-	</table>
-
-	<h6>The <code class="att">repetition</code> operation</h6>
-	<table>
-	  <thead>
-	    <tr>
-	      <th>Key</th>
-	      <th>Type</th>
-	      <th>Values</th>
-	    </tr>
-	  </thead>
-	  <tbody>
-	    <tr>
-	      <td>boundary</td>
-	      <td>boundary</td>
-	      <td>Specifies operand's mininmum and maximum repetition</td>
-	    </tr>
-	    <tr>
-	      <td>operands</td>
-	      <td>[span type]</td>
-	      <td>No. of operands: 1</td>
-	    </tr>
-	  </tbody>
-	</table>
-
-	<h6>The <code class="att">class</code> operation</h6>
-	<table>
-	  <thead>
-	    <tr>
-	      <th>Key</th>
-	      <th>Type</th>
-	      <th>Values</th>
-	    </tr>
-	  </thead>
-	  <tbody>
-	    <tr>
-	      <td>classOut</td>
-	      <td>xsd:integer</td>
-	      <td>The ID for the defined class.</td>
+	      <td class="opt">boundary</td>
+	      <td><code class="att">koral:boundary</code></td>
+	      <td></td>
+	      <td>Specifies the mininmum and maximum repetition of the operand.</td>
 	    </tr>
 	    <tr>
 	      <td class="opt">classIn</td>
 	      <td>[xsd:integer]</td>
-	      <td>Specifies classes on which <code>classRefCheck</code> or <code>classRefOp</code> works.</td>
+	      <td></td>
+	      <td>The numeric identifiers of classes on which <code>classRefCheck</code> or <code>classRefOp</code> operate.</td>
+	    </tr>
+	    <tr>
+	      <td>classOut</td>
+	      <td>xsd:integer</td>
+	      <td></td>
+	      <td>The numeric identifier of the defined class.</td>
 	    </tr>
 	    <tr>
 	      <td class="opt">classRefCheck</td>
 	      <td>[@id]</td>
+	      <td></td>
 	      <td>Set-theoretic condition on input classes. Results that do not fulfil this condition are excluded from the result set.</td>
 	    </tr>
 	    <tr>
 	      <td class="opt">classRefOp</td>
 	      <td>@id</td>
-	      <td>Set-theoretic operation on input classes, creates new output class</td>
+	      <td></td>
+	      <td>Set-theoretic operation on input classes. Creates new output class.</td>
 	    </tr>
 	    <tr>
-	      <td>operands</td>
-	      <td>[span type]</td>
-	      <td>No. of operands: 1</td>
+	      <td class="opt">distances</td>
+	      <td>[<code class="att">koral:distance</code>]</td>
+	      <td>[]</td>
+	      <td>Distance constraints between operands
+		(pertaining to different keys).</td>
+	    </tr>
+	    <tr>
+	      <td class="opt">exclude</td>
+	      <td>xsd:boolean</td>
+	      <td><code>false</code></td>
+	      <td>If <code>true</code>, negate positional relations.</td>
+	    </tr>
+	    <tr>
+	      <td class="opt">frames</td>
+	      <td>[@id]</td>
+	      <td>[<code class="att">frames:contains</code>]</td>
+	      <td>The allowed positional relations between operands.</td>
+	    </tr>
+	    <tr>
+	      <td class="opt">inOrder</td>
+	      <td>xsd:boolean</td>
+	      <td><code>true</code></td>
+	      <td>If <code>true</code>, the order is relevant.</td>
+	    </tr>
+	    <tr>
+	      <td class="opt">relType</td>
+	      <td><code class="att">koral:relation</code></td>
+	      <td></td>
+	      <td>Specifies the relation between operands.</td>
 	    </tr>
 	  </tbody>
 	</table>
-        
-	<h6>The <code class="att">merge</code> operation</h6> 
-	<table>
-	  <thead>
-	    <tr>
-	      <th>Key</th>
-	      <th>Type</th>
-	      <th>Values</th>
-	    </tr>
-	  </thead>
-	  <tbody>
-	    <tr>
-	      <td>operands</td>
-	      <td>[span type]</td>
-	      <td>No. of operands: 1</td>
-	    </tr>
-	  </tbody>
-	</table>        
 
 	<h4 class="koral-type"><a name="koral-reference"
 				  id="koral-reference"
@@ -726,29 +623,41 @@
               <td>operation</td>
               <td>@id</td>
 	      <td></td>
-              <td>Defines the operation on the operands</td>
+              <td>Defines the operation performed based on the references.
+		<dl>
+		  <dt><code class="att">operation:focus</code></dt>
+		  <dd>Reduce the match to the given classes.<br />
+		  Expects 0 or 1 operands.</dd>
+		</dl>
+	      </td>
             </tr>
             <tr>
               <td class="opt">classRef</td>
-              <td>[@id]</td>
-              <td></td>
-              <td>Classes on which the operation is applied</td>
+              <td>[xsd:integer]</td>
+              <td>[0]</td>
+              <td>Defined classes to refer to.<br />
+		The class <em>0</em> refers to the operand's span.</td>
             </tr>
             <tr>
               <td class="opt">spanRef</td>
-              <td>[@id]</td>
+              <td>[@xsd:integer]</td>
               <td></td>
-              <td>Subspan to which the operand is reduced</td>
+              <td>Defined subspans to refer to.<br />
+		Expects one or to integers. The first integer defines the start index of the subspan, the second defines the length of the subspan.</td>
             </tr>
             <tr>
               <td class="opt">operands</td>
               <td>[span type]</td>
               <td></td>
-	      <td>Arguments of the operation. Number depends on respective operation</td>
+	      <td>Arguments of the operation. Number depends on respective operation.</td>
             </tr>
 	  </tbody>
 	</table>
       </section>
+
+      <p><code>spanRef</code> refers to subspans (i.e. tokens) of the operand. The first parameter defines the start index (starting at position 0). A negative start index counts from the end of the operand's span. If the positive start index starts beyond the end of the operand's span, the result of the operation is empty (no match). If the negative start index starts beyond the beginning of the operand's span, the startindex will be treated as being 0. The second parameter defines the length of the match counting from the start index to the right. If the length is omitted or exceeds the length of the operand's span, the rest of the operand's span is part of the match.</p>
+
+      <p>The reference (either a span or a class) has to be part of the operands. If no operand is given, but a <code>classRef</code> is defined, the class refers to a class defined at any point in the query tree. If <code>spanRef</code> is defined but no operand is defined, the query object is invalid.</p>
 
       <section>
 	<h2><a id="para-type" name="para-type">Parametric Type Objects</a></h2>
@@ -783,50 +692,62 @@
             </tr>
             <tr>
               <td>key</td>
-              <td>string</td>
+              <td>xsd:string</td>
               <td></td>
               <td>The term key</td>
             </tr>
             <tr>
               <td class="opt">value</td>
-              <td>string</td>
+              <td>xsd:string</td>
               <td></td>
               <td>The term value</td>
             </tr>
             <tr>
               <td class="opt">foundry</td>
-              <td>string</td>
+              <td>xsd:string</td>
               <td></td>
               <td>The annotation foundry</td>
             </tr>
             <tr>
               <td class="opt">layer</td>
-              <td><code>type:string</code></td>
-	      <td>surface layer</td>
+              <td>xsd:string</td>
+	      <td><em>surface layer</em></td>
               <td>The annotation layer</td>
             </tr>
             <tr>
               <td class="opt">type</td>
               <td>@id</td>
-	      <td>type:string</td>
-	      <td>type:string<br />
-		type:regex<br />
-		type:wildcard<br />
-		type:punct</td>
+	      <td><code class="att">type:string</code></td>
+	      <td>
+		<dl>
+		  <dt><code class="att">type:string</code></dt>
+		  <dt><code class="att">type:regex</code></dt>
+		  <dt><code class="att">type:wildcard</code></dt>
+		  <dt><code class="att">type:punct</code></dt>
+		</dl>
+	      </td>
             </tr>
             <tr>
               <td class="opt">match</td>
 	      <td>@id</td>
-              <td>match:eq</td>
-	      <td>match:eq<br />
-		match:ne</td>
+              <td><code class="att">match:eq</code></td>
+	      <td>
+		<dl>
+		  <dt><code class="att">match:eq</code></dt>
+		  <dt><code class="att">match:ne</code></dt>
+		</dl>
+	      </td>
             </tr>
             <tr>
               <td class="opt">flags</td>
               <td>[@id]</td>
               <td></td>
-              <td>flags:caseInsensitive<br />
-		flags:diacriticInsensitive</td>
+              <td>
+		<dl>
+		  <dt><code class="att">flags:caseInsensitive</code></dt>
+		  <dt><code class="att">flags:diacriticInsensitive</code></dt>
+		</dl>
+	      </td>
             </tr>
 	  </tbody>
 	</table>
