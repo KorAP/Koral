@@ -32,11 +32,11 @@
 	  <span class="p-org">IDS</span>,
 	  <span class="p-locality">Mannheim</span></p>
 	<p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-	<p>Last update: <time class="dt-updated" datetime="2015-03-22">2015/03/22</time></p>
+	<p>Last update: <time class="dt-updated" datetime="2015-04-21">2015/04/21</time></p>
       </div>
       
-      <p style="color: red">This draft is in preparation! Expected first usable version at the end of march 2015.</p>
-
+      <p style="color: red">This draft is in preparation! Expected first usable version at the end of april 2015.</p>
+      <!--
       <nav>
 	<ul>
 	  <li>Collection Type Objects
@@ -46,7 +46,7 @@
 	  </li>
 	</ul>
       </nav>
-      
+      -->
       <summary>
 	<h2>Abstract</h2>
 	<p>KoralQuery is a general corpus query protocol (i.e. independent of research tasks and corpus formats), serialized in <a href="#ref-jsonld">JSON-LD</a> <a href="#fn-jsonldrecommendation" id="ref-jsonldrecommendation" name="ref-jsonldrecommendation">[1]</a>.
@@ -81,7 +81,6 @@
 	
 	<section>
 	  <h2>Status of this draft</h2>
-	  <p style="color: red">This draft is in preparation! Expected first usable version at the end of march 2015.</p>
 	  <p>KoralQuery is not meant to be complete, but to be extensible and forward compatible. Extensibility is granted by support of embedded <code>@context</code> objects.
 	    Forward compatibility is tried to be ensured by describing implementation advices for incompatibility fallbacks.</p>
 	  <p>Implementations do not need to implement all described features to be called <em>KoralQuery compliant</em>,
@@ -162,8 +161,69 @@
 
 	<section>
 	  <h2><a id="coll-type" name="coll-type">Collection Type Objects</a></h2>
+	  <p>A KoralQuery can be limited to a subset of documents of a corpus.
+	    The collection can be defined by criteria, documents have to satisfy.
+	    The collection has to be defined on the top level object with the attribute
+	    <code class="att">collection</code>.
+	    A single criterion is defined by a <a href="#koral-doc">koral:doc</a>
+	    object. Multiple criteria can be further constrained using
+	    <a href="#koral-docGroup">koral:docGroup</a> objects.</p>
+	  <p>The result of a collection type object is a collection of documents
+	    that meet the conditions formulated by the collection criteria
+	    and group constraints.</p>
+
+<pre>{
+  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld",
+  "collection" : {
+    "@type":"koral:docGroup",
+    "operation":"operation:and",
+    "operands":[{
+      "@type":"koral:doc",
+      "key":"title",
+      "match":"match:eq",
+      "value":"Der Birnbaum",
+      "type":"type:string"
+    },{
+      "@type":"koral:doc",
+      "key":"pubPlace",
+      "match":"match:eq",
+      "value":"Mannheim",
+      "type":"type:string"
+    },{
+      "@type":"koral:docGroup",
+      "operation":"operation:or",
+      "operands":[{
+        "@type":"koral:doc",
+        "key":"pubDate",
+        "match":"match:geq",
+        "value":"2015-03-03",
+        "type":"type:date"
+      },{
+        "@type":"koral:doc",
+        "key":"lastModified",
+        "match":"match:geq",
+        "value":"2015-04-04",
+        "type":"type:date"
+      }]
+    }]
+  },
+  "query" : { ... },
+  "meta" : { ... }
+}</pre>
+
 	  <h3>Basic collection types</h3>
-	  
+
+	  <p>A document in KoralQuery is represented by the primary data,
+	    annotation data and meta data. The different data fields are defined
+	    by field names, for example <code>author</code> for the meta data field
+	    for the author, or <code>pubDate</code> for the meta data field
+	    for the publication date. The name of the fields
+	    is not part of the specification. Basic collection types do
+	    also not differ between fields for meta data, primary data and
+	    annotation data, although the field type may be constrained by the nature
+	    of the field.
+	  </p>
+
 	  <h4 class="koral-type"><a name="koral-doc"
 				    id="koral-doc"
 				    href="#koral-doc">koral:doc</a></h4>
@@ -194,13 +254,13 @@
 		<td>key</td>
 		<td>xsd:string</td>
 		<td></td>
-		<td>The metadata field.</td>
+		<td>The field name.</td>
               </tr>
 	      <tr>
 		<td>value</td>
 		<td>xsd:string</td>
 		<td></td>
-		<td>The metadata value</td>
+		<td>The field value.</td>
               </tr>
 	      <tr>
 		<td class="opt">type</td>
@@ -240,13 +300,118 @@
               </tr>
 	    </tbody>
 	  </table>
-	  
+
+	  <p>A <code class="att">koral:doc</code> object defines one criterion a document in the collection has to satisfy.
+	    If a document satisfies the criterion, it is part of the collection.</p>
+	  <p>The <code class="att">key</code> attribute represents a field name,
+	    like <code>author</code>, for maybe a meta data field containing
+	    the name of the document's author, <code>text</code>, for probably
+	    a field containing the primary data, or even a field like
+	    <code>numberOfTokens</code>, representing a field containing the
+	    number of tokens annotated in the document.</p>
+	  <p>The <code class="att">value</code> attribute represents the value
+	    a document is expected to match according to the
+	    <code class="att">match</code> attribute in the
+	    field defined by the <code class="att">key</code> attribute.
+	    This may, for example, be the name of the author <code>Theodor Fontane</code>,
+	    in case of a <code class="att">key</code> field for <code>author</code>.</p>
+	  <p>The <code class="att">type</code> attribute defines the nature of the
+	    <code class="att">value</code> attribute. This may represent a string,
+	    a date or a <a href="#appendix-regex">regular expression</a>. Dates have to follow the
+	    <a href="#ref-w3cdates">W3C Date and Time Formats</a>.</p>
+	  <p>The <code class="match">match</code> attribute defines the kind of
+	    agreement the value defined by the <code class="att">value</code>
+	    attribute has needs to make with the value specified in the document
+	    in the respective <code class="att">key</code> field.
+	    Ths behaviour is further constrained by the <code class="att">type</code>
+	    attribute. <code class="att">match:eq</code> expects an exact agreement for
+	    <code class="att">type:string</code>, a full match for
+	    <code class="att">type:regex</code> with implicit anchors
+	    <code>^</code> and <code>$</code>, and for <code class="att">type:date</code>
+	    a date value in the range of the given date
+	    (the range is based on the granularity, so a <code>2015-04</code> date matches
+	    <code>2015-04-01</code> as well as <code>2015-04-12</code>).
+	    <code class="att">match:ne</code> expects an exact disagreement for
+	    <code class="att">type:string</code>, a mismatch
+	    for <code class="att">type:regex</code> with implicit boundary anchors,
+	    and a date outside the defined range.
+	    <code class="att">match:geq</code> and <code class="att">match:leq</code>
+	    are currently only defined for <code class="att">type:date</code>,
+	    expecting a date in the exact range or later for
+	    <code class="att">match:geq</code> or a date in the exact range or earlier
+	    for <code class="att">match:leq</code>.
+	    <code class="att">match:contains</code> expects a value in which
+	    <code class="att">value</code> is a valid substring
+	    for <code class="att">type:string</code> or in which
+	    <code class="att">value</code> matches
+	    for <code class="att">type:regex</code>.
+	    <code class="att">match:excludes</code> expects a value in which
+	    <code class="att">value</code> is not a valid substring
+	    for <code class="att">type:string</code> or in which
+	    <code class="att">value</code> does not match
+	    for <code class="att">type:regex</code>.
+	    <code class="att">match:contains</code> and
+	    <code class="att">match:excludes</code> are undefined for
+	    <code class="att">type:date</code>.
+	  </p>
+
+
+
+	  <section class="guide">
+	    <h4>Implementation Guide</h4>
+	    <p>As collection type objects are used for the restriction of
+	      access to certain parts of the corpus, the implementation
+	      needs to be strict to prevent violation of access control mechanisms.</p>
+
+	    <p>The <code class="att">key</code> attribute in
+	      <code class="att">koral:doc</code> is mandatory. If the attribute
+	      is missing, the query has to be rejected and an error has to be raised.</p>
+
+	    <p>If the <code class="att">key</code> field of the criterion
+	      is not part of the document and the <code class="att">match</code>
+	      attribute is <code class="att">match:ne</code> or
+	      <code class="att">excludes</code>, the criterion is satisfied.
+	      In case of any other <code class="att">match</code> values,
+	      the criterion is not satisfied.</p>
+
+	    <p>The <code class="att">value</code> attribute in
+	      <code class="att">koral:doc</code> is mandatory. If the attribute
+	      is missing, the query has to be rejected and an error has to be raised.
+	      However, this rule is experimental and may change in
+	      future versions of this specification.</p>
+
+	    <p>If the <code class="att">type</code> attribute contains an
+	      undefined identifier, the query has to be rejeced and an
+	      error has to be raised.</p>
+
+	    <p>If the <code class="att">value</code> attribute is not valid
+	      refering to the given <code class="att">type</code>, e.g.
+	      an invalid date string or a regular expression with unbalanced
+	      parenthesis, the query has to be rejeced and an
+	      error has to be raised.</p>
+
+	    <p>If the <code class="att">match</code> attribute contains an
+	      undefined identifier, or an identifier that is undefined
+	      to the given <code class="att">type</code>,
+	      the query has to be rejected and an
+	      error has to be raised.</p>
+
+	    <p><code class="att">match:contains</code> and
+	    <code class="att">match:excludes</code> are only defined for fields
+	    supporting full text search. If a field with no fulltext search
+	    capabilities is requested with <code class="att">match:contains</code>,
+	    the meaning is identical to <code class="att">match:eq</code>. If a field with
+	    no fulltext search capailities is requested with
+	    <code class="att">match:excludes</code>, the query may be
+	    rejected with a raised error, or an empty collection is returned.</p>
+
+	    <p>Field names are not specified by KoralQuery and their string
+	      representation is not constrained.</p>
+	  </section>
+
 	  <!--
-The metadata attribute (e.g. <code>textClass</code>)
 
-The metadata value  (e.g. <code>Sport</code>)
 
-If , following <a href="#ref-w3cdates">W3C Date and Time Formats</a> with day granualarity (e.g. <code>2015-03-19</code>)
 
 
 match:geq
@@ -265,6 +430,7 @@ match:leq
 		    this expects a document having a field value with the name of the key attribute either matching or being alphabetically preceding.
 		    This match attribute is undefined for the type attribute being <code class="att">type:regex</code>.
 	    -->
+
 
 	  <h3>Complex collection types</h3>
 	  <h4 class="koral-type"><a name="koral-docGroup"
@@ -306,7 +472,7 @@ match:leq
 
 	<section>
 	  <h2><a name="span-type" id="span-type">Span Type Objects</a></h2>
-	  <p>For KoralQuery a document is represented as a series of tokens. A series of tokens is called a <em>substring</em> of the document.</p>
+	  <p>For KoralQuery the primary data of a document is represented as a series of tokens. A series of tokens is called a <em>substring</em> of the document.</p>
 	  <p>Query objects define conditions regarding the constellation of tokens and token-bound features that have to be in place to make a substring a valid occurrence of the query object in a document. These conditions may have syntagmatic or paradigmatic character.</p>
 	  <p>In addition to the substring, results of a query object may contain so-called <em>classes</em> as markers for substrings of the result substring.</p>
 	  <p>The result of a KoralQuery object may be an operand of another object, that may filter, enrich, combine or alter the results of nested objects.</p>
