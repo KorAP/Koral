@@ -280,6 +280,10 @@ code, h4.koral-type {
   background-color: rgba(0, 0, 0, 0.25);
 }
 
+code:not(.att) {
+  background-color: transparent; /* rgba(99, 111, 7, 0.35); */
+}
+
 h4.koral-type {
   font-weight: bold;
   display: inline-block;

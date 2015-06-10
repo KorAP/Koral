@@ -32,10 +32,10 @@
 	  <span class="p-org">IDS</span>,
 	  <span class="p-locality">Mannheim</span></p>
 	<p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-	<p>Last update: <time class="dt-updated" datetime="2015-04-26">2015/05/08</time></p>
+	<p>Last update: <time class="dt-updated" datetime="2015-06-10">2015/06/10</time></p>
       </div>
       
-      <p style="color: red">This draft is in preparation! Expected first usable version in may 2015.</p>
+      <p style="color: red">This draft is in preparation! Expected first usable version in summer 2015.</p>
       <!--
       <nav>
 	<ul>
@@ -58,6 +58,7 @@
   "query" : { ... },
   "meta" : { ... }
 }</pre>
+
       </summary>
 
       <main class="e-content">
@@ -137,6 +138,24 @@
 	      consequences for other attributes,
 	      and examples with descriptions.</dd>
 	  </dl>
+
+	  <section class="guide">
+	    <h3>Implementation Guide</h3>
+	    <p>If an object contains key attributes other than defined, they are ignored.</p>
+	    <p>If an object contains types other than defined for a certain key,
+	      the query has to be rejected and an error has to be raised.</p>
+	    <p>If an object has values other then defined for a certain key,
+	      the behaviour is defined in the implementation guide of the object type.
+	      If no special behaviour is defined,
+	      the query has to be rejected and an error has to be raised.
+	      The term <em>defined</em> in implementation guides may cover
+	      further definitions not part of this specification.
+	      The term <em>undefined</em> in implementation guides is not
+	      restricted to definitions of this specification.
+	    </p>
+	    <p>Empty objects in lists have to be ignored.
+	      Exception are &quot;[xsd:integer]&quot; and &quot;[xsd:string]&quot;.</p>
+	  </section>
 	</section>
 
 	<section>
@@ -319,7 +338,7 @@
 	    <code class="att">value</code> attribute. This may represent a string,
 	    a date or a <a href="#appendix-regex">regular expression</a>. Dates have to follow the
 	    <a href="#ref-w3cdates">W3C Date and Time Formats</a>.</p>
-	  <p>The <code class="match">match</code> attribute defines the kind of
+	  <p>The <code class="att">match</code> attribute defines the kind of
 	    agreement the value defined by the <code class="att">value</code>
 	    attribute has needs to make with the value specified in the document
 	    in the respective <code class="att">key</code> field.
@@ -354,8 +373,6 @@
 	    <code class="att">match:excludes</code> are undefined for
 	    <code class="att">type:date</code>.
 	  </p>
-
-
 
 	  <section class="guide">
 	    <h4>Implementation Guide</h4>
@@ -461,14 +478,56 @@ match:leq
 		<td>operation</td>
 		<td>@id</td>
 		<td></td>
-		<td><code>and</code> <br/>
-		  <code>or</code> 
+		<td>
+		  <dl>
+		    <dt><code class="att">operation:and</code></dt>
+		    <dt><code class="att">operation:or</code></dt>
+		  </dl>
 		</td>
+              </tr>
+	      <tr>
+		<td>operands</td>
+		<td>[collection type]</td>
+		<td></td>
+		<td>Arguments of the operation.
+		  Number depends on the respective operation</td>
               </tr>
 	    </tbody>
 	  </table>
-	</section>
 
+	  <p>A <code class="att">koral:docGroup</code> object defines
+	    boolean operations on criteria a document in the collection has to satisfy.</p>
+	  <p>The <code class="att">operands</code> list represents collection type objects
+	    the group refers to.</p>
+	  <p>The <code class="att">operation</code> attribute represents the kind of
+	    boolean operation between the <code class="att">operands</code>.
+	    The <code class="att">operation:or</code> operation
+	    acts like a unification of all collections defined in the
+	    <code class="att">operands</code> list,
+	    meaning a document is part of the collection
+	    if it is part of at least one collection in the <code class="att">operands</code> list.
+	    The <code class="att">operation:and</code> operation
+	    acts like an intersection of all collections defined in the
+	    <code class="att">operands</code> list,
+	    meaning a document is part of the collection
+	    if it is part of all collections in the <code class="att">operands</code> list.
+	  </p>
+
+	  <section class="guide">
+	    <h4>Implementation Guide</h4>
+	    <p>The <code class="att">operation</code> attribute is mandatory.
+	      If the attribute is missing, the query has to be rejected and an error
+	      has to be raised.
+	      If the <code class="att">operation</code> attribute contains an undefined
+	      identifier,
+	      the query has to be rejected and an error has to be raised.</p>
+	    <p>If the <code att="att">operands</code> list is empty,
+	      the resulting collection is empty.
+	      If the <code class="att">operands</code> list has only one entry,
+	      the resulting collection is identical to the resulting collection
+	      of the only entry, independent of the <code class="att">operation</code>.</p>
+	  </section>
+	</section>
 
 	<section>
 	  <h2><a name="span-type" id="span-type">Span Type Objects</a></h2>
@@ -724,6 +783,8 @@ match:leq
 	    </tbody>
 	  </table>
 
+
+
 	  <h4 class="koral-type"><a name="koral-reference"
 				    id="koral-reference"
 				    href="#koral-reference">koral:reference</a></h4>
@@ -774,7 +835,9 @@ match:leq
 		<td>[@xsd:integer]</td>
 		<td></td>
 		<td>Defined subspans to refer to.<br />
-		  Expects one or to integers. The first integer defines the start index of the subspan, the second defines the length of the subspan.</td>
+		  Expects one or to integers.
+		  The first integer defines the start index of the subspan,
+		  the second defines the length of the subspan.</td>
               </tr>
               <tr>
 		<td class="opt">operands</td>
@@ -785,12 +848,57 @@ match:leq
 	    </tbody>
 	  </table>
 
-	  <p><code>spanRef</code> refers to subspans (i.e. tokens) of the operand. The first parameter defines the start index (starting at position 0). A negative start index counts from the end of the operand's span. If the positive start index starts beyond the end of the operand's span, the result of the operation is empty (no match). If the negative start index starts beyond the beginning of the operand's span, the startindex will be treated as being 0. The second parameter defines the length of the match counting from the start index to the right. If the length is omitted or exceeds the length of the operand's span, the rest of the operand's span is part of the match.</p>
+	  <p>A <code class="att">koral:reference</code> object defines a
+	    span by refering to another span type.</p>
 
-	  <p>The reference (either a span or a class) has to be part of the operands. If no operand is given, but a <code>classRef</code> is defined, the class refers to a class defined at any point in the query tree. If <code>spanRef</code> is defined but no operand is defined, the query object is invalid.</p>
+	  <p>The <code class="att">operation</code> attribute defines the kind of result
+	  expected by referencing to another span.
+	  Currently the only value defined is <code class="att">operation:focus</code>,
+	  making the matching span refering to the defined start and end positions
+	  of the refering span.</p>
 
-	  <p>In case multiple classes are defined in <code>classRef</code> for a <code class="att">operation:focus</code>, the focus starts with the first classed token in sequential order and ends with the final classed token in sequential order.</p>
+	  <p><code class="att">spanRef</code> refers to subspans (i.e. tokens) of the operand.
+	    It accepts a list of numerical parameters.
+	    The first parameter defines the start index (starting at position 0).
+	    The second parameter defines the length of the match counting from the
+	    start index to the right.</p>
 
+	  <p>The reference (either a span or a class) has to be part of the operands.
+	    If no operand is given, but a <code class="att">classRef</code> is defined,
+	    the class refers to classes defined at any point in the query tree.</p>
+
+	  <p>In case multiple classes are defined in <code class="att">classRef</code> for
+	    a <code class="att">operation:focus</code>,
+	    the focus starts with the first classed token in sequential order
+	    and ends with the final classed token in sequential order.</p>
+
+	  <section class="guide">
+	    <h4>Implementation Guide</h4>
+	    <p>If the <code class="att">operation</code> attribute contains an undefined identifier,
+	      a warning has to be raised and the default operation has to be assumed.</p>
+	    <p>If the <code class="att">classRef</code> list refers to a class not defined,
+	      the class is ignored.</p>
+	    <p>If the <code class="att">classRef</code> is an empty list
+	      (for example &quot;[]&quot; or because of ignored classes),
+	      and the operation is <code>operation:focus</code>,
+	      the resulting span is empty and matches <em>nowhere</em>.</p>
+	    <p>If the <code class="att">operands</code> list is empty
+	      and no <code class="att">classRef</code> is defined,
+	      the resulting spoan is empty and matches <em>nowhere</em>.</p>
+	    <p>If both <code class="att">spanRef</code> and
+	      <code class="att">classRef</code> is defined,
+	      a warning has to be raised and <code class="att">classRef</code>
+	      has to be assumed.</p>
+	    <p>A negative start index for <code class="att">spanRef</code>
+	      counts from the end of the operand's span.
+	      If the positive start index starts beyond the end of the operand's span,
+	      the result of the operation is empty and matches <em>nowhere</em>.
+	      If the negative start index starts beyond the beginning of the operand's span,
+	      the startindex will be treated as being <code>0</code>.
+	      If the length is omitted or exceeds the length of the operand's span,
+	      the rest of the operand's span is part of the match.
+	    </p>
+	  </section>
 	</section>
 
 	<section>
@@ -1276,7 +1384,6 @@ match:leq
 	    that consumes
 	    KoralQuery and creates KoralQuery compatible responses.</p>
 	  <!-- http://www.w3.org/TR/html5/common-idioms.html -->
-
 	</section>
 
 	<section>
@@ -1290,6 +1397,10 @@ match:leq
 
 	<section>
 	  <h2>References</h2>
+
+	  <p>To cite work on KoralQuery, please refer to: <a id="ref-koralquery" name="ref-koralquery">Bingel, Joachim and Nils Diewald (2015): <a href="http://www.ep.liu.se/ecp_article/index.en.aspx?issue=111;article=001">KoralQuery - a General Corpus Query Protocol</a>, Proceedings of the Workshop on Innovative Corpus Query and Visualization Tools at NODALIDA 2015, May 11-13, 2015, Vilnius, Lithuania.</a></p>
+	  <p>To cite this specification, please refer to: <a id="ref-koralspec" name="ref-koralquery">Diewald, Nils and Joachim Bingel (2015): <a href="http://KorAP.github.io/Koral">KoralQuery 0.3</a>, Technical report, IDS, Mannheim, Germany. Working  draft.</p>
+
 	  <p><a id="ref-json" name="ref-json">ECMA (2003): <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf">The JSON Data Interchange Format</a>, ECMA-404, ECMA Standard.</a></p>
 	  <p><a id="ref-jsonld" name="ref-jsonld">Sporny, Manu, Dave Longley, Gregg Kellogg, Markus Lanthaler, and Niklas Lindstr&ouml;m (2014): <a href="http://www.w3.org/TR/json-ld/">JSON-LD 1.0 - A JSON-based Serialization for Linked Data</a>, W3C Recommendation.</a></p>
 	  <p><a id="ref-w3cdates" name="ref-w3cdates">Wolf, Misha and Charles Wicksteed (1997): <a href="http://www.w3.org/TR/NOTE-datetime">Date and Time Formats</a>, W3C Standard.</a></p>
