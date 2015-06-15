@@ -1,4 +1,4 @@
-# Koral
+![Koral](https://raw.githubusercontent.com/KorAP/Koral/master/misc/koral.png)
 
 Koral is a library designed for the translation of different corpus query 
 languages to KoralQuery, a JSON-LD-based protocol for the common representation
