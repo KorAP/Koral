@@ -16,43 +16,40 @@ public class MetaQueryBuilder {
     private Map meta;
     private SpanContext spanContext;
 
-
-    public MetaQueryBuilder () {
+    public MetaQueryBuilder() {
         this.meta = new LinkedHashMap();
+        this.meta.put("fields", new LinkedList<>());
     }
-
 
     /**
      * context segment if context is either of type char or token.
      * size can differ for left and right span
-     * 
+     *
      * @param left
      * @param leftType
      * @param right
      * @param rightType
      * @return
      */
-    public MetaQueryBuilder setSpanContext (Integer left, String leftType,
+    public MetaQueryBuilder setSpanContext(Integer left, String leftType,
             Integer right, String rightType) {
         this.spanContext = new SpanContext(left, leftType, right, rightType);
         return this;
     }
 
-
-    public SpanContext getSpanContext () {
+    public SpanContext getSpanContext() {
         return this.spanContext;
     }
-
 
     /**
      * context if of type paragraph or sentence where left and right
      * size delimiters are irrelevant; or 2-token, 2-char p/paragraph,
      * s/sentence or token, char
-     * 
+     *
      * @param context
      * @return
      */
-    public MetaQueryBuilder setSpanContext (String context) {
+    public MetaQueryBuilder setSpanContext(String context) {
         if (context.startsWith("s") | context.startsWith("p"))
             this.spanContext = new SpanContext(context);
         else {
@@ -65,30 +62,12 @@ public class MetaQueryBuilder {
         return this;
     }
 
-
-    public MetaQueryBuilder fillMeta (Integer pageIndex, Integer pageInteger,
-            Integer pageLength, String ctx, Boolean cutoff) {
-        if (pageIndex != null)
-            this.addEntry("startIndex", pageIndex);
-        if (pageIndex == null && pageInteger != null)
-            this.addEntry("startPage", pageInteger);
-        if (pageLength != null)
-            this.addEntry("count", pageLength);
-        if (ctx != null)
-            this.setSpanContext(ctx);
-        if (cutoff != null)
-            this.addEntry("cutOff", cutoff);
-        return this;
-    }
-
-
-    public MetaQueryBuilder addEntry (String name, Object value) {
+    public MetaQueryBuilder addEntry(String name, Object value) {
         meta.put(name, value);
         return this;
     }
 
-
-    public Map raw () {
+    public Map raw() {
         if (this.spanContext != null)
             meta.putAll(this.spanContext.raw());
         return meta;
@@ -102,31 +81,28 @@ public class MetaQueryBuilder {
         private int right_size;
         private String context = null;
 
-
         /**
          * context segment if context is either of type char or token.
          * size can differ for left and right span
-         * 
+         *
          * @param ls
          * @param lt
          * @param rs
          * @param rt
          * @return
          */
-        public SpanContext (int ls, String lt, int rs, String rt) {
+        public SpanContext(int ls, String lt, int rs, String rt) {
             this.left_type = lt;
             this.left_size = ls;
             this.right_type = rt;
             this.right_size = rs;
         }
 
-
-        public SpanContext (String context) {
+        public SpanContext(String context) {
             this.context = context;
         }
 
-
-        public Map raw () {
+        public Map raw() {
             Map meta = new LinkedHashMap();
             if (this.context == null) {
                 Map map = new LinkedHashMap();
@@ -139,8 +115,7 @@ public class MetaQueryBuilder {
                 r.add(this.right_size);
                 map.put("right", r);
                 meta.put("context", map);
-            }
-            else
+            }else
                 meta.put("context", this.context);
             return meta;
         }
