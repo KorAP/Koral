@@ -1,8 +1,6 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
@@ -40,7 +38,7 @@ public class QuerySerializer {
     public static String queryLanguageVersion;
 
     private AbstractQueryProcessor ast;
-    private Map<String, Object> collection = new LinkedHashMap<String, Object>();
+    private Map<String, Object> collection = new LinkedHashMap<>();
     private Map<String, Object> meta;
     private List<Object> errors;
     private List<Object> warnings;
@@ -82,10 +80,6 @@ public class QuerySerializer {
             }catch (NullPointerException npe) {
                 npe.printStackTrace();
                 System.out.println("null\n");
-            }catch (JsonGenerationException e) {
-                e.printStackTrace();
-            }catch (JsonMappingException e) {
-                e.printStackTrace();
             }catch (IOException e) {
                 e.printStackTrace();
             }
@@ -180,20 +174,21 @@ public class QuerySerializer {
             List warnings = (List) requestMap.get("warnings");
             List messages = (List) requestMap.get("messages");
             this.collection = mergeCollection(collection, this.collection);
-            requestMap.put("collection", this.collection);
+            if (this.collection != null && !this.collection.isEmpty())
+                requestMap.put("collection", this.collection);
             if (this.meta != null) {
                 meta.putAll(this.meta);
                 requestMap.put("meta", meta);
             }
-            if (this.errors != null) {
+            if (this.errors != null && !this.errors.isEmpty()) {
                 errors.addAll(this.errors);
                 requestMap.put("errors", errors);
             }
-            if (this.warnings != null) {
+            if (this.warnings != null && !this.warnings.isEmpty()) {
                 warnings.addAll(this.warnings);
                 requestMap.put("warnings", warnings);
             }
-            if (this.messages != null) {
+            if (this.messages != null && !this.messages.isEmpty()) {
                 messages.addAll(this.messages);
                 requestMap.put("messages", messages);
             }
@@ -205,15 +200,15 @@ public class QuerySerializer {
 
     private Map<String, Object> mergeCollection(Map<String, Object> collection1,
             Map<String, Object> collection2) {
-        LinkedHashMap<String, Object> docGroup = KoralObjectGenerator
-                .makeDocGroup("and");
-        ArrayList<Object> operands = (ArrayList<Object>) docGroup
-                .get("operands");
         if (collection1 == null || collection1.isEmpty()) {
             return collection2;
         }else if (collection2 == null || collection2.isEmpty()) {
             return collection1;
         }else {
+            LinkedHashMap<String, Object> docGroup = KoralObjectGenerator
+                    .makeDocGroup("and");
+            ArrayList<Object> operands = (ArrayList<Object>) docGroup
+                    .get("operands");
             operands.add(collection1);
             operands.add(collection2);
             return docGroup;
@@ -243,14 +238,16 @@ public class QuerySerializer {
 
     public QuerySerializer setCollection(String collection) {
         CollectionQueryProcessor tree = new CollectionQueryProcessor();
-        Map<String, Object> collectionRequest = tree.getRequestMap();
         tree.process(collection);
+        Map<String, Object> collectionRequest = tree.getRequestMap();
         if (collectionRequest.get("errors") != null)
             this.errors.addAll((List) collectionRequest.get("errors"));
         if (collectionRequest.get("warnings") != null)
             this.warnings.addAll((List) collectionRequest.get("warnings"));
         if (collectionRequest.get("messages") != null)
             this.messages.addAll((List) collectionRequest.get("messages"));
+        this.collection = (Map<String, Object>) collectionRequest
+                .get("collection");
         return this;
     }
 }
