@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author hanl
@@ -13,12 +14,14 @@ import java.util.Map;
  */
 public class MetaQueryBuilder {
 
+    private static Pattern p = Pattern
+            .compile("\\s*\\d+-(?:c(?:hars?)?|t(?:okens?)?)");
     private Map meta;
     private SpanContext spanContext;
 
     public MetaQueryBuilder() {
         this.meta = new LinkedHashMap();
-        this.meta.put("fields", new LinkedList<>());
+        //        this.meta.put("fields", new LinkedList<>());
     }
 
     /**
@@ -52,7 +55,7 @@ public class MetaQueryBuilder {
      */
     public MetaQueryBuilder setSpanContext(String context) {
         if (context != null) {
-            if (!context.contains("-") || context.contains(":"))
+            if (!p.matcher(context).find())
                 this.spanContext = new SpanContext(context);
             else {
                 String[] ct = context.replaceAll("\\s+", "").split(",");
@@ -76,8 +79,6 @@ public class MetaQueryBuilder {
             meta.putAll(this.spanContext.raw());
         return meta;
     }
-
-
 
     @Data
     public class SpanContext {
