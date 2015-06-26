@@ -231,7 +231,7 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer addMeta(MetaQueryBuilder meta) {
+    public QuerySerializer setMeta(MetaQueryBuilder meta) {
         this.meta = meta.raw();
         return this;
     }

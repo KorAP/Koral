@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author hanl
@@ -13,12 +14,14 @@ import java.util.Map;
  */
 public class MetaQueryBuilder {
 
+    private static Pattern p = Pattern
+            .compile("\\s*\\d+-(?:c(?:hars?)?|t(?:okens?)?)");
     private Map meta;
     private SpanContext spanContext;
 
     public MetaQueryBuilder() {
         this.meta = new LinkedHashMap();
-        this.meta.put("fields", new LinkedList<>());
+        //        this.meta.put("fields", new LinkedList<>());
     }
 
     /**
@@ -44,26 +47,30 @@ public class MetaQueryBuilder {
     /**
      * context if of type paragraph or sentence where left and right
      * size delimiters are irrelevant; or 2-token, 2-char p/paragraph,
-     * s/sentence or token, char
+     * s/sentence or token, char.
+     * Distinguish
      *
      * @param context
      * @return
      */
     public MetaQueryBuilder setSpanContext(String context) {
-        if (context.startsWith("s") | context.startsWith("p"))
-            this.spanContext = new SpanContext(context);
-        else {
-            String[] ct = context.replaceAll("\\s+", "").split(",");
-            String[] lc = ct[0].split("-");
-            String[] rc = ct[1].split("-");
-            this.spanContext = new SpanContext(Integer.valueOf(lc[0]), lc[1],
-                    Integer.valueOf(rc[0]), rc[1]);
+        if (context != null) {
+            if (!p.matcher(context).find())
+                this.spanContext = new SpanContext(context);
+            else {
+                String[] ct = context.replaceAll("\\s+", "").split(",");
+                String[] lc = ct[0].split("-");
+                String[] rc = ct[1].split("-");
+                this.spanContext = new SpanContext(Integer.valueOf(lc[0]),
+                        lc[1], Integer.valueOf(rc[0]), rc[1]);
+            }
         }
         return this;
     }
 
     public MetaQueryBuilder addEntry(String name, Object value) {
-        meta.put(name, value);
+        if (value != null)
+            meta.put(name, value);
         return this;
     }
 
@@ -72,6 +79,8 @@ public class MetaQueryBuilder {
             meta.putAll(this.spanContext.raw());
         return meta;
     }
+
+
 
     @Data
     public class SpanContext {
