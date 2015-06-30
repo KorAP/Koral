@@ -54,6 +54,18 @@ public class CollectionQueryProcessorTest {
     }
 
     @Test
+    public void testSpecialCharacters() throws JsonProcessingException, IOException {
+        collection = "tokens=base/n:alt";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("tokens", res.at("/collection/key").asText());
+        assertEquals("base/s:s", res.at("/collection/value").asText());
+        assertEquals("match:eq", res.at("/collection/match").asText());
+    };
+
+    @Test
     public void testContains() throws JsonProcessingException, IOException {
         collection = "title~Mannheim";
         qs.setQuery(query, ql);
