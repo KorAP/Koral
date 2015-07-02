@@ -22,7 +22,12 @@ import java.util.*;
  */
 public class QuerySerializer {
 
+    // fixme: not used in any way!
+    @Deprecated
     static HashMap<String, Class<? extends AbstractQueryProcessor>> qlProcessorAssignment;
+
+
+
 
     static {
         qlProcessorAssignment = new HashMap<String, Class<? extends AbstractQueryProcessor>>();
@@ -174,11 +179,10 @@ public class QuerySerializer {
             List warnings = (List) requestMap.get("warnings");
             List messages = (List) requestMap.get("messages");
             this.collection = mergeCollection(collection, this.collection);
-            if (this.collection != null && !this.collection.isEmpty())
-                requestMap.put("collection", this.collection);
+            requestMap.put("collection", this.collection);
             if (this.meta != null) {
-                meta.putAll(this.meta);
-                requestMap.put("meta", meta);
+                this.meta.putAll(meta);
+                requestMap.put("meta", this.meta);
             }
             if (this.errors != null && !this.errors.isEmpty()) {
                 errors.addAll(this.errors);
@@ -193,9 +197,27 @@ public class QuerySerializer {
                 requestMap.put("messages", messages);
             }
 
-            return requestMap;
+            return cleanup(requestMap);
         }
         return new HashMap<>();
+    }
+
+    private Map<String, Object> cleanup(Map<String, Object> requestMap) {
+        Iterator<Map.Entry<String, Object>> set = requestMap.entrySet()
+                .iterator();
+        while (set.hasNext()) {
+            Map.Entry<String, Object> entry = set.next();
+            if (entry.getValue() instanceof List && ((List) entry.getValue())
+                    .isEmpty())
+                set.remove();
+            else if (entry.getValue() instanceof Map && ((Map) entry.getValue())
+                    .isEmpty())
+                set.remove();
+            else if (entry.getValue() instanceof String && ((String) entry
+                    .getValue()).isEmpty())
+                set.remove();
+        }
+        return requestMap;
     }
 
     private Map<String, Object> mergeCollection(Map<String, Object> collection1,
