@@ -13,7 +13,7 @@ import java.io.IOException;
 public class CollectionQueryDuplicateTest {
 
     @Test
-    public void testCollectionQueryDuplicateThrowsNoException() {
+    public void testCollectionQueryDuplicateThrowsAssertionException() {
         QuerySerializer serializer = new QuerySerializer();
         serializer.setQuery("[base=Haus]", "poliqarp");
         serializer.setCollection("textClass=politik & corpusID=WPD");
