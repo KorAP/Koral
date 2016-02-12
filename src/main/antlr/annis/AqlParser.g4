@@ -98,11 +98,11 @@ spanrelation
 | LEFT_OVERLAP # LeftOverlap
 ;
 
-commonparent
+commonparent_
 : COMMON_PARENT (label)? # CommonParent
 ;
 
-commonancestor
+commonancestor_
 : COMMON_PARENT (label)? STAR # CommonAncestor
 ;
 
@@ -129,8 +129,8 @@ operator
 | spanrelation
 | dominance
 | pointing
-| commonparent
-| commonancestor
+| commonparent_
+| commonancestor_
 | identity
 | equalvalue
 | notequalvalue
