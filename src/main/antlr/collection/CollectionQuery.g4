@@ -167,7 +167,7 @@ value
 ;
 
 multiword
-: '"' WORD+ '"'
+: '"' ~'"'* '"'
 ;
 
 relation
