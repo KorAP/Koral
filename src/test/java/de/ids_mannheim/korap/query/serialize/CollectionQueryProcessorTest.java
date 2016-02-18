@@ -87,6 +87,15 @@ public class CollectionQueryProcessorTest {
         assertEquals("title", res.at("/collection/key").asText());
         assertEquals("IDS Mannheim", res.at("/collection/value").asText());
         assertEquals("match:contains", res.at("/collection/match").asText());
+
+        collection = "title~\"IDS:Mannheim\"";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("title", res.at("/collection/key").asText());
+        assertEquals("IDS:Mannheim", res.at("/collection/value").asText());
+        assertEquals("match:contains", res.at("/collection/match").asText());
     }
 
     @Test
