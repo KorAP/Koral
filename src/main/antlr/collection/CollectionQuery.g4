@@ -43,7 +43,7 @@ SINCE				: 'since';
 UNTIL				: 'until';
 IN					: 'in';
 ON					: 'on';
-WS 					: ( ' ' | '\t' | '\r' | '\n' )+ -> skip ;
+WS 					: ( ' ' | '\t' | '\r' | '\n' )+ -> channel(HIDDEN);
 fragment NO_RE      : ~[ \t\/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
                     | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' );

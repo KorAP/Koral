@@ -5,14 +5,15 @@ import de.ids_mannheim.korap.query.parse.collection.CollectionQueryParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +25,7 @@ import java.util.regex.Pattern;
  * of the KoralQuery tree. See the official documentation for VC query
  * syntax
  * and functionality.
- * 
+ *
  * @author Michael Hanl (hanl@ids-mannheim.de)
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @version 0.3.0
@@ -35,31 +36,26 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
     private static Logger log = LoggerFactory
             .getLogger(CollectionQueryProcessor.class);
 
-
-    public CollectionQueryProcessor () {
+    public CollectionQueryProcessor() {
         KoralObjectGenerator.setQueryProcessor(this);
     }
 
-
-    public CollectionQueryProcessor (boolean verbose) {
+    public CollectionQueryProcessor(boolean verbose) {
         KoralObjectGenerator.setQueryProcessor(this);
         CollectionQueryProcessor.verbose = verbose;
     }
 
-
-    public CollectionQueryProcessor (String query) {
+    public CollectionQueryProcessor(String query) {
         KoralObjectGenerator.setQueryProcessor(this);
         process(query);
     }
 
-
     @Override
-    public void process (String query) {
+    public void process(String query) {
         ParseTree tree = parseCollectionQuery(query);
         if (this.parser != null) {
             super.parser = this.parser;
-        }
-        else {
+        }else {
             throw new NullPointerException("Parser has not been instantiated!");
         }
         log.info("Processing virtual collection query: " + query);
@@ -68,15 +64,13 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (tree != null) {
             log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
             processNode(tree);
-        }
-        else {
-            addError(StatusCodes.MALFORMED_QUERY, "Could not parse query >>> "
-                    + query + " <<<.");
+        }else {
+            addError(StatusCodes.MALFORMED_QUERY,
+                    "Could not parse query >>> " + query + " <<<.");
         }
     }
 
-
-    private void processNode (ParseTree node) {
+    private void processNode(ParseTree node) {
         // Top-down processing
         String nodeCat = getNodeCat(node);
         openNodeCats.push(nodeCat);
@@ -96,8 +90,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
          */
 
         if (nodeCat.equals("relation")) {
-            String operator = getNodeCat(node.getChild(1).getChild(0)).equals(
-                    "&") ? "and" : "or";
+            String operator = getNodeCat(node.getChild(1).getChild(0))
+                    .equals("&") ? "and" : "or";
             LinkedHashMap<String, Object> relationGroup = KoralObjectGenerator
                     .makeDocGroup(operator);
             putIntoSuperObject(relationGroup);
@@ -188,8 +182,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
                     }
                 }
                 token.put("wrap", term);
-            }
-            else {
+            }else {
                 // child is 'term' or 'termGroup' -> process in extra method 
                 LinkedHashMap<String, Object> termOrTermGroup = parseTermOrTermGroup(
                         node.getChild(1), negated);
@@ -226,22 +219,20 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         openNodeCats.pop();
 
-
     }
-
 
     /**
      * Checks whether the combination of operator and value is legal
      * (inequation operators <,>,<=,>= may only be used with dates).
      */
-    private boolean checkOperatorValueConformance (
+    private boolean checkOperatorValueConformance(
             LinkedHashMap<String, Object> term) {
         String match = (String) term.get("match");
         String type = (String) term.get("type");
         if (type == null || type.equals("type:regex")) {
-            if (!(match.equals("match:eq") || match.equals("match:ne")
-                    || match.equals("match:contains") || match
-                        .equals("match:containsnot"))) {
+            if (!(match.equals("match:eq") || match.equals("match:ne") || match
+                    .equals("match:contains") || match
+                    .equals("match:containsnot"))) {
                 addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
                         "You used an inequation operator with a string value.");
                 return false;
@@ -250,40 +241,58 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         return true;
     }
 
-
-    private LinkedHashMap<String, Object> parseValue (ParseTree valueNode) {
+    private LinkedHashMap<String, Object> parseValue(ParseTree valueNode) {
         LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
         if (getNodeCat(valueNode).equals("date")) {
             map.put("type", "type:date");
             checkDateValidity(valueNode);
         }
-        if (getNodeCat(valueNode.getChild(0)).equals("regex")) {
-            String regex = valueNode.getChild(0).getChild(0)
-                    .toStringTree(parser);
-            map.put("value", regex.substring(1, regex.length() - 1));
-            map.put("type", "type:regex");
-        }
-        else if (getNodeCat(valueNode.getChild(0)).equals("multiword")) {
-            String mw = ""; // multiword
-            for (int i = 1; i < valueNode.getChild(0).getChildCount() - 1; i++) {
-                mw += valueNode.getChild(0).getChild(i).getText() + " ";
-            }
-            map.put("value", mw.substring(0, mw.length() - 1));
-        }
-        else {
+        String node_cat = getNodeCat(valueNode.getChild(0));
+
+        TokenStream stream = parser.getTokenStream();
+        String stm = stream.getText(valueNode.getChild(0).getSourceInterval());
+        if (stm.startsWith("\"") && stm.endsWith("\""))
+            stm = stm.replaceAll("\"", "");
+
+        if ("regex".equals(node_cat) | "multiword".equals(node_cat))
+            map.put("value", stm);
+        else
             map.put("value", valueNode.getChild(0).toStringTree(parser));
-        }
+
+        if ("regex".equals(node_cat))
+            map.put("type", "type:regex");
+
+        // deprecated code
+        //        if (getNodeCat(valueNode.getChild(0)).equals("regex")) {
+        //            String regex = valueNode.getChild(0).getChild(0)
+        //                    .toStringTree(parser);
+        //            map.put("value", regex.substring(1, regex.length() - 1));
+        //            map.put("type", "type:regex");
+        //        }else if (getNodeCat(valueNode.getChild(0)).equals("multiword")) {
+        //            TokenStream stream = parser.getTokenStream();
+        //            String stm = stream
+        //                    .getText(valueNode.getChild(0).getSourceInterval());
+        //
+        //            //            StringBuilder mw = new StringBuilder(); // multiword
+        //            //            for (int i = 1;
+        //            //                 i < valueNode.getChild(0).getChildCount() - 1; i++) {
+        //            //                mw.append(valueNode.getChild(0).getChild(i).getText());
+        //            //            }
+        //            map.put("value", stm.substring(1, stm.length() - 1));
+        //        }else {
+        //            map.put("value", valueNode.getChild(0).toStringTree(parser));
+        //        }
         return map;
     }
 
-
     /**
      * Checks if a date
-     * 
+     *
      * @param valueNode
      * @return
      */
-    private boolean checkDateValidity (ParseTree valueNode) {
+
+    private boolean checkDateValidity(ParseTree valueNode) {
         Pattern p = Pattern.compile("[0-9]{4}(-([0-9]{2})(-([0-9]{2}))?)?");
         Matcher m = p.matcher(valueNode.getText());
 
@@ -294,8 +303,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (month != null) {
             if (Integer.parseInt(month) > 12) {
                 return false;
-            }
-            else if (day != null) {
+            }else if (day != null) {
                 if (Integer.parseInt(day) > 31) {
                     return false;
                 }
@@ -304,8 +312,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         return true;
     }
 
-
-    private String interpretMatchOperator (String match) {
+    private String interpretMatchOperator(String match) {
         String out = null;
         switch (match) {
             case "<":
@@ -353,9 +360,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         return out;
     }
 
-
     @Deprecated
-    private String invertInequation (String op) {
+    private String invertInequation(String op) {
         String inv = null;
         switch (op) {
             case "lt":
@@ -374,47 +380,41 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         return inv;
     }
 
-
-    private void putIntoSuperObject (LinkedHashMap<String, Object> object) {
+    private void putIntoSuperObject(LinkedHashMap<String, Object> object) {
         putIntoSuperObject(object, 0);
     }
 
-
     @SuppressWarnings({ "unchecked" })
-    private void putIntoSuperObject (LinkedHashMap<String, Object> object,
+    private void putIntoSuperObject(LinkedHashMap<String, Object> object,
             int objStackPosition) {
         if (objectStack.size() > objStackPosition) {
             ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack
                     .get(objStackPosition).get("operands");
             topObjectOperands.add(object);
-        }
-        else {
+        }else {
             //        	requestMap = object;
             requestMap.put("collection", object);
         }
     }
 
-
-    private LinkedHashMap<String, Object> parseTermOrTermGroup (ParseTree node,
+    private LinkedHashMap<String, Object> parseTermOrTermGroup(ParseTree node,
             boolean negated) {
         return parseTermOrTermGroup(node, negated, "token");
     }
 
-
     /**
      * Parses a (term) or (termGroup) node
-     * 
+     *
      * @param node
-     * @param negatedGlobal
-     *            Indicates whether the term/termGroup is globally
-     *            negated, e.g. through a negation operator preceding
-     *            the related token
-     *            like "![base=foo]". Global negation affects the
-     *            "match" parameter.
+     * @param negatedGlobal Indicates whether the term/termGroup is globally
+     *                      negated, e.g. through a negation operator preceding
+     *                      the related token
+     *                      like "![base=foo]". Global negation affects the
+     *                      "match" parameter.
      * @return A term or termGroup object, depending on input
      */
     @SuppressWarnings("unchecked")
-    private LinkedHashMap<String, Object> parseTermOrTermGroup (ParseTree node,
+    private LinkedHashMap<String, Object> parseTermOrTermGroup(ParseTree node,
             boolean negatedGlobal, String mode) {
         if (getNodeCat(node).equals("term")) {
             String key = null;
@@ -488,8 +488,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
                 }
             }
             return term;
-        }
-        else {
+        }else {
             // For termGroups, establish a boolean relation between operands 
             // and recursively call this function with the term or termGroup 
             // operands.
@@ -519,8 +518,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
     }
 
-
-    private ParserRuleContext parseCollectionQuery (String query) {
+    private ParserRuleContext parseCollectionQuery(String query) {
         Lexer lexer = new CollectionQueryLexer((CharStream) null);
         ParserRuleContext tree = null;
         Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(
