@@ -54,7 +54,8 @@ public class CollectionQueryProcessorTest {
     }
 
     @Test
-    public void testSpecialCharacters() throws JsonProcessingException, IOException {
+    public void testSpecialCharacters()
+            throws JsonProcessingException, IOException {
         collection = "[base/n=alt]";
         qs.setQuery(query, ql);
         qs.setCollection(collection);
@@ -66,7 +67,9 @@ public class CollectionQueryProcessorTest {
         assertEquals("n", res.at("/collection/wrap/layer").asText());
         assertEquals("alt", res.at("/collection/wrap/key").asText());
         assertEquals("match:eq", res.at("/collection/wrap/match").asText());
-    };
+    }
+
+    ;
 
     @Test
     public void testContains() throws JsonProcessingException, IOException {
@@ -99,6 +102,20 @@ public class CollectionQueryProcessorTest {
     }
 
     @Test
+    public void testNotDate() throws JsonProcessingException, IOException {
+        collection = "author=\"firefighter1974\"";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("author", res.at("/collection/key").asText());
+        assertEquals("firefighter1974", res.at("/collection/value").asText());
+        assertEquals("match:eq", res.at("/collection/match").asText());
+        assertEquals("", res.at("/errors/0/0").asText());
+        assertEquals("", res.at("/warnings/0/0").asText());
+    }
+
+    @Test
     public void testTwoConjuncts() throws JsonProcessingException, IOException {
         collection = "textClass=Sport & pubDate in 2014";
         qs.setQuery(query, ql);
@@ -125,7 +142,11 @@ public class CollectionQueryProcessorTest {
         collection = "textClass=Sport & pubDate=2014";
         qs.setQuery(query, ql);
         qs.setCollection(collection);
-        res = mapper.readTree(qs.toJSON());
+
+        String s = qs.toJSON();
+        System.out.println("________________________");
+        System.out.println(s);
+        res = mapper.readTree(s);
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:and", res.at("/collection/operation").asText());
         assertEquals("koral:doc",
@@ -513,5 +534,21 @@ public class CollectionQueryProcessorTest {
         assertEquals("2000-01-01", res.at("/collection/value").asText());
         assertEquals("type:date", res.at("/collection/type").asText());
         assertEquals("match:leq", res.at("/collection/match").asText());
+    }
+
+    @Test
+    public void testDateValidate() {
+        String fake_date = "fireStorm2014";
+        String fake_date_2 = "2014-12Date";
+        String date = "2015";
+        String date_1 = "2015-05";
+        String date_2 = "2015-05-13";
+        String date_3 = "2015-23-01";
+        assertEquals(false, QueryUtils.checkDateValidity(fake_date));
+        assertEquals(false, QueryUtils.checkDateValidity(fake_date_2));
+        assertEquals(true, QueryUtils.checkDateValidity(date));
+        assertEquals(true, QueryUtils.checkDateValidity(date_1));
+        assertEquals(true, QueryUtils.checkDateValidity(date_2));
+        assertEquals(false, QueryUtils.checkDateValidity(date_3));
     }
 }

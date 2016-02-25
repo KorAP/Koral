@@ -109,11 +109,12 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             term.putAll(parseValue(valueNode));
             String match = operatorNode.getText();
             term.put("match", "match:" + interpretMatchOperator(match));
-            if (checkOperatorValueConformance(term) == false) {
+
+            if (!checkOperatorValueConformance(term)) {
                 requestMap = new LinkedHashMap<String, Object>();
                 return;
             }
-            if (checkDateValidity(valueNode)) {
+            if (QueryUtils.checkDateValidity(valueNode.getText())) {
                 addWarning("The collection query contains a value that looks"
                         + " like a date ('" + valueNode.getText() + "') and an"
                         + " operator that is only defined for strings" + " ('"
@@ -121,6 +122,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
                         + " a string. Use a date operator to ensure the value"
                         + " is treated as a date");
             }
+
             putIntoSuperObject(term);
         }
 
@@ -135,11 +137,19 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             term.putAll(parseValue(dateNode));
             String match = dateOpNode.getText();
             term.put("match", "match:" + interpretMatchOperator(match));
-            if (checkOperatorValueConformance(term) == false) {
+            if (!checkOperatorValueConformance(term)) {
                 requestMap = new LinkedHashMap<String, Object>();
                 return;
             }
+            if (!QueryUtils.checkDateValidity(dateNode.getText())) {
+                addError(StatusCodes.MALFORMED_QUERY,
+                        "The collection query contains elements "
+                                + "that could not be parsed as a date ('"
+                                + dateNode.getText() + "')");
+                return;
+            }
             putIntoSuperObject(term);
+
         }
 
         if (nodeCat.equals("token")) {
@@ -261,37 +271,17 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 
         if ("regex".equals(node_cat))
             map.put("type", "type:regex");
-
-        // deprecated code
-        //        if (getNodeCat(valueNode.getChild(0)).equals("regex")) {
-        //            String regex = valueNode.getChild(0).getChild(0)
-        //                    .toStringTree(parser);
-        //            map.put("value", regex.substring(1, regex.length() - 1));
-        //            map.put("type", "type:regex");
-        //        }else if (getNodeCat(valueNode.getChild(0)).equals("multiword")) {
-        //            TokenStream stream = parser.getTokenStream();
-        //            String stm = stream
-        //                    .getText(valueNode.getChild(0).getSourceInterval());
-        //
-        //            //            StringBuilder mw = new StringBuilder(); // multiword
-        //            //            for (int i = 1;
-        //            //                 i < valueNode.getChild(0).getChildCount() - 1; i++) {
-        //            //                mw.append(valueNode.getChild(0).getChild(i).getText());
-        //            //            }
-        //            map.put("value", stm.substring(1, stm.length() - 1));
-        //        }else {
-        //            map.put("value", valueNode.getChild(0).toStringTree(parser));
-        //        }
         return map;
     }
 
     /**
-     * Checks if a date
+     * Checks if value is a date
      *
      * @param valueNode
      * @return
      */
 
+    @Deprecated
     private boolean checkDateValidity(ParseTree valueNode) {
         Pattern p = Pattern.compile("[0-9]{4}(-([0-9]{2})(-([0-9]{2}))?)?");
         Matcher m = p.matcher(valueNode.getText());

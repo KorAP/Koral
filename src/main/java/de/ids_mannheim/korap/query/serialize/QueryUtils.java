@@ -1,27 +1,20 @@
 package de.ids_mannheim.korap.query.serialize;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * @author Joachim Bingel (bingel@ids-mannheim.de),
  *         Michael Hanl (hanl@ids-mannheim.de)
- * @date 10/12/2013
  * @version 0.3.0
+ * @date 10/12/2013
  * @since 0.1.0
  */
 public class QueryUtils {
 
-    public static SimpleEntry<String, Integer> checkUnbalancedPars (String q) {
+    public static SimpleEntry<String, Integer> checkUnbalancedPars(String q) {
         Map<Character, Character> brackets = new HashMap<Character, Character>();
         brackets.put('[', ']');
         brackets.put('{', '}');
@@ -38,9 +31,8 @@ public class QueryUtils {
             if (brackets.containsKey(q.charAt(i))) {
                 stack.push(q.charAt(i));
                 lastOpenBracket = i;
-            }
-            else if (stack.empty()
-                    || (q.charAt(i) != brackets.get(stack.pop()))) {
+            }else if (stack.empty() || (q.charAt(i) != brackets
+                    .get(stack.pop()))) {
                 return new SimpleEntry<String, Integer>(
                         "Parantheses/brackets unbalanced.", i);
             }
@@ -51,15 +43,13 @@ public class QueryUtils {
         return null;
     }
 
-
-    public static List<String> parseMorph (String stringTree) {
+    public static List<String> parseMorph(String stringTree) {
 
         ArrayList<String> morph = new ArrayList<String>();
         return morph;
     }
 
-
-    public static String buildCypherQuery (String cypher, String ctypel,
+    public static String buildCypherQuery(String cypher, String ctypel,
             String ctyper, int cl, int cr, int page, int limit) {
         // todo: implies that there is only one type allowed!
         String sctypel = "", sctyper = "";
@@ -110,8 +100,7 @@ public class QueryUtils {
         return buffer.toString();
     }
 
-
-    public static String buildDotQuery (long sid, String graphdb_id) {
+    public static String buildDotQuery(long sid, String graphdb_id) {
         StringBuffer b = new StringBuffer();
         b.append("<query>");
         b.append("<sentenceId>");
@@ -133,8 +122,7 @@ public class QueryUtils {
         return b.toString();
     }
 
-
-    public String buildaggreQuery (String query) {
+    public String buildaggreQuery(String query) {
         StringBuffer b = new StringBuffer();
         b.append("<query><cypher><![CDATA[");
         b.append(query);
@@ -163,10 +151,9 @@ public class QueryUtils {
         return b.toString();
     }
 
-
     @Deprecated
-    public static Map addParameters (Map request, int page, int num,
-            String cli, String cri, int cls, int crs, boolean cutoff) {
+    public static Map addParameters(Map request, int page, int num, String cli,
+            String cri, int cls, int crs, boolean cutoff) {
         Map ctx = new LinkedHashMap();
         List left = new ArrayList();
         left.add(cli);
@@ -185,8 +172,34 @@ public class QueryUtils {
         return request;
     }
 
+    /**
+     * Checks if value is a date
+     *
+     * @param value
+     * @return
+     */
 
-    public static String escapeRegexSpecialChars (String key) {
+    public static boolean checkDateValidity(String value) {
+        Pattern p = Pattern.compile("^[0-9]{4}(-([0-9]{2})(-([0-9]{2}))?)?$");
+        Matcher m = p.matcher(value);
+
+        if (!m.find())
+            return false;
+        String month = m.group(2);
+        String day = m.group(4);
+        if (month != null) {
+            if (Integer.parseInt(month) > 12) {
+                return false;
+            }else if (day != null) {
+                if (Integer.parseInt(day) > 31) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static String escapeRegexSpecialChars(String key) {
         key.replace("\\", "\\\\");
         Pattern p = Pattern
                 .compile("\\.|\\^|\\$|\\||\\?|\\*|\\+|\\(|\\)|\\[|\\]|\\{|\\}");
