@@ -114,14 +114,14 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
                 requestMap = new LinkedHashMap<String, Object>();
                 return;
             }
-            if (QueryUtils.checkDateValidity(valueNode.getText())) {
-                addWarning("The collection query contains a value that looks"
-                        + " like a date ('" + valueNode.getText() + "') and an"
-                        + " operator that is only defined for strings" + " ('"
-                        + match + "'). The value is interpreted as"
-                        + " a string. Use a date operator to ensure the value"
-                        + " is treated as a date");
-            }
+//            if (QueryUtils.checkDateValidity(valueNode.getText())) {
+//                addWarning("The collection query contains a value that looks"
+//                        + " like a date ('" + valueNode.getText() + "') and an"
+//                        + " operator that is only defined for strings" + " ('"
+//                        + match + "'). The value is interpreted as"
+//                        + " a string. Use a date operator to ensure the value"
+//                        + " is treated as a date");
+//            }
 
             putIntoSuperObject(term);
         }
