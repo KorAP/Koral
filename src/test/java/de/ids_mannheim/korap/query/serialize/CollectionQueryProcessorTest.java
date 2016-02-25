@@ -143,10 +143,7 @@ public class CollectionQueryProcessorTest {
         qs.setQuery(query, ql);
         qs.setCollection(collection);
 
-        String s = qs.toJSON();
-        System.out.println("________________________");
-        System.out.println(s);
-        res = mapper.readTree(s);
+        res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:and", res.at("/collection/operation").asText());
         assertEquals("koral:doc",
@@ -164,8 +161,9 @@ public class CollectionQueryProcessorTest {
                 res.at("/collection/operands/1/type").isMissingNode());
         assertEquals("match:eq",
                 res.at("/collection/operands/1/match").asText());
-        assertTrue(res.at("/warnings/0/0").asText().startsWith(
-                "The collection query contains a value that looks like a date"));
+        assertTrue(res.at("/warnings/0").isMissingNode());
+        //        assertTrue(res.at("/warnings/0/0").asText().startsWith(
+        //                "The collection query contains a value that looks like a date"));
     }
 
     @Test
