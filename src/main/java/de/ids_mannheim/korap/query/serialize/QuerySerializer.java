@@ -16,7 +16,8 @@ import java.util.*;
  * KoralQuery
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de),
- *         Michael Hanl (hanl@ids-mannheim.de)
+ *         Michael Hanl (hanl@ids-mannheim.de),
+ *         Eliza Margaretha (margaretha@ids-mannheim.de)
  * @version 0.3.0
  * @since 0.1.0
  */
@@ -152,17 +153,24 @@ public class QuerySerializer {
             ast = new PoliqarpPlusQueryProcessor(query);
         }
         else if (ql.equalsIgnoreCase("cql")) {
-            if (version == null)
+			if (version == null) {
                 ast = new CqlQueryProcessor(query);
-            else
+			} else {
                 ast = new CqlQueryProcessor(query, version);
-        }
-        else if (ql.equalsIgnoreCase("annis")) {
+            }
+        } else if (ql.equalsIgnoreCase("fcsql")) {
+			if (version == null) {
+				ast.addError(StatusCodes.MISSING_VERSION,
+						"SRU Version is missing!");
+			} else {
+				ast = new FCSQLQueryProcessor(query, version);
+			}
+        }else if (ql.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
-        }
-        else {
-            ast.addError(StatusCodes.UNKNOWN_QL, ql
-                    + " is not a supported query language!");
+
+        }else {
+			ast.addError(StatusCodes.UNKNOWN_QUERY_LANGUAGE,
+                    ql + " is not a supported query language!");
         }
         return this;
     }
