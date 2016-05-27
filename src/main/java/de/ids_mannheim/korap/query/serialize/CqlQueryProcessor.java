@@ -22,16 +22,12 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
     private static final String INDEX_WORDS = "words";
     private static final String TERM_RELATION_CQL_1_1 = "scr";
     private static final String TERM_RELATION_CQL_1_2 = "=";
-    private static final String SUPPORTED_RELATION_EXACT = "exact"; // not
-                                                                    // in
-                                                                    // the
-                                                                    // doc
+    private static final String SUPPORTED_RELATION_EXACT = "exact"; // not in the doc
     private static final String OPERATION_OR = "operation:or";
     private static final String OPERATION_SEQUENCE = "operation:sequence";
     private static final String OPERATION_POSITION = "operation:position";
     private static final String KORAP_CONTEXT = "http://ids-mannheim.de/ns/KorAP/json-ld/v0.1/context.jsonld";
 
-    private LinkedHashMap<String, Object> requestMap;
     private String version;
     private boolean isCaseSensitive; // default true
 
@@ -40,11 +36,9 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         this(query, VERSION_1_2, true);
     }
 
-
     public CqlQueryProcessor (String query, String version) {
         this(query, version, true);
     }
-
 
     public CqlQueryProcessor (String query, String version,
                               boolean isCaseSensitive) {
@@ -55,12 +49,10 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         process(query);
     }
 
-
     @Override
     public Map<String, Object> getRequestMap () {
         return this.requestMap;
     }
-
 
     @Override
     public void process (String query) {
