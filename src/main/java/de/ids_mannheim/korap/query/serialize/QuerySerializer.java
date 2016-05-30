@@ -189,8 +189,8 @@ public class QuerySerializer {
             List errors = (List) requestMap.get("errors");
             List warnings = (List) requestMap.get("warnings");
             List messages = (List) requestMap.get("messages");
-            this.collection = mergeCollection(collection, this.collection);
-            requestMap.put("collection", this.collection);
+            collection = mergeCollection(collection, this.collection);
+            requestMap.put("collection", collection);
             if (this.meta != null) {
                 this.meta.putAll(meta);
                 requestMap.put("meta", this.meta);
@@ -236,6 +236,8 @@ public class QuerySerializer {
         if (collection1 == null || collection1.isEmpty()) {
             return collection2;
         }else if (collection2 == null || collection2.isEmpty()) {
+            return collection1;
+        }else if (collection1.equals(collection2)) {
             return collection1;
         }else {
             LinkedHashMap<String, Object> docGroup = KoralObjectGenerator
