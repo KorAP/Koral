@@ -5,10 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.ids_mannheim.korap.query.elements.KoralGroup;
+import de.ids_mannheim.korap.query.elements.KoralTerm;
+import de.ids_mannheim.korap.query.elements.KoralOperation;
+import de.ids_mannheim.korap.query.elements.KoralType;
+import de.ids_mannheim.korap.query.elements.KoralGroup.Distance;
 import de.ids_mannheim.korap.query.parse.fcsql.FCSSRUQueryParser;
-import de.ids_mannheim.korap.query.parse.fcsql.KoralSequence;
-import de.ids_mannheim.korap.query.parse.fcsql.KoralSequence.Distance;
-import de.ids_mannheim.korap.query.parse.fcsql.KoralTerm;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import eu.clarin.sru.server.SRUQueryBase;
 import eu.clarin.sru.server.fcs.Constants;
@@ -35,9 +37,6 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
     }
 
     private static final String VERSION_2_0 = "2.0";
-    private static final String OPERATION_OR = "operation:or";
-    private static final String OPERATION_SEQUENCE = "operation:sequence";
-    private static final String OPERATION_POSITION = "operation:position";
 
     private final QueryParser fcsParser = new QueryParser();
     private String version;
@@ -99,73 +98,7 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
     private void parseFCSQueryToKoralQuery(QueryNode queryNode) {
         FCSSRUQueryParser parser = new FCSSRUQueryParser(this);
         Object o = parser.parseQueryNode(queryNode);
-        Map<String, Object> queryMap = buildQueryMap(o);
+        Map<String, Object> queryMap = MapBuilder.buildQueryMap(o);
         if (queryMap != null) requestMap.put("query", queryMap);
     }
-
-    private Map<String, Object> buildQueryMap(Object o) {
-        if (o != null) {
-            if (o instanceof KoralTerm) {
-                KoralTerm koralTerm = (KoralTerm) o;
-                if (!koralTerm.isInvalid()) {
-                    return createTermMap(koralTerm);
-                }
-            }
-            else if (o instanceof KoralSequence) {
-                KoralSequence koralSequence = (KoralSequence) o;
-                return createSequenceMap(koralSequence);
-            }
-        }
-        return null;
-    }
-
-    private Map<String, Object> createSequenceMap(KoralSequence koralSequence) {
-        Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "koral:group");
-        map.put("operation", OPERATION_SEQUENCE);
-        map.put("inOrder", koralSequence.isInOrder());
-
-        if (koralSequence.getDistances() != null) {
-            List<Map<String, Object>> distanceList = new ArrayList<Map<String, Object>>();
-            for (Distance d : koralSequence.getDistances()) {
-                distanceList.add(createDistanceMap(d));
-            }
-            map.put("distances", distanceList);
-        }
-
-        List<Map<String, Object>> operandList = new ArrayList<Map<String, Object>>();
-        for (Object o : koralSequence.getOperands()) {
-            operandList.add(buildQueryMap(o));
-        }
-        map.put("operands", operandList);
-        return map;
-    }
-
-    private Map<String, Object> createDistanceMap(Distance distance) {
-        Map<String, Object> distanceMap = new LinkedHashMap<String, Object>();
-        distanceMap.put("@type", "koral:distance");
-        distanceMap.put("key", distance.getKey());
-        distanceMap.put("min", distance.getMin());
-        distanceMap.put("max", distance.getMax());
-        return distanceMap;
-
-    }
-
-    private Map<String, Object> createTermMap(KoralTerm fcsQuery) {
-        Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "koral:term");
-        if (!fcsQuery.isCaseSensitive()) {
-            map.put("caseInsensitive", "true");
-        }
-        map.put("key", fcsQuery.getQueryTerm());
-        map.put("foundry", fcsQuery.getFoundry());
-        map.put("layer", fcsQuery.getLayer());
-        map.put("match", fcsQuery.getOperator());
-
-        Map<String, Object> tokenMap = new LinkedHashMap<String, Object>();
-        tokenMap.put("@type", "koral:token");
-        tokenMap.put("wrap", map);
-        return tokenMap;
-    }
-
 }

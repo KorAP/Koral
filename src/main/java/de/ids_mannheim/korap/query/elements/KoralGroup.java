@@ -1,12 +1,25 @@
-package de.ids_mannheim.korap.query.parse.fcsql;
+package de.ids_mannheim.korap.query.elements;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-public class KoralSequence {
+import de.ids_mannheim.korap.query.serialize.MapBuilder;
+
+public class KoralGroup implements Element {
+
+    private static final KoralType type = KoralType.GROUP;
+
+    private KoralOperation operation;;
 
     private boolean inOrder = false;
     private List<Object> operands;
     private List<Distance> distances;
+
+    public KoralGroup (KoralOperation operation) {
+        this.operation = operation;
+    }
 
     public boolean isInOrder() {
         return inOrder;
@@ -32,7 +45,32 @@ public class KoralSequence {
         this.distances = distances;
     }
 
-    public class Distance {
+    @Override
+    public Map<String, Object> buildMap() {
+        Map<String, Object> map = new LinkedHashMap<String, Object>();
+        map.put("@type", type.toString());
+        map.put("operation", operation.toString());
+
+        if (getDistances() != null) {
+            map.put("inOrder", isInOrder());
+            List<Map<String, Object>> distanceList = new ArrayList<Map<String, Object>>();
+            for (Distance d : getDistances()) {
+                distanceList.add(d.buildMap());
+            }
+            map.put("distances", distanceList);
+        }
+
+        List<Map<String, Object>> operandList = new ArrayList<Map<String, Object>>();
+        for (Object o : getOperands()) {
+            operandList.add(MapBuilder.buildQueryMap(o));
+        }
+        map.put("operands", operandList);
+        return map;
+    }
+
+    public class Distance implements Element {
+
+        private final KoralType type = KoralType.DISTANCE;
         private String key;
         private String min;
         private String max;
@@ -65,6 +103,17 @@ public class KoralSequence {
 
         public void setMax(String max) {
             this.max = max;
+        }
+
+        @Override
+        public Map<String, Object> buildMap() {
+            Map<String, Object> distanceMap = new LinkedHashMap<String, Object>();
+            distanceMap.put("@type", type.toString());
+            distanceMap.put("key", getKey());
+            distanceMap.put("min", getMin());
+            distanceMap.put("max", getMax());
+            return distanceMap;
+
         }
 
     }

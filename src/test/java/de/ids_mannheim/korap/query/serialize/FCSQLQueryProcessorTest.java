@@ -2,16 +2,20 @@ package de.ids_mannheim.korap.query.serialize;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FCSQLQueryProcessorTest {
 
+    QuerySerializer qs = new QuerySerializer();
     ObjectMapper mapper = new ObjectMapper();
+    JsonNode node;
 
     private void runAndValidate(String query, String jsonLD)
             throws JsonProcessingException {
@@ -30,7 +34,7 @@ public class FCSQLQueryProcessorTest {
     public void testTermQuery() throws JsonProcessingException {
         String query = "\"Sonne\"";
         String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:Sonne, "
-                + "foundry:opennlp, layer:orth, match:match:eq}}";
+                + "foundry:opennlp, layer:orth, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
     }
 
@@ -38,7 +42,7 @@ public class FCSQLQueryProcessorTest {
     public void testTermQueryWithRegexFlag() throws JsonProcessingException {
         String query = "\"Fliegen\" /c";
         String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, caseInsensitive:true, "
-                + "key:Fliegen, foundry:opennlp, layer:orth, match:match:eq}}";
+                + "key:Fliegen, foundry:opennlp, layer:orth, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
     }
 
@@ -46,17 +50,17 @@ public class FCSQLQueryProcessorTest {
     public void testTermQueryWithSpecificLayer() throws JsonProcessingException {
         String query = "[text = \"Sonne\"]";
         String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:Sonne, "
-                + "foundry:opennlp, layer:orth, match:match:eq}}";
+                + "foundry:opennlp, layer:orth, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
 
         query = "[lemma = \"sein\"]";
         jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:sein, "
-                + "foundry:tt, layer:l, match:match:eq}}";
+                + "foundry:tt, layer:l, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
 
         query = "[pos = \"NN\"]";
         jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:NN, "
-                + "foundry:tt, layer:p, match:match:eq}}";
+                + "foundry:tt, layer:p, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
     }
 
@@ -64,12 +68,12 @@ public class FCSQLQueryProcessorTest {
     public void testTermQueryWithQualifier() throws JsonProcessingException {
         String query = "[mate:lemma = \"sein\"]";
         String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:sein, "
-                + "foundry:mate, layer:l, match:match:eq}}";
+                + "foundry:mate, layer:l, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
 
         query = "[cnx:pos = \"N\"]";
         jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:N, "
-                + "foundry:cnx, layer:p, match:match:eq}}";
+                + "foundry:cnx, layer:p, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
     }
 
@@ -97,38 +101,90 @@ public class FCSQLQueryProcessorTest {
     }
 
     @Test
-    public void testMatchOperation() throws JsonProcessingException {
+    public void testRegex() throws JsonProcessingException {
+        String query = "[text=\"M(a|ä)nn(er)?\"]";
+        String jsonLd = "{@type:koral:token,wrap:{@type:koral:term,"
+                + "key:M(a|ä)nn(er)?,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}";
+        runAndValidate(query, jsonLd);
+
+        query = "\".*?Mann.*?\"";
+        jsonLd = "{@type:koral:token,wrap:{@type:koral:term,key:.*?Mann.*?,"
+                + "foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}";
+        runAndValidate(query, jsonLd);
+
+        query = "\"z.B.\"";
+        jsonLd = "{@type:koral:token,wrap:{@type:koral:term,key:z.B.,"
+                + "foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}";
+        runAndValidate(query, jsonLd);
+
+        query = "\"Sonne&scheint\"";
+        jsonLd = "{@type:koral:token,wrap:{@type:koral:term,key:Sonne&scheint,"
+                + "foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}";
+        runAndValidate(query, jsonLd);
+
+        // Not possible
+        // query = "\"a\\.\"";
+    }
+
+    @Test
+    public void testNot() throws JsonProcessingException {
         String query = "[cnx:pos != \"N\"]";
         String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:N, "
-                + "foundry:cnx, layer:p, match:match:ne}}";
+                + "foundry:cnx, layer:p, type:type:regex, match:match:ne}}";
         runAndValidate(query, jsonLd);
+
+        jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:NN, "
+                + "foundry:tt, layer:p, type:type:regex, match:match:eq}}";
+        query = "[!pos != \"NN\"]";
+        runAndValidate(query, jsonLd);
+
+        // Not possible
+        // query = "![pos != \"NN\"]";
     }
 
     @Test
     public void testSequenceQuery() throws JsonProcessingException {
-        String query = "\"blaue\" [pos = \"NN\"]";
+        String query = "\"blaue|grüne\" [pos = \"NN\"]";
         String jsonLd = "{@type:koral:group, operation:operation:sequence, operands:["
-                + "{@type:koral:token, wrap:{@type:koral:term, key:blaue, foundry:opennlp, layer:orth, match:match:eq}},"
-                + "{@type:koral:token, wrap:{@type:koral:term, key:NN, foundry:tt, layer:p, match:match:eq}}"
+                + "{@type:koral:token, wrap:{@type:koral:term, key:blaue|grüne, foundry:opennlp, layer:orth, type:type:regex, match:match:eq}},"
+                + "{@type:koral:token, wrap:{@type:koral:term, key:NN, foundry:tt, layer:p, type:type:regex, match:match:eq}}"
                 + "]}";
+        runAndValidate(query, jsonLd);
+
+        query = "[text=\"blaue|grüne\"][pos = \"NN\"]";
         runAndValidate(query, jsonLd);
     }
 
     @Test
-    public void testAndQuery() throws JsonProcessingException {
-        String query = "[text=\"Sonne\" & text=\"scheint\"]";
-        String jsonLd = "{@type:koral:group, operation:operation:sequence, inOrder:false,"
-                + "distances:["
-                + "{@type:koral:distance, key:s, min:0, max:0}],"
-                + "operands:["
-                + "{@type:koral:token, wrap:{@type:koral:term, key:Sonne, foundry: opennlp, layer:orth, match:match:eq}},"
-                + "{@type:koral:token,wrap:{@type:koral:term, key:scheint, foundry: opennlp, layer:orth,match:match:eq}"
-                + "}]}";
+    public void testBooleanQuery() throws IOException {
+        String query = "[mate:lemma=\"sein\" & mate:pos=\"PPOSS\"]";
+        String jsonLd = "{@type: koral:token,"
+                + " wrap: { @type: koral:termGroup,"
+                + "relation: relation:and,"
+                + " operands:["
+                + "{@type: koral:term, key: sein, foundry: mate, layer: l, type:type:regex, match: match:eq},"
+                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq}]}}";
         runAndValidate(query, jsonLd);
 
-        // sru parser doesnt work for the following queries:
-        // String query = "\"Sonne & scheint\"";
-        // String query = "\"Sonne&scheint\"";
+        query = "[mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
+        qs.setQuery(query, "fcsql", "2.0");
+        node = mapper.readTree(qs.toJSON());
+        assertEquals("relation:or", node.at("/query/wrap/relation").asText());
+
+        query = "[pos=\"NN\"]|[text=\"Mann\"]";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:disjunction,"
+                + "operands:["
+                + "{@type:koral:token, wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token, wrap:{@type:koral:term,key:Mann,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}]}";
+        runAndValidate(query, jsonLd);
+    }
+
+    @Test
+    public void testGroupQuery() throws JsonProcessingException {
+        // String query = "(\"blaue\"|\"grüne\")";
+        // runAndValidate(query, jsonLd);
+
     }
 
     @Test
