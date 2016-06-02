@@ -3,6 +3,10 @@ package de.ids_mannheim.korap.query.elements;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * @author margaretha
+ * 
+ */
 public class KoralToken implements Element {
 
     private final static KoralType type = KoralType.TOKEN;

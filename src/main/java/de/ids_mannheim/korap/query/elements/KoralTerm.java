@@ -3,6 +3,10 @@ package de.ids_mannheim.korap.query.elements;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * @author margaretha
+ * 
+ */
 public class KoralTerm implements Element {
 
     public enum KoralTermType {

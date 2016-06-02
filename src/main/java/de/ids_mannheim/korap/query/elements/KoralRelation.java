@@ -1,17 +1,15 @@
 package de.ids_mannheim.korap.query.elements;
 
+/**
+ * @author margaretha
+ * 
+ */
 public enum KoralRelation {
 
-    AND("relation:and"), OR("relation:or");
-
-    String value;
-
-    KoralRelation (String value) {
-        this.value = value;
-    }
+    AND, OR;
 
     @Override
     public String toString() {
-        return value;
+        return "relation:" + super.toString().toLowerCase();
     }
 }
