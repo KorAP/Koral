@@ -11,6 +11,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * @author margaretha
+ * 
+ */
 public class FCSQLQueryProcessorTest {
 
     QuerySerializer qs = new QuerySerializer();
@@ -288,4 +292,17 @@ public class FCSQLQueryProcessorTest {
         runAndValidate(query, jsonLd);
     }
 
+    @Test
+    public void testWithinQuery() throws JsonProcessingException {
+        String query = "[pos=\"VVFIN\"] within s";
+        String jsonLd = "{@type:koral:group,"
+                + "operation:operation:position,"
+                + "frames:["
+                + "frames:isAround"
+                + "],"
+                + "operands:[{@type: koral:span,key:s,foundry:base,layer:s,match:match:eq},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:VVFIN,foundry:tt,layer:p,type:type:regex,match:match:eq}}"
+                + "]}";
+        runAndValidate(query, jsonLd);
+    }
 }

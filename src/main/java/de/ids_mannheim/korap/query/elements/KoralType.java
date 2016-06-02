@@ -1,5 +1,9 @@
 package de.ids_mannheim.korap.query.elements;
 
+/**
+ * @author margaretha
+ * 
+ */
 public enum KoralType {
     TERMGROUP("koral:termGroup"), TERM("koral:term"), TOKEN("koral:token"), SPAN(
             "koral:span"), GROUP("koral:group"), BOUNDARY("koral:boundary"), RELATION(
