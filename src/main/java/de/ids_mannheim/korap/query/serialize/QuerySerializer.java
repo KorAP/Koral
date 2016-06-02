@@ -172,7 +172,7 @@ public class QuerySerializer {
 
     private Map raw() {
         if (ast != null) {
-            Map<String, Object> requestMap = ast.getRequestMap();
+            Map<String, Object> requestMap = new HashMap<>(ast.getRequestMap());
             Map meta = (Map) requestMap.get("meta");
             Map collection = (Map) requestMap.get("collection");
             List errors = (List) requestMap.get("errors");
@@ -181,8 +181,8 @@ public class QuerySerializer {
             collection = mergeCollection(collection, this.collection);
             requestMap.put("collection", collection);
             if (this.meta != null) {
-                this.meta.putAll(meta);
-                requestMap.put("meta", this.meta);
+                meta.putAll(this.meta);
+                requestMap.put("meta", meta);
             }
             if (this.errors != null && !this.errors.isEmpty()) {
                 errors.addAll(this.errors);
@@ -252,11 +252,6 @@ public class QuerySerializer {
 
     public QuerySerializer setMeta(Map<String, Object> meta) {
         this.meta = meta;
-        return this;
-    }
-
-    public QuerySerializer setMeta(MetaQueryBuilder meta) {
-        this.meta = meta.raw();
         return this;
     }
 

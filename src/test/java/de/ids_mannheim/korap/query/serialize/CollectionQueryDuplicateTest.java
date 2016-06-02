@@ -2,9 +2,13 @@ package de.ids_mannheim.korap.query.serialize;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author hanl
@@ -13,20 +17,16 @@ import java.io.IOException;
 public class CollectionQueryDuplicateTest {
 
     @Test
-    public void testCollectionQueryDuplicateThrowsAssertionException() {
+    public void testCollectionQueryDuplicateThrowsAssertionException() throws IOException {
         QuerySerializer serializer = new QuerySerializer();
         serializer.setQuery("[base=Haus]", "poliqarp");
         serializer.setCollection("textClass=politik & corpusID=WPD");
         ObjectMapper m = new ObjectMapper();
-        try {
-            JsonNode first = m.readTree(serializer.toJSON());
-            JsonNode second = m.readTree(serializer.toJSON());
-
-            assert first.at("/collection").equals(second.at("/collection"));
-
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
+        JsonNode first = m.readTree(serializer.toJSON());
+        assertNotNull(first);
+        assertEquals(first.at("/collection"), m.readTree(serializer.toJSON()).at("/collection"));
+        assertEquals(first.at("/collection"), m.readTree(serializer.toJSON()).at("/collection"));
+        assertEquals(first.at("/collection"), m.readTree(serializer.toJSON()).at("/collection"));
     }
 
 }

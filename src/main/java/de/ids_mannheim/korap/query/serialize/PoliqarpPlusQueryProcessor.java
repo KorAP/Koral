@@ -327,7 +327,11 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             // no 'term' child, but direct key specification: process here
             LinkedHashMap<String, Object> term = KoralObjectGenerator
                     .makeTerm();
+
             String key = node.getChild(0).getText();
+            TokenStream stream = parser.getTokenStream();
+            String kval = stream.getText(node.getChild(0).getSourceInterval());
+
             if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
                 isRegex = true;
                 term.put("type", "type:regex");

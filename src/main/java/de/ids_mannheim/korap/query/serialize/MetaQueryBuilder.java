@@ -1,6 +1,9 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
