@@ -1,18 +1,15 @@
 package de.ids_mannheim.korap.query.parse.fcsql;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.hamcrest.core.IsNot;
-
+import de.ids_mannheim.korap.query.elements.KoralRelation;
 import de.ids_mannheim.korap.query.elements.KoralTerm;
 import de.ids_mannheim.korap.query.elements.KoralTerm.KoralTermType;
 import de.ids_mannheim.korap.query.elements.KoralTermGroup;
 import de.ids_mannheim.korap.query.elements.KoralToken;
-import de.ids_mannheim.korap.query.elements.KoralRelation;
-import de.ids_mannheim.korap.query.elements.KoralGroup.Distance;
+import de.ids_mannheim.korap.query.elements.MatchOperator;
 import de.ids_mannheim.korap.query.serialize.FCSQLQueryProcessor;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import eu.clarin.sru.server.fcs.parser.Expression;
@@ -23,6 +20,10 @@ import eu.clarin.sru.server.fcs.parser.Operator;
 import eu.clarin.sru.server.fcs.parser.QueryNode;
 import eu.clarin.sru.server.fcs.parser.RegexFlag;
 
+/**
+ * @author margaretha
+ * 
+ */
 public class ExpressionParser {
 
     private static final String FOUNDRY_CNX = "cnx";
@@ -173,12 +174,14 @@ public class ExpressionParser {
 
     private void parseOperator(KoralTerm koralTerm, Operator operator,
             boolean isNot) {
-        String matchOperator = null;
+        MatchOperator matchOperator = null;
         if (operator == null || operator == Operator.EQUALS) {
-            matchOperator = isNot ? "match:ne" : "match:eq";
+            matchOperator = isNot ? MatchOperator.NOT_EQUALS
+                    : MatchOperator.EQUALS;
         }
         else if (operator == Operator.NOT_EQUALS) {
-            matchOperator = isNot ? "match:eq" : "match:ne";
+            matchOperator = isNot ? MatchOperator.EQUALS
+                    : MatchOperator.NOT_EQUALS;
         }
         else {
             processor
@@ -187,7 +190,7 @@ public class ExpressionParser {
                                     + " is unsupported.");
             koralTerm.setInvalid(true);
         }
-        koralTerm.setOperator(matchOperator);
+        koralTerm.setOperator(matchOperator.toString());
     }
 
     private void parseRegexFlags(KoralTerm koralTerm, Set<RegexFlag> set) {

@@ -7,6 +7,10 @@ import java.util.Map;
 
 import de.ids_mannheim.korap.query.serialize.MapBuilder;
 
+/**
+ * @author margaretha
+ * 
+ */
 public class KoralGroup implements Element {
 
     private static final KoralType type = KoralType.GROUP;
@@ -16,6 +20,7 @@ public class KoralGroup implements Element {
     private boolean inOrder = false;
     private List<Object> operands;
     private List<Distance> distances;
+    private List<Frame> frames;
 
     public KoralGroup (KoralOperation operation) {
         this.operation = operation;
@@ -45,6 +50,14 @@ public class KoralGroup implements Element {
         this.distances = distances;
     }
 
+    public List<Frame> getFrames() {
+        return frames;
+    }
+
+    public void setFrames(List<Frame> frames) {
+        this.frames = frames;
+    }
+
     @Override
     public Map<String, Object> buildMap() {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
@@ -60,12 +73,40 @@ public class KoralGroup implements Element {
             map.put("distances", distanceList);
         }
 
+        if (getFrames() != null) {
+            List<String> frameList = new ArrayList<String>();
+            for (Frame f : getFrames()) {
+                frameList.add(f.toString());
+            }
+            map.put("frames", frameList);
+        }
+
         List<Map<String, Object>> operandList = new ArrayList<Map<String, Object>>();
         for (Object o : getOperands()) {
             operandList.add(MapBuilder.buildQueryMap(o));
         }
         map.put("operands", operandList);
         return map;
+    }
+
+    public enum Frame {
+        SUCCEDS("succeds"), SUCCEDS_DIRECTLY("succeedsDirectly"), OVERLAPS_RIGHT(
+                "overlapsRight"), ALIGNS_RIGHT("alignsRight"), IS_WITHIN(
+                "isWithin"), STARTS_WITH("startsWith"), MATCHES("matches"), ALIGNS_LEFT(
+                "alignsLeft"), IS_AROUND("isAround"), ENDS_WITH("endsWith"), OVERLAPS_LEFT(
+                "overlapsLeft"), PRECEDES_DIRECTLY("precedesDirectly"), PRECEDES(
+                "precedes");
+
+        String value;
+
+        Frame (String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return "frames:" + value;
+        };
     }
 
     public class Distance implements Element {
