@@ -3,10 +3,15 @@ package de.ids_mannheim.korap.query.serialize;
 import java.util.Map;
 
 import de.ids_mannheim.korap.query.elements.KoralGroup;
+import de.ids_mannheim.korap.query.elements.KoralSpan;
 import de.ids_mannheim.korap.query.elements.KoralTerm;
 import de.ids_mannheim.korap.query.elements.KoralTermGroup;
 import de.ids_mannheim.korap.query.elements.KoralToken;
 
+/**
+ * @author margaretha
+ * 
+ */
 public class MapBuilder {
 
     public static Map<String, Object> buildQueryMap(Object o) {
@@ -26,6 +31,10 @@ public class MapBuilder {
             else if (o instanceof KoralTermGroup) {
                 KoralTermGroup termGroup = (KoralTermGroup) o;
                 return termGroup.buildMap();
+            }
+            else if (o instanceof KoralSpan) {
+                KoralSpan span = (KoralSpan) o;
+                return span.buildMap();
             }
         }
         return null;

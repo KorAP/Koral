@@ -1,15 +1,7 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import de.ids_mannheim.korap.query.elements.KoralGroup;
-import de.ids_mannheim.korap.query.elements.KoralTerm;
-import de.ids_mannheim.korap.query.elements.KoralOperation;
-import de.ids_mannheim.korap.query.elements.KoralType;
-import de.ids_mannheim.korap.query.elements.KoralGroup.Distance;
 import de.ids_mannheim.korap.query.parse.fcsql.FCSSRUQueryParser;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import eu.clarin.sru.server.SRUQueryBase;

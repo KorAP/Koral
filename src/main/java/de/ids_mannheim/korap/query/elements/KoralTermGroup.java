@@ -9,6 +9,10 @@ import de.ids_mannheim.korap.query.parse.fcsql.ExpressionParser;
 import de.ids_mannheim.korap.query.serialize.MapBuilder;
 import eu.clarin.sru.server.fcs.parser.QueryNode;
 
+/**
+ * @author margaretha
+ * 
+ */
 public class KoralTermGroup implements Element {
 
     private static final KoralType type = KoralType.TERMGROUP;
