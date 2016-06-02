@@ -64,7 +64,8 @@ public class ExpressionParser {
         //
         // }
         else if (queryNode instanceof ExpressionNot) {
-            return parseExpression(queryNode.getChild(0), true, true);
+            boolean negation = isNot ? false : true;
+            return parseExpression(queryNode.getChild(0), negation, isToken);
         }
         else if (queryNode instanceof ExpressionOr) {
             List<QueryNode> operands = queryNode.getChildren();
