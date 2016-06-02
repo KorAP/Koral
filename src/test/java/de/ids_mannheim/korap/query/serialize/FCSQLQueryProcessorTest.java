@@ -25,9 +25,31 @@ public class FCSQLQueryProcessorTest {
         assertEquals(jsonLD.replace(" ", ""), serializedQuery.replace("\"", ""));
     }
 
+    private void validateNode(String query, String path, String jsonLd)
+            throws JsonProcessingException, IOException {
+        qs.setQuery(query, "fcsql", "2.0");
+        node = mapper.readTree(qs.toJSON());
+        String serializedQuery = mapper.writeValueAsString(node.at(path));
+        assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
+    }
+
     private List<Object> getError(FCSQLQueryProcessor processor) {
         List<Object> errors = (List<Object>) processor.requestMap.get("errors");
         return (List<Object>) errors.get(0);
+    }
+
+    @Test
+    public void testVersion() throws JsonProcessingException {
+        List<Object> error = getError(new FCSQLQueryProcessor("\"Sonne\"",
+                "1.0"));
+        assertEquals(309, error.get(0));
+        assertEquals("SRU diagnostic 5: Only supports SRU version 2.0.",
+                error.get(1));
+
+        error = getError(new FCSQLQueryProcessor("\"Sonne\"", null));
+        assertEquals(309, error.get(0));
+        assertEquals("SRU diagnostic 7: Version number is missing.",
+                error.get(1));
     }
 
     @Test
@@ -127,7 +149,7 @@ public class FCSQLQueryProcessorTest {
     }
 
     @Test
-    public void testNot() throws JsonProcessingException {
+    public void testNot() throws IOException {
         String query = "[cnx:pos != \"N\"]";
         String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:N, "
                 + "foundry:cnx, layer:p, type:type:regex, match:match:ne}}";
@@ -137,15 +159,47 @@ public class FCSQLQueryProcessorTest {
                 + "foundry:tt, layer:p, type:type:regex, match:match:eq}}";
         query = "[!pos != \"NN\"]";
         runAndValidate(query, jsonLd);
+        query = "[!!pos = \"NN\"]";
+        runAndValidate(query, jsonLd);
+        query = "[!!!pos != \"NN\"]";
+        runAndValidate(query, jsonLd);
 
-        // Not possible
-        // query = "![pos != \"NN\"]";
+        query = "[mate:lemma=\"sein\" & !mate:pos=\"PPOSS\"]";
+        jsonLd = "{@type: koral:token,"
+                + " wrap: { "
+                + "@type: koral:termGroup,"
+                + "relation: relation:and,"
+                + " operands:["
+                + "{@type: koral:term, key: sein, foundry: mate, layer: l, type:type:regex, match: match:eq},"
+                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:ne}]}}";
+        runAndValidate(query, jsonLd);
     }
 
     @Test
-    public void testSequenceQuery() throws JsonProcessingException {
+    public void testWrongQuery() throws IOException {
+        String query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
+        List<Object> error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(399, error.get(0));
+        assertEquals(true,
+                error.get(1).toString().startsWith("FCS diagnostic 10"));
+
+        query = "![mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
+        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(true,
+                error.get(1).toString().startsWith("FCS diagnostic 10"));
+
+        query = "(\"blaue\"&\"grüne\")";
+        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(true,
+                error.get(1).toString().startsWith("FCS diagnostic 10"));
+    }
+
+    @Test
+    public void testSequenceQuery() throws IOException {
         String query = "\"blaue|grüne\" [pos = \"NN\"]";
-        String jsonLd = "{@type:koral:group, operation:operation:sequence, operands:["
+        String jsonLd = "{@type:koral:group, "
+                + "operation:operation:sequence, "
+                + "operands:["
                 + "{@type:koral:token, wrap:{@type:koral:term, key:blaue|grüne, foundry:opennlp, layer:orth, type:type:regex, match:match:eq}},"
                 + "{@type:koral:token, wrap:{@type:koral:term, key:NN, foundry:tt, layer:p, type:type:regex, match:match:eq}}"
                 + "]}";
@@ -153,6 +207,11 @@ public class FCSQLQueryProcessorTest {
 
         query = "[text=\"blaue|grüne\"][pos = \"NN\"]";
         runAndValidate(query, jsonLd);
+
+        query = "\"blaue\" \"grüne\" [pos = \"NN\"]";
+        jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:grüne, foundry:opennlp, layer:orth, type:type:regex, match:match:eq}}";
+        validateNode(query, "/query/operands/1", jsonLd);
+
     }
 
     @Test
@@ -167,10 +226,13 @@ public class FCSQLQueryProcessorTest {
         runAndValidate(query, jsonLd);
 
         query = "[mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
-        qs.setQuery(query, "fcsql", "2.0");
-        node = mapper.readTree(qs.toJSON());
-        assertEquals("relation:or", node.at("/query/wrap/relation").asText());
+        validateNode(query, "/query/wrap/relation", "relation:or");
 
+        query = "[cnx:lemma=\"sein\" | mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
+        jsonLd = "{@type: koral:term, key: sein, foundry: cnx, layer: l, type:type:regex, match: match:eq}";
+        validateNode(query, "/query/wrap/operands/0", jsonLd);
+
+        // group with two tokens
         query = "[pos=\"NN\"]|[text=\"Mann\"]";
         jsonLd = "{@type:koral:group,"
                 + "operation:operation:disjunction,"
@@ -178,27 +240,52 @@ public class FCSQLQueryProcessorTest {
                 + "{@type:koral:token, wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
                 + "{@type:koral:token, wrap:{@type:koral:term,key:Mann,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}]}";
         runAndValidate(query, jsonLd);
+
+        query = "[pos=\"NN\"]&[text=\"Mann\"]";
+        List<Object> error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(399, error.get(0));
+        String msg = (String) error.get(1);
+        assertEquals(true, msg.startsWith("FCS diagnostic 10"));
     }
 
     @Test
-    public void testGroupQuery() throws JsonProcessingException {
-        // String query = "(\"blaue\"|\"grüne\")";
-        // runAndValidate(query, jsonLd);
+    public void testGroupQuery() throws IOException {
+        String query = "(\"blaue\"|\"grüne\")";
+        String jsonLd = "{@type:koral:group,"
+                + "operation:operation:disjunction,"
+                + "operands:["
+                + "{@type:koral:token, wrap:{@type:koral:term,key:blaue,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token, wrap:{@type:koral:term,key:grüne,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}]}";;
+        runAndValidate(query, jsonLd);
 
-    }
+        // group and disjunction
+        query = "([pos=\"NN\"]|[cnx:pos=\"N\"]|[text=\"Mann\"])";
+        jsonLd = "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}";
+        validateNode(query, "/query/operands/1", jsonLd);
 
-    @Test
-    public void testVersion() throws JsonProcessingException {
-        List<Object> error = getError(new FCSQLQueryProcessor("\"Sonne\"",
-                "1.0"));
-        assertEquals(309, error.get(0));
-        assertEquals("SRU diagnostic 5: Only supports SRU version 2.0.",
-                error.get(1));
+        // sequence and disjunction
+        query = "([pos=\"NN\"]|[cnx:pos=\"N\"])[text=\"Mann\"]";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:sequence,"
+                + "operands:["
+                + "{@type:koral:group,"
+                + "operation:operation:disjunction,"
+                + "operands:[{@type:koral:token,wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
+                + "]},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:Mann,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}"
+                + "]}";
+        runAndValidate(query, jsonLd);
 
-        error = getError(new FCSQLQueryProcessor("\"Sonne\"", null));
-        assertEquals(309, error.get(0));
-        assertEquals("SRU diagnostic 7: Version number is missing.",
-                error.get(1));
+        // group and sequence
+        query = "([text=\"blaue\"][pos=\"NN\"])";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:sequence,"
+                + "operands:["
+                + "{@type:koral:token,wrap:{@type:koral:term,key:blaue,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}}"
+                + "]}";
+        runAndValidate(query, jsonLd);
     }
 
 }

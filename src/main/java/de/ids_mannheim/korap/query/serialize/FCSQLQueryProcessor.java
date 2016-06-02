@@ -56,8 +56,10 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
     public void process(String query) {
         if (isVersionValid()) {
             FCSSRUQuery fcsSruQuery = parseQueryStringtoFCSQuery(query);
-            QueryNode fcsQueryNode = fcsSruQuery.getParsedQuery();
-            parseFCSQueryToKoralQuery(fcsQueryNode);
+            if (fcsSruQuery != null) {
+                QueryNode fcsQueryNode = fcsSruQuery.getParsedQuery();
+                parseFCSQueryToKoralQuery(fcsQueryNode);
+            }
         }
     }
 
@@ -83,13 +85,19 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
         try {
             QueryNode parsedQuery = fcsParser.parse(query);
             fcsQuery = new FCSSRUQuery(query, parsedQuery);
+            if (fcsQuery == null) {
+                addError(StatusCodes.UNKNOWN_QUERY_ERROR,
+                        "FCS diagnostic 10: Unexpected error while parsing query.");
+            }
         }
         catch (QueryParserException e) {
-            addError(StatusCodes.UNKNOWN_QUERY_ERROR, "FCS diagnostic 10: +"
-                    + e.getMessage());
+            addError(
+                    StatusCodes.UNKNOWN_QUERY_ERROR,
+                    "FCS diagnostic 10: Query cannot be parsed, "
+                            + e.getMessage());
         }
         catch (Exception e) {
-            addError(StatusCodes.UNKNOWN_QUERY_ERROR, "FCS diagnostic 10: +"
+            addError(StatusCodes.UNKNOWN_QUERY_ERROR, "FCS diagnostic 10: "
                     + "Unexpected error while parsing query.");
         }
         return fcsQuery;

@@ -8,6 +8,7 @@ import de.ids_mannheim.korap.query.elements.KoralOperation;
 import de.ids_mannheim.korap.query.serialize.FCSQLQueryProcessor;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import eu.clarin.sru.server.fcs.parser.QueryDisjunction;
+import eu.clarin.sru.server.fcs.parser.QueryGroup;
 import eu.clarin.sru.server.fcs.parser.QueryNode;
 import eu.clarin.sru.server.fcs.parser.QuerySegment;
 import eu.clarin.sru.server.fcs.parser.QuerySequence;
@@ -26,8 +27,9 @@ public class FCSSRUQueryParser {
 
         if (queryNode instanceof QuerySegment) {
             return parseQuerySegment((QuerySegment) queryNode);
-            // } else if (queryNode instanceof QueryGroup) {
-            //
+        }
+        else if (queryNode instanceof QueryGroup) {
+            return parseQueryNode(queryNode.getChild(0));
         }
         else if (queryNode instanceof QuerySequence) {
             return parseGroupQuery(queryNode.getChildren(),
