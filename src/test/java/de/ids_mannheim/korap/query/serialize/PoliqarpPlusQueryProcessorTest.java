@@ -1699,8 +1699,35 @@ public class PoliqarpPlusQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
-        assertEquals("s", res.at("/query/operands/0/key").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("VVFIN", res.at("/query/operands/1/wrap/key").asText());
+    }
+
+    @Test
+    public void testSpanSerialization () throws JsonProcessingException, IOException {
+
+        // Both constructs should be serialized identically
+        query = "contains(<s>, der)";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
+        assertEquals(true, res.at("/query/frames/1").isMissingNode());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+
+        query = "der within s";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
+        assertEquals(true, res.at("/query/frames/1").isMissingNode());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
     }
 
 

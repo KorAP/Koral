@@ -27,7 +27,9 @@ public class KoralObjectGenerator {
     public static LinkedHashMap<String, Object> makeSpan (String key) {
         LinkedHashMap<String, Object> span = new LinkedHashMap<String, Object>();
         span.put("@type", "koral:span");
-        span.put("key", key);
+        LinkedHashMap<String, Object> term = makeTerm();
+        term.put("key", key);
+        span.put("wrap", term);
         return span;
     }
 

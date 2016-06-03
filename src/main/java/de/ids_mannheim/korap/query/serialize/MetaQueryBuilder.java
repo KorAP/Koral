@@ -1,10 +1,5 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -83,7 +78,6 @@ public class MetaQueryBuilder {
         return meta;
     }
 
-    @Data
     public class SpanContext {
         private String left_type;
         private String right_type;

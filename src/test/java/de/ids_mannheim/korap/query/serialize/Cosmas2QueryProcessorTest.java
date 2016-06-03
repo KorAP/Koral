@@ -18,7 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Tests for JSON-LD serialization of Cosmas II queries.
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
- * @version 1.0
+ * @author Nils Diewald
+ * @version 1.1
  */
 public class Cosmas2QueryProcessorTest {
 
@@ -685,7 +686,7 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
         assertEquals(
                 "s",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/0/operands/1/@type")
@@ -727,7 +728,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:span",
                 res.at("/query/operands/0/operands/0/operands/0/@type")
                         .asText());
-        assertEquals("s", res.at("/query/operands/0/operands/0/operands/0/key")
+        assertEquals("s", res.at("/query/operands/0/operands/0/operands/0/wrap/key")
                 .asText());
         assertEquals("koral:group", res
                 .at("/query/operands/0/operands/1/@type").asText());
@@ -859,7 +860,7 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
         assertEquals(
                 "s",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/0/operands/1/@type")
@@ -1400,7 +1401,7 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
         assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type")
                 .asText());
-        assertEquals("s", res.at("/query/operands/0/operands/0/key").asText());
+        assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key").asText());
 
         query = "#BED(der Mann , +pe)";
         qs.setQuery(query, "cosmas2");
@@ -1424,7 +1425,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:span",
                 res.at("/query/operands/0/operands/0/operands/0/@type")
                         .asText());
-        assertEquals("p", res.at("/query/operands/0/operands/0/operands/0/key")
+        assertEquals("p", res.at("/query/operands/0/operands/0/operands/0/wrap/key")
                 .asText());
         assertEquals("koral:reference",
                 res.at("/query/operands/0/operands/1/@type").asText());
@@ -1477,7 +1478,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:span",
                 res.at("/query/operands/0/operands/0/operands/0/@type")
                         .asText());
-        assertEquals("s", res.at("/query/operands/0/operands/0/operands/0/key")
+        assertEquals("s", res.at("/query/operands/0/operands/0/operands/0/wrap/key")
                 .asText());
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/0/operands/1/@type")
@@ -1512,7 +1513,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:span",
                 res.at("/query/operands/0/operands/1/operands/0/@type")
                         .asText());
-        assertEquals("p", res.at("/query/operands/0/operands/1/operands/0/key")
+        assertEquals("p", res.at("/query/operands/0/operands/1/operands/0/wrap/key")
                 .asText());
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/1/operands/1/@type")
@@ -1566,7 +1567,7 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
         assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type")
                 .asText());
-        assertEquals("s", res.at("/query/operands/0/operands/0/key").asText());
+        assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key").asText());
 
         query = "der:sa,-pa";
         qs.setQuery(query, "cosmas2");
@@ -1588,7 +1589,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:span",
                 res.at("/query/operands/0/operands/0/operands/0/@type")
                         .asText());
-        assertEquals("s", res.at("/query/operands/0/operands/0/operands/0/key")
+        assertEquals("s", res.at("/query/operands/0/operands/0/operands/0/wrap/key")
                 .asText());
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/0/operands/1/@type")
@@ -1614,7 +1615,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:span",
                 res.at("/query/operands/0/operands/1/operands/0/@type")
                         .asText());
-        assertEquals("p", res.at("/query/operands/0/operands/1/operands/0/key")
+        assertEquals("p", res.at("/query/operands/0/operands/1/operands/0/wrap/key")
                 .asText());
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/1/operands/1/@type")
@@ -1650,7 +1651,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:span",
                 res.at("/query/operands/0/operands/0/operands/0/@type")
                         .asText());
-        assertEquals("s", res.at("/query/operands/0/operands/0/operands/0/key")
+        assertEquals("s", res.at("/query/operands/0/operands/0/operands/0/wrap/key")
                 .asText());
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/0/operands/1/@type")
@@ -1702,7 +1703,7 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
         assertEquals(
                 "p",
-                res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/key")
+                res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals(
                 "koral:group",
@@ -1754,7 +1755,7 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
         assertEquals(
                 "t",
-                res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/operands/0/key")
+                res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals(
                 "koral:reference",

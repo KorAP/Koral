@@ -654,6 +654,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         ArrayList<Object> operands = (ArrayList<Object>) contains
                 .get("operands");
         operands.add(span);
+
         operands.add(queryObj);
         requestMap.put("query", contains);
         visited.add(node.getChild(0));

@@ -1,7 +1,14 @@
-0.2 2015-10-27
-        - Switch to "koral:" prefix.
+0.22 2016-06-03
+        - Spans now always wrap terms (diewald)
+
+0.21 2015-10-27
+        - Improved meta query builder (hanl)
+
+0.2 2015-06-25
+        - Switch to "koral:" prefix (bingel)
 	- Coverage of KoralQuery 0.3
 	  (see http://korap.github.io/Koral/)
+          (bingel)
 
 0.1 2015-02-10
-        - First version published to GitHub.
+        - First version published to GitHub (bingel)
