@@ -106,6 +106,25 @@ public class MetaQueryBuilder {
             this.context = context;
         }
 
+        public String getRightType() {
+            return this.right_type;
+        }
+
+        public String getLeftType() {
+            return this.left_type;
+        }
+
+        public Integer getLeftSize() {
+            return this.left_size;
+        }
+
+        public Integer getRightSize() {
+            return this.right_size;
+        }
+
+
+
+
         public Map raw() {
             Map meta = new LinkedHashMap();
             if (this.context == null) {
