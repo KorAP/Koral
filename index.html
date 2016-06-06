@@ -32,7 +32,7 @@
 	  <span class="p-org">IDS</span>,
 	  <span class="p-locality">Mannheim</span></p>
 	<p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-	<p>Last update: <time class="dt-updated" datetime="2015-06-10">2015/06/10</time></p>
+	<p>Last update: <time class="dt-updated" datetime="2016-06-06">2016/06/06</time></p>
       </div>
       
       <p style="color: red">This draft is in preparation.</p>
@@ -545,7 +545,7 @@ match:leq
   "@type" : "koral:token",
   "wrap" : {
     "@type" : "koral:term",
-    "foundry" : "Treetagger",
+    "foundry" : "tt",
     "layer" : "pos",
     "key" : "ADJD",
   }
@@ -581,9 +581,12 @@ match:leq
 	  <pre>
 {
   "@type" : "koral:span",
-  "foundry" : "cnx",
-  "layer" : "c",
-  "key" : "np"
+  "wrap" : {
+    "@type" : "koral:term",
+    "foundry" : "cnx",
+    "layer" : "c",
+    "key" : "np"
+  }
 }</pre>
 	  <table class="koral-type">
 	    <thead>
@@ -602,36 +605,10 @@ match:leq
 		<td><code class="att">koral:span</code></td>
               </tr>
               <tr>
-		<td class="opt">foundry</td>
-		<td>xsd:string</td>
+		<td class="opt">wrap</td>
+		<td><code class="att">koral:term</code>, <code class="att">koral:termGroup</code></td>
 		<td></td>
-		<td>The annotation foundry</td>
-              </tr>
-              <tr>
-		<td>layer</td>
-		<td>xsd:string</td>
-		<td></td>
-		<td>The annotation layer</td>
-              </tr>
-              <tr>
-		<td class="opt">key</td>
-		<td>xsd:string</td>
-		<td></td>
-		<td>The search key (span type)</td>
-              </tr>
-              <tr>
-		<td class="opt">match</td>
-		<td>@id</td>
-		<td></td>
-		<td>
-		  Specifies agreement between search key and annotation.
-		  <dl>
-		    <dt><code class="att">match:eq</code></dt>
-		    <dd>The search key has to match the annotation exactly.</dd>
-		    <dt><code class="att">match:ne</code></dt>
-		    <dd>The search key has to match anything but the annotation.</dd>
-		  </dl>
-		</td>
+		<td>Holds information on search key, foundry, layer, value</td>
               </tr>
               <tr>
 		<td class="opt">attr</td>
@@ -910,7 +887,7 @@ match:leq
 	  <pre>
 {
   "@type" : "koral:term",
-  "foundry" : "Treetagger",
+  "foundry" : "tt",
   "layer" : "pos",
   "key" : "ADJD",
 }</pre>
@@ -1436,7 +1413,10 @@ match:leq
       <div class="changes">
 	<pre>
 CHANGES:
-0.3 2015-03-22
+0.3.1 2016-06-06
+- Spans now wrap terms
+
+0.3.0 2015-03-22
 - Initial publication on GitHub
   Versions prior to 0.3 were used internally only</pre>
       </div>
