@@ -21,7 +21,8 @@ public class ResourceMapper {
         map.put("ANA", "p");
     }
 
-    public static String descriptor2policy(String descriptor) {
+
+    public static String descriptor2policy (String descriptor) {
         if (map.containsKey(descriptor))
             return map.get(descriptor);
         else

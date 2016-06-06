@@ -1,24 +1,20 @@
 package de.ids_mannheim.korap.query.serialize;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author hanl
+ * @author Joachim Bingel (bingel@ids-mannheim.de),
+ *         Michael Hanl (hanl@ids-mannheim.de)
+ * @version 0.3.0
  * @date 10/12/2013
+ * @since 0.1.0
  */
 public class QueryUtils {
 
-    public static SimpleEntry<String, Integer> checkUnbalancedPars(String q) {
+    public static SimpleEntry<String, Integer> checkUnbalancedPars (String q) {
         Map<Character, Character> brackets = new HashMap<Character, Character>();
         brackets.put('[', ']');
         brackets.put('{', '}');
@@ -48,13 +44,15 @@ public class QueryUtils {
         return null;
     }
 
-    public static List<String> parseMorph(String stringTree) {
+
+    public static List<String> parseMorph (String stringTree) {
 
         ArrayList<String> morph = new ArrayList<String>();
         return morph;
     }
 
-    public static String buildCypherQuery(String cypher, String ctypel,
+
+    public static String buildCypherQuery (String cypher, String ctypel,
             String ctyper, int cl, int cr, int page, int limit) {
         // todo: implies that there is only one type allowed!
         String sctypel = "", sctyper = "";
@@ -105,7 +103,8 @@ public class QueryUtils {
         return buffer.toString();
     }
 
-    public static String buildDotQuery(long sid, String graphdb_id) {
+
+    public static String buildDotQuery (long sid, String graphdb_id) {
         StringBuffer b = new StringBuffer();
         b.append("<query>");
         b.append("<sentenceId>");
@@ -127,7 +126,8 @@ public class QueryUtils {
         return b.toString();
     }
 
-    public String buildaggreQuery(String query) {
+
+    public String buildaggreQuery (String query) {
         StringBuffer b = new StringBuffer();
         b.append("<query><cypher><![CDATA[");
         b.append(query);
@@ -156,9 +156,10 @@ public class QueryUtils {
         return b.toString();
     }
 
+
     @Deprecated
-    public static Map addParameters(Map request, int page, int num, String cli,
-            String cri, int cls, int crs, boolean cutoff) {
+    public static Map addParameters (Map request, int page, int num,
+            String cli, String cri, int cls, int crs, boolean cutoff) {
         Map ctx = new LinkedHashMap();
         List left = new ArrayList();
         left.add(cli);
@@ -177,92 +178,46 @@ public class QueryUtils {
         return request;
     }
 
-    public static void prepareContext(LinkedHashMap<String, Object> requestMap) {
-        LinkedHashMap<String, Object> context = new LinkedHashMap<String, Object>();
 
-        LinkedHashMap<String, Object> classMap = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> operands = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> operation = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> frame = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> classRef = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> spanRef = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> classRefOp = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> min = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> max = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> exclude = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> distances = new LinkedHashMap<String, Object>();
-        LinkedHashMap<String, Object> inOrder = new LinkedHashMap<String, Object>();
+    /**
+     * Checks if value is a date
+     * 
+     * @param value
+     * @return
+     */
 
-        operation.put("@id", "group:operation/");
-        operation.put("@type", "@id");
+    public static boolean checkDateValidity (String value) {
+        Pattern p = Pattern.compile("^[0-9]{4}(-([0-9]{2})(-([0-9]{2}))?)?$");
+        Matcher m = p.matcher(value);
 
-        classMap.put("@id", "group:class");
-        classMap.put("@type", "xsd:integer");
-
-        operands.put("@id", "group:operands");
-        operands.put("@container", "@list");
-
-        frame.put("@id", "group:frame/");
-        frame.put("@type", "@id");
-
-        classRef.put("@id", "group:classRef");
-        classRef.put("@type", "xsd:integer");
-
-        spanRef.put("@id", "group:spanRef");
-        spanRef.put("@type", "xsd:integer");
-
-        classRefOp.put("@id", "group:classRefOp");
-        classRefOp.put("@type", "@id");
-
-        min.put("@id", "boundary:min");
-        min.put("@type", "xsd:integer");
-
-        max.put("@id", "boundary:max");
-        max.put("@type", "xsd:integer");
-
-        exclude.put("@id", "group:exclude");
-        exclude.put("@type", "xsd:boolean");
-
-        distances.put("@id", "group:distances");
-        distances.put("@container", "@list");
-
-        inOrder.put("@id", "group:inOrder");
-        inOrder.put("@type", "xsd:boolean");
-
-        context.put("korap",
-                "http://korap.ids-mannheim.de/ns/KorAP/json-ld/v0.1/");
-        context.put("boundary", "korap:boundary/");
-        context.put("group", "korap:group/");
-        context.put("operation", operation);
-        context.put("class", classMap);
-        context.put("operands", operands);
-        context.put("frame", frame);
-        context.put("classRef", classRef);
-        context.put("spanRef", spanRef);
-        context.put("classRefOp", classRefOp);
-        context.put("min", min);
-        context.put("max", max);
-        context.put("exclude", exclude);
-        context.put("distances", distances);
-        context.put("inOrder", inOrder);
-
-        requestMap.put("@context", context);
+        if (!m.find())
+            return false;
+        String month = m.group(2);
+        String day = m.group(4);
+        if (month != null) {
+            if (Integer.parseInt(month) > 12) {
+                return false;
+            }
+            else if (day != null) {
+                if (Integer.parseInt(day) > 31) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
-    public static String escapeRegexSpecialChars(String key) {
+
+    public static String escapeRegexSpecialChars (String key) {
         key.replace("\\", "\\\\");
         Pattern p = Pattern
                 .compile("\\.|\\^|\\$|\\||\\?|\\*|\\+|\\(|\\)|\\[|\\]|\\{|\\}");
         Matcher m = p.matcher(key);
         while (m.find()) {
-            System.out.println(m.group(0));
             String match = m.group();
-            System.out.println(key);
             key = m.replaceAll("\\\\" + match);
-            System.out.println(" > " + key);
         }
         return key;
     }
-
 
 }

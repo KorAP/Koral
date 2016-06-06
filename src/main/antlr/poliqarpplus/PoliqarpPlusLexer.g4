@@ -60,9 +60,7 @@ NUMBER              : [0-9]+;
 
 NL                  : [\r\n] -> skip;
 
-
 WORD                : ALPHABET+;
-
 
 /* Complex queries */
 LPAREN      : '[';
@@ -101,4 +99,5 @@ fragment RE_group    : '(' RE_expr ')';
 fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant | RE_group)+;
 fragment RE_dquote            : '"'  (RE_expr | '\'' | ':' )* '"';
 fragment RE_squote            : '\''  (RE_expr | '\"' | ':' )* '\'';
-REGEX             : ( RE_dquote | RE_squote );
+ 
+REGEX             : ( RE_dquote | RE_squote | );

@@ -1,4 +1,4 @@
-# Koral v0.1
+![Koral](https://raw.githubusercontent.com/KorAP/Koral/master/misc/koral.png)
 
 Koral is a library designed for the translation of different corpus query 
 languages to KoralQuery, a JSON-LD-based protocol for the common representation
@@ -37,44 +37,44 @@ operands, an *s* span and a sequence of two tokens.
 
 ```json
 {
-    "@context": "http://ids-mannheim.de/ns/KorAP/json-ld/v0.2/context.jsonld",
-    "query": {
-        "@type": "korap:group",
-        "operation": "operation:position",
-        "frames": [
-            "frames:isAround"
-        ],
+  "@context": "http://korap.ids-mannheim.de/ns/KoralQuery/v0.2/context.jsonld",
+  "query": {
+    "@type": "koral:group",
+    "operation": "operation:position",
+    "frames": [
+      "frames:isAround"
+    ],
+    "operands": [
+      {
+        "@type": "koral:span",
+        "key": "s"
+      },
+      {
+        "@type": "koral:group",
+        "operation": "operation:sequence",
         "operands": [
-            {
-                "@type": "korap:span",
-                "key": "s"
-            },
-            {
-                "@type": "korap:group",
-                "operation": "operation:sequence",
-                "operands": [
-                    {
-                        "@type": "korap:token",
-                        "wrap": {
-                            "@type": "korap:term",
-                            "layer": "orth",
-                            "key": "zu",
-                            "match": "match:eq"
-                        }
-                    },
-                    {
-                        "@type": "korap:token",
-                        "wrap": {
-                            "@type": "korap:term",
-                            "layer": "pos",
-                            "key": "ADJA",
-                            "match": "match:eq"
-                        }
-                    }
-                ]
+          {
+            "@type": "koral:token",
+            "wrap": {
+              "@type": "koral:term",
+              "layer": "orth",
+              "key": "zu",
+              "match": "match:eq"
             }
+          },
+          {
+            "@type": "koral:token",
+            "wrap": {
+              "@type": "koral:term",
+              "layer": "pos",
+              "key": "ADJA",
+              "match": "match:eq"
+            }
+          }
         ]
-    }
+      }
+    ]
+  }
 }
 ```
 
@@ -102,7 +102,7 @@ Installation is straightforward (Maven3 required):
 
 There is also a command line version. After installation, simply run
 
-    java -jar target/Koral-0.1.jar [query] [queryLanguage]
+    java -jar target/Koral-0.2.jar [query] [queryLanguage]
     
 ## Authorship
 

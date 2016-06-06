@@ -150,7 +150,7 @@ matching
 ;
 
 alignment
-: CARET (segment|sequence)
+: segment? (CARET segment)* CARET?
 ;
 
 disjunction
@@ -194,15 +194,18 @@ segment
   | LRPAREN segment RRPAREN
   ) 
   repetition?
-; 
+ ; 
 
 sequence
 : segment* (emptyTokenSequence|emptyTokenSequenceClass)		// ordering important! this subrule must precede any 'distance'-subrules to give precedence to repetition-interpretation of numbers in braces (could be mistaken for number tokens in spanclass), e.g. {2}.
 | (emptyTokenSequence|emptyTokenSequenceClass) (segment+ | sequence) (emptyTokenSequence|emptyTokenSequenceClass)?
+| alignment segment* 	// give precedence to this subrule over the next to make sure preceding segments come into 'alignment'
+| segment+ alignment segment*
 | segment segment+ 
 | segment (distance|emptyTokenSequenceClass) segment 
 | segment (distance|emptyTokenSequenceClass)? sequence
-| segment+ alignment
+
+//| alignment (segment|sequence) alignment?
 ;
 
 

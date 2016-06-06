@@ -15,11 +15,13 @@ public class CollectionTypes {
 
     private ObjectMapper mapper;
 
-    public CollectionTypes() {
+
+    public CollectionTypes () {
         this.mapper = new ObjectMapper();
     }
 
-    public Map createGroup(String relation, String field, List terms) {
+
+    public Map createGroup (String relation, String field, List terms) {
         if (relation == null)
             return null;
 
@@ -32,7 +34,9 @@ public class CollectionTypes {
         return kgroup;
     }
 
-    public Map createTerm(String field, String subtype, String value, String type) {
+
+    public Map createTerm (String field, String subtype, String value,
+            String type) {
         Map term = new LinkedHashMap<>();
         if (type == null)
             type = "korap:term";
@@ -45,15 +49,18 @@ public class CollectionTypes {
         return term;
     }
 
-    public Map createTerm(String field, String value, String type) {
+
+    public Map createTerm (String field, String value, String type) {
         return createTerm(field, null, value, type);
     }
 
-    public Map createTerm(String field, String value) {
+
+    public Map createTerm (String field, String value) {
         return createTerm(field, value, null);
     }
 
-    public Map createResourceFilter(String resource, Map value) {
+
+    public Map createResourceFilter (String resource, Map value) {
         Map meta = new LinkedHashMap();
         meta.put("@type", "korap:meta-filter");
         meta.put("@id", "korap-filter#" + resource);
@@ -61,11 +68,14 @@ public class CollectionTypes {
         return meta;
     }
 
-    public Map createResourceFilter(String resource, String value) throws IOException {
+
+    public Map createResourceFilter (String resource, String value)
+            throws IOException {
         return createResourceFilter(resource, mapify(value));
     }
 
-    public Map createResourceExtend(String resource, Map value) {
+
+    public Map createResourceExtend (String resource, Map value) {
         Map meta = new LinkedHashMap();
         meta.put("@type", "korap:meta-extend");
         meta.put("@id", "korap-filter#" + resource);
@@ -73,14 +83,16 @@ public class CollectionTypes {
         return meta;
     }
 
-    public Map createMetaFilter(Map value) {
+
+    public Map createMetaFilter (Map value) {
         Map meta = new LinkedHashMap();
         meta.put("@type", "korap:meta-filter");
         meta.put("@value", value);
         return meta;
     }
 
-    public Map createMetaExtend(Map value) {
+
+    public Map createMetaExtend (Map value) {
         Map meta = new LinkedHashMap();
         meta.put("@type", "korap:meta-extend");
         meta.put("@value", value);
@@ -88,7 +100,7 @@ public class CollectionTypes {
     }
 
 
-    public Map mapify(String s) throws IOException {
+    public Map mapify (String s) throws IOException {
         return mapper.readValue(s, Map.class);
     }
 

@@ -11,22 +11,19 @@ public class c2ps_opAnnot
 
 {
 
- public static String strip(String input)
- 	{
-	if( input.startsWith("MORPH(") )
-		{
-		input = input.substring(6,input.length()-1);
-		}
+    public static String strip (String input) {
+        if (input.startsWith("MORPH(")) {
+            input = input.substring(6, input.length() - 1);
+        }
 
-	return input;
-	}
+        return input;
+    }
 
- /*
-  * main: testprogram:
-  */
 
- public static void main(String args[]) throws Exception 
-  {
-  } // main
+    /*
+     * main: testprogram:
+     */
 
-} 
+    public static void main (String args[]) throws Exception {} // main
+
+}

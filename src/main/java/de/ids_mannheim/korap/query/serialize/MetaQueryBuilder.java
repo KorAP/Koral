@@ -1,11 +1,10 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import lombok.Data;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author hanl
@@ -13,81 +12,78 @@ import java.util.Map;
  */
 public class MetaQueryBuilder {
 
+    private static Pattern p = Pattern
+            .compile("\\s*\\d+-(?:c(?:hars?)?|t(?:okens?)?)");
     private Map meta;
     private SpanContext spanContext;
 
+
     public MetaQueryBuilder () {
         this.meta = new LinkedHashMap();
+        //        this.meta.put("fields", new LinkedList<>());
     }
+
 
     /**
      * context segment if context is either of type char or token.
      * size can differ for left and right span
-     *
+     * 
      * @param left
      * @param leftType
      * @param right
      * @param rightType
      * @return
      */
-    public MetaQueryBuilder setSpanContext(Integer left, String leftType,
+    public MetaQueryBuilder setSpanContext (Integer left, String leftType,
             Integer right, String rightType) {
         this.spanContext = new SpanContext(left, leftType, right, rightType);
         return this;
     }
 
-    public SpanContext getSpanContext() {
+
+    public SpanContext getSpanContext () {
         return this.spanContext;
     }
+
 
     /**
      * context if of type paragraph or sentence where left and right
      * size delimiters are irrelevant; or 2-token, 2-char p/paragraph,
-     * s/sentence or token, char
-     *
+     * s/sentence or token, char.
+     * Distinguish
+     * 
      * @param context
      * @return
      */
-    public MetaQueryBuilder setSpanContext(String context) {
-        if (context.startsWith("s") | context.startsWith("p"))
-            this.spanContext = new SpanContext(context);
-        else {
-            String[] ct = context.replaceAll("\\s+", "").split(",");
-            String[] lc = ct[0].split("-");
-            String[] rc = ct[1].split("-");
-            this.spanContext = new SpanContext(Integer.valueOf(lc[0]), lc[1],
-                    Integer.valueOf(rc[0]), rc[1]);
+    public MetaQueryBuilder setSpanContext (String context) {
+        if (context != null) {
+            if (!p.matcher(context).find())
+                this.spanContext = new SpanContext(context);
+            else {
+                String[] ct = context.replaceAll("\\s+", "").split(",");
+                String[] lc = ct[0].split("-");
+                String[] rc = ct[1].split("-");
+                this.spanContext = new SpanContext(Integer.valueOf(lc[0]),
+                        lc[1], Integer.valueOf(rc[0]), rc[1]);
+            }
         }
         return this;
     }
 
-    public MetaQueryBuilder fillMeta(Integer pageIndex, Integer pageInteger,
-            Integer pageLength, String ctx, Boolean cutoff) {
-        if (pageIndex != null)
-            this.addEntry("startIndex", pageIndex);
-        if (pageIndex == null && pageInteger != null)
-            this.addEntry("startPage", pageInteger);
-        if (pageLength != null)
-            this.addEntry("count", pageLength);
-        if (ctx != null)
-            this.setSpanContext(ctx);
-        if (cutoff != null)
-            this.addEntry("cutOff", cutoff);
+
+    public MetaQueryBuilder addEntry (String name, Object value) {
+        if (value != null)
+            meta.put(name, value);
         return this;
     }
 
-    public MetaQueryBuilder addEntry(String name, Object value) {
-        meta.put(name, value);
-        return this;
-    }
 
-    public Map raw() {
+    public Map raw () {
         if (this.spanContext != null)
             meta.putAll(this.spanContext.raw());
         return meta;
     }
 
-    @Data
     public class SpanContext {
         private String left_type;
         private String right_type;
@@ -95,10 +91,11 @@ public class MetaQueryBuilder {
         private int right_size;
         private String context = null;
 
+
         /**
          * context segment if context is either of type char or token.
          * size can differ for left and right span
-         *
+         * 
          * @param ls
          * @param lt
          * @param rs
@@ -112,8 +109,25 @@ public class MetaQueryBuilder {
             this.right_size = rs;
         }
 
+
         public SpanContext (String context) {
             this.context = context;
+        }
+
+        public String getRightType() {
+            return this.right_type;
+        }
+
+        public String getLeftType() {
+            return this.left_type;
+        }
+
+        public Integer getLeftSize() {
+            return this.left_size;
+        }
+
+        public Integer getRightSize() {
+            return this.right_size;
         }
 
         public Map raw() {

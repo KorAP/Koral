@@ -10,8 +10,8 @@ import java.util.Iterator;
 /**
  * @author hanl
  * @date 04/06/2014
- * <p/>
- * create idn for korap:token
+ *       <p/>
+ *       create idn for korap:token
  */
 public class IdWriter {
 
@@ -19,17 +19,20 @@ public class IdWriter {
     private int counter;
     private ObjectMapper mapper = new ObjectMapper();
 
-    public IdWriter(String json) {
+
+    public IdWriter (String json) {
         node = mapper.valueToTree(json);
         counter = 0;
     }
 
-    public IdWriter process() {
+
+    public IdWriter process () {
         process(node.path("query"));
         return this;
     }
 
-    private void process(JsonNode node) {
+
+    private void process (JsonNode node) {
         if (node.path("@type").asText().equals("korap:group")) {
             Iterator<JsonNode> operands = node.path("operands").elements();
             while (operands.hasNext())
@@ -39,7 +42,8 @@ public class IdWriter {
             addId(node);
     }
 
-    private JsonNode addId(JsonNode node) {
+
+    private JsonNode addId (JsonNode node) {
         if (node.isObject()) {
             ObjectNode o = (ObjectNode) node;
             String s = extractToken(node);
@@ -49,7 +53,8 @@ public class IdWriter {
         return node;
     }
 
-    private String extractToken(JsonNode token) {
+
+    private String extractToken (JsonNode token) {
         if (!token.path("@type").equals("korap:term")) {
             JsonNode wrap = token.path("wrap");
             JsonNode op = token.path("operands");
@@ -65,11 +70,8 @@ public class IdWriter {
 
     }
 
-    @Deprecated public JsonNode getFinalNode() {
-        return this.node;
-    }
 
-    public String toJSON() {
+    public String toJSON () {
         try {
             return mapper.writeValueAsString(node);
         }

@@ -35,16 +35,19 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
     private String version;
     private boolean isCaseSensitive; // default true
 
+
     public CqlQueryProcessor (String query) {
         this(query, VERSION_1_2, true);
     }
+
 
     public CqlQueryProcessor (String query, String version) {
         this(query, version, true);
     }
 
+
     public CqlQueryProcessor (String query, String version,
-            boolean isCaseSensitive) {
+                              boolean isCaseSensitive) {
         this.version = version;
         this.isCaseSensitive = isCaseSensitive;
         this.requestMap = new LinkedHashMap<>();
@@ -52,13 +55,15 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         process(query);
     }
 
+
     @Override
-    public Map<String, Object> getRequestMap() {
+    public Map<String, Object> getRequestMap () {
         return this.requestMap;
     }
 
+
     @Override
-    public void process(String query) {
+    public void process (String query) {
         if ((query == null) || query.isEmpty())
             addError(StatusCodes.MALFORMED_QUERY,
                     "SRU diagnostic 27: An empty query is unsupported.");
@@ -69,14 +74,15 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         // requestMap.put("query", sentenceWrapper(queryMap));
     }
 
-    private Map<String, Object> sentenceWrapper(Map<String, Object> m) {
+
+    private Map<String, Object> sentenceWrapper (Map<String, Object> m) {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "korap:group");
+        map.put("@type", "koral:group");
         map.put("operation", OPERATION_POSITION);
         map.put("frame", "frame:contains");
 
         Map<String, Object> sentence = new LinkedHashMap<String, Object>();
-        sentence.put("@type", "korap:span");
+        sentence.put("@type", "koral:span");
         sentence.put("key", "s");
 
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -87,7 +93,8 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         return map;
     }
 
-    private CQLNode parseQuerytoCQLNode(String query) {
+
+    private CQLNode parseQuerytoCQLNode (String query) {
         try {
             int compat = -1;
             switch (version) {
@@ -106,7 +113,8 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         }
     }
 
-    private Map<String, Object> parseCQLNode(CQLNode node) {
+
+    private Map<String, Object> parseCQLNode (CQLNode node) {
 
         if (node instanceof CQLTermNode) {
             return parseTermNode((CQLTermNode) node);
@@ -126,7 +134,8 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         }
     }
 
-    private Map<String, Object> parseTermNode(CQLTermNode node) {
+
+    private Map<String, Object> parseTermNode (CQLTermNode node) {
         checkTermNode(node);
         final String term = node.getTerm();
         if ((term == null) || term.isEmpty()) {
@@ -142,17 +151,18 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         }
     }
 
-    private Map<String, Object> parseAndNode(CQLAndNode node) {
+
+    private Map<String, Object> parseAndNode (CQLAndNode node) {
         checkBooleanModifier(node);
 
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "korap:group");
+        map.put("@type", "koral:group");
         map.put("operation", OPERATION_SEQUENCE);
         map.put("inOrder", false);
 
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         Map<String, Object> distanceMap = new LinkedHashMap<String, Object>();
-        distanceMap.put("@type", "korap:distance");
+        distanceMap.put("@type", "koral:distance");
         distanceMap.put("key", "s");
         distanceMap.put("min", "0");
         distanceMap.put("max", "0");
@@ -167,11 +177,12 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         return map;
     }
 
-    private Map<String, Object> parseOrNode(CQLOrNode node) {
+
+    private Map<String, Object> parseOrNode (CQLOrNode node) {
         checkBooleanModifier(node);
 
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "korap:group");
+        map.put("@type", "koral:group");
         map.put("operation", OPERATION_OR);
 
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -182,9 +193,10 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         return map;
     }
 
-    private Map<String, Object> writeSequence(String str) {
+
+    private Map<String, Object> writeSequence (String str) {
         Map<String, Object> sequenceMap = new LinkedHashMap<String, Object>();
-        sequenceMap.put("@type", "korap:group");
+        sequenceMap.put("@type", "koral:group");
         sequenceMap.put("operation", OPERATION_SEQUENCE);
 
         List<Map<String, Object>> termList = new ArrayList<Map<String, Object>>();
@@ -197,9 +209,10 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         return sequenceMap;
     }
 
-    private Map<String, Object> writeTerm(String term) {
+
+    private Map<String, Object> writeTerm (String term) {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        map.put("@type", "korap:term");
+        map.put("@type", "koral:term");
         if (!isCaseSensitive) {
             map.put("caseInsensitive", "true");
         }
@@ -208,12 +221,13 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         map.put("match", "match:eq");
 
         Map<String, Object> tokenMap = new LinkedHashMap<String, Object>();
-        tokenMap.put("@type", "korap:token");
+        tokenMap.put("@type", "koral:token");
         tokenMap.put("wrap", map);
         return tokenMap;
     }
 
-    private void checkBooleanModifier(CQLBooleanNode node) {
+
+    private void checkBooleanModifier (CQLBooleanNode node) {
         List<Modifier> modifiers = node.getModifiers();
         if ((modifiers != null) && !modifiers.isEmpty()) {
             Modifier modifier = modifiers.get(0);
@@ -223,7 +237,8 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         }
     }
 
-    private void checkTermNode(CQLTermNode node) {
+
+    private void checkTermNode (CQLTermNode node) {
         // only allow "cql.serverChoice" and "words" index
         if (!(INDEX_CQL_SERVERCHOICE.equals(node.getIndex()) || INDEX_WORDS
                 .equals(node.getIndex()))) {

@@ -1,13 +1,9 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-
 import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +12,26 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * @author bingel, hanl
+ * Main class for Koral, serializes queries from concrete QLs to
+ * KoralQuery
+ * 
+ * @author Joachim Bingel (bingel@ids-mannheim.de),
+ *         Michael Hanl (hanl@ids-mannheim.de)
+ * @version 0.3.0
+ * @since 0.1.0
  */
 public class QuerySerializer {
 
+    // fixme: not used in any way!
+    @Deprecated
     static HashMap<String, Class<? extends AbstractQueryProcessor>> qlProcessorAssignment;
+
+
 
     static {
         qlProcessorAssignment = new HashMap<String, Class<? extends AbstractQueryProcessor>>();
-        qlProcessorAssignment
-                .put("poliqarpplus", PoliqarpPlusQueryProcessor.class);
+        qlProcessorAssignment.put("poliqarpplus",
+                PoliqarpPlusQueryProcessor.class);
         qlProcessorAssignment.put("cosmas2", Cosmas2QueryProcessor.class);
         qlProcessorAssignment.put("annis", AnnisQueryProcessor.class);
         qlProcessorAssignment.put("cql", CqlQueryProcessor.class);
@@ -36,7 +42,7 @@ public class QuerySerializer {
     public static String queryLanguageVersion;
 
     private AbstractQueryProcessor ast;
-    private Map<String, Object> collection = new LinkedHashMap<String, Object>();
+    private Map<String, Object> collection = new LinkedHashMap<>();
     private Map<String, Object> meta;
     private List<Object> errors;
     private List<Object> warnings;
@@ -44,10 +50,18 @@ public class QuerySerializer {
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(QuerySerializer.class);
 
+
+    public QuerySerializer () {
+        this.errors = new LinkedList<>();
+        this.warnings = new LinkedList<>();
+        this.messages = new LinkedList<>();
+    }
+
+
     /**
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main (String[] args) {
         /*
          * just for testing...
          */
@@ -57,12 +71,13 @@ public class QuerySerializer {
         String[] queries = null;
         String ql = "poliqarpplus";
         if (args.length < 2) {
-            System.err.println("Usage: QuerySerializer \"query\" queryLanguage");
+            System.err
+                    .println("Usage: QuerySerializer \"query\" queryLanguage");
             System.exit(1);
         }
         else {
             queries = new String[] { args[0] };
-            ql  = args[1];
+            ql = args[1];
         }
         for (String q : queries) {
             i++;
@@ -74,31 +89,27 @@ public class QuerySerializer {
                 npe.printStackTrace();
                 System.out.println("null\n");
             }
-            catch (JsonGenerationException e) {
-                e.printStackTrace();
-            }
-            catch (JsonMappingException e) {
-                e.printStackTrace();
-            }
             catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
+
     /**
      * Runs the QuerySerializer by initializing the relevant
      * AbstractSyntaxTree implementation (depending on specified query
      * language) and transforms and writes the tree's requestMap to
      * the specified output file.
-     *
-     * @param outFile       The file to which the serialization is written
-     * @param query         The query string
-     * @param queryLanguage The query language. As of 17 Dec 2014, this must be
-     *                      one of 'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
+     * 
+     * @param query
+     *            The query string
+     * @param queryLanguage
+     *            The query language. As of 17 Dec 2014, this must be
+     *            one of 'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
      * @throws IOException
      */
-    public void run(String query, String queryLanguage) throws IOException {
+    public void run (String query, String queryLanguage) throws IOException {
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
         }
@@ -115,13 +126,14 @@ public class QuerySerializer {
             ast = new AnnisQueryProcessor(query);
         }
         else {
-            throw new IllegalArgumentException(
-                    queryLanguage + " is not a supported query language!");
+            throw new IllegalArgumentException(queryLanguage
+                    + " is not a supported query language!");
         }
         toJSON();
     }
 
-    public QuerySerializer setQuery(String query, String ql, String version) {
+
+    public QuerySerializer setQuery (String query, String ql, String version) {
         ast = new DummyQueryProcessor();
         if (query == null || query.isEmpty()) {
             ast.addError(StatusCodes.NO_QUERY, "You did not specify a query!");
@@ -149,21 +161,24 @@ public class QuerySerializer {
             ast = new AnnisQueryProcessor(query);
         }
         else {
-            ast.addError(StatusCodes.UNKNOWN_QL,
-                    ql + " is not a supported query language!");
+            ast.addError(StatusCodes.UNKNOWN_QL, ql
+                    + " is not a supported query language!");
         }
         return this;
     }
 
-    public QuerySerializer setQuery(String query, String ql) {
+
+    public QuerySerializer setQuery (String query, String ql) {
         return setQuery(query, ql, "");
     }
 
-    public void setVerbose(boolean verbose) {
+
+    public void setVerbose (boolean verbose) {
         AbstractQueryProcessor.verbose = verbose;
     }
 
-    public final String toJSON() {
+
+    public final String toJSON () {
         String ser;
         try {
             ser = mapper.writeValueAsString(raw());
@@ -175,62 +190,98 @@ public class QuerySerializer {
         return ser;
     }
 
-    public final Map build() {
+
+    public final Map build () {
         return raw();
     }
 
-    private Map raw() {
+
+    private Map raw () {
         if (ast != null) {
-            Map<String, Object> requestMap = ast.getRequestMap();
+            Map<String, Object> requestMap = new HashMap<>(ast.getRequestMap());
             Map meta = (Map) requestMap.get("meta");
             Map collection = (Map) requestMap.get("collection");
             List errors = (List) requestMap.get("errors");
             List warnings = (List) requestMap.get("warnings");
             List messages = (List) requestMap.get("messages");
-            this.collection = mergeCollection(collection, this.collection);
-            requestMap.put("collection", this.collection);
+            collection = mergeCollection(collection, this.collection);
+            requestMap.put("collection", collection);
+            
+            if (meta == null)
+                meta = new HashMap();
+            if (errors == null)
+                errors = new LinkedList();
+            if (warnings == null)
+                warnings = new LinkedList();
+            if (messages == null)
+                messages = new LinkedList();
+
             if (this.meta != null) {
                 meta.putAll(this.meta);
                 requestMap.put("meta", meta);
             }
-            if (this.errors != null) {
+            if (this.errors != null && !this.errors.isEmpty()) {
                 errors.addAll(this.errors);
                 requestMap.put("errors", errors);
             }
-            if (this.warnings != null) {
+            if (this.warnings != null && !this.warnings.isEmpty()) {
                 warnings.addAll(this.warnings);
                 requestMap.put("warnings", warnings);
             }
-            if (this.messages != null) {
+            if (this.messages != null && !this.messages.isEmpty()) {
                 messages.addAll(this.messages);
                 requestMap.put("messages", messages);
             }
-
-            return requestMap;
+            return cleanup(requestMap);
         }
         return new HashMap<>();
     }
 
-    private Map<String, Object> mergeCollection(Map<String, Object> collection1,
-            Map<String, Object> collection2) {
-        LinkedHashMap<String, Object> docGroup = KoralObjectGenerator
-                .makeDocGroup("and");
-        ArrayList<Object> operands = (ArrayList<Object>) docGroup
-                .get("operands");
+
+    private Map<String, Object> cleanup (Map<String, Object> requestMap) {
+        Iterator<Map.Entry<String, Object>> set = requestMap.entrySet()
+                .iterator();
+        while (set.hasNext()) {
+            Map.Entry<String, Object> entry = set.next();
+            if (entry.getValue() instanceof List
+                    && ((List) entry.getValue()).isEmpty())
+                set.remove();
+            else if (entry.getValue() instanceof Map
+                    && ((Map) entry.getValue()).isEmpty())
+                set.remove();
+            else if (entry.getValue() instanceof String
+                    && ((String) entry.getValue()).isEmpty())
+                set.remove();
+        }
+        return requestMap;
+    }
+
+
+    private Map<String, Object> mergeCollection (
+            Map<String, Object> collection1, Map<String, Object> collection2) {
         if (collection1 == null || collection1.isEmpty()) {
             return collection2;
         }
         else if (collection2 == null || collection2.isEmpty()) {
             return collection1;
         }
+        else if (collection1.equals(collection2)) {
+            return collection1;
+        }
         else {
+            LinkedHashMap<String, Object> docGroup = KoralObjectGenerator
+                    .makeDocGroup("and");
+            ArrayList<Object> operands = (ArrayList<Object>) docGroup
+                    .get("operands");
             operands.add(collection1);
             operands.add(collection2);
             return docGroup;
         }
     }
 
-    public QuerySerializer addMeta(String cli, String cri, int cls, int crs,
+
+    @Deprecated
+    public QuerySerializer addMeta (String cli, String cri, int cls, int crs,
             int num, int pageIndex) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
         meta.setSpanContext(cls, cli, crs, cri);
@@ -240,47 +291,25 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer addMeta(String context, int num, int pageidx) {
-        MetaQueryBuilder meta = new MetaQueryBuilder();
-        meta.addEntry("startIndex", pageidx);
-        meta.addEntry("count", num);
-        meta.setSpanContext(context);
-        this.meta = meta.raw();
+
+    public QuerySerializer setMeta (Map<String, Object> meta) {
+        this.meta = meta;
         return this;
     }
 
-    public QuerySerializer addMeta(MetaQueryBuilder meta) {
-        this.meta = meta.raw();
-        return this;
-    }
 
-//    @Deprecated public QuerySerializer setCollectionSimple(String collection) {
-//        CollectionQueryBuilder qobj = new CollectionQueryBuilder();
-//        qobj.addResource(collection);
-//        this.collection = (Map<String, Object>) qobj.raw();
-//        return this;
-//    }
-
-    public QuerySerializer setCollection(String collection) {
+    public QuerySerializer setCollection (String collection) {
         CollectionQueryProcessor tree = new CollectionQueryProcessor();
-        Map<String, Object> collectionRequest = tree.getRequestMap();
         tree.process(collection);
+        Map<String, Object> collectionRequest = tree.getRequestMap();
+        if (collectionRequest.get("errors") != null)
+            this.errors.addAll((List) collectionRequest.get("errors"));
+        if (collectionRequest.get("warnings") != null)
+            this.warnings.addAll((List) collectionRequest.get("warnings"));
+        if (collectionRequest.get("messages") != null)
+            this.messages.addAll((List) collectionRequest.get("messages"));
         this.collection = (Map<String, Object>) collectionRequest
                 .get("collection");
-        this.errors = (List) collectionRequest.get("errors");
-        this.warnings = (List) collectionRequest.get("warnings");
-        this.messages = (List) collectionRequest.get("messages");
         return this;
     }
-
-//    public QuerySerializer setCollection(CollectionQueryBuilder2 collections) {
-    //        this.collection = (Map<String, Object>) collections.raw();
-    //        return this;
-    //    }
-    //
-    //    public QuerySerializer setDeprCollection(
-    //            CollectionQueryBuilder collections) {
-    //        this.collection = (Map<String, Object>) collections.raw();
-    //        return this;
-    //    }
 }
