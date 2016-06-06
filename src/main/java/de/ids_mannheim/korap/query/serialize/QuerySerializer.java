@@ -180,6 +180,16 @@ public class QuerySerializer {
             List messages = (List) requestMap.get("messages");
             collection = mergeCollection(collection, this.collection);
             requestMap.put("collection", collection);
+            
+            if (meta == null)
+                meta = new HashMap();
+            if (errors == null)
+                errors = new LinkedList();
+            if (warnings == null)
+                warnings = new LinkedList();
+            if (messages == null)
+                messages = new LinkedList();
+
             if (this.meta != null) {
                 meta.putAll(this.meta);
                 requestMap.put("meta", meta);
@@ -196,7 +206,6 @@ public class QuerySerializer {
                 messages.addAll(this.messages);
                 requestMap.put("messages", messages);
             }
-
             return cleanup(requestMap);
         }
         return new HashMap<>();
