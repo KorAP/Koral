@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Main class for Koral, serializes queries from concrete QLs to
  * KoralQuery
- *
+ * 
  * @author Joachim Bingel (bingel@ids-mannheim.de),
  *         Michael Hanl (hanl@ids-mannheim.de)
  * @version 0.3.0
@@ -28,11 +28,10 @@ public class QuerySerializer {
 
 
 
-
     static {
         qlProcessorAssignment = new HashMap<String, Class<? extends AbstractQueryProcessor>>();
-        qlProcessorAssignment
-                .put("poliqarpplus", PoliqarpPlusQueryProcessor.class);
+        qlProcessorAssignment.put("poliqarpplus",
+                PoliqarpPlusQueryProcessor.class);
         qlProcessorAssignment.put("cosmas2", Cosmas2QueryProcessor.class);
         qlProcessorAssignment.put("annis", AnnisQueryProcessor.class);
         qlProcessorAssignment.put("cql", CqlQueryProcessor.class);
@@ -51,16 +50,18 @@ public class QuerySerializer {
     private org.slf4j.Logger log = LoggerFactory
             .getLogger(QuerySerializer.class);
 
-    public QuerySerializer() {
+
+    public QuerySerializer () {
         this.errors = new LinkedList<>();
         this.warnings = new LinkedList<>();
         this.messages = new LinkedList<>();
     }
 
+
     /**
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main (String[] args) {
         /*
          * just for testing...
          */
@@ -73,7 +74,8 @@ public class QuerySerializer {
             System.err
                     .println("Usage: QuerySerializer \"query\" queryLanguage");
             System.exit(1);
-        }else {
+        }
+        else {
             queries = new String[] { args[0] };
             ql = args[1];
         }
@@ -82,95 +84,119 @@ public class QuerySerializer {
             try {
                 jg.run(q, ql);
                 System.out.println();
-            }catch (NullPointerException npe) {
+            }
+            catch (NullPointerException npe) {
                 npe.printStackTrace();
                 System.out.println("null\n");
-            }catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
+
 
     /**
      * Runs the QuerySerializer by initializing the relevant
      * AbstractSyntaxTree implementation (depending on specified query
      * language) and transforms and writes the tree's requestMap to
      * the specified output file.
-     *
-     * @param query         The query string
-     * @param queryLanguage The query language. As of 17 Dec 2014, this must be
-     *                      one of 'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
+     * 
+     * @param query
+     *            The query string
+     * @param queryLanguage
+     *            The query language. As of 17 Dec 2014, this must be
+     *            one of 'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
      * @throws IOException
      */
-    public void run(String query, String queryLanguage) throws IOException {
+    public void run (String query, String queryLanguage) throws IOException {
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        }else if (queryLanguage.equalsIgnoreCase("cosmas2")) {
+        }
+        else if (queryLanguage.equalsIgnoreCase("cosmas2")) {
             ast = new Cosmas2QueryProcessor(query);
-        }else if (queryLanguage.equalsIgnoreCase("poliqarpplus")) {
+        }
+        else if (queryLanguage.equalsIgnoreCase("poliqarpplus")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        }else if (queryLanguage.equalsIgnoreCase("cql")) {
+        }
+        else if (queryLanguage.equalsIgnoreCase("cql")) {
             ast = new CqlQueryProcessor(query);
-        }else if (queryLanguage.equalsIgnoreCase("annis")) {
+        }
+        else if (queryLanguage.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
-        }else {
-            throw new IllegalArgumentException(
-                    queryLanguage + " is not a supported query language!");
+        }
+        else {
+            throw new IllegalArgumentException(queryLanguage
+                    + " is not a supported query language!");
         }
         toJSON();
     }
 
-    public QuerySerializer setQuery(String query, String ql, String version) {
+
+    public QuerySerializer setQuery (String query, String ql, String version) {
         ast = new DummyQueryProcessor();
         if (query == null || query.isEmpty()) {
             ast.addError(StatusCodes.NO_QUERY, "You did not specify a query!");
-        }else if (ql == null || ql.isEmpty()) {
+        }
+        else if (ql == null || ql.isEmpty()) {
             ast.addError(StatusCodes.NO_QUERY,
                     "You did not specify any query language!");
-        }else if (ql.equalsIgnoreCase("poliqarp")) {
+        }
+        else if (ql.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        }else if (ql.equalsIgnoreCase("cosmas2")) {
+        }
+        else if (ql.equalsIgnoreCase("cosmas2")) {
             ast = new Cosmas2QueryProcessor(query);
-        }else if (ql.equalsIgnoreCase("poliqarpplus")) {
+        }
+        else if (ql.equalsIgnoreCase("poliqarpplus")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        }else if (ql.equalsIgnoreCase("cql")) {
+        }
+        else if (ql.equalsIgnoreCase("cql")) {
             if (version == null)
                 ast = new CqlQueryProcessor(query);
             else
                 ast = new CqlQueryProcessor(query, version);
-        }else if (ql.equalsIgnoreCase("annis")) {
+        }
+        else if (ql.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
-        }else {
-            ast.addError(StatusCodes.UNKNOWN_QL,
-                    ql + " is not a supported query language!");
+        }
+        else {
+            ast.addError(StatusCodes.UNKNOWN_QL, ql
+                    + " is not a supported query language!");
         }
         return this;
     }
 
-    public QuerySerializer setQuery(String query, String ql) {
+
+    public QuerySerializer setQuery (String query, String ql) {
         return setQuery(query, ql, "");
     }
 
-    public void setVerbose(boolean verbose) {
+
+    public void setVerbose (boolean verbose) {
         AbstractQueryProcessor.verbose = verbose;
     }
 
-    public final String toJSON() {
+
+    public final String toJSON () {
         String ser;
         try {
             ser = mapper.writeValueAsString(raw());
             qllogger.info("Serialized query: " + ser);
-        }catch (JsonProcessingException e) {
+        }
+        catch (JsonProcessingException e) {
             return "";
         }
         return ser;
     }
 
-    public final Map build() {
+
+    public final Map build () {
         return raw();
     }
 
-    private Map raw() {
+
+    private Map raw () {
         if (ast != null) {
             Map<String, Object> requestMap = new HashMap<>(ast.getRequestMap());
             Map meta = (Map) requestMap.get("meta");
@@ -202,33 +228,38 @@ public class QuerySerializer {
         return new HashMap<>();
     }
 
-    private Map<String, Object> cleanup(Map<String, Object> requestMap) {
+
+    private Map<String, Object> cleanup (Map<String, Object> requestMap) {
         Iterator<Map.Entry<String, Object>> set = requestMap.entrySet()
                 .iterator();
         while (set.hasNext()) {
             Map.Entry<String, Object> entry = set.next();
-            if (entry.getValue() instanceof List && ((List) entry.getValue())
-                    .isEmpty())
+            if (entry.getValue() instanceof List
+                    && ((List) entry.getValue()).isEmpty())
                 set.remove();
-            else if (entry.getValue() instanceof Map && ((Map) entry.getValue())
-                    .isEmpty())
+            else if (entry.getValue() instanceof Map
+                    && ((Map) entry.getValue()).isEmpty())
                 set.remove();
-            else if (entry.getValue() instanceof String && ((String) entry
-                    .getValue()).isEmpty())
+            else if (entry.getValue() instanceof String
+                    && ((String) entry.getValue()).isEmpty())
                 set.remove();
         }
         return requestMap;
     }
 
-    private Map<String, Object> mergeCollection(Map<String, Object> collection1,
-            Map<String, Object> collection2) {
+
+    private Map<String, Object> mergeCollection (
+            Map<String, Object> collection1, Map<String, Object> collection2) {
         if (collection1 == null || collection1.isEmpty()) {
             return collection2;
-        }else if (collection2 == null || collection2.isEmpty()) {
+        }
+        else if (collection2 == null || collection2.isEmpty()) {
             return collection1;
-        }else if (collection1.equals(collection2)) {
+        }
+        else if (collection1.equals(collection2)) {
             return collection1;
-        }else {
+        }
+        else {
             LinkedHashMap<String, Object> docGroup = KoralObjectGenerator
                     .makeDocGroup("and");
             ArrayList<Object> operands = (ArrayList<Object>) docGroup
@@ -239,8 +270,9 @@ public class QuerySerializer {
         }
     }
 
+
     @Deprecated
-    public QuerySerializer addMeta(String cli, String cri, int cls, int crs,
+    public QuerySerializer addMeta (String cli, String cri, int cls, int crs,
             int num, int pageIndex) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
         meta.setSpanContext(cls, cli, crs, cri);
@@ -250,12 +282,14 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer setMeta(Map<String, Object> meta) {
+
+    public QuerySerializer setMeta (Map<String, Object> meta) {
         this.meta = meta;
         return this;
     }
 
-    public QuerySerializer setCollection(String collection) {
+
+    public QuerySerializer setCollection (String collection) {
         CollectionQueryProcessor tree = new CollectionQueryProcessor();
         tree.process(collection);
         Map<String, Object> collectionRequest = tree.getRequestMap();
