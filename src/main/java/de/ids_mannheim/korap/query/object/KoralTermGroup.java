@@ -7,6 +7,7 @@ import java.util.Map;
 
 import de.ids_mannheim.korap.query.parse.fcsql.ExpressionParser;
 import de.ids_mannheim.korap.query.serialize.MapBuilder;
+import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import eu.clarin.sru.server.fcs.parser.QueryNode;
 
 /**
@@ -25,7 +26,7 @@ public class KoralTermGroup implements Element {
     }
 
     public KoralTermGroup (ExpressionParser parser, KoralRelation relation,
-            List<QueryNode> nodes) {
+            List<QueryNode> nodes) throws KoralException {
         this.relation = relation.toString();
         for (QueryNode node : nodes) {
             operands.add(parser.parseExpression(node, false, false));
