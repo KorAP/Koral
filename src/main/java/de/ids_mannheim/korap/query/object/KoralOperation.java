@@ -1,4 +1,4 @@
-package de.ids_mannheim.korap.query.elements;
+package de.ids_mannheim.korap.query.object;
 
 /**
  * @author margaretha
