@@ -291,18 +291,16 @@ public class FCSQLQueryProcessorTest {
                 + "]}";
         runAndValidate(query, jsonLd);
     }
-
+    
     @Test
     public void testWithinQuery() throws JsonProcessingException {
-        String query = "[pos=\"VVFIN\"] within s";
-        String jsonLd = "{@type:koral:group,"
-                + "operation:operation:position,"
-                + "frames:["
-                + "frames:isAround"
-                + "],"
-                + "operands:[{@type: koral:span,key:s,foundry:base,layer:s,match:match:eq},"
-                + "{@type:koral:token,wrap:{@type:koral:term,key:VVFIN,foundry:tt,layer:p,type:type:regex,match:match:eq}}"
-                + "]}";
-        runAndValidate(query, jsonLd);
-    }
+    	String query = "[cnx:pos=\"VVFIN\"] within s";
+    	String jsonLd = "{@type:koral:group,"
+    			+ "operation:operation:position,"
+    			+ "operands:["
+    			+ "{@type:koral:span,wrap:{@type:koral:term,key:s,foundry:base,layer:s}},"
+    			+ "{@type:koral:token,wrap:{@type:koral:term,key:VVFIN,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
+    			+ "]}";
+    	runAndValidate(query, jsonLd);
+	}
 }
