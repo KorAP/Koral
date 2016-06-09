@@ -4,14 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import de.ids_mannheim.korap.query.elements.KoralRelation;
-import de.ids_mannheim.korap.query.elements.KoralTerm;
-import de.ids_mannheim.korap.query.elements.KoralTerm.KoralTermType;
-import de.ids_mannheim.korap.query.elements.KoralTermGroup;
-import de.ids_mannheim.korap.query.elements.KoralToken;
-import de.ids_mannheim.korap.query.elements.MatchOperator;
-import de.ids_mannheim.korap.query.serialize.FCSQLQueryProcessor;
+import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+import de.ids_mannheim.korap.query.object.KoralMatchOperator;
+import de.ids_mannheim.korap.query.object.KoralObject;
+import de.ids_mannheim.korap.query.object.KoralRelation;
+import de.ids_mannheim.korap.query.object.KoralTerm;
+import de.ids_mannheim.korap.query.object.KoralTermGroup;
+import de.ids_mannheim.korap.query.object.KoralToken;
+import de.ids_mannheim.korap.query.object.KoralTerm.KoralTermType;
 import eu.clarin.sru.server.fcs.parser.Expression;
 import eu.clarin.sru.server.fcs.parser.ExpressionAnd;
 import eu.clarin.sru.server.fcs.parser.ExpressionNot;
@@ -36,18 +37,12 @@ public class ExpressionParser {
             .asList(new String[] { FOUNDRY_CNX, FOUNDRY_OPENNLP, FOUNDRY_TT,
                     FOUNDRY_MATE, FOUNDRY_XIP });
 
-    private FCSQLQueryProcessor processor;
-
-    public ExpressionParser (FCSQLQueryProcessor processor) {
-        this.processor = processor;
-    }
-
-    public Object parseExpression(QueryNode queryNode) {
+    public KoralObject parseExpression(QueryNode queryNode) throws KoralException {
         return parseExpression(queryNode, false, true);
     }
 
-    public Object parseExpression(QueryNode queryNode, boolean isNot,
-            boolean isToken) {
+    public KoralObject parseExpression(QueryNode queryNode, boolean isNot,
+            boolean isToken) throws KoralException {
 
         if (queryNode instanceof Expression) {
             return parseSimpleExpression((Expression) queryNode, isNot, isToken);
@@ -81,20 +76,19 @@ public class ExpressionParser {
         // for distance query, using empty token
         // }
         else {
-            processor.addError(StatusCodes.QUERY_TOO_COMPLEX,
+            throw new KoralException(StatusCodes.QUERY_TOO_COMPLEX,
                     "FCS diagnostic 11: Query is too complex.");
-            return null;
         }
     }
 
-    private Object parseBooleanExpression(List<QueryNode> operands,
-            KoralRelation relation) {
+    private KoralObject parseBooleanExpression(List<QueryNode> operands,
+            KoralRelation relation) throws KoralException {
         KoralTermGroup termGroup = new KoralTermGroup(this, relation, operands);
         return new KoralToken(termGroup);
     }
 
-    private Object parseSimpleExpression(Expression expression, boolean isNot,
-            boolean isToken) {
+    private KoralObject parseSimpleExpression(Expression expression, boolean isNot,
+            boolean isToken) throws KoralException {
         KoralTerm koralTerm = parseTerm(expression, isNot);
         if (isToken) {
             return new KoralToken(koralTerm);
@@ -104,10 +98,10 @@ public class ExpressionParser {
         }
     }
 
-    public KoralTerm parseTerm(Expression expression, boolean isNot) {
-        KoralTerm koralTerm = new KoralTerm();
+    public KoralTerm parseTerm(Expression expression, boolean isNot) throws KoralException {
+    	KoralTerm koralTerm = null;
+    	koralTerm = new KoralTerm(expression.getRegexValue());
         koralTerm.setType(KoralTermType.REGEX);
-        koralTerm.setKey(expression.getRegexValue());
         parseLayerIdentifier(koralTerm, expression.getLayerIdentifier());
         parseQualifier(koralTerm, expression.getLayerQualifier());
         parseOperator(koralTerm, expression.getOperator(), isNot);
@@ -115,12 +109,11 @@ public class ExpressionParser {
         return koralTerm;
     }
 
-    private void parseLayerIdentifier(KoralTerm koralTerm, String identifier) {
+    private void parseLayerIdentifier(KoralTerm koralTerm, String identifier) throws KoralException {
         String layer = null;
         if (identifier == null) {
-            processor.addError(StatusCodes.MALFORMED_QUERY,
+            throw new KoralException(StatusCodes.MALFORMED_QUERY,
                     "FCS diagnostic 10: Layer identifier is missing.");
-            koralTerm.setInvalid(true);
         }
         else if (identifier.equals("text")) {
             layer = "orth";
@@ -132,19 +125,17 @@ public class ExpressionParser {
             layer = "l";
         }
         else {
-            processor.addError(StatusCodes.UNKNOWN_QUERY_ELEMENT,
+            throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
                     "SRU diagnostic 48: Layer " + identifier
                             + " is unsupported.");
-            koralTerm.setInvalid(true);
         }
 
         koralTerm.setLayer(layer);
     }
 
-    private void parseQualifier(KoralTerm koralTerm, String qualifier) {
+    private void parseQualifier(KoralTerm koralTerm, String qualifier) throws KoralException {
         String layer = koralTerm.getLayer();
         if (layer == null) {
-            koralTerm.setInvalid(true);
             return;
         }
         // Set default foundry
@@ -157,43 +148,36 @@ public class ExpressionParser {
             }
         }
         else if (qualifier.equals(FOUNDRY_OPENNLP) && layer.equals("l")) {
-            processor
-                    .addError(StatusCodes.UNKNOWN_QUERY_ELEMENT,
+            throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
                             "SRU diagnostic 48: Layer lemma with qualifier opennlp is unsupported.");
-            koralTerm.setInvalid(true);
         }
         else if (!supportedFoundries.contains(qualifier)) {
-            processor.addError(StatusCodes.UNKNOWN_QUERY_ELEMENT,
+            throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
                     "SRU diagnostic 48: Qualifier " + qualifier
                             + " is unsupported.");
-            koralTerm.setInvalid(true);
         }
 
         koralTerm.setFoundry(qualifier);
     }
 
     private void parseOperator(KoralTerm koralTerm, Operator operator,
-            boolean isNot) {
-        MatchOperator matchOperator = null;
+            boolean isNot) throws KoralException {
+    	KoralMatchOperator matchOperator = null;
         if (operator == null || operator == Operator.EQUALS) {
-            matchOperator = isNot ? MatchOperator.NOT_EQUALS
-                    : MatchOperator.EQUALS;
+            matchOperator = isNot ? KoralMatchOperator.NOT_EQUALS : KoralMatchOperator.EQUALS;
         }
         else if (operator == Operator.NOT_EQUALS) {
-            matchOperator = isNot ? MatchOperator.EQUALS
-                    : MatchOperator.NOT_EQUALS;
+            matchOperator = isNot ? KoralMatchOperator.EQUALS : KoralMatchOperator.NOT_EQUALS;
         }
         else {
-            processor
-                    .addError(StatusCodes.UNKNOWN_QUERY_ELEMENT,
+        	throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
                             "SRU diagnostic 37:" + operator.name()
                                     + " is unsupported.");
-            koralTerm.setInvalid(true);
         }
-        koralTerm.setOperator(matchOperator.toString());
+        koralTerm.setOperator(matchOperator);
     }
 
-    private void parseRegexFlags(KoralTerm koralTerm, Set<RegexFlag> set) {
+    private void parseRegexFlags(KoralTerm koralTerm, Set<RegexFlag> set) throws KoralException {
         // default case sensitive
         if (set != null) {
             for (RegexFlag f : set) {
@@ -204,10 +188,9 @@ public class ExpressionParser {
                     koralTerm.setCaseSensitive(false);
                 }
                 else {
-                    processor.addError(StatusCodes.UNKNOWN_QUERY_ELEMENT,
+                	throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
                             "SRU diagnostic 48:" + f.name()
                                     + " is unsupported.");
-                    koralTerm.setInvalid(true);
                 }
             }
         }

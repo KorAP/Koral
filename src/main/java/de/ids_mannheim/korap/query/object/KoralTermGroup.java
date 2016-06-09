@@ -1,4 +1,4 @@
-package de.ids_mannheim.korap.query.elements;
+package de.ids_mannheim.korap.query.object;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,7 +14,7 @@ import eu.clarin.sru.server.fcs.parser.QueryNode;
  * @author margaretha
  * 
  */
-public class KoralTermGroup implements Element {
+public class KoralTermGroup implements KoralObject {
 
     private static final KoralType type = KoralType.TERMGROUP;
 

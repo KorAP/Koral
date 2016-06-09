@@ -1,4 +1,4 @@
-package de.ids_mannheim.korap.query.elements;
+package de.ids_mannheim.korap.query.object;
 
 import java.util.Map;
 
@@ -6,7 +6,7 @@ import java.util.Map;
  * @author margaretha
  * 
  */
-public interface Element {
+public interface KoralObject {
 
     public Map<String, Object> buildMap();
 }

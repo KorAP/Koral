@@ -1,41 +1,58 @@
-package de.ids_mannheim.korap.query.elements;
+package de.ids_mannheim.korap.query.object;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import de.ids_mannheim.korap.query.serialize.util.KoralException;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+import de.ids_mannheim.korap.query.object.KoralMatchOperator;
+import de.ids_mannheim.korap.query.object.KoralType;
 
 /**
  * @author margaretha
  * 
  */
-public class KoralTerm implements Element {
-
-    public enum KoralTermType {
-        STRING("type:string"), REGEX("type:regex"), WILDCARD("type:wildcard"), PUNCT(
-                "type:punct");
-
-        String value;
-
-        KoralTermType (String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return value;
-        }
-    }
+public class KoralTerm implements KoralObject {
 
     private static final KoralType koralType = KoralType.TERM;
-
+  
+    private final String key;
+    private String value;
     private String layer;
     private String foundry;
-    private String operator;
-    private String key;
+    private KoralMatchOperator operator; // match
+    
     private KoralTermType type;
+    
     private boolean caseSensitive = true;
-    private boolean invalid = false;
 
-    public String getLayer() {
+    public KoralTerm(String key) throws KoralException {
+    	if (key == null){
+    		throw new KoralException(StatusCodes.MALFORMED_QUERY, 
+    				"KoralTerm key cannot be null.");
+    	}
+    	this.key = key;
+    }
+    
+    public KoralTerm(KoralContext context) throws KoralException {
+    	if (context.getKey() == null){
+    		throw new KoralException(StatusCodes.MALFORMED_QUERY, 
+    				"KoralTerm key cannot be null.");
+    	}
+    	this.key = context.getKey();
+    	this.foundry = KoralContext.FOUNDRY;
+    	this.layer = KoralContext.LAYER;
+	}
+    
+    public String getValue() {
+		return value;
+	}
+    
+    public void setValue(String value) {
+		this.value = value;
+	}
+    
+	public String getLayer() {
         return layer;
     }
 
@@ -51,20 +68,16 @@ public class KoralTerm implements Element {
         this.foundry = foundry;
     }
 
-    public String getOperator() {
-        return operator;
-    }
-
-    public void setOperator(String operator) {
-        this.operator = operator;
-    }
+    public KoralMatchOperator getOperator() {
+		return operator;
+	}
+    
+    public void setOperator(KoralMatchOperator operator) {
+		this.operator = operator;
+	}
 
     public String getKey() {
         return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
     }
 
     public KoralTermType getType() {
@@ -83,14 +96,6 @@ public class KoralTerm implements Element {
         this.caseSensitive = isCaseSensitive;
     }
 
-    public boolean isInvalid() {
-        return invalid;
-    }
-
-    public void setInvalid(boolean invalid) {
-        this.invalid = invalid;
-    }
-
     @Override
     public Map<String, Object> buildMap() {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
@@ -98,12 +103,36 @@ public class KoralTerm implements Element {
         if (!isCaseSensitive()) {
             map.put("caseInsensitive", "true");
         }
+        
         map.put("key", getKey());
+        if (value != null){
+        	map.put("value", getValue());
+        }
         map.put("foundry", getFoundry());
         map.put("layer", getLayer());
-        map.put("type", getType().toString());
-        map.put("match", getOperator());
-
+        if (type != null){
+        	map.put("type", getType().toString());
+        }
+		if (operator !=null){
+			map.put("match", getOperator().toString());
+		}
         return map;
     }
+
+    public enum KoralTermType {
+        STRING("type:string"), REGEX("type:regex"), WILDCARD("type:wildcard"), PUNCT(
+                "type:punct");
+
+        String value;
+
+        KoralTermType (String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
+
 }
