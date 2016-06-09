@@ -1,11 +1,11 @@
-package de.ids_mannheim.korap.query.elements;
+package de.ids_mannheim.korap.query.object;
 
-public enum MatchOperator {
+public enum KoralMatchOperator {
     EQUALS("eq"), NOT_EQUALS("ne");
 
     String value;
 
-    MatchOperator (String value) {
+    KoralMatchOperator (String value) {
         this.value = value;
     }
 

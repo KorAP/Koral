@@ -3,6 +3,7 @@ package de.ids_mannheim.korap.query.serialize;
 import java.util.Map;
 
 import de.ids_mannheim.korap.query.parse.fcsql.FCSSRUQueryParser;
+import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import eu.clarin.sru.server.SRUQueryBase;
 import eu.clarin.sru.server.fcs.Constants;
@@ -50,7 +51,11 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
             FCSSRUQuery fcsSruQuery = parseQueryStringtoFCSQuery(query);
             if (fcsSruQuery != null) {
                 QueryNode fcsQueryNode = fcsSruQuery.getParsedQuery();
-                parseFCSQueryToKoralQuery(fcsQueryNode);
+                try {
+					parseFCSQueryToKoralQuery(fcsQueryNode);
+				} catch (KoralException e) {
+					addError(e.getStatusCode(), e.getMessage());
+				}
             }
         }
     }
@@ -95,8 +100,8 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
         return fcsQuery;
     }
 
-    private void parseFCSQueryToKoralQuery(QueryNode queryNode) {
-        FCSSRUQueryParser parser = new FCSSRUQueryParser(this);
+    private void parseFCSQueryToKoralQuery(QueryNode queryNode) throws KoralException {
+        FCSSRUQueryParser parser = new FCSSRUQueryParser();
         Object o = parser.parseQueryNode(queryNode);
         Map<String, Object> queryMap = MapBuilder.buildQueryMap(o);
         if (queryMap != null) requestMap.put("query", queryMap);

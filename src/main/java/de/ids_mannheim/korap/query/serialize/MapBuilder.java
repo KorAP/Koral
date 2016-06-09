@@ -2,11 +2,11 @@ package de.ids_mannheim.korap.query.serialize;
 
 import java.util.Map;
 
-import de.ids_mannheim.korap.query.elements.KoralGroup;
-import de.ids_mannheim.korap.query.elements.KoralSpan;
-import de.ids_mannheim.korap.query.elements.KoralTerm;
-import de.ids_mannheim.korap.query.elements.KoralTermGroup;
-import de.ids_mannheim.korap.query.elements.KoralToken;
+import de.ids_mannheim.korap.query.object.KoralGroup;
+import de.ids_mannheim.korap.query.object.KoralSpan;
+import de.ids_mannheim.korap.query.object.KoralTerm;
+import de.ids_mannheim.korap.query.object.KoralTermGroup;
+import de.ids_mannheim.korap.query.object.KoralToken;
 
 /**
  * @author margaretha
@@ -32,9 +32,9 @@ public class MapBuilder {
                 KoralTermGroup termGroup = (KoralTermGroup) o;
                 return termGroup.buildMap();
             }
-            else if (o instanceof KoralSpan) {
-                KoralSpan span = (KoralSpan) o;
-                return span.buildMap();
+            else if (o instanceof KoralSpan){
+            	KoralSpan span = (KoralSpan) o;
+            	return span.buildMap();
             }
         }
         return null;
