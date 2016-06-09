@@ -122,8 +122,9 @@ public class QuerySerializer {
         }
         else if (queryLanguage.equalsIgnoreCase("cql")) {
             ast = new CqlQueryProcessor(query);
-        }
-        else if (queryLanguage.equalsIgnoreCase("annis")) {
+		} else if (queryLanguage.equalsIgnoreCase("fcsql")) {
+			ast = new FCSQLQueryProcessor(query, "2.0");
+        }else if (queryLanguage.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
         }
         else {
@@ -150,7 +151,7 @@ public class QuerySerializer {
             ast = new Cosmas2QueryProcessor(query);
         }
         else if (ql.equalsIgnoreCase("poliqarpplus")) {
-            ast = new PoliqarpPlusQueryProcessor(query);
+            ast = new PoliqarpPlusQueryProcessor(query); 
         }
         else if (ql.equalsIgnoreCase("cql")) {
 			if (version == null) {
@@ -165,7 +166,14 @@ public class QuerySerializer {
 			} else {
 				ast = new FCSQLQueryProcessor(query, version);
 			}
-        }else if (ql.equalsIgnoreCase("annis")) {
+		} else if (ql.equalsIgnoreCase("fcsql")) {
+			if (version == null) {
+				ast.addError(StatusCodes.MISSING_VERSION,
+						"SRU Version is missing!");
+			} else {
+				ast = new FCSQLQueryProcessor(query, version);
+			}
+		} else if (ql.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
 
         }else {
