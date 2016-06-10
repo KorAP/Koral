@@ -15,14 +15,6 @@
       <id>id-maven-repo</id>
       <url>http://maven.indexdata.com</url>
     </repository>
-    <repository>
-      <id>CLARIN</id>
-      <name>CLARIN Repository</name>
-      <url>https://nexus.clarin.eu/content/repositories/Clarin</url>
-      <snapshots>
-          <enabled>false</enabled>
-      </snapshots>
-    </repository>         
   </repositories>
   <dependencies>
     <dependency>

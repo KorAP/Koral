@@ -2,7 +2,7 @@
 # /
 /.project
 /.classpath
-/.settings/org.eclipse.jdt.core.prefs
+/.settings
 /target
 
 # /src/main/antlr/cosmas/
