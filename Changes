@@ -2,6 +2,7 @@
         - Spans now always wrap terms (diewald)
 	- Cosmas-II "und", "oder", and "nicht" operations
 	  now serialize to unordered sequences (diewald)
+	- Cleanup POM (diewald)
 
 0.21 2015-10-27
         - Improved meta query builder (hanl)
