@@ -1,5 +1,9 @@
 package de.ids_mannheim.korap.query.object;
 
+/**
+ * @author margaretha
+ * 
+ */
 public enum KoralMatchOperator {
     EQUALS("eq"), NOT_EQUALS("ne");
 

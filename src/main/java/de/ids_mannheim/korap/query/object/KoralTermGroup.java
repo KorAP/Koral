@@ -5,10 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.ids_mannheim.korap.query.parse.fcsql.ExpressionParser;
 import de.ids_mannheim.korap.query.serialize.MapBuilder;
 import de.ids_mannheim.korap.query.serialize.util.KoralException;
-import eu.clarin.sru.server.fcs.parser.QueryNode;
 
 /**
  * @author margaretha
@@ -19,18 +17,12 @@ public class KoralTermGroup implements KoralObject {
     private static final KoralType type = KoralType.TERMGROUP;
 
     private String relation;
-    private List<Object> operands = new ArrayList<Object>();
+    private List<KoralObject> operands = new ArrayList<KoralObject>();
 
-    public KoralTermGroup () {
-
-    }
-
-    public KoralTermGroup (ExpressionParser parser, KoralRelation relation,
-            List<QueryNode> nodes) throws KoralException {
+    public KoralTermGroup (KoralRelation relation, List<KoralObject> operands)
+            throws KoralException {
         this.relation = relation.toString();
-        for (QueryNode node : nodes) {
-            operands.add(parser.parseExpression(node, false, false));
-        }
+        this.operands = operands;
     }
 
     public String getRelation() {
@@ -41,11 +33,11 @@ public class KoralTermGroup implements KoralObject {
         this.relation = relation;
     }
 
-    public List<Object> getOperands() {
+    public List<KoralObject> getOperands() {
         return operands;
     }
 
-    public void setOperands(List<Object> operands) {
+    public void setOperands(List<KoralObject> operands) {
         this.operands = operands;
     }
 

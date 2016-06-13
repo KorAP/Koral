@@ -1,20 +1,23 @@
 package de.ids_mannheim.korap.query.parse.fcsql;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import de.ids_mannheim.korap.query.serialize.util.KoralException;
-import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.query.object.KoralMatchOperator;
 import de.ids_mannheim.korap.query.object.KoralObject;
 import de.ids_mannheim.korap.query.object.KoralRelation;
 import de.ids_mannheim.korap.query.object.KoralTerm;
+import de.ids_mannheim.korap.query.object.KoralTerm.KoralTermType;
 import de.ids_mannheim.korap.query.object.KoralTermGroup;
 import de.ids_mannheim.korap.query.object.KoralToken;
-import de.ids_mannheim.korap.query.object.KoralTerm.KoralTermType;
+import de.ids_mannheim.korap.query.serialize.util.KoralException;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import eu.clarin.sru.server.fcs.parser.Expression;
 import eu.clarin.sru.server.fcs.parser.ExpressionAnd;
+import eu.clarin.sru.server.fcs.parser.ExpressionGroup;
 import eu.clarin.sru.server.fcs.parser.ExpressionNot;
 import eu.clarin.sru.server.fcs.parser.ExpressionOr;
 import eu.clarin.sru.server.fcs.parser.Operator;
@@ -56,9 +59,10 @@ public class ExpressionParser {
                 return parseBooleanExpression(operands, KoralRelation.AND);
             }
         }
-        // else if (queryNode instanceof ExpressionGroup) {
-        //
-        // }
+        else if (queryNode instanceof ExpressionGroup) {
+            // Ignore the group
+            return parseExpression(queryNode.getFirstChild());
+        }
         else if (queryNode instanceof ExpressionNot) {
             boolean negation = isNot ? false : true;
             return parseExpression(queryNode.getChild(0), negation, isToken);
@@ -81,9 +85,13 @@ public class ExpressionParser {
         }
     }
 
-    private KoralObject parseBooleanExpression(List<QueryNode> operands,
+    private KoralToken parseBooleanExpression(List<QueryNode> operands,
             KoralRelation relation) throws KoralException {
-        KoralTermGroup termGroup = new KoralTermGroup(this, relation, operands);
+        List<KoralObject> terms = new ArrayList<>();
+        for (QueryNode node : operands) {
+            terms.add(parseExpression(node, false, false));
+        }
+        KoralTermGroup termGroup = new KoralTermGroup(relation, terms);
         return new KoralToken(termGroup);
     }
 
@@ -179,20 +187,32 @@ public class ExpressionParser {
 
     private void parseRegexFlags(KoralTerm koralTerm, Set<RegexFlag> set) throws KoralException {
         // default case sensitive
-        if (set != null) {
-            for (RegexFlag f : set) {
-                if (f == RegexFlag.CASE_SENSITVE) {
-                    koralTerm.setCaseSensitive(true);
-                }
-                else if (f == RegexFlag.CASE_INSENSITVE) {
-                    koralTerm.setCaseSensitive(false);
-                }
-                else {
-                	throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
-                            "SRU diagnostic 48:" + f.name()
-                                    + " is unsupported.");
-                }
+        if (set == null) return;
+        
+        ArrayList<String> names = new ArrayList<String>();
+        Iterator<RegexFlag> i = set.iterator();
+        while (i.hasNext()) {
+            RegexFlag f = i.next();
+            if (f == RegexFlag.CASE_SENSITVE) {
+                koralTerm.setCaseSensitive(true);
             }
+            else if (f == RegexFlag.CASE_INSENSITVE) {
+                koralTerm.setCaseSensitive(false);
+            }
+            else {
+                names.add(f.name());
+            }
+        }
+
+        if (names.size() == 1) {
+            throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
+                    "SRU diagnostic 48: Regexflag: " + names.get(0)
+                            + " is unsupported.");
+        }
+        else if (names.size() > 1) {
+            throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
+                    "SRU diagnostic 48: Regexflags: " + names.toString()
+                            + " are unsupported.");
         }
     }
 

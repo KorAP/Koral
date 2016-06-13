@@ -49,9 +49,11 @@ public class FCSSRUQueryParser {
         else if (queryNode instanceof QueryDisjunction) {
             return parseGroupQuery(queryNode.getChildren(),
                     KoralOperation.DISJUNCTION);
-        } else if (queryNode instanceof QueryWithWithin) {
+        }
+        else if (queryNode instanceof QueryWithWithin) {
         	return parseWithinQuery((QueryWithWithin)queryNode);
-	    } else if (queryNode instanceof SimpleWithin) {
+        }
+        else if (queryNode instanceof SimpleWithin) {
 	    	SimpleWithin withinNode = (SimpleWithin) queryNode;
 	    	return parseWithinScope(withinNode.getScope());
 	    }

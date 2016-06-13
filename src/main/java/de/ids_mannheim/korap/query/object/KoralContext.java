@@ -1,5 +1,9 @@
 package de.ids_mannheim.korap.query.object;
 
+/**
+ * @author margaretha
+ * 
+ */
 public enum KoralContext {
 	SENTENCE("s"), PARAGRAPH("p"), TEXT("t");
 	
