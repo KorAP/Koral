@@ -38,20 +38,6 @@ public class FCSQLComplexTest {
         FCSQLQueryProcessorTest
                 .validateNode(query, "/query/operands/1", jsonLd);
 
-        // sequence and disjunction
-        query = "([pos=\"NN\"]|[cnx:pos=\"N\"])[text=\"Mann\"]";
-        jsonLd = "{@type:koral:group,"
-                + "operation:operation:sequence,"
-                + "operands:["
-                + "{@type:koral:group,"
-                + "operation:operation:disjunction,"
-                + "operands:[{@type:koral:token,wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
-                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
-                + "]},"
-                + "{@type:koral:token,wrap:{@type:koral:term,key:Mann,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}"
-                + "]}";
-        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
-
         // group and sequence
         query = "([text=\"blaue\"][pos=\"NN\"])";
         jsonLd = "{@type:koral:group,"
@@ -94,13 +80,6 @@ public class FCSQLComplexTest {
                 + "{@type:koral:token, wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
                 + "{@type:koral:token, wrap:{@type:koral:term,key:Mann,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
-
-        query = "[pos=\"NN\"]&[text=\"Mann\"]";
-        List<Object> error = FCSQLQueryProcessorTest
-                .getError(new FCSQLQueryProcessor(query, "2.0"));
-        assertEquals(399, error.get(0));
-        String msg = (String) error.get(1);
-        assertEquals(true, msg.startsWith("FCS diagnostic 10"));
     }
 
     // | simple-query main-query /* sequence */
@@ -123,12 +102,67 @@ public class FCSQLComplexTest {
         FCSQLQueryProcessorTest
                 .validateNode(query, "/query/operands/1", jsonLd);
 
+        // sequence and disjunction
+        query = "([pos=\"NN\"]|[cnx:pos=\"N\"])[text=\"Mann\"]";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:sequence,"
+                + "operands:["
+                + "{@type:koral:group,"
+                + "operation:operation:disjunction,"
+                + "operands:[{@type:koral:token,wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
+                + "]},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:Mann,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}"
+                + "]}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+
     }
 
     // | simple-query quantifier /* quatification */
     @Test
     public void testQueryWithQuantifier() throws IOException {
+        // repetition
+        String query = "\"die\"{2}";
+        String jsonLd = "{@type:koral:group,"
+                + "operation:operation:repetition,"
+                + "operands:["
+                + "{@type:koral:token,wrap:{@type:koral:term,key:die,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}],"
+                + "boundary:{@type:koral:boundary,min:2,max:2}}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
+        query = "\"die\"{1,2}";
+        jsonLd = "{@type:koral:boundary,min:1,max:2}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
+
+        query = "\"die\"{,2}";
+        jsonLd = "{@type:koral:boundary,min:0,max:2}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
+
+        query = "\"die\"{2,}";
+        jsonLd = "{@type:koral:boundary,min:2}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
+
+        query = "\"die\"+";
+        jsonLd = "{@type:koral:boundary,min:1}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
+
+        query = "\"die\"?";
+        jsonLd = "{@type:koral:boundary,min:0, max:1}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
+        
+        query = "\"die\"*";
+        jsonLd = "{@type:koral:boundary,min:0}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
+
+        query = "\"die\"{0}";
+        jsonLd = "{@type:koral:boundary,min:0, max:0}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
+    }
+
+    @Test
+    public void testEmptyToken() {
+        // distance query
+        // query = "\"Hund\" []{3} \"Katze\"";
     }
 
     // -------------------------------------------------------------------------
@@ -170,4 +204,32 @@ public class FCSQLComplexTest {
                 (String) error.get(1));
     }
     
+    @Test
+    public void testWrongQuery() throws IOException {
+        String query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
+        List<Object> error = FCSQLQueryProcessorTest
+                .getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(399, error.get(0));
+        assertEquals(true,
+                error.get(1).toString().startsWith("FCS diagnostic 10"));
+
+        query = "![mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
+                "2.0"));
+        assertEquals(true,
+                error.get(1).toString().startsWith("FCS diagnostic 10"));
+
+        query = "(\"blaue\"&\"grüne\")";
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
+                "2.0"));
+        assertEquals(true,
+                error.get(1).toString().startsWith("FCS diagnostic 10"));
+
+        query = "[pos=\"NN\"]&[text=\"Mann\"]";
+        error = FCSQLQueryProcessorTest
+                .getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(399, error.get(0));
+        String msg = (String) error.get(1);
+        assertEquals(true, msg.startsWith("FCS diagnostic 10"));
+    }
 }

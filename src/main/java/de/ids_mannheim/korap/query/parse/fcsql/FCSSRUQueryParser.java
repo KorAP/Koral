@@ -7,6 +7,7 @@ import java.util.List;
 import de.ids_mannheim.korap.query.object.KoralContext;
 import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+import de.ids_mannheim.korap.query.object.KoralBoundary;
 import de.ids_mannheim.korap.query.object.KoralGroup;
 import de.ids_mannheim.korap.query.object.KoralObject;
 import de.ids_mannheim.korap.query.object.KoralOperation;
@@ -111,12 +112,22 @@ public class FCSSRUQueryParser {
     }
 
     private KoralObject parseQuerySegment(QuerySegment segment) throws KoralException {
-        if ((segment.getMinOccurs() == 1) && (segment.getMaxOccurs() == 1)) {
+        int minOccurs = segment.getMinOccurs();
+        int maxOccurs = segment.getMaxOccurs();
+        
+        if ((minOccurs == 1) && (maxOccurs == 1)) {
             return expressionParser.parseExpression(segment.getExpression());
         }
         else {
-            throw new KoralException(StatusCodes.QUERY_TOO_COMPLEX,
-                    "FCS diagnostic 11: Query is too complex.");
+            KoralBoundary boundary = new KoralBoundary(minOccurs, maxOccurs);
+            List<KoralObject> operand = new ArrayList<KoralObject>(1);
+            operand.add(expressionParser.parseExpression(segment
+                    .getExpression()));
+
+            KoralGroup koralGroup = new KoralGroup(KoralOperation.REPETITION);
+            koralGroup.setBoundary(boundary);
+            koralGroup.setOperands(operand);
+            return koralGroup;
         }
     }
 }

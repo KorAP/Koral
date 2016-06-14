@@ -24,6 +24,7 @@ public class KoralGroup implements KoralObject {
     private List<KoralObject> operands;
     private List<Distance> distances;
     private List<Frame> frames;
+    private KoralBoundary boundary;
 
     public KoralGroup (KoralOperation operation) {
         this.operation = operation;
@@ -61,6 +62,14 @@ public class KoralGroup implements KoralObject {
 		this.frames = frames;
 	}
 
+    public KoralBoundary getBoundary() {
+        return boundary;
+    }
+
+    public void setBoundary(KoralBoundary boundary) {
+        this.boundary = boundary;
+    }
+
     @Override
     public Map<String, Object> buildMap() {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
@@ -81,6 +90,10 @@ public class KoralGroup implements KoralObject {
             operandList.add(MapBuilder.buildQueryMap(o));
         }
         map.put("operands", operandList);
+
+        if (boundary != null) {
+            map.put("boundary", boundary.buildMap());
+        }
         return map;
     }
 
@@ -146,8 +159,6 @@ public class KoralGroup implements KoralObject {
             distanceMap.put("min", getMin());
             distanceMap.put("max", getMax());
             return distanceMap;
-
         }
-
     }
 }
