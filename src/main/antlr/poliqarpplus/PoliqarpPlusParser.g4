@@ -57,14 +57,13 @@ layer
 ;
 
 value
-: WORD 
-| NUMBER
-| regex
+: (WORD | NUMBER) | regex
 ;
  
 /* Fields */
 term       
-: NEG* (foundry SLASH)? layer termOp key (COLON value)? flag? 
+: NEG* (foundry SLASH)? layer termOp key (COLON value)? flag?
+| LRPAREN term RRPAREN
 ;
 
 termOp
@@ -125,8 +124,7 @@ token
 ;
 
 span
-: LT ((foundry SLASH)? layer termOp)? key NEG* (LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? GT
-| LT ((foundry SLASH)? layer termOp)? key NEG* (term|termGroup)? GT
+: LT ((foundry SLASH)? layer termOp)? key NEG* ((LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? | (term|termGroup)?) GT
 ;
 
 position
