@@ -769,8 +769,16 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     @SuppressWarnings("unchecked")
     private LinkedHashMap<String, Object> parseTermOrTermGroup (ParseTree node,
             boolean negatedGlobal, String mode) {
+
         String nodeCat = getNodeCat(node);
+
         if (nodeCat.equals("term")) {
+
+            // Term is defined recursive with non-necessary brackets
+            if (getNodeCat(node.getChild(0)).equals("(")) {
+                return parseTermOrTermGroup(node.getChild(1), negatedGlobal, mode);
+            };
+
             String key = null;
             LinkedHashMap<String, Object> term = KoralObjectGenerator
                     .makeTerm();
