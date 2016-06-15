@@ -4,7 +4,7 @@
 	  now serialize to unordered sequences (diewald)
 	- Cleanup POM (diewald)
 	- Fix deserialization of unnecessary brackets
-	  around terms in Poliqarp (diewald)
+	  around terms and termGroups in Poliqarp (diewald)
 
 0.21 2015-10-27
         - Improved meta query builder (hanl)

@@ -995,6 +995,59 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("lemma", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
 
+        query = "[(base=Mann&cas=N)]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", res.at("/query/wrap/@type")
+                .asText());
+        assertEquals("relation:and", res.at("/query/wrap/relation")
+                     .asText());
+        assertEquals("Mann", res.at("/query/wrap/operands/0/key")
+                     .asText());
+        assertEquals("lemma", res.at("/query/wrap/operands/0/layer")
+                     .asText());
+        assertEquals("N", res.at("/query/wrap/operands/1/key")
+                     .asText());
+        assertEquals("cas", res.at("/query/wrap/operands/1/layer")
+                     .asText());
+
+
+        query = "[(((base=Mann&cas=N)))]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", res.at("/query/wrap/@type")
+                .asText());
+        assertEquals("relation:and", res.at("/query/wrap/relation")
+                     .asText());
+        assertEquals("Mann", res.at("/query/wrap/operands/0/key")
+                     .asText());
+        assertEquals("lemma", res.at("/query/wrap/operands/0/layer")
+                     .asText());
+        assertEquals("N", res.at("/query/wrap/operands/1/key")
+                     .asText());
+        assertEquals("cas", res.at("/query/wrap/operands/1/layer")
+                     .asText());
+
+
+        query = "[(((base=Mann&((cas=N)))))]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", res.at("/query/wrap/@type")
+                .asText());
+        assertEquals("relation:and", res.at("/query/wrap/relation")
+                     .asText());
+        assertEquals("Mann", res.at("/query/wrap/operands/0/key")
+                     .asText());
+        assertEquals("lemma", res.at("/query/wrap/operands/0/layer")
+                     .asText());
+        assertEquals("N", res.at("/query/wrap/operands/1/key")
+                     .asText());
+        assertEquals("cas", res.at("/query/wrap/operands/1/layer")
+                     .asText());
+
     };
 
     @Test
