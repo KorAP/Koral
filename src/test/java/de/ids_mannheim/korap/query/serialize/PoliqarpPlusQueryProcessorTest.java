@@ -726,6 +726,24 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
         assertEquals(true, operands.get(0).at("/key").isMissingNode());
 
+        query = "[base=Mann][]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        operands = Lists.newArrayList(res.at("/query/operands").elements());
+        assertEquals("koral:token", operands.get(1).at("/@type").asText());
+        assertEquals(true, operands.get(1).at("/key").isMissingNode());
+
+        query = "[base=Mann][]{3}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        operands = Lists.newArrayList(res.at("/query/operands").elements());
+        res = operands.get(1);
+        assertEquals("koral:group", res.at("/@type").asText());
+        assertEquals(true, res.at("/key").isMissingNode());
+        assertEquals("operation:repetition", res.at("/operation").asText());
+        assertEquals(3, res.at("/boundary/min").asInt());
+        assertEquals(3, res.at("/boundary/max").asInt());
+
         query = "startswith(<s>, [][base=Mann])";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());

@@ -15,6 +15,8 @@ public class KoralToken implements KoralObject {
     private final static KoralType type = KoralType.TOKEN;
     private KoralObject wrappedObject;
 
+    public KoralToken () {}
+    
     public KoralToken (KoralObject wrappedObject) {
         this.wrappedObject = wrappedObject;
     }
@@ -30,7 +32,9 @@ public class KoralToken implements KoralObject {
     public Map<String, Object> buildMap() {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
         map.put("@type", type.toString());
-        map.put("wrap", wrappedObject.buildMap());
+        if (wrappedObject != null){
+            map.put("wrap", wrappedObject.buildMap());
+        }
         return map;
     }
 }

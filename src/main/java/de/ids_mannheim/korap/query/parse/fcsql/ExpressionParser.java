@@ -20,6 +20,7 @@ import eu.clarin.sru.server.fcs.parser.ExpressionAnd;
 import eu.clarin.sru.server.fcs.parser.ExpressionGroup;
 import eu.clarin.sru.server.fcs.parser.ExpressionNot;
 import eu.clarin.sru.server.fcs.parser.ExpressionOr;
+import eu.clarin.sru.server.fcs.parser.ExpressionWildcard;
 import eu.clarin.sru.server.fcs.parser.Operator;
 import eu.clarin.sru.server.fcs.parser.QueryNode;
 import eu.clarin.sru.server.fcs.parser.RegexFlag;
@@ -76,9 +77,9 @@ public class ExpressionParser {
                 return parseBooleanExpression(operands, KoralRelation.OR);
             }
         }
-        // else if (queryNode instanceof ExpressionWildcard) {
-        // for distance query, using empty token
-        // }
+        else if (queryNode instanceof ExpressionWildcard) {
+            return new KoralToken();
+        }
         else {
             throw new KoralException(StatusCodes.QUERY_TOO_COMPLEX,
                     "FCS diagnostic 11: Query is too complex.");

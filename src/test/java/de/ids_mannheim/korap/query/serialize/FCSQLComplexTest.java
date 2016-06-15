@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 /**
  * @author margaretha
  * 
@@ -149,7 +151,7 @@ public class FCSQLComplexTest {
         query = "\"die\"?";
         jsonLd = "{@type:koral:boundary,min:0, max:1}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
-        
+
         query = "\"die\"*";
         jsonLd = "{@type:koral:boundary,min:0}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
@@ -159,10 +161,59 @@ public class FCSQLComplexTest {
         FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
     }
 
+    // wildcards
     @Test
-    public void testEmptyToken() {
+    public void testQueryWithEmptyToken() throws IOException {
+        // expansion query
+        String query = "[]{2}\"Hund\"";
+        String jsonLd = "{@type:koral:group, "
+                + "operation:operation:sequence, "
+                + "operands:["
+                + "{@type:koral:group,"
+                + "operation:operation:repetition,"
+                + "operands:["
+                + "{@type:koral:token}],"
+                + "boundary:{@type:koral:boundary,min:2,max:2}},"
+                + "{@type:koral:token, "
+                + "wrap:{@type:koral:term, key:Hund, foundry:opennlp, layer:orth, type:type:regex, match:match:eq}}"
+                + "]}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+
+        query = "\"Hund\"[]{2}";
+        jsonLd = "{@type:koral:group," + "operation:operation:repetition,"
+                + "operands:[" + "{@type:koral:token}],"
+                + "boundary:{@type:koral:boundary,min:2,max:2}}";
+        FCSQLQueryProcessorTest
+                .validateNode(query, "/query/operands/1", jsonLd);
+
+        // arbitrary tokens
+        query = "[]{2}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+
+        // sequence with extension
+        query = "[cnx:pos=\"A\"] \"Hund\"[]{2}";
+        jsonLd = "["
+                + "{@type:koral:token,wrap:{@type:koral:term,key:A,foundry:cnx,layer:p,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:Hund,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                + "{@type:koral:group,operation:operation:repetition,operands:["
+                + "{@type:koral:token}],boundary:{@type:koral:boundary,min:2,max:2}}"
+                + "]";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/operands", jsonLd);
+    }
+
+    @Test
+    public void testQueryWithDistance() throws JsonProcessingException {
         // distance query
-        // query = "\"Hund\" []{3} \"Katze\"";
+        String query = "\"Katze\" []{3} \"Hund\"";
+        String jsonLd = "{@type:koral:group,operation:operation:sequence,inOrder:false,"
+                + "distances:["
+                + "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:3,max:3}}"
+                + "],"
+                + "operands:["
+                + "{@type:koral:token,wrap:{@type:koral:term,key:Katze,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:Hund,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}]}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+
     }
 
     // -------------------------------------------------------------------------
@@ -203,7 +254,7 @@ public class FCSQLComplexTest {
                 "FCS diagnostic 11: Within scope UTTERANCE is currently unsupported.",
                 (String) error.get(1));
     }
-    
+
     @Test
     public void testWrongQuery() throws IOException {
         String query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
@@ -226,8 +277,8 @@ public class FCSQLComplexTest {
                 error.get(1).toString().startsWith("FCS diagnostic 10"));
 
         query = "[pos=\"NN\"]&[text=\"Mann\"]";
-        error = FCSQLQueryProcessorTest
-                .getError(new FCSQLQueryProcessor(query, "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
+                "2.0"));
         assertEquals(399, error.get(0));
         String msg = (String) error.get(1);
         assertEquals(true, msg.startsWith("FCS diagnostic 10"));
