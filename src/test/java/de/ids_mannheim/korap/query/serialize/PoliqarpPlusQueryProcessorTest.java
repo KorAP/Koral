@@ -280,7 +280,7 @@ public class PoliqarpPlusQueryProcessorTest {
 
         query = "<\".*\">";
         qs.setQuery(query, "poliqarpplus");
-        res = mapper.readTree(qs.toJSON());
+       res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
         assertEquals(".*", res.at("/query/wrap/key").asText());
         assertEquals("type:regex", res.at("/query/wrap/type").asText());
@@ -976,6 +976,26 @@ public class PoliqarpPlusQueryProcessorTest {
                 .asText());
     }
 
+    @Test
+    public void testUnnecessaryParentheses () throws JsonProcessingException,
+            IOException {
+        query = "[(base=Mann)]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("Mann", res.at("/query/wrap/key").asText());
+        assertEquals("lemma", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+
+        query = "[(((base=Mann)))]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("Mann", res.at("/query/wrap/key").asText());
+        assertEquals("lemma", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+
+    };
 
     @Test
     public void testTokenSequence () throws JsonProcessingException,

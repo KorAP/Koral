@@ -100,4 +100,4 @@ fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quan
 fragment RE_dquote            : '"'  (RE_expr | '\'' | ':' )* '"';
 fragment RE_squote            : '\''  (RE_expr | '\"' | ':' )* '\'';
  
-REGEX             : ( RE_dquote | RE_squote | );
+REGEX             : ( RE_dquote | RE_squote );
