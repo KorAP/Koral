@@ -180,7 +180,7 @@ public class QuerySerializer {
             List messages = (List) requestMap.get("messages");
             collection = mergeCollection(collection, this.collection);
             requestMap.put("collection", collection);
-            
+
             if (meta == null)
                 meta = new HashMap();
             if (errors == null)

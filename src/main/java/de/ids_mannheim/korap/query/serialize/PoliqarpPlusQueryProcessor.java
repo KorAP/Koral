@@ -46,7 +46,6 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      * 
      * @param query
      *            The syntax tree as returned by ANTLR
-     * @throws QueryException
      */
     public PoliqarpPlusQueryProcessor (String query) {
         KoralObjectGenerator.setQueryProcessor(this);
@@ -59,6 +58,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     public void process (String query) {
         ParseTree tree;
         tree = parsePoliqarpQuery(query);
+        // fixme: not required!?
         super.parser = this.parser;
         log.info("Processing PoliqarpPlus query: " + query);
         if (tree != null) {
@@ -86,7 +86,6 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      * @param node
      *            The currently processed node. The process(String
      *            query) method calls this method with the root.
-     * @throws QueryException
      */
     private void processNode (ParseTree node) {
         // Top-down processing
@@ -329,12 +328,14 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                     .makeTerm();
 
             String key = node.getChild(0).getText();
-            TokenStream stream = parser.getTokenStream();
-            String kval = stream.getText(node.getChild(0).getSourceInterval());
 
             if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
                 isRegex = true;
                 term.put("type", "type:regex");
+
+                // fixme: use stream with offset to get text!
+                // TokenStream stream = parser.getTokenStream();
+                // key = stream.getText(node.getChild(0).getSourceInterval());
                 key = key.substring(1, key.length() - 1);
             }
             term.put("layer", "orth");
