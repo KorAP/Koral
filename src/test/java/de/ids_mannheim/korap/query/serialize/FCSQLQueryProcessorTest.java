@@ -20,13 +20,16 @@ public class FCSQLQueryProcessorTest {
     static QuerySerializer qs = new QuerySerializer();
     static ObjectMapper mapper = new ObjectMapper();
     static JsonNode node;
+    String query;
+    String jsonLd;
+    List<Object> error;
 
-    public static void runAndValidate(String query, String jsonLD)
+    public static void runAndValidate(String query, String jsonLd)
             throws JsonProcessingException {
         FCSQLQueryProcessor processor = new FCSQLQueryProcessor(query, "2.0");
         String serializedQuery = mapper.writeValueAsString(processor
                 .getRequestMap().get("query"));
-        assertEquals(jsonLD.replace(" ", ""), serializedQuery.replace("\"", ""));
+        assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
     }
 
     public static void validateNode(String query, String path, String jsonLd)
@@ -44,7 +47,7 @@ public class FCSQLQueryProcessorTest {
 
     @Test
     public void testVersion() throws JsonProcessingException {
-        List<Object> error = getError(new FCSQLQueryProcessor("\"Sonne\"",
+        error = getError(new FCSQLQueryProcessor("\"Sonne\"",
                 "1.0"));
         assertEquals(309, error.get(0));
         assertEquals("SRU diagnostic 5: Only supports SRU version 2.0.",
@@ -59,16 +62,16 @@ public class FCSQLQueryProcessorTest {
     // regexp ::= quoted-string
     @Test
     public void testTermQuery() throws JsonProcessingException {
-        String query = "\"Sonne\"";
-        String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:Sonne, "
+        query = "\"Sonne\"";
+        jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:Sonne, "
                 + "foundry:opennlp, layer:orth, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
     }
 
     @Test
     public void testRegex() throws JsonProcessingException {
-        String query = "[text=\"M(a|ä)nn(er)?\"]";
-        String jsonLd = "{@type:koral:token,wrap:{@type:koral:term,"
+        query = "[text=\"M(a|ä)nn(er)?\"]";
+        jsonLd = "{@type:koral:token,wrap:{@type:koral:term,"
                 + "key:M(a|ä)nn(er)?,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}";
         runAndValidate(query, jsonLd);
 
@@ -95,8 +98,8 @@ public class FCSQLQueryProcessorTest {
     // | regexp "/" regexp-flag+
     @Test
     public void testTermQueryWithRegexFlag() throws IOException {
-        String query = "\"Fliegen\" /c";
-        String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, caseInsensitive:true, "
+        query = "\"Fliegen\" /c";
+        jsonLd = "{@type:koral:token, wrap:{@type:koral:term, caseInsensitive:true, "
                 + "key:Fliegen, foundry:opennlp, layer:orth, type:type:regex, match:match:eq}}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
@@ -111,7 +114,7 @@ public class FCSQLQueryProcessorTest {
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap", jsonLd);
 
         query = "\"Fliegen\" /l";
-        List<Object> error = FCSQLQueryProcessorTest
+        error = FCSQLQueryProcessorTest
                 .getError(new FCSQLQueryProcessor(query, "2.0"));
         assertEquals(306, error.get(0));
         String msg = (String) error.get(1);
@@ -130,8 +133,8 @@ public class FCSQLQueryProcessorTest {
     // | "!=" /* non-equals */
     @Test
     public void testOperator() throws IOException {
-        String query = "[cnx:pos != \"N\"]";
-        String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:N, "
+        query = "[cnx:pos != \"N\"]";
+        jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:N, "
                 + "foundry:cnx, layer:p, type:type:regex, match:match:ne}}";
         runAndValidate(query, jsonLd);
     }
@@ -145,8 +148,8 @@ public class FCSQLQueryProcessorTest {
     // simple-attribute ::= identifier
     @Test
     public void testTermQueryWithSpecificLayer() throws JsonProcessingException {
-        String query = "[text = \"Sonne\"]";
-        String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:Sonne, "
+        query = "[text = \"Sonne\"]";
+        jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:Sonne, "
                 + "foundry:opennlp, layer:orth, type:type:regex, match:match:eq}}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
@@ -164,8 +167,8 @@ public class FCSQLQueryProcessorTest {
     // qualified-attribute ::= identifier ":" identifier
     @Test
     public void testTermQueryWithQualifier() throws JsonProcessingException {
-        String query = "[mate:lemma = \"sein\"]";
-        String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:sein, "
+        query = "[mate:lemma = \"sein\"]";
+        jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:sein, "
                 + "foundry:mate, layer:l, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
 
@@ -175,28 +178,6 @@ public class FCSQLQueryProcessorTest {
         runAndValidate(query, jsonLd);
     }
 
-    @Test
-    public void testTermQueryException() throws JsonProcessingException {
-        String query = "[opennlp:lemma = \"sein\"]";
-        List<Object> error = getError(new FCSQLQueryProcessor(query, "2.0"));
-        assertEquals(306, error.get(0));
-        assertEquals(
-                "SRU diagnostic 48: Layer lemma with qualifier opennlp is unsupported.",
-                error.get(1));
-
-        query = "[malt:lemma = \"sein\"]";
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
-        assertEquals(306, error.get(0));
-        assertEquals("SRU diagnostic 48: Qualifier malt is unsupported.",
-                error.get(1));
-
-        query = "[cnx:morph = \"heit\"]";
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
-        assertEquals(306, error.get(0));
-        assertEquals("SRU diagnostic 48: Layer morph is unsupported.",
-                error.get(1));
-
-    }
 
     // segment-query ::= "[" expression? "]"
     // -------------------------------------------------------------------------
@@ -208,8 +189,8 @@ public class FCSQLQueryProcessorTest {
     // | expression "|" expression /* or */
     @Test
     public void testExpressionOr() throws IOException {
-        String query = "[mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
-        String jsonLd = "{@type: koral:token,"
+        query = "[mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
+        jsonLd = "{@type: koral:token,"
                 + " wrap: { @type: koral:termGroup,"
                 + "relation: relation:or,"
                 + " operands:["
@@ -227,8 +208,8 @@ public class FCSQLQueryProcessorTest {
     // | expression "&" expression /* and */
     @Test
     public void testExpressionAnd() throws IOException {
-        String query = "[mate:lemma=\"sein\" & mate:pos=\"PPOSS\"]";
-        String jsonLd = "{@type: koral:token,"
+        query = "[mate:lemma=\"sein\" & mate:pos=\"PPOSS\"]";
+        jsonLd = "{@type: koral:token,"
                 + " wrap: { @type: koral:termGroup,"
                 + "relation: relation:and,"
                 + " operands:["
@@ -247,8 +228,8 @@ public class FCSQLQueryProcessorTest {
 
     @Test
     public void testExpressionGroup() throws JsonProcessingException {
-        String query = "[(text=\"blau\"|pos=\"ADJ\")]";
-        String jsonLd = "{@type: koral:token,"
+        query = "[(text=\"blau\"|pos=\"ADJ\")]";
+        jsonLd = "{@type: koral:token,"
                 + "wrap: {@type: koral:termGroup,"
                 + "relation: relation:or,"
                 + "operands: ["
@@ -260,9 +241,9 @@ public class FCSQLQueryProcessorTest {
     // "!" expression /* not */
     @Test
     public void testExpressionNot() throws IOException {
-        String jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:NN, "
+        jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:NN, "
                 + "foundry:tt, layer:p, type:type:regex, match:match:eq}}";
-        String query = "[!pos != \"NN\"]";
+        query = "[!pos != \"NN\"]";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
         query = "[!!pos = \"NN\"]";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
@@ -280,4 +261,42 @@ public class FCSQLQueryProcessorTest {
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
 
+    @Test
+    public void testExceptions() throws JsonProcessingException {
+        // unsupported lemma und qualifier
+        query = "[opennlp:lemma = \"sein\"]";
+        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(306, error.get(0));
+        assertEquals(
+                "SRU diagnostic 48: Layer lemma with qualifier opennlp is unsupported.",
+                error.get(1));
+
+        query = "[tt:morph = \"sein\"]";
+        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(306, error.get(0));
+        assertEquals(
+                "SRU diagnostic 48: Layer morph is unsupported.",
+                error.get(1));
+        
+        // unsupported qualifier
+        query = "[malt:lemma = \"sein\"]";
+        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(306, error.get(0));
+        assertEquals("SRU diagnostic 48: Qualifier malt is unsupported.",
+                error.get(1));
+
+        // unsupported layer
+        query = "[cnx:morph = \"heit\"]";
+        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(306, error.get(0));
+        assertEquals("SRU diagnostic 48: Layer morph is unsupported.",
+                error.get(1));
+
+        // missing layer
+        query = "[cnx=\"V\"]";
+        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(306, error.get(0));
+        assertEquals("SRU diagnostic 48: Layer cnx is unsupported.",
+                error.get(1));
+    }
 }

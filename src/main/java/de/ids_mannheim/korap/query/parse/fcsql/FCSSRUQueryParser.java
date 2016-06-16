@@ -66,7 +66,28 @@ public class FCSSRUQueryParser {
                             + " is currently unsupported.");
         }
     }
+    
+    private KoralObject parseQuerySegment(QuerySegment segment)
+            throws KoralException {
+        int minOccurs = segment.getMinOccurs();
+        int maxOccurs = segment.getMaxOccurs();
 
+        if ((minOccurs == 1) && (maxOccurs == 1)) {
+            return expressionParser.parseExpression(segment.getExpression());
+        }
+        else {
+            KoralBoundary boundary = new KoralBoundary(minOccurs, maxOccurs);
+            List<KoralObject> operand = new ArrayList<KoralObject>(1);
+            operand.add(expressionParser.parseExpression(segment
+                    .getExpression()));
+
+            KoralGroup koralGroup = new KoralGroup(KoralOperation.REPETITION);
+            koralGroup.setBoundary(boundary);
+            koralGroup.setOperands(operand);
+            return koralGroup;
+        }
+    }
+    
     private KoralObject parseWithinQuery(QueryWithWithin queryNode)
             throws KoralException {
         KoralGroup koralGroup = new KoralGroup(KoralOperation.POSITION);
@@ -146,7 +167,6 @@ public class FCSSRUQueryParser {
         }
 
         if (isEmptyTokenFound) {
-            //operands = updateOperands(operands);
             operands = createDistance(koralGroup,operands);
         }
 
@@ -169,8 +189,7 @@ public class FCSSRUQueryParser {
     }
 
     private List<KoralObject> createDistance(KoralGroup koralGroup, List<KoralObject> operands){
-        boolean isLastOperandUpdated = false;
-        boolean isDistanceSet = false;
+        boolean isSubGroupAdded = false;
         List<KoralObject> newOperands = new ArrayList<KoralObject>(
                 operands.size());        
         newOperands.add(operands.get(0));        
@@ -178,68 +197,43 @@ public class FCSSRUQueryParser {
         for (int i = 1; i < operandSize - 1; i++) {
             KoralObject operand = operands.get(i);
             if (operand instanceof KoralBoundary) {
-                if (isDistanceSet){
-                    
+                List<KoralDistance> distances = new ArrayList<KoralDistance>();
+                distances.add(new KoralDistance ((KoralBoundary) operand));  
+                
+                if (koralGroup.getDistances() != null){
+                    KoralObject lastOperand = newOperands.get(newOperands.size()-1);
+                    KoralGroup subGroup = createSubGroup(distances, lastOperand, operands.get(i+1));
+                    newOperands.remove(lastOperand);
+                    newOperands.add(subGroup);
+                    isSubGroupAdded = true;
+                    continue;
                 }
-                else{
-                    List<KoralDistance> distances = new ArrayList<KoralDistance>(1);
-                    distances.add(new KoralDistance((KoralBoundary) operand));
+                else{                    
                     koralGroup.setDistances(distances);
+                    koralGroup.setInOrder(true);
                 }
-                isLastOperandUpdated = true;
             }
-            isLastOperandUpdated = false;
+            else{
+                newOperands.add(operand);                
+            }
+            isSubGroupAdded = false;
         }
-        if (!isLastOperandUpdated){
+        
+        if (!isSubGroupAdded){
             newOperands.add(operands.get(operandSize-1));
         }
         return newOperands;
     }
     
-    private List<KoralObject> updateOperands(List<KoralObject> operands) {
-        boolean isLastOperandUpdated = false;
-        List<KoralObject> newOperands = new ArrayList<KoralObject>(
-                operands.size());        
-        newOperands.add(operands.get(0));        
-        int operandSize = operands.size();
-        for (int i = 1; i < operandSize - 1; i++) {
-            KoralObject operand = operands.get(i);
-            if (operand instanceof KoralBoundary) {
-                KoralGroup koralGroup = new KoralGroup(KoralOperation.SEQUENCE);
-                List<KoralDistance> distances = new ArrayList<KoralDistance>(1);
-                distances.add(new KoralDistance((KoralBoundary) operand));
-                koralGroup.setDistances(distances);
-                koralGroup.setOperands(Arrays.asList(newOperands.get(i - 1),
-                        operands.get(i + 1)));
-                newOperands.set(i-1,koralGroup);
-                isLastOperandUpdated = true;
-            }
-            isLastOperandUpdated = false;
-        }
-        if (!isLastOperandUpdated){
-            newOperands.add(operands.get(operandSize-1));
-        }
-        return newOperands;
-    }
-
-    private KoralObject parseQuerySegment(QuerySegment segment)
-            throws KoralException {
-        int minOccurs = segment.getMinOccurs();
-        int maxOccurs = segment.getMaxOccurs();
-
-        if ((minOccurs == 1) && (maxOccurs == 1)) {
-            return expressionParser.parseExpression(segment.getExpression());
-        }
-        else {
-            KoralBoundary boundary = new KoralBoundary(minOccurs, maxOccurs);
-            List<KoralObject> operand = new ArrayList<KoralObject>(1);
-            operand.add(expressionParser.parseExpression(segment
-                    .getExpression()));
-
-            KoralGroup koralGroup = new KoralGroup(KoralOperation.REPETITION);
-            koralGroup.setBoundary(boundary);
-            koralGroup.setOperands(operand);
-            return koralGroup;
-        }
+    private KoralGroup createSubGroup(List<KoralDistance> distances, 
+            KoralObject operand, KoralObject operand2) {
+        KoralGroup subGroup = new KoralGroup(KoralOperation.SEQUENCE);
+        subGroup.setDistances(distances);
+        subGroup.setInOrder(true);
+        List<KoralObject> operands = new ArrayList<KoralObject>();
+        operands.add(operand);
+        operands.add(operand2);
+        subGroup.setOperands(operands);
+        return subGroup;
     }
 }

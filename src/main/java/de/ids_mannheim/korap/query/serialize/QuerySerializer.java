@@ -180,19 +180,29 @@ public class QuerySerializer {
         return raw();
     }
 
-	private Map raw() {
+    private Map raw () {
         if (ast != null) {
-			Map<String, Object> requestMap = ast.getRequestMap();
+            Map<String, Object> requestMap = new HashMap<>(ast.getRequestMap());
             Map meta = (Map) requestMap.get("meta");
             Map collection = (Map) requestMap.get("collection");
             List errors = (List) requestMap.get("errors");
             List warnings = (List) requestMap.get("warnings");
             List messages = (List) requestMap.get("messages");
-			this.collection = mergeCollection(collection, this.collection);
-			requestMap.put("collection", this.collection);
+            collection = mergeCollection(collection, this.collection);
+            requestMap.put("collection", collection);
+            
+            if (meta == null)
+                meta = new HashMap();
+            if (errors == null)
+                errors = new LinkedList();
+            if (warnings == null)
+                warnings = new LinkedList();
+            if (messages == null)
+                messages = new LinkedList();
+
             if (this.meta != null) {
-				this.meta.putAll(meta);
-				requestMap.put("meta", this.meta);
+                meta.putAll(this.meta);
+                requestMap.put("meta", meta);
             }
             if (this.errors != null && !this.errors.isEmpty()) {
                 errors.addAll(this.errors);
@@ -206,37 +216,41 @@ public class QuerySerializer {
                 messages.addAll(this.messages);
                 requestMap.put("messages", messages);
             }
-
             return cleanup(requestMap);
         }
         return new HashMap<>();
     }
 
-	private Map<String, Object> cleanup(Map<String, Object> requestMap) {
+    private Map<String, Object> cleanup (Map<String, Object> requestMap) {
         Iterator<Map.Entry<String, Object>> set = requestMap.entrySet()
                 .iterator();
         while (set.hasNext()) {
             Map.Entry<String, Object> entry = set.next();
-			if (entry.getValue() instanceof List
-					&& ((List) entry.getValue()).isEmpty())
+            if (entry.getValue() instanceof List
+                    && ((List) entry.getValue()).isEmpty())
                 set.remove();
-			else if (entry.getValue() instanceof Map
-					&& ((Map) entry.getValue()).isEmpty())
+            else if (entry.getValue() instanceof Map
+                    && ((Map) entry.getValue()).isEmpty())
                 set.remove();
-			else if (entry.getValue() instanceof String
-					&& ((String) entry.getValue()).isEmpty())
+            else if (entry.getValue() instanceof String
+                    && ((String) entry.getValue()).isEmpty())
                 set.remove();
         }
         return requestMap;
     }
 
-	private Map<String, Object> mergeCollection(
-			Map<String, Object> collection1, Map<String, Object> collection2) {
+	private Map<String, Object> mergeCollection (
+            Map<String, Object> collection1, Map<String, Object> collection2) {
         if (collection1 == null || collection1.isEmpty()) {
             return collection2;
-		} else if (collection2 == null || collection2.isEmpty()) {
+        }
+        else if (collection2 == null || collection2.isEmpty()) {
             return collection1;
-		} else {
+        }
+        else if (collection1.equals(collection2)) {
+            return collection1;
+        }
+        else {
             LinkedHashMap<String, Object> docGroup = KoralObjectGenerator
                     .makeDocGroup("and");
             ArrayList<Object> operands = (ArrayList<Object>) docGroup

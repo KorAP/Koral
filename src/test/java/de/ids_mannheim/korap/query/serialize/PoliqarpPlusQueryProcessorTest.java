@@ -658,7 +658,13 @@ public class PoliqarpPlusQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals(true, res.at("/query/key").isMissingNode());
-
+        
+        query = "[]{3}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("{@type:koral:boundary,min:3,max:3}", 
+                res.at("/query/boundary").asText());
+        
         query = "contains(<s>, [])";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
