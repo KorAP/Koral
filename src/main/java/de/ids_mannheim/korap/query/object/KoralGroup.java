@@ -22,8 +22,9 @@ public class KoralGroup implements KoralObject {
 
     private boolean inOrder = false;
     private List<KoralObject> operands;
-    private List<Distance> distances;
+    private List<KoralDistance> distances;
     private List<Frame> frames;
+    private KoralBoundary boundary;
 
     public KoralGroup (KoralOperation operation) {
         this.operation = operation;
@@ -45,11 +46,19 @@ public class KoralGroup implements KoralObject {
 		this.operands = operands;
 	}
 
-    public List<Distance> getDistances() {
+    public KoralOperation getOperation() {
+        return operation;
+    }
+
+    public void setOperation(KoralOperation operation) {
+        this.operation = operation;
+    }
+
+    public List<KoralDistance> getDistances() {
         return distances;
     }
 
-    public void setDistances(List<Distance> distances) {
+    public void setDistances(List<KoralDistance> distances) {
         this.distances = distances;
     }
     
@@ -61,6 +70,14 @@ public class KoralGroup implements KoralObject {
 		this.frames = frames;
 	}
 
+    public KoralBoundary getBoundary() {
+        return boundary;
+    }
+
+    public void setBoundary(KoralBoundary boundary) {
+        this.boundary = boundary;
+    }
+
     @Override
     public Map<String, Object> buildMap() {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
@@ -70,17 +87,21 @@ public class KoralGroup implements KoralObject {
         if (getDistances() != null) {
             map.put("inOrder", isInOrder());
             List<Map<String, Object>> distanceList = new ArrayList<Map<String, Object>>();
-            for (Distance d : getDistances()) {
+            for (KoralDistance d : distances) {
                 distanceList.add(d.buildMap());
             }
             map.put("distances", distanceList);
         }
 
         List<Map<String, Object>> operandList = new ArrayList<Map<String, Object>>();
-        for (Object o : getOperands()) {
+        for (Object o : operands) {
             operandList.add(MapBuilder.buildQueryMap(o));
         }
         map.put("operands", operandList);
+
+        if (boundary != null) {
+            map.put("boundary", boundary.buildMap());
+        }
         return map;
     }
 
@@ -100,54 +121,4 @@ public class KoralGroup implements KoralObject {
 			return "frame:"+value;
 		}
 	}
-    
-    public class Distance implements KoralObject {
-
-        private final KoralType type = KoralType.DISTANCE;
-        private String key;
-        private String min;
-        private String max;
-
-        public Distance (String key, int min, int max) {
-            this.key = key;
-            this.min = String.valueOf(min);
-            this.max = String.valueOf(max);
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public void setKey(String key) {
-            this.key = key;
-        }
-
-        public String getMin() {
-            return min;
-        }
-
-        public void setMin(String min) {
-            this.min = min;
-        }
-
-        public String getMax() {
-            return max;
-        }
-
-        public void setMax(String max) {
-            this.max = max;
-        }
-
-        @Override
-        public Map<String, Object> buildMap() {
-            Map<String, Object> distanceMap = new LinkedHashMap<String, Object>();
-            distanceMap.put("@type", type.toString());
-            distanceMap.put("key", getKey());
-            distanceMap.put("min", getMin());
-            distanceMap.put("max", getMax());
-            return distanceMap;
-
-        }
-
-    }
 }

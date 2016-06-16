@@ -280,24 +280,4 @@ public class FCSQLQueryProcessorTest {
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
 
-
-    @Test
-    public void testWrongQuery() throws IOException {
-        String query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
-        List<Object> error = getError(new FCSQLQueryProcessor(query, "2.0"));
-        assertEquals(399, error.get(0));
-        assertEquals(true,
-                error.get(1).toString().startsWith("FCS diagnostic 10"));
-
-        query = "![mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
-        assertEquals(true,
-                error.get(1).toString().startsWith("FCS diagnostic 10"));
-
-        query = "(\"blaue\"&\"grüne\")";
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
-        assertEquals(true,
-                error.get(1).toString().startsWith("FCS diagnostic 10"));
-    }
-
 }
