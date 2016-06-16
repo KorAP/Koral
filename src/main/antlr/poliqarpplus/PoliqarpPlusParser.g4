@@ -102,6 +102,7 @@ emptyToken
 
 termGroup
 : (term | LRPAREN termGroup RRPAREN) boolOp (term | LRPAREN termGroup RRPAREN | termGroup)
+| LRPAREN termGroup RRPAREN
 ;
 
 repetition
