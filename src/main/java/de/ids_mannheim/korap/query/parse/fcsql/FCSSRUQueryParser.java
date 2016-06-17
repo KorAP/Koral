@@ -44,14 +44,13 @@ public class FCSSRUQueryParser {
             return parseQuerySegment((QuerySegment) queryNode);
         }
         else if (queryNode instanceof QueryGroup) {
-            return parseQueryNode(queryNode.getChild(0));
+            return parseQueryGroup((QueryGroup) queryNode);
         }
         else if (queryNode instanceof QuerySequence) {
             return parseSequenceQuery(queryNode.getChildren());
         }
         else if (queryNode instanceof QueryDisjunction) {
-            return parseGroupQuery(queryNode.getChildren(),
-                    KoralOperation.DISJUNCTION);
+            return parseQueryDisjunction(queryNode.getChildren());
         }
         else if (queryNode instanceof QueryWithWithin) {
             return parseWithinQuery((QueryWithWithin) queryNode);
@@ -69,23 +68,28 @@ public class FCSSRUQueryParser {
     
     private KoralObject parseQuerySegment(QuerySegment segment)
             throws KoralException {
-        int minOccurs = segment.getMinOccurs();
-        int maxOccurs = segment.getMaxOccurs();
-
+        KoralObject object = expressionParser.parseExpression(segment.getExpression());
+        return handleQuantifier(object, segment.getMinOccurs(), segment.getMaxOccurs());
+    }
+    
+    private KoralObject parseQueryGroup(QueryGroup group) throws KoralException {
+        KoralObject object = parseQueryNode(group.getFirstChild());
+        return handleQuantifier(object, group.getMinOccurs(), group.getMaxOccurs());
+    }
+    
+    private KoralObject handleQuantifier(KoralObject object, int minOccurs, int maxOccurs){
         if ((minOccurs == 1) && (maxOccurs == 1)) {
-            return expressionParser.parseExpression(segment.getExpression());
+            return object;
         }
-        else {
-            KoralBoundary boundary = new KoralBoundary(minOccurs, maxOccurs);
-            List<KoralObject> operand = new ArrayList<KoralObject>(1);
-            operand.add(expressionParser.parseExpression(segment
-                    .getExpression()));
+        
+        KoralBoundary boundary = new KoralBoundary(minOccurs, maxOccurs);
+        List<KoralObject> operand = new ArrayList<KoralObject>(1);
+        operand.add(object);
 
-            KoralGroup koralGroup = new KoralGroup(KoralOperation.REPETITION);
-            koralGroup.setBoundary(boundary);
-            koralGroup.setOperands(operand);
-            return koralGroup;
-        }
+        KoralGroup koralGroup = new KoralGroup(KoralOperation.REPETITION);
+        koralGroup.setBoundary(boundary);
+        koralGroup.setOperands(operand);
+        return koralGroup;
     }
     
     private KoralObject parseWithinQuery(QueryWithWithin queryNode)
@@ -125,9 +129,8 @@ public class FCSSRUQueryParser {
         return new KoralSpan(new KoralTerm(contextSpan));
     }
 
-    private KoralGroup parseGroupQuery(List<QueryNode> children,
-            KoralOperation operation) throws KoralException {
-        KoralGroup koralGroup = new KoralGroup(operation);
+    private KoralGroup parseQueryDisjunction(List<QueryNode> children) throws KoralException {
+        KoralGroup koralGroup = new KoralGroup(KoralOperation.DISJUNCTION);
         List<KoralObject> operands = new ArrayList<KoralObject>();
         for (QueryNode child : children) {
             operands.add(parseQueryNode(child));

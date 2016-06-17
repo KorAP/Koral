@@ -47,8 +47,7 @@ public class FCSQLQueryProcessorTest {
 
     @Test
     public void testVersion() throws JsonProcessingException {
-        error = getError(new FCSQLQueryProcessor("\"Sonne\"",
-                "1.0"));
+        error = getError(new FCSQLQueryProcessor("\"Sonne\"", "1.0"));
         assertEquals(309, error.get(0));
         assertEquals("SRU diagnostic 5: Only supports SRU version 2.0.",
                 error.get(1));
@@ -103,7 +102,7 @@ public class FCSQLQueryProcessorTest {
                 + "key:Fliegen, foundry:opennlp, layer:orth, type:type:regex, match:match:eq}}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
-        query = "\"Fliegen\" /i";
+        query = "[text = \"Fliegen\" /i]";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
         query = "\"Fliegen\" /C";
@@ -114,8 +113,8 @@ public class FCSQLQueryProcessorTest {
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap", jsonLd);
 
         query = "\"Fliegen\" /l";
-        error = FCSQLQueryProcessorTest
-                .getError(new FCSQLQueryProcessor(query, "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
+                "2.0"));
         assertEquals(306, error.get(0));
         String msg = (String) error.get(1);
         assertEquals(true, msg.startsWith("SRU diagnostic 48: Regexflags"));
@@ -138,7 +137,6 @@ public class FCSQLQueryProcessorTest {
                 + "foundry:cnx, layer:p, type:type:regex, match:match:ne}}";
         runAndValidate(query, jsonLd);
     }
-
 
     // attribute operator flagged-regexp
     // -------------------------------------------------------------------------
@@ -177,7 +175,6 @@ public class FCSQLQueryProcessorTest {
                 + "foundry:cnx, layer:p, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
     }
-
 
     // segment-query ::= "[" expression? "]"
     // -------------------------------------------------------------------------
@@ -238,6 +235,19 @@ public class FCSQLQueryProcessorTest {
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
 
+    @Test
+    public void testMultipleBooleanExpressions() throws IOException {
+        query = "[mate:lemma=\"sein\" & (mate:pos=\"PPOSS\"|mate:pos=\"VAFIN\")]";
+        jsonLd = "{@type: koral:token,"
+                + " wrap: { @type: koral:termGroup,"
+                + "relation: relation:or,"
+                + " operands:["
+                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq},"
+                + "{@type: koral:term, key: VAFIN, foundry: mate, layer: p, type:type:regex, match: match:eq}]}}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/1",
+                jsonLd);
+    }
+
     // "!" expression /* not */
     @Test
     public void testExpressionNot() throws IOException {
@@ -259,6 +269,9 @@ public class FCSQLQueryProcessorTest {
                 + "{@type: koral:term, key: sein, foundry: mate, layer: l, type:type:regex, match: match:eq},"
                 + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:ne}]}}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+        
+        query = "[!(mate:lemma=\"sein\" & mate:pos=\"PPOSS\")]";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
 
     @Test
@@ -274,10 +287,9 @@ public class FCSQLQueryProcessorTest {
         query = "[tt:morph = \"sein\"]";
         error = getError(new FCSQLQueryProcessor(query, "2.0"));
         assertEquals(306, error.get(0));
-        assertEquals(
-                "SRU diagnostic 48: Layer morph is unsupported.",
+        assertEquals("SRU diagnostic 48: Layer morph is unsupported.",
                 error.get(1));
-        
+
         // unsupported qualifier
         query = "[malt:lemma = \"sein\"]";
         error = getError(new FCSQLQueryProcessor(query, "2.0"));

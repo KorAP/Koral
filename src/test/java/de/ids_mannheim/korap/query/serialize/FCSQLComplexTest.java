@@ -44,7 +44,7 @@ public class FCSQLComplexTest {
         FCSQLQueryProcessorTest
                 .validateNode(query, "/query/operands/1", jsonLd);
 
-        // group and sequence
+        // a group contains a sequence
         query = "([text=\"blaue\"][pos=\"NN\"])";
         jsonLd = "{@type:koral:group,"
                 + "operation:operation:sequence,"
@@ -122,11 +122,12 @@ public class FCSQLComplexTest {
                 + "]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
+        // sequence of groups
     }
 
     // | simple-query quantifier /* quatification */
     @Test
-    public void testQueryWithQuantifier() throws IOException {
+    public void testSimpleQueryWithQuantifier() throws IOException {
         // repetition
         query = "\"die\"{2}";
         jsonLd = "{@type:koral:group,"
@@ -163,6 +164,30 @@ public class FCSQLComplexTest {
         query = "\"die\"{0}";
         jsonLd = "{@type:koral:boundary,min:0, max:0}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
+
+        // segment query with quantifier
+        query = "[cnx:pos=\"A\"]*";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:repetition,"
+                + "operands:[{@type:koral:token,wrap:{@type:koral:term,key:A,foundry:cnx,layer:p,type:type:regex,match:match:eq}}],"
+                + "boundary:{@type:koral:boundary,min:0}}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+    }
+
+    @Test
+    public void testGroupQueryWithQuantifier() throws JsonProcessingException {
+        // group with quantifier
+        query = "(\"blaue\"|\"grüne\")*";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:repetition,"
+                + "operands:["
+                + "{@type:koral:group,"
+                + "operation:operation:disjunction,"
+                + "operands:["
+                + "{@type:koral:token, wrap:{@type:koral:term,key:blaue,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token, wrap:{@type:koral:term,key:grüne,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}"
+                + "]}]," + "boundary:{@type:koral:boundary,min:0}}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
 
     // wildcards
@@ -185,7 +210,7 @@ public class FCSQLComplexTest {
 
         query = "\"Hund\"[]{2}";
         jsonLd = "{@type:koral:group," + "operation:operation:repetition,"
-                + "operands:[" + "{@type:koral:token}],"
+                + "operands:[{@type:koral:token}],"
                 + "boundary:{@type:koral:boundary,min:2,max:2}}";
         FCSQLQueryProcessorTest
                 .validateNode(query, "/query/operands/1", jsonLd);
@@ -206,21 +231,52 @@ public class FCSQLComplexTest {
     }
 
     @Test
-    public void testQueryWithDistance() throws IOException {
+    public void testDistanceQuery() throws IOException {
         // distance query
-        query = "\"Katze\" []{3} \"Hund\"";
+        query = "\"Katze\" [] \"Hund\"";
         jsonLd = "{@type:koral:group,operation:operation:sequence,inOrder:true,"
                 + "distances:["
-                + "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:3,max:3}}"
+                + "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:1,max:1}}"
                 + "],"
                 + "operands:["
                 + "{@type:koral:token,wrap:{@type:koral:term,key:Katze,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
                 + "{@type:koral:token,wrap:{@type:koral:term,key:Hund,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+    }
 
+    @Test
+    public void testDistanceQueryWithQuantifier() throws IOException {
+        query = "\"Katze\" []* \"Hund\"";
+        jsonLd = "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:0}}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/distances/0",
+                jsonLd);
+
+        query = "\"Katze\" []+ \"Hund\"";
+        jsonLd = "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:1}}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/distances/0",
+                jsonLd);
+
+        query = "\"Katze\" []{3} \"Hund\"";
+        jsonLd = "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:3,max:3}}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/distances/0",
+                jsonLd);
+
+        query = "\"Katze\" []{2,3} \"Hund\"";
+        jsonLd = "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:2,max:3}}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/distances/0",
+                jsonLd);
+    }
+
+    @Test
+    public void testDistanceQueryWithMultipleWildcards() throws IOException {
         // sequences of wildcards
         query = "\"Katze\" []{3}[] \"Hund\"";
         jsonLd = "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:4,max:4}}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/distances/0",
+                jsonLd);
+
+        query = "\"Katze\" []{3}[]? \"Hund\"";
+        jsonLd = "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:3,max:4}}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/distances/0",
                 jsonLd);
 
@@ -240,15 +296,15 @@ public class FCSQLComplexTest {
                 + "operands:["
                 + "{@type:koral:token,wrap:{@type:koral:term,key:Katze,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
                 + "{@type:koral:group,"
-                    + "operation:operation:sequence,"
-                    + "inOrder:true,"
-                    + "distances:["
-                    + "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:1,max:2}}"
-                    + "],"
-                    + "operands:["
-                    + "{@type:koral:token,wrap:{@type:koral:term,key:Hund,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
-                    + "{@type:koral:token,wrap:{@type:koral:term,key:V,foundry:cnx,layer:p,type:type:regex,match:match:eq}}]}" 
-                +"]}";
+                + "operation:operation:sequence,"
+                + "inOrder:true,"
+                + "distances:["
+                + "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:1,max:2}}"
+                + "],"
+                + "operands:["
+                + "{@type:koral:token,wrap:{@type:koral:term,key:Hund,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:V,foundry:cnx,layer:p,type:type:regex,match:match:eq}}]}"
+                + "]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
 
@@ -290,17 +346,43 @@ public class FCSQLComplexTest {
                 "FCS diagnostic 11: Within scope UTTERANCE is currently unsupported.",
                 (String) error.get(1));
     }
-    
+
     @Test
-    public void testWithinQueryWithEmptyTokens() throws IOException {        
+    public void testWithinQueryWithEmptyTokens() throws IOException {
         query = "[] within s";
         jsonLd = "{@type:koral:group,"
                 + "operation:operation:position,"
                 + "operands:["
                 + "{@type:koral:span,wrap:{@type:koral:term,key:s,foundry:base,layer:s}},"
-                + "{@type:koral:token}"
-                + "]}";
+                + "{@type:koral:token}" + "]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+
+        query = "[]+ within s";
+        jsonLd = "{@type:koral:group," + "operation:operation:repetition,"
+                + "operands:[{@type:koral:token}],"
+                + "boundary:{@type:koral:boundary,min:1}}";
+        FCSQLQueryProcessorTest
+                .validateNode(query, "/query/operands/1", jsonLd);
+    }
+
+    @Test
+    public void testWithinQueryWithGroupQuery() throws IOException {
+        query = "(\"blaue\"|\"grüne\")+ within s";
+        jsonLd = "{@type:koral:span,wrap:{@type:koral:term,key:s,foundry:base,layer:s}}";
+        FCSQLQueryProcessorTest
+                .validateNode(query, "/query/operands/0", jsonLd);
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:repetition,"
+                + "operands:["
+                + "{@type:koral:group,"
+                + "operation:operation:disjunction,"
+                + "operands:["
+                + "{@type:koral:token, wrap:{@type:koral:term,key:blaue,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token, wrap:{@type:koral:term,key:grüne,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}"
+                + "]}]," + "boundary:{@type:koral:boundary,min:1}}";
+        FCSQLQueryProcessorTest
+                .validateNode(query, "/query/operands/1", jsonLd);
+
     }
 
     @Test
