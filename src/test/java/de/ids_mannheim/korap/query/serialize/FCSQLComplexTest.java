@@ -15,6 +15,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  */
 public class FCSQLComplexTest {
 
+    String query;
+    String jsonLd;
+    List<Object> error;
+
     // -------------------------------------------------------------------------
     // simple-query ::= '(' main_query ')' /* grouping */
     // | implicit-query
@@ -26,8 +30,8 @@ public class FCSQLComplexTest {
     // simple-query ::= '(' main_query ')' /* grouping */
     @Test
     public void testGroupQuery() throws IOException {
-        String query = "(\"blaue\"|\"grüne\")";
-        String jsonLd = "{@type:koral:group,"
+        query = "(\"blaue\"|\"grüne\")";
+        jsonLd = "{@type:koral:group,"
                 + "operation:operation:disjunction,"
                 + "operands:["
                 + "{@type:koral:token, wrap:{@type:koral:term,key:blaue,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
@@ -61,8 +65,8 @@ public class FCSQLComplexTest {
     // | simple-query "|" main-query /* or */
     @Test
     public void testOrQuery() throws IOException {
-        String query = "\"man\"|\"Mann\"";
-        String jsonLd = "{@type:koral:group,"
+        query = "\"man\"|\"Mann\"";
+        jsonLd = "{@type:koral:group,"
                 + "operation:operation:disjunction,"
                 + "operands:["
                 + "{@type:koral:token,wrap:{@type:koral:term,key:man,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
@@ -87,8 +91,8 @@ public class FCSQLComplexTest {
     // | simple-query main-query /* sequence */
     @Test
     public void testSequenceQuery() throws IOException {
-        String query = "\"blaue|grüne\" [pos = \"NN\"]";
-        String jsonLd = "{@type:koral:group, "
+        query = "\"blaue|grüne\" [pos = \"NN\"]";
+        jsonLd = "{@type:koral:group, "
                 + "operation:operation:sequence, "
                 + "operands:["
                 + "{@type:koral:token, wrap:{@type:koral:term, key:blaue|grüne, foundry:opennlp, layer:orth, type:type:regex, match:match:eq}},"
@@ -124,8 +128,8 @@ public class FCSQLComplexTest {
     @Test
     public void testQueryWithQuantifier() throws IOException {
         // repetition
-        String query = "\"die\"{2}";
-        String jsonLd = "{@type:koral:group,"
+        query = "\"die\"{2}";
+        jsonLd = "{@type:koral:group,"
                 + "operation:operation:repetition,"
                 + "operands:["
                 + "{@type:koral:token,wrap:{@type:koral:term,key:die,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}],"
@@ -165,8 +169,8 @@ public class FCSQLComplexTest {
     @Test
     public void testQueryWithEmptyToken() throws IOException {
         // expansion query
-        String query = "[]{2}\"Hund\"";
-        String jsonLd = "{@type:koral:group, "
+        query = "[]{2}\"Hund\"";
+        jsonLd = "{@type:koral:group, "
                 + "operation:operation:sequence, "
                 + "operands:["
                 + "{@type:koral:group,"
@@ -202,10 +206,10 @@ public class FCSQLComplexTest {
     }
 
     @Test
-    public void testQueryWithDistance() throws JsonProcessingException {
+    public void testQueryWithDistance() throws IOException {
         // distance query
-        String query = "\"Katze\" []{3} \"Hund\"";
-        String jsonLd = "{@type:koral:group,operation:operation:sequence,inOrder:false,"
+        query = "\"Katze\" []{3} \"Hund\"";
+        jsonLd = "{@type:koral:group,operation:operation:sequence,inOrder:true,"
                 + "distances:["
                 + "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:3,max:3}}"
                 + "],"
@@ -214,6 +218,38 @@ public class FCSQLComplexTest {
                 + "{@type:koral:token,wrap:{@type:koral:term,key:Hund,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
+        // sequences of wildcards
+        query = "\"Katze\" []{3}[] \"Hund\"";
+        jsonLd = "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:4,max:4}}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/distances/0",
+                jsonLd);
+
+        query = "\"Katze\" []{2}[]{3}[] \"Hund\"";
+        jsonLd = "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:6,max:6}}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/distances/0",
+                jsonLd);
+
+        // multiple occurrences of wildcards
+        query = "\"Katze\" []{3} \"Hund\" []{1,2} [cnx:pos=\"V\"]";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:sequence,"
+                + "inOrder:true,"
+                + "distances:["
+                + "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:3,max:3}}"
+                + "],"
+                + "operands:["
+                + "{@type:koral:token,wrap:{@type:koral:term,key:Katze,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                + "{@type:koral:group,"
+                    + "operation:operation:sequence,"
+                    + "inOrder:true,"
+                    + "distances:["
+                    + "{@type:koral:distance,key:w,boundary:{@type:koral:boundary,min:1,max:2}}"
+                    + "],"
+                    + "operands:["
+                    + "{@type:koral:token,wrap:{@type:koral:term,key:Hund,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                    + "{@type:koral:token,wrap:{@type:koral:term,key:V,foundry:cnx,layer:p,type:type:regex,match:match:eq}}]}" 
+                +"]}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
 
     // -------------------------------------------------------------------------
@@ -224,8 +260,8 @@ public class FCSQLComplexTest {
 
     @Test
     public void testWithinQuery() throws IOException {
-        String query = "[cnx:pos=\"VVFIN\"] within s";
-        String jsonLd = "{@type:koral:group,"
+        query = "[cnx:pos=\"VVFIN\"] within s";
+        jsonLd = "{@type:koral:group,"
                 + "operation:operation:position,"
                 + "operands:["
                 + "{@type:koral:span,wrap:{@type:koral:term,key:s,foundry:base,layer:s}},"
@@ -247,19 +283,31 @@ public class FCSQLComplexTest {
                 .validateNode(query, "/query/operands/0", jsonLd);
 
         query = "[cnx:pos=\"VVFIN\"] within u";
-        List<Object> error = FCSQLQueryProcessorTest
-                .getError(new FCSQLQueryProcessor(query, "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
+                "2.0"));
         assertEquals(310, error.get(0));
         assertEquals(
                 "FCS diagnostic 11: Within scope UTTERANCE is currently unsupported.",
                 (String) error.get(1));
     }
+    
+    @Test
+    public void testWithinQueryWithEmptyTokens() throws IOException {        
+        query = "[] within s";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:position,"
+                + "operands:["
+                + "{@type:koral:span,wrap:{@type:koral:term,key:s,foundry:base,layer:s}},"
+                + "{@type:koral:token}"
+                + "]}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+    }
 
     @Test
     public void testWrongQuery() throws IOException {
-        String query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
-        List<Object> error = FCSQLQueryProcessorTest
-                .getError(new FCSQLQueryProcessor(query, "2.0"));
+        query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
+                "2.0"));
         assertEquals(399, error.get(0));
         assertEquals(true,
                 error.get(1).toString().startsWith("FCS diagnostic 10"));
