@@ -43,9 +43,9 @@ regex
 ;
 
 key
-: WORD
+: (WORD
 | regex
-| NUMBER
+| NUMBER)
 ;
 
 foundry
@@ -149,7 +149,7 @@ matching
 ;
 
 alignment
-: segment? (CARET segment)* CARET?
+: segment? ( (CARET segment)+ | CARET)
 ;
 
 disjunction

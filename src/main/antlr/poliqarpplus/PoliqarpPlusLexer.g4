@@ -86,9 +86,13 @@ PLUS		: '+';
 EMPTYREL	: '@';
 
 /* Regular expressions and Regex queries */
-fragment RE_char     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']'
-                     | '(' | ')' | '|' | '"' | ':' | '\'' | '\\');
+fragment RE_symbol     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']'
+                     | '(' | ')' | '|' | '\\' | '"' | ':' | '\'');
+fragment RE_esc      : '\\' ('.' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
+                     | '(' | ')' | '|' | '\\' | '"' | ':' | '\'');
+fragment RE_char     : (RE_symbol | RE_esc );
 fragment RE_alter    : ((RE_char | ('(' RE_expr ')') | RE_chgroup) '|' RE_expr )+;
+
 fragment RE_chgroup  : '[' RE_char+ ']';
 fragment RE_quant	 : (RE_star | RE_plus | RE_occ) QMARK?;
 fragment RE_opt      : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '?';
