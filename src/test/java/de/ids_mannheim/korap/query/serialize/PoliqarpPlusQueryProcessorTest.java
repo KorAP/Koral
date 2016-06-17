@@ -683,12 +683,6 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals(true, res.at("/query/key").isMissingNode());
         
-        query = "[]{3}";
-        qs.setQuery(query, "poliqarpplus");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("{@type:koral:boundary,min:3,max:3}", 
-                res.at("/query/boundary").asText());
-        
         query = "contains(<s>, [])";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
@@ -729,6 +723,27 @@ public class PoliqarpPlusQueryProcessorTest {
                 .at("/query/operands/1/operands/0/operands/0/key")
                 .isMissingNode());
 
+    }
+
+
+    @Test
+    public void testEmptyTokenSequence () throws JsonProcessingException, IOException {
+        query = "[]{3}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:group",
+                     res.at("/query/@type").asText());
+        assertEquals("operation:repetition",
+                     res.at("/query/operation").asText());
+        assertEquals("koral:token",
+                     res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:boundary",
+                     res.at("/query/boundary/@type").asText());
+        assertEquals(3,
+                     res.at("/query/boundary/min").asInt());
+        assertEquals(3,
+                     res.at("/query/boundary/max").asInt());
     }
 
 
