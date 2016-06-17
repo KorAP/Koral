@@ -179,7 +179,6 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
         assertEquals("a\\.", res.at("/query/wrap/key").asText());
 
-
         query = "\"a\\.\\+\\?\\\\\"";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
@@ -189,7 +188,20 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("orth", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
         assertEquals("a\\.\\+\\?\\\\", res.at("/query/wrap/key").asText());
+    }
 
+    @Test
+    public void testRegexWhiteSpace () throws JsonProcessingException, IOException {
+        // Escape regex symbols
+        query = "\"a b\"";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("orth", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("a b", res.at("/query/wrap/key").asText());
     }
 
 
@@ -743,6 +755,57 @@ public class PoliqarpPlusQueryProcessorTest {
                      res.at("/query/boundary/min").asInt());
         assertEquals(3,
                      res.at("/query/boundary/max").asInt());
+
+        query = "[]{1,3}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:group",
+                     res.at("/query/@type").asText());
+        assertEquals("operation:repetition",
+                     res.at("/query/operation").asText());
+        assertEquals("koral:token",
+                     res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:boundary",
+                     res.at("/query/boundary/@type").asText());
+        assertEquals(1,
+                     res.at("/query/boundary/min").asInt());
+        assertEquals(3,
+                     res.at("/query/boundary/max").asInt());
+
+
+        query = "[]{ , 3}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:group",
+                     res.at("/query/@type").asText());
+        assertEquals("operation:repetition",
+                     res.at("/query/operation").asText());
+        assertEquals("koral:token",
+                     res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:boundary",
+                     res.at("/query/boundary/@type").asText());
+        assertEquals(0,
+                     res.at("/query/boundary/min").asInt());
+        assertEquals(3,
+                     res.at("/query/boundary/max").asInt());
+
+        query = "[]{4,}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:group",
+                     res.at("/query/@type").asText());
+        assertEquals("operation:repetition",
+                     res.at("/query/operation").asText());
+        assertEquals("koral:token",
+                     res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:boundary",
+                     res.at("/query/boundary/@type").asText());
+        assertEquals(4,
+                     res.at("/query/boundary/min").asInt());
+        assertTrue(res.at("/query/boundary/max").isMissingNode());
     }
 
 
