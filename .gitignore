@@ -1,5 +1,8 @@
 
 # /
+/sandbox
+/Sandbox
+/todo.org
 /target
 /.settings
 /.project
@@ -7,6 +10,7 @@
 *~
 .*
 !.gitignore
+
 
 /src/main/resources
 
