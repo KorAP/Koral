@@ -148,7 +148,6 @@ public class PoliqarpPlusQueryProcessorTest {
         query = "z.B./x";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
-        System.out.println("QUERY IS  " + res);
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("koral:term", res.at("/query/wrap/@type").asText());
         assertEquals(".*?z\\.B\\..*?", res.at("/query/wrap/key").asText());
