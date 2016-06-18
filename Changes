@@ -5,6 +5,9 @@
 	- Cleanup POM (diewald)
 	- Fix deserialization of unnecessary brackets
 	  around terms and termGroups in Poliqarp (diewald)
+	- Support for FCS 2.0 (margaretha)
+	- Fixed handling of escapes in regex
+	  (issue #21; diewald)
 
 0.21 2015-10-27
         - Improved meta query builder (hanl)
