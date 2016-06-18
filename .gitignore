@@ -1,9 +1,18 @@
 
 # /
+/sandbox
+/Sandbox
+/todo.org
+/target
+/.settings
 /.project
 /.classpath
-/.settings/org.eclipse.jdt.core.prefs
-/target
+*~
+.*
+!.gitignore
+
+
+/src/main/resources
 
 # /src/main/antlr/cosmas/
 /src/main/antlr/cosmas/c2ps_regex.g

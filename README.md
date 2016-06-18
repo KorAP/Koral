@@ -97,13 +97,20 @@ Installation is straightforward (Maven3 required):
 
     git clone https://github.com/korap/Koral [install-dir]
     cd [install-dir]
-    mvn test
+    mvn test -Dhttps.protocols=TLSv1.2
     mvn install
 
 There is also a command line version. After installation, simply run
 
     java -jar target/Koral-0.2.jar [query] [queryLanguage]
-    
+   
+## Prerequisites
+
+* Java 7 (OpenJDK or Oracle JDK with [JCE] (http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html))
+* [Git](http://git-scm.com/)
+* At least [Maven 3.2.1](https://maven.apache.org/)
+* Further dependencies are resolved by Maven.
+
 ## Authorship
 
 Koral and KoralQuery were developed by Joachim Bingel,

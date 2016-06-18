@@ -15,8 +15,9 @@ public class EmptyResultsTest {
 
     private static ObjectMapper mapper = new ObjectMapper();
 
+
     @Test
-    public void testEmptyQueryObject() {
+    public void testEmptyQueryObject () {
         QuerySerializer s = new QuerySerializer();
         s.setQuery("prox/unit=word/distance<=5", "cql");
         JsonNode node = mapper.valueToTree(s.build());
@@ -24,8 +25,9 @@ public class EmptyResultsTest {
         assertEquals(node.has("collection"), false);
     }
 
+
     @Test
-    public void testEmptyCollectionObject() {
+    public void testEmptyCollectionObject () {
         QuerySerializer s = new QuerySerializer();
         s.setQuery("[base=Wort]", "poliqarp");
 
@@ -34,8 +36,9 @@ public class EmptyResultsTest {
         assertEquals(node.has("collection"), false);
     }
 
+
     @Test
-    public void testEmptyMetaObject() {
+    public void testEmptyMetaObject () {
         QuerySerializer s = new QuerySerializer();
         s.setQuery("[base=Wort]", "poliqarp");
 

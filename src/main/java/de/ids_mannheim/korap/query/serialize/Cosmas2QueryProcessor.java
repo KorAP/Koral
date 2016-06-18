@@ -669,6 +669,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // Step I: create group
         LinkedHashMap<String, Object> disjunction = KoralObjectGenerator
                 .makeGroup("disjunction");
+        disjunction.put("inOrder", false); // Order is not important 
         objectStack.push(disjunction);
         stackedObjects++;
         // Step II: decide where to put
@@ -681,6 +682,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         String nodeCat = getNodeCat(node);
         LinkedHashMap<String, Object> distgroup = KoralObjectGenerator
                 .makeGroup("sequence");
+        distgroup.put("inOrder", false); // Order is not important 
         ArrayList<Object> distances = new ArrayList<Object>();
         LinkedHashMap<String, Object> zerodistance = KoralObjectGenerator
                 .makeDistance("t", 0, 0);

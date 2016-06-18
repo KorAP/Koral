@@ -1,5 +1,13 @@
-0.22 2016-06-03
+0.22 2016-06-15
         - Spans now always wrap terms (diewald)
+	- Cosmas-II "und", "oder", and "nicht" operations
+	  now serialize to unordered sequences (diewald)
+	- Cleanup POM (diewald)
+	- Fix deserialization of unnecessary brackets
+	  around terms and termGroups in Poliqarp (diewald)
+	- Support for FCS 2.0 (margaretha)
+	- Fixed handling of escapes in regex
+	  (issue #21; diewald)
 
 0.21 2015-10-27
         - Improved meta query builder (hanl)
