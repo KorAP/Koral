@@ -199,7 +199,6 @@ public class FCSQLQueryProcessorTest {
         jsonLd = "{@type: koral:term, key: sein, foundry: cnx, layer: l, type:type:regex, match: match:eq}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/0",
                 jsonLd);
-
     }
 
     // | expression "&" expression /* and */
@@ -246,6 +245,18 @@ public class FCSQLQueryProcessorTest {
                 + "{@type: koral:term, key: VAFIN, foundry: mate, layer: p, type:type:regex, match: match:eq}]}}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/1",
                 jsonLd);
+        FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/relation",
+                "relation:and");
+        
+        query = "[(cnx:lemma=\"sein\" | mate:pos=\"PPOSS\") | mate:pos=\"PPOSS\"]";
+        jsonLd = "{@type: koral:token,"
+                + " wrap: { @type: koral:termGroup,"
+                + "relation: relation:or,"
+                + " operands:["
+                + "{@type: koral:term, key: sein, foundry: cnx, layer: l, type:type:regex, match: match:eq},"
+                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq}]}}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/0",
+                jsonLd);
     }
 
     // "!" expression /* not */
@@ -269,9 +280,25 @@ public class FCSQLQueryProcessorTest {
                 + "{@type: koral:term, key: sein, foundry: mate, layer: l, type:type:regex, match: match:eq},"
                 + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:ne}]}}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
-        
+    }
+    
+    @Test
+    public void testNotExpressionGroup() throws JsonProcessingException {
         query = "[!(mate:lemma=\"sein\" & mate:pos=\"PPOSS\")]";
-        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+        jsonLd = "{@type: koral:token,"
+                + " wrap: { "
+                + "@type: koral:termGroup,"
+                + "relation: relation:or,"
+                + " operands:["
+                + "{@type: koral:term, key: sein, foundry: mate, layer: l, type:type:regex, match: match:ne},"
+                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:ne}]}}";
+        //FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+        
+        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        assertEquals(399, error.get(0));
+        assertEquals(
+                "FCS diagnostic 10: Query cannot be parsed, an unexpcected occured exception while parsing",
+                error.get(1));
     }
 
     @Test

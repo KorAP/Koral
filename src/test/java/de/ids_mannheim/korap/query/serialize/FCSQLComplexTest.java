@@ -121,8 +121,40 @@ public class FCSQLComplexTest {
                 + "{@type:koral:token,wrap:{@type:koral:term,key:Mann,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}"
                 + "]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+        
+        query = "[text=\"Mann\"]([pos=\"NN\"]|[cnx:pos=\"N\"])";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:disjunction,"
+                + "operands:[{@type:koral:token,wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
+                + "]}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/operands/1", jsonLd);
+    }
 
-        // sequence of groups
+    @Test
+    public void testSequenceOfQueryGroups() throws IOException {
+        query = "(\"blaue\"|\"grüne\")([pos=\"NN\"]|[cnx:pos=\"N\"])";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/@type",
+                "koral:group");
+        FCSQLQueryProcessorTest.validateNode(query, "/query/operation",
+                "operation:sequence");
+
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:disjunction,"
+                + "operands:["
+                + "{@type:koral:token,wrap:{@type:koral:term,key:blaue,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:grüne,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}"
+                + "]}";
+        FCSQLQueryProcessorTest
+                .validateNode(query, "/query/operands/0", jsonLd);
+
+        jsonLd = "{@type:koral:group,operation:operation:disjunction,"
+                + "operands:["
+                + "{@type:koral:token,wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
+                + "]}";
+        FCSQLQueryProcessorTest
+                .validateNode(query, "/query/operands/1", jsonLd);
     }
 
     // | simple-query quantifier /* quatification */
