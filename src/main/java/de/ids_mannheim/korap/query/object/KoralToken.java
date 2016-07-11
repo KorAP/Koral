@@ -6,7 +6,8 @@ import java.util.Map;
 import de.ids_mannheim.korap.query.object.KoralObject;
 import de.ids_mannheim.korap.query.object.KoralType;
 
-/**
+/** Definition of koral:token in KoralQuery.
+ * 
  * @author margaretha
  * 
  */

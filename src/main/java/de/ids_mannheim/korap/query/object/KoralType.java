@@ -1,6 +1,7 @@
 package de.ids_mannheim.korap.query.object;
 
-/**
+/** Definition of various types of KoralQuery building objects.
+ *  
  * @author margaretha
  * 
  */

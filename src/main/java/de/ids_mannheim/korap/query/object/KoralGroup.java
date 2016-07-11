@@ -10,7 +10,7 @@ import de.ids_mannheim.korap.query.object.KoralObject;
 import de.ids_mannheim.korap.query.object.KoralOperation;
 import de.ids_mannheim.korap.query.object.KoralType;
 
-/**
+/** Definition of koral:group in KoralQuery.
  * @author margaretha
  * 
  */
@@ -25,7 +25,13 @@ public class KoralGroup implements KoralObject {
     private List<KoralDistance> distances;
     private List<Frame> frames;
     private KoralBoundary boundary;
-
+    
+//    private int[] classIn;
+//    private int classOut;
+//    private int classRefCheck;
+//    private int classRefOp;
+//    private boolean exclude = false;
+    
     public KoralGroup (KoralOperation operation) {
         this.operation = operation;
     }
@@ -94,7 +100,7 @@ public class KoralGroup implements KoralObject {
         }
 
         List<Map<String, Object>> operandList = new ArrayList<Map<String, Object>>();
-        for (Object o : operands) {
+        for (KoralObject o : operands) {
             operandList.add(MapBuilder.buildQueryMap(o));
         }
         map.put("operands", operandList);

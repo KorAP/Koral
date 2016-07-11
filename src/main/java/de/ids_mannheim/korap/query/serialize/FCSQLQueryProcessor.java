@@ -2,6 +2,7 @@ package de.ids_mannheim.korap.query.serialize;
 
 import java.util.Map;
 
+import de.ids_mannheim.korap.query.object.KoralObject;
 import de.ids_mannheim.korap.query.parse.fcsql.FCSSRUQueryParser;
 import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
@@ -11,7 +12,9 @@ import eu.clarin.sru.server.fcs.parser.QueryNode;
 import eu.clarin.sru.server.fcs.parser.QueryParser;
 import eu.clarin.sru.server.fcs.parser.QueryParserException;
 
-/**
+/** FCSQLQueryProcessor is accountable for the serialization of FCSQL to KoralQuery.
+ * The KoralQuery is structured as a map containing parts of JSON-LD serializations of KoralObjects.  
+ * 
  * @author margaretha
  * 
  */
@@ -34,6 +37,10 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
     private final QueryParser fcsParser = new QueryParser();
     private String version;
 
+    /** Constructs FCSQLQueryProcessor for the given query and version.
+     * @param query an FCS query string
+     * @param version the FCSQL version of the query
+     */
     public FCSQLQueryProcessor (String query, String version) {
         super();
         this.version = version;
@@ -74,6 +81,10 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
         return true;
     }
 
+    /** Translates the given FCS query string into an FCSSSRUQuery object.
+     * @param query an FCS query string
+     * @return an FCSSRUQuery
+     */
     private FCSSRUQuery parseQueryStringtoFCSQuery(String query) {
         if ((query == null) || query.isEmpty())
             addError(StatusCodes.NO_QUERY,
@@ -100,9 +111,14 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
         return fcsQuery;
     }
 
+    /** Generates a query map structure for the given FCS query node.
+     * 
+     * @param queryNode an FCS query node
+     * @throws KoralException
+     */
     private void parseFCSQueryToKoralQuery(QueryNode queryNode) throws KoralException {
         FCSSRUQueryParser parser = new FCSSRUQueryParser();
-        Object o = parser.parseQueryNode(queryNode);
+        KoralObject o = parser.parseQueryNode(queryNode);
         Map<String, Object> queryMap = MapBuilder.buildQueryMap(o);
         if (queryMap != null) requestMap.put("query", queryMap);
     }

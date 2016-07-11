@@ -3,6 +3,11 @@ package de.ids_mannheim.korap.query.object;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/** Definition of koral:boundary in KoralQuery.
+ * 
+ * @author margaretha
+ *
+ */
 public class KoralBoundary implements KoralObject {
 
     private static final KoralType type = KoralType.BOUNDARY;

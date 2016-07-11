@@ -8,7 +8,7 @@ import java.util.Set;
 
 import de.ids_mannheim.korap.query.object.KoralMatchOperator;
 import de.ids_mannheim.korap.query.object.KoralObject;
-import de.ids_mannheim.korap.query.object.KoralRelation;
+import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
 import de.ids_mannheim.korap.query.object.KoralTerm;
 import de.ids_mannheim.korap.query.object.KoralTerm.KoralTermType;
 import de.ids_mannheim.korap.query.object.KoralTermGroup;
@@ -26,6 +26,9 @@ import eu.clarin.sru.server.fcs.parser.QueryNode;
 import eu.clarin.sru.server.fcs.parser.RegexFlag;
 
 /**
+ * This class handles and parses various FCSQL expressions (e.g.
+ * simple and boolean expressions) into a KoralObject.
+ * 
  * @author margaretha
  * 
  */
@@ -41,10 +44,34 @@ public class ExpressionParser {
             .asList(new String[] { FOUNDRY_CNX, FOUNDRY_OPENNLP, FOUNDRY_TT,
                     FOUNDRY_MATE, FOUNDRY_XIP });
 
-    public KoralObject parseExpression(QueryNode queryNode) throws KoralException {
+    /**
+     * Parses the given query node and constructs a koral object
+     * representation of it.
+     * 
+     * @param queryNode
+     *            an FCSQL query node
+     * @return a koral object representation of the given node
+     * @throws KoralException
+     */
+    public KoralObject parseExpression(QueryNode queryNode)
+            throws KoralException {
         return parseExpression(queryNode, false, true);
     }
 
+    /**
+     * Parses the given query node using the specified parameters.
+     * 
+     * @param queryNode
+     *            an FCSQL query node
+     * @param isNot
+     *            a boolean value indicating if the query node was
+     *            negated or not.
+     * @param isToken
+     *            a boolean value indicating if the query node is a
+     *            token or not.
+     * @return a koral object representation of the given node
+     * @throws KoralException
+     */
     public KoralObject parseExpression(QueryNode queryNode, boolean isNot,
             boolean isToken) throws KoralException {
 
@@ -54,10 +81,12 @@ public class ExpressionParser {
         else if (queryNode instanceof ExpressionAnd) {
             List<QueryNode> operands = queryNode.getChildren();
             if (isNot) {
-                return parseBooleanExpression(operands, KoralRelation.OR);
+                return parseBooleanExpression(operands,
+                        KoralTermGroupRelation.OR);
             }
             else {
-                return parseBooleanExpression(operands, KoralRelation.AND);
+                return parseBooleanExpression(operands,
+                        KoralTermGroupRelation.AND);
             }
         }
         else if (queryNode instanceof ExpressionGroup) {
@@ -71,10 +100,12 @@ public class ExpressionParser {
         else if (queryNode instanceof ExpressionOr) {
             List<QueryNode> operands = queryNode.getChildren();
             if (isNot) {
-                return parseBooleanExpression(operands, KoralRelation.AND);
+                return parseBooleanExpression(operands,
+                        KoralTermGroupRelation.AND);
             }
             else {
-                return parseBooleanExpression(operands, KoralRelation.OR);
+                return parseBooleanExpression(operands,
+                        KoralTermGroupRelation.OR);
             }
         }
         else if (queryNode instanceof ExpressionWildcard) {
@@ -86,8 +117,20 @@ public class ExpressionParser {
         }
     }
 
+    /**
+     * Handles a boolean expression by parsing the given operands and
+     * creates a koral token using the parsed operands and the given
+     * relation.
+     * 
+     * @param operands
+     *            a list of query node
+     * @param relation
+     *            the boolean operator
+     * @return a koral token
+     * @throws KoralException
+     */
     private KoralToken parseBooleanExpression(List<QueryNode> operands,
-            KoralRelation relation) throws KoralException {
+            KoralTermGroupRelation relation) throws KoralException {
         List<KoralObject> terms = new ArrayList<>();
         for (QueryNode node : operands) {
             terms.add(parseExpression(node, false, false));
@@ -96,8 +139,23 @@ public class ExpressionParser {
         return new KoralToken(termGroup);
     }
 
-    private KoralObject parseSimpleExpression(Expression expression, boolean isNot,
-            boolean isToken) throws KoralException {
+    /**
+     * Parses the given simple expression considering the other
+     * specified parameters.
+     * 
+     * @param expression
+     *            a simple expression
+     * @param isNot
+     *            a boolean value indicating if the expression was
+     *            negated or not.
+     * @param isToken
+     *            a boolean value indicating if the expression is a
+     *            token or not.
+     * @return
+     * @throws KoralException
+     */
+    private KoralObject parseSimpleExpression(Expression expression,
+            boolean isNot, boolean isToken) throws KoralException {
         KoralTerm koralTerm = parseTerm(expression, isNot);
         if (isToken) {
             return new KoralToken(koralTerm);
@@ -107,9 +165,21 @@ public class ExpressionParser {
         }
     }
 
-    public KoralTerm parseTerm(Expression expression, boolean isNot) throws KoralException {
-    	KoralTerm koralTerm = null;
-    	koralTerm = new KoralTerm(expression.getRegexValue());
+    /**
+     * Parses the given expression and constructs a KoralTerm.
+     * 
+     * @param expression
+     *            an expression
+     * @param isNot
+     *            a boolean value indicating if the expression was
+     *            negated or not.
+     * @return a koral term
+     * @throws KoralException
+     */
+    public KoralTerm parseTerm(Expression expression, boolean isNot)
+            throws KoralException {
+        KoralTerm koralTerm = null;
+        koralTerm = new KoralTerm(expression.getRegexValue());
         koralTerm.setType(KoralTermType.REGEX);
         parseLayerIdentifier(koralTerm, expression.getLayerIdentifier());
         parseQualifier(koralTerm, expression.getLayerQualifier());
@@ -118,7 +188,18 @@ public class ExpressionParser {
         return koralTerm;
     }
 
-    private void parseLayerIdentifier(KoralTerm koralTerm, String identifier) throws KoralException {
+    /**
+     * Parses the given layer identifier and adds it to the koral
+     * term.
+     * 
+     * @param koralTerm
+     *            a koral term
+     * @param identifier
+     *            a layer identifier
+     * @throws KoralException
+     */
+    private void parseLayerIdentifier(KoralTerm koralTerm, String identifier)
+            throws KoralException {
         String layer = null;
         if (identifier == null) {
             throw new KoralException(StatusCodes.MALFORMED_QUERY,
@@ -142,7 +223,17 @@ public class ExpressionParser {
         koralTerm.setLayer(layer);
     }
 
-    private void parseQualifier(KoralTerm koralTerm, String qualifier) throws KoralException {
+    /**
+     * Parses the given layer qualifier and adds it to the koral term.
+     * 
+     * @param koralTerm
+     *            a koral term
+     * @param qualifier
+     *            a layer qualifier
+     * @throws KoralException
+     */
+    private void parseQualifier(KoralTerm koralTerm, String qualifier)
+            throws KoralException {
         String layer = koralTerm.getLayer();
         if (layer == null) {
             return;
@@ -158,7 +249,7 @@ public class ExpressionParser {
         }
         else if (qualifier.equals(FOUNDRY_OPENNLP) && layer.equals("l")) {
             throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
-                            "SRU diagnostic 48: Layer lemma with qualifier opennlp is unsupported.");
+                    "SRU diagnostic 48: Layer lemma with qualifier opennlp is unsupported.");
         }
         else if (!supportedFoundries.contains(qualifier)) {
             throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
@@ -169,27 +260,51 @@ public class ExpressionParser {
         koralTerm.setFoundry(qualifier);
     }
 
+    /**
+     * Parses the given match operator and adds it to the koral term.
+     * 
+     * @param koralTerm
+     *            a koral term
+     * @param operator
+     *            a match operator
+     * @param isNot
+     *            a boolean value indicating if there was a negation
+     *            or not.
+     * @throws KoralException
+     */
     private void parseOperator(KoralTerm koralTerm, Operator operator,
             boolean isNot) throws KoralException {
-    	KoralMatchOperator matchOperator = null;
+        KoralMatchOperator matchOperator = null;
         if (operator == null || operator == Operator.EQUALS) {
-            matchOperator = isNot ? KoralMatchOperator.NOT_EQUALS : KoralMatchOperator.EQUALS;
+            matchOperator = isNot ? KoralMatchOperator.NOT_EQUALS
+                    : KoralMatchOperator.EQUALS;
         }
         else if (operator == Operator.NOT_EQUALS) {
-            matchOperator = isNot ? KoralMatchOperator.EQUALS : KoralMatchOperator.NOT_EQUALS;
+            matchOperator = isNot ? KoralMatchOperator.EQUALS
+                    : KoralMatchOperator.NOT_EQUALS;
         }
         else {
-        	throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
-                            "SRU diagnostic 37:" + operator.name()
-                                    + " is unsupported.");
+            throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
+                    "SRU diagnostic 37:" + operator.name() + " is unsupported.");
         }
         koralTerm.setOperator(matchOperator);
     }
 
-    private void parseRegexFlags(KoralTerm koralTerm, Set<RegexFlag> set) throws KoralException {
+    /**
+     * Parses the given set of regex flags and adds them to the koral
+     * term.
+     * 
+     * @param koralTerm
+     *            a koral term
+     * @param set
+     *            a set of regex flags
+     * @throws KoralException
+     */
+    private void parseRegexFlags(KoralTerm koralTerm, Set<RegexFlag> set)
+            throws KoralException {
         // default case sensitive
         if (set == null) return;
-        
+
         ArrayList<String> names = new ArrayList<String>();
         Iterator<RegexFlag> i = set.iterator();
         while (i.hasNext()) {

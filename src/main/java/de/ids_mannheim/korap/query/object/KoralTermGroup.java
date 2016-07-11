@@ -8,7 +8,8 @@ import java.util.Map;
 import de.ids_mannheim.korap.query.serialize.MapBuilder;
 import de.ids_mannheim.korap.query.serialize.util.KoralException;
 
-/**
+/** Definition of koral:termGroup in KoralQuery.
+ * 
  * @author margaretha
  * 
  */
@@ -19,7 +20,7 @@ public class KoralTermGroup implements KoralObject {
     private String relation;
     private List<KoralObject> operands = new ArrayList<KoralObject>();
 
-    public KoralTermGroup (KoralRelation relation, List<KoralObject> operands)
+    public KoralTermGroup (KoralTermGroupRelation relation, List<KoralObject> operands)
             throws KoralException {
         this.relation = relation.toString();
         this.operands = operands;
@@ -48,7 +49,7 @@ public class KoralTermGroup implements KoralObject {
         map.put("relation", getRelation());
 
         List<Map<String, Object>> operandList = new ArrayList<Map<String, Object>>();
-        for (Object o : getOperands()) {
+        for (KoralObject o : getOperands()) {
             operandList.add(MapBuilder.buildQueryMap(o));
         }
         map.put("operands", operandList);

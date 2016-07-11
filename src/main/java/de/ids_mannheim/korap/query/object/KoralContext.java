@@ -1,6 +1,9 @@
 package de.ids_mannheim.korap.query.object;
 
-/**
+/** Context definition for the search scope in WithinQuery,
+ * for instance, a withinquery in poliqarp is
+ * <code>"Bild" within s</code>.
+ * 
  * @author margaretha
  * 
  */

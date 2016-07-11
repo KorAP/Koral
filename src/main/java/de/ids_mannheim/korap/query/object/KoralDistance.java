@@ -3,6 +3,11 @@ package de.ids_mannheim.korap.query.object;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/** Definition of koral:distance in KoralQuery.
+ *  
+ * @author margaretha
+ *
+ */
 public class KoralDistance implements KoralObject {
 
     private final KoralType type = KoralType.DISTANCE;

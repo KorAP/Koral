@@ -1,6 +1,6 @@
 package de.ids_mannheim.korap.query.object;
 
-/**
+/** Definition of the match operations used within koral:term.
  * @author margaretha
  * 
  */

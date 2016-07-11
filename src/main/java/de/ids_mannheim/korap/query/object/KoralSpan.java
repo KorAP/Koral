@@ -6,7 +6,8 @@ import java.util.Map;
 import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
-/**
+/** Definition of koral:span in KoralQuery.
+ * 
  * @author margaretha
  *
  */

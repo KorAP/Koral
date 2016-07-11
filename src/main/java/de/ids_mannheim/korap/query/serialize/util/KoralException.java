@@ -1,10 +1,12 @@
 package de.ids_mannheim.korap.query.serialize.util;
 
+/** Define a custom exception for errors in parsing into and serializing KoralQuery.
+ * 
+ * @author margaretha
+ *
+ */
 public class KoralException extends Exception{
-
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 5463242042200109417L;
 	private int statusCode;
 	

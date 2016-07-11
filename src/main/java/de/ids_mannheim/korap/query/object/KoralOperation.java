@@ -1,6 +1,6 @@
 package de.ids_mannheim.korap.query.object;
 
-/**
+/** Definition of possible operations within koral:group. 
  * @author margaretha
  * 
  */

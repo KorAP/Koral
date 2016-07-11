@@ -348,6 +348,15 @@ public class FCSQLComplexTest {
 
     @Test
     public void testWithinQuery() throws IOException {
+        query = "'grün' within s";
+        jsonLd = "{@type:koral:group,"
+                + "operation:operation:position,"
+                + "operands:["
+                + "{@type:koral:span,wrap:{@type:koral:term,key:s,foundry:base,layer:s}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:grün,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}"
+                + "]}";
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
+        
         query = "[cnx:pos=\"VVFIN\"] within s";
         jsonLd = "{@type:koral:group,"
                 + "operation:operation:position,"
@@ -419,6 +428,7 @@ public class FCSQLComplexTest {
 
     @Test
     public void testWrongQuery() throws IOException {
+        // expression should always be within a segment
         query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
                 "2.0"));

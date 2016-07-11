@@ -8,7 +8,8 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.query.object.KoralMatchOperator;
 import de.ids_mannheim.korap.query.object.KoralType;
 
-/**
+/** Definition of koral:term in KoralQuery.
+ * 
  * @author margaretha
  * 
  */
@@ -25,6 +26,7 @@ public class KoralTerm implements KoralObject {
     private KoralTermType type;
     
     private boolean caseSensitive = true;
+    private boolean diacriticSensitive = true; 
 
     public KoralTerm(String key) throws KoralException {
     	if (key == null){
@@ -96,6 +98,14 @@ public class KoralTerm implements KoralObject {
         this.caseSensitive = isCaseSensitive;
     }
 
+    public boolean isDiacriticSensitive() {
+        return diacriticSensitive;
+    }
+
+    public void setDiacriticSensitive(boolean diacriticSensitive) {
+        this.diacriticSensitive = diacriticSensitive;
+    }
+
     @Override
     public Map<String, Object> buildMap() {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
@@ -103,13 +113,20 @@ public class KoralTerm implements KoralObject {
         if (!isCaseSensitive()) {
             map.put("caseInsensitive", "true");
         }
-        
+        if (!isDiacriticSensitive()){
+            map.put("diacriticInsensitive", "true");
+        }
+            
         map.put("key", getKey());
         if (value != null){
         	map.put("value", getValue());
         }
-        map.put("foundry", getFoundry());
-        map.put("layer", getLayer());
+        if (foundry != null){
+           map.put("foundry", getFoundry());
+        }
+        if (layer !=null){
+           map.put("layer", getLayer());
+        }
         if (type != null){
         	map.put("type", getType().toString());
         }
@@ -119,6 +136,11 @@ public class KoralTerm implements KoralObject {
         return map;
     }
 
+    /** Definition of possible types of koral:term.
+     * 
+     * @author margaretha
+     *
+     */
     public enum KoralTermType {
         STRING("type:string"), REGEX("type:regex"), WILDCARD("type:wildcard"), PUNCT(
                 "type:punct");
