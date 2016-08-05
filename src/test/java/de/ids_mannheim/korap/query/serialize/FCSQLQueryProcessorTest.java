@@ -237,25 +237,28 @@ public class FCSQLQueryProcessorTest {
     @Test
     public void testMultipleBooleanExpressions() throws IOException {
         query = "[mate:lemma=\"sein\" & (mate:pos=\"PPOSS\"|mate:pos=\"VAFIN\")]";
-        jsonLd = "{@type: koral:token,"
-                + " wrap: { @type: koral:termGroup,"
+        jsonLd = "{@type: koral:termGroup,"
                 + "relation: relation:or,"
                 + " operands:["
                 + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq},"
-                + "{@type: koral:term, key: VAFIN, foundry: mate, layer: p, type:type:regex, match: match:eq}]}}";
+                + "{@type: koral:term, key: VAFIN, foundry: mate, layer: p, type:type:regex, match: match:eq}]}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/1",
                 jsonLd);
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/relation",
                 "relation:and");
         
-        query = "[(cnx:lemma=\"sein\" | mate:pos=\"PPOSS\") | mate:pos=\"PPOSS\"]";
-        jsonLd = "{@type: koral:token,"
-                + " wrap: { @type: koral:termGroup,"
+        query = "[(cnx:lemma=\"sein\" | mate:pos=\"PPOSS\") | mate:pos=\"VAFIN\"]";
+        jsonLd = "{@type: koral:termGroup,"
                 + "relation: relation:or,"
                 + " operands:["
                 + "{@type: koral:term, key: sein, foundry: cnx, layer: l, type:type:regex, match: match:eq},"
-                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq}]}}";
+                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq}]}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/0",
+                jsonLd);
+        
+        query = "[(cnx:lemma=\"sein\" | mate:pos=\"PPOSS\") & text=\"ist\"]";
+        jsonLd = "{@type: koral:term, key: ist, foundry: opennlp, layer: orth, type:type:regex, match: match:eq}";
+        FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/1",
                 jsonLd);
     }
 

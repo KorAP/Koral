@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.omg.CosNaming.IstringHelper;
+
 import de.ids_mannheim.korap.query.object.KoralMatchOperator;
 import de.ids_mannheim.korap.query.object.KoralObject;
 import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
@@ -82,16 +84,16 @@ public class ExpressionParser {
             List<QueryNode> operands = queryNode.getChildren();
             if (isNot) {
                 return parseBooleanExpression(operands,
-                        KoralTermGroupRelation.OR);
+                        KoralTermGroupRelation.OR, isToken);
             }
             else {
                 return parseBooleanExpression(operands,
-                        KoralTermGroupRelation.AND);
+                        KoralTermGroupRelation.AND, isToken);
             }
         }
         else if (queryNode instanceof ExpressionGroup) {
             // Ignore the group
-            return parseExpression(queryNode.getFirstChild());
+            return parseExpression(queryNode.getFirstChild(), false, isToken);
         }
         else if (queryNode instanceof ExpressionNot) {
             boolean negation = isNot ? false : true;
@@ -101,11 +103,11 @@ public class ExpressionParser {
             List<QueryNode> operands = queryNode.getChildren();
             if (isNot) {
                 return parseBooleanExpression(operands,
-                        KoralTermGroupRelation.AND);
+                        KoralTermGroupRelation.AND, isToken);
             }
             else {
                 return parseBooleanExpression(operands,
-                        KoralTermGroupRelation.OR);
+                        KoralTermGroupRelation.OR, isToken);
             }
         }
         else if (queryNode instanceof ExpressionWildcard) {
@@ -129,14 +131,20 @@ public class ExpressionParser {
      * @return a koral token
      * @throws KoralException
      */
-    private KoralToken parseBooleanExpression(List<QueryNode> operands,
-            KoralTermGroupRelation relation) throws KoralException {
+    private KoralObject parseBooleanExpression(List<QueryNode> operands,
+            KoralTermGroupRelation relation, boolean isToken) throws KoralException {
         List<KoralObject> terms = new ArrayList<>();
         for (QueryNode node : operands) {
             terms.add(parseExpression(node, false, false));
         }
+        
         KoralTermGroup termGroup = new KoralTermGroup(relation, terms);
-        return new KoralToken(termGroup);
+        if (isToken){        
+            return new KoralToken(termGroup);
+        }
+        else {
+            return termGroup;
+        }
     }
 
     /**
