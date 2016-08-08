@@ -382,9 +382,9 @@ public class FCSQLComplexTest {
         query = "[cnx:pos=\"VVFIN\"] within u";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
                 "2.0"));
-        assertEquals(310, error.get(0));
+        assertEquals(311, error.get(0));
         assertEquals(
-                "FCS diagnostic 11: Within scope UTTERANCE is currently unsupported.",
+                "Within scope UTTERANCE is currently unsupported.",
                 (String) error.get(1));
     }
 
@@ -428,31 +428,30 @@ public class FCSQLComplexTest {
 
     @Test
     public void testWrongQuery() throws IOException {
+        
+        String errorMessage = "Query cannot be parsed, an unexpcected occured exception while parsing";
+        
         // expression should always be within a segment
         query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
                 "2.0"));
         assertEquals(399, error.get(0));
-        assertEquals(true,
-                error.get(1).toString().startsWith("FCS diagnostic 10"));
+        assertEquals(errorMessage, error.get(1).toString());
 
         query = "![mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
                 "2.0"));
-        assertEquals(true,
-                error.get(1).toString().startsWith("FCS diagnostic 10"));
+        assertEquals(errorMessage, error.get(1).toString());
 
         query = "(\"blaue\"&\"grüne\")";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
                 "2.0"));
-        assertEquals(true,
-                error.get(1).toString().startsWith("FCS diagnostic 10"));
+        assertEquals(errorMessage, error.get(1).toString());
 
         query = "[pos=\"NN\"]&[text=\"Mann\"]";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
                 "2.0"));
         assertEquals(399, error.get(0));
-        String msg = (String) error.get(1);
-        assertEquals(true, msg.startsWith("FCS diagnostic 10"));
+        assertEquals(errorMessage, error.get(1).toString());
     }
 }

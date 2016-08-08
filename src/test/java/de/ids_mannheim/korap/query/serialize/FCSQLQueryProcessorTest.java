@@ -48,13 +48,13 @@ public class FCSQLQueryProcessorTest {
     @Test
     public void testVersion() throws JsonProcessingException {
         error = getError(new FCSQLQueryProcessor("\"Sonne\"", "1.0"));
-        assertEquals(309, error.get(0));
-        assertEquals("SRU diagnostic 5: Only supports SRU version 2.0.",
+        assertEquals(310, error.get(0));
+        assertEquals("Only supports SRU version 2.0.",
                 error.get(1));
 
         error = getError(new FCSQLQueryProcessor("\"Sonne\"", null));
         assertEquals(309, error.get(0));
-        assertEquals("SRU diagnostic 7: Version number is missing.",
+        assertEquals("Version number is missing.",
                 error.get(1));
     }
 
@@ -117,14 +117,14 @@ public class FCSQLQueryProcessorTest {
                 "2.0"));
         assertEquals(306, error.get(0));
         String msg = (String) error.get(1);
-        assertEquals(true, msg.startsWith("SRU diagnostic 48: Regexflags"));
+        assertEquals(true, msg.startsWith("Regexflags"));
 
         query = "\"Fliegen\" /d";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
                 "2.0"));
         assertEquals(306, error.get(0));
         assertEquals(
-                "SRU diagnostic 48: Regexflag: IGNORE_DIACRITICS is unsupported.",
+                "Regexflag: IGNORE_DIACRITICS is unsupported.",
                 (String) error.get(1));
     }
 
@@ -300,7 +300,7 @@ public class FCSQLQueryProcessorTest {
         error = getError(new FCSQLQueryProcessor(query, "2.0"));
         assertEquals(399, error.get(0));
         assertEquals(
-                "FCS diagnostic 10: Query cannot be parsed, an unexpcected occured exception while parsing",
+                "Query cannot be parsed, an unexpcected occured exception while parsing",
                 error.get(1));
     }
 
@@ -311,34 +311,34 @@ public class FCSQLQueryProcessorTest {
         error = getError(new FCSQLQueryProcessor(query, "2.0"));
         assertEquals(306, error.get(0));
         assertEquals(
-                "SRU diagnostic 48: Layer lemma with qualifier opennlp is unsupported.",
+                "Layer lemma with qualifier opennlp is unsupported.",
                 error.get(1));
 
         query = "[tt:morph = \"sein\"]";
         error = getError(new FCSQLQueryProcessor(query, "2.0"));
         assertEquals(306, error.get(0));
-        assertEquals("SRU diagnostic 48: Layer morph is unsupported.",
+        assertEquals("Layer morph is unsupported.",
                 error.get(1));
 
         // unsupported qualifier
         query = "[malt:lemma = \"sein\"]";
         error = getError(new FCSQLQueryProcessor(query, "2.0"));
         assertEquals(306, error.get(0));
-        assertEquals("SRU diagnostic 48: Qualifier malt is unsupported.",
+        assertEquals("Qualifier malt is unsupported.",
                 error.get(1));
 
         // unsupported layer
         query = "[cnx:morph = \"heit\"]";
         error = getError(new FCSQLQueryProcessor(query, "2.0"));
         assertEquals(306, error.get(0));
-        assertEquals("SRU diagnostic 48: Layer morph is unsupported.",
+        assertEquals("Layer morph is unsupported.",
                 error.get(1));
 
         // missing layer
         query = "[cnx=\"V\"]";
         error = getError(new FCSQLQueryProcessor(query, "2.0"));
         assertEquals(306, error.get(0));
-        assertEquals("SRU diagnostic 48: Layer cnx is unsupported.",
+        assertEquals("Layer cnx is unsupported.",
                 error.get(1));
     }
 }

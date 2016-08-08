@@ -70,7 +70,7 @@ public class FCSSRUQueryParser {
         }
         else {
             throw new KoralException(StatusCodes.QUERY_TOO_COMPLEX,
-                    "FCS diagnostic 11:" + queryNode.getNodeType().name()
+                    queryNode.getNodeType().name()
                             + " is currently unsupported.");
         }
     }
@@ -142,7 +142,7 @@ public class FCSSRUQueryParser {
     private KoralSpan parseWithinScope(Scope scope) throws KoralException {
         if (scope == null) {
             throw new KoralException(StatusCodes.MALFORMED_QUERY,
-                    "FCS diagnostic 11: Within context is missing.");
+                    "Within context is missing.");
         }
 
         KoralContext contextSpan;
@@ -157,7 +157,7 @@ public class FCSSRUQueryParser {
         }
         else {
             throw new KoralException(StatusCodes.QUERY_TOO_COMPLEX,
-                    "FCS diagnostic 11: Within scope " + scope.toString()
+                    "Within scope " + scope.toString()
                             + " is currently unsupported.");
         }
 

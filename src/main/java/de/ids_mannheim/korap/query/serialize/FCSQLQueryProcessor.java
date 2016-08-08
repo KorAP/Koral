@@ -70,12 +70,12 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
     private boolean isVersionValid() {
         if (version == null || version.isEmpty()) {
             addError(StatusCodes.MISSING_VERSION,
-                    "SRU diagnostic 7: Version number is missing.");
+                    "Version number is missing.");
             return false;
         }
         else if (!version.equals(VERSION_2_0)) {
-            addError(StatusCodes.MISSING_VERSION,
-                    "SRU diagnostic 5: Only supports SRU version 2.0.");
+            addError(StatusCodes.UNSUPPORTED_VERSION,
+                    "Only supports SRU version 2.0.");
             return false;
         }
         return true;
@@ -88,25 +88,24 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
     private FCSSRUQuery parseQueryStringtoFCSQuery(String query) {
         if ((query == null) || query.isEmpty())
             addError(StatusCodes.NO_QUERY,
-                    "SRU diagnostic 1: No query has been passed.");
+                    "No query has been passed.");
         FCSSRUQuery fcsQuery = null;
         try {
             QueryNode parsedQuery = fcsParser.parse(query);
             fcsQuery = new FCSSRUQuery(query, parsedQuery);
             if (fcsQuery == null) {
                 addError(StatusCodes.UNKNOWN_QUERY_ERROR,
-                        "FCS diagnostic 10: Unexpected error while parsing query.");
+                        "Unexpected error while parsing query.");
             }
         }
         catch (QueryParserException e) {
             addError(
                     StatusCodes.UNKNOWN_QUERY_ERROR,
-                    "FCS diagnostic 10: Query cannot be parsed, "
+                    "Query cannot be parsed, "
                             + e.getMessage());
         }
         catch (Exception e) {
-            addError(StatusCodes.UNKNOWN_QUERY_ERROR, "FCS diagnostic 10: "
-                    + "Unexpected error while parsing query.");
+            addError(StatusCodes.UNKNOWN_QUERY_ERROR, "Unexpected error while parsing query.");
         }
         return fcsQuery;
     }

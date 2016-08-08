@@ -115,7 +115,7 @@ public class ExpressionParser {
         }
         else {
             throw new KoralException(StatusCodes.QUERY_TOO_COMPLEX,
-                    "FCS diagnostic 11: Query is too complex.");
+                    "Query is too complex.");
         }
     }
 
@@ -224,7 +224,7 @@ public class ExpressionParser {
         }
         else {
             throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
-                    "SRU diagnostic 48: Layer " + identifier
+                    "Layer " + identifier
                             + " is unsupported.");
         }
 
@@ -257,11 +257,11 @@ public class ExpressionParser {
         }
         else if (qualifier.equals(FOUNDRY_OPENNLP) && layer.equals("l")) {
             throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
-                    "SRU diagnostic 48: Layer lemma with qualifier opennlp is unsupported.");
+                    "Layer lemma with qualifier opennlp is unsupported.");
         }
         else if (!supportedFoundries.contains(qualifier)) {
             throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
-                    "SRU diagnostic 48: Qualifier " + qualifier
+                    "Qualifier " + qualifier
                             + " is unsupported.");
         }
 
@@ -293,7 +293,7 @@ public class ExpressionParser {
         }
         else {
             throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
-                    "SRU diagnostic 37:" + operator.name() + " is unsupported.");
+                    operator.name() + " is unsupported.");
         }
         koralTerm.setOperator(matchOperator);
     }
@@ -330,12 +330,12 @@ public class ExpressionParser {
 
         if (names.size() == 1) {
             throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
-                    "SRU diagnostic 48: Regexflag: " + names.get(0)
+                    "Regexflag: " + names.get(0)
                             + " is unsupported.");
         }
         else if (names.size() > 1) {
             throw new KoralException(StatusCodes.UNKNOWN_QUERY_ELEMENT,
-                    "SRU diagnostic 48: Regexflags: " + names.toString()
+                    "Regexflags: " + names.toString()
                             + " are unsupported.");
         }
     }
