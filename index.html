@@ -32,7 +32,7 @@
 	  <span class="p-org">IDS</span>,
 	  <span class="p-locality">Mannheim</span></p>
 	<p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-	<p>Last update: <time class="dt-updated" datetime="2016-06-06">2016/06/06</time></p>
+	<p>Last update: <time class="dt-updated" datetime="2016-10-05">2016/10/05</time></p>
       </div>
       
       <p style="color: red">This draft is in preparation.</p>
@@ -574,6 +574,13 @@ match:leq
               </tr>
 	    </tbody>
 	  </table>
+
+    <p>A <code class="att">koral:token</code> object defines the occurrence
+      of one token, a match has to satisfy.</p>
+    <p>The <code class="att">wrap</code> attribute contains either a
+      <code class="att">koral:term</code> or a <code class="att">koral:termGroup</code>
+      object, specifying the token. In case no <code class="att">wrap</code>
+      attribute is defined, the object matches <em>any</em> token of the text.</p>
 
 	  <h4 class="koral-type"><a name="koral-span"
 				    id="koral-span"
@@ -1413,6 +1420,9 @@ match:leq
       <div class="changes">
 	<pre>
 CHANGES:
+0.4.0 2016-10-05
+- Introduced response format
+
 0.3.1 2016-06-06
 - Spans now wrap terms
 
