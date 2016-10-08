@@ -387,7 +387,7 @@
               <code class="att">koral:doc</code> is mandatory. If the attribute
               is missing, the query has to be rejected and an error has to be raised.
               However, this rule is experimental and may change in
-              future versions of this specification.</p>
+               future versions of this specification.</p>
 
             <p>If the <code class="att">type</code> attribute contains an
               undefined identifier, the query has to be rejeced and an
@@ -569,11 +569,19 @@ match:leq
 
           <p>A <code class="att">koral:token</code> object defines the occurrence
             of one token, a match has to satisfy.</p>
-          <p>The <code class="att">wrap</code> attribute contains either a
-            <code class="att">koral:term</code> or a <code class="att">koral:termGroup</code>
-            object, specifying the token. In case no <code class="att">wrap</code>
-            attribute is defined, the object matches <em>any</em> token of the text.</p>
 
+          <section class="guide">
+            <h4>Implementation Guide</h4>
+
+            <p>The <code class="att">wrap</code> attribute is optional.
+              In case no <code class="att">wrap</code>
+              attribute is defined, the object matches <em>any</em> token of the text.
+              If the processor does not support <em>any</em> tokens,
+              the query has to be rejected and an error has to be raised.
+            </p>
+            
+          </section>
+          
           <h4 class="koral-type"><a name="koral-span"
                                     id="koral-span"
                                     href="#koral-span">koral:span</a></h4>
