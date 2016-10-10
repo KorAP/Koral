@@ -860,7 +860,35 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
         assertEquals(true, operands.get(0).at("/key").isMissingNode());
     }
-
+    
+    @Test
+    public void testDistanceWithEmptyTokenAndOptionality() throws JsonProcessingException, IOException{
+    	query = "[base=der][][base=Mann]?";
+    	qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        
+        String path = "/query";
+        String serializedQuery = mapper.writeValueAsString(res.at(path));
+        //System.out.println(serializedQuery);
+        
+//        {"@type":"koral:group",
+//        	"operation":"operation:sequence",
+//        	"operands":[
+//        		{"@type":"koral:token",
+//        			"wrap":{"@type":"koral:term","key":"der","layer":"lemma","match":"match:eq"}},
+//        		{"@type":"koral:group",
+//        				"operation":"operation:repetition",
+//        				"operands":[{
+//        					"@type":"koral:token","wrap":{"@type":"koral:term","key":"Mann","layer":"lemma","match":"match:eq"}}],
+//        				"boundary":{"@type":"koral:boundary","min":0,"max":1}}
+//        	],
+//        	"inOrder":true,
+//        	"distances":[
+//	             {"@type":"koral:distance",
+//	            	 "key":"w",
+//	            	 "boundary":{
+//	            	 	"@type":"koral:boundary","min":1,"max":1},"min":1,"max":1}]}
+    }
 
     @Test
     public void testRepetition () throws JsonProcessingException, IOException {
