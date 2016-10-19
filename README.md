@@ -1,25 +1,19 @@
 ![Koral](https://raw.githubusercontent.com/KorAP/Koral/master/misc/koral.png)
 
-Koral is a library designed for the translation of different corpus query 
-languages to KoralQuery, a JSON-LD-based protocol for the common representation
-of linguistic queries. This work has been carried out within the KorAP
-project (see below) and forms the major part of a Master thesis that is
-due to appear. The detailed specifications of KoralQuery will be covered
-in that thesis.
+Koral is a translator tool for converting different corpus query 
+languages to [KoralQuery](https://korap.github.io/Koral/), a JSON-LD-based protocol for the common representation
+of linguistic queries. KoralQuery specifications are described extensively in Bingel (2015). This work has been carried out within the KorAP project. 
 
-As of v0.1, the following corpus query languages (QLs) are supported:
+Koral v0.3 supports the following corpus query languages (QLs):
 * [Cosmas-II QL](http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/) 
 * [ANNIS QL](http://annis-tools.org/aql.html)
 * [Poliqarp QL](http://korpus.pl/en/cheatsheet/node3.html) (extended by numerous operators to "PoliqarpPlus" QL)
-* [CQL](http://www.loc.gov/standards/sru/cql/spec.html)
-
-You can use the main class QuerySerializer to translate and serialize queries
-for you. The usage example below illustrates this. Valid QL identifiers
-are `cosmas2`, `annis`, `poliqarp`, `poliqarpplus` and `cql`.
-
+* [CQL] (http://www.loc.gov/standards/sru/cql/spec.html) (for basic search as described in [the CLARIN FCS 1.0 Specification] (https://www.clarin.eu/content/federated-content-search-clarin-fcs) )
+* FCSQL (based on [CQP](http://cwb.sourceforge.net/files/CQP_Tutorial/), for advanced search as described in the CLARIN FCS 2.0 specification draft)
 
 ## Usage Example
 
+You can use the main class QuerySerializer to translate and serialize queries. Valid QL identifiers are `cosmas2`, `annis`, `poliqarp`, `poliqarpplus` and `cql`.
 
 ```java
 import de.ids_mannheim.korap.query.serialize.QuerySerialzer;
@@ -30,7 +24,7 @@ System.out.println(qs.toJSON());
 ```
 
 This will print out the following JSON-LD string for the Koralized query.
-The query asks for a sentence element (`<s>`) that is contained in a
+The query asks for a sentence element (`<s>`) contained in a
 sequence of the surface form *zu* and a token with the part-of-speech tag *ADJA*.
 In the KoralQuery string, a containment relation is defined over two
 operands, an *s* span and a sequence of two tokens.
@@ -81,15 +75,13 @@ operands, an *s* span and a sequence of two tokens.
 
 ## Motivation
 
-Koral enables the design and implementation of corpus query systems 
-independently of any specific query languages. All the system needs to do on
-the query processing side is have the query translated to KoralQuery (see usage)
-and feed the translated query to its search engine. In particular, several query
- languages can be supported without further adjustments to the search engine.
+Koral allows designing and implementating corpus query systems 
+independent of any specific query languages. The systems only need to have Koral translate a query to a KoralQuery (see usage)
+and feed the translated query to its search engine. Several query languages can be supported without further adjustments to the search engine.
 
 Koral and KoralQuery have been designed and developed within the 
 [KorAP Project](http://korap.ids-mannheim.de/), and are used in KorAP to 
-translate queries to a common format before sending them to the backend.
+translate queries to a common format before sending them to its search engine.
 
 ## Installation
 
@@ -110,6 +102,12 @@ There is also a command line version. After installation, simply run
 * [Git](http://git-scm.com/)
 * At least [Maven 3.2.1](https://maven.apache.org/)
 * Further dependencies are resolved by Maven.
+
+## Publications
+
+J. Bingel, "Instantiation and implementation of a corpus query lingua franca," M.S. thesis, University of Heidelberg, Heidelberg, 2015. 
+
+J. Bingel and N. Diewald, "KoralQuery – a General Corpus Query Protocol," in Proceedings of the Workshop on Innovative Corpus Query and Visualization Tools at NODALIDA 2015, Vilnius, 2015, pp. 1-5.
 
 ## Authorship
 
