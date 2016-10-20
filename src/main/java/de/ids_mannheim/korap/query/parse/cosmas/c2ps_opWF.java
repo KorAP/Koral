@@ -52,8 +52,8 @@ public class c2ps_opWF
         }
 
         // AST Tree anzeigen:
-        Tree tree = bLem ? (Tree) c2PQLEMReturn.getTree() : (Tree) c2PQWFReturn
-                .getTree();
+        Tree tree = bLem ? (Tree) c2PQLEMReturn.getTree()
+                : (Tree) c2PQWFReturn.getTree();
         // System.out.println(bLem? "opLEM: " : "opWF: " + tree.toStringTree() );
 
         return tree;
@@ -76,8 +76,8 @@ public class c2ps_opWF
                 sbWF.deleteCharAt(i);
         }
 
-        return new CommonTree(new CommonToken(tokenType, "\"" + sbWF.toString()
-                + "\""));
+        return new CommonTree(
+                new CommonToken(tokenType, "\"" + sbWF.toString() + "\""));
     }
 
 
@@ -104,8 +104,8 @@ public class c2ps_opWF
             else
                 tree = check(input[i], false, false, 0); // bStrip=false, bLem=false.
 
-            System.out.println(bLem ? "LEM: " : "WF: " + "AST  : "
-                    + tree.toStringTree() + "\n");
+            System.out.println(bLem ? "LEM: "
+                    : "WF: " + "AST  : " + tree.toStringTree() + "\n");
         }
 
     } // main

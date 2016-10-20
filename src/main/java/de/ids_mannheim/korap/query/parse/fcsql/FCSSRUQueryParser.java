@@ -25,7 +25,9 @@ import eu.clarin.sru.server.fcs.parser.QueryWithWithin;
 import eu.clarin.sru.server.fcs.parser.SimpleWithin;
 import eu.clarin.sru.server.fcs.parser.SimpleWithin.Scope;
 
-/** This class handles FCS query nodes from the FCSParser converting FCSQL to Java objects. 
+/**
+ * This class handles FCS query nodes from the FCSParser converting
+ * FCSQL to Java objects.
  * 
  * @author margaretha
  * 
@@ -34,19 +36,25 @@ public class FCSSRUQueryParser {
 
     private ExpressionParser expressionParser;
 
-    /** Constructs the FCSSRUQueryParser.
+
+    /**
+     * Constructs the FCSSRUQueryParser.
      * 
      */
     public FCSSRUQueryParser () {
         this.expressionParser = new ExpressionParser();
     }
 
-    /** Parses the given query node according to its type.
-     * @param queryNode an FCS a query node
+
+    /**
+     * Parses the given query node according to its type.
+     * 
+     * @param queryNode
+     *            an FCS a query node
      * @return a koral object
      * @throws KoralException
      */
-    public KoralObject parseQueryNode(QueryNode queryNode)
+    public KoralObject parseQueryNode (QueryNode queryNode)
             throws KoralException {
 
         if (queryNode instanceof QuerySegment) {
@@ -74,39 +82,60 @@ public class FCSSRUQueryParser {
                             + " is currently unsupported.");
         }
     }
-    
-    /** Parses the given query segment into a koral object.
-     * @param segment a query segment
+
+
+    /**
+     * Parses the given query segment into a koral object.
+     * 
+     * @param segment
+     *            a query segment
      * @return a koral object representation of the query segment
      * @throws KoralException
      */
-    private KoralObject parseQuerySegment(QuerySegment segment)
+    private KoralObject parseQuerySegment (QuerySegment segment)
             throws KoralException {
-        KoralObject object = expressionParser.parseExpression(segment.getExpression());
-        return handleQuantifier(object, segment.getMinOccurs(), segment.getMaxOccurs());
+        KoralObject object = expressionParser
+                .parseExpression(segment.getExpression());
+        return handleQuantifier(object, segment.getMinOccurs(),
+                segment.getMaxOccurs());
     }
-    
-    /** Parses the given query group into a koral object.
-     * @param group a koral group
+
+
+    /**
+     * Parses the given query group into a koral object.
+     * 
+     * @param group
+     *            a koral group
      * @return a koral object
      * @throws KoralException
      */
-    private KoralObject parseQueryGroup(QueryGroup group) throws KoralException {
+    private KoralObject parseQueryGroup (QueryGroup group)
+            throws KoralException {
         KoralObject object = parseQueryNode(group.getFirstChild());
-        return handleQuantifier(object, group.getMinOccurs(), group.getMaxOccurs());
+        return handleQuantifier(object, group.getMinOccurs(),
+                group.getMaxOccurs());
     }
-    
-    /** Parses FCSQL quantifier into a koral boundary and adds it to a koral group
-     * @param object a koral object
-     * @param minOccurs minimum occurrences
-     * @param maxOccurs maximum occurrences
-     * @return a koral group or the given koral object when minimum and maximum occurrences are exactly 1.
+
+
+    /**
+     * Parses FCSQL quantifier into a koral boundary and adds it to a
+     * koral group
+     * 
+     * @param object
+     *            a koral object
+     * @param minOccurs
+     *            minimum occurrences
+     * @param maxOccurs
+     *            maximum occurrences
+     * @return a koral group or the given koral object when minimum
+     *         and maximum occurrences are exactly 1.
      */
-    private KoralObject handleQuantifier(KoralObject object, int minOccurs, int maxOccurs){
+    private KoralObject handleQuantifier (KoralObject object, int minOccurs,
+            int maxOccurs) {
         if ((minOccurs == 1) && (maxOccurs == 1)) {
             return object;
         }
-        
+
         KoralBoundary boundary = new KoralBoundary(minOccurs, maxOccurs);
         List<KoralObject> operand = new ArrayList<KoralObject>(1);
         operand.add(object);
@@ -116,13 +145,17 @@ public class FCSSRUQueryParser {
         koralGroup.setOperands(operand);
         return koralGroup;
     }
-    
-    /** Parses a QueryWithWithin into a koral group.
-     * @param queryNode a query node of type QueryWithWithin
+
+
+    /**
+     * Parses a QueryWithWithin into a koral group.
+     * 
+     * @param queryNode
+     *            a query node of type QueryWithWithin
      * @return a koral group
      * @throws KoralException
      */
-    private KoralGroup parseWithinQuery(QueryWithWithin queryNode)
+    private KoralGroup parseWithinQuery (QueryWithWithin queryNode)
             throws KoralException {
         KoralGroup koralGroup = new KoralGroup(KoralOperation.POSITION);
         koralGroup.setFrames(Arrays.asList(Frame.IS_AROUND));
@@ -134,12 +167,16 @@ public class FCSSRUQueryParser {
         return koralGroup;
     }
 
-    /** Parses the scope of a QueryWithWithin into a koral span.
-     * @param scope the scope of a QueryWithWithin
+
+    /**
+     * Parses the scope of a QueryWithWithin into a koral span.
+     * 
+     * @param scope
+     *            the scope of a QueryWithWithin
      * @return a koral span
      * @throws KoralException
      */
-    private KoralSpan parseWithinScope(Scope scope) throws KoralException {
+    private KoralSpan parseWithinScope (Scope scope) throws KoralException {
         if (scope == null) {
             throw new KoralException(StatusCodes.MALFORMED_QUERY,
                     "Within context is missing.");
@@ -164,12 +201,17 @@ public class FCSSRUQueryParser {
         return new KoralSpan(new KoralTerm(contextSpan));
     }
 
-    /** Parses a query disjunction into a koral group.
-     * @param children a list of query nodes.
+
+    /**
+     * Parses a query disjunction into a koral group.
+     * 
+     * @param children
+     *            a list of query nodes.
      * @return a koral group with operation disjunction
      * @throws KoralException
      */
-    private KoralGroup parseQueryDisjunction(List<QueryNode> children) throws KoralException {
+    private KoralGroup parseQueryDisjunction (List<QueryNode> children)
+            throws KoralException {
         KoralGroup koralGroup = new KoralGroup(KoralOperation.DISJUNCTION);
         List<KoralObject> operands = new ArrayList<KoralObject>();
         for (QueryNode child : children) {
@@ -179,12 +221,16 @@ public class FCSSRUQueryParser {
         return koralGroup;
     }
 
-    /** Parses a sequence query into a koral group.
-     * @param children a list query nodes.
+
+    /**
+     * Parses a sequence query into a koral group.
+     * 
+     * @param children
+     *            a list query nodes.
      * @return a koral group
      * @throws KoralException
      */
-    private KoralGroup parseSequenceQuery(List<QueryNode> children)
+    private KoralGroup parseSequenceQuery (List<QueryNode> children)
             throws KoralException {
         KoralGroup koralGroup = new KoralGroup(KoralOperation.SEQUENCE);
         List<KoralObject> operands = new ArrayList<KoralObject>();
@@ -199,12 +245,13 @@ public class FCSSRUQueryParser {
             if (i > 0 && i < size - 1 && findEmptyToken(child)) {
                 QuerySegment qs = (QuerySegment) child;
                 if (isLastTokenEmpty) {
-                    KoralBoundary boundary = (KoralBoundary) operands.get(operands.size() - 1);
+                    KoralBoundary boundary = (KoralBoundary) operands
+                            .get(operands.size() - 1);
                     updateBoundary(boundary, qs);
                 }
                 else {
-                    operands.add(new KoralBoundary(qs.getMinOccurs(), qs
-                            .getMaxOccurs()));
+                    operands.add(new KoralBoundary(qs.getMinOccurs(),
+                            qs.getMaxOccurs()));
                     isLastTokenEmpty = true;
                 }
                 isEmptyTokenFound = true;
@@ -216,89 +263,115 @@ public class FCSSRUQueryParser {
         }
 
         if (isEmptyTokenFound) {
-            operands = createDistance(koralGroup,operands);
+            operands = createDistance(koralGroup, operands);
         }
 
         koralGroup.setOperands(operands);
         return koralGroup;
     }
 
-    /** Determines if there is an empty token in the given query node.
-     * @param node a query node
+
+    /**
+     * Determines if there is an empty token in the given query node.
+     * 
+     * @param node
+     *            a query node
      * @return true if an empty token is found or false otherwise.
      */
-    private boolean findEmptyToken(QueryNode node) {
-        if (node instanceof QuerySegment
-                && ((QuerySegment) node).getExpression() instanceof ExpressionWildcard) {
+    private boolean findEmptyToken (QueryNode node) {
+        if (node instanceof QuerySegment && ((QuerySegment) node)
+                .getExpression() instanceof ExpressionWildcard) {
             return true;
         }
         return false;
     }
 
-    /** Updates the boundary properties with the parameters in the query segment.
-     * @param boundary a koral boundary
-     * @param qs a query segment
+
+    /**
+     * Updates the boundary properties with the parameters in the
+     * query segment.
+     * 
+     * @param boundary
+     *            a koral boundary
+     * @param qs
+     *            a query segment
      */
-    private void updateBoundary(KoralBoundary boundary, QuerySegment qs) {
+    private void updateBoundary (KoralBoundary boundary, QuerySegment qs) {
         boundary.setMin(boundary.getMin() + qs.getMinOccurs());
         boundary.setMax(boundary.getMax() + qs.getMaxOccurs());
     }
 
-    /** Creates koral distances from KoralBoundary objects in the given operand list, 
-     * and adds the distances the koral group. Removes the KoralBoundary objects from 
+
+    /**
+     * Creates koral distances from KoralBoundary objects in the given
+     * operand list,
+     * and adds the distances the koral group. Removes the
+     * KoralBoundary objects from
      * the operand list and returns the new operand list.
      * 
-     * @param koralGroup a koral group
-     * @param operands a list of koral objects
-     * @return an updated operand lists without KoralBoundary objects 
+     * @param koralGroup
+     *            a koral group
+     * @param operands
+     *            a list of koral objects
+     * @return an updated operand lists without KoralBoundary objects
      */
-    private List<KoralObject> createDistance(KoralGroup koralGroup, List<KoralObject> operands){
+    private List<KoralObject> createDistance (KoralGroup koralGroup,
+            List<KoralObject> operands) {
         boolean isSubGroupAdded = false;
         List<KoralObject> newOperands = new ArrayList<KoralObject>(
-                operands.size());        
-        newOperands.add(operands.get(0));        
+                operands.size());
+        newOperands.add(operands.get(0));
         int operandSize = operands.size();
         for (int i = 1; i < operandSize - 1; i++) {
             KoralObject operand = operands.get(i);
             if (operand instanceof KoralBoundary) {
                 List<KoralDistance> distances = new ArrayList<KoralDistance>();
-                distances.add(new KoralDistance ((KoralBoundary) operand));  
-                
-                if (koralGroup.getDistances() != null){
-                    KoralObject lastOperand = newOperands.get(newOperands.size()-1);
-                    KoralGroup subGroup = createSequenceGroupWithDistance(distances, lastOperand, operands.get(i+1));
+                distances.add(new KoralDistance((KoralBoundary) operand));
+
+                if (koralGroup.getDistances() != null) {
+                    KoralObject lastOperand = newOperands
+                            .get(newOperands.size() - 1);
+                    KoralGroup subGroup = createSequenceGroupWithDistance(
+                            distances, lastOperand, operands.get(i + 1));
                     newOperands.remove(lastOperand);
                     newOperands.add(subGroup);
                     isSubGroupAdded = true;
                     continue;
                 }
-                else{                    
+                else {
                     koralGroup.setDistances(distances);
                     koralGroup.setInOrder(true);
                 }
             }
-            else{
-                newOperands.add(operand);                
+            else {
+                newOperands.add(operand);
             }
             isSubGroupAdded = false;
         }
-        
-        if (!isSubGroupAdded){
-            newOperands.add(operands.get(operandSize-1));
+
+        if (!isSubGroupAdded) {
+            newOperands.add(operands.get(operandSize - 1));
         }
         return newOperands;
     }
-    
-    /** Creates a distance query, namely a koral group of operation sequence 
+
+
+    /**
+     * Creates a distance query, namely a koral group of operation
+     * sequence
      * with the given distances and operands.
-     *  
-     * @param distances a list of distances.
-     * @param operand an operand
-     * @param operand2 another operand
+     * 
+     * @param distances
+     *            a list of distances.
+     * @param operand
+     *            an operand
+     * @param operand2
+     *            another operand
      * @return a koral group
      */
-    private KoralGroup createSequenceGroupWithDistance(List<KoralDistance> distances, 
-            KoralObject operand, KoralObject operand2) {
+    private KoralGroup createSequenceGroupWithDistance (
+            List<KoralDistance> distances, KoralObject operand,
+            KoralObject operand2) {
         KoralGroup subGroup = new KoralGroup(KoralOperation.SEQUENCE);
         subGroup.setDistances(distances);
         subGroup.setInOrder(true);

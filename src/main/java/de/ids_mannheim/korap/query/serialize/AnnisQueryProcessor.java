@@ -185,8 +185,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             if (!queuedRelations.isEmpty()) {
                 ParseTree queued = queuedRelations.pop();
                 if (verbose)
-                    System.out.println("Taking off queue (last rel): "
-                            + queued.getText());
+                    System.out.println(
+                            "Taking off queue (last rel): " + queued.getText());
                 if (checkOperandsProcessedPreviously(queued)) {
                     processNode(queued);
                 }
@@ -194,8 +194,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     addError(StatusCodes.UNBOUND_ANNIS_RELATION,
                             "The relation " + queued.getText()
                                     + " is not bound to any other relations.");
-                    requestMap
-                            .put("query", new LinkedHashMap<String, Object>());
+                    requestMap.put("query",
+                            new LinkedHashMap<String, Object>());
                 }
             }
         }
@@ -232,8 +232,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 ParseTree queued = queuedRelations.getFirst();
                 if (checkOperandsProcessedPreviously(queued)) {
                     if (verbose)
-                        System.out.println("Taking off queue: "
-                                + queued.getText());
+                        System.out.println(
+                                "Taking off queue: " + queued.getText());
                     queuedRelations.removeFirst();
                     processNode(queued);
                 }
@@ -323,8 +323,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 "n_ary_linguistic_term")) {
             for (ParseTree refOrNode : getChildrenWithCat(lingTermNode,
                     "refOrNode")) {
-                String refOrNodeString = refOrNode.getChild(0).toStringTree(
-                        parser);
+                String refOrNodeString = refOrNode.getChild(0)
+                        .toStringTree(parser);
                 if (refOrNodeString.startsWith("#")) {
                     String ref = refOrNode.getChild(0).toStringTree(parser)
                             .substring(1);
@@ -355,7 +355,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 ref = variableCount.toString();
             }
             nodes2refs.put(variableExprNode, ref);
-            LinkedHashMap<String, Object> object = processVariableExpr(variableExprNode);
+            LinkedHashMap<String, Object> object = processVariableExpr(
+                    variableExprNode);
             nodeVariables.put(ref, object);
             variableCount++;
             // Check if this object definition is part of a "direct declaration
@@ -364,8 +365,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             // objects must still be available for later reference, handle this 
             // here. Direct declaration relation is present when grandparent is
             // n_ary_linguistic_term node.
-            if (getNodeCat(variableExprNode.getParent().getParent()).equals(
-                    "n_ary_linguistic_term")) {
+            if (getNodeCat(variableExprNode.getParent().getParent())
+                    .equals("n_ary_linguistic_term")) {
                 if (nodeReferencesTotal.containsKey(ref)) {
                     nodeReferencesTotal.put(ref,
                             nodeReferencesTotal.get(ref) + 1);
@@ -422,8 +423,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             // (e.g. cnx/cat=NP vs mate/pos=NN)
             // TODO generalize the list below -> look up layers associated with
             // tokens rather than spans somewhere
-            HashMap<String, Object> qNameParse = parseQNameNode(node
-                    .getChild(0));
+            HashMap<String, Object> qNameParse = parseQNameNode(
+                    node.getChild(0));
             if (Arrays.asList(new String[] { "p", "lemma", "m", "orth" })
                     .contains(qNameParse.get("layer"))) {
                 object = KoralObjectGenerator.makeToken();
@@ -451,17 +452,13 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 HashMap<String, Object> term = (HashMap<String, Object>) object
                         .get("wrap");
                 term.putAll(parseTextSpec(node.getChild(2)));
-                term.put(
-                        "match",
-                        parseMatchOperator(getFirstChildWithCat(node,
-                                "eqOperator")));
+                term.put("match", parseMatchOperator(
+                        getFirstChildWithCat(node, "eqOperator")));
             }
             else {
                 object.putAll(parseTextSpec(node.getChild(2)));
-                object.put(
-                        "match",
-                        parseMatchOperator(getFirstChildWithCat(node,
-                                "eqOperator")));
+                object.put("match", parseMatchOperator(
+                        getFirstChildWithCat(node, "eqOperator")));
             }
         }
 
@@ -521,7 +518,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
      *         representation
      *         of the operand
      */
-    private LinkedHashMap<String, Object> retrieveOperand (ParseTree operandNode) {
+    private LinkedHashMap<String, Object> retrieveOperand (
+            ParseTree operandNode) {
         LinkedHashMap<String, Object> operand = null;
         if (!getNodeCat(operandNode.getChild(0)).equals("variableExpr")) {
             String ref = operandNode.getChild(0).toStringTree(parser)
@@ -620,8 +618,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 }
             }
             // Retrieve operands.
-            LinkedHashMap<String, Object> operand1 = retrieveOperand(operandTree1);
-            LinkedHashMap<String, Object> operand2 = retrieveOperand(operandTree2);
+            LinkedHashMap<String, Object> operand1 = retrieveOperand(
+                    operandTree1);
+            LinkedHashMap<String, Object> operand2 = retrieveOperand(
+                    operandTree2);
             // 'Proper' n_ary_linguistic_operators receive a considerably 
             // different serialisation than 'commonparent' and 'commonancestor'
             // For the latter cases, a dummy span is introduced and declared as
@@ -658,15 +658,14 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 // for lowest level, add the underspecified node as first 
                 // operand and wrap it in a class group
                 if (i == 1) {
-                    innerOperands
-                            .add(KoralObjectGenerator.wrapInClass(
-                                    KoralObjectGenerator.makeSpan(),
-                                    classCounter + 128));
+                    innerOperands.add(KoralObjectGenerator.wrapInClass(
+                            KoralObjectGenerator.makeSpan(),
+                            classCounter + 128));
                     // add the first operand and wrap the whole group in a 
                     // focusing reference 
                     innerOperands.add(operand1);
-                    innerGroup = KoralObjectGenerator.wrapInReference(
-                            innerGroup, classCounter + 128);
+                    innerGroup = KoralObjectGenerator
+                            .wrapInReference(innerGroup, classCounter + 128);
                     outerOperands.add(innerGroup);
                 }
                 else {
@@ -691,8 +690,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 // attributes defined in KoralQ. and can be handled more easily
             }
             else {
-                LinkedHashMap<String, Object> operatorGroup = parseOperatorNode(node
-                        .getChild(i).getChild(0));
+                LinkedHashMap<String, Object> operatorGroup = parseOperatorNode(
+                        node.getChild(i).getChild(0));
                 String groupType;
                 try {
                     groupType = (String) operatorGroup.get("groupType");
@@ -720,10 +719,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 // (see following 'if')
                 operands = (ArrayList<Object>) group.get("operands");
 
-                ParseTree leftChildSpec = getFirstChildWithCat(node.getChild(i)
-                        .getChild(0), "@l");
-                ParseTree rightChildSpec = getFirstChildWithCat(node
-                        .getChild(i).getChild(0), "@r");
+                ParseTree leftChildSpec = getFirstChildWithCat(
+                        node.getChild(i).getChild(0), "@l");
+                ParseTree rightChildSpec = getFirstChildWithCat(
+                        node.getChild(i).getChild(0), "@r");
                 if (leftChildSpec != null || rightChildSpec != null) {
                     String frame = (leftChildSpec != null) ? "frames:startsWith"
                             : "frames:endsWith";
@@ -859,7 +858,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             if (qName != null)
                 term = parseQNameNode(qName);
             if (edgeSpecNode != null) {
-                LinkedHashMap<String, Object> edgeSpec = parseEdgeSpec(edgeSpecNode);
+                LinkedHashMap<String, Object> edgeSpec = parseEdgeSpec(
+                        edgeSpecNode);
                 String edgeSpecType = (String) edgeSpec.get("@type");
                 if (edgeSpecType.equals("koral:termGroup")) {
                     ((ArrayList<Object>) edgeSpec.get("operands")).add(term);
@@ -933,7 +933,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                             "frames:matches" };
                     break;
                 case "_r_":
-                    frames = new String[] { "frames:endsWith", "frames:matches" };
+                    frames = new String[] { "frames:endsWith",
+                            "frames:matches" };
                     break;
                 case "_i_":
                     frames = new String[] { "frames:isAround" };
@@ -1000,7 +1001,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private LinkedHashMap<String, Object> parseEdgeAnno (ParseTree edgeAnnoSpec) {
+    private LinkedHashMap<String, Object> parseEdgeAnno (
+            ParseTree edgeAnnoSpec) {
         LinkedHashMap<String, Object> edgeAnno = KoralObjectGenerator
                 .makeTerm();
         ParseTree textSpecNode = getFirstChildWithCat(edgeAnnoSpec, "textSpec");
@@ -1009,8 +1011,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         ParseTree matchOperatorNode = getFirstChildWithCat(edgeAnnoSpec,
                 "eqOperator");
         if (foundryNode != null)
-            edgeAnno.put("foundry", foundryNode.getChild(0)
-                    .toStringTree(parser));
+            edgeAnno.put("foundry",
+                    foundryNode.getChild(0).toStringTree(parser));
         if (layerNode != null)
             edgeAnno.put("layer", layerNode.getChild(0).toStringTree(parser));
         edgeAnno.putAll(parseTextSpec(textSpecNode));
@@ -1027,8 +1029,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     private LinkedHashMap<String, Object> boundaryFromRangeSpec (
             ParseTree rangeSpec, boolean expandToMax) {
-        Integer min = Integer.parseInt(rangeSpec.getChild(0).toStringTree(
-                parser));
+        Integer min = Integer
+                .parseInt(rangeSpec.getChild(0).toStringTree(parser));
         Integer max = min;
         if (expandToMax)
             max = null;
@@ -1157,8 +1159,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             parser.addErrorListener(errorListener);
             // Get starting rule from parser
             Method startRule = AqlParser.class.getMethod("start");
-            tree = (ParserRuleContext) startRule
-                    .invoke(parser, (Object[]) null);
+            tree = (ParserRuleContext) startRule.invoke(parser,
+                    (Object[]) null);
         }
         // Some things went wrong ...
         catch (Exception e) {

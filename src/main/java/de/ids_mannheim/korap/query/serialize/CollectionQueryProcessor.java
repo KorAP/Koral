@@ -71,8 +71,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             processNode(tree);
         }
         else {
-            addError(StatusCodes.MALFORMED_QUERY, "Could not parse query >>> "
-                    + query + " <<<.");
+            addError(StatusCodes.MALFORMED_QUERY,
+                    "Could not parse query >>> " + query + " <<<.");
         }
     }
 
@@ -97,8 +97,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
          */
 
         if (nodeCat.equals("relation")) {
-            String operator = getNodeCat(node.getChild(1).getChild(0)).equals(
-                    "&") ? "and" : "or";
+            String operator = getNodeCat(node.getChild(1).getChild(0))
+                    .equals("&") ? "and" : "or";
             LinkedHashMap<String, Object> relationGroup = KoralObjectGenerator
                     .makeDocGroup(operator);
             putIntoSuperObject(relationGroup);
@@ -250,8 +250,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         String type = (String) term.get("type");
         if (type == null || type.equals("type:regex")) {
             if (!(match.equals("match:eq") || match.equals("match:ne")
-                    || match.equals("match:contains") || match
-                        .equals("match:containsnot"))) {
+                    || match.equals("match:contains")
+                    || match.equals("match:containsnot"))) {
                 addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
                         "You used an inequation operator with a string value.");
                 return false;
@@ -553,8 +553,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             parser.addErrorListener(errorListener);
             // Get starting rule from parser
             Method startRule = CollectionQueryParser.class.getMethod("start");
-            tree = (ParserRuleContext) startRule
-                    .invoke(parser, (Object[]) null);
+            tree = (ParserRuleContext) startRule.invoke(parser,
+                    (Object[]) null);
         }
         // Some things went wrong ...
         catch (Exception e) {

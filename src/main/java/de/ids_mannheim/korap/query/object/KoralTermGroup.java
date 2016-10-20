@@ -8,7 +8,8 @@ import java.util.Map;
 import de.ids_mannheim.korap.query.serialize.MapBuilder;
 import de.ids_mannheim.korap.query.serialize.util.KoralException;
 
-/** Definition of koral:termGroup in KoralQuery.
+/**
+ * Definition of koral:termGroup in KoralQuery.
  * 
  * @author margaretha
  * 
@@ -20,30 +21,37 @@ public class KoralTermGroup implements KoralObject {
     private String relation;
     private List<KoralObject> operands = new ArrayList<KoralObject>();
 
-    public KoralTermGroup (KoralTermGroupRelation relation, List<KoralObject> operands)
+
+    public KoralTermGroup (KoralTermGroupRelation relation,
+                           List<KoralObject> operands)
             throws KoralException {
         this.relation = relation.toString();
         this.operands = operands;
     }
 
-    public String getRelation() {
+
+    public String getRelation () {
         return relation;
     }
 
-    public void setRelation(String relation) {
+
+    public void setRelation (String relation) {
         this.relation = relation;
     }
 
-    public List<KoralObject> getOperands() {
+
+    public List<KoralObject> getOperands () {
         return operands;
     }
 
-    public void setOperands(List<KoralObject> operands) {
+
+    public void setOperands (List<KoralObject> operands) {
         this.operands = operands;
     }
 
+
     @Override
-    public Map<String, Object> buildMap() {
+    public Map<String, Object> buildMap () {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
         map.put("@type", type.toString());
         map.put("relation", getRelation());

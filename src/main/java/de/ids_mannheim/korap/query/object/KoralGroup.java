@@ -10,7 +10,9 @@ import de.ids_mannheim.korap.query.object.KoralObject;
 import de.ids_mannheim.korap.query.object.KoralOperation;
 import de.ids_mannheim.korap.query.object.KoralType;
 
-/** Definition of koral:group in KoralQuery.
+/**
+ * Definition of koral:group in KoralQuery.
+ * 
  * @author margaretha
  * 
  */
@@ -25,67 +27,81 @@ public class KoralGroup implements KoralObject {
     private List<KoralDistance> distances;
     private List<Frame> frames;
     private KoralBoundary boundary;
-    
-//    private int[] classIn;
-//    private int classOut;
-//    private int classRefCheck;
-//    private int classRefOp;
-//    private boolean exclude = false;
-    
+
+
+    //    private int[] classIn;
+    //    private int classOut;
+    //    private int classRefCheck;
+    //    private int classRefOp;
+    //    private boolean exclude = false;
+
     public KoralGroup (KoralOperation operation) {
         this.operation = operation;
     }
 
-    public boolean isInOrder() {
+
+    public boolean isInOrder () {
         return inOrder;
     }
 
-    public void setInOrder(boolean inOrder) {
+
+    public void setInOrder (boolean inOrder) {
         this.inOrder = inOrder;
     }
 
-    public List<KoralObject> getOperands() {
-		return operands;
-	}
-    
-    public void setOperands(List<KoralObject> operands) {
-		this.operands = operands;
-	}
 
-    public KoralOperation getOperation() {
+    public List<KoralObject> getOperands () {
+        return operands;
+    }
+
+
+    public void setOperands (List<KoralObject> operands) {
+        this.operands = operands;
+    }
+
+
+    public KoralOperation getOperation () {
         return operation;
     }
 
-    public void setOperation(KoralOperation operation) {
+
+    public void setOperation (KoralOperation operation) {
         this.operation = operation;
     }
 
-    public List<KoralDistance> getDistances() {
+
+    public List<KoralDistance> getDistances () {
         return distances;
     }
 
-    public void setDistances(List<KoralDistance> distances) {
+
+    public void setDistances (List<KoralDistance> distances) {
         this.distances = distances;
     }
-    
-    public List<Frame> getFrames() {
-		return frames;
-	}
 
-	public void setFrames(List<Frame> frames) {
-		this.frames = frames;
-	}
 
-    public KoralBoundary getBoundary() {
+    public List<Frame> getFrames () {
+        return frames;
+    }
+
+
+    public void setFrames (List<Frame> frames) {
+        this.frames = frames;
+    }
+
+
+    public KoralBoundary getBoundary () {
         return boundary;
     }
 
-    public void setBoundary(KoralBoundary boundary) {
+
+    public void setBoundary (KoralBoundary boundary) {
         this.boundary = boundary;
     }
 
+
     @Override
-    public Map<String, Object> buildMap() {
+    public Map<String, Object> buildMap () {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
         map.put("@type", type.toString());
         map.put("operation", operation.toString());
@@ -111,20 +127,32 @@ public class KoralGroup implements KoralObject {
         return map;
     }
 
-    public enum Frame{
-		SUCCEDS("succeeds"), SUCCEDS_DIRECTLY("succeedsDirectly"), OVERLAPS_RIGHT("overlapsRight"), 
-		ALIGNS_RIGHT("alignsRight"), IS_WITHIN("isWithin"), STARTS_WITH("startsWith"), 
-		MATCHES("matches"), ALIGNS_LEFT("alignsLeft"), IS_AROUND("isAround"), ENDS_WITH("endsWith"),
-		OVERLAPS_LEFT("overlapsLeft"), PRECEEDS_DIRECTLY("precedesDirectly"), PRECEDES("precedes");
-		
-		private String value;
-		Frame(String value) {
-			this.value = value;
-		}
-		
-		@Override
-		public String toString() {
-			return "frame:"+value;
-		}
-	}
+    public enum Frame {
+        SUCCEDS("succeeds"), SUCCEDS_DIRECTLY(
+                "succeedsDirectly"), OVERLAPS_RIGHT(
+                        "overlapsRight"), ALIGNS_RIGHT(
+                                "alignsRight"), IS_WITHIN(
+                                        "isWithin"), STARTS_WITH(
+                                                "startsWith"), MATCHES(
+                                                        "matches"), ALIGNS_LEFT(
+                                                                "alignsLeft"), IS_AROUND(
+                                                                        "isAround"), ENDS_WITH(
+                                                                                "endsWith"), OVERLAPS_LEFT(
+                                                                                        "overlapsLeft"), PRECEEDS_DIRECTLY(
+                                                                                                "precedesDirectly"), PRECEDES(
+                                                                                                        "precedes");
+
+        private String value;
+
+
+        Frame (String value) {
+            this.value = value;
+        }
+
+
+        @Override
+        public String toString () {
+            return "frame:" + value;
+        }
+    }
 }

@@ -86,8 +86,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * be in a sequence with any number of other nodes in this list)
      */
     private final List<String> sequentiableNodeTypes = Arrays
-            .asList(new String[] { "OPWF", "OPLEM", "OPMORPH", "OPBEG",
-                    "OPEND", "OPIN", "OPBED", "OPELEM", "OPOR", "OPAND" });
+            .asList(new String[] { "OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND",
+                    "OPIN", "OPBED", "OPELEM", "OPOR", "OPAND" });
     /**
      * Keeps track of sequenced nodes, i.e. nodes that implicitly
      * govern a sequence, as in (C2PQ (OPWF der) (OPWF Mann)). This is
@@ -172,8 +172,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 if (node == parent.getChild(0)) {
                     nodeHasSequentiableSiblings = false;
                     for (int i = 1; i < parent.getChildCount(); i++) {
-                        if (sequentiableNodeTypes.contains(getNodeCat(parent
-                                .getChild(i)))) {
+                        if (sequentiableNodeTypes
+                                .contains(getNodeCat(parent.getChild(i)))) {
                             nodeHasSequentiableSiblings = true;
                             continue;
                         }
@@ -503,8 +503,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         LinkedHashMap<String, Object> focusGroup = null;
         if ((boolean) positionOptions.get("matchall") == true) {
             focusGroup = KoralObjectGenerator.makeClassRefOp(
-                    "classRefOp:delete",
-                    new Integer[] { 128 + classCounter++ }, 128 + classCounter);
+                    "classRefOp:delete", new Integer[] { 128 + classCounter++ },
+                    128 + classCounter);
             ((ArrayList<Object>) focusGroup.get("operands")).add(topGroup);
         }
         else { // match only first argument
@@ -607,8 +607,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         LinkedHashMap<String, Object> embeddedSequence = group;
 
         if (!(openNodeCats.get(1).equals("OPBEG")
-                || openNodeCats.get(1).equals("OPEND") || inOPALL || openNodeCats
-                .get(1).equals("OPNHIT"))) {
+                || openNodeCats.get(1).equals("OPEND") || inOPALL
+                || openNodeCats.get(1).equals("OPNHIT"))) {
             wrapOperandInClass(node, 1, 128 + classCounter);
             wrapOperandInClass(node, 2, 128 + classCounter);
             // Deactivated, uncomment to wrap sequence in reference.
@@ -713,18 +713,16 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // Step I: create element
         LinkedHashMap<String, Object> span = KoralObjectGenerator.makeSpan();
         if (node.getChild(0).toStringTree().equals("EMPTY")) {
-            addError(
-                    StatusCodes.MALFORMED_QUERY,
-                    "Empty #ELEM() operator."
-                            + " Please specify a valid element key (like 's' for sentence).");
+            addError(StatusCodes.MALFORMED_QUERY, "Empty #ELEM() operator."
+                    + " Please specify a valid element key (like 's' for sentence).");
             return;
         }
         else {
             int elname = 0;
             Tree elnameNode = getFirstChildWithCat(node, "ELNAME");
             if (elnameNode != null) {
-                span.put("key", elnameNode.getChild(0).toStringTree()
-                        .toLowerCase());
+                span.put("key",
+                        elnameNode.getChild(0).toStringTree().toLowerCase());
                 elname = 1;
             }
             if (node.getChildCount() > elname) {
@@ -777,9 +775,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                                 layer = splitted[1];
                             }
                             term.put("layer", translateMorph(layer));
-                            term.put("key", attrNode.getChild(j).toStringTree());
-                            String match = getNodeCat(attrNode).equals("EQ") ? "eq"
-                                    : "ne";
+                            term.put("key",
+                                    attrNode.getChild(j).toStringTree());
+                            String match = getNodeCat(attrNode).equals("EQ")
+                                    ? "eq" : "ne";
                             term.put("match", "match:" + match);
                             if (node.getChildCount() == elname + 1) {
                                 termGroupOperands.add(term);
@@ -993,16 +992,26 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     @SuppressWarnings("unchecked")
     /**
-     * Processes individual position conditions as provided in the OPTS node under the OPBEG node.
-     * #BEG allows to specify position constrains that apply to the beginning or the end of the subquery X.
-     * E.g., in #BEG(X, tpos/tpos), the 'tpos' constraints before the slash indicate conditions that apply 
-     * to the beginning of X, those after the slash are conditions that apply to the end of X.
-     * See the official C-II documentation for more details. <br/><br/>
+     * Processes individual position conditions as provided in the
+     * OPTS node under the OPBEG node.
+     * #BEG allows to specify position constrains that apply to the
+     * beginning or the end of the subquery X.
+     * E.g., in #BEG(X, tpos/tpos), the 'tpos' constraints before the
+     * slash indicate conditions that apply
+     * to the beginning of X, those after the slash are conditions
+     * that apply to the end of X.
+     * See the official C-II documentation for more details.
+     * <br/><br/>
      * What's important here is what follows: <br/>
-     * Assume the query #BED(der Mann, sa/pa). This means that <b>the beginning<b/> of "der Mann" stands at
-     * the beginning of a sentence and that <b>the end</b> (because this constraint comes after the slash) stands at the 
-     * beginning of a paragraph. The "end" means the last item, here "Mann", so this token comes at the beginning
-     * of a paragraph. To capture this, we choose spanRefs: The last item of X matches the first item of the span (here: P). 
+     * Assume the query #BED(der Mann, sa/pa). This means that <b>the
+     * beginning<b/> of "der Mann" stands at
+     * the beginning of a sentence and that <b>the end</b> (because
+     * this constraint comes after the slash) stands at the
+     * beginning of a paragraph. The "end" means the last item, here
+     * "Mann", so this token comes at the beginning
+     * of a paragraph. To capture this, we choose spanRefs: The last
+     * item of X matches the first item of the span (here: P).
+     * 
      * @param cond
      * @param distributedOperands
      * @param mode
@@ -1251,8 +1260,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             LinkedHashMap<String, Object>[] wrapCascade) {
         int i;
         for (i = 0; i < wrapCascade.length - 1; i++) {
-            ArrayList<Object> containerOperands = (ArrayList<Object>) wrapCascade[i + 1]
-                    .get("operands");
+            ArrayList<Object> containerOperands = (ArrayList<Object>) wrapCascade[i
+                    + 1].get("operands");
             containerOperands.add(0, wrapCascade[i]);
         }
         return wrapCascade[i];
@@ -1332,7 +1341,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         }
         catch (RecognitionException e) {
-            log.error("Could not parse query. Please make sure it is well-formed.");
+            log.error(
+                    "Could not parse query. Please make sure it is well-formed.");
             addError(StatusCodes.MALFORMED_QUERY,
                     "Could not parse query. Please make sure it is well-formed.");
         }

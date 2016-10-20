@@ -3,7 +3,8 @@ package de.ids_mannheim.korap.query.object;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Definition of koral:boundary in KoralQuery.
+/**
+ * Definition of koral:boundary in KoralQuery.
  * 
  * @author margaretha
  *
@@ -15,29 +16,35 @@ public class KoralBoundary implements KoralObject {
     private int min;
     private int max;
 
+
     public KoralBoundary (int min, int max) {
         this.min = min;
         this.max = max;
     }
 
-    public int getMin() {
+
+    public int getMin () {
         return min;
     }
 
-    public void setMin(int min) {
+
+    public void setMin (int min) {
         this.min = min;
     }
 
-    public int getMax() {
+
+    public int getMax () {
         return max;
     }
 
-    public void setMax(int max) {
+
+    public void setMax (int max) {
         this.max = max;
     }
 
+
     @Override
-    public Map<String, Object> buildMap() {
+    public Map<String, Object> buildMap () {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
         map.put("@type", type.toString());
         if (min > -1) {

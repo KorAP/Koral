@@ -23,8 +23,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
  * @version 0.3.0
  * @since 0.1.0
  */
-public abstract class Antlr4AbstractQueryProcessor extends
-        AbstractQueryProcessor {
+public abstract class Antlr4AbstractQueryProcessor
+        extends AbstractQueryProcessor {
 
     /**
      * The ANTLR parser. Subclasses need to instantiate this field
@@ -129,7 +129,8 @@ public abstract class Antlr4AbstractQueryProcessor extends
      *         given
      *         category.
      */
-    protected List<ParseTree> getChildrenWithCat (ParseTree node, String nodeCat) {
+    protected List<ParseTree> getChildrenWithCat (ParseTree node,
+            String nodeCat) {
         ArrayList<ParseTree> children = new ArrayList<ParseTree>();
         for (int i = 0; i < node.getChildCount(); i++) {
             if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
@@ -204,6 +205,9 @@ public abstract class Antlr4AbstractQueryProcessor extends
             int n) {
         int counter = 0;
         for (int i = 0; i < node.getChildCount(); i++) {
+            if (visited.contains(node.getChild(i))) {
+                continue;
+            }
             if (getNodeCat(node.getChild(i)).equals(nodeCat)) {
                 counter++;
                 if (counter == n) {

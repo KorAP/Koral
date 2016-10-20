@@ -158,8 +158,8 @@ public class QueryUtils {
 
 
     @Deprecated
-    public static Map addParameters (Map request, int page, int num,
-            String cli, String cri, int cls, int crs, boolean cutoff) {
+    public static Map addParameters (Map request, int page, int num, String cli,
+            String cri, int cls, int crs, boolean cutoff) {
         Map ctx = new LinkedHashMap();
         List left = new ArrayList();
         left.add(cli);

@@ -56,7 +56,7 @@ public abstract class AbstractQueryProcessor {
     /**
      * If true, print debug statements
      */
-    public static boolean verbose = false;
+    public static boolean verbose = true;
     protected Integer stackedObjects = 0;
     /**
      * Contains error arrays, consisting of an error code and a
@@ -206,8 +206,8 @@ public abstract class AbstractQueryProcessor {
 
 
     public void addAlignment (int leftClassId, int rightClassId) {
-        List<Integer> alignment = Arrays.asList(new Integer[] { leftClassId,
-                rightClassId });
+        List<Integer> alignment = Arrays
+                .asList(new Integer[] { leftClassId, rightClassId });
         alignments.add(alignment);
         meta.put("alignment", alignments);
     }

@@ -25,12 +25,12 @@ public class CollectionQueryDuplicateTest {
         ObjectMapper m = new ObjectMapper();
         JsonNode first = m.readTree(serializer.toJSON());
         assertNotNull(first);
-        assertEquals(first.at("/collection"), m.readTree(serializer.toJSON())
-                .at("/collection"));
-        assertEquals(first.at("/collection"), m.readTree(serializer.toJSON())
-                .at("/collection"));
-        assertEquals(first.at("/collection"), m.readTree(serializer.toJSON())
-                .at("/collection"));
+        assertEquals(first.at("/collection"),
+                m.readTree(serializer.toJSON()).at("/collection"));
+        assertEquals(first.at("/collection"),
+                m.readTree(serializer.toJSON()).at("/collection"));
+        assertEquals(first.at("/collection"),
+                m.readTree(serializer.toJSON()).at("/collection"));
     }
 
 }

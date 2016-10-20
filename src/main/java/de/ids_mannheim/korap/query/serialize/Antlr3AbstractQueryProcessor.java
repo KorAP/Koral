@@ -23,8 +23,8 @@ import org.antlr.runtime.tree.Tree;
  * @version 0.3.0
  * @since 0.1.0
  */
-public abstract class Antlr3AbstractQueryProcessor extends
-        AbstractQueryProcessor {
+public abstract class Antlr3AbstractQueryProcessor
+        extends AbstractQueryProcessor {
 
     /**
      * The ANTLR parser. Subclasses need to instantiate this field.
@@ -197,7 +197,8 @@ public abstract class Antlr3AbstractQueryProcessor extends
      *         of children
      *         with the given category).
      */
-    protected static Tree getNthChildWithCat (Tree node, String nodeCat, int n) {
+    protected static Tree getNthChildWithCat (Tree node, String nodeCat,
+            int n) {
         int counter = 0;
         for (int i = 0; i < node.getChildCount(); i++) {
             if (getNodeCat(node.getChild(i)).equals(nodeCat)) {

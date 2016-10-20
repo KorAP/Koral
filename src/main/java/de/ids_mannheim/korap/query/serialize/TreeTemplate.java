@@ -55,8 +55,8 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
             processNode(tree);
         }
         else {
-            addError(StatusCodes.MALFORMED_QUERY, "Could not parse query >>> "
-                    + query + " <<<.");
+            addError(StatusCodes.MALFORMED_QUERY,
+                    "Could not parse query >>> " + query + " <<<.");
         }
     }
 
@@ -158,8 +158,8 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
             // TODO replace AqlParser with parser for your Antlr4
             // grammar!
             Method startRule = AqlParser.class.getMethod("start");
-            tree = (ParserRuleContext) startRule
-                    .invoke(parser, (Object[]) null);
+            tree = (ParserRuleContext) startRule.invoke(parser,
+                    (Object[]) null);
         }
 
         // Some things went wrong ...

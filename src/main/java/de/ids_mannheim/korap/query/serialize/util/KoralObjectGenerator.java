@@ -41,7 +41,8 @@ public class KoralObjectGenerator {
     }
 
 
-    public static LinkedHashMap<String, Object> makeTermGroup (String relation) {
+    public static LinkedHashMap<String, Object> makeTermGroup (
+            String relation) {
         LinkedHashMap<String, Object> term = new LinkedHashMap<String, Object>();
         term.put("@type", "koral:termGroup");
         term.put("relation", "relation:" + relation);
@@ -126,9 +127,10 @@ public class KoralObjectGenerator {
         group.put("operation", "operation:class");
         if (setBySystem) {
             classId += 128;
-            qp.addMessage("A class has been introduced into the backend representation of "
-                    + "your query for later reference to a part of the query. The class id is "
-                    + classId);
+            qp.addMessage(
+                    "A class has been introduced into the backend representation of "
+                            + "your query for later reference to a part of the query. The class id is "
+                            + classId);
         }
         group.put("classOut", classId);
         group.put("operands", new ArrayList<Object>());
@@ -163,7 +165,8 @@ public class KoralObjectGenerator {
 
 
     @Deprecated
-    public static LinkedHashMap<String, Object> makeTreeRelation (String reltype) {
+    public static LinkedHashMap<String, Object> makeTreeRelation (
+            String reltype) {
         LinkedHashMap<String, Object> group = new LinkedHashMap<String, Object>();
         group.put("@type", "koral:treeRelation");
         if (reltype != null)
@@ -206,8 +209,7 @@ public class KoralObjectGenerator {
         if (max != null) {
             group.put("max", max);
         }
-        qp.addMessage(
-                StatusCodes.DEPRECATED_QUERY_ELEMENT,
+        qp.addMessage(StatusCodes.DEPRECATED_QUERY_ELEMENT,
                 "Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
         return group;
     }
@@ -280,7 +282,8 @@ public class KoralObjectGenerator {
     }
 
 
-    public static void addOperandsToGroup (LinkedHashMap<String, Object> group) {
+    public static void addOperandsToGroup (
+            LinkedHashMap<String, Object> group) {
         ArrayList<Object> operands = new ArrayList<Object>();
         group.put("operands", operands);
     }
@@ -328,10 +331,10 @@ public class KoralObjectGenerator {
     public static int cropToMaxValue (int number) {
         if (number > MAXIMUM_DISTANCE) {
             number = MAXIMUM_DISTANCE;
-            String warning = String
-                    .format("You specified a distance between two segments that is greater than "
+            String warning = String.format(
+                    "You specified a distance between two segments that is greater than "
                             + "the allowed max value of %d. Your query will be re-interpreted using a distance of %d.",
-                            MAXIMUM_DISTANCE, MAXIMUM_DISTANCE);
+                    MAXIMUM_DISTANCE, MAXIMUM_DISTANCE);
             qp.addWarning(warning);
         }
         return number;

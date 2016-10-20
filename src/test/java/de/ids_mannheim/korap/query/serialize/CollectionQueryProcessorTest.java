@@ -57,8 +57,8 @@ public class CollectionQueryProcessorTest {
 
 
     @Test
-    public void testSpecialCharacters () throws JsonProcessingException,
-            IOException {
+    public void testSpecialCharacters ()
+            throws JsonProcessingException, IOException {
         collection = "[base/n=alt]";
         qs.setQuery(query, ql);
         qs.setCollection(collection);
@@ -122,27 +122,29 @@ public class CollectionQueryProcessorTest {
 
 
     @Test
-    public void testTwoConjuncts () throws JsonProcessingException, IOException {
+    public void testTwoConjuncts ()
+            throws JsonProcessingException, IOException {
         collection = "textClass=Sport & pubDate in 2014";
         qs.setQuery(query, ql);
         qs.setCollection(collection);
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:and", res.at("/collection/operation").asText());
-        assertEquals("koral:doc", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("textClass", res.at("/collection/operands/0/key").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("textClass",
+                res.at("/collection/operands/0/key").asText());
         assertEquals("Sport", res.at("/collection/operands/0/value").asText());
-        assertEquals("match:eq", res.at("/collection/operands/0/match")
-                .asText());
-        assertEquals("koral:doc", res.at("/collection/operands/1/@type")
-                .asText());
+        assertEquals("match:eq",
+                res.at("/collection/operands/0/match").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/1/@type").asText());
         assertEquals("pubDate", res.at("/collection/operands/1/key").asText());
         assertEquals("2014", res.at("/collection/operands/1/value").asText());
-        assertEquals("type:date", res.at("/collection/operands/1/type")
-                .asText());
-        assertEquals("match:eq", res.at("/collection/operands/1/match")
-                .asText());
+        assertEquals("type:date",
+                res.at("/collection/operands/1/type").asText());
+        assertEquals("match:eq",
+                res.at("/collection/operands/1/match").asText());
 
         collection = "textClass=Sport & pubDate=2014";
         qs.setQuery(query, ql);
@@ -151,20 +153,21 @@ public class CollectionQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:and", res.at("/collection/operation").asText());
-        assertEquals("koral:doc", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("textClass", res.at("/collection/operands/0/key").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("textClass",
+                res.at("/collection/operands/0/key").asText());
         assertEquals("Sport", res.at("/collection/operands/0/value").asText());
-        assertEquals("match:eq", res.at("/collection/operands/0/match")
-                .asText());
-        assertEquals("koral:doc", res.at("/collection/operands/1/@type")
-                .asText());
+        assertEquals("match:eq",
+                res.at("/collection/operands/0/match").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/1/@type").asText());
         assertEquals("pubDate", res.at("/collection/operands/1/key").asText());
         assertEquals("2014", res.at("/collection/operands/1/value").asText());
-        assertEquals(true, res.at("/collection/operands/1/type")
-                .isMissingNode());
-        assertEquals("match:eq", res.at("/collection/operands/1/match")
-                .asText());
+        assertEquals(true,
+                res.at("/collection/operands/1/type").isMissingNode());
+        assertEquals("match:eq",
+                res.at("/collection/operands/1/match").asText());
         assertTrue(res.at("/warnings/0").isMissingNode());
         //        assertTrue(res.at("/warnings/0/0").asText().startsWith(
         //                "The collection query contains a value that looks like a date"));
@@ -172,105 +175,109 @@ public class CollectionQueryProcessorTest {
 
 
     @Test
-    public void testThreeConjuncts () throws JsonProcessingException,
-            IOException {
+    public void testThreeConjuncts ()
+            throws JsonProcessingException, IOException {
         collection = "textClass=Sport & pubDate in 2014 & corpusId=WPD";
         qs.setQuery(query, ql);
         qs.setCollection(collection);
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:and", res.at("/collection/operation").asText());
-        assertEquals("koral:doc", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("textClass", res.at("/collection/operands/0/key").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("textClass",
+                res.at("/collection/operands/0/key").asText());
         assertEquals("Sport", res.at("/collection/operands/0/value").asText());
-        assertEquals("match:eq", res.at("/collection/operands/0/match")
-                .asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/1/@type")
-                .asText());
-        assertEquals("operation:and", res
-                .at("/collection/operands/1/operation").asText());
+        assertEquals("match:eq",
+                res.at("/collection/operands/0/match").asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/1/@type").asText());
+        assertEquals("operation:and",
+                res.at("/collection/operands/1/operation").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/0/@type").asText());
-        assertEquals("pubDate", res.at("/collection/operands/1/operands/0/key")
-                .asText());
-        assertEquals("2014", res.at("/collection/operands/1/operands/0/value")
-                .asText());
+        assertEquals("pubDate",
+                res.at("/collection/operands/1/operands/0/key").asText());
+        assertEquals("2014",
+                res.at("/collection/operands/1/operands/0/value").asText());
         assertEquals("type:date",
                 res.at("/collection/operands/1/operands/0/type").asText());
         assertEquals("match:eq",
                 res.at("/collection/operands/1/operands/0/match").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/1/@type").asText());
-        assertEquals("corpusId", res
-                .at("/collection/operands/1/operands/1/key").asText());
-        assertEquals("WPD", res.at("/collection/operands/1/operands/1/value")
-                .asText());
+        assertEquals("corpusId",
+                res.at("/collection/operands/1/operands/1/key").asText());
+        assertEquals("WPD",
+                res.at("/collection/operands/1/operands/1/value").asText());
         assertEquals("match:eq",
                 res.at("/collection/operands/1/operands/1/match").asText());
     }
 
 
     @Test
-    public void testTwoDisjuncts () throws JsonProcessingException, IOException {
+    public void testTwoDisjuncts ()
+            throws JsonProcessingException, IOException {
         collection = "textClass=Sport | pubDate in 2014";
         qs.setQuery(query, ql);
         qs.setCollection(collection);
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:or", res.at("/collection/operation").asText());
-        assertEquals("koral:doc", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("textClass", res.at("/collection/operands/0/key").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("textClass",
+                res.at("/collection/operands/0/key").asText());
         assertEquals("Sport", res.at("/collection/operands/0/value").asText());
-        assertEquals("match:eq", res.at("/collection/operands/0/match")
-                .asText());
-        assertEquals("koral:doc", res.at("/collection/operands/1/@type")
-                .asText());
+        assertEquals("match:eq",
+                res.at("/collection/operands/0/match").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/1/@type").asText());
         assertEquals("pubDate", res.at("/collection/operands/1/key").asText());
         assertEquals("2014", res.at("/collection/operands/1/value").asText());
-        assertEquals("type:date", res.at("/collection/operands/1/type")
-                .asText());
-        assertEquals("match:eq", res.at("/collection/operands/1/match")
-                .asText());
+        assertEquals("type:date",
+                res.at("/collection/operands/1/type").asText());
+        assertEquals("match:eq",
+                res.at("/collection/operands/1/match").asText());
     }
 
 
     @Test
-    public void testThreeDisjuncts () throws JsonProcessingException,
-            IOException {
+    public void testThreeDisjuncts ()
+            throws JsonProcessingException, IOException {
         collection = "textClass=Sport | pubDate in 2014 | corpusId=WPD";
         qs.setQuery(query, ql);
         qs.setCollection(collection);
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:or", res.at("/collection/operation").asText());
-        assertEquals("koral:doc", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("textClass", res.at("/collection/operands/0/key").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("textClass",
+                res.at("/collection/operands/0/key").asText());
         assertEquals("Sport", res.at("/collection/operands/0/value").asText());
-        assertEquals("match:eq", res.at("/collection/operands/0/match")
-                .asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/1/@type")
-                .asText());
-        assertEquals("operation:or", res.at("/collection/operands/1/operation")
-                .asText());
+        assertEquals("match:eq",
+                res.at("/collection/operands/0/match").asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/1/@type").asText());
+        assertEquals("operation:or",
+                res.at("/collection/operands/1/operation").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/0/@type").asText());
-        assertEquals("pubDate", res.at("/collection/operands/1/operands/0/key")
-                .asText());
-        assertEquals("2014", res.at("/collection/operands/1/operands/0/value")
-                .asText());
+        assertEquals("pubDate",
+                res.at("/collection/operands/1/operands/0/key").asText());
+        assertEquals("2014",
+                res.at("/collection/operands/1/operands/0/value").asText());
         assertEquals("type:date",
                 res.at("/collection/operands/1/operands/0/type").asText());
         assertEquals("match:eq",
                 res.at("/collection/operands/1/operands/0/match").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/1/@type").asText());
-        assertEquals("corpusId", res
-                .at("/collection/operands/1/operands/1/key").asText());
-        assertEquals("WPD", res.at("/collection/operands/1/operands/1/value")
-                .asText());
+        assertEquals("corpusId",
+                res.at("/collection/operands/1/operands/1/key").asText());
+        assertEquals("WPD",
+                res.at("/collection/operands/1/operands/1/value").asText());
         assertEquals("match:eq",
                 res.at("/collection/operands/1/operands/1/match").asText());
     }
@@ -284,32 +291,33 @@ public class CollectionQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:or", res.at("/collection/operation").asText());
-        assertEquals("koral:doc", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("textClass", res.at("/collection/operands/0/key").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("textClass",
+                res.at("/collection/operands/0/key").asText());
         assertEquals("Sport", res.at("/collection/operands/0/value").asText());
-        assertEquals("match:eq", res.at("/collection/operands/0/match")
-                .asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/1/@type")
-                .asText());
-        assertEquals("operation:and", res
-                .at("/collection/operands/1/operation").asText());
+        assertEquals("match:eq",
+                res.at("/collection/operands/0/match").asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/1/@type").asText());
+        assertEquals("operation:and",
+                res.at("/collection/operands/1/operation").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/0/@type").asText());
-        assertEquals("pubDate", res.at("/collection/operands/1/operands/0/key")
-                .asText());
-        assertEquals("2014", res.at("/collection/operands/1/operands/0/value")
-                .asText());
+        assertEquals("pubDate",
+                res.at("/collection/operands/1/operands/0/key").asText());
+        assertEquals("2014",
+                res.at("/collection/operands/1/operands/0/value").asText());
         assertEquals("type:date",
                 res.at("/collection/operands/1/operands/0/type").asText());
         assertEquals("match:eq",
                 res.at("/collection/operands/1/operands/0/match").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/1/@type").asText());
-        assertEquals("corpusId", res
-                .at("/collection/operands/1/operands/1/key").asText());
-        assertEquals("WPD", res.at("/collection/operands/1/operands/1/value")
-                .asText());
+        assertEquals("corpusId",
+                res.at("/collection/operands/1/operands/1/key").asText());
+        assertEquals("WPD",
+                res.at("/collection/operands/1/operands/1/value").asText());
         assertEquals("match:eq",
                 res.at("/collection/operands/1/operands/1/match").asText());
 
@@ -319,32 +327,33 @@ public class CollectionQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:or", res.at("/collection/operation").asText());
-        assertEquals("koral:doc", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("textClass", res.at("/collection/operands/0/key").asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("textClass",
+                res.at("/collection/operands/0/key").asText());
         assertEquals("Sport", res.at("/collection/operands/0/value").asText());
-        assertEquals("match:eq", res.at("/collection/operands/0/match")
-                .asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/1/@type")
-                .asText());
-        assertEquals("operation:and", res
-                .at("/collection/operands/1/operation").asText());
+        assertEquals("match:eq",
+                res.at("/collection/operands/0/match").asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/1/@type").asText());
+        assertEquals("operation:and",
+                res.at("/collection/operands/1/operation").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/0/@type").asText());
-        assertEquals("pubDate", res.at("/collection/operands/1/operands/0/key")
-                .asText());
-        assertEquals("2014", res.at("/collection/operands/1/operands/0/value")
-                .asText());
+        assertEquals("pubDate",
+                res.at("/collection/operands/1/operands/0/key").asText());
+        assertEquals("2014",
+                res.at("/collection/operands/1/operands/0/value").asText());
         assertEquals("type:date",
                 res.at("/collection/operands/1/operands/0/type").asText());
         assertEquals("match:eq",
                 res.at("/collection/operands/1/operands/0/match").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/1/@type").asText());
-        assertEquals("corpusId", res
-                .at("/collection/operands/1/operands/1/key").asText());
-        assertEquals("WPD", res.at("/collection/operands/1/operands/1/value")
-                .asText());
+        assertEquals("corpusId",
+                res.at("/collection/operands/1/operands/1/key").asText());
+        assertEquals("WPD",
+                res.at("/collection/operands/1/operands/1/value").asText());
         assertEquals("match:eq",
                 res.at("/collection/operands/1/operands/1/match").asText());
 
@@ -354,16 +363,16 @@ public class CollectionQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:and", res.at("/collection/operation").asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("operation:or", res.at("/collection/operands/0/operation")
-                .asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("operation:or",
+                res.at("/collection/operands/0/operation").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/0/operands/0/@type").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/0/operands/1/@type").asText());
-        assertEquals("koral:doc", res.at("/collection/operands/1/@type")
-                .asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/1/@type").asText());
 
         collection = "(textClass=Sport & pubDate in 2014) & corpusId=WPD";
         qs.setQuery(query, ql);
@@ -371,16 +380,16 @@ public class CollectionQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:and", res.at("/collection/operation").asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("operation:and", res
-                .at("/collection/operands/0/operation").asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("operation:and",
+                res.at("/collection/operands/0/operation").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/0/operands/0/@type").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/0/operands/1/@type").asText());
-        assertEquals("koral:doc", res.at("/collection/operands/1/@type")
-                .asText());
+        assertEquals("koral:doc",
+                res.at("/collection/operands/1/@type").asText());
 
         collection = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White)";
         qs.setQuery(query, ql);
@@ -388,30 +397,30 @@ public class CollectionQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:or", res.at("/collection/operation").asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("operation:and", res
-                .at("/collection/operands/0/operation").asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/1/@type")
-                .asText());
-        assertEquals("operation:and", res
-                .at("/collection/operands/1/operation").asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("operation:and",
+                res.at("/collection/operands/0/operation").asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/1/@type").asText());
+        assertEquals("operation:and",
+                res.at("/collection/operands/1/operation").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/0/operands/0/@type").asText());
-        assertEquals("Sport", res.at("/collection/operands/0/operands/0/value")
-                .asText());
+        assertEquals("Sport",
+                res.at("/collection/operands/0/operands/0/value").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/0/operands/1/@type").asText());
         assertEquals("ausland",
                 res.at("/collection/operands/0/operands/1/value").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/0/@type").asText());
-        assertEquals("WPD", res.at("/collection/operands/1/operands/0/value")
-                .asText());
+        assertEquals("WPD",
+                res.at("/collection/operands/1/operands/0/value").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/1/@type").asText());
-        assertEquals("White", res.at("/collection/operands/1/operands/1/value")
-                .asText());
+        assertEquals("White",
+                res.at("/collection/operands/1/operands/1/value").asText());
 
         collection = "(textClass=Sport & textClass=ausland) | (corpusID=WPD & author=White & pubDate in 2000)";
         qs.setQuery(query, ql);
@@ -419,26 +428,26 @@ public class CollectionQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroup", res.at("/collection/@type").asText());
         assertEquals("operation:or", res.at("/collection/operation").asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/0/@type")
-                .asText());
-        assertEquals("operation:and", res
-                .at("/collection/operands/0/operation").asText());
-        assertEquals("koral:docGroup", res.at("/collection/operands/1/@type")
-                .asText());
-        assertEquals("operation:and", res
-                .at("/collection/operands/1/operation").asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/0/@type").asText());
+        assertEquals("operation:and",
+                res.at("/collection/operands/0/operation").asText());
+        assertEquals("koral:docGroup",
+                res.at("/collection/operands/1/@type").asText());
+        assertEquals("operation:and",
+                res.at("/collection/operands/1/operation").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/0/operands/0/@type").asText());
-        assertEquals("Sport", res.at("/collection/operands/0/operands/0/value")
-                .asText());
+        assertEquals("Sport",
+                res.at("/collection/operands/0/operands/0/value").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/0/operands/1/@type").asText());
         assertEquals("ausland",
                 res.at("/collection/operands/0/operands/1/value").asText());
         assertEquals("koral:doc",
                 res.at("/collection/operands/1/operands/0/@type").asText());
-        assertEquals("WPD", res.at("/collection/operands/1/operands/0/value")
-                .asText());
+        assertEquals("WPD",
+                res.at("/collection/operands/1/operands/0/value").asText());
         assertEquals("koral:docGroup",
                 res.at("/collection/operands/1/operands/1/@type").asText());
         assertEquals("operation:and",
@@ -497,7 +506,8 @@ public class CollectionQueryProcessorTest {
 
 
     @Test
-    public void testDateMonthDay () throws JsonProcessingException, IOException {
+    public void testDateMonthDay ()
+            throws JsonProcessingException, IOException {
         collection = "pubDate in 2000-02";
         qs.setQuery(query, ql);
         qs.setCollection(collection);

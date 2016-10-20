@@ -47,8 +47,8 @@ public class c2ps_optCase
 
         for (int i = 0; i < input.length; i++) {
             tree = check(input[i], 0);
-            System.out.println("Parsing input: " + input[i] + ": "
-                    + tree.toStringTree());
+            System.out.println(
+                    "Parsing input: " + input[i] + ": " + tree.toStringTree());
         }
 
     } // main
