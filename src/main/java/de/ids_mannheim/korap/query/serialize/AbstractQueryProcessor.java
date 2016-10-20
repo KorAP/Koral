@@ -56,7 +56,7 @@ public abstract class AbstractQueryProcessor {
     /**
      * If true, print debug statements
      */
-    public static boolean verbose = true;
+    public static boolean verbose = false;
     protected Integer stackedObjects = 0;
     /**
      * Contains error arrays, consisting of an error code and a

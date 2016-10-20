@@ -12,7 +12,7 @@
 !.gitignore
 
 
-/src/main/resources
+#/src/main/resources
 
 # /src/main/antlr/cosmas/
 /src/main/antlr/cosmas/c2ps_regex.g
