@@ -28,7 +28,8 @@ import java.util.*;
  * This class expects the Poliqarp+ ANTLR grammar shipped with Koral
  * v0.3.0.
  * 
- * @author Joachim Bingel (bingel@ids-mannheim.de)
+ * @author Joachim Bingel (bingel@ids-mannheim.de), Eliza Margaretha
+ *         (margaretha@ids-mannheim.de)
  * @version 0.3.0
  * @since 0.1.0
  */
@@ -38,6 +39,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             .getLogger(PoliqarpPlusQueryProcessor.class);
     private int classCounter = 1;
 
+    boolean isExpansion = false;
     LinkedHashMap<ParseTree, Integer> classWrapRegistry = new LinkedHashMap<ParseTree, Integer>();
 
 
@@ -66,8 +68,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             processNode(tree);
         }
         else {
-            addError(StatusCodes.MALFORMED_QUERY, "Could not parse query >>> "
-                    + query + " <<<.");
+            addError(StatusCodes.MALFORMED_QUERY,
+                    "Could not parse query >>> " + query + " <<<.");
         }
     }
 
@@ -91,7 +93,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         // Top-down processing
         if (visited.contains(node))
             return;
-        else
+        else if (!isExpansion)
             visited.add(node);
 
         String nodeCat = getNodeCat(node);
@@ -151,7 +153,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
 
         if (nodeCat.equals("disjunction")) {
-            processDisjunction(node);
+            processDisjunction();
         }
 
         if (nodeCat.equals("position")) {
@@ -234,9 +236,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      */
     private void processSequence (ParseTree node) {
         // skip in case of emptyTokenSequence or emptyTokenSequenceClass
-        if (node.getChildCount() == 1
-                && getNodeCat(node.getChild(0))
-                        .startsWith("emptyTokenSequence")) {
+        if (node.getChildCount() == 1 && getNodeCat(node.getChild(0))
+                .startsWith("emptyTokenSequence")) {
             return;
         }
         // skip in case this sequence is just a container for an alignment 
@@ -261,6 +262,30 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             ArrayList<Object> distances = new ArrayList<Object>();
             distances.add(distance);
             sequence.put("distances", distances);
+
+            // Check optionality
+            ParseTree lastChildNode = node.getChild(node.getChildCount() - 1);
+            if (getNodeCat(lastChildNode).equals("segment")) {
+                ParseTree quantification = getFirstChildWithCat(lastChildNode,
+                        "repetition");
+                if (quantification != null) {
+                    minmax = parseRepetition(quantification);
+                    if (minmax[0] == 0 && minmax[1] == 1) {
+                        visited.add(quantification);
+                        processDisjunction();
+                        // create expansion
+                        isExpansion = true;
+                        LinkedHashMap<String, Object> expansionSequence = KoralObjectGenerator
+                                .makeGroup("sequence");
+                        putIntoSuperObject(expansionSequence);
+                        objectStack.push(expansionSequence);
+                        processNode(node.getChild(0));
+                        processNode(distanceNode.getChild(0));
+                        isExpansion = false;
+                        objectStack.pop();
+                    }
+                }
+            }
             // don't re-visit the emptyTokenSequence node
             visited.add(distanceNode.getChild(0));
         }
@@ -273,6 +298,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     @SuppressWarnings("unchecked")
     /**
      * empty tokens at beginning/end of sequence
+     * 
      * @param node
      */
     private void processEmptyTokenSequence (ParseTree node) {
@@ -298,8 +324,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     private void processEmptyTokenSequenceClass (ParseTree node) {
         int classId = 1;
         if (hasChild(node, "spanclass_id")) {
-            classId = Integer.parseInt(node.getChild(1).getChild(0)
-                    .toStringTree(parser));
+            classId = Integer.parseInt(
+                    node.getChild(1).getChild(0).toStringTree(parser));
         }
         LinkedHashMap<String, Object> classGroup = KoralObjectGenerator
                 .makeSpanClass(classId);
@@ -391,7 +417,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         int i = 1;
         if (node.getChild(0).getText().equals("^")) {
             i = 0; // if there is no first child (anchor is at extreme left or
-                   // right of segment), start counting at 0 in the loop
+                  // right of segment), start counting at 0 in the loop
         }
         // for every alignment anchor, get its left and right child and register
         // these to be wrapped in classes.
@@ -477,7 +503,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private void processDisjunction (ParseTree node) {
+    private void processDisjunction () {
         LinkedHashMap<String, Object> disjunction = KoralObjectGenerator
                 .makeGroup("disjunction");
         putIntoSuperObject(disjunction);
@@ -633,8 +659,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         addWarning("You used the 'meta' keyword in a PoliqarpPlus query. This"
                 + " feature is currently not supported. Please use virtual "
                 + "collections to restrict documents by metadata.");
-        CollectionQueryProcessor cq = new CollectionQueryProcessor(node
-                .getChild(1).getText());
+        CollectionQueryProcessor cq = new CollectionQueryProcessor(
+                node.getChild(1).getText());
         requestMap.put("collection", cq.getRequestMap().get("collection"));
         for (ParseTree child : getChildren(node)) {
             visited.add(child);
@@ -777,7 +803,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             // Term is defined recursive with non-necessary brackets
             if (getNodeCat(node.getChild(0)).equals("(")) {
-                return parseTermOrTermGroup(node.getChild(1), negatedGlobal, mode);
+                return parseTermOrTermGroup(node.getChild(1), negatedGlobal,
+                        mode);
             };
 
             String key = null;
@@ -868,7 +895,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             // TermGroup is defined recursive with non-necessary brackets
             if (getNodeCat(node.getChild(0)).equals("(")) {
-                return parseTermOrTermGroup(node.getChild(1), negatedGlobal, mode);
+                return parseTermOrTermGroup(node.getChild(1), negatedGlobal,
+                        mode);
             };
 
             // For termGroups, establish a boolean relation between
@@ -959,8 +987,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     private Integer[] parseDistance (ParseTree distanceNode) {
         int emptyTokenSeqIndex = getNodeCat(distanceNode).equals("distance") ? 0
                 : 2;
-        Integer[] minmax = parseEmptySegments(distanceNode
-                .getChild(emptyTokenSeqIndex));
+        Integer[] minmax = parseEmptySegments(
+                distanceNode.getChild(emptyTokenSeqIndex));
         Integer min = minmax[0];
         Integer max = minmax[1];
         //        min++;
@@ -1023,8 +1051,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             // Get starting rule from parser
             Method startRule = PoliqarpPlusParser.class.getMethod("request");
-            tree = (ParserRuleContext) startRule
-                    .invoke(parser, (Object[]) null);
+            tree = (ParserRuleContext) startRule.invoke(parser,
+                    (Object[]) null);
         }
         // Some things went wrong ...
         catch (Exception e) {
