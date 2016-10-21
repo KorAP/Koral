@@ -264,34 +264,67 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             sequence.put("distances", distances);
 
             // Check optionality
-            ParseTree lastChildNode = node.getChild(node.getChildCount() - 1);
-            if (getNodeCat(lastChildNode).equals("segment")) {
-                ParseTree quantification = getFirstChildWithCat(lastChildNode,
-                        "repetition");
-                if (quantification != null) {
-                    minmax = parseRepetition(quantification);
-                    if (minmax[0] == 0 && minmax[1] == 1) {
-                        visited.add(quantification);
-                        processDisjunction();
-                        // create expansion
-                        isExpansion = true;
-                        LinkedHashMap<String, Object> expansionSequence = KoralObjectGenerator
-                                .makeGroup("sequence");
-                        putIntoSuperObject(expansionSequence);
-                        objectStack.push(expansionSequence);
-                        processNode(node.getChild(0));
-                        processNode(distanceNode.getChild(0));
-                        isExpansion = false;
-                        objectStack.pop();
-                    }
+            ParseTree operand1 = node.getChild(0);
+            ParseTree operand2 = node.getChild(node.getChildCount() - 1);
+            isExpansion = true;
+            if (checkOptionality(operand1)) {
+                processDisjunction();
+                // create expansion                
+                if (checkOptionality(operand2)) {
+                    createDisjunctionForDistanceWithOptionality(operand2, operand1,
+                            distanceNode, false);
+                    objectStack.pop();
+                    putIntoSuperObject(KoralObjectGenerator.makeToken());
                 }
+                createDisjunctionForDistanceWithOptionality(operand1, operand2,
+                        distanceNode, true);
+                objectStack.pop();
+                
             }
+            else if (checkOptionality(operand2)){
+                processDisjunction();
+                createDisjunctionForDistanceWithOptionality(operand2, operand1,
+                        distanceNode, false);
+                objectStack.pop();
+            }
+            isExpansion = false;
             // don't re-visit the emptyTokenSequence node
             visited.add(distanceNode.getChild(0));
         }
         putIntoSuperObject(sequence);
         objectStack.push(sequence);
         stackedObjects++;
+    }
+
+
+    private boolean checkOptionality (ParseTree node) {
+        ParseTree quantification = getFirstChildWithCat(node, "repetition");
+        if (quantification != null) {
+            Integer[] minmax = parseRepetition(quantification);
+            if (minmax[0] == 0 && minmax[1] == 1) {
+                visited.add(quantification);
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private void createDisjunctionForDistanceWithOptionality (
+            ParseTree operand1, ParseTree operand2, ParseTree distanceNode,
+            boolean isCheckingFirstOperand) {
+            LinkedHashMap<String, Object> expansionSequence = KoralObjectGenerator
+                    .makeGroup("sequence");
+            putIntoSuperObject(expansionSequence);
+            objectStack.push(expansionSequence);
+            if (isCheckingFirstOperand) {
+                processNode(distanceNode.getChild(0));
+                processNode(operand2);
+            }
+            else {
+                processNode(operand2);
+                processNode(distanceNode.getChild(0));
+            }
     }
 
 

@@ -827,7 +827,7 @@ public class PoliqarpPlusQueryProcessorTest {
 
 
     @Test
-    public void testDistanceWithEmptyTokenAndOptionality ()
+    public void testDistanceWithOptionality ()
             throws JsonProcessingException, IOException {
         query = "[base=der][][base=Mann]?";
         qs.setQuery(query, "poliqarpplus");
@@ -841,6 +841,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("operation:sequence", res.at(disjunctionOperand1+"operation").asText());
         assertEquals("der", res.at(disjunctionOperand1+"operands/0/wrap/key").asText());
         assertEquals("koral:token", res.at(disjunctionOperand1+"operands/1/@type").asText());
+        assertEquals(true, res.at(disjunctionOperand1+"operands/1/wrap/key").isMissingNode());
         
         String disjunctionOperand2 = "/query/operands/1/";
         assertEquals("operation:sequence", res.at(disjunctionOperand2+"operation").asText());
@@ -852,7 +853,7 @@ public class PoliqarpPlusQueryProcessorTest {
     }
 
     @Test
-    public void testDistanceWithEmptyTokenAndOptionality2 ()
+    public void testDistanceWithOptionalityAndMultipleSequences ()
             throws JsonProcessingException, IOException {
         query = "[base=der][base=bose][][base=Mann]?";
         qs.setQuery(query, "poliqarpplus");
@@ -872,6 +873,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("operation:sequence", res.at(disjunctionOperand1+"operation").asText());
         assertEquals("bose", res.at(disjunctionOperand1+"operands/0/wrap/key").asText());
         assertEquals("koral:token", res.at(disjunctionOperand1+"operands/1/@type").asText());
+        assertEquals(true, res.at(disjunctionOperand1+"operands/1/wrap/key").isMissingNode());
         
         String disjunctionOperand2 = "/query/operands/1/operands/1/";
         assertEquals("operation:sequence", res.at(disjunctionOperand2+"operation").asText());
@@ -880,7 +882,97 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("1", res.at(disjunctionOperand2+"distances/0/boundary/min").asText());
         assertEquals("1", res.at(disjunctionOperand2+"distances/0/boundary/max").asText());
     }
+    
+    @Test
+    public void testDistanceWithOptionalityAndMultipleEmptyToken ()
+            throws JsonProcessingException, IOException {
+        query = "[base=der][][][base=Mann]?";
+        qs.setQuery(query, "poliqarpplus");
+        String koralQuery = qs.toJSON();
+        res = mapper.readTree(koralQuery);
 
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:disjunction", res.at("/query/operation").asText());
+        
+        String disjunctionOperand1 = "/query/operands/0/";
+        assertEquals("operation:sequence", res.at(disjunctionOperand1+"operation").asText());
+        assertEquals("der", res.at(disjunctionOperand1+"operands/0/wrap/key").asText());
+        
+        String emptyTokenOperand = disjunctionOperand1+"operands/1/";
+        assertEquals("koral:group", res.at(emptyTokenOperand+"@type").asText());
+        assertEquals("koral:token", res.at(emptyTokenOperand+"operands/0/@type").asText());
+        assertEquals(true, res.at(emptyTokenOperand+"operands/0/wrap/key").isMissingNode());
+        assertEquals("2", res.at(emptyTokenOperand+"boundary/min").asText());
+        assertEquals("2", res.at(emptyTokenOperand+"boundary/max").asText());
+        
+        String disjunctionOperand2 = "/query/operands/1/";
+        assertEquals("operation:sequence", res.at(disjunctionOperand2+"operation").asText());
+        assertEquals("der", res.at(disjunctionOperand2+"operands/0/wrap/key").asText());
+        assertEquals("Mann", res.at(disjunctionOperand2+"operands/1/wrap/key").asText());
+        assertEquals("2", res.at(disjunctionOperand2+"distances/0/boundary/min").asText());
+        assertEquals("2", res.at(disjunctionOperand2+"distances/0/boundary/max").asText());
+        
+    }
+    
+    @Test
+    public void testDistanceWithOptionalityOnTheLeft ()
+            throws JsonProcessingException, IOException {
+        query = "[base=der][base=bose]?[][base=Mann]";
+        qs.setQuery(query, "poliqarpplus");
+        String koralQuery = qs.toJSON();
+        res = mapper.readTree(koralQuery);
+        
+        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
+        assertEquals("operation:disjunction", res.at("/query/operands/1/operation").asText());
+        
+        String disjunctionOperand1 = "/query/operands/1/operands/0/";
+        assertEquals("operation:sequence", res.at(disjunctionOperand1+"operation").asText());
+        assertEquals("koral:token", res.at(disjunctionOperand1+"operands/0/@type").asText());
+        assertEquals(true, res.at(disjunctionOperand1+"operands/0/key").isMissingNode());
+        assertEquals("Mann", res.at(disjunctionOperand1+"operands/1/wrap/key").asText());
+                
+        String disjunctionOperand2 = "/query/operands/1/operands/1/";
+        assertEquals("operation:sequence", res.at(disjunctionOperand2+"operation").asText());
+        assertEquals("bose", res.at(disjunctionOperand2+"operands/0/wrap/key").asText());
+        assertEquals("Mann", res.at(disjunctionOperand2+"operands/1/wrap/key").asText());
+        assertEquals("1", res.at(disjunctionOperand2+"distances/0/boundary/min").asText());
+        assertEquals("1", res.at(disjunctionOperand2+"distances/0/boundary/max").asText());
+    }
+    @Test
+    public void testDistanceWithOptionalityOnBothOperands()
+            throws JsonProcessingException, IOException {
+        query = "[base=der]?[][base=Mann]?";
+        qs.setQuery(query, "poliqarpplus");
+        String koralQuery = qs.toJSON();
+        res = mapper.readTree(koralQuery);
+        
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:disjunction", res.at("/query/operation").asText());
+        
+        String disjunctionOperand1 = "/query/operands/0/";
+        assertEquals("operation:sequence", res.at(disjunctionOperand1+"operation").asText());
+        assertEquals("der", res.at(disjunctionOperand1+"operands/0/wrap/key").asText());
+        assertEquals("koral:token", res.at(disjunctionOperand1+"operands/1/@type").asText());
+        assertEquals(true, res.at(disjunctionOperand1+"operands/1/key").isMissingNode());
+                        
+        String disjunctionOperand2 = "/query/operands/1/";
+        assertEquals("koral:token", res.at(disjunctionOperand2+"@type").asText());
+        assertEquals(true, res.at(disjunctionOperand2+"key").isMissingNode());
+        
+        String disjunctionOperand3 = "/query/operands/2/";
+        assertEquals("operation:sequence", res.at(disjunctionOperand3+"operation").asText());
+        assertEquals("koral:token", res.at(disjunctionOperand3+"operands/0/@type").asText());
+        assertEquals(true, res.at(disjunctionOperand3+"operands/0/key").isMissingNode());
+        assertEquals("Mann", res.at(disjunctionOperand3+"operands/1/wrap/key").asText());
+                        
+        String disjunctionOperand4 = "/query/operands/3/";
+        assertEquals("operation:sequence", res.at(disjunctionOperand4+"operation").asText());
+        assertEquals("der", res.at(disjunctionOperand4+"operands/0/wrap/key").asText());
+        assertEquals("Mann", res.at(disjunctionOperand4+"operands/1/wrap/key").asText());
+        assertEquals("1", res.at(disjunctionOperand4+"distances/0/boundary/min").asText());
+        assertEquals("1", res.at(disjunctionOperand4+"distances/0/boundary/max").asText());
+    }
+    
     @Test
     public void testRepetition () throws JsonProcessingException, IOException {
         query = "der{3}";
