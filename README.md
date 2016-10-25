@@ -4,7 +4,7 @@ Koral is a translator tool for converting different corpus query
 languages to [KoralQuery](https://korap.github.io/Koral/), a JSON-LD-based protocol for the common representation
 of linguistic queries. KoralQuery specifications are described extensively in Bingel (2015). This work has been carried out within the KorAP project. 
 
-Koral v0.3 supports the following corpus query languages (QLs):
+Koral v0.23 supports the following corpus query languages (QLs):
 * [Cosmas-II QL](http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/) 
 * [ANNIS QL](http://annis-tools.org/aql.html)
 * [Poliqarp QL](http://korpus.pl/en/cheatsheet/node3.html) (extended by numerous operators to "PoliqarpPlus" QL)
@@ -77,7 +77,7 @@ operands, an *s* span and a sequence of two tokens.
 
 Koral allows designing and implementating corpus query systems 
 independent of any specific query languages. The systems only need to have Koral translate a query to a KoralQuery (see usage)
-and feed the translated query to its search engine. Several query languages can be supported without further adjustments to the search engine.
+and feed the translated query to their search engine. Several query languages can be supported without further adjustments to the search engine.
 
 Koral and KoralQuery have been designed and developed within the 
 [KorAP Project](http://korap.ids-mannheim.de/), and are used in KorAP to 
