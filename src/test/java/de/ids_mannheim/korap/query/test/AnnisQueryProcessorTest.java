@@ -1,4 +1,4 @@
-package de.ids_mannheim.korap.query.serialize;
+package de.ids_mannheim.korap.query.test;
 
 import static org.junit.Assert.*;
 

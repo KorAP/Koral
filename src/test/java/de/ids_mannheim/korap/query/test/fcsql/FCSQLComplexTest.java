@@ -1,4 +1,4 @@
-package de.ids_mannheim.korap.query.serialize;
+package de.ids_mannheim.korap.query.test.fcsql;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import de.ids_mannheim.korap.query.serialize.FCSQLQueryProcessor;
 
 /**
  * @author margaretha

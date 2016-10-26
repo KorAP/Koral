@@ -1,4 +1,4 @@
-package de.ids_mannheim.korap.query.serialize;
+package de.ids_mannheim.korap.query.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,6 +10,8 @@ import org.z3950.zing.cql.CQLParseException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.ids_mannheim.korap.query.serialize.CqlQueryProcessor;
+
 public class CqlQueryProcessorTest {
 
     String query;
@@ -17,7 +19,7 @@ public class CqlQueryProcessorTest {
     ObjectMapper mapper = new ObjectMapper();
 
     private List<Object> getError(CqlQueryProcessor processor) {
-        List<Object> errors = (List<Object>) processor.requestMap.get("errors");
+        List<Object> errors = (List<Object>) processor.getRequestMap().get("errors");
         return (List<Object>) errors.get(0);
     }
 

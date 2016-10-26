@@ -1,8 +1,12 @@
-package de.ids_mannheim.korap.query.serialize;
+package de.ids_mannheim.korap.query.test.collection;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.ids_mannheim.korap.query.serialize.QuerySerializer;
+import de.ids_mannheim.korap.query.serialize.QueryUtils;
+
 import org.junit.Test;
 
 import java.io.IOException;

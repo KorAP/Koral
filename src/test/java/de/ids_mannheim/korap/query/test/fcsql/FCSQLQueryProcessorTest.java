@@ -1,4 +1,4 @@
-package de.ids_mannheim.korap.query.serialize;
+package de.ids_mannheim.korap.query.test.fcsql;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,6 +10,9 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.ids_mannheim.korap.query.serialize.FCSQLQueryProcessor;
+import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 
 /**
  * @author margaretha
@@ -41,7 +44,7 @@ public class FCSQLQueryProcessorTest {
     }
 
     public static List<Object> getError(FCSQLQueryProcessor processor) {
-        List<Object> errors = (List<Object>) processor.requestMap.get("errors");
+        List<Object> errors = (List<Object>) processor.getRequestMap().get("errors");
         return (List<Object>) errors.get(0);
     }
 
