@@ -9,7 +9,9 @@ tokenVocab=PoliqarpPlusLexer;
 }
 /*
  -- author: Joachim Bingel
- -- date: 14-06-27
+ -- date: 06-27-06-2014
+
+ -- updated: 26-10-2016 (margaretha) 
 
  Poliqarp Query Language parser
 
@@ -191,18 +193,16 @@ segment
   | submatch
   | relation
   | LRPAREN segment RRPAREN
+  | emptyTokenSequence
+  | emptyTokenSequenceClass
   ) 
   repetition?
  ; 
 
 sequence
-: segment* (emptyTokenSequence|emptyTokenSequenceClass)		// ordering important! this subrule must precede any 'distance'-subrules to give precedence to repetition-interpretation of numbers in braces (could be mistaken for number tokens in spanclass), e.g. {2}.
-| (emptyTokenSequence|emptyTokenSequenceClass) (segment+ | sequence) (emptyTokenSequence|emptyTokenSequenceClass)?
-| alignment segment* 	// give precedence to this subrule over the next to make sure preceding segments come into 'alignment'
+: alignment segment* 	// give precedence to this subrule over the next to make sure preceding segments come into 'alignment'
 | segment+ alignment segment*
-| segment segment+ 
-| segment (distance|emptyTokenSequenceClass) segment 
-| segment (distance|emptyTokenSequenceClass)? sequence
+| segment segment+
 
 //| alignment (segment|sequence) alignment?
 ;
