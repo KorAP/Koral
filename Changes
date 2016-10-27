@@ -1,7 +1,8 @@
-0.23 2016-10-25
+0.23 2016-10-27
 	- Added tests and comments for FCSQL (margaretha)
 	- Added quantifier for FCSQL QueryGroup (margaretha)
-	- Improved Poliqarp+ test suite (diewald) 
+	- Improved Poliqarp+ test suite (diewald)
+  - Removed redundant min serialization in repetitions (diewald)
 
 0.22 2016-06-15
     - Spans now always wrap terms (diewald)

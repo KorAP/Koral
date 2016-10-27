@@ -20,6 +20,7 @@ import de.ids_mannheim.korap.query.serialize.QuerySerializer;
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @author Eliza Margaretha (margaretha@ids-mannheim.de)
+ * @author Nils Diewald (diewald@ids-mannheim.de)
  * @version 1.0
  */
 
@@ -82,6 +83,7 @@ public class EmptyTokenTest {
                 res.at("/query/boundary/@type").asText());
         assertEquals(0, res.at("/query/boundary/min").asInt());
         assertEquals(3, res.at("/query/boundary/max").asInt());
+		assertTrue(res.at("/query/min").isMissingNode());
 
         query = "[]{4,}";
         qs.setQuery(query, "poliqarpplus");

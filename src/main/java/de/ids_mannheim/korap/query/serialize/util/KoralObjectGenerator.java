@@ -86,7 +86,6 @@ public class KoralObjectGenerator {
             Integer max) {
         LinkedHashMap<String, Object> group = makeGroup("repetition");
         group.put("boundary", makeBoundary(min, max));
-        group.put("min", min);
         return group;
     }
 
