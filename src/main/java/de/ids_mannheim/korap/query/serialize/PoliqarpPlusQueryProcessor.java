@@ -251,19 +251,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         LinkedHashMap<String, Object> sequence = KoralObjectGenerator
                 .makeGroup("sequence");
-        ParseTree distanceNode = getFirstChildWithCat(node, "distance");
-
-        if (distanceNode != null) {
-            Integer[] minmax = parseDistance(distanceNode);
-            LinkedHashMap<String, Object> distance = KoralObjectGenerator
-                    .makeDistance("w", minmax[0], minmax[1]);
-            sequence.put("inOrder", true);
-            ArrayList<Object> distances = new ArrayList<Object>();
-            distances.add(distance);
-            sequence.put("distances", distances);
-            // don't re-visit the emptyTokenSequence node
-            visited.add(distanceNode.getChild(0));
-        }
+        
         putIntoSuperObject(sequence);
         objectStack.push(sequence);
         stackedObjects++;

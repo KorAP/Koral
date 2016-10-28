@@ -232,7 +232,63 @@ public class EmptyTokenTest {
 
     }
 
-
+    @Test
+    public void testBetweenTokensAndOptionality ()
+            throws JsonProcessingException, IOException {
+        query = "[base=der][][base=Mann]?";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:sequence", res.at("/query/operation").asText());
+        operands = Lists.newArrayList(res.at("/query/operands").elements());
+        assertEquals(3, operands.size());
+        
+        assertEquals("koral:token", operands.get(1).at("/@type").asText());
+        assertEquals(true, operands.get(1).at("/wrap/key").isMissingNode());
+        
+        assertEquals("koral:group", operands.get(2).at("/@type").asText());
+        assertEquals("operation:repetition",
+                operands.get(2).at("/operation").asText());
+        assertEquals("Mann", operands.get(2).at("/operands/0/wrap/key").asText());
+        assertEquals("koral:boundary",
+                operands.get(2).at("/boundary/@type").asText());
+        assertEquals(0, operands.get(2).at("/boundary/min").asInt());
+        assertEquals(1, operands.get(2).at("/boundary/max").asInt());
+    }
+        
+    @Test
+    public void testBetweenTokensAndOptionality2 ()
+            throws JsonProcessingException, IOException {
+        query = "[base=der]?[][base=Mann]?";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:sequence", res.at("/query/operation").asText());
+        operands = Lists.newArrayList(res.at("/query/operands").elements());
+        assertEquals(3, operands.size());
+        
+        assertEquals("koral:group", operands.get(0).at("/@type").asText());
+        assertEquals("operation:repetition",
+                operands.get(0).at("/operation").asText());
+        assertEquals("der", operands.get(0).at("/operands/0/wrap/key").asText());
+        assertEquals("koral:boundary",
+                operands.get(0).at("/boundary/@type").asText());
+        assertEquals(0, operands.get(0).at("/boundary/min").asInt());
+        assertEquals(1, operands.get(0).at("/boundary/max").asInt());
+        
+        assertEquals("koral:token", operands.get(1).at("/@type").asText());
+        assertEquals(true, operands.get(1).at("/wrap/key").isMissingNode());
+        
+        assertEquals("koral:group", operands.get(2).at("/@type").asText());
+        assertEquals("operation:repetition",
+                operands.get(2).at("/operation").asText());
+        assertEquals("Mann", operands.get(2).at("/operands/0/wrap/key").asText());
+        assertEquals("koral:boundary",
+                operands.get(2).at("/boundary/@type").asText());
+        assertEquals(0, operands.get(2).at("/boundary/min").asInt());
+        assertEquals(1, operands.get(2).at("/boundary/max").asInt());
+    }
+    
     @Test
     public void testQuantifierBetweenTokens1 ()
             throws JsonProcessingException, IOException {
