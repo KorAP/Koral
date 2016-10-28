@@ -447,7 +447,7 @@ match:leq
                                     href="#koral-docGroup">koral:docGroup</a></h4>
           <pre>
 {
-  "@type" : "koral:docGroup",
+  "@type" : "koral:docGroup"
 }</pre>
 
           <table class="koral-type">
@@ -539,7 +539,7 @@ match:leq
     "@type" : "koral:term",
     "foundry" : "tt",
     "layer" : "pos",
-    "key" : "ADJD",
+    "key" : "ADJD"
   }
 }</pre>
           <table class="koral-type">
@@ -749,8 +749,52 @@ match:leq
               <tr>
                 <td class="opt">frames</td>
                 <td>[@id]</td>
-                <td>[<code class="att">frames:contains</code>]</td>
-                <td>The allowed positional relations between operands.</td>
+                <td>[<code class="att">frames:isAround</code>,
+                  <code class="att">frames:endsWith</code>,
+                  <code class="att">frames:startsWith</code>,
+                  <code class="att">frames:matches</code>]</td>
+                <td>The allowed positional relations between operands A and B.
+                  <dl>
+                    <dt><code class="att">frames:succeedsDirectly</code></dt>
+                    <dd>Matches <code class="config">[B..B]..[A..A]</code></dd>
+
+                    <dt><code class="att">frames:succeeds</code></dt>
+                    <dd>Matches <code class="config">[B..B][A..A]</code></dd>
+
+                    <dt><code class="att">frames:alignsRight</code></dt>
+                    <dd>Matches <code class="config">[B..[A..A]B]</code></dd>
+
+                    <dt><code class="att">frames:isWithin</code></dt>
+                    <dd>Matches <code class="config">[B..[A..A]..B]</code></dd>
+
+                    <dt><code class="att">frames:overlapsRight</code></dt>
+                    <dd>Matches <code class="config">[B..[A..B]..A]</code></dd>
+
+                    <dt><code class="att">frames:preceedsDirectly</code></dt>
+                    <dd>Matches <code class="config">[A..A][B..B]</code></dd>
+
+                    <dt><code class="att">frames:preceeds</code></dt>
+                    <dd>Matches <code class="config">[A..A]..[B..B]</code></dd>
+
+                    <dt><code class="att">frames:endsWith</code></dt>
+                    <dd>Matches <code class="config">[A..[B..B]A]</code></dd>
+
+                    <dt><code class="att">frames:isAround</code></dt>
+                    <dd>Matches <code class="config">[A..[B..B]..A]</code></dd>
+                    
+                    <dt><code class="att">frames:overlapsLeft</code></dt>
+                    <dd>Matches <code class="config">[A..[B..A]..B]</code></dd>
+
+                    <dt><code class="att">frames:startsWith</code></dt>
+                    <dd>Matches <code class="config">[A[B..B]..A]</code></dd>
+
+                    <dt><code class="att">frames:alignsLeft</code></dt>
+                    <dd>Matches <code class="config">[A[B..A]..B]</code></dd>
+
+                    <dt><code class="att">frames:matches</code></dt>
+                    <dd>Matches <code class="config">[A[B..B]A]</code></dd>
+                  </dl>
+                </td>
               </tr>
               <tr>
                 <td class="opt">inOrder</td>
