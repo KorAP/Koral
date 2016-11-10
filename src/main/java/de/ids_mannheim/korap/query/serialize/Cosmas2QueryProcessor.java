@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
  * Map representation of CosmasII syntax tree as returned by ANTLR
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
+ * @author Nils Diewald (diewald@ids-mannheim.de)
  * @version 0.3
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
@@ -708,6 +709,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     }
 
 
+	// TODO: The handling of attributes vs. element names is somehow disputable ...
     @SuppressWarnings("unchecked")
     private void processOPELEM (Tree node) {
         // Step I: create element
@@ -722,11 +724,35 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         else {
             int elname = 0;
             Tree elnameNode = getFirstChildWithCat(node, "ELNAME");
+			/*
+			// TODO: This is identical to processOPMORPH
+			String wordOrRegex = "\\w+|\".+?\"";
+			Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(" + wordOrRegex
+										+ ")(:(" + wordOrRegex + "))?");
+			*/
+
             if (elnameNode != null) {
+				/*
                 span.put("key", elnameNode.getChild(0).toStringTree()
                         .toLowerCase());
+				*/
+				LinkedHashMap<String, Object> fm =
+					termToFieldMap(elnameNode.getChild(0).toStringTree());
+
+				if (fm == null)
+					return;
+
+				// Workaround for things like #ELEM(S) to become #ELEM(s)
+				if (fm.get("foundry") == null &&
+					fm.get("layer") == null &&
+					fm.get("key") != null) {
+					fm.put("key", fm.get("key").toString().toLowerCase());
+				};
+				span.put("wrap", fm);
                 elname = 1;
+
             }
+
             if (node.getChildCount() > elname) {
                 /*
                  * Attributes can carry several values, like #ELEM(W
@@ -801,7 +827,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     termGroup = (LinkedHashMap<String, Object>) termGroupOperands
                             .get(0);
                 }
-                span.put("attr", termGroup);
+
+				// TODO: This should be improved ...
+				if (elname == 0) {
+					span.put("wrap", termGroup);
+				}
+				else {
+					span.put("attr", termGroup);
+				}
             }
         }
         // Step II: decide where to put
@@ -816,61 +849,21 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         LinkedHashMap<String, Object> token = KoralObjectGenerator.makeToken();
         ArrayList<Object> terms = new ArrayList<Object>();
         LinkedHashMap<String, Object> fieldMap = null;
-        // regex group #2 is foundry, #4 layer, #5 operator,
-        // #6 key, #8 value
-        String wordOrRegex = "\\w+|\".+?\"";
-        Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(" + wordOrRegex
-                + ")(:(" + wordOrRegex + "))?");
-        Matcher m;
+
         for (String morphterm : morphterms) {
-            m = p.matcher(morphterm);
-            if (!m.matches()) {
-                addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
-                        "Something went wrong parsing the argument in MORPH().");
-                requestMap.put("query", new LinkedHashMap<String, Object>());
-                return;
-            }
 
-            fieldMap = KoralObjectGenerator.makeTerm();
-
-            if (m.group(2) != null)
-                fieldMap.put("foundry", m.group(2));
-            if (m.group(4) != null)
-                fieldMap.put("layer", m.group(4));
-            if (m.group(5) != null) {
-                if ("!=".equals(m.group(5)))
-                    negate = !negate;
-            }
-            if (m.group(6) != null) {
-                String key = m.group(6);
-                if (key.startsWith("\"") && key.endsWith("\"")) {
-                    key = key.substring(1, key.length() - 1);
-                    fieldMap.put("type", "type:regex");
-                }
-                fieldMap.put("key", key);
-            }
-
-            if (m.group(8) != null) {
-                String value = m.group(8);
-                if (value.startsWith("\"") && value.endsWith("\"")) {
-                    value = value.substring(1, value.length() - 1);
-                    fieldMap.put("type", "type:regex");
-                }
-                fieldMap.put("value", value);
-            }
-
-            // negate field (see above)
-            if (negate) {
-                fieldMap.put("match", "match:ne");
-            }
-            else {
-                fieldMap.put("match", "match:eq");
-            }
+			fieldMap = termToFieldMap(morphterm);
+			if (fieldMap == null) {
+				return;
+			};
+			
             terms.add(fieldMap);
         }
+		
         if (morphterms.length == 1) {
             token.put("wrap", fieldMap);
         }
+		
         else {
             LinkedHashMap<String, Object> termGroup = KoralObjectGenerator
                     .makeTermGroup("and");
@@ -1310,7 +1303,64 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         return rewrittenQuery;
     }
 
+	private LinkedHashMap<String, Object> termToFieldMap (String term) {
 
+        // regex group #2 is foundry, #4 layer, #5 operator,
+        // #6 key, #8 value
+        String wordOrRegex = "\\w+|\".+?\"";
+		// TODO: Should be initialized globally
+        Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(" + wordOrRegex
+                + ")(:(" + wordOrRegex + "))?");
+        Matcher m;
+
+		m = p.matcher(term);
+		if (!m.matches()) {
+			addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
+					 "Something went wrong parsing the argument in MORPH() or #ELEM().");
+			requestMap.put("query", new LinkedHashMap<String, Object>());
+			return null;
+		};
+
+        LinkedHashMap<String, Object> fieldMap = null;
+		fieldMap = KoralObjectGenerator.makeTerm();
+
+		if (m.group(2) != null)
+			fieldMap.put("foundry", m.group(2));
+		if (m.group(4) != null)
+			fieldMap.put("layer", m.group(4));
+		if (m.group(5) != null) {
+			if ("!=".equals(m.group(5)))
+				negate = !negate;
+		}
+		if (m.group(6) != null) {
+			String key = m.group(6);
+			if (key.startsWith("\"") && key.endsWith("\"")) {
+				key = key.substring(1, key.length() - 1);
+				fieldMap.put("type", "type:regex");
+			}
+			fieldMap.put("key", key);
+		}
+
+		if (m.group(8) != null) {
+			String value = m.group(8);
+			if (value.startsWith("\"") && value.endsWith("\"")) {
+				value = value.substring(1, value.length() - 1);
+				fieldMap.put("type", "type:regex");
+			}
+			fieldMap.put("value", value);
+		}
+
+		// negate field (see above)
+		if (negate) {
+			fieldMap.put("match", "match:ne");
+		}
+		else {
+			fieldMap.put("match", "match:eq");
+		};
+		return fieldMap;
+	};
+
+	
     private Tree parseCosmasQuery (String query) {
         query = rewritePositionQuery(query);
         Tree tree = null;

@@ -29,7 +29,7 @@ WS  	:	( ' '|'\t'|'\r'|'\n')+ {$channel=HIDDEN;};
 // remove '#' from ID to avoid #ELEM(C) being tokenized as an ID;
 // stating '#' should not start an ID has no effect in ANTLR.
 // ID may contain an escaped ', e.g. l\'été.
-ID	:	(~('#'|'\''|' '|'='|'!'|'<'|'>'|')') | ('\\' '\''))+;
+ID	   :	(~('#'|'\''|' '|'='|'!'|'<'|'>'|')') | ('\\' '\''))+;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
