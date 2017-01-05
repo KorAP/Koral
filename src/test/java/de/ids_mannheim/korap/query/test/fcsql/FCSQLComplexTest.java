@@ -17,9 +17,9 @@ import de.ids_mannheim.korap.query.serialize.FCSQLQueryProcessor;
  */
 public class FCSQLComplexTest {
 
-    String query;
-    String jsonLd;
-    List<Object> error;
+    private String query;
+    private String jsonLd;
+    private List<Object> error;
 
     // -------------------------------------------------------------------------
     // simple-query ::= '(' main_query ')' /* grouping */

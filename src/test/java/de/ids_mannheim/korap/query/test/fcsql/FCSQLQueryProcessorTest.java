@@ -20,12 +20,12 @@ import de.ids_mannheim.korap.query.serialize.QuerySerializer;
  */
 public class FCSQLQueryProcessorTest {
 
-    static QuerySerializer qs = new QuerySerializer();
-    static ObjectMapper mapper = new ObjectMapper();
-    static JsonNode node;
-    String query;
-    String jsonLd;
-    List<Object> error;
+    private static QuerySerializer qs = new QuerySerializer();
+    private static ObjectMapper mapper = new ObjectMapper();
+    private static JsonNode node;
+    private String query;
+    private String jsonLd;
+    private List<Object> error;
 
     public static void runAndValidate(String query, String jsonLd)
             throws JsonProcessingException {

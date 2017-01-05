@@ -83,9 +83,13 @@ dominance
 ;
 
 pointing
-: POINTING qName (anno=edgeSpec)? # DirectPointing
-| POINTING qName (anno=edgeSpec)? STAR # IndirectPointing
-| POINTING qName (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
+: POINTING edgeAnno (anno=edgeSpec)? # DirectPointing
+| POINTING edgeAnno (anno=edgeSpec)? STAR # IndirectPointing
+| POINTING edgeAnno (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
+
+//: POINTING qName (anno=edgeSpec)? # DirectPointing
+//| POINTING qName (anno=edgeSpec)? STAR # IndirectPointing
+//| POINTING qName (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
 ;
 
 spanrelation

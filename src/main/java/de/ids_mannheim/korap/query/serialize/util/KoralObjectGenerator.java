@@ -201,13 +201,13 @@ public class KoralObjectGenerator {
         }
         group.put("key", key);
         group.put("boundary", makeBoundary(min, max));
-        group.put("min", min);
-        if (max != null) {
-            group.put("max", max);
-        }
-        qp.addMessage(
-                StatusCodes.DEPRECATED_QUERY_ELEMENT,
-                "Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
+//        group.put("min", min);
+//        if (max != null) {
+//            group.put("max", max);
+//        }
+//        qp.addMessage(
+//                StatusCodes.DEPRECATED_QUERY_ELEMENT,
+//                "Deprecated 2014-07-24: 'min' and 'max' to be supported until 3 months from deprecation date.");
         return group;
     }
 
