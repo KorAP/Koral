@@ -1,8 +1,16 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import de.ids_mannheim.korap.query.object.ClassRefCheck;
+import de.ids_mannheim.korap.query.object.ClassRefOp;
+import de.ids_mannheim.korap.query.object.KoralFrame;
+import de.ids_mannheim.korap.query.object.KoralMatchOperator;
+import de.ids_mannheim.korap.query.object.KoralOperation;
+import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
+import de.ids_mannheim.korap.query.object.KoralType;
 import de.ids_mannheim.korap.query.parse.cosmas.c2psLexer;
 import de.ids_mannheim.korap.query.parse.cosmas.c2psParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
+import de.ids_mannheim.korap.query.serialize.util.Converter;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
@@ -26,6 +34,7 @@ import java.util.regex.Pattern;
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @author Nils Diewald (diewald@ids-mannheim.de)
+ * @author Eliza Margaretha (margaretha@ids-mannheim.de)
  * @version 0.3
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
@@ -87,8 +96,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * be in a sequence with any number of other nodes in this list)
      */
     private final List<String> sequentiableNodeTypes = Arrays
-            .asList(new String[] { "OPWF", "OPLEM", "OPMORPH", "OPBEG",
-                    "OPEND", "OPIN", "OPBED", "OPELEM", "OPOR", "OPAND" });
+            .asList(new String[] { "OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND",
+                    "OPIN", "OPBED", "OPELEM", "OPOR", "OPAND" });
     /**
      * Keeps track of sequenced nodes, i.e. nodes that implicitly
      * govern a sequence, as in (C2PQ (OPWF der) (OPWF Mann)). This is
@@ -173,8 +182,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 if (node == parent.getChild(0)) {
                     nodeHasSequentiableSiblings = false;
                     for (int i = 1; i < parent.getChildCount(); i++) {
-                        if (sequentiableNodeTypes.contains(getNodeCat(parent
-                                .getChild(i)))) {
+                        if (sequentiableNodeTypes
+                                .contains(getNodeCat(parent.getChild(i)))) {
                             nodeHasSequentiableSiblings = true;
                             continue;
                         }
@@ -182,7 +191,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     if (nodeHasSequentiableSiblings) {
                         // Step I: create sequence
                         LinkedHashMap<String, Object> sequence = KoralObjectGenerator
-                                .makeGroup("sequence");
+                                .makeGroup(KoralOperation.SEQUENCE);
                         // push sequence on object stack but don't
                         // increment stackedObjects counter since
                         // we've got to wait until the parent node is
@@ -387,8 +396,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 submatchOperands.add(conditionGroup);
             }
             else if (conditionCount < conditionGroups.size()) {
+                ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
+                frames.add(KoralFrame.MATCHES);
                 LinkedHashMap<String, Object> matchesGroup = KoralObjectGenerator
-                        .makePosition(new String[] { "frames:matches" });
+                        .makePosition(frames);
                 @SuppressWarnings("unchecked")
                 ArrayList<Object> matchesOperands = (ArrayList<Object>) matchesGroup
                         .get("operands");
@@ -425,7 +436,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         LinkedHashMap<String, Object> group = KoralObjectGenerator
                 .makeReference(classCounter + 128);
         LinkedHashMap<String, Object> classRefCheck = KoralObjectGenerator
-                .makeClassRefOp("classRefOp:inversion", classRef,
+                .makeClassRefOp(ClassRefOp.INVERSION, classRef,
                         classCounter + 128);
         ArrayList<Object> operands = new ArrayList<Object>();
         operands.add(classRefCheck);
@@ -467,7 +478,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // LinkedHashMap<String, Object> posgroup =
         // makePosition(null);
         LinkedHashMap<String, Object> posGroup = KoralObjectGenerator
-                .makeGroup("position");
+                .makeGroup(KoralOperation.POSITION);
         LinkedHashMap<String, Object> positionOptions;
         // posgroup
         if (nodeCat.equals("OPIN")) {
@@ -487,7 +498,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 .push((ArrayList<Object>) posGroup.get("operands"));
         stackedObjects++;
         // Step II: wrap in classRefCheck and/or focus and decide where to put
-        ArrayList<String> check = (ArrayList<String>) positionOptions
+        ArrayList<ClassRefCheck> check = (ArrayList<ClassRefCheck>) positionOptions
                 .get("classRefCheck");
         Integer[] classIn = new Integer[] { classCounter + 128 - 2,
                 classCounter + 128 - 1 };
@@ -503,8 +514,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         LinkedHashMap<String, Object> focusGroup = null;
         if ((boolean) positionOptions.get("matchall") == true) {
-            focusGroup = KoralObjectGenerator.makeClassRefOp(
-                    "classRefOp:delete",
+            focusGroup = KoralObjectGenerator.makeClassRefOp(ClassRefOp.DELETE,
                     new Integer[] { 128 + classCounter++ }, 128 + classCounter);
             ((ArrayList<Object>) focusGroup.get("operands")).add(topGroup);
         }
@@ -517,7 +527,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         if (positionOptions.containsKey("grouping")) {
             if (positionOptions.get("grouping").equals(true)) {
                 LinkedHashMap<String, Object> mergeOperation = KoralObjectGenerator
-                        .makeGroup("merge");
+                        .makeGroup(KoralOperation.MERGE);
                 ArrayList<Object> mergeOperands = (ArrayList<Object>) mergeOperation
                         .get("operands");
                 mergeOperands.add(focusGroup);
@@ -536,7 +546,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         Tree dist_list = prox_opts.getChild(1);
         // Step I: create group
         LinkedHashMap<String, Object> group = KoralObjectGenerator
-                .makeGroup("sequence");
+                .makeGroup(KoralOperation.SEQUENCE);
 
         ArrayList<Object> constraints = new ArrayList<Object>();
         boolean exclusion = typ.getChild(0).toStringTree().equals("EXCL");
@@ -584,7 +594,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     .makeDistance(meas, min, max);
             // override @type, min/max to be treated according to 
             // Cosmas particularities
-            distance.put("@type", "cosmas:distance");
+            distance.put("@type", KoralType.COSMAS_DISTANCE.toString());
             if (exclusion) {
                 distance.put("exclude", true);
             }
@@ -608,8 +618,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         LinkedHashMap<String, Object> embeddedSequence = group;
 
         if (!(openNodeCats.get(1).equals("OPBEG")
-                || openNodeCats.get(1).equals("OPEND") || inOPALL || openNodeCats
-                .get(1).equals("OPNHIT"))) {
+                || openNodeCats.get(1).equals("OPEND") || inOPALL
+                || openNodeCats.get(1).equals("OPNHIT"))) {
             wrapOperandInClass(node, 1, 128 + classCounter);
             wrapOperandInClass(node, 2, 128 + classCounter);
             // Deactivated, uncomment to wrap sequence in reference.
@@ -669,7 +679,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private void processOPOR (Tree node) {
         // Step I: create group
         LinkedHashMap<String, Object> disjunction = KoralObjectGenerator
-                .makeGroup("disjunction");
+                .makeGroup(KoralOperation.DISJUNCTION);
         disjunction.put("inOrder", false); // Order is not important 
         objectStack.push(disjunction);
         stackedObjects++;
@@ -682,7 +692,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // Step I: create group
         String nodeCat = getNodeCat(node);
         LinkedHashMap<String, Object> distgroup = KoralObjectGenerator
-                .makeGroup("sequence");
+                .makeGroup(KoralOperation.SEQUENCE);
         distgroup.put("inOrder", false); // Order is not important 
         ArrayList<Object> distances = new ArrayList<Object>();
         LinkedHashMap<String, Object> zerodistance = KoralObjectGenerator
@@ -709,46 +719,43 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     }
 
 
-	// TODO: The handling of attributes vs. element names is somehow disputable ...
+    // TODO: The handling of attributes vs. element names is somehow disputable ...
     @SuppressWarnings("unchecked")
     private void processOPELEM (Tree node) {
         // Step I: create element
         LinkedHashMap<String, Object> span = KoralObjectGenerator.makeSpan();
         if (node.getChild(0).toStringTree().equals("EMPTY")) {
-            addError(
-                    StatusCodes.MALFORMED_QUERY,
-                    "Empty #ELEM() operator."
-                            + " Please specify a valid element key (like 's' for sentence).");
+            addError(StatusCodes.MALFORMED_QUERY, "Empty #ELEM() operator."
+                    + " Please specify a valid element key (like 's' for sentence).");
             return;
         }
         else {
             int elname = 0;
             Tree elnameNode = getFirstChildWithCat(node, "ELNAME");
-			/*
-			// TODO: This is identical to processOPMORPH
-			String wordOrRegex = "\\w+|\".+?\"";
-			Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(" + wordOrRegex
-										+ ")(:(" + wordOrRegex + "))?");
-			*/
+            /*
+            // TODO: This is identical to processOPMORPH
+            String wordOrRegex = "\\w+|\".+?\"";
+            Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(" + wordOrRegex
+            							+ ")(:(" + wordOrRegex + "))?");
+            */
 
             if (elnameNode != null) {
-				/*
+                /*
                 span.put("key", elnameNode.getChild(0).toStringTree()
                         .toLowerCase());
-				*/
-				LinkedHashMap<String, Object> fm =
-					termToFieldMap(elnameNode.getChild(0).toStringTree());
+                */
+                LinkedHashMap<String, Object> fm = termToFieldMap(
+                        elnameNode.getChild(0).toStringTree());
 
-				if (fm == null)
-					return;
+                if (fm == null)
+                    return;
 
-				// Workaround for things like #ELEM(S) to become #ELEM(s)
-				if (fm.get("foundry") == null &&
-					fm.get("layer") == null &&
-					fm.get("key") != null) {
-					fm.put("key", fm.get("key").toString().toLowerCase());
-				};
-				span.put("wrap", fm);
+                // Workaround for things like #ELEM(S) to become #ELEM(s)
+                if (fm.get("foundry") == null && fm.get("layer") == null
+                        && fm.get("key") != null) {
+                    fm.put("key", fm.get("key").toString().toLowerCase());
+                };
+                span.put("wrap", fm);
                 elname = 1;
 
             }
@@ -766,7 +773,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                  * sub-group).
                  */
                 LinkedHashMap<String, Object> termGroup = KoralObjectGenerator
-                        .makeTermGroup("and");
+                        .makeTermGroup(KoralTermGroupRelation.AND);
                 ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup
                         .get("operands");
                 for (int i = elname; i < node.getChildCount(); i++) {
@@ -783,13 +790,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                         }
                         term.put("layer", translateMorph(layer));
                         term.put("key", attrNode.getChild(1).toStringTree());
-                        String match = getNodeCat(attrNode).equals("EQ") ? "eq"
-                                : "ne";
-                        term.put("match", "match:" + match);
+                        KoralMatchOperator match = getNodeCat(attrNode)
+                                .equals("EQ") ? KoralMatchOperator.EQUALS
+                                        : KoralMatchOperator.NOT_EQUALS;
+                        term.put("match", match.toString());
                     }
                     else {
                         LinkedHashMap<String, Object> subTermGroup = KoralObjectGenerator
-                                .makeTermGroup("and");
+                                .makeTermGroup(KoralTermGroupRelation.AND);
                         ArrayList<Object> subTermGroupOperands = (ArrayList<Object>) subTermGroup
                                 .get("operands");
                         int j;
@@ -803,10 +811,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                                 layer = splitted[1];
                             }
                             term.put("layer", translateMorph(layer));
-                            term.put("key", attrNode.getChild(j).toStringTree());
-                            String match = getNodeCat(attrNode).equals("EQ") ? "eq"
-                                    : "ne";
-                            term.put("match", "match:" + match);
+                            term.put("key",
+                                    attrNode.getChild(j).toStringTree());
+                            KoralMatchOperator match = getNodeCat(attrNode)
+                                    .equals("EQ") ? KoralMatchOperator.EQUALS
+                                            : KoralMatchOperator.NOT_EQUALS;
+                            term.put("match", match.toString());
                             if (node.getChildCount() == elname + 1) {
                                 termGroupOperands.add(term);
                             }
@@ -828,13 +838,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                             .get(0);
                 }
 
-				// TODO: This should be improved ...
-				if (elname == 0) {
-					span.put("wrap", termGroup);
-				}
-				else {
-					span.put("attr", termGroup);
-				}
+                // TODO: This should be improved ...
+                if (elname == 0) {
+                    span.put("wrap", termGroup);
+                }
+                else {
+                    span.put("attr", termGroup);
+                }
             }
         }
         // Step II: decide where to put
@@ -852,21 +862,21 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         for (String morphterm : morphterms) {
 
-			fieldMap = termToFieldMap(morphterm);
-			if (fieldMap == null) {
-				return;
-			};
-			
+            fieldMap = termToFieldMap(morphterm);
+            if (fieldMap == null) {
+                return;
+            };
+
             terms.add(fieldMap);
         }
-		
+
         if (morphterms.length == 1) {
             token.put("wrap", fieldMap);
         }
-		
+
         else {
             LinkedHashMap<String, Object> termGroup = KoralObjectGenerator
-                    .makeTermGroup("and");
+                    .makeTermGroup(KoralTermGroupRelation.AND);
             termGroup.put("operands", terms);
             token.put("wrap", termGroup);
         }
@@ -912,10 +922,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         // negate field (see above)
         if (negate) {
-            fieldMap.put("match", "match:ne");
+            fieldMap.put("match", KoralMatchOperator.NOT_EQUALS.toString());
         }
         else {
-            fieldMap.put("match", "match:eq");
+            fieldMap.put("match", KoralMatchOperator.EQUALS.toString());
         }
         // Step II: decide where to put
         if (!hasChild(node, "TPOS")) {
@@ -986,16 +996,26 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     @SuppressWarnings("unchecked")
     /**
-     * Processes individual position conditions as provided in the OPTS node under the OPBEG node.
-     * #BEG allows to specify position constrains that apply to the beginning or the end of the subquery X.
-     * E.g., in #BEG(X, tpos/tpos), the 'tpos' constraints before the slash indicate conditions that apply 
-     * to the beginning of X, those after the slash are conditions that apply to the end of X.
-     * See the official C-II documentation for more details. <br/><br/>
+     * Processes individual position conditions as provided in the
+     * OPTS node under the OPBEG node.
+     * #BEG allows to specify position constrains that apply to the
+     * beginning or the end of the subquery X.
+     * E.g., in #BEG(X, tpos/tpos), the 'tpos' constraints before the
+     * slash indicate conditions that apply
+     * to the beginning of X, those after the slash are conditions
+     * that apply to the end of X.
+     * See the official C-II documentation for more details.
+     * <br/><br/>
      * What's important here is what follows: <br/>
-     * Assume the query #BED(der Mann, sa/pa). This means that <b>the beginning<b/> of "der Mann" stands at
-     * the beginning of a sentence and that <b>the end</b> (because this constraint comes after the slash) stands at the 
-     * beginning of a paragraph. The "end" means the last item, here "Mann", so this token comes at the beginning
-     * of a paragraph. To capture this, we choose spanRefs: The last item of X matches the first item of the span (here: P). 
+     * Assume the query #BED(der Mann, sa/pa). This means that <b>the
+     * beginning<b/> of "der Mann" stands at
+     * the beginning of a sentence and that <b>the end</b> (because
+     * this constraint comes after the slash) stands at the
+     * beginning of a paragraph. The "end" means the last item, here
+     * "Mann", so this token comes at the beginning
+     * of a paragraph. To capture this, we choose spanRefs: The last
+     * item of X matches the first item of the span (here: P).
+     * 
      * @param cond
      * @param distributedOperands
      * @param mode
@@ -1005,7 +1025,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             ArrayList<Object> distributedOperands, String mode) {
         boolean negated = false;
         String elem; // the 'span' (s/p/t)
-        String position = "frames:matches"; // default
+        KoralFrame position = KoralFrame.MATCHES; // default
         // spanRef to be used for the element ('span')
         Integer[] elemSpanRef = null;
         // spanRef to be used for the subquery X
@@ -1026,7 +1046,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // we need to define spanRefs
         if (mode.equals("beg")) {
             if (nodeString.equals("a")) {
-                position = "frames:startsWith";
+                position = KoralFrame.STARTS_WITH;
             }
             else if (nodeString.equals("e")) {
                 hitSpanRef = new Integer[] { 0, 1 };
@@ -1035,7 +1055,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else if (mode.equals("end")) {
             if (nodeString.equals("e")) {
-                position = "frames:endsWith";
+                position = KoralFrame.ENDS_WITH;
             }
             else if (nodeString.equals("a")) {
                 hitSpanRef = new Integer[] { 0, 1 };
@@ -1044,8 +1064,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         // Create the position group and add the span and the subquery
         // as operands, possibly wrapped in spanRefs
+        ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
+        frames.add(position);
         LinkedHashMap<String, Object> positionGroup = KoralObjectGenerator
-                .makePosition(new String[] { position });
+                .makePosition(frames);
         if (negated)
             positionGroup.put("exclude", true);
         ArrayList<Object> posOperands = new ArrayList<Object>();
@@ -1058,7 +1080,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         objectStack.push(classGroup);
         if (hitSpanRef != null) {
             LinkedHashMap<String, Object> spanRefAroundHit = KoralObjectGenerator
-                    .makeSpanReference(hitSpanRef, "focus");
+                    .makeSpanReference(hitSpanRef, KoralOperation.FOCUS);
             ((ArrayList<Object>) spanRefAroundHit.get("operands"))
                     .add(classGroup);
             // re-assign after wrapping classGroup in spanRef
@@ -1066,7 +1088,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         if (elemSpanRef != null) {
             LinkedHashMap<String, Object> spanRefAroundSpan = KoralObjectGenerator
-                    .makeSpanReference(elemSpanRef, "focus");
+                    .makeSpanReference(elemSpanRef, KoralOperation.FOCUS);
             ((ArrayList<Object>) spanRefAroundSpan.get("operands")).add(span);
             // re-assign after wrapping span in spanRef
             span = spanRefAroundSpan;
@@ -1084,46 +1106,46 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         Tree groupnode = getFirstChildWithCat(node, "GROUP");
         boolean negatePosition = false;
         LinkedHashMap<String, Object> posOptions = new LinkedHashMap<String, Object>();
-        ArrayList<String> positions = new ArrayList<String>();
-        ArrayList<String> classRefCheck = new ArrayList<String>();
+        ArrayList<KoralFrame> positions = new ArrayList<KoralFrame>();
+        ArrayList<ClassRefCheck> classRefCheck = new ArrayList<ClassRefCheck>();
         posOptions.put("matchall", false);
         String posOption = null;
         if (posnode != null) {
             posOption = posnode.getChild(0).toStringTree();
             switch (posOption) {
                 case "L":
-                    positions.add("frames:startsWith");
-                    positions.add("frames:matches");
+                    positions.add(KoralFrame.STARTS_WITH);
+                    positions.add(KoralFrame.MATCHES);
                     //                    classRefCheck.add("classRefCheck:includes");
                     break;
                 case "R":
-                    positions.add("frames:endsWith");
-                    positions.add("frames:matches");
+                    positions.add(KoralFrame.ENDS_WITH);
+                    positions.add(KoralFrame.MATCHES);
                     //                    classRefCheck.add("classRefCheck:includes");
                     break;
                 case "F":
-                    positions.add("frames:matches");
+                    positions.add(KoralFrame.MATCHES);
                     //                    classRefCheck.add("classRefCheck:includes");
                     break;
                 case "FE":
-                    positions.add("frames:matches");
-                    classRefCheck.add("classRefCheck:equals");
+                    positions.add(KoralFrame.MATCHES);
+                    classRefCheck.add(ClassRefCheck.EQUALS);
                     break;
                 case "FI":
-                    positions.add("frames:matches");
-                    classRefCheck.add("classRefCheck:unequals");
+                    positions.add(KoralFrame.MATCHES);
+                    classRefCheck.add(ClassRefCheck.UNEQUALS);
                     //                    classRefCheck.add("classRefCheck:includes");
                     break;
                 case "N":
-                    positions.add("frames:contains");
+                    positions.add(KoralFrame.IS_AROUND);
                     //                    classRefCheck.add("classRefCheck:includes");
                     break;
             }
         }
         else {
-            classRefCheck.add("classRefCheck:includes");
+            classRefCheck.add(ClassRefCheck.INCLUDES);
         }
-        posOptions.put("frames", positions);
+        posOptions.put("frames", Converter.enumListToStringList(positions));
         posOptions.put("classRefCheck", classRefCheck);
         if (exclnode != null) {
             if (exclnode.getChild(0).toStringTree().equals("YES")) {
@@ -1164,48 +1186,48 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         Tree exclnode = getFirstChildWithCat(node, "EXCL");
         Tree groupnode = getFirstChildWithCat(node, "GROUP");
         LinkedHashMap<String, Object> posOptions = new LinkedHashMap<String, Object>();
-        ArrayList<String> positions = new ArrayList<String>();
-        ArrayList<String> classRefCheck = new ArrayList<String>();
+        ArrayList<KoralFrame> positions = new ArrayList<KoralFrame>();
+        ArrayList<ClassRefCheck> classRefCheck = new ArrayList<ClassRefCheck>();
         posOptions.put("matchall", false);
         String posOption = null;
         if (posnode != null) {
             posOption = posnode.getChild(0).toStringTree();
             switch (posOption) {
                 case "L":
-                    positions.add("frames:startsWith");
-                    positions.add("frames:overlapsLeft");
-                    positions.add("frames:matches");
-                    classRefCheck.add("classRefCheck:intersects");
+                    positions.add(KoralFrame.STARTS_WITH);
+                    positions.add(KoralFrame.OVERLAPS_LEFT);
+                    positions.add(KoralFrame.MATCHES);
+                    classRefCheck.add(ClassRefCheck.INTERSECTS);
                     break;
                 case "R":
-                    positions.add("frames:endsWith");
-                    positions.add("frames:overlapsRight");
-                    positions.add("frames:matches");
-                    classRefCheck.add("classRefCheck:intersects");
+                    positions.add(KoralFrame.ENDS_WITH);
+                    positions.add(KoralFrame.OVERLAPS_RIGHT);
+                    positions.add(KoralFrame.MATCHES);
+                    classRefCheck.add(ClassRefCheck.INTERSECTS);
                     break;
                 case "F":
-                    positions.add("frames:matches");
-                    classRefCheck.add("classRefCheck:intersects");
+                    positions.add(KoralFrame.MATCHES);
+                    classRefCheck.add(ClassRefCheck.INTERSECTS);
                     break;
                 case "FE":
-                    positions.add("frames:matches");
-                    classRefCheck.add("classRefCheck:equals");
+                    positions.add(KoralFrame.MATCHES);
+                    classRefCheck.add(ClassRefCheck.EQUALS);
                     break;
                 case "FI":
-                    positions.add("frames:matches");
-                    classRefCheck.add("classRefCheck:unequals");
+                    positions.add(KoralFrame.MATCHES);
+                    classRefCheck.add(ClassRefCheck.UNEQUALS);
                     break;
                 case "X":
-                    positions.add("frames:contains");
-                    classRefCheck.add("classRefCheck:intersects");
+                    positions.add(KoralFrame.IS_AROUND);
+                    classRefCheck.add(ClassRefCheck.INTERSECTS);
                     break;
             }
         }
         else {
-            classRefCheck.add("classRefCheck:intersects");
+            classRefCheck.add(ClassRefCheck.INTERSECTS);
         }
 
-        posOptions.put("frames", positions);
+        posOptions.put("frames", Converter.enumListToStringList(positions));
         posOptions.put("classRefCheck", classRefCheck);
         if (exclnode != null) {
             if (exclnode.getChild(0).toStringTree().equals("YES")) {
@@ -1244,8 +1266,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             LinkedHashMap<String, Object>[] wrapCascade) {
         int i;
         for (i = 0; i < wrapCascade.length - 1; i++) {
-            ArrayList<Object> containerOperands = (ArrayList<Object>) wrapCascade[i + 1]
-                    .get("operands");
+            ArrayList<Object> containerOperands = (ArrayList<Object>) wrapCascade[i
+                    + 1].get("operands");
             containerOperands.add(0, wrapCascade[i]);
         }
         return wrapCascade[i];
@@ -1303,64 +1325,65 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         return rewrittenQuery;
     }
 
-	private LinkedHashMap<String, Object> termToFieldMap (String term) {
+
+    private LinkedHashMap<String, Object> termToFieldMap (String term) {
 
         // regex group #2 is foundry, #4 layer, #5 operator,
         // #6 key, #8 value
         String wordOrRegex = "\\w+|\".+?\"";
-		// TODO: Should be initialized globally
+        // TODO: Should be initialized globally
         Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(" + wordOrRegex
                 + ")(:(" + wordOrRegex + "))?");
         Matcher m;
 
-		m = p.matcher(term);
-		if (!m.matches()) {
-			addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
-					 "Something went wrong parsing the argument in MORPH() or #ELEM().");
-			requestMap.put("query", new LinkedHashMap<String, Object>());
-			return null;
-		};
+        m = p.matcher(term);
+        if (!m.matches()) {
+            addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
+                    "Something went wrong parsing the argument in MORPH() or #ELEM().");
+            requestMap.put("query", new LinkedHashMap<String, Object>());
+            return null;
+        };
 
         LinkedHashMap<String, Object> fieldMap = null;
-		fieldMap = KoralObjectGenerator.makeTerm();
+        fieldMap = KoralObjectGenerator.makeTerm();
 
-		if (m.group(2) != null)
-			fieldMap.put("foundry", m.group(2));
-		if (m.group(4) != null)
-			fieldMap.put("layer", m.group(4));
-		if (m.group(5) != null) {
-			if ("!=".equals(m.group(5)))
-				negate = !negate;
-		}
-		if (m.group(6) != null) {
-			String key = m.group(6);
-			if (key.startsWith("\"") && key.endsWith("\"")) {
-				key = key.substring(1, key.length() - 1);
-				fieldMap.put("type", "type:regex");
-			}
-			fieldMap.put("key", key);
-		}
+        if (m.group(2) != null)
+            fieldMap.put("foundry", m.group(2));
+        if (m.group(4) != null)
+            fieldMap.put("layer", m.group(4));
+        if (m.group(5) != null) {
+            if ("!=".equals(m.group(5)))
+                negate = !negate;
+        }
+        if (m.group(6) != null) {
+            String key = m.group(6);
+            if (key.startsWith("\"") && key.endsWith("\"")) {
+                key = key.substring(1, key.length() - 1);
+                fieldMap.put("type", "type:regex");
+            }
+            fieldMap.put("key", key);
+        }
 
-		if (m.group(8) != null) {
-			String value = m.group(8);
-			if (value.startsWith("\"") && value.endsWith("\"")) {
-				value = value.substring(1, value.length() - 1);
-				fieldMap.put("type", "type:regex");
-			}
-			fieldMap.put("value", value);
-		}
+        if (m.group(8) != null) {
+            String value = m.group(8);
+            if (value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1);
+                fieldMap.put("type", "type:regex");
+            }
+            fieldMap.put("value", value);
+        }
 
-		// negate field (see above)
-		if (negate) {
-			fieldMap.put("match", "match:ne");
-		}
-		else {
-			fieldMap.put("match", "match:eq");
-		};
-		return fieldMap;
-	};
+        // negate field (see above)
+        if (negate) {
+            fieldMap.put("match", KoralMatchOperator.NOT_EQUALS.toString());
+        }
+        else {
+            fieldMap.put("match", KoralMatchOperator.EQUALS.toString());
+        };
+        return fieldMap;
+    };
 
-	
+
     private Tree parseCosmasQuery (String query) {
         query = rewritePositionQuery(query);
         Tree tree = null;
@@ -1382,7 +1405,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         }
         catch (RecognitionException e) {
-            log.error("Could not parse query. Please make sure it is well-formed.");
+            log.error(
+                    "Could not parse query. Please make sure it is well-formed.");
             addError(StatusCodes.MALFORMED_QUERY,
                     "Could not parse query. Please make sure it is well-formed.");
         }

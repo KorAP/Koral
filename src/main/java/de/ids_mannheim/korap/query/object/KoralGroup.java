@@ -23,7 +23,7 @@ public class KoralGroup implements KoralObject {
     private boolean inOrder = false;
     private List<KoralObject> operands;
     private List<KoralDistance> distances;
-    private List<Frame> frames;
+    private List<KoralFrame> frames;
     private KoralBoundary boundary;
     
 //    private int[] classIn;
@@ -68,11 +68,11 @@ public class KoralGroup implements KoralObject {
         this.distances = distances;
     }
     
-    public List<Frame> getFrames() {
+    public List<KoralFrame> getFrames() {
 		return frames;
 	}
 
-	public void setFrames(List<Frame> frames) {
+	public void setFrames(List<KoralFrame> frames) {
 		this.frames = frames;
 	}
 
@@ -111,20 +111,20 @@ public class KoralGroup implements KoralObject {
         return map;
     }
 
-    public enum Frame{
-		SUCCEDS("succeeds"), SUCCEDS_DIRECTLY("succeedsDirectly"), OVERLAPS_RIGHT("overlapsRight"), 
-		ALIGNS_RIGHT("alignsRight"), IS_WITHIN("isWithin"), STARTS_WITH("startsWith"), 
-		MATCHES("matches"), ALIGNS_LEFT("alignsLeft"), IS_AROUND("isAround"), ENDS_WITH("endsWith"),
-		OVERLAPS_LEFT("overlapsLeft"), PRECEEDS_DIRECTLY("precedesDirectly"), PRECEDES("precedes");
-		
-		private String value;
-		Frame(String value) {
-			this.value = value;
-		}
-		
-		@Override
-		public String toString() {
-			return "frame:"+value;
-		}
-	}
+//    public enum Frame{
+//		SUCCEDS("succeeds"), SUCCEDS_DIRECTLY("succeedsDirectly"), OVERLAPS_RIGHT("overlapsRight"), 
+//		ALIGNS_RIGHT("alignsRight"), IS_WITHIN("isWithin"), STARTS_WITH("startsWith"), 
+//		MATCHES("matches"), ALIGNS_LEFT("alignsLeft"), IS_AROUND("isAround"), ENDS_WITH("endsWith"),
+//		OVERLAPS_LEFT("overlapsLeft"), PRECEEDS_DIRECTLY("precedesDirectly"), PRECEDES("precedes");
+//		
+//		private String value;
+//		Frame(String value) {
+//			this.value = value;
+//		}
+//		
+//		@Override
+//		public String toString() {
+//			return "frame:"+value;
+//		}
+//	}
 }

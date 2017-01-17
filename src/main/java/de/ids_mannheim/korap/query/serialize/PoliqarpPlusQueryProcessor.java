@@ -1,5 +1,10 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import de.ids_mannheim.korap.query.object.ClassRefOp;
+import de.ids_mannheim.korap.query.object.KoralFrame;
+import de.ids_mannheim.korap.query.object.KoralMatchOperator;
+import de.ids_mannheim.korap.query.object.KoralOperation;
+import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
 import de.ids_mannheim.korap.query.parse.poliqarpplus.PoliqarpPlusLexer;
 import de.ids_mannheim.korap.query.parse.poliqarpplus.PoliqarpPlusParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
@@ -29,6 +34,7 @@ import java.util.*;
  * v0.3.0.
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
+ * @author Eliza Margaretha (margaretha@ids-mannheim.de)
  * @version 0.3.0
  * @since 0.1.0
  */
@@ -66,8 +72,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             processNode(tree);
         }
         else {
-            addError(StatusCodes.MALFORMED_QUERY, "Could not parse query >>> "
-                    + query + " <<<.");
+            addError(StatusCodes.MALFORMED_QUERY,
+                    "Could not parse query >>> " + query + " <<<.");
         }
     }
 
@@ -216,7 +222,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         ParseTree quantification = getFirstChildWithCat(node, "repetition");
         if (quantification != null) {
             LinkedHashMap<String, Object> quantGroup = KoralObjectGenerator
-                    .makeGroup("repetition");
+                    .makeGroup(KoralOperation.REPETITION);
             Integer[] minmax = parseRepetition(quantification);
             quantGroup.put("boundary",
                     KoralObjectGenerator.makeBoundary(minmax[0], minmax[1]));
@@ -234,9 +240,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      */
     private void processSequence (ParseTree node) {
         // skip in case of emptyTokenSequence or emptyTokenSequenceClass
-        if (node.getChildCount() == 1
-                && getNodeCat(node.getChild(0))
-                        .startsWith("emptyTokenSequence")) {
+        if (node.getChildCount() == 1 && getNodeCat(node.getChild(0))
+                .startsWith("emptyTokenSequence")) {
             return;
         }
         // skip in case this sequence is just a container for an alignment 
@@ -250,8 +255,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
         }
         LinkedHashMap<String, Object> sequence = KoralObjectGenerator
-                .makeGroup("sequence");
-        
+                .makeGroup(KoralOperation.SEQUENCE);
+
         putIntoSuperObject(sequence);
         objectStack.push(sequence);
         stackedObjects++;
@@ -261,6 +266,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     @SuppressWarnings("unchecked")
     /**
      * empty tokens at beginning/end of sequence
+     * 
      * @param node
      */
     private void processEmptyTokenSequence (ParseTree node) {
@@ -286,8 +292,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     private void processEmptyTokenSequenceClass (ParseTree node) {
         int classId = 1;
         if (hasChild(node, "spanclass_id")) {
-            classId = Integer.parseInt(node.getChild(1).getChild(0)
-                    .toStringTree(parser));
+            classId = Integer.parseInt(
+                    node.getChild(1).getChild(0).toStringTree(parser));
         }
         LinkedHashMap<String, Object> classGroup = KoralObjectGenerator
                 .makeSpanClass(classId);
@@ -328,8 +334,9 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
             term.put("layer", "orth");
             term.put("key", key);
-            String matches = negated ? "ne" : "eq";
-            term.put("match", "match:" + matches);
+            KoralMatchOperator matches = negated ? KoralMatchOperator.NOT_EQUALS
+                    : KoralMatchOperator.EQUALS;
+            term.put("match", matches.toString());
             ParseTree flagNode = getFirstChildWithCat(node, "flag");
             if (flagNode != null) {
                 ArrayList<String> flags = new ArrayList<String>();
@@ -379,7 +386,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         int i = 1;
         if (node.getChild(0).getText().equals("^")) {
             i = 0; // if there is no first child (anchor is at extreme left or
-                   // right of segment), start counting at 0 in the loop
+                  // right of segment), start counting at 0 in the loop
         }
         // for every alignment anchor, get its left and right child and register
         // these to be wrapped in classes.
@@ -445,9 +452,9 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (termOpNode != null) {
             String termOp = termOpNode.getText();
             if (termOp.equals("=="))
-                wrappedTerm.put("match", "match:eq");
+                wrappedTerm.put("match", KoralMatchOperator.EQUALS.toString());
             else if (termOp.equals("!="))
-                wrappedTerm.put("match", "match:ne");
+                wrappedTerm.put("match", KoralMatchOperator.NOT_EQUALS.toString());
         }
         if (termNode != null) {
             LinkedHashMap<String, Object> termOrTermGroup = parseTermOrTermGroup(
@@ -467,7 +474,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     private void processDisjunction (ParseTree node) {
         LinkedHashMap<String, Object> disjunction = KoralObjectGenerator
-                .makeGroup("disjunction");
+                .makeGroup(KoralOperation.DISJUNCTION);
         putIntoSuperObject(disjunction);
         objectStack.push(disjunction);
         stackedObjects++;
@@ -484,7 +491,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     private void processRelation (ParseTree node) {
         LinkedHashMap<String, Object> relationGroup = KoralObjectGenerator
-                .makeGroup("relation");
+                .makeGroup(KoralOperation.RELATION);
         LinkedHashMap<String, Object> relation = KoralObjectGenerator
                 .makeRelation();
         LinkedHashMap<String, Object> term = KoralObjectGenerator.makeTerm();
@@ -549,13 +556,13 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     private void processMatching (ParseTree node) {
         // Step I: get info
         ArrayList<Integer> classRefs = new ArrayList<Integer>();
-        String classRefOp = null;
+        ClassRefOp classRefOp = null;
         if (getNodeCat(node.getChild(2)).equals("spanclass_id")) {
             ParseTree spanNode = node.getChild(2);
             for (int i = 0; i < spanNode.getChildCount() - 1; i++) {
                 String ref = spanNode.getChild(i).getText();
                 if (ref.equals("|") || ref.equals("&")) {
-                    classRefOp = ref.equals("|") ? "intersection" : "union";
+                    classRefOp = ref.equals("|") ? ClassRefOp.INTERSECTION : ClassRefOp.UNION;
                 }
                 else {
                     try {
@@ -581,7 +588,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (type.equals("split"))
             referenceGroup.put("operation", "operation:split");
         if (classRefOp != null) {
-            referenceGroup.put("classRefOp", "classRefOp:" + classRefOp);
+            referenceGroup.put("classRefOp", classRefOp.toString());
         }
         ArrayList<Object> referenceOperands = new ArrayList<Object>();
         referenceGroup.put("operands", referenceOperands);
@@ -621,8 +628,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         addWarning("You used the 'meta' keyword in a PoliqarpPlus query. This"
                 + " feature is currently not supported. Please use virtual "
                 + "collections to restrict documents by metadata.");
-        CollectionQueryProcessor cq = new CollectionQueryProcessor(node
-                .getChild(1).getText());
+        CollectionQueryProcessor cq = new CollectionQueryProcessor(
+                node.getChild(1).getText());
         requestMap.put("collection", cq.getRequestMap().get("collection"));
         for (ParseTree child : getChildren(node)) {
             visited.add(child);
@@ -638,8 +645,10 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 .makeSpan(domain);
         LinkedHashMap<String, Object> queryObj = (LinkedHashMap<String, Object>) requestMap
                 .get("query");
+        ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
+        frames.add(KoralFrame.IS_AROUND);
         LinkedHashMap<String, Object> contains = KoralObjectGenerator
-                .makePosition(new String[] { "frames:isAround" });
+                .makePosition(frames);
         ArrayList<Object> operands = (ArrayList<Object>) contains
                 .get("operands");
         operands.add(span);
@@ -712,23 +721,25 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     private LinkedHashMap<String, Object> parseFrame (ParseTree node) {
         String operator = node.toStringTree(parser).toLowerCase();
-        String[] frames = new String[] { "" };
+        ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
         switch (operator) {
             case "contains":
-                frames = new String[] { "frames:isAround" };
+                frames.add(KoralFrame.IS_AROUND);
                 break;
             case "matches":
-                frames = new String[] { "frames:matches" };
+                frames.add(KoralFrame.MATCHES);
                 break;
             case "startswith":
-                frames = new String[] { "frames:startsWith", "frames:matches" };
+                frames.add(KoralFrame.STARTS_WITH);
+                frames.add(KoralFrame.MATCHES);
                 break;
             case "endswith":
-                frames = new String[] { "frames:endsWith", "frames:matches" };
+                frames.add(KoralFrame.ENDS_WITH);
+                frames.add(KoralFrame.MATCHES);
                 break;
             case "overlaps":
-                frames = new String[] { "frames:overlapsLeft",
-                        "frames:overlapsRight" };
+                frames.add(KoralFrame.OVERLAPS_LEFT);
+                frames.add(KoralFrame.OVERLAPS_RIGHT);
                 break;
         }
         return KoralObjectGenerator.makePosition(frames);
@@ -765,7 +776,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             // Term is defined recursive with non-necessary brackets
             if (getNodeCat(node.getChild(0)).equals("(")) {
-                return parseTermOrTermGroup(node.getChild(1), negatedGlobal, mode);
+                return parseTermOrTermGroup(node.getChild(1), negatedGlobal,
+                        mode);
             };
 
             String key = null;
@@ -856,7 +868,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             // TermGroup is defined recursive with non-necessary brackets
             if (getNodeCat(node.getChild(0)).equals("(")) {
-                return parseTermOrTermGroup(node.getChild(1), negatedGlobal, mode);
+                return parseTermOrTermGroup(node.getChild(1), negatedGlobal,
+                        mode);
             };
 
             // For termGroups, establish a boolean relation between
@@ -877,8 +890,14 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 rightOp = node.getChild(node.getChildCount() - 2);
             // establish boolean relation
             ParseTree boolOp = getFirstChildWithCat(node, "boolOp");
-            String operator = boolOp.getText().equals("&") ? "and" : "or";
-            termGroup = KoralObjectGenerator.makeTermGroup(operator);
+            if (boolOp.getText().equals("&")) {
+                termGroup = KoralObjectGenerator
+                        .makeTermGroup(KoralTermGroupRelation.AND);
+            }
+            else {
+                termGroup = KoralObjectGenerator
+                        .makeTermGroup(KoralTermGroupRelation.OR);
+            }
             ArrayList<Object> operands = (ArrayList<Object>) termGroup
                     .get("operands");
             // recursion with left/right operands
@@ -947,8 +966,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     private Integer[] parseDistance (ParseTree distanceNode) {
         int emptyTokenSeqIndex = getNodeCat(distanceNode).equals("distance") ? 0
                 : 2;
-        Integer[] minmax = parseEmptySegments(distanceNode
-                .getChild(emptyTokenSeqIndex));
+        Integer[] minmax = parseEmptySegments(
+                distanceNode.getChild(emptyTokenSeqIndex));
         Integer min = minmax[0];
         Integer max = minmax[1];
         //        min++;
@@ -1011,8 +1030,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             // Get starting rule from parser
             Method startRule = PoliqarpPlusParser.class.getMethod("request");
-            tree = (ParserRuleContext) startRule
-                    .invoke(parser, (Object[]) null);
+            tree = (ParserRuleContext) startRule.invoke(parser,
+                    (Object[]) null);
         }
         // Some things went wrong ...
         catch (Exception e) {

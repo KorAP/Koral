@@ -1,5 +1,6 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
 import de.ids_mannheim.korap.query.parse.collection.CollectionQueryLexer;
 import de.ids_mannheim.korap.query.parse.collection.CollectionQueryParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
@@ -519,8 +520,12 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
                 rightOp = node.getChild(node.getChildCount() - 2);
             // establish boolean relation
             ParseTree boolOp = getFirstChildWithCat(node, "booleanOp");
-            String operator = boolOp.getText().equals("&") ? "and" : "or";
-            termGroup = KoralObjectGenerator.makeTermGroup(operator);
+            if (boolOp.getText().equals("&")){
+                termGroup = KoralObjectGenerator.makeTermGroup(KoralTermGroupRelation.AND);
+            }
+            else {
+                termGroup = KoralObjectGenerator.makeTermGroup(KoralTermGroupRelation.OR);
+            }
             ArrayList<Object> operands = (ArrayList<Object>) termGroup
                     .get("operands");
             // recursion with left/right operands

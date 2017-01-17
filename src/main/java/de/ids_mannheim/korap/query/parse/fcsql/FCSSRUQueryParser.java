@@ -10,11 +10,11 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.query.object.KoralBoundary;
 import de.ids_mannheim.korap.query.object.KoralGroup;
 import de.ids_mannheim.korap.query.object.KoralDistance;
+import de.ids_mannheim.korap.query.object.KoralFrame;
 import de.ids_mannheim.korap.query.object.KoralObject;
 import de.ids_mannheim.korap.query.object.KoralOperation;
 import de.ids_mannheim.korap.query.object.KoralSpan;
 import de.ids_mannheim.korap.query.object.KoralTerm;
-import de.ids_mannheim.korap.query.object.KoralGroup.Frame;
 import eu.clarin.sru.server.fcs.parser.ExpressionWildcard;
 import eu.clarin.sru.server.fcs.parser.QueryDisjunction;
 import eu.clarin.sru.server.fcs.parser.QueryGroup;
@@ -125,7 +125,7 @@ public class FCSSRUQueryParser {
     private KoralGroup parseWithinQuery(QueryWithWithin queryNode)
             throws KoralException {
         KoralGroup koralGroup = new KoralGroup(KoralOperation.POSITION);
-        koralGroup.setFrames(Arrays.asList(Frame.IS_AROUND));
+        koralGroup.setFrames(Arrays.asList(KoralFrame.IS_AROUND));
 
         List<KoralObject> operands = new ArrayList<KoralObject>();
         operands.add(parseQueryNode(queryNode.getWithin()));
