@@ -2,6 +2,7 @@ package de.ids_mannheim.korap.query.serialize;
 
 import de.ids_mannheim.korap.query.object.ClassRefCheck;
 import de.ids_mannheim.korap.query.object.ClassRefOp;
+import de.ids_mannheim.korap.query.object.CosmasPosition;
 import de.ids_mannheim.korap.query.object.KoralFrame;
 import de.ids_mannheim.korap.query.object.KoralMatchOperator;
 import de.ids_mannheim.korap.query.object.KoralOperation;
@@ -469,72 +470,120 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     }
 
 
+    private boolean isExclusion (Tree node) {
+        Tree exclnode = getFirstChildWithCat(node, "EXCL");
+        if (exclnode != null
+                && exclnode.getChild(0).toStringTree().equals("YES")) {
+            return true;
+        }
+        return false;
+    }
+
+
+    private Map<String, Object> addClassRefCheck (
+            ArrayList<ClassRefCheck> check, Map<String, Object> group) {
+        Integer[] classIn = new Integer[] { classCounter + 128 - 2,
+                classCounter + 128 - 1 };
+        // wrap position in a classRefCheck
+        Map<String, Object> topGroup = KoralObjectGenerator
+                .makeClassRefCheck(check, classIn, classCounter + 128);
+        ((ArrayList<Object>) topGroup.get("operands")).add(group);
+        return topGroup;
+    }
+
+
+    private Map<String, Object> addClassFocus (boolean isMatchAll,
+            Map<String, Object> posGroup) {
+        Map<String, Object> focusGroup = null;
+        if (isMatchAll) {
+            focusGroup = KoralObjectGenerator.makeClassRefOp(ClassRefOp.DELETE,
+                    new Integer[] { 128 + classCounter++ }, 128 + classCounter);
+            ((ArrayList<Object>) focusGroup.get("operands")).add(posGroup);
+        }
+        else { // match only first argument
+            focusGroup = KoralObjectGenerator.wrapInReference(posGroup,
+                    classCounter + 128 - 1);
+            classCounter++;
+        }
+        return focusGroup;
+    }
+
+
     @SuppressWarnings("unchecked")
     private void processOPIN_OPOV (Tree node) {
-        // Step I: create group
         String nodeCat = getNodeCat(node);
-        wrapOperandInClass(node, 2, 128 + classCounter++);
-        wrapOperandInClass(node, 1, 128 + classCounter++);
+
         // LinkedHashMap<String, Object> posgroup =
         // makePosition(null);
-        LinkedHashMap<String, Object> posGroup = KoralObjectGenerator
-                .makeGroup(KoralOperation.POSITION);
-        LinkedHashMap<String, Object> positionOptions;
-        // posgroup
+        boolean isExclusion = isExclusion(node);
+
+        KoralOperation operation;
+        if (isExclusion) {
+            operation = KoralOperation.EXCLUSION;
+        }
+        else {
+            operation = KoralOperation.POSITION;
+            wrapOperandInClass(node, 2, 128 + classCounter++);
+            wrapOperandInClass(node, 1, 128 + classCounter++);
+        }
+
+        Map<String, Object> posGroup = KoralObjectGenerator
+                .makeGroup(operation);
+
+        Map<String, Object> positionOptions;
         if (nodeCat.equals("OPIN")) {
-            positionOptions = parseOPINOptions(node);
+            positionOptions = parseOPINOptions(node, isExclusion);
         }
         else {
             positionOptions = parseOPOVOptions(node);
         }
+
         posGroup.put("frames", positionOptions.get("frames"));
-        posGroup.put("frame", positionOptions.get("frame"));
-        if (positionOptions.containsKey("exclude")) {
-            posGroup.put("exclude", positionOptions.get("exclude"));
-        }
+        // EM: is frame needed?
+        // posGroup.put("frame", positionOptions.get("frame"));
         objectStack.push(posGroup);
-        // mark this an inverted operands object
-        invertedOperandsLists
-                .push((ArrayList<Object>) posGroup.get("operands"));
         stackedObjects++;
-        // Step II: wrap in classRefCheck and/or focus and decide where to put
-        ArrayList<ClassRefCheck> check = (ArrayList<ClassRefCheck>) positionOptions
+
+        ArrayList<ClassRefCheck> checkList = (ArrayList<ClassRefCheck>) positionOptions
                 .get("classRefCheck");
-        Integer[] classIn = new Integer[] { classCounter + 128 - 2,
-                classCounter + 128 - 1 };
-        LinkedHashMap<String, Object> topGroup;
-        if (!check.isEmpty()) {
-            // wrap position in a classRefCheck
-            topGroup = KoralObjectGenerator.makeClassRefCheck(check, classIn,
-                    classCounter + 128);
-            ((ArrayList<Object>) topGroup.get("operands")).add(posGroup);
-        }
-        else {
-            topGroup = posGroup;
-        }
-        LinkedHashMap<String, Object> focusGroup = null;
-        if ((boolean) positionOptions.get("matchall") == true) {
-            focusGroup = KoralObjectGenerator.makeClassRefOp(ClassRefOp.DELETE,
-                    new Integer[] { 128 + classCounter++ }, 128 + classCounter);
-            ((ArrayList<Object>) focusGroup.get("operands")).add(topGroup);
-        }
-        else { // match only first argument
-            focusGroup = KoralObjectGenerator.wrapInReference(topGroup,
-                    classCounter + 128 - 1);
-            classCounter++;
-        }
-        // wrap in 'merge' operation if grouping option is set
-        if (positionOptions.containsKey("grouping")) {
-            if (positionOptions.get("grouping").equals(true)) {
-                LinkedHashMap<String, Object> mergeOperation = KoralObjectGenerator
-                        .makeGroup(KoralOperation.MERGE);
-                ArrayList<Object> mergeOperands = (ArrayList<Object>) mergeOperation
-                        .get("operands");
-                mergeOperands.add(focusGroup);
-                focusGroup = mergeOperation;
+
+        // EM: why bother inverting the operands and creating classes and focus? 
+        // can't we agree on the first operand to be the results, like in operation:exclusion?
+        if (!isExclusion) {
+            // mark this an inverted operands object
+            invertedOperandsLists
+                    .push((ArrayList<Object>) posGroup.get("operands"));
+
+            // Step II: wrap in classRefCheck and/or focus and decide where to put
+            if (!checkList.isEmpty()) {
+                posGroup = addClassRefCheck(checkList, posGroup);
             }
+            posGroup = addClassFocus((boolean) positionOptions.get("matchall"),
+                    posGroup);
+
         }
-        putIntoSuperObject(focusGroup, 1);
+        else if (!checkList.isEmpty()) {
+            wrapOperandInClass(node, 1, 128 + classCounter++);
+            wrapOperandInClass(node, 2, 128 + classCounter++);
+            posGroup = addClassRefCheck(
+                    (ArrayList<ClassRefCheck>) positionOptions
+                            .get("classRefCheck"),
+                    posGroup);
+            posGroup = addClassFocus((boolean) positionOptions.get("matchall"),
+                    posGroup);
+        }
+
+        // wrap in 'merge' operation if grouping option is set
+        if (positionOptions.containsKey("grouping")
+                && (boolean) positionOptions.get("grouping")) {
+            LinkedHashMap<String, Object> mergeOperation = KoralObjectGenerator
+                    .makeGroup(KoralOperation.MERGE);
+            ArrayList<Object> mergeOperands = (ArrayList<Object>) mergeOperation
+                    .get("operands");
+            mergeOperands.add(posGroup);
+            posGroup = mergeOperation;
+        }
+        putIntoSuperObject(posGroup, 1);
     }
 
 
@@ -1099,60 +1148,34 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     }
 
 
-    private LinkedHashMap<String, Object> parseOPINOptions (Tree node) {
+    private LinkedHashMap<String, Object> parseOPINOptions (Tree node,
+            boolean isExclusion) {
         Tree posnode = getFirstChildWithCat(node, "POS");
         Tree rangenode = getFirstChildWithCat(node, "RANGE");
-        Tree exclnode = getFirstChildWithCat(node, "EXCL");
         Tree groupnode = getFirstChildWithCat(node, "GROUP");
-        boolean negatePosition = false;
+
         LinkedHashMap<String, Object> posOptions = new LinkedHashMap<String, Object>();
         ArrayList<KoralFrame> positions = new ArrayList<KoralFrame>();
         ArrayList<ClassRefCheck> classRefCheck = new ArrayList<ClassRefCheck>();
         posOptions.put("matchall", false);
+
         String posOption = null;
         if (posnode != null) {
-            posOption = posnode.getChild(0).toStringTree();
-            switch (posOption) {
-                case "L":
-                    positions.add(KoralFrame.STARTS_WITH);
-                    positions.add(KoralFrame.MATCHES);
-                    //                    classRefCheck.add("classRefCheck:includes");
-                    break;
-                case "R":
-                    positions.add(KoralFrame.ENDS_WITH);
-                    positions.add(KoralFrame.MATCHES);
-                    //                    classRefCheck.add("classRefCheck:includes");
-                    break;
-                case "F":
-                    positions.add(KoralFrame.MATCHES);
-                    //                    classRefCheck.add("classRefCheck:includes");
-                    break;
-                case "FE":
-                    positions.add(KoralFrame.MATCHES);
-                    classRefCheck.add(ClassRefCheck.EQUALS);
-                    break;
-                case "FI":
-                    positions.add(KoralFrame.MATCHES);
-                    classRefCheck.add(ClassRefCheck.UNEQUALS);
-                    //                    classRefCheck.add("classRefCheck:includes");
-                    break;
-                case "N":
-                    positions.add(KoralFrame.IS_AROUND);
-                    //                    classRefCheck.add("classRefCheck:includes");
-                    break;
+            posOption = posnode.getChild(0).toStringTree().toUpperCase();
+            if (isExclusion) {
+                checkINWithExclusionOptions(posOption, positions,
+                        classRefCheck);
+            }
+            else {
+                checkINOptions(posOption, positions, classRefCheck);
             }
         }
         else {
             classRefCheck.add(ClassRefCheck.INCLUDES);
         }
+
         posOptions.put("frames", Converter.enumListToStringList(positions));
         posOptions.put("classRefCheck", classRefCheck);
-        if (exclnode != null) {
-            if (exclnode.getChild(0).toStringTree().equals("YES")) {
-                negatePosition = !negatePosition;
-            }
-        }
-
         if (rangenode != null) {
             String range = rangenode.getChild(0).toStringTree().toLowerCase();
             if (range.equals("all")) {
@@ -1163,19 +1186,78 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             }
         }
 
-        if (negatePosition) {
-            posOptions.put("exclude", true);
-        }
-
-        boolean grouping = false;
-        if (groupnode != null) {
-            if (groupnode.getChild(0).toStringTree().equalsIgnoreCase("max")) {
-                grouping = true;
-            }
+        Boolean grouping = false;
+        if (groupnode != null && groupnode.getChild(0).toStringTree()
+                .equalsIgnoreCase("max")) {
+            grouping = true;
         }
         posOptions.put("grouping", grouping);
 
         return posOptions;
+    }
+
+
+    private void checkINOptions (String posOption,
+            ArrayList<KoralFrame> positions,
+            ArrayList<ClassRefCheck> classRefCheck) {
+        switch (posOption) {
+            case "L":
+                positions.add(KoralFrame.STARTS_WITH);
+                positions.add(KoralFrame.MATCHES);
+                //                    classRefCheck.add("classRefCheck:includes");
+                break;
+            case "R":
+                positions.add(KoralFrame.ENDS_WITH);
+                positions.add(KoralFrame.MATCHES);
+                //                    classRefCheck.add("classRefCheck:includes");
+                break;
+            case "F":
+                positions.add(KoralFrame.MATCHES);
+                //                    classRefCheck.add("classRefCheck:includes");
+                break;
+            case "FE":
+                positions.add(KoralFrame.MATCHES);
+                classRefCheck.add(ClassRefCheck.EQUALS);
+                break;
+            case "FI":
+                positions.add(KoralFrame.MATCHES);
+                classRefCheck.add(ClassRefCheck.UNEQUALS);
+                //                    classRefCheck.add("classRefCheck:includes");
+                break;
+            case "N":
+                positions.add(KoralFrame.IS_AROUND);
+                //                    classRefCheck.add("classRefCheck:includes");
+                break;
+        }
+    }
+
+
+    private void checkINWithExclusionOptions (String posOption,
+            ArrayList<KoralFrame> positions,
+            ArrayList<ClassRefCheck> classRefCheck) {
+        if (CosmasPosition.N.name().equals(posOption)) {
+            positions.add(KoralFrame.IS_WITHIN);
+            return;
+        }
+        else if (CosmasPosition.L.name().equals(posOption)) {
+            positions.add(KoralFrame.ALIGNS_LEFT);
+        }
+        else if (CosmasPosition.R.name().equals(posOption)) {
+            positions.add(KoralFrame.ALIGNS_RIGHT);
+        }
+        else if (CosmasPosition.FE.name().equals(posOption)) {
+            classRefCheck.add(ClassRefCheck.UNEQUALS);
+        }
+        else if (CosmasPosition.FI.name().equals(posOption)) {
+            classRefCheck.add(ClassRefCheck.EQUALS);
+        }
+        else if (CosmasPosition.F.name().equals(posOption)) {}
+        else {
+            // throw an error or add an exception;
+            return;
+        }
+
+        positions.add(KoralFrame.MATCHES);
     }
 
 
@@ -1275,7 +1357,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
 
     @SuppressWarnings("unchecked")
-    private void putIntoSuperObject (LinkedHashMap<String, Object> object,
+    private void putIntoSuperObject (Map<String, Object> object,
             int objStackPosition) {
         if (objectStack.size() > objStackPosition) {
             ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack

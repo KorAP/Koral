@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.ids_mannheim.korap.query.object.ClassRefCheck;
 import de.ids_mannheim.korap.query.object.ClassRefOp;
@@ -291,8 +292,8 @@ public class KoralObjectGenerator {
     }
 
 
-    public static LinkedHashMap<String, Object> wrapInReference (
-            LinkedHashMap<String, Object> group, Integer classId) {
+    public static Map<String, Object> wrapInReference (
+            Map<String, Object> group, Integer classId) {
         LinkedHashMap<String, Object> refGroup = makeReference(classId);
         ArrayList<Object> operands = new ArrayList<Object>();
         operands.add(group);
@@ -314,9 +315,9 @@ public class KoralObjectGenerator {
 
 
     @SuppressWarnings("unchecked")
-    public static LinkedHashMap<String, Object> wrapInClass (
-            LinkedHashMap<String, Object> group, Integer classId) {
-        LinkedHashMap<String, Object> classGroup = makeSpanClass(classId);
+    public static Map<String, Object> wrapInClass (
+            Map<String, Object> group, Integer classId) {
+        Map<String, Object> classGroup = makeSpanClass(classId);
         ((ArrayList<Object>) classGroup.get("operands")).add(group);
         return classGroup;
     }

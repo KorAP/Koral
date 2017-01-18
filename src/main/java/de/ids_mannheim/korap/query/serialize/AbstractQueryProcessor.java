@@ -46,7 +46,7 @@ public abstract class AbstractQueryProcessor {
      * objects
      * into last created objects.
      */
-    LinkedList<LinkedHashMap<String, Object>> objectStack = new LinkedList<LinkedHashMap<String, Object>>();
+    LinkedList<Map<String, Object>> objectStack = new LinkedList<Map<String, Object>>();
     /**
      * Keeps track of how many objects there are to pop after every
      * recursion
