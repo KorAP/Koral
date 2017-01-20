@@ -2,7 +2,7 @@ package de.ids_mannheim.korap.query.serialize;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,40 +19,41 @@ import org.slf4j.Logger;
  * JSON-LD tree for that query.
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
+ * @author Eliza Margaretha (margaretha@ids-mannheim.de)
  * @version 0.3.0
  * @since 0.1.0
  */
 public abstract class AbstractQueryProcessor {
 
-    Logger log;
+    protected Logger log;
     /**
      * The query string.
      */
-    String query;
+    protected String query;
     /**
      * Top-level map representing the whole request.
      */
-    LinkedHashMap<String, Object> requestMap = new LinkedHashMap<String, Object>();
+    protected Map<String, Object> requestMap = new HashMap<String, Object>();
     /**
      * Keeps track of open node categories.
      */
-    LinkedList<String> openNodeCats = new LinkedList<String>();
+    protected LinkedList<String> openNodeCats = new LinkedList<String>();
     /**
      * Keeps track of all visited nodes in a tree.
      */
-    List<ParseTree> visited = new ArrayList<ParseTree>();
+    protected List<ParseTree> visited = new ArrayList<ParseTree>();
     /**
      * Keeps track of active object, used for inserting new KoralQuery
      * objects
      * into last created objects.
      */
-    LinkedList<Map<String, Object>> objectStack = new LinkedList<Map<String, Object>>();
+    protected LinkedList<Map<String, Object>> objectStack = new LinkedList<Map<String, Object>>();
     /**
      * Keeps track of how many objects there are to pop after every
      * recursion
      * of {@link #processNode(ParseTree)}
      */
-    LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
+    protected LinkedList<Integer> objectsToPop = new LinkedList<Integer>();
     /**
      * If true, print debug statements
      */
@@ -62,34 +63,34 @@ public abstract class AbstractQueryProcessor {
      * Contains error arrays, consisting of an error code and a
      * message.
      */
-    private ArrayList<List<Object>> errors = new ArrayList<List<Object>>();
+    private List<List<Object>> errors = new ArrayList<List<Object>>();
     /**
      * Contains warning arrays, consisting of a warning code
      * (optional) and a
      * message.
      */
-    private ArrayList<List<Object>> warnings = new ArrayList<List<Object>>();
+    private List<List<Object>> warnings = new ArrayList<List<Object>>();
     /**
      * Contains other messages.
      */
-    private ArrayList<List<Object>> messages = new ArrayList<List<Object>>();
+    private List<List<Object>> messages = new ArrayList<List<Object>>();
     /**
      * Virtual collection queries.
      */
-    private LinkedHashMap<String, Object> collection = new LinkedHashMap<String, Object>();
+    private Object collection = new HashMap<String, Object>();
     /**
      * Holds information on displaying directives.
      */
-    private LinkedHashMap<String, Object> meta = new LinkedHashMap<String, Object>();
+    private Map<String, Object> meta = new HashMap<String, Object>();
     /**
      * Indicates which classes are to be highlighted in KWIC view.
      */
-    private ArrayList<Integer> highlightClasses = new ArrayList<Integer>();
+    private List<Integer> highlightClasses = new ArrayList<Integer>();
 
     /**
      * Indicates positions of alignment rulers in KWIC view.
      */
-    private ArrayList<List<Integer>> alignments = new ArrayList<List<Integer>>();
+    private List<List<Integer>> alignments = new ArrayList<List<Integer>>();
 
 
     AbstractQueryProcessor () {
@@ -99,7 +100,7 @@ public abstract class AbstractQueryProcessor {
         requestMap.put("warnings", warnings);
         requestMap.put("messages", messages);
         requestMap.put("collection", collection);
-        requestMap.put("query", new LinkedHashMap<String, Object>());
+        requestMap.put("query", new HashMap<String, Object>());
         requestMap.put("meta", meta);
     }
 

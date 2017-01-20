@@ -44,7 +44,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             .getLogger(PoliqarpPlusQueryProcessor.class);
     private int classCounter = 1;
 
-    LinkedHashMap<ParseTree, Integer> classWrapRegistry = new LinkedHashMap<ParseTree, Integer>();
+    Map<ParseTree, Integer> classWrapRegistry = new HashMap<ParseTree, Integer>();
 
 
     /**
@@ -114,7 +114,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         // in a class, e.g. by an alignment operation
         if (classWrapRegistry.containsKey(node)) {
             Integer classId = classWrapRegistry.get(node);
-            LinkedHashMap<String, Object> spanClass = KoralObjectGenerator
+            Map<String, Object> spanClass = KoralObjectGenerator
                     .makeSpanClass(classId);
             putIntoSuperObject(spanClass);
             objectStack.push(spanClass);
@@ -221,7 +221,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         // Cover possible quantification (i.e. repetition) of segment
         ParseTree quantification = getFirstChildWithCat(node, "repetition");
         if (quantification != null) {
-            LinkedHashMap<String, Object> quantGroup = KoralObjectGenerator
+            Map<String, Object> quantGroup = KoralObjectGenerator
                     .makeGroup(KoralOperation.REPETITION);
             Integer[] minmax = parseRepetition(quantification);
             quantGroup.put("boundary",
@@ -254,7 +254,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 return;
             }
         }
-        LinkedHashMap<String, Object> sequence = KoralObjectGenerator
+        Map<String, Object> sequence = KoralObjectGenerator
                 .makeGroup(KoralOperation.SEQUENCE);
 
         putIntoSuperObject(sequence);
@@ -273,8 +273,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         Integer[] minmax = parseEmptySegments(node);
         // object will be either a repetition group or a single empty
         // token
-        LinkedHashMap<String, Object> object;
-        LinkedHashMap<String, Object> emptyToken = KoralObjectGenerator
+        Map<String, Object> object;
+        Map<String, Object> emptyToken = KoralObjectGenerator
                 .makeToken();
         if (minmax[0] != 1 || minmax[1] == null || minmax[1] != 1) {
             object = KoralObjectGenerator.makeRepetition(minmax[0], minmax[1]);
@@ -295,7 +295,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             classId = Integer.parseInt(
                     node.getChild(1).getChild(0).toStringTree(parser));
         }
-        LinkedHashMap<String, Object> classGroup = KoralObjectGenerator
+        Map<String, Object> classGroup = KoralObjectGenerator
                 .makeSpanClass(classId);
         addHighlightClass(classId);
         putIntoSuperObject(classGroup);
@@ -305,7 +305,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 
     private void processToken (ParseTree node) {
-        LinkedHashMap<String, Object> token = KoralObjectGenerator.makeToken();
+        Map<String, Object> token = KoralObjectGenerator.makeToken();
         // handle negation
         List<ParseTree> negations = getChildrenWithCat(node, "!");
         int termOrTermGroupChildId = 1;
@@ -318,7 +318,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
         if (getNodeCat(node.getChild(0)).equals("key")) {
             // no 'term' child, but direct key specification: process here
-            LinkedHashMap<String, Object> term = KoralObjectGenerator
+            Map<String, Object> term = KoralObjectGenerator
                     .makeTerm();
 
             String key = node.getChild(0).getText();
@@ -360,7 +360,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         else {
             // child is 'term' or 'termGroup' -> process in extra method
-            LinkedHashMap<String, Object> termOrTermGroup = parseTermOrTermGroup(
+            Map<String, Object> termOrTermGroup = parseTermOrTermGroup(
                     node.getChild(termOrTermGroupChildId), negated);
             token.put("wrap", termOrTermGroup);
         }
@@ -423,8 +423,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         boolean negated = false;
         if (negations.size() % 2 == 1)
             negated = true;
-        LinkedHashMap<String, Object> span = KoralObjectGenerator.makeSpan();
-        LinkedHashMap<String, Object> wrappedTerm = KoralObjectGenerator
+        Map<String, Object> span = KoralObjectGenerator.makeSpan();
+        Map<String, Object> wrappedTerm = KoralObjectGenerator
                 .makeTerm();
         span.put("wrap", wrappedTerm);
         ParseTree keyNode = getFirstChildWithCat(node, "key");
@@ -457,12 +457,12 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 wrappedTerm.put("match", KoralMatchOperator.NOT_EQUALS.toString());
         }
         if (termNode != null) {
-            LinkedHashMap<String, Object> termOrTermGroup = parseTermOrTermGroup(
+            Map<String, Object> termOrTermGroup = parseTermOrTermGroup(
                     termNode, negated, "span");
             span.put("attr", termOrTermGroup);
         }
         if (termGroupNode != null) {
-            LinkedHashMap<String, Object> termOrTermGroup = parseTermOrTermGroup(
+            Map<String, Object> termOrTermGroup = parseTermOrTermGroup(
                     termGroupNode, negated, "span");
             span.put("attr", termOrTermGroup);
         }
@@ -473,7 +473,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 
     private void processDisjunction (ParseTree node) {
-        LinkedHashMap<String, Object> disjunction = KoralObjectGenerator
+        Map<String, Object> disjunction = KoralObjectGenerator
                 .makeGroup(KoralOperation.DISJUNCTION);
         putIntoSuperObject(disjunction);
         objectStack.push(disjunction);
@@ -482,7 +482,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 
     private void processPosition (ParseTree node) {
-        LinkedHashMap<String, Object> position = parseFrame(node.getChild(0));
+        Map<String, Object> position = parseFrame(node.getChild(0));
         putIntoSuperObject(position);
         objectStack.push(position);
         stackedObjects++;
@@ -490,11 +490,11 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 
     private void processRelation (ParseTree node) {
-        LinkedHashMap<String, Object> relationGroup = KoralObjectGenerator
+        Map<String, Object> relationGroup = KoralObjectGenerator
                 .makeGroup(KoralOperation.RELATION);
-        LinkedHashMap<String, Object> relation = KoralObjectGenerator
+        Map<String, Object> relation = KoralObjectGenerator
                 .makeRelation();
-        LinkedHashMap<String, Object> term = KoralObjectGenerator.makeTerm();
+        Map<String, Object> term = KoralObjectGenerator.makeTerm();
         relationGroup.put("relation", relation);
         relation.put("wrap", term);
         if (node.getChild(0).getText().equals("dominates")) {
@@ -543,7 +543,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 addError(StatusCodes.INVALID_CLASS_REFERENCE, msg);
             }
         }
-        LinkedHashMap<String, Object> classGroup = KoralObjectGenerator
+        Map<String, Object> classGroup = KoralObjectGenerator
                 .makeSpanClass(classId);
         addHighlightClass(classId);
         putIntoSuperObject(classGroup);
@@ -580,7 +580,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         else {
             classRefs.add(1); // default
         }
-        LinkedHashMap<String, Object> referenceGroup = KoralObjectGenerator
+        Map<String, Object> referenceGroup = KoralObjectGenerator
                 .makeReference(classRefs);
 
         String type = node.getChild(0).toStringTree(parser);
@@ -601,7 +601,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 
     private void processSubmatch (ParseTree node) {
-        LinkedHashMap<String, Object> submatch = KoralObjectGenerator
+        Map<String, Object> submatch = KoralObjectGenerator
                 .makeReference(null);
         submatch.put("operands", new ArrayList<Object>());
         ParseTree startpos = getFirstChildWithCat(node, "startpos");
@@ -641,13 +641,13 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     private void processWithin (ParseTree node) {
         ParseTree domainNode = node.getChild(1);
         String domain = getNodeCat(domainNode);
-        LinkedHashMap<String, Object> span = KoralObjectGenerator
+        Map<String, Object> span = KoralObjectGenerator
                 .makeSpan(domain);
-        LinkedHashMap<String, Object> queryObj = (LinkedHashMap<String, Object>) requestMap
+        Map<String, Object> queryObj = (Map<String, Object>) requestMap
                 .get("query");
         ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
         frames.add(KoralFrame.IS_AROUND);
-        LinkedHashMap<String, Object> contains = KoralObjectGenerator
+        Map<String, Object> contains = KoralObjectGenerator
                 .makePosition(frames);
         ArrayList<Object> operands = (ArrayList<Object>) contains
                 .get("operands");
@@ -719,7 +719,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private LinkedHashMap<String, Object> parseFrame (ParseTree node) {
+    private Map<String, Object> parseFrame (ParseTree node) {
         String operator = node.toStringTree(parser).toLowerCase();
         ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
         switch (operator) {
@@ -746,7 +746,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private LinkedHashMap<String, Object> parseTermOrTermGroup (ParseTree node,
+    private Map<String, Object> parseTermOrTermGroup (ParseTree node,
             boolean negated) {
         return parseTermOrTermGroup(node, negated, "token");
     }
@@ -767,7 +767,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      * @return A term or termGroup object, depending on input
      */
     @SuppressWarnings("unchecked")
-    private LinkedHashMap<String, Object> parseTermOrTermGroup (ParseTree node,
+    private Map<String, Object> parseTermOrTermGroup (ParseTree node,
             boolean negatedGlobal, String mode) {
 
         String nodeCat = getNodeCat(node);
@@ -781,7 +781,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             };
 
             String key = null;
-            LinkedHashMap<String, Object> term = KoralObjectGenerator
+            Map<String, Object> term = KoralObjectGenerator
                     .makeTerm();
             // handle negation
             boolean negated = negatedGlobal;
@@ -875,7 +875,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             // For termGroups, establish a boolean relation between
             // operands and recursively call this function with
             // the term or termGroup operands
-            LinkedHashMap<String, Object> termGroup = null;
+            Map<String, Object> termGroup = null;
             ParseTree leftOp = null;
             ParseTree rightOp = null;
             // check for leading/trailing parantheses
@@ -919,7 +919,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      * @param object
      *            The object to be inserted
      */
-    private void putIntoSuperObject (LinkedHashMap<String, Object> object) {
+    private void putIntoSuperObject (Map<String, Object> object) {
         putIntoSuperObject(object, 0);
     }
 
@@ -939,7 +939,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      *            the stack is the super object.
      */
     @SuppressWarnings({ "unchecked" })
-    private void putIntoSuperObject (LinkedHashMap<String, Object> object,
+    private void putIntoSuperObject (Map<String, Object> object,
             int objStackPosition) {
         if (objectStack.size() > objStackPosition) {
             ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack

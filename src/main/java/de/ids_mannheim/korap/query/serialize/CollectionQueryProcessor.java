@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,7 +101,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (nodeCat.equals("relation")) {
             String operator = getNodeCat(node.getChild(1).getChild(0)).equals(
                     "&") ? "and" : "or";
-            LinkedHashMap<String, Object> relationGroup = KoralObjectGenerator
+            Map<String, Object> relationGroup = KoralObjectGenerator
                     .makeDocGroup(operator);
             putIntoSuperObject(relationGroup);
             objectStack.push(relationGroup);
@@ -112,14 +113,14 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             String field = fieldNode.getChild(0).toStringTree(parser);
             ParseTree operatorNode = getFirstChildWithCat(node, "operator");
             ParseTree valueNode = getFirstChildWithCat(node, "value");
-            LinkedHashMap<String, Object> term = KoralObjectGenerator.makeDoc();
+            Map<String, Object> term = KoralObjectGenerator.makeDoc();
             term.put("key", field);
             term.putAll(parseValue(valueNode));
             String match = operatorNode.getText();
             term.put("match", "match:" + interpretMatchOperator(match));
 
             if (!checkOperatorValueConformance(term)) {
-                requestMap = new LinkedHashMap<String, Object>();
+                requestMap = new HashMap<String, Object>();
                 return;
             }
             //            if (QueryUtils.checkDateValidity(valueNode.getText())) {
@@ -140,13 +141,13 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             ParseTree dateOpNode = getFirstChildWithCat(node, "dateOp");
             ParseTree dateNode = getFirstChildWithCat(node, "date");
 
-            LinkedHashMap<String, Object> term = KoralObjectGenerator.makeDoc();
+            Map<String, Object> term = KoralObjectGenerator.makeDoc();
             term.put("key", field);
             term.putAll(parseValue(dateNode));
             String match = dateOpNode.getText();
             term.put("match", "match:" + interpretMatchOperator(match));
             if (!checkOperatorValueConformance(term)) {
-                requestMap = new LinkedHashMap<String, Object>();
+                requestMap = new HashMap<String, Object>();
                 return;
             }
             if (!QueryUtils.checkDateValidity(dateNode.getText())) {
@@ -161,7 +162,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
 
         if (nodeCat.equals("token")) {
-            LinkedHashMap<String, Object> token = KoralObjectGenerator
+            Map<String, Object> token = KoralObjectGenerator
                     .makeToken();
             // handle negation
             List<ParseTree> negations = getChildrenWithCat(node, "!");
@@ -171,7 +172,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
                 negated = true;
             if (getNodeCat(node.getChild(0)).equals("key")) {
                 // no 'term' child, but direct key specification: process here
-                LinkedHashMap<String, Object> term = KoralObjectGenerator
+                Map<String, Object> term = KoralObjectGenerator
                         .makeTerm();
                 String key = node.getChild(0).getText();
                 if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
@@ -203,7 +204,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
             else {
                 // child is 'term' or 'termGroup' -> process in extra method 
-                LinkedHashMap<String, Object> termOrTermGroup = parseTermOrTermGroup(
+                Map<String, Object> termOrTermGroup = parseTermOrTermGroup(
                         node.getChild(1), negated);
                 token.put("wrap", termOrTermGroup);
             }
@@ -246,7 +247,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
      * (inequation operators <,>,<=,>= may only be used with dates).
      */
     private boolean checkOperatorValueConformance (
-            LinkedHashMap<String, Object> term) {
+            Map<String, Object> term) {
         String match = (String) term.get("match");
         String type = (String) term.get("type");
         if (type == null || type.equals("type:regex")) {
@@ -262,8 +263,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private LinkedHashMap<String, Object> parseValue (ParseTree valueNode) {
-        LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+    private Map<String, Object> parseValue (ParseTree valueNode) {
+        Map<String, Object> map = new HashMap<String, Object>();
         if (getNodeCat(valueNode).equals("date")) {
             map.put("type", "type:date");
             checkDateValidity(valueNode);
@@ -387,13 +388,13 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private void putIntoSuperObject (LinkedHashMap<String, Object> object) {
+    private void putIntoSuperObject (Map<String, Object> object) {
         putIntoSuperObject(object, 0);
     }
 
 
     @SuppressWarnings({ "unchecked" })
-    private void putIntoSuperObject (LinkedHashMap<String, Object> object,
+    private void putIntoSuperObject (Map<String, Object> object,
             int objStackPosition) {
         if (objectStack.size() > objStackPosition) {
             ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack
@@ -407,7 +408,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private LinkedHashMap<String, Object> parseTermOrTermGroup (ParseTree node,
+    private Map<String, Object> parseTermOrTermGroup (ParseTree node,
             boolean negated) {
         return parseTermOrTermGroup(node, negated, "token");
     }
@@ -426,11 +427,11 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
      * @return A term or termGroup object, depending on input
      */
     @SuppressWarnings("unchecked")
-    private LinkedHashMap<String, Object> parseTermOrTermGroup (ParseTree node,
+    private Map<String, Object> parseTermOrTermGroup (ParseTree node,
             boolean negatedGlobal, String mode) {
         if (getNodeCat(node).equals("term")) {
             String key = null;
-            LinkedHashMap<String, Object> term = KoralObjectGenerator
+            Map<String, Object> term = KoralObjectGenerator
                     .makeTerm();
             // handle negation
             boolean negated = negatedGlobal;
@@ -505,7 +506,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             // For termGroups, establish a boolean relation between operands 
             // and recursively call this function with the term or termGroup 
             // operands.
-            LinkedHashMap<String, Object> termGroup = null;
+            Map<String, Object> termGroup = null;
             ParseTree leftOp = null;
             ParseTree rightOp = null;
             // check for leading/trailing parantheses

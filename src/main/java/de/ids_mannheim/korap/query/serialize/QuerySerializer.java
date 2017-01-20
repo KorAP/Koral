@@ -42,7 +42,7 @@ public class QuerySerializer {
     public static String queryLanguageVersion;
 
     private AbstractQueryProcessor ast;
-    private Map<String, Object> collection = new LinkedHashMap<>();
+    private Map<String, Object> collection = new HashMap<>();
     private Map<String, Object> meta;
     private List<Object> errors;
     private List<Object> warnings;
@@ -251,7 +251,7 @@ public class QuerySerializer {
             return collection1;
         }
         else {
-            LinkedHashMap<String, Object> docGroup = KoralObjectGenerator
+            Map<String, Object> docGroup = KoralObjectGenerator
                     .makeDocGroup("and");
             ArrayList<Object> operands = (ArrayList<Object>) docGroup
                     .get("operands");
