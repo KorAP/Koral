@@ -526,7 +526,7 @@ match:leq
           <p>For KoralQuery the primary data of a document is represented as a series of tokens. A series of tokens is called a <em>substring</em> of the document.</p>
           <p>Query objects define conditions regarding the constellation of tokens and token-bound features that have to be in place to make a substring a valid occurrence of the query object in a document. These conditions may have syntagmatic or paradigmatic character.</p>
           <p>In addition to the substring, results of a query object may contain so-called <em>classes</em> as markers for substrings of the result substring.</p>
-          <p>The result of a KoralQuery object may be an operand of another object, that may filter, enrich, combine or alter the results of nested objects.</p>
+          <p>The result of a span type object, i.e. its span and its classes, may be an operand of another object, that may filter, enrich, combine or alter the results of nested objects.</p>
 
           <h3>Basic span types</h3>
           <h4 class="koral-type"><a name="koral-token"
@@ -1363,7 +1363,17 @@ match:leq
           <pre>
 {
   "@type" : "koral:result",
-  "doc" : {
+  "text" : {
+    "@type" : "koral:text",
+    "annotation" : ["xip","xip/p", "cnx", "cnx/c"],
+    "annotationType" : ["xip/p=token", "cnx/c=spans"],
+    "meta" : [{
+      "@type" : "koral:doc",
+      "key" : "docID",
+      "value" : "doc-3",
+      "type" : "type:string"
+    }],
+    "snippet" : "..."
   }
 }
           </pre>
@@ -1426,15 +1436,15 @@ match:leq
           <h3><a id="appendix-regex" name="appendix-regex">Regular Expressions</a></h3>
           <p>The definition of the supported regular expressions is out of scope of this specification and depends on the implementation.</p>
 
-          <h3><a id="appendix-kwic" name="appendix-kwic">KwiC representation as a HTML snippet</a></h3>
+          <h3><a id="appendix-kwic" name="appendix-kwic">KWIC representation as HTML snippets</a></h3>
           <p>KoralQuery <a href="#span-type">span type objects</a> return a textual span.
-            There are several ways to return this information, with a &quot;KwiC&quot; snippet
-            being the most popular. In a &quot;KwiC&quot; snippet, the primary data
+            There are several ways to return this information, with a &quot;KWIC&quot; snippet
+            being the most popular. In a &quot;KWIC&quot; snippet, the primary data
             of the document is merged with the positional information of the match,
             with a context to the left and the right of the actual match.</p>
           <p>KoralQuery supports the definition of classes using <code class="att">operation:class</code>,
-            that may add additional positional information to the &quot;KwiC&quot;, that may be merged into the primary data.
-            As KoralQuery supports annotations of different types, the &quot;KwiC&quot; may be enriched with further annotations as well.</p>
+            that may add additional positional information to the &quot;KWIC&quot;, that may be merged into the primary data.
+            As KoralQuery supports annotations of different types, the &quot;KWIC&quot; may be enriched with further annotations as well.</p>
           <p>The snippet may be added to a match as an <code>xsd:string</code> using a <code>snippet</code> attribute.</p>
           
           <pre>
