@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KoralQuery (in preparation)</title>
+    <title>KoralQuery 0.4</title>
     <link rel="stylesheet" href="misc/font/koral-fontello.css">
     <!--[if IE 7]><link rel="stylesheet" href="misc/font/koral-fontello-ie7.css"><![endif]-->
     <link rel="stylesheet" href="misc/style.css" type="text/css" />
@@ -13,7 +13,7 @@
   </head>
 
   <body class="specification draft">
-    <div id="banner"><span>In preparation</span></div>
+    <div id="banner"><span>WiP</span></div>
     <div class="h-entry hentry">
       <h1 class="p-name"><span>KoralQuery</span></h1>
       <div id="reference">
@@ -33,13 +33,12 @@
           <span class="p-org">IDS</span>,
           <span class="p-locality">Mannheim</span></p>
         <p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-        <p>Last update: <time class="dt-updated" datetime="2016-10-08">2016/10/08</time></p>
+        <p>Last update: <time class="dt-updated" datetime="2016-10-08">2017/04/03</time></p>
       </div>
       
-      <p style="color: red">This draft is in preparation.</p>
       <summary>
         <h2>Abstract</h2>
-        <p>KoralQuery is a general corpus query protocol (i.e. independent of research tasks and corpus formats), serialized in <a href="#ref-jsonld">JSON-LD</a> <a href="#fn-jsonldrecommendation" id="ref-jsonldrecommendation" name="ref-jsonldrecommendation">[1]</a>.
+        <p>KoralQuery is a general corpus query protocol (i.e. it tries to be independent of research tasks and corpus formats), serialized in <a href="#ref-jsonld">JSON-LD</a> <a href="#fn-jsonldrecommendation" id="ref-jsonldrecommendation" name="ref-jsonldrecommendation">[1]</a>.
           KoralQuery focuses on simplicity of implementation rather than human readibility and writability.
           Support for a growing number of query languages is granted by the <a href="#sec-implementations">Koral</a> serialization processor.</p>
         <pre>{
@@ -55,22 +54,22 @@
         <section>
           <h2>Introduction</h2>
           <p><a href="#ref-jsonld">JSON-LD</a> is a <a href="#ref-json">JSON</a> based serialization format for Linked Data.
-            Nested objects in JSON-LD can be categorized by providing unique identifiers based on URIs. These identifiers can be defined in context files and associated to JSON objects by defining a <code>@context</code> attribute. The context file for the current version of KoralQuery is available at <a href="http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld">http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld</a>.</p>
-          <p>In KoralQuery corpus search is divided in multiple separated query concepts, that are categorized in the following types:</p>
+            Nested objects in JSON-LD can be categorized by providing unique identifiers based on URIs. These identifiers can be defined in context files and associated to JSON objects by defining a <code>@context</code> attribute.<!-- The context file for the current version of KoralQuery is available at <a href="http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld">http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld</a>. --></p>
+          <p>In KoralQuery corpus search is divided in multiple separated protocol concepts, that are categorized in the following types:</p>
           <dl>
             <dt><a href="#coll-type">Collection Type Objects</a></dt>
             <dd>Define a document collection by certain constraints. The expected result of a collection type object is a subset of the corpus collection that meet the conditions. The empty set is valid.</dd>
             <dt><a href="#span-type">Span Type Objects</a></dt>
             <dd>Define an occurrence collection by certain conditions. The expected result of a span type object is a collection of substrings in documents of the document collection, that meet the conditions. The empty set is valid.</dd>
             <dt><a href="#para-type">Parametric Type Objects</a></dt>
-            <dd>Specify further constraints for embedding collection type object or span type objects as parameters. The expected result of a parametric type object is a refinement of the parental collection type object or span type object.</dd>
+            <dd>Specify further constraints for embedding collection type objects or span type objects as parameters. The expected result of a parametric type object is a refinement of the parental collection type object or span type object.</dd>
             <dt><a href="#report-type">Report Type Objects</a></dt>
             <dd>Report modifications of a query object (<em>rewrites</em>) as part of the query; or report errors, warnings and further messages regarding the processing of the query. Report types do not alter the expected result of a query.</dd>
             <dt><a href="#response-type">Response Type Objects</a></dt>
-            <dd>Define a document collection by certain constraints. The expected result of a collection type object is a subset of the corpus collection that meet the conditions. The empty set is valid.</dd>
+            <dd>Define the result of the processing of the query.</dd>
 
           </dl>
-          <p>Further undefined objects are allowed, but are unspecified. The definition of <code>meta</code> objects, that define further adjustments to the query execution or the processing of search results, is dependent on the implementation of KoralQuery and not part of this specification. For common meta information with recommended definitions, refer to the <a href="#appendix-meta">appendix</a></p>
+          <p>Further undefined objects are allowed, but are unspecified. The definition of <code>meta</code> objects, that define further adjustments to the query execution or the processing of search results, is dependent on the implementation of KoralQuery and not part of this specification. For common meta information with recommended definitions, refer to the <a href="#appendix-meta">appendix</a>.</p>
         </section>
         
         <section>
@@ -152,7 +151,7 @@
 
         <section>
           <h2><a id="sec-report" name="sec-report">Error, Warning, and Message objects</a></h2>
-          <p>KoralQuery is meant to be future proof by being upwards compatible. That means, new features official introduced or supported by third party software (using external context files) should be either treated as intended, be intendendly ignored or be rejected.</p>
+          <p>KoralQuery is meant to be future proof by being upwards compatible. That means, new features officially introduced or supported by third party software (using external context files) should be either treated as intended, be intendendly ignored or be rejected.</p>
           <p>Incompatibilities with query objects and collection objects should be treated as documented in the implementation guide section of each object.</p>
           <p>To inform the user on certain incompatibilities, KoralQuery has three different mechanisms for raising awareness. These mechanisms may also be used by query rewrite processors, to inject errors, warnings, and messages.</p>
           <dl>
@@ -1345,38 +1344,132 @@ match:leq
           <p>The response to a KoralQuery match request
             (in contrast to, for example, a request for statistic information, currently out of scope of this document)
             is a collection of documents,
-            satisfying both the defined document query in the <code>collection</code>
-            and the defined span query in <code>query</code>.
+            satisfying the defined document query in the <code>collection</code>,
+            the defined span query in <code>query</code>,
+            and all supported result modifying constraints in <code>meta</code>.
             In case no <code>query</code> is defined,
             each document of the collection is
             represented by the requested metadata.
+            <!--
             In case a span query is defined, at the total number of matches
-            per document is returned (see <a href="#appendix-meta"><code>totalResults</code></a>).</p>
+            per document is returned (see <a href="#appendix-meta"><code>totalResults</code></a>).--></p>
+
+          <pre>{
+  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld",
+  "collection" : { ... },
+  "query" : { ... },
+  "result" : {
+    "@type" : "koral:result",
+    "results" : [
+      {
+        "@type" : "koral:match",
+        "annotation" : ["xip","xip/p", "cnx", "cnx/c"],
+        "annotationType" : ["xip/p=token", "cnx/c=spans"],
+        "fields" : [{
+          "@type" : "koral:doc",
+          "key" : "docID",
+          "value" : "doc-3",
+          "type" : "type:string"
+        }],
+        "snippet" : "..."
+      },
+      {
+        "@type" : "koral:match",
+        ...
+      }
+    ]
+  }
+}
+          </pre>
+
+          <h4 class="koral-type"><a name="koral-result"
+                                      id="koral-result"
+                                      href="#koral-result">koral:result</a></h4>
+
+          <pre>
+{
+  "@type" : "koral:result",
+  "results" : [ ... ],
+  "totalResults" : 4
+}</pre>
+          <table class="koral-type">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Values</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>@type</td>
+                <td>@id</td>
+                <td></td>
+                <td><code class="att">koral:result</code></td>
+              </tr>
+              <tr>
+                <td>results</td>
+                <td>[response type]</td>
+                <td></td>
+                <td>Contains a list of results.</td>
+              </tr>
+              <tr>
+                <td class="opt">totalResults</td>
+                <td>xsd:integer</td>
+                <td>0</td>
+                <td>The number of total results in the result set.</td>
+              </tr>
+            </tbody>
+          </table>
+
+
+          <h4 class="koral-type"><a name="koral-match"
+                                      id="koral-match"
+                                      href="#koral-match">koral:match</a></h4>
+
           <p>This specification defines a format for representing
             matches as HTML snippets in the <a href="#appendix-kwic">appendix</a> with &quot;keywords in context&quot;,
             that may be used in the response format.
           </p>
 
-          <h4 class="koral-result"><a name="koral-result"
-                                      id="koral-result"
-                                      href="#koral-result">koral:result</a></h4>
           <pre>
 {
-  "@type" : "koral:result",
-  "text" : {
-    "@type" : "koral:text",
-    "annotation" : ["xip","xip/p", "cnx", "cnx/c"],
-    "annotationType" : ["xip/p=token", "cnx/c=spans"],
-    "meta" : [{
-      "@type" : "koral:doc",
-      "key" : "docID",
-      "value" : "doc-3",
-      "type" : "type:string"
-    }],
-    "snippet" : "..."
-  }
+  "@type" : "koral:match",
+  "fields" : [{
+    "@type" : "koral:doc",
+    "key" : "docID",
+    "value" : "doc-3",
+    "type" : "type:string"
+  }],
+  "snippet" : "..."
 }
-          </pre>
+</pre>
+          <table class="koral-type">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Values</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>@type</td>
+                <td>@id</td>
+                <td></td>
+                <td><code class="att">koral:match</code></td>
+              </tr>
+              <tr>
+                <td>fields</td>
+                <td>[<code class="att">koral:doc</att>]</td>
+                <td></td>
+                <td>Contains a set of <code class="att">koral:doc</code> objects defining the metadata fields of the document the match occurs in.</td>
+              </tr>
+            </tbody>
+          </table>
+
           
         </section>
         
@@ -1419,12 +1512,6 @@ match:leq
                 <td>[xsd:string]</td>
                 <td></td>
                 <td>The data fields requested.</td>
-              </tr>
-              <tr>
-                <td class="opt">totalResults</td>
-                <td>xsd:integer</td>
-                <td></td>
-                <td>The number of total results in the result set.</td>
               </tr>
             </tbody>
           </table>
@@ -1510,7 +1597,7 @@ match:leq
           <h2>References</h2>
 
           <p>To cite work on KoralQuery, please refer to: <a id="ref-koralquery" name="ref-koralquery">Bingel, Joachim and Nils Diewald (2015): <a href="http://www.ep.liu.se/ecp_article/index.en.aspx?issue=111;article=001">KoralQuery - a General Corpus Query Protocol</a>, Proceedings of the Workshop on Innovative Corpus Query and Visualization Tools at NODALIDA 2015, May 11-13, 2015, Vilnius, Lithuania.</a></p>
-          <p>To cite this specification, please refer to: <a id="ref-koralspec" name="ref-koralquery">Diewald, Nils and Joachim Bingel (2015): <a href="http://KorAP.github.io/Koral">KoralQuery 0.3</a>, Technical report, IDS, Mannheim, Germany. Working  draft.</p>
+          <p>To cite this specification, please refer to: <a id="ref-koralspec" name="ref-koralquery">Diewald, Nils and Joachim Bingel (2015-2017): <a href="http://KorAP.github.io/Koral">KoralQuery 0.4</a>, Technical report, IDS, Mannheim, Germany. Working  draft.</p>
 
           <p><a id="ref-json" name="ref-json">ECMA (2003): <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf">The JSON Data Interchange Format</a>, ECMA-404, ECMA Standard.</a></p>
           <p><a id="ref-jsonld" name="ref-jsonld">Sporny, Manu, Dave Longley, Gregg Kellogg, Markus Lanthaler, and Niklas Lindstr&ouml;m (2014): <a href="http://www.w3.org/TR/json-ld/">JSON-LD 1.0 - A JSON-based Serialization for Linked Data</a>, W3C Recommendation.</a></p>
