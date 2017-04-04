@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KoralQuery 0.4</title>
+    <title>KoralQuery 0.5</title>
     <link rel="stylesheet" href="misc/font/koral-fontello.css">
     <!--[if IE 7]><link rel="stylesheet" href="misc/font/koral-fontello-ie7.css"><![endif]-->
     <link rel="stylesheet" href="misc/style.css" type="text/css" />
@@ -42,7 +42,7 @@
           KoralQuery focuses on simplicity of implementation rather than human readibility and writability.
           Support for a growing number of query languages is granted by the <a href="#sec-implementations">Koral</a> serialization processor.</p>
         <pre>{
-  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld",
+  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.5/context.jsonld",
   "collection" : { ... },
   "query" : { ... },
   "meta" : { ... }
@@ -54,7 +54,7 @@
         <section>
           <h2>Introduction</h2>
           <p><a href="#ref-jsonld">JSON-LD</a> is a <a href="#ref-json">JSON</a> based serialization format for Linked Data.
-            Nested objects in JSON-LD can be categorized by providing unique identifiers based on URIs. These identifiers can be defined in context files and associated to JSON objects by defining a <code>@context</code> attribute.<!-- The context file for the current version of KoralQuery is available at <a href="http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld">http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld</a>. --></p>
+            Nested objects in JSON-LD can be categorized by providing unique identifiers based on URIs. These identifiers can be defined in context files and associated to JSON objects by defining a <code>@context</code> attribute.<!-- The context file for the current version of KoralQuery is available at <a href="http://korap.ids-mannheim.de/ns/koral/0.5/context.jsonld">http://korap.ids-mannheim.de/ns/koral/0.5/context.jsonld</a>. --></p>
           <p>In KoralQuery corpus search is divided in multiple separated protocol concepts, that are categorized in the following types:</p>
           <dl>
             <dt><a href="#coll-type">Collection Type Objects</a></dt>
@@ -183,7 +183,7 @@
             and group constraints.</p>
 
           <pre>{
-  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld",
+  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.5/context.jsonld",
   "collection" : {
     "@type":"koral:docGroup",
     "operation":"operation:and",
@@ -364,6 +364,8 @@
             <code class="att">match:excludes</code> are undefined for
             <code class="att">type:date</code>.
           </p>
+
+          <p style="color:red"><code class="att">koral:doc</code> may be renamed to <code class="att">koral:field</code> in future versions of this specification.</p>
 
           <section class="guide">
             <h4>Implementation Guide</h4>
@@ -1355,7 +1357,7 @@ match:leq
             per document is returned (see <a href="#appendix-meta"><code>totalResults</code></a>).--></p>
 
           <pre>{
-  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.4/context.jsonld",
+  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.5/context.jsonld",
   "collection" : { ... },
   "query" : { ... },
   "result" : {
@@ -1463,16 +1465,222 @@ match:leq
               </tr>
               <tr>
                 <td>fields</td>
-                <td>[<code class="att">koral:doc</att>]</td>
+                <td>[<code class="att">koral:doc</code>]</td>
                 <td></td>
                 <td>Contains a set of <code class="att">koral:doc</code> objects defining the metadata fields of the document the match occurs in.</td>
               </tr>
             </tbody>
           </table>
-
-          
         </section>
-        
+
+        <section>
+          <h2><a id="import-type" name="import type">Import Type Objects</a></h2>
+          <p style="color: red">The import format is still in preparation and currently not supported by the reference implementation Krill.</p>
+
+          <pre>
+{
+  "@context" : "http://korap.ids-mannheim.de/ns/koral/0.5/context.jsonld",
+  "record" : {
+    "@type" : "koral:record",
+    "primaryData" : "Der Bau-Leiter trug einen lustigen Bau-Helm.",
+    "id" : 3,
+    "fields" : [
+      {
+        "@type" : "koral:doc",
+        "key" : "docID",
+        "value" : "doc-3",
+        "type" : "type:string"
+      },
+      {
+        "@type":"koral:doc",
+        "key":"license",
+        "value":"closed",
+        "type":"type:string"
+      }
+    ],
+    "subtokens" : [
+      {
+        "@type" : "koral:subtoken",
+        "offsets" : [0,3]
+      },
+      {
+        "@type" : "koral:subtoken",
+        "offsets" : [4,7]
+      },
+      {
+        "@type" : "koral:subtoken",
+        "offsets" : [8,14]
+      },
+      {
+        "@type" : "koral:subtoken",
+        "offsets" : [15,19]
+      },
+      {
+        "@type" : "koral:subtoken",
+        "offsets" : [20,25]
+      },
+      {
+        "@type" : "koral:subtoken",
+        "offsets" : [26,34]
+      },
+      {
+        "@type" : "koral:subtoken",
+        "offsets" : [35,38]
+      },
+      {
+        "@type" : "koral:subtoken",
+        "offsets" : [39,43]
+      }
+    ],
+    "annotations" : [
+      {
+        "@type": "koral:token",
+        "subtokens" : [0],
+        "wrap" : {
+          "@type" : "koral:term",
+          "foundry" : "akron",
+          "key" : "Der"
+        }
+      },
+      {
+        "@type" : "koral:span",
+        "subtokens" : [0,2],
+        "wrap" : {
+          "@type" : "koral:term",
+          "foundry" : "akron",
+          "layer" : "c",
+          "key" : "NP"
+        }
+      },
+      {
+        "@type": "koral:token",
+        "subtokens" : [1,2],
+        "wrap" : {
+          "@type" : "koral:term",
+          "foundry" : "akron",
+          "key" : "Bau-Leiter"
+        }
+      },
+      {
+        "@type": "koral:token",
+        "subtokens" : [3],
+        "wrap" : {
+          "@type" : "koral:termGroup",
+          "operands" : [
+            {
+              "@type" : "koral:term",
+              "foundry" : "akron",
+              "key" : "trug"
+            },
+            {
+              "@type" : "koral:term",
+              "foundry" : "opennlp",
+              "layer" : "p",
+              "key" : "V"
+            }
+          ]
+        }
+      },
+      {
+        "@type": "koral:token",
+        "subtokens" : [4],
+        "wrap" : {
+          "@type" : "koral:term",
+          "foundry" : "akron",
+          "key" : "einen"
+        }
+      },
+      {
+        "@type" : "koral:span",
+        "subtokens" : [4,7],
+        "wrap" : {
+          "@type" : "koral:term",
+          "foundry" : "akron",
+          "layer" : "c",
+          "key" : "NP"
+        }
+      },
+      {
+        "@type": "koral:token",
+        "subtokens" : [5],
+        "wrap" : {
+          "@type" : "koral:term",
+          "foundry" : "akron",
+          "key" : "lustigen"
+        }
+      },
+      {
+        "@type": "koral:token",
+        "subtokens" : [6,7],
+        "wrap" : {
+          "@type" : "koral:term",
+          "foundry" : "akron",
+          "key" : "Bau-Helm"
+        }
+      }
+    ]
+  }
+}
+</pre>
+          
+
+          <h4 class="koral-type"><a name="koral-record"
+                                      id="koral-record"
+                                      href="#koral-record">koral:record</a></h4>
+
+          <pre>
+{
+  "@type" : "koral:record",
+  "fields" : [],
+  "subtokens" : [],
+  "annotations" : []
+}
+          </pre>
+
+          <table class="koral-type">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Values</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>@type</td>
+                <td>@id</td>
+                <td></td>
+                <td><code class="att">koral:record</code></td>
+              </tr>
+              <tr>
+                <td>fields</td>
+                <td>[<code class="att">koral:doc</code>]</td>
+                <td></td>
+                <td>Contains a set of <code class="att">koral:doc</code> objects defining the metadata fields of the imported record.</td>
+              </tr>
+              <tr>
+                <td>primaryData</td>
+                <td>xsd:string</td>
+                <td></td>
+                <td>The primary data of the record. Currently only supports text.</td>
+              </tr>
+              <tr>
+                <td>subtokens</td>
+                <td>[<code class="att">koral:subtoken</code>]</td>
+                <td></td>
+                <td>The list of subtoken offsets defined on the primaryData.</td>
+              </tr>
+              <tr>
+                <td>annotations</td>
+                <td>[<code class="att">koral:token</code>,<code class="att">koral:span</code>,<code class="att">koral:relation</code>]</td>
+                <td></td>
+                <td>The list of annotations refering to the primary data.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
         <section>
           <h2>Appendix</h2>
           <h3><a id="appendix-meta" name="appendix-meta">Recommended Attributes for Meta Objects</a></h3>
@@ -1597,7 +1805,7 @@ match:leq
           <h2>References</h2>
 
           <p>To cite work on KoralQuery, please refer to: <a id="ref-koralquery" name="ref-koralquery">Bingel, Joachim and Nils Diewald (2015): <a href="http://www.ep.liu.se/ecp_article/index.en.aspx?issue=111;article=001">KoralQuery - a General Corpus Query Protocol</a>, Proceedings of the Workshop on Innovative Corpus Query and Visualization Tools at NODALIDA 2015, May 11-13, 2015, Vilnius, Lithuania.</a></p>
-          <p>To cite this specification, please refer to: <a id="ref-koralspec" name="ref-koralquery">Diewald, Nils and Joachim Bingel (2015-2017): <a href="http://KorAP.github.io/Koral">KoralQuery 0.4</a>, Technical report, IDS, Mannheim, Germany. Working  draft.</p>
+          <p>To cite this specification, please refer to: <a id="ref-koralspec" name="ref-koralquery">Diewald, Nils and Joachim Bingel (2015-2017): <a href="http://KorAP.github.io/Koral">KoralQuery 0.5</a>, Technical report, IDS, Mannheim, Germany. Working  draft.</p>
 
           <p><a id="ref-json" name="ref-json">ECMA (2003): <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf">The JSON Data Interchange Format</a>, ECMA-404, ECMA Standard.</a></p>
           <p><a id="ref-jsonld" name="ref-jsonld">Sporny, Manu, Dave Longley, Gregg Kellogg, Markus Lanthaler, and Niklas Lindstr&ouml;m (2014): <a href="http://www.w3.org/TR/json-ld/">JSON-LD 1.0 - A JSON-based Serialization for Linked Data</a>, W3C Recommendation.</a></p>
@@ -1634,6 +1842,9 @@ match:leq
       <div class="changes">
         <pre>
 CHANGES:
+0.5.0 2017-04-04
+- Introduced import format
+
 0.4.0 2016-10-05
 - Introduced response format
 
