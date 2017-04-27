@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -74,6 +75,7 @@ public class OPINTest {
 
 
     @Test
+   
     public void testOPINWithOptionN ()
             throws JsonProcessingException, IOException {
         query = "wegen #IN(N) <s>";
@@ -176,5 +178,40 @@ public class OPINTest {
                 .isMissingNode());
     }
 
+    @Test
+    @Ignore
+    public void testOPINWithOptionN_MAX ()
+            throws JsonProcessingException, IOException {
+        query = "wegen #IN(N, MAX) <s>";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        System.out.println(res.toString());
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        assertEquals(130, res.at("/query/classRef/0").asInt());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position",
+                res.at("/query/operands/0/operation").asText());
+        assertEquals("frames:isAround",
+                res.at("/query/operands/0/frames/0").asText());
+    }
+    
+    @Test
+    public void testOPINWithOptionN_HIT ()
+            throws JsonProcessingException, IOException {
+        query = "wegen #IN(N, HIT) <s>";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        System.out.println(res.toString());
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        assertEquals(130, res.at("/query/classRef/0").asInt());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position",
+                res.at("/query/operands/0/operation").asText());
+        assertEquals("frames:isAround",
+                res.at("/query/operands/0/frames/0").asText());
+    }
+    
 
 }

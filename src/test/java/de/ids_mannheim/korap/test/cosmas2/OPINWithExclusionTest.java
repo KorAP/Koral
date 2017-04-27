@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -91,15 +92,11 @@ public class OPINWithExclusionTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
 
-        assertEquals("koral:reference", res.at("/query/@type").asText());
-        assertEquals("operation:focus", res.at("/query/operation").asText());
-        assertEquals("130", res.at("/query/classRef/0").asText());
-        
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
+        assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefCheck:unequals",
-                res.at("/query/operands/0/classRefCheck/0").asText());
+                res.at("/query/classRefCheck/0").asText());
 
-        JsonNode classRefCheckOperand = res.at("/query/operands/0/operands/0");
+        JsonNode classRefCheckOperand = res.at("/query/operands/0");
         assertEquals("operation:exclusion",
                 classRefCheckOperand.at("/operation").asText());
         assertEquals(1, classRefCheckOperand.at("/frames").size());
@@ -115,15 +112,11 @@ public class OPINWithExclusionTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
 
-        assertEquals("koral:reference", res.at("/query/@type").asText());
-        assertEquals("operation:focus", res.at("/query/operation").asText());
-        assertEquals("130", res.at("/query/classRef/0").asText());
-        
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
+        assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefCheck:equals",
-                res.at("/query/operands/0/classRefCheck/0").asText());
+                res.at("/query/classRefCheck/0").asText());
 
-        JsonNode classRefCheckOperand = res.at("/query/operands/0/operands/0");
+        JsonNode classRefCheckOperand = res.at("/query/operands/0");
         assertEquals("operation:exclusion",
                 classRefCheckOperand.at("/operation").asText());
         assertEquals(1, classRefCheckOperand.at("/frames").size());
@@ -133,23 +126,98 @@ public class OPINWithExclusionTest {
 
 
     @Test
-    public void testOPINwithMultipleExclusion1 ()
+    public void testOPINwithExclusionFE_MIN ()
             throws JsonProcessingException, IOException {
+        // MIN is the default value, thus the query below 
+        // is the same as "wegen #IN(FE,%) <s>"
         query = "wegen #IN(FE,%,MIN) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefCheck:unequals",
-                res.at("/query/operands/0/classRefCheck/0").asText());
+                res.at("/query/classRefCheck/0").asText());
+        assertEquals(1, res.at("/query/operands/0/frames").size());
         assertEquals("frames:matches",
-                res.at("/query/operands/0/operands/0/frames/0").asText());
-        //        assertEquals(true,                            res.at("/query/operands/0/operands/0/exclude").isMissingNode());
+                res.at("/query/operands/0/frames/0").asText());
     }
 
 
     @Test
-    public void testOPINwithMultipleExclusion2 ()
+    public void testOPINwithExclusionN_MAX ()
             throws JsonProcessingException, IOException {
-        query = "wegen #IN(FE,ALL,%,MIN) <s>";
+        query = "wegen #IN(N,%,MAX) <s>";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("operation:merge", res.at("/query/operation").asText());
+        assertEquals("operation:exclusion",
+                res.at("/query/operands/0/operation").asText());
+        assertEquals(1, res.at("/query/operands/0/frames").size());
+        assertEquals("frames:isWithin",
+                res.at("/query/operands/0/frames/0").asText());
+    }
+
+
+    @Test
+    public void testOPINwithExclusionL_MAX ()
+            throws JsonProcessingException, IOException {
+        query = "wegen #IN(L,%,MAX) <s>";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("operation:merge", res.at("/query/operation").asText());
+        assertEquals("operation:exclusion",
+                res.at("/query/operands/0/operation").asText());
+        assertEquals(2, res.at("/query/operands/0/frames").size());
+        assertEquals("frames:alignsLeft",
+                res.at("/query/operands/0/frames/0").asText());
+        assertEquals("frames:matches",
+                res.at("/query/operands/0/frames/1").asText());
+    }
+
+
+    @Test
+    public void testOPINwithExclusionFE_MAX ()
+            throws JsonProcessingException, IOException {
+        query = "wegen #IN(FE,%,MAX) <s>";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("operation:merge", res.at("/query/operation").asText());
+        assertEquals("operation:class",
+                res.at("/query/operands/0/operation").asText());
+        assertEquals("classRefCheck:unequals",
+                res.at("/query/operands/0/classRefCheck/0").asText());
+        JsonNode classOperand = res.at("/query/operands/0/operands/0");
+        assertEquals("operation:exclusion",
+                classOperand.at("/operation").asText());
+        assertEquals(1, classOperand.at("/frames").size());
+        assertEquals("frames:matches", classOperand.at("/frames/0").asText());
+    }
+
+    
+    @Test
+    @Ignore
+    public void testOPINwithMultipleExclusionN_ALL ()
+            throws JsonProcessingException, IOException {
+        query = "wegen #IN(N,ALL,%) <s>";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        System.out.println(res.toString());
+        assertEquals("operation:class", res.at("/query/operation").asText());
+        assertEquals("classRefOp:delete", res.at("/query/classRefOp").asText());
+        assertEquals(131, res.at("/query/classIn/0").asInt());
+        assertEquals("classRefCheck:unequals",
+                res.at("/query/operands/0/classRefCheck/0").asText());
+        assertEquals("frames:matches",
+                res.at("/query/operands/0/operands/0/frames/0").asText());
+    }
+
+    @Test
+    @Ignore
+    public void testOPINwithMultipleExclusionFE_ALL ()
+            throws JsonProcessingException, IOException {
+        query = "wegen #IN(FE,ALL,%) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:class", res.at("/query/operation").asText());
@@ -161,9 +229,17 @@ public class OPINWithExclusionTest {
                 res.at("/query/operands/0/operands/0/frames/0").asText());
     }
 
-
     @Test
-    public void testOPINwithMultipleExclusion3 ()
+    public void testOPINwithMultipleExclusionN_ALL_MAX ()
+            throws JsonProcessingException, IOException {
+        query = "wegen #IN(N,ALL,%,MAX) <s>";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+    }
+    
+    @Test
+    @Ignore
+    public void testOPINwithMultipleExclusionFE_ALL_MAX ()
             throws JsonProcessingException, IOException {
         query = "wegen #IN(FE,ALL,%,MAX) <s>";
         qs.setQuery(query, "cosmas2");

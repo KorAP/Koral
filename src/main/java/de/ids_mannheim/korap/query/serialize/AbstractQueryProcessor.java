@@ -77,7 +77,7 @@ public abstract class AbstractQueryProcessor {
     /**
      * Virtual collection queries.
      */
-    private Object collection = new HashMap<String, Object>();
+    private Map<String, Object> collection = new HashMap<String, Object>();
     /**
      * Holds information on displaying directives.
      */

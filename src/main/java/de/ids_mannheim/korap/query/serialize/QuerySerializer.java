@@ -38,7 +38,7 @@ public class QuerySerializer {
     }
 
     private static ObjectMapper mapper = new ObjectMapper();
-    private Logger qllogger = LoggerFactory.getLogger("ql");
+    private static Logger qllogger = LoggerFactory.getLogger(QuerySerializer.class);
     public static String queryLanguageVersion;
 
     private AbstractQueryProcessor ast;
@@ -47,13 +47,11 @@ public class QuerySerializer {
     private List<Object> errors;
     private List<Object> warnings;
     private List<Object> messages;
-    private org.slf4j.Logger log = LoggerFactory
-            .getLogger(QuerySerializer.class);
 
 	public QuerySerializer() {
-        this.errors = new LinkedList<>();
-        this.warnings = new LinkedList<>();
-        this.messages = new LinkedList<>();
+        this.errors = new ArrayList<>();
+        this.warnings = new ArrayList<>();
+        this.messages = new ArrayList<>();
     }
 
     /**
@@ -176,29 +174,30 @@ public class QuerySerializer {
         return ser;
     }
 
-	public final Map build() {
+	public final Map<String, Object> build() {
         return raw();
     }
 
-    private Map raw () {
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> raw () {
         if (ast != null) {
             Map<String, Object> requestMap = new HashMap<>(ast.getRequestMap());
-            Map meta = (Map) requestMap.get("meta");
-            Map collection = (Map) requestMap.get("collection");
-            List errors = (List) requestMap.get("errors");
-            List warnings = (List) requestMap.get("warnings");
-            List messages = (List) requestMap.get("messages");
+            Map<String, Object> meta = (Map<String, Object>) requestMap.get("meta");
+            Map<String, Object> collection = (Map<String, Object>) requestMap.get("collection");
+            List<Object> errors = (List<Object>) requestMap.get("errors");
+            List<Object> warnings = (List<Object>) requestMap.get("warnings");
+            List<Object> messages = (List<Object>) requestMap.get("messages");
             collection = mergeCollection(collection, this.collection);
             requestMap.put("collection", collection);
 
             if (meta == null)
-                meta = new HashMap();
+                meta = new HashMap<String, Object>();
             if (errors == null)
-                errors = new LinkedList();
+                errors = new ArrayList<Object>();
             if (warnings == null)
-                warnings = new LinkedList();
+                warnings = new ArrayList<Object>();
             if (messages == null)
-                messages = new LinkedList();
+                messages = new ArrayList<Object>();
 
             if (this.meta != null) {
                 meta.putAll(this.meta);
@@ -218,7 +217,7 @@ public class QuerySerializer {
             }
             return cleanup(requestMap);
         }
-        return new HashMap<>();
+        return new HashMap<String, Object>();
     }
 
     private Map<String, Object> cleanup (Map<String, Object> requestMap) {
@@ -282,16 +281,17 @@ public class QuerySerializer {
 		return this;
 	}
 
-	public QuerySerializer setCollection(String collection) {
+	@SuppressWarnings("unchecked")
+    public QuerySerializer setCollection(String collection) {
         CollectionQueryProcessor tree = new CollectionQueryProcessor();
         tree.process(collection);
         Map<String, Object> collectionRequest = tree.getRequestMap();
         if (collectionRequest.get("errors") != null)
-            this.errors.addAll((List) collectionRequest.get("errors"));
+            this.errors.addAll((List<Object>) collectionRequest.get("errors"));
         if (collectionRequest.get("warnings") != null)
-            this.warnings.addAll((List) collectionRequest.get("warnings"));
+            this.warnings.addAll((List<Object>) collectionRequest.get("warnings"));
         if (collectionRequest.get("messages") != null)
-            this.messages.addAll((List) collectionRequest.get("messages"));
+            this.messages.addAll((List<Object>) collectionRequest.get("messages"));
         this.collection = (Map<String, Object>) collectionRequest
                 .get("collection");
         return this;

@@ -24,6 +24,7 @@ public class RelationTests {
         query = "node & node & #1 ->malt/d=\"PP\" #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
+        System.out.println(res.asText());
     }
     
     @Test
