@@ -715,6 +715,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     group = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
                     putAllButGroupType(group, operatorGroup);
                 }
+                else if (groupType.equals("hierarchy")) {
+                    group = KoralObjectGenerator.makeGroup(KoralOperation.HIERARCHY);
+                    putAllButGroupType(group, operatorGroup);
+                }
                 else if (groupType.equals("position")) {
                     group = new HashMap<String, Object>();
                     putAllButGroupType(group, operatorGroup);
@@ -851,20 +855,22 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         String operator = getNodeCat(operatorNode);
         // DOMINANCE
         if (operator.equals("dominance")) {
-            relation = KoralObjectGenerator.makeRelation();
-            relation.put("groupType", "relation");
-            ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
+//            relation = KoralObjectGenerator.makeRelation();
+            relation = new HashMap<String, Object>();
+            relation.put("groupType", "hierarchy");
+//            ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
             ParseTree edgeSpecNode = getFirstChildWithCat(operatorNode,
                     "edgeSpec");
             ParseTree star = getFirstChildWithCat(operatorNode, "*");
             ParseTree rangeSpec = getFirstChildWithCat(operatorNode,
                     "rangeSpec");
-            Map<String, Object> term = KoralObjectGenerator
-                    .makeTerm();
-            term.put("layer", "c");
-            if (qName != null)
-                term = parseQNameNode(qName);
+            
+//            term.put("layer", "c");
+//            if (qName != null)
+//                term = parseQNameNode(qName);
             if (edgeSpecNode != null) {
+                Map<String, Object> term = KoralObjectGenerator
+                        .makeTerm();
                 Map<String, Object> edgeSpec = parseEdgeSpec(edgeSpecNode);
                 String edgeSpecType = (String) edgeSpec.get("@type");
                 if (edgeSpecType.equals("koral:termGroup")) {
@@ -872,22 +878,23 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     term = edgeSpec;
                 }
                 else {
-                    term = KoralObjectGenerator.makeTermGroup(KoralTermGroupRelation.AND);
-                    ArrayList<Object> termGroupOperands = (ArrayList<Object>) term
-                            .get("operands");
-                    termGroupOperands.add(edgeSpec);
-                    Map<String, Object> constTerm = KoralObjectGenerator
-                            .makeTerm();
-                    constTerm.put("layer", "c");
-                    termGroupOperands.add(constTerm);
+                    term = edgeSpec;
+//                    term = KoralObjectGenerator.makeTermGroup(KoralTermGroupRelation.AND);
+//                    ArrayList<Object> termGroupOperands = (ArrayList<Object>) term
+//                            .get("operands");
+//                    termGroupOperands.add(edgeSpec);
+//                    Map<String, Object> constTerm = KoralObjectGenerator
+//                            .makeTerm();
+//                    constTerm.put("layer", "c");
+//                    termGroupOperands.add(constTerm);
                 }
+                relation.put("label", term);
             }
             if (star != null)
                 relation.put("boundary",
                         KoralObjectGenerator.makeBoundary(0, null));
             if (rangeSpec != null)
                 relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
-            relation.put("wrap", term);
         }
         else if (operator.equals("pointing")) {
             relation = KoralObjectGenerator.makeRelation();

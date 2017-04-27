@@ -182,8 +182,7 @@ public class KoralObjectGenerator {
         group.put("@type", KoralType.RELATION.toString());
         return group;
     }
-
-
+    
     public static Map<String, Object> makeBoundary (Integer min,
             Integer max) {
         Map<String, Object> group = new HashMap<String, Object>();

@@ -2,7 +2,6 @@ package de.ids_mannheim.korap.query.test.annis;
 
 import java.io.IOException;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
