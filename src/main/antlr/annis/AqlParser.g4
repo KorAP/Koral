@@ -58,7 +58,7 @@ qName
 ;
 
 edgeAnno
-:	((foundry '/')? layer eqOperator)? textSpec
+:	((foundry '/')? (layer COLON)? key eqOperator)? textSpec
 ;
 
 edgeSpec
@@ -76,16 +76,18 @@ precedence
 | PRECEDENCE (layer COMMA?)? rangeSpec #RangePrecedence
 ;
 
+// EM: it seems that dominance does not have qName
 dominance
 : DOMINANCE (qName)? (LEFT_CHILD | RIGHT_CHILD)? (anno=edgeSpec)? # DirectDominance
 | DOMINANCE (qName)? STAR # IndirectDominance
 | DOMINANCE (qName)? rangeSpec? # RangeDominance
 ;
 
+// EM: qName is edgeAnno
 pointing
-: POINTING edgeAnno (anno=edgeSpec)? # DirectPointing
-| POINTING edgeAnno (anno=edgeSpec)? STAR # IndirectPointing
-| POINTING edgeAnno (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
+: POINTING (qName | edgeAnno) (anno=edgeSpec)? # DirectPointing
+| POINTING (qName | edgeAnno) (anno=edgeSpec)? STAR # IndirectPointing
+| POINTING (qName | edgeAnno) (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
 
 //: POINTING qName (anno=edgeSpec)? # DirectPointing
 //| POINTING qName (anno=edgeSpec)? STAR # IndirectPointing
@@ -145,6 +147,9 @@ foundry
 : ID;
 
 layer
+: ID;
+
+key
 : ID;
 
 label

@@ -173,99 +173,56 @@ public class DominanceTests {
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         //        System.out.println(res.asText());
-        //        assertEquals("koral:relation",
-        //                res.at("/query/relation/@type").asText());
-        //        assertEquals("koral:termGroup",
-        //                res.at("/query/relation/wrap/@type").asText());
-        //        assertEquals("relation:and",
-        //                res.at("/query/relation/wrap/relation").asText());
-        //        assertEquals("c", 
-        //                res.at("/query/relation/wrap/operands/1/layer").asText());
-        //        assertEquals("func",
-        //                res.at("/query/relation/wrap/operands/0/layer").asText());
-        //        assertEquals("SB",
-        //                res.at("/query/relation/wrap/operands/0/key").asText());
+        assertEquals("operation:hierarchy",
+                res.at("/query/operation").asText());
+        assertEquals("koral:relation", res.at("/query/relType/@type").asText());
+        assertEquals("koral:term",
+                res.at("/query/relType/wrap/@type").asText());
+        assertEquals("func", res.at("/query/relType/wrap/key").asText());
+        assertEquals("SBJ", res.at("/query/relType/wrap/value").asText());
+    }
 
-        //        {
-        //            "@context": "http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld",
-        //            "query": {
-        //                "operation": "operation:hierarchy",
-        //                "operands": [
-        //                    {"@type": "koral:span"},
-        //                    {
-        //                        "wrap": {
-        //                            "@type": "koral:term",
-        //                            "layer": "orth",
-        //                            "match": "match:eq",
-        //                            "key": "Mann"
-        //                        },
-        //                        "@type": "koral:token"
-        //                    }
-        //                ],
-        //                "@type": "koral:group",
-        //                "label": {
-        //                    "@type": "koral:term",
-        //                    "layer": "c",
-        //                    "match": "match:eq",
-        //                    "key": "SBJ"
-        //                }
-        //            }
-        //        }
+
+    @Test
+    public void testDominanceWithLayerAndType ()
+            throws JsonProcessingException, IOException {
+        query = "\"Mann\" & node & #2 >[c:func=\"SBJ\"] #1";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("operation:hierarchy",
+                res.at("/query/operation").asText());
+        assertEquals("koral:relation", res.at("/query/relType/@type").asText());
+        assertEquals("koral:term",
+                res.at("/query/relType/wrap/@type").asText());
+        assertEquals("c", res.at("/query/relType/wrap/layer").asText());
+        assertEquals("func", res.at("/query/relType/wrap/key").asText());
+        assertEquals("SBJ", res.at("/query/relType/wrap/value").asText());
     }
 
 
     @Test
     public void testDominanceWithMultipleTypes ()
             throws JsonProcessingException, IOException {
-        query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 >[malt/d=\"PP\" malt/d=\"PN\"] #2";
+        query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 >[corenlp/c:func=\"PP\" corenlp/c:func=\"PN\"] #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         System.out.println(res.asText());
-
-        //      {
-        //          "@context": "http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld",
-        //          "query": {
-        //              "operation": "operation:hierarchy",
-        //              "operands": [
-        //                  {
-        //                      "@type": "koral:span",
-        //                      "layer": "c",
-        //                      "foundry": "corenlp",
-        //                      "match": "match:eq",
-        //                      "key": "VP"
-        //                  },
-        //                  {
-        //                      "@type": "koral:span",
-        //                      "layer": "c",
-        //                      "foundry": "corenlp",
-        //                      "match": "match:eq",
-        //                      "key": "NP"
-        //                  }
-        //              ],
-        //              "@type": "koral:group",
-        //              "label": {
-        //                  "operands": [
-        //                      {
-        //                          "@type": "koral:term",
-        //                          "layer": "d",
-        //                          "foundry": "malt",
-        //                          "match": "match:eq",
-        //                          "key": "PP"
-        //                      },
-        //                      {
-        //                          "@type": "koral:term",
-        //                          "layer": "d",
-        //                          "foundry": "malt",
-        //                          "match": "match:eq",
-        //                          "key": "PN"
-        //                      },
-        //                      {"@type": "koral:term"}
-        //                  ],
-        //                  "@type": "koral:termGroup",
-        //                  "relation": "relation:and"
-        //              }
-        //          }
-        //      }
+        assertEquals("operation:hierarchy",
+                res.at("/query/operation").asText());
+        assertEquals("koral:relation", res.at("/query/relType/@type").asText());
+        assertEquals("koral:termGroup",
+                res.at("/query/relType/wrap/@type").asText());
+        assertEquals("relation:and",
+                res.at("/query/relType/wrap/relation").asText());
+        assertEquals("corenlp", res.at("/query/relType/wrap/operands/0/foundry").asText());
+        assertEquals("c", res.at("/query/relType/wrap/operands/0/layer").asText());
+        assertEquals("func", res.at("/query/relType/wrap/operands/0/key").asText());
+        assertEquals("PP", res.at("/query/relType/wrap/operands/0/value").asText());
+        
+        assertEquals("corenlp", res.at("/query/relType/wrap/operands/1/foundry").asText());
+        assertEquals("c", res.at("/query/relType/wrap/operands/1/layer").asText());
+        assertEquals("func", res.at("/query/relType/wrap/operands/1/key").asText());
+        assertEquals("PN", res.at("/query/relType/wrap/operands/1/value").asText());
     }
 
 

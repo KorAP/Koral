@@ -18,7 +18,7 @@ public class RelationTests {
     private JsonNode res;
 
     @Test
-    public void testLabelledRelationWithArbritraryNodes ()
+    public void testTypedRelationWithArbritraryNodes ()
             throws JsonProcessingException, IOException {
         query = "node & node & #1 ->malt/d=\"PP\" #2";
         qs.setQuery(query, "annis");
@@ -27,7 +27,7 @@ public class RelationTests {
     }
     
     @Test
-    public void testLabelledRelation ()
+    public void testTypedRelation ()
             throws JsonProcessingException, IOException {
         query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 ->malt/d=\"PP\" #2";
         qs.setQuery(query, "annis");
@@ -36,7 +36,7 @@ public class RelationTests {
 
 
     @Test
-    public void testLabelledRelationWithType ()
+    public void testTypedRelationWithLabel ()
             throws JsonProcessingException, IOException {
         query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 ->malt/d=\"PP\"[func=\"SB\"] #2";
         qs.setQuery(query, "annis");

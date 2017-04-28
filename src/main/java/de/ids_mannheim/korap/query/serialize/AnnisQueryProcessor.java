@@ -709,7 +709,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     group = KoralObjectGenerator.makeGroup(KoralOperation.RELATION);
                     Map<String, Object> relation = new HashMap<String, Object>();
                     putAllButGroupType(relation, operatorGroup);
-                    group.put("relation", relation);
+                    group.put("relType", relation);
                 }
                 else if (groupType.equals("sequence")) {
                     group = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
@@ -875,10 +875,9 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 String edgeSpecType = (String) edgeSpec.get("@type");
                 if (edgeSpecType.equals("koral:termGroup")) {
                     ((ArrayList<Object>) edgeSpec.get("operands")).add(term);
-                    term = edgeSpec;
+//                    term = edgeSpec;
                 }
-                else {
-                    term = edgeSpec;
+//                else {
 //                    term = KoralObjectGenerator.makeTermGroup(KoralTermGroupRelation.AND);
 //                    ArrayList<Object> termGroupOperands = (ArrayList<Object>) term
 //                            .get("operands");
@@ -887,8 +886,11 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 //                            .makeTerm();
 //                    constTerm.put("layer", "c");
 //                    termGroupOperands.add(constTerm);
-                }
-                relation.put("label", term);
+//                }
+                term = edgeSpec;
+                Map<String, Object> relType = KoralObjectGenerator.makeRelation();
+                relType.put("wrap", term);
+                relation.put("relType", relType);
             }
             if (star != null)
                 relation.put("boundary",
@@ -900,22 +902,28 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             relation = KoralObjectGenerator.makeRelation();
             relation.put("groupType", "relation");
             ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
-            ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
+            ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeAnno");
             ParseTree star = getFirstChildWithCat(operatorNode, "*");
             ParseTree rangeSpec = getFirstChildWithCat(operatorNode,
                     "rangeSpec");
             Map<String, Object> term = KoralObjectGenerator
                     .makeTerm();
-            if (qName != null)
+            if (qName != null){
                 term.putAll(parseQNameNode(qName));
-            if (edgeSpec != null)
+                relation.put("wrap", term);
+            }
+            if (edgeSpec != null){
                 term.putAll(parseEdgeSpec(edgeSpec));
+                Map<String, Object> relType = KoralObjectGenerator.makeRelation();
+                relType.put("wrap", term);
+                relation.put("relType", relType);
+            }
             if (star != null)
                 relation.put("boundary",
                         KoralObjectGenerator.makeBoundary(0, null));
             if (rangeSpec != null)
                 relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
-            relation.put("wrap", term);
+            
         }
         else if (operator.equals("precedence")) {
             relation = new HashMap<String, Object>();
@@ -1013,11 +1021,11 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
     }
 
-
     private Map<String, Object> parseEdgeAnno (ParseTree edgeAnnoSpec) {
         Map<String, Object> edgeAnno = KoralObjectGenerator
                 .makeTerm();
         ParseTree textSpecNode = getFirstChildWithCat(edgeAnnoSpec, "textSpec");
+        ParseTree keyNode = getFirstChildWithCat(edgeAnnoSpec, "key");
         ParseTree layerNode = getFirstChildWithCat(edgeAnnoSpec, "layer");
         ParseTree foundryNode = getFirstChildWithCat(edgeAnnoSpec, "foundry");
         ParseTree matchOperatorNode = getFirstChildWithCat(edgeAnnoSpec,
@@ -1027,7 +1035,9 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     .toStringTree(parser));
         if (layerNode != null)
             edgeAnno.put("layer", layerNode.getChild(0).toStringTree(parser));
-        edgeAnno.putAll(parseTextSpec(textSpecNode));
+        if (keyNode != null)
+            edgeAnno.put("key", keyNode.getChild(0).toStringTree(parser));
+        edgeAnno.putAll(parseTextSpec(textSpecNode, "value"));
         edgeAnno.put("match", parseMatchOperator(matchOperatorNode));
         return edgeAnno;
     }
@@ -1070,16 +1080,19 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         return KoralObjectGenerator.makeDistance("w", min, max);
     }
 
-
     private Map<String, Object> parseTextSpec (ParseTree node) {
+        return parseTextSpec(node, "key");
+    }
+    
+    private Map<String, Object> parseTextSpec (ParseTree node, String name) {
         Map<String, Object> term = new HashMap<String, Object>();
         if (hasChild(node, "regex")) {
             term.put("type", "type:regex");
-            term.put("key", node.getChild(0).getChild(0).toStringTree(parser)
+            term.put(name, node.getChild(0).getChild(0).toStringTree(parser)
                     .replaceAll("/", ""));
         }
         else {
-            term.put("key", node.getChild(1).toStringTree(parser));
+            term.put(name, node.getChild(1).toStringTree(parser));
         }
         term.put("match", "match:eq");
         return term;
