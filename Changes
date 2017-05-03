@@ -1,3 +1,6 @@
+0.24 2017-05-03
+	- Fixed serialization of regexes for VCs (diewald)
+
 0.23 2016-10-27
 	- Added tests and comments for FCSQL (margaretha)
 	- Added quantifier for FCSQL QueryGroup (margaretha)

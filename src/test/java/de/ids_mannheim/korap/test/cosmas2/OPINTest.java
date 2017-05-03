@@ -185,7 +185,7 @@ public class OPINTest {
         query = "wegen #IN(N, MAX) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res.toString());
+        // System.out.println(res.toString());
         assertEquals("koral:reference", res.at("/query/@type").asText());
         assertEquals("operation:focus", res.at("/query/operation").asText());
         assertEquals(130, res.at("/query/classRef/0").asInt());
@@ -202,7 +202,7 @@ public class OPINTest {
         query = "wegen #IN(N, HIT) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res.toString());
+        // System.out.println(res.toString());
         assertEquals("koral:reference", res.at("/query/@type").asText());
         assertEquals("operation:focus", res.at("/query/operation").asText());
         assertEquals(130, res.at("/query/classRef/0").asInt());

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class CollectionQueryProcessorTest {
 
@@ -47,6 +48,7 @@ public class CollectionQueryProcessorTest {
         assertEquals("koral:doc", res.at("/collection/@type").asText());
         assertEquals("textClass", res.at("/collection/key").asText());
         assertEquals("politik", res.at("/collection/value").asText());
+        assertFalse(res.at("/collection/type").asText().equals("type:regex"));
         assertEquals("match:eq", res.at("/collection/match").asText());
 
         collection = "textClass!=politik";
@@ -56,6 +58,7 @@ public class CollectionQueryProcessorTest {
         assertEquals("koral:doc", res.at("/collection/@type").asText());
         assertEquals("textClass", res.at("/collection/key").asText());
         assertEquals("politik", res.at("/collection/value").asText());
+        assertFalse(res.at("/collection/type").asText().equals("type:regex"));
         assertEquals("match:ne", res.at("/collection/match").asText());
     }
 
@@ -108,6 +111,21 @@ public class CollectionQueryProcessorTest {
         assertEquals("IDS:Mannheim", res.at("/collection/value").asText());
         assertEquals("match:contains", res.at("/collection/match").asText());
     }
+
+
+	@Test
+    public void testRegex () throws JsonProcessingException, IOException {
+        collection = "textClass=/politik/";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("textClass", res.at("/collection/key").asText());
+        assertEquals("politik", res.at("/collection/value").asText());
+        assertEquals("type:regex", res.at("/collection/type").asText());
+        assertEquals("match:eq", res.at("/collection/match").asText());
+    }
+
 
 
     @Test

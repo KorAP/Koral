@@ -203,7 +203,7 @@ public class OPINWithExclusionTest {
         query = "wegen #IN(N,ALL,%) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res.toString());
+        // System.out.println(res.toString());
         assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefOp:delete", res.at("/query/classRefOp").asText());
         assertEquals(131, res.at("/query/classIn/0").asInt());

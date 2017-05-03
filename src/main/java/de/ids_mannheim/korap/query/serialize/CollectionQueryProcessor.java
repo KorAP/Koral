@@ -277,13 +277,21 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (stm.startsWith("\"") && stm.endsWith("\""))
             stm = stm.replaceAll("\"", "");
 
-        if ("regex".equals(node_cat) | "multiword".equals(node_cat))
+        if ("regex".equals(node_cat)) {
+			
+            map.put("type", "type:regex");
+
+			// remove leading and trailing slashes
+			if (stm.startsWith("/") && stm.endsWith("/")) {
+				stm = stm.substring(1, stm.length() - 1);
+			};
+            map.put("value", stm);
+		}
+		else if ("multiword".equals(node_cat))
             map.put("value", stm);
         else
             map.put("value", valueNode.getChild(0).toStringTree(parser));
 
-        if ("regex".equals(node_cat))
-            map.put("type", "type:regex");
         return map;
     }
 
