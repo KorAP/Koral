@@ -147,7 +147,7 @@ public class DominanceTests {
         query = "node & node & #1 >2,4 #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res.asText());
+
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
@@ -166,7 +166,7 @@ public class DominanceTests {
 
 
     @Test
-    public void testDominanceWithType ()
+    public void testDominanceWithLabel ()
             throws JsonProcessingException, IOException {
         query = "\"Mann\" & node & #2 >[func=\"SBJ\"] #1";
         //coordinates the func=SB term and requires a "c"-layer term (consituency relation/dominance)
@@ -184,7 +184,7 @@ public class DominanceTests {
 
 
     @Test
-    public void testDominanceWithLayerAndType ()
+    public void testDominanceWithLayerAndLabel ()
             throws JsonProcessingException, IOException {
         query = "\"Mann\" & node & #2 >[c:func=\"SBJ\"] #1";
         qs.setQuery(query, "annis");
@@ -201,7 +201,7 @@ public class DominanceTests {
 
 
     @Test
-    public void testDominanceWithMultipleTypes ()
+    public void testDominanceWithMultipleLabels ()
             throws JsonProcessingException, IOException {
         query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 >[corenlp/c:func=\"PP\" corenlp/c:func=\"PN\"] #2";
         qs.setQuery(query, "annis");

@@ -57,6 +57,10 @@ qName
 :	(foundry '/')? layer
 ;
 
+edgeType
+:	((foundry '/')? layer eqOperator)? textSpec
+;
+
 edgeAnno
 :	((foundry '/')? (layer COLON)? key eqOperator)? textSpec
 ;
@@ -76,18 +80,18 @@ precedence
 | PRECEDENCE (layer COMMA?)? rangeSpec #RangePrecedence
 ;
 
-// EM: it seems that dominance does not have qName
+// EM: dominance may have a type. Is qName appropriate for the dominance type?
 dominance
 : DOMINANCE (qName)? (LEFT_CHILD | RIGHT_CHILD)? (anno=edgeSpec)? # DirectDominance
 | DOMINANCE (qName)? STAR # IndirectDominance
 | DOMINANCE (qName)? rangeSpec? # RangeDominance
 ;
 
-// EM: qName is edgeAnno
+// EM: qName is edgeType
 pointing
-: POINTING (qName | edgeAnno) (anno=edgeSpec)? # DirectPointing
-| POINTING (qName | edgeAnno) (anno=edgeSpec)? STAR # IndirectPointing
-| POINTING (qName | edgeAnno) (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
+: POINTING (qName | edgeType) (anno=edgeSpec)? # DirectPointing
+| POINTING (qName | edgeType) (anno=edgeSpec)? STAR # IndirectPointing
+| POINTING (qName | edgeType) (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
 
 //: POINTING qName (anno=edgeSpec)? # DirectPointing
 //| POINTING qName (anno=edgeSpec)? STAR # IndirectPointing
