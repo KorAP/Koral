@@ -58,15 +58,14 @@ qName
 ;
 
 edgeType
-:	((foundry '/')? layer eqOperator)? textSpec
-;
+: ID;
 
 edgeAnno
 :	((foundry '/')? (layer COLON)? key eqOperator)? textSpec
 ;
 
 edgeSpec
-: BRACKET_OPEN (edgeAnno WS*)+ BRACKET_CLOSE
+: BRACKET_OPEN edgeAnno BRACKET_CLOSE
 ;
 
 refOrNode
@@ -80,22 +79,16 @@ precedence
 | PRECEDENCE (layer COMMA?)? rangeSpec #RangePrecedence
 ;
 
-// EM: dominance may have a type. Is qName appropriate for the dominance type?
 dominance
-: DOMINANCE (qName)? (LEFT_CHILD | RIGHT_CHILD)? (anno=edgeSpec)? # DirectDominance
-| DOMINANCE (qName)? STAR # IndirectDominance
-| DOMINANCE (qName)? rangeSpec? # RangeDominance
+: DOMINANCE (edgeType)? (LEFT_CHILD | RIGHT_CHILD)? (anno=edgeSpec)? # DirectDominance
+| DOMINANCE (edgeType)? STAR # IndirectDominance
+| DOMINANCE (edgeType)? rangeSpec? # RangeDominance
 ;
 
-// EM: qName is edgeType
 pointing
-: POINTING (qName | edgeType) (anno=edgeSpec)? # DirectPointing
-| POINTING (qName | edgeType) (anno=edgeSpec)? STAR # IndirectPointing
-| POINTING (qName | edgeType) (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
-
-//: POINTING qName (anno=edgeSpec)? # DirectPointing
-//| POINTING qName (anno=edgeSpec)? STAR # IndirectPointing
-//| POINTING qName (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
+: POINTING qName (anno=edgeSpec)? # DirectPointing
+| POINTING qName (anno=edgeSpec)? STAR # IndirectPointing
+| POINTING qName (anno=edgeSpec)? COMMA? rangeSpec # RangePointing
 ;
 
 spanrelation

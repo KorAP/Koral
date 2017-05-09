@@ -39,6 +39,37 @@ public class DominanceTests {
 
 
     @Test
+    public void testDefaultTypedDominance ()
+            throws JsonProcessingException, IOException {
+        query = "node & node & #1 >edgeType #2";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:hierarchy",
+                res.at("/query/operation").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+    }
+
+
+    @Test
+    public void testTypedDominance ()
+            throws JsonProcessingException, IOException {
+        query = "node & node & #1 >secedge #2";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:hierarchy",
+                res.at("/query/operation").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertTrue(res.at("/query/operands/0/attr").isMissingNode());
+        assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+    }
+
+
+    @Test
     public void testDominanceWithAnnotationOnFirstOperand ()
             throws JsonProcessingException, IOException {
         query = "cnx/c=\"np\" > node";
@@ -92,16 +123,20 @@ public class DominanceTests {
 
 
     @Test
-    public void testDominanceWithAbritraryReferences ()
+    public void testDominanceWithDifferentLayer ()
             throws JsonProcessingException, IOException {
-        query = "node & node & #2 > #1";
+        query = "cat=\"NP\" & pos=\"ADJ\" & #1 > #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+        assertEquals("NP", res.at("/query/operands/0/key").asText());
+        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+        assertEquals("ADJ", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("p", res.at("/query/operands/1/wrap/layer").asText());
     }
 
 
@@ -162,6 +197,65 @@ public class DominanceTests {
         res = mapper.readTree(qs.toJSON());
         assertEquals(0, res.at("/query/boundary/min").asInt());
         assertTrue(res.at("/query/boundary/max").isMissingNode());
+        
+        // same layers
+        query = "cat=\"NP\" & cnx/c=\"PP\" & #1 >2,4 #2";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("c", res.at("/query/operands/1/layer").asText());
+        assertEquals(2, res.at("/query/boundary/min").asInt());
+        assertEquals(4, res.at("/query/boundary/max").asInt());
+        assertTrue(res.at("/errors").isMissingNode());
+    }
+
+
+    @Test
+    public void testIndirectDominanceWithDifferentLayers ()
+            throws JsonProcessingException, IOException {
+        query = "cat=\"NP\" & pos=\"ADJ\" & #1 >2,4 #2";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals(305, res.at("/errors/0/0").asInt());
+        assertEquals(
+                "Indirect dominance between operands of different layers is not possible.",
+                res.at("/errors/0/1").asText());
+
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:hierarchy",
+                res.at("/query/operation").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("NP", res.at("/query/operands/0/key").asText());
+        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+        assertEquals("ADJ", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("p", res.at("/query/operands/1/wrap/layer").asText());
+    }
+
+    @Test
+    public void testIndirectDominanceWithFoundries ()
+            throws JsonProcessingException, IOException {
+        
+        query = "opennlp/c=\"NP\" & cnx/c=\"PP\" & #1 >2,4 #2";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals(305, res.at("/errors/0/0").asInt());
+        assertEquals(
+                "Indirect dominance between operands of different foundries is not possible.",
+                res.at("/errors/0/1").asText());
+
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:hierarchy",
+                res.at("/query/operation").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("NP", res.at("/query/operands/0/key").asText());
+        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+        assertEquals("PP", res.at("/query/operands/1/key").asText());
+        assertEquals("c", res.at("/query/operands/1/layer").asText());
     }
 
 
@@ -172,67 +266,81 @@ public class DominanceTests {
         //coordinates the func=SB term and requires a "c"-layer term (consituency relation/dominance)
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        //        System.out.println(res.asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
-        assertEquals("koral:relation", res.at("/query/relType/@type").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:term",
-                res.at("/query/relType/wrap/@type").asText());
-        assertEquals("func", res.at("/query/relType/wrap/key").asText());
-        assertEquals("SBJ", res.at("/query/relType/wrap/value").asText());
+                res.at("/query/operands/0/attr/@type").asText());
+        assertEquals("match:eq",
+                res.at("/query/operands/0/attr/match").asText());
+        assertEquals("SBJ", res.at("/query/operands/0/attr/key").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+        assertEquals("koral:term",
+                res.at("/query/operands/1/wrap/@type").asText());
+        assertEquals("Mann", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("match:eq",
+                res.at("/query/operands/1/wrap/match").asText());
     }
 
 
     @Test
-    public void testDominanceWithLayerAndLabel ()
+    public void testDominanceWithLayerInLabel ()
             throws JsonProcessingException, IOException {
-        query = "\"Mann\" & node & #2 >[c:func=\"SBJ\"] #1";
+        query = "\"Mann\" & node & " + "#2 >[c:func=\"SBJ\"] #1";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
-        assertEquals("koral:relation", res.at("/query/relType/@type").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:term",
-                res.at("/query/relType/wrap/@type").asText());
-        assertEquals("c", res.at("/query/relType/wrap/layer").asText());
-        assertEquals("func", res.at("/query/relType/wrap/key").asText());
-        assertEquals("SBJ", res.at("/query/relType/wrap/value").asText());
+                res.at("/query/operands/0/attr/@type").asText());
+        assertEquals("match:eq",
+                res.at("/query/operands/0/attr/match").asText());
+        assertEquals("SBJ", res.at("/query/operands/0/attr/key").asText());
+        assertTrue("SBJ",
+                res.at("/query/operands/0/attr/layer").isMissingNode());
+        assertTrue("SBJ",
+                res.at("/query/operands/0/attr/value").isMissingNode());
     }
+
+
+    @Test
+    public void testDominanceWithTypeAndLabel ()
+            throws JsonProcessingException, IOException {
+        query = "node & node & #2 >rst[rst:name=\"evidence\"] #1";
+        //coordinates the func=SB term and requires a "c"-layer term (consituency relation/dominance)
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("operation:hierarchy",
+                res.at("/query/operation").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:term",
+                res.at("/query/operands/0/attr/@type").asText());
+        assertEquals("match:eq",
+                res.at("/query/operands/0/attr/match").asText());
+        assertEquals("evidence", res.at("/query/operands/0/attr/key").asText());
+        assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+    }
+
 
 
     @Test
     public void testDominanceWithMultipleLabels ()
             throws JsonProcessingException, IOException {
-        query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 >[corenlp/c:func=\"PP\" corenlp/c:func=\"PN\"] #2";
+        query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & "
+                + "#1 >[corenlp/c:func=\"PP\" corenlp/c:func=\"PN\"] #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res.asText());
-        assertEquals("operation:hierarchy",
-                res.at("/query/operation").asText());
-        assertEquals("koral:relation", res.at("/query/relType/@type").asText());
-        assertEquals("koral:termGroup",
-                res.at("/query/relType/wrap/@type").asText());
-        assertEquals("relation:and",
-                res.at("/query/relType/wrap/relation").asText());
-        assertEquals("corenlp", res.at("/query/relType/wrap/operands/0/foundry").asText());
-        assertEquals("c", res.at("/query/relType/wrap/operands/0/layer").asText());
-        assertEquals("func", res.at("/query/relType/wrap/operands/0/key").asText());
-        assertEquals("PP", res.at("/query/relType/wrap/operands/0/value").asText());
-        
-        assertEquals("corenlp", res.at("/query/relType/wrap/operands/1/foundry").asText());
-        assertEquals("c", res.at("/query/relType/wrap/operands/1/layer").asText());
-        assertEquals("func", res.at("/query/relType/wrap/operands/1/key").asText());
-        assertEquals("PN", res.at("/query/relType/wrap/operands/1/value").asText());
+        assertEquals(302, res.at("/errors/0/0").asInt());
     }
 
 
     @Test
     public void testMultipleDominance ()
             throws JsonProcessingException, IOException {
-        query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 > #3";
+        query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & #1 > #2 & #2 > #3";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        //        System.out.println(res.asText());
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
@@ -269,10 +377,10 @@ public class DominanceTests {
     @Test
     public void testMultipleDominance2 ()
             throws JsonProcessingException, IOException {
-        query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & cat=\"DP\" & #1 > #2 > #3 > #4";
+        query = "cat=\"CP\" & cat=\"VP\" & cat=\"NP\" & cat=\"DP\""
+                + " & #1 > #2 > #3 > #4";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res.asText());
 
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",

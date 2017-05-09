@@ -4,11 +4,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
+import org.antlr.v4.parse.ANTLRParser.throwsSpec_return;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
@@ -20,11 +23,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.ids_mannheim.korap.query.object.KoralFrame;
+import de.ids_mannheim.korap.query.object.KoralMatchOperator;
 import de.ids_mannheim.korap.query.object.KoralOperation;
 import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
 import de.ids_mannheim.korap.query.parse.annis.AqlLexer;
 import de.ids_mannheim.korap.query.parse.annis.AqlParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
+import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
@@ -685,6 +690,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             else {
                 Map<String, Object> operatorGroup = parseOperatorNode(
                         node.getChild(i).getChild(0));
+                // EM: change group type to enum KoralOperation
                 String groupType;
                 try {
                     groupType = (String) operatorGroup.get("groupType");
@@ -698,22 +704,31 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     group = KoralObjectGenerator
                             .makeGroup(KoralOperation.RELATION);
                     Map<String, Object> relation = new HashMap<String, Object>();
-                    putAllButGroupType(relation, operatorGroup);
+                    putAllBut(relation, operatorGroup, "groupType");
                     group.put("relType", relation);
                 }
                 else if (groupType.equals("sequence")) {
                     group = KoralObjectGenerator
                             .makeGroup(KoralOperation.SEQUENCE);
-                    putAllButGroupType(group, operatorGroup);
+                    putAllBut(group, operatorGroup, "groupType");
                 }
                 else if (groupType.equals("hierarchy")) {
                     group = KoralObjectGenerator
                             .makeGroup(KoralOperation.HIERARCHY);
-                    putAllButGroupType(group, operatorGroup);
+                    if (operatorGroup.containsKey("edgeValue")) {
+                        String edgeValue = (String) operatorGroup
+                                .get("edgeValue");
+                        inheritFoundryAndLayer(edgeValue, operand1, operand2);
+                    }
+                    if (operatorGroup.containsKey("boundary")) {
+                        checkBoundary((Map<String, Object>) operatorGroup
+                                .get("boundary"), operand1, operand2);
+                    }
+                    putAllBut(group, operatorGroup, "groupType", "edgeValue");
                 }
                 else if (groupType.equals("position")) {
                     group = new HashMap<String, Object>();
-                    putAllButGroupType(group, operatorGroup);
+                    putAllBut(group, operatorGroup, "groupType");
                 }
 
                 // Get operands list before possible re-assignment of 'group'
@@ -813,6 +828,104 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
+    private void checkBoundary (Map<String, Object> boundary,
+            Map<String, Object> operand1, Map<String, Object> operand2) {
+
+        boolean isDirect = true;
+        if (boundary.containsKey("min")) {
+            if ((int) boundary.get("min") != 1) {
+                isDirect = false;
+            }
+        }
+        if (isDirect && boundary.containsKey("max")) {
+            if ((int) boundary.get("max") != 1) {
+                isDirect = false;
+            }
+        }
+
+        if (!isDirect) {
+
+            String layer1 = searchMap(operand1, "layer");
+            String layer2 = searchMap(operand2, "layer");
+
+            if (layer1 != null && layer2 != null && !layer1.equals(layer2)) {
+                addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
+                        "Indirect dominance between operands of different layers is not possible.");
+                return;
+            }
+
+            String foundry1 = searchMap(operand1, "foundry");
+            String foundry2 = searchMap(operand2, "foundry");
+
+            if (foundry1 != null && foundry2 != null
+                    && !foundry1.equals(foundry2)) {
+                addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
+                        "Indirect dominance between operands of different foundries is not possible.");
+            }
+        }
+    }
+
+
+    private String searchMap (Map<String, Object> operand, String key) {
+
+        String type = (String) operand.get("@type");
+        Map<String, Object> child;
+        if (type.equals("koral:token") && operand.containsKey("wrap")) {
+            return searchMap((Map<String, Object>) operand.get("wrap"), key);
+        }
+        else if (type.equals("koral:span")) {
+            // EM: legacy, should be deprecated later
+            if (operand.containsKey(key)) {
+                return (String) operand.get(key);
+            }
+            else if (operand.containsKey("wrap")) {
+                return searchMap((Map<String, Object>) operand.get("wrap"),
+                        key);
+            }
+        }
+        else if (type.equals("koral:term")) {
+            if (operand.containsKey(key)) {
+                return (String) operand.get(key);
+            }
+        }
+        else {
+            addError(StatusCodes.MALFORMED_QUERY,
+                    "Cannot determine the " + key + ".");
+        }
+
+        return null;
+    }
+
+
+    private void inheritFoundryAndLayer (String edgeValue,
+            Map<String, Object> operand1, Map<String, Object> operand2) {
+
+        Map<String, Object> attribute = KoralObjectGenerator.makeTerm();
+        attribute.put("key", edgeValue);
+        attribute.put("match", KoralMatchOperator.EQUALS.toString());
+        operand1.put("attr", attribute);
+
+        if (operand1.containsKey("layer")) {
+            attribute.put("layer", operand1.get("layer"));
+            if (operand1.containsKey("foundry")) {
+                attribute.put("foundry", operand1.get("foundry"));
+            }
+        }
+        else if (operand2.containsKey("layer")) {
+            attribute.put("layer", operand2.get("layer"));
+            if (operand2.containsKey("foundry")) {
+                attribute.put("foundry", operand2.get("foundry"));
+            }
+        }
+        else if (operand1.containsKey("foundry")) {
+            attribute.put("foundry", operand1.get("foundry"));
+        }
+        else if (operand2.containsKey("foundry")) {
+            attribute.put("foundry", operand2.get("foundry"));
+        }
+    }
+
+
     /**
      * Parses a unary_linguistic_operator node. Possible operators
      * are:
@@ -849,39 +962,18 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             //            relation = KoralObjectGenerator.makeRelation();
             relation = new HashMap<String, Object>();
             relation.put("groupType", "hierarchy");
-            //            ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
+            // Ignored
+            // ParseTree edgeType = getFirstChildWithCat(operatorNode, "edgeType");
             ParseTree edgeSpecNode = getFirstChildWithCat(operatorNode,
                     "edgeSpec");
             ParseTree star = getFirstChildWithCat(operatorNode, "*");
             ParseTree rangeSpec = getFirstChildWithCat(operatorNode,
                     "rangeSpec");
 
-            //            term.put("layer", "c");
-            //            if (qName != null)
             //                term = parseQNameNode(qName);
             if (edgeSpecNode != null) {
-                Map<String, Object> term = KoralObjectGenerator.makeTerm();
                 Map<String, Object> edgeSpec = parseEdgeSpec(edgeSpecNode);
-                String edgeSpecType = (String) edgeSpec.get("@type");
-                if (edgeSpecType.equals("koral:termGroup")) {
-                    ((ArrayList<Object>) edgeSpec.get("operands")).add(term);
-                    //                    term = edgeSpec;
-                }
-                //                else {
-                //                    term = KoralObjectGenerator.makeTermGroup(KoralTermGroupRelation.AND);
-                //                    ArrayList<Object> termGroupOperands = (ArrayList<Object>) term
-                //                            .get("operands");
-                //                    termGroupOperands.add(edgeSpec);
-                //                    Map<String, Object> constTerm = KoralObjectGenerator
-                //                            .makeTerm();
-                //                    constTerm.put("layer", "c");
-                //                    termGroupOperands.add(constTerm);
-                //                }
-                term = edgeSpec;
-                Map<String, Object> relType = KoralObjectGenerator
-                        .makeRelation();
-                relType.put("wrap", term);
-                relation.put("relType", relType);
+                relation.put("edgeValue", edgeSpec.get("value"));
             }
             if (star != null)
                 relation.put("boundary",
@@ -1019,18 +1111,23 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     @SuppressWarnings("unchecked")
     private Map<String, Object> parseEdgeSpec (ParseTree edgeSpec) {
         List<ParseTree> annos = getChildrenWithCat(edgeSpec, "edgeAnno");
-        if (annos.size() == 1)
-            return parseEdgeAnno(annos.get(0));
-        else {
-            Map<String, Object> termGroup = KoralObjectGenerator
-                    .makeTermGroup(KoralTermGroupRelation.AND);
-            ArrayList<Object> operands = (ArrayList<Object>) termGroup
-                    .get("operands");
-            for (ParseTree anno : annos) {
-                operands.add(parseEdgeAnno(anno));
-            }
-            return termGroup;
+        if (annos.size() != 1) {
+            addWarning(StatusCodes.MALFORMED_QUERY,
+                    "Multiple annotations are not allowed. "
+                            + "Processed only the first annotation.");
         }
+        return parseEdgeAnno(annos.get(0));
+
+        //        else {
+        //            Map<String, Object> termGroup = KoralObjectGenerator
+        //                    .makeTermGroup(KoralTermGroupRelation.AND);
+        //            ArrayList<Object> operands = (ArrayList<Object>) termGroup
+        //                    .get("operands");
+        //            for (ParseTree anno : annos) {
+        //                operands.add(parseEdgeAnno(anno));
+        //            }
+        //            return termGroup;
+        //        }
     }
 
 
@@ -1173,13 +1270,23 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private void putAllButGroupType (Map<String, Object> container,
-            Map<String, Object> input) {
-        for (String key : input.keySet()) {
-            if (!key.equals("groupType")) {
-                container.put(key, input.get(key));
-            }
+    private void putAllBut (Map<String, Object> container,
+            Map<String, Object> input, String ... keys) {
+
+        Set<String> names = input.keySet();
+        for (String k : keys) {
+            names.remove(k);
         }
+
+        for (String n : names) {
+            container.put(n, input.get(n));
+        }
+
+        //        for (String key : input.keySet()) {
+        //            if (!key.equals("groupType")) {
+        //                container.put(key, input.get(key));
+        //            }
+        //        }
     }
 
 
