@@ -33,6 +33,7 @@ public class DominanceTests {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
     }
@@ -41,13 +42,14 @@ public class DominanceTests {
     @Test
     public void testDefaultTypedDominance ()
             throws JsonProcessingException, IOException {
-        query = "node & node & #1 >edgeType #2";
+        query = "node & node & #1 >edgetype #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
 
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
     }
@@ -61,8 +63,8 @@ public class DominanceTests {
         res = mapper.readTree(qs.toJSON());
 
         assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:hierarchy",
-                res.at("/query/operation").asText());
+        assertEquals("operation:relation", res.at("/query/operation").asText());
+        assertEquals("secedge", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertTrue(res.at("/query/operands/0/attr").isMissingNode());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
@@ -78,6 +80,7 @@ public class DominanceTests {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("np", res.at("/query/operands/0/key").asText());
         assertEquals("c", res.at("/query/operands/0/layer").asText());
@@ -95,6 +98,7 @@ public class DominanceTests {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
         assertEquals("np", res.at("/query/operands/1/key").asText());
@@ -113,6 +117,7 @@ public class DominanceTests {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("PP", res.at("/query/operands/0/key").asText());
         assertEquals("c", res.at("/query/operands/0/layer").asText());
@@ -131,6 +136,7 @@ public class DominanceTests {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("NP", res.at("/query/operands/0/key").asText());
         assertEquals("c", res.at("/query/operands/0/layer").asText());
@@ -149,6 +155,7 @@ public class DominanceTests {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
         assertEquals("Mann", res.at("/query/operands/1/wrap/key").asText());
@@ -197,12 +204,12 @@ public class DominanceTests {
         res = mapper.readTree(qs.toJSON());
         assertEquals(0, res.at("/query/boundary/min").asInt());
         assertTrue(res.at("/query/boundary/max").isMissingNode());
-        
+
         // same layers
         query = "cat=\"NP\" & cnx/c=\"PP\" & #1 >2,4 #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        
+
         assertEquals("c", res.at("/query/operands/0/layer").asText());
         assertEquals("c", res.at("/query/operands/1/layer").asText());
         assertEquals(2, res.at("/query/boundary/min").asInt());
@@ -234,14 +241,15 @@ public class DominanceTests {
         assertEquals("p", res.at("/query/operands/1/wrap/layer").asText());
     }
 
+
     @Test
     public void testIndirectDominanceWithFoundries ()
             throws JsonProcessingException, IOException {
-        
+
         query = "opennlp/c=\"NP\" & cnx/c=\"PP\" & #1 >2,4 #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        
+
         assertEquals(305, res.at("/errors/0/0").asInt());
         assertEquals(
                 "Indirect dominance between operands of different foundries is not possible.",
@@ -268,6 +276,7 @@ public class DominanceTests {
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:term",
                 res.at("/query/operands/0/attr/@type").asText());
@@ -291,6 +300,7 @@ public class DominanceTests {
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:term",
                 res.at("/query/operands/0/attr/@type").asText());
@@ -305,21 +315,43 @@ public class DominanceTests {
 
 
     @Test
-    public void testDominanceWithTypeAndLabel ()
+    public void testDominanceWithEdgetypeAndLabel ()
             throws JsonProcessingException, IOException {
-        query = "node & node & #2 >rst[rst:name=\"evidence\"] #1";
+        query = "node & node & #2 >edgetype[func=\"SBJ\"] #1";
         //coordinates the func=SB term and requires a "c"-layer term (consituency relation/dominance)
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
+        assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:term",
                 res.at("/query/operands/0/attr/@type").asText());
         assertEquals("match:eq",
                 res.at("/query/operands/0/attr/match").asText());
-        assertEquals("evidence", res.at("/query/operands/0/attr/key").asText());
+        assertEquals("SBJ", res.at("/query/operands/0/attr/key").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+    }
+
+
+    @Test
+    public void testDominanceWithTypeAndLabel ()
+            throws JsonProcessingException, IOException {
+        query = "rst & rst & #2 >rst[rst:name=\"evidence\"] #1";
+        //coordinates the func=SB term and requires a "c"-layer term (consituency relation/dominance)
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("operation:relation", res.at("/query/operation").asText());
+        assertEquals("rst", res.at("/query/edgeType").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("rst", res.at("/query/operands/0/layer").asText());
+        assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+        assertEquals("rst", res.at("/query/operands/1/layer").asText());
+
+        assertEquals("koral:term",
+                res.at("/query/relType/wrap/@type").asText());
+        assertEquals("evidence", res.at("/query/relType/wrap/key").asText());
+        assertEquals("rst", res.at("/query/relType/wrap/layer").asText());
     }
 
 

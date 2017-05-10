@@ -698,6 +698,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 catch (ClassCastException | NullPointerException n) {
                     groupType = "relation";
                 }
+
                 if (groupType.equals("relation")
                 //                        || groupType.equals("treeRelation")
                 ) {
@@ -713,17 +714,44 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     putAllBut(group, operatorGroup, "groupType");
                 }
                 else if (groupType.equals("hierarchy")) {
-                    group = KoralObjectGenerator
-                            .makeGroup(KoralOperation.HIERARCHY);
+                    Map<String, Object> attribute = null;
                     if (operatorGroup.containsKey("edgeValue")) {
                         String edgeValue = (String) operatorGroup
                                 .get("edgeValue");
-                        inheritFoundryAndLayer(edgeValue, operand1, operand2);
+                        attribute = inheritFoundryAndLayer(edgeValue, operand1,
+                                operand2);
                     }
-                    if (operatorGroup.containsKey("boundary")) {
-                        checkBoundary((Map<String, Object>) operatorGroup
-                                .get("boundary"), operand1, operand2);
+
+                    if (operatorGroup.containsKey("edgeType") && !operatorGroup
+                            .get("edgeType").toString().equals("edgetype")) {
+                        group = KoralObjectGenerator
+                                .makeGroup(KoralOperation.RELATION);
+                        Map<String, Object> relation = KoralObjectGenerator
+                                .makeRelation();
+                        // EM: for relations between arbitrary nodes e.g. secedge, rst without a label 
+                        // need layer and foundry rewrite default in Kustvakt 
+                        if (attribute != null) {
+                            relation.put("wrap", attribute);
+                        }
+                        group.put("relType", relation);
                     }
+                    else {
+                        group = KoralObjectGenerator
+                                .makeGroup(KoralOperation.HIERARCHY);
+                        if (!operatorGroup.containsKey("edgeType")) {
+                            group.put("edgeType", "edgetype");
+                        }
+                        if (attribute != null) {
+                            operand1.put("attr", attribute);
+                        }
+                        if (operatorGroup.containsKey("boundary")) {
+                            checkBoundary(
+                                    (Map<String, Object>) operatorGroup
+                                            .get("boundary"),
+                                    operand1, operand2);
+                        }
+                    }
+
                     putAllBut(group, operatorGroup, "groupType", "edgeValue");
                 }
                 else if (groupType.equals("position")) {
@@ -866,10 +894,10 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
+    @SuppressWarnings("unchecked")
     private String searchMap (Map<String, Object> operand, String key) {
 
         String type = (String) operand.get("@type");
-        Map<String, Object> child;
         if (type.equals("koral:token") && operand.containsKey("wrap")) {
             return searchMap((Map<String, Object>) operand.get("wrap"), key);
         }
@@ -889,6 +917,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
         }
         else {
+            // EM: (Annis) operand should not be of koral:group
             addError(StatusCodes.MALFORMED_QUERY,
                     "Cannot determine the " + key + ".");
         }
@@ -897,13 +926,12 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private void inheritFoundryAndLayer (String edgeValue,
+    private Map<String, Object> inheritFoundryAndLayer (String edgeValue,
             Map<String, Object> operand1, Map<String, Object> operand2) {
 
         Map<String, Object> attribute = KoralObjectGenerator.makeTerm();
         attribute.put("key", edgeValue);
         attribute.put("match", KoralMatchOperator.EQUALS.toString());
-        operand1.put("attr", attribute);
 
         if (operand1.containsKey("layer")) {
             attribute.put("layer", operand1.get("layer"));
@@ -923,6 +951,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         else if (operand2.containsKey("foundry")) {
             attribute.put("foundry", operand2.get("foundry"));
         }
+        return attribute;
     }
 
 
@@ -962,15 +991,18 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             //            relation = KoralObjectGenerator.makeRelation();
             relation = new HashMap<String, Object>();
             relation.put("groupType", "hierarchy");
-            // Ignored
-            // ParseTree edgeType = getFirstChildWithCat(operatorNode, "edgeType");
+            ParseTree edgeType = getFirstChildWithCat(operatorNode, "edgeType");
             ParseTree edgeSpecNode = getFirstChildWithCat(operatorNode,
                     "edgeSpec");
             ParseTree star = getFirstChildWithCat(operatorNode, "*");
             ParseTree rangeSpec = getFirstChildWithCat(operatorNode,
                     "rangeSpec");
 
-            //                term = parseQNameNode(qName);
+            if (edgeType != null) {
+                relation.put("edgeType",
+                        edgeType.getChild(0).toStringTree(parser));
+            }
+
             if (edgeSpecNode != null) {
                 Map<String, Object> edgeSpec = parseEdgeSpec(edgeSpecNode);
                 relation.put("edgeValue", edgeSpec.get("value"));
@@ -985,49 +1017,27 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             relation = KoralObjectGenerator.makeRelation();
             relation.put("groupType", "relation");
             ParseTree qName = getFirstChildWithCat(operatorNode, "qName");
-            ParseTree edgeType = getFirstChildWithCat(operatorNode, "edgeType");
             ParseTree edgeSpec = getFirstChildWithCat(operatorNode, "edgeSpec");
             ParseTree star = getFirstChildWithCat(operatorNode, "*");
             ParseTree rangeSpec = getFirstChildWithCat(operatorNode,
                     "rangeSpec");
+
             Map<String, Object> type = KoralObjectGenerator.makeTerm();
             if (qName != null) {
                 type.putAll(parseQNameNode(qName));
             }
-            else if (edgeType != null) {
-                type.putAll(parseEdgeAnno(edgeType, "key"));
-            }
-
-            Map<String, Object> label = KoralObjectGenerator.makeTerm();
             if (edgeSpec != null) {
-                label.putAll(parseEdgeSpec(edgeSpec));
-                relation.put("wrap", label);
+                type.putAll(parseEdgeSpec(edgeSpec));
             }
+            relation.put("wrap", type);
 
-            if (qName != null || edgeType != null) {
-                if (edgeSpec == null) {
-                    relation.put("wrap", type);
-                }
-                else {
-                    Map<String, Object> termgroup = KoralObjectGenerator
-                            .makeTermGroup(KoralTermGroupRelation.AND);
-                    ArrayList<Object> termGroupOperands = (ArrayList<Object>) termgroup
-                            .get("operands");
-                    termGroupOperands.add(type);
-                    termGroupOperands.add(label);
-                    relation.put("wrap", termgroup);
-                }
-            }
-            else if (!label.isEmpty()) {
-                relation.put("wrap", label);
-            }
-
-            if (star != null)
+            if (star != null) {
                 relation.put("boundary",
                         KoralObjectGenerator.makeBoundary(0, null));
-            if (rangeSpec != null)
+            }
+            if (rangeSpec != null) {
                 relation.put("boundary", boundaryFromRangeSpec(rangeSpec));
-
+            }
         }
         else if (operator.equals("precedence")) {
             relation = new HashMap<String, Object>();
@@ -1131,32 +1141,26 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private Map<String, Object> parseEdgeAnno (ParseTree edgeAnnoSpec,
-            String name) {
+    private Map<String, Object> parseEdgeAnno (ParseTree edgeAnnoSpec) {
         Map<String, Object> edgeAnno = KoralObjectGenerator.makeTerm();
         ParseTree textSpecNode = getFirstChildWithCat(edgeAnnoSpec, "textSpec");
-        ParseTree keyNode = getFirstChildWithCat(edgeAnnoSpec, "key");
-        ParseTree layerNode = getFirstChildWithCat(edgeAnnoSpec, "layer");
-        ParseTree foundryNode = getFirstChildWithCat(edgeAnnoSpec, "foundry");
+//        ignored
+//        ParseTree keyNode = getFirstChildWithCat(edgeAnnoSpec, "key");
+//        ParseTree layerNode = getFirstChildWithCat(edgeAnnoSpec, "layer");
+//        ParseTree foundryNode = getFirstChildWithCat(edgeAnnoSpec, "foundry");
         ParseTree matchOperatorNode = getFirstChildWithCat(edgeAnnoSpec,
                 "eqOperator");
-        if (foundryNode != null)
-            edgeAnno.put("foundry",
-                    foundryNode.getChild(0).toStringTree(parser));
-        if (layerNode != null)
-            edgeAnno.put("layer", layerNode.getChild(0).toStringTree(parser));
-        if (keyNode != null)
-            edgeAnno.put("key", keyNode.getChild(0).toStringTree(parser));
-        edgeAnno.putAll(parseTextSpec(textSpecNode, name));
+//        if (foundryNode != null)
+//            edgeAnno.put("foundry",
+//                    foundryNode.getChild(0).toStringTree(parser));
+//        if (layerNode != null)
+//            edgeAnno.put("layer", layerNode.getChild(0).toStringTree(parser));
+//        if (keyNode != null)
+//            edgeAnno.put("key", keyNode.getChild(0).toStringTree(parser));
+        edgeAnno.putAll(parseTextSpec(textSpecNode, "key"));
         edgeAnno.put("match", parseMatchOperator(matchOperatorNode));
         return edgeAnno;
     }
-
-
-    private Map<String, Object> parseEdgeAnno (ParseTree edgeAnnoSpec) {
-        return parseEdgeAnno(edgeAnnoSpec, "value");
-    }
-
 
     private Map<String, Object> boundaryFromRangeSpec (ParseTree rangeSpec) {
         return boundaryFromRangeSpec(rangeSpec, true);

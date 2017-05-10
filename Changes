@@ -1,6 +1,11 @@
+0.25 2017-05-10
+	- Altered dominance and relation serialization (margaretha)
+	 
 0.24 2017-05-03
-	- Fixed serialization of regexes for VCs (diewald)
-
+	- Fixed serialization of regexes for VCs (diewald)	
+	- Implemented exclusion in Cosmas2 IN operation (margaretha)
+	- Restructured test suite (margaretha)
+	
 0.23 2016-10-27
 	- Added tests and comments for FCSQL (margaretha)
 	- Added quantifier for FCSQL QueryGroup (margaretha)
