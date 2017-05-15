@@ -108,7 +108,58 @@ public class RelationTests {
         assertTrue(res.at("/query/relType/wrap/value").isMissingNode());
     }
 
+    @Test
+    public void testTypedRelationWithTokenNodes ()
+            throws JsonProcessingException, IOException {
+        query = "tt/p=\"KOUI\" ->malt/d[func=\"KONJ\"] tt/p=\"NN\"";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
 
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:relation", res.at("/query/operation").asText());
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
+        assertEquals("KOUI", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("p", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+        assertEquals("NN", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("p", res.at("/query/operands/1/wrap/layer").asText());
+
+        assertEquals("koral:relation", res.at("/query/relType/@type").asText());
+        assertEquals("koral:term",
+                res.at("/query/relType/wrap/@type").asText());
+        assertEquals("malt", res.at("/query/relType/wrap/foundry").asText());
+        assertEquals("d", res.at("/query/relType/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/relType/wrap/match").asText());
+        assertEquals("KONJ", res.at("/query/relType/wrap/key").asText());
+        assertTrue(res.at("/query/relType/wrap/value").isMissingNode());
+    }
+
+    @Test
+    public void testTypedRelationWithTokenNodesWithReferences ()
+            throws JsonProcessingException, IOException {
+        query = "tt/p=\"KOUI\" & tt/p=\"NN\" & #1 ->malt/d[func=\"KONJ\"] #2";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:relation", res.at("/query/operation").asText());
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
+        assertEquals("KOUI", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("p", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+        assertEquals("NN", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("p", res.at("/query/operands/1/wrap/layer").asText());
+
+        assertEquals("koral:relation", res.at("/query/relType/@type").asText());
+        assertEquals("koral:term",
+                res.at("/query/relType/wrap/@type").asText());
+        assertEquals("malt", res.at("/query/relType/wrap/foundry").asText());
+        assertEquals("d", res.at("/query/relType/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/relType/wrap/match").asText());
+        assertEquals("KONJ", res.at("/query/relType/wrap/key").asText());
+        assertTrue(res.at("/query/relType/wrap/value").isMissingNode());
+    }
+    
     @Test
     public void testTypedRelationWithAnnotationNodes ()
             throws JsonProcessingException, IOException {
