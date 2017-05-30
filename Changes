@@ -1,3 +1,7 @@
+0.26 2017-05-30
+	- Updated collection query grammar (margaretha)
+	- Updated maven dependency phase (margaretha)
+	
 0.25 2017-05-10
 	- Altered dominance and relation serialization (margaretha)
 	 
