@@ -1,7 +1,8 @@
-0.26 2017-05-30
+0.26 2017-06-28
 	- Updated collection query grammar (margaretha)
 	- Updated maven dependency phase (margaretha)
-	
+  - Fixed handling of non-necessary brackets in tokens (diewald)
+
 0.25 2017-05-10
 	- Altered dominance and relation serialization (margaretha)
 	 

@@ -634,8 +634,29 @@ public class PoliqarpPlusQueryProcessorTest {
                 .asText());
         assertEquals("gen", res.at("/query/wrap/operands/1/operands/1/layer")
                 .asText());
-    }
 
+		query = "[(cas=N|cas=A)&base=Mann]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());		
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("relation:and", res.at("/query/wrap/relation").asText());
+        assertEquals("koral:termGroup", res.at("/query/wrap/operands/0/@type")
+                .asText());
+        assertEquals("relation:or", res.at("/query/wrap/operands/0/relation")
+                .asText());
+        assertEquals("N", res.at("/query/wrap/operands/0/operands/0/key")
+                .asText());
+        assertEquals("cas", res.at("/query/wrap/operands/0/operands/0/layer")
+                .asText());
+        assertEquals("A", res.at("/query/wrap/operands/0/operands/1/key")
+                .asText());
+        assertEquals("cas", res.at("/query/wrap/operands/0/operands/1/layer")
+                .asText());
+		assertEquals("Mann", res.at("/query/wrap/operands/1/key").asText());
+        assertEquals("lemma", res.at("/query/wrap/operands/1/layer").asText());
+	}
+
+	
     @Test
     public void testUnnecessaryParentheses () throws JsonProcessingException,
             IOException {
@@ -708,6 +729,25 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("cas", res.at("/query/wrap/operands/1/layer")
                      .asText());
 
+		query = "[((cas=N|cas=A))&base=Mann]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());		
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("relation:and", res.at("/query/wrap/relation").asText());
+        assertEquals("koral:termGroup", res.at("/query/wrap/operands/0/@type")
+                .asText());
+        assertEquals("relation:or", res.at("/query/wrap/operands/0/relation")
+                .asText());
+        assertEquals("N", res.at("/query/wrap/operands/0/operands/0/key")
+                .asText());
+        assertEquals("cas", res.at("/query/wrap/operands/0/operands/0/layer")
+                .asText());
+        assertEquals("A", res.at("/query/wrap/operands/0/operands/1/key")
+                .asText());
+        assertEquals("cas", res.at("/query/wrap/operands/0/operands/1/layer")
+                .asText());
+		assertEquals("Mann", res.at("/query/wrap/operands/1/key").asText());
+        assertEquals("lemma", res.at("/query/wrap/operands/1/layer").asText());
     };
 
     @Test

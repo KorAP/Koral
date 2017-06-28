@@ -867,7 +867,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         else if (nodeCat.equals("termGroup")) {
 
             // TermGroup is defined recursive with non-necessary brackets
-            if (getNodeCat(node.getChild(0)).equals("(")) {
+            if (getNodeCat(node.getChild(0)).equals("(") && node.getChildCount() == 3) {
                 return parseTermOrTermGroup(node.getChild(1), negatedGlobal,
                         mode);
             };
@@ -878,6 +878,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             Map<String, Object> termGroup = null;
             ParseTree leftOp = null;
             ParseTree rightOp = null;
+
+
             // check for leading/trailing parantheses
             if (!getNodeCat(node.getChild(0)).equals("("))
                 leftOp = node.getChild(0);
@@ -890,6 +892,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 rightOp = node.getChild(node.getChildCount() - 2);
             // establish boolean relation
             ParseTree boolOp = getFirstChildWithCat(node, "boolOp");
+
+			// Create group
             if (boolOp.getText().equals("&")) {
                 termGroup = KoralObjectGenerator
                         .makeTermGroup(KoralTermGroupRelation.AND);
