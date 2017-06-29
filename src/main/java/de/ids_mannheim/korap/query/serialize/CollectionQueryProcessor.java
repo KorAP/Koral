@@ -66,15 +66,13 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             throw new NullPointerException("Parser has not been instantiated!");
         }
         log.info("Processing virtual collection query: " + query);
-        if (verbose)
-            System.out.println(tree.toStringTree(parser));
+        log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
         if (tree != null) {
-            log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
             processNode(tree);
         }
         else {
-            addError(StatusCodes.MALFORMED_QUERY, "Could not parse query >>> "
-                    + query + " <<<.");
+            addError(StatusCodes.MALFORMED_QUERY, new String[]{"Could not parse query >>> "
+                    + query + " <<<.", query});
         }
     }
 
@@ -120,6 +118,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             term.put("match", "match:" + interpretMatchOperator(match));
 
             if (!checkOperatorValueConformance(term)) {
+                addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND, 
+                        "Operator "+match+" is not valid.");
                 requestMap = new HashMap<String, Object>();
                 return;
             }
@@ -254,8 +254,6 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             if (!(match.equals("match:eq") || match.equals("match:ne")
                     || match.equals("match:contains") || match
                         .equals("match:containsnot"))) {
-                addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
-                        "You used an inequation operator with a string value.");
                 return false;
             }
         }

@@ -180,6 +180,13 @@ public abstract class AbstractQueryProcessor {
         List<Object> error = Arrays.asList(new Object[] { code, msg });
         errors.add(error);
     }
+    
+    public void addError (int code, String[] details) {
+        List<Object> error = new ArrayList<Object>();
+        error.add(code);
+        error.add(details);
+        errors.add(error);
+    }
 
 
     /**
@@ -192,10 +199,19 @@ public abstract class AbstractQueryProcessor {
     public void addError (List<Object> fullErrorMsg) {
         errors.add(fullErrorMsg);
     }
+    
+    
+    /** Retrieves a list of errors occurring in the serialization process. 
+     * 
+     * @return a list of errors
+     */
+    public List<List<Object>> getErrors () {
+        return errors;
+    }
 
 
     /**
-     * Add a class to the list of classes highlighted in KWIC view.
+     * Adds a class to the list of classes highlighted in KWIC view.
      * 
      * @param classId
      *            The class ID.
