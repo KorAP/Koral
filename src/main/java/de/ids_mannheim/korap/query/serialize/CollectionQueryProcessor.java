@@ -66,8 +66,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             throw new NullPointerException("Parser has not been instantiated!");
         }
         log.info("Processing virtual collection query: " + query);
-        log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
         if (tree != null) {
+            log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
             processNode(tree);
         }
         else {
@@ -119,7 +119,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             if (!checkOperatorValueConformance(term)) {
                 addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND, 
-                        "Operator "+match+" is not valid.");
+                        new String[]{"Operator "+match+" is not acceptable.", match});
                 requestMap = new HashMap<String, Object>();
                 return;
             }
