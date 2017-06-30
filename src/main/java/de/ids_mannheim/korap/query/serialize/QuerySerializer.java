@@ -167,7 +167,7 @@ public class QuerySerializer {
         String ser;
         try {
             ser = mapper.writeValueAsString(raw());
-            qllogger.info("Serialized query: " + ser);
+            System.out.println("Serialized query: " + ser);
 		} catch (JsonProcessingException e) {
             return "";
         }
