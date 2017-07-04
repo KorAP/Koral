@@ -62,11 +62,12 @@ public class AnnisQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
 
+        // EM: this query should not be allowed
         query = "Mann"; // no special keyword -> defaults to layer name
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("Mann", res.at("/query/layer").asText());
+        assertEquals(StatusCodes.MALFORMED_QUERY, res.at("/errors/0/0").asInt());
     }
 
 
@@ -81,15 +82,15 @@ public class AnnisQueryProcessorTest {
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("np", res.at("/query/key").asText());
-        assertEquals("c", res.at("/query/layer").asText());
+        assertEquals("np", res.at("/query/wrap/key").asText());
+        assertEquals("c", res.at("/query/wrap/layer").asText());
 
         query = "cat=\"NP\"";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("NP", res.at("/query/key").asText());
-        assertEquals("c", res.at("/query/layer").asText());
+        assertEquals("NP", res.at("/query/wrap/key").asText());
+        assertEquals("c", res.at("/query/wrap/layer").asText());
     }
 
 
@@ -120,16 +121,16 @@ public class AnnisQueryProcessorTest {
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("np", res.at("/query/key").asText());
-        assertEquals("c", res.at("/query/layer").asText());
+        assertEquals("np", res.at("/query/wrap/key").asText());
+        assertEquals("c", res.at("/query/wrap/layer").asText());
 
         query = "cnx/c=\"np\"";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("np", res.at("/query/key").asText());
-        assertEquals("c", res.at("/query/layer").asText());
-        assertEquals("cnx", res.at("/query/foundry").asText());
+        assertEquals("np", res.at("/query/wrap/key").asText());
+        assertEquals("c", res.at("/query/wrap/layer").asText());
+        assertEquals("cnx", res.at("/query/wrap/foundry").asText());
 
         query = "tt/pos=\"np\"";
         qs.setQuery(query, "annis");
@@ -154,7 +155,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("frames:startsWith", res.at("/query/frames/0").asText());
         assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type")
                 .asText());
-        assertEquals("S", res.at("/query/operands/0/operands/0/key").asText());
+        assertEquals("S", res.at("/query/operands/0/operands/0/wrap/key").asText());
         assertEquals("koral:group", res
                 .at("/query/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",
@@ -165,7 +166,7 @@ public class AnnisQueryProcessorTest {
                 res.at("/query/operands/0/operands/1/operands/0/@type")
                         .asText());
         assertEquals("NP", res
-                .at("/query/operands/0/operands/1/operands/0/key").asText());
+                .at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
         assertEquals("koral:reference", res.at("/query/operands/1/@type")
                 .asText());
         assertEquals("operation:focus", res.at("/query/operands/1/operation")
@@ -185,7 +186,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("frames:endsWith", res.at("/query/frames/0").asText());
         assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type")
                 .asText());
-        assertEquals("S", res.at("/query/operands/0/operands/0/key").asText());
+        assertEquals("S", res.at("/query/operands/0/operands/0/wrap/key").asText());
         assertEquals("koral:group", res
                 .at("/query/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",
@@ -196,7 +197,7 @@ public class AnnisQueryProcessorTest {
                 res.at("/query/operands/0/operands/1/operands/0/@type")
                         .asText());
         assertEquals("NP", res
-                .at("/query/operands/0/operands/1/operands/0/key").asText());
+                .at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
         assertEquals("koral:reference", res.at("/query/operands/1/@type")
                 .asText());
         assertEquals("operation:focus", res.at("/query/operands/1/operation")
@@ -414,17 +415,17 @@ public class AnnisQueryProcessorTest {
                         .asText());
         assertEquals(
                 "A",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals(
                 "B",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/wrap/key")
                         .asText());
         assertEquals(
                 "C",
-                res.at("/query/operands/0/operands/0/operands/1/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
-        assertEquals("D", res.at("/query/operands/1/key").asText());
+        assertEquals("D", res.at("/query/operands/1/wrap/key").asText());
 
         query = "cat=\"A\" & cat=\"B\" & cat=\"C\" & cat=\"D\" & cat=\"E\" & cat=\"F\" & #1 . #2 & #3 . #4 & #5 . #6 & #1 > #3 & #3 > #5";
         // the resulting query should be equivalent to PQ+:   focus(3:dominates(focus(2:dominates(focus(1:{1:<A>}<B>),{2:<C>}))<D>,{3:<E>}))<F> 
@@ -460,25 +461,25 @@ public class AnnisQueryProcessorTest {
                         .asText());
         assertEquals(
                 "A",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals(
                 "B",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/1/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/1/wrap/key")
                         .asText());
         assertEquals(
                 "C",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/1/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
         assertEquals(
                 "D",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/wrap/key")
                         .asText());
         assertEquals(
                 "E",
-                res.at("/query/operands/0/operands/0/operands/1/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
-        assertEquals("F", res.at("/query/operands/1/key").asText());
+        assertEquals("F", res.at("/query/operands/1/wrap/key").asText());
 
         query = "cat=\"A\" & cat=\"B\" & cat=\"C\" & cat=\"D\" & #1 . #2 & #3 . #4";
         // the resulting query should be equivalent to PQ+:  focus(2:dominates(focus(1:{1:<A>}<B>),{2:<C>}))<D> 
@@ -613,7 +614,7 @@ public class AnnisQueryProcessorTest {
                         .asText());
         assertEquals(
                 "NP",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/wrap/key")
                         .asText());
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/0/operands/1/@type")
@@ -626,9 +627,9 @@ public class AnnisQueryProcessorTest {
                         .asInt());
         assertEquals(
                 "VP",
-                res.at("/query/operands/0/operands/0/operands/1/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
-        assertEquals("PP", res.at("/query/operands/1/key").asText());
+        assertEquals("PP", res.at("/query/operands/1/wrap/key").asText());
 
     }
 
@@ -662,7 +663,7 @@ public class AnnisQueryProcessorTest {
                         .asText());
         assertEquals(
                 "NP",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals("operation:class",
                 res.at("/query/operands/0/operands/0/operands/1/operation")
@@ -672,7 +673,7 @@ public class AnnisQueryProcessorTest {
                         .asInt());
         assertEquals(
                 "VP",
-                res.at("/query/operands/0/operands/0/operands/1/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
         assertEquals("koral:reference", res.at("/query/operands/1/@type")
                 .asText());
@@ -756,9 +757,9 @@ public class AnnisQueryProcessorTest {
                         .asInt());
         assertEquals(
                 "VP",
-                res.at("/query/operands/0/operands/0/operands/1/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
-        assertEquals("NP", res.at("/query/operands/1/key").asText());
+        assertEquals("NP", res.at("/query/operands/1/wrap/key").asText());
 
         query = "node & \"Mann\" & #2 _o_ #1";
         qs.setQuery(query, "annis");
@@ -909,7 +910,7 @@ public class AnnisQueryProcessorTest {
                         .asInt());
         assertEquals(
                 "NP",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals(
                 130,
@@ -950,9 +951,9 @@ public class AnnisQueryProcessorTest {
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("cnx", res.at("/query/foundry").asText());
-        assertEquals("c", res.at("/query/layer").asText());
-        assertEquals("NP", res.at("/query/key").asText());
+        assertEquals("cnx", res.at("/query/wrap/foundry").asText());
+        assertEquals("c", res.at("/query/wrap/layer").asText());
+        assertEquals("NP", res.at("/query/wrap/key").asText());
         assertEquals("koral:term", res.at("/query/attr/@type").asText());
         assertEquals("koral:boundary", res.at("/query/attr/tokenarity/@type")
                 .asText());
@@ -969,10 +970,10 @@ public class AnnisQueryProcessorTest {
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("cnx", res.at("/query/foundry").asText());
-        assertEquals("c", res.at("/query/layer").asText());
-        assertEquals("NP", res.at("/query/key").asText());
-        assertEquals("match:eq", res.at("/query/match").asText());
+        assertEquals("cnx", res.at("/query/wrap/foundry").asText());
+        assertEquals("c", res.at("/query/wrap/layer").asText());
+        assertEquals("NP", res.at("/query/wrap/key").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
         assertEquals("koral:term", res.at("/query/attr/@type").asText());
         assertEquals(true, res.at("/query/attr/root").asBoolean());
 
@@ -980,9 +981,9 @@ public class AnnisQueryProcessorTest {
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("cnx", res.at("/query/foundry").asText());
-        assertEquals("c", res.at("/query/layer").asText());
-        assertEquals("NP", res.at("/query/key").asText());
+        assertEquals("cnx", res.at("/query/wrap/foundry").asText());
+        assertEquals("c", res.at("/query/wrap/layer").asText());
+        assertEquals("NP", res.at("/query/wrap/key").asText());
         assertEquals("koral:termGroup", res.at("/query/attr/@type").asText());
         assertEquals("koral:term", res.at("/query/attr/operands/0/@type")
                 .asText());
@@ -1000,9 +1001,9 @@ public class AnnisQueryProcessorTest {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:hierarchy", res.at("/query/operation").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("cnx", res.at("/query/operands/0/foundry").asText());
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
-        assertEquals("NP", res.at("/query/operands/0/key").asText());
+        assertEquals("cnx", res.at("/query/operands/0/wrap/foundry").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("NP", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("koral:term", res.at("/query/operands/0/attr/@type")
                 .asText());
         assertEquals("koral:boundary",
@@ -1051,13 +1052,13 @@ public class AnnisQueryProcessorTest {
                 res.at("/query/operands/0/operands/0/operands/1/@type")
                         .asText());
         assertEquals("NP", res
-                .at("/query/operands/0/operands/0/operands/1/key").asText());
+                .at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
         assertEquals("c",
-                res.at("/query/operands/0/operands/0/operands/1/layer")
+                res.at("/query/operands/0/operands/0/operands/1/wrap/layer")
                         .asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("VP", res.at("/query/operands/1/key").asText());
-        assertEquals("c", res.at("/query/operands/1/layer").asText());
+        assertEquals("VP", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/1/wrap/layer").asText());
 
         query = "cat=\"NP\" & cat=\"VP\" & cat=\"PP\" & #1 $ #2 $ #3";
         qs.setQuery(query, "annis");
@@ -1085,11 +1086,11 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:disjunction", res.at("/query/operation")
                 .asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("NP", res.at("/query/operands/0/key").asText());
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("NP", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("VP", res.at("/query/operands/1/key").asText());
-        assertEquals("c", res.at("/query/operands/1/layer").asText());
+        assertEquals("VP", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/1/wrap/layer").asText());
     }
 
     //		

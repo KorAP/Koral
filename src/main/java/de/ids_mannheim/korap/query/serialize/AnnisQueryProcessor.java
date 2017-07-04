@@ -26,6 +26,7 @@ import de.ids_mannheim.korap.query.object.KoralFrame;
 import de.ids_mannheim.korap.query.object.KoralMatchOperator;
 import de.ids_mannheim.korap.query.object.KoralOperation;
 import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
+import de.ids_mannheim.korap.query.object.KoralType;
 import de.ids_mannheim.korap.query.parse.annis.AqlLexer;
 import de.ids_mannheim.korap.query.parse.annis.AqlParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
@@ -437,8 +438,21 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                 term.putAll(qNameParse);
             }
             else {
+
                 object = KoralObjectGenerator.makeSpan();
-                object.putAll(qNameParse);
+                if (node.getChildCount() == 3) {
+                    Map<String, Object> term = KoralObjectGenerator.makeTerm();
+                    term.putAll(parseTextSpec(node.getChild(2)));
+                    term.putAll(qNameParse);
+                    object.put("wrap", term);
+                }
+                // EM: koral:span without key but layer and foundry should generally 
+                // not be allowed except as relation type
+                else{
+                    addError(StatusCodes.MALFORMED_QUERY,
+                            "Malformed query.");
+                }
+                
             }
         }
         else if (firstChildNodeCat.equals("textSpec")) {
@@ -448,20 +462,14 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             term.put("layer", "orth");
             term.putAll(parseTextSpec(node.getChild(0)));
         }
-        if (node.getChildCount() == 3) {
-            // (foundry/)?layer=key specification
-            if (object.get("@type").equals("koral:token")) {
-                HashMap<String, Object> term = (HashMap<String, Object>) object
-                        .get("wrap");
-                term.putAll(parseTextSpec(node.getChild(2)));
-                term.put("match", parseMatchOperator(
-                        getFirstChildWithCat(node, "eqOperator")));
-            }
-            else {
-                object.putAll(parseTextSpec(node.getChild(2)));
-                object.put("match", parseMatchOperator(
-                        getFirstChildWithCat(node, "eqOperator")));
-            }
+        // (foundry/)?layer=key specification
+        if (object.get("@type").equals("koral:token")
+                && node.getChildCount() == 3) {
+            HashMap<String, Object> term = (HashMap<String, Object>) object
+                    .get("wrap");
+            term.putAll(parseTextSpec(node.getChild(2)));
+            term.put("match", parseMatchOperator(
+                    getFirstChildWithCat(node, "eqOperator")));
         }
 
         // Check if there's a unary relation defined for this node
@@ -718,8 +726,13 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     if (operatorGroup.containsKey("edgeValue")) {
                         String edgeValue = (String) operatorGroup
                                 .get("edgeValue");
-                        attribute = inheritFoundryAndLayer(edgeValue, operand1,
-                                operand2);
+                        attribute = KoralObjectGenerator.makeTerm();
+                        attribute.put("key", edgeValue);
+                        attribute.put("match",
+                                KoralMatchOperator.EQUALS.toString());
+                        if (!inheritFoundryAndLayer(attribute, operand1)){
+                            inheritFoundryAndLayer(attribute, operand2);
+                        }
                     }
 
                     if (operatorGroup.containsKey("edgeType") && !operatorGroup
@@ -898,10 +911,11 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     private String searchMap (Map<String, Object> operand, String key) {
 
         String type = (String) operand.get("@type");
-        if (type.equals("koral:token") && operand.containsKey("wrap")) {
+        if (type.equals(KoralType.TOKEN.toString())
+                && operand.containsKey("wrap")) {
             return searchMap((Map<String, Object>) operand.get("wrap"), key);
         }
-        else if (type.equals("koral:span")) {
+        else if (type.equals(KoralType.SPAN.toString())) {
             // EM: legacy, should be deprecated later
             if (operand.containsKey(key)) {
                 return (String) operand.get(key);
@@ -911,7 +925,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                         key);
             }
         }
-        else if (type.equals("koral:term")) {
+        else if (type.equals(KoralType.TERM.toString())) {
             if (operand.containsKey(key)) {
                 return (String) operand.get(key);
             }
@@ -926,32 +940,25 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private Map<String, Object> inheritFoundryAndLayer (String edgeValue,
-            Map<String, Object> operand1, Map<String, Object> operand2) {
+    private boolean inheritFoundryAndLayer (
+            Map<String, Object> attribute, Map<String, Object> operand) {
 
-        Map<String, Object> attribute = KoralObjectGenerator.makeTerm();
-        attribute.put("key", edgeValue);
-        attribute.put("match", KoralMatchOperator.EQUALS.toString());
-
-        if (operand1.containsKey("layer")) {
-            attribute.put("layer", operand1.get("layer"));
-            if (operand1.containsKey("foundry")) {
-                attribute.put("foundry", operand1.get("foundry"));
+        if (operand.containsKey("wrap")) {
+            operand = (Map<String, Object>) operand.get("wrap");
+            if (operand.containsKey("layer")) {
+                attribute.put("layer", operand.get("layer"));
+                if (operand.containsKey("foundry")) {
+                    attribute.put("foundry", operand.get("foundry"));
+                }
+                return true;
             }
-        }
-        else if (operand2.containsKey("layer")) {
-            attribute.put("layer", operand2.get("layer"));
-            if (operand2.containsKey("foundry")) {
-                attribute.put("foundry", operand2.get("foundry"));
+            else if (operand.containsKey("foundry")) {
+                attribute.put("foundry", operand.get("foundry"));
+                return true;
             }
+            
         }
-        else if (operand1.containsKey("foundry")) {
-            attribute.put("foundry", operand1.get("foundry"));
-        }
-        else if (operand2.containsKey("foundry")) {
-            attribute.put("foundry", operand2.get("foundry"));
-        }
-        return attribute;
+        return false;
     }
 
 
@@ -1005,7 +1012,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             if (edgeSpecNode != null) {
                 Map<String, Object> edgeSpec = parseEdgeSpec(edgeSpecNode);
-                relation.put("edgeValue", edgeSpec.get("value"));
+                relation.put("edgeValue", edgeSpec.get("key"));
             }
             if (star != null)
                 relation.put("boundary",
@@ -1144,23 +1151,24 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     private Map<String, Object> parseEdgeAnno (ParseTree edgeAnnoSpec) {
         Map<String, Object> edgeAnno = KoralObjectGenerator.makeTerm();
         ParseTree textSpecNode = getFirstChildWithCat(edgeAnnoSpec, "textSpec");
-//        ignored
-//        ParseTree keyNode = getFirstChildWithCat(edgeAnnoSpec, "key");
-//        ParseTree layerNode = getFirstChildWithCat(edgeAnnoSpec, "layer");
-//        ParseTree foundryNode = getFirstChildWithCat(edgeAnnoSpec, "foundry");
+        //        ignored
+        //        ParseTree keyNode = getFirstChildWithCat(edgeAnnoSpec, "key");
+        //        ParseTree layerNode = getFirstChildWithCat(edgeAnnoSpec, "layer");
+        //        ParseTree foundryNode = getFirstChildWithCat(edgeAnnoSpec, "foundry");
         ParseTree matchOperatorNode = getFirstChildWithCat(edgeAnnoSpec,
                 "eqOperator");
-//        if (foundryNode != null)
-//            edgeAnno.put("foundry",
-//                    foundryNode.getChild(0).toStringTree(parser));
-//        if (layerNode != null)
-//            edgeAnno.put("layer", layerNode.getChild(0).toStringTree(parser));
-//        if (keyNode != null)
-//            edgeAnno.put("key", keyNode.getChild(0).toStringTree(parser));
+        //        if (foundryNode != null)
+        //            edgeAnno.put("foundry",
+        //                    foundryNode.getChild(0).toStringTree(parser));
+        //        if (layerNode != null)
+        //            edgeAnno.put("layer", layerNode.getChild(0).toStringTree(parser));
+        //        if (keyNode != null)
+        //            edgeAnno.put("key", keyNode.getChild(0).toStringTree(parser));
         edgeAnno.putAll(parseTextSpec(textSpecNode, "key"));
         edgeAnno.put("match", parseMatchOperator(matchOperatorNode));
         return edgeAnno;
     }
+
 
     private Map<String, Object> boundaryFromRangeSpec (ParseTree rangeSpec) {
         return boundaryFromRangeSpec(rangeSpec, true);

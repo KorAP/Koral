@@ -82,9 +82,9 @@ public class DominanceTests {
                 res.at("/query/operation").asText());
         assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("np", res.at("/query/operands/0/key").asText());
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
-        assertEquals("cnx", res.at("/query/operands/0/foundry").asText());
+        assertEquals("np", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("cnx", res.at("/query/operands/0/wrap/foundry").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
     }
 
@@ -101,9 +101,9 @@ public class DominanceTests {
         assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("np", res.at("/query/operands/1/key").asText());
-        assertEquals("c", res.at("/query/operands/1/layer").asText());
-        assertEquals("cnx", res.at("/query/operands/1/foundry").asText());
+        assertEquals("np", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/1/wrap/layer").asText());
+        assertEquals("cnx", res.at("/query/operands/1/wrap/foundry").asText());
     }
 
 
@@ -119,11 +119,11 @@ public class DominanceTests {
                 res.at("/query/operation").asText());
         assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("PP", res.at("/query/operands/0/key").asText());
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("PP", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("NP", res.at("/query/operands/1/key").asText());
-        assertEquals("c", res.at("/query/operands/1/layer").asText());
+        assertEquals("NP", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/1/wrap/layer").asText());
     }
 
 
@@ -138,8 +138,8 @@ public class DominanceTests {
                 res.at("/query/operation").asText());
         assertEquals("edgetype", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("NP", res.at("/query/operands/0/key").asText());
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("NP", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
         assertEquals("ADJ", res.at("/query/operands/1/wrap/key").asText());
         assertEquals("p", res.at("/query/operands/1/wrap/layer").asText());
@@ -173,13 +173,13 @@ public class DominanceTests {
                 res.at("/query/operation").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("vp", res.at("/query/operands/0/key").asText());
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
-        assertEquals("cnx", res.at("/query/operands/0/foundry").asText());
+        assertEquals("vp", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("cnx", res.at("/query/operands/0/wrap/foundry").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("np", res.at("/query/operands/1/key").asText());
-        assertEquals("c", res.at("/query/operands/1/layer").asText());
-        assertEquals("cnx", res.at("/query/operands/1/foundry").asText());
+        assertEquals("np", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/1/wrap/layer").asText());
+        assertEquals("cnx", res.at("/query/operands/1/wrap/foundry").asText());
     }
 
 
@@ -210,8 +210,8 @@ public class DominanceTests {
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
 
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
-        assertEquals("c", res.at("/query/operands/1/layer").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("c", res.at("/query/operands/1/wrap/layer").asText());
         assertEquals(2, res.at("/query/boundary/min").asInt());
         assertEquals(4, res.at("/query/boundary/max").asInt());
         assertTrue(res.at("/errors").isMissingNode());
@@ -234,8 +234,8 @@ public class DominanceTests {
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("NP", res.at("/query/operands/0/key").asText());
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("NP", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
         assertEquals("ADJ", res.at("/query/operands/1/wrap/key").asText());
         assertEquals("p", res.at("/query/operands/1/wrap/layer").asText());
@@ -259,11 +259,11 @@ public class DominanceTests {
         assertEquals("operation:hierarchy",
                 res.at("/query/operation").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("NP", res.at("/query/operands/0/key").asText());
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("NP", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("PP", res.at("/query/operands/1/key").asText());
-        assertEquals("c", res.at("/query/operands/1/layer").asText());
+        assertEquals("PP", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/1/wrap/layer").asText());
     }
 
 
@@ -307,10 +307,8 @@ public class DominanceTests {
         assertEquals("match:eq",
                 res.at("/query/operands/0/attr/match").asText());
         assertEquals("SBJ", res.at("/query/operands/0/attr/key").asText());
-        assertTrue("SBJ",
-                res.at("/query/operands/0/attr/layer").isMissingNode());
-        assertTrue("SBJ",
-                res.at("/query/operands/0/attr/value").isMissingNode());
+        assertEquals("orth", res.at("/query/operands/0/attr/layer").asText());
+        assertTrue(res.at("/query/operands/0/attr/value").isMissingNode());
     }
 
 
@@ -318,7 +316,6 @@ public class DominanceTests {
     public void testDominanceWithEdgetypeAndLabel ()
             throws JsonProcessingException, IOException {
         query = "node & node & #2 >edgetype[func=\"SBJ\"] #1";
-        //coordinates the func=SB term and requires a "c"-layer term (consituency relation/dominance)
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:hierarchy",
@@ -337,16 +334,15 @@ public class DominanceTests {
     @Test
     public void testDominanceWithTypeAndLabel ()
             throws JsonProcessingException, IOException {
-        query = "rst & rst & #2 >rst[rst:name=\"evidence\"] #1";
-        //coordinates the func=SB term and requires a "c"-layer term (consituency relation/dominance)
+        query = "rst=\"segment\" & rst=\"segment\" & #2 >rst[rst:name=\"evidence\"] #1";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals("operation:relation", res.at("/query/operation").asText());
         assertEquals("rst", res.at("/query/edgeType").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("rst", res.at("/query/operands/0/layer").asText());
+        assertEquals("rst", res.at("/query/operands/0/wrap/layer").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("rst", res.at("/query/operands/1/layer").asText());
+        assertEquals("rst", res.at("/query/operands/1/wrap/layer").asText());
 
         assertEquals("koral:term",
                 res.at("/query/relType/wrap/@type").asText());
@@ -388,10 +384,12 @@ public class DominanceTests {
                 res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("koral:span", res
                 .at("/query/operands/0/operands/0/operands/0/@type").asText());
-        assertEquals("c", res
-                .at("/query/operands/0/operands/0/operands/0/layer").asText());
+        assertEquals("c",
+                res.at("/query/operands/0/operands/0/operands/0/wrap/layer")
+                        .asText());
         assertEquals("CP",
-                res.at("/query/operands/0/operands/0/operands/0/key").asText());
+                res.at("/query/operands/0/operands/0/operands/0/wrap/key")
+                        .asText());
         assertEquals("koral:group", res
                 .at("/query/operands/0/operands/0/operands/1/@type").asText());
         assertEquals("operation:class",
@@ -401,7 +399,7 @@ public class DominanceTests {
                 res.at("/query/operands/0/operands/0/operands/1/classOut")
                         .asInt());
         assertEquals("VP",
-                res.at("/query/operands/0/operands/0/operands/1/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
     }
 
@@ -423,8 +421,8 @@ public class DominanceTests {
                 res.at("/query/operands/0/operation").asText());
         assertEquals(130, res.at("/query/operands/0/classRef/0").asInt());
 
-        assertEquals("c", res.at("/query/operands/1/layer").asText());
-        assertEquals("DP", res.at("/query/operands/1/key").asText());
+        assertEquals("c", res.at("/query/operands/1/wrap/layer").asText());
+        assertEquals("DP", res.at("/query/operands/1/wrap/key").asText());
 
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/0/@type").asText());
@@ -443,14 +441,14 @@ public class DominanceTests {
                 res.at("/query/operands/0/operands/0/operands/1/classOut")
                         .asInt());
         assertEquals("NP",
-                res.at("/query/operands/0/operands/0/operands/1/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
 
         assertEquals("c",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/layer")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/wrap/layer")
                         .asText());
         assertEquals("CP",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals("koral:group",
                 res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/@type")
@@ -462,7 +460,7 @@ public class DominanceTests {
                 res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/classOut")
                         .asInt());
         assertEquals("VP",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/operands/0/key")
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
 
     }
