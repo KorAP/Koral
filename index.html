@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KoralQuery 0.5</title>
+    <title>KoralQuery 0.5.1</title>
     <link rel="stylesheet" href="misc/font/koral-fontello.css">
     <!--[if IE 7]><link rel="stylesheet" href="misc/font/koral-fontello-ie7.css"><![endif]-->
     <link rel="stylesheet" href="misc/style.css" type="text/css" />
@@ -33,7 +33,7 @@
           <span class="p-org">IDS</span>,
           <span class="p-locality">Mannheim</span></p>
         <p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-        <p>Last update: <time class="dt-updated" datetime="2016-10-08">2017/04/03</time></p>
+        <p>Last update: <time class="dt-updated" datetime="2017-07-05">2017/07/05</time></p>
       </div>
       
       <summary>
@@ -668,36 +668,49 @@ match:leq
                   <dl>
                     <dt><code class="att">operation:sequence</code></dt>
                     <dd>Operands take part in a sequence.<br />
+                      Returns the joined span of all operands.<br />
                       Expects &ge; 2 operands.<br/>
                       <span class="valid-parameters">Parameters: <code>inOrder</code>, <code>distances</code></span>
                     </dd>
                     <dt><code class="att">operation:position</code></dt>
-                    <dd>The operands take part in a positional relation.<br />
+                    <dd>The operands take part in a defined positional relation.<br />
+                      Returns the joined span of both operands.<br />
                       Expects 2 operands.<br />
-                      <span class="valid-parameters">Parameters: <code>frames</code>, <code>exclude</code></span>
+                      <span class="valid-parameters">Parameters: <code>frames</code></span>
+                    </dd>
+                    <dt><code class="att">operation:exclusion</code></dt>
+                    <dd>There is no second operand in a defined positional relation to a first operand.<br />
+                      Returns the span of the first operand.<br />
+                      Expects 2 operands.<br />
+                      <span class="valid-parameters">Parameters: <code>frames</code></span>
                     </dd>
                     <dt><code class="att">operation:relation</code></dt>
                     <dd>The operands take part in an arbitrary relation.<br />
+                      Returns the joined span of both operands.<br />
                       Expects 2 operands.<br />
                       <span class="valid-parameters">Parameters: <code>relType</code></span>
                     </dd>
                     <dt><code class="att">operation:disjunction</code></dt>
                     <dd>The operands are treated as alternatives.<br />
+                      Returns the span of a single operand.<br />
                       Expects &ge; 2 operands.<br />
                       <span class="valid-parameters">Parameters: none</span>
                     </dd>
                     <dt><code class="att">operation:repetition</code></dt>
                     <dd>The operand is sequentially repeated a defined time.<br />
+                      Returns the joined span of the repetition.<br />
                       Expects 1 operand.<br />
                       <span class="valid-parameters">Parameters: <code>boundary</code></span>
                     </dd>
                     <dt><code class="att">operation:class</code></dt>
                     <dd>Define a class span based on the operand.<br />
+                      Returns the span of the operand.<br />
                       Expects 1 operand.<br />
                       <span class="valid-parameters">Parameters: <code>classOut</code>, <code>classIn</code>, <code>classRefCheck</code>, <code>classRefOp</code></span>
                     </dd>
                     <dt><code class="att">operation:merge</code></dt>
                     <dd>Condense the result set.<br />
+                      Returns the joined span of the merged spans.<br />
                       Expects &ge; 1 operand.<br />
                       <span class="valid-parameters">Parameters: none</span>
                     </dd>
@@ -741,12 +754,14 @@ match:leq
                 <td>Distance constraints between operands
                   (pertaining to different keys).</td>
               </tr>
+              <!-- deprecated
               <tr>
                 <td class="opt">exclude</td>
                 <td>xsd:boolean</td>
                 <td><code>false</code></td>
                 <td>If <code>true</code>, negate positional relations.</td>
               </tr>
+              -->
               <tr>
                 <td class="opt">frames</td>
                 <td>[@id]</td>
@@ -1842,6 +1857,9 @@ match:leq
       <div class="changes">
         <pre>
 CHANGES:
+0.5.1 2017-07-05
+- Introduced 'operation:exclusion' in favour of the 'exclude' attribute
+
 0.5.0 2017-04-04
 - Introduced import format
 
