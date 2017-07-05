@@ -3,6 +3,7 @@
 	- Updated maven dependency phase (margaretha)
     - Fixed handling of non-necessary brackets in tokens (diewald)
     - Improved error handling (margaretha)
+    - Added wrap to koral:span serialization (margaretha)
 
 0.25 2017-05-10
 	- Altered dominance and relation serialization (margaretha)

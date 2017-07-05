@@ -521,15 +521,6 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else {
             posGroup = KoralObjectGenerator.makeGroup(KoralOperation.POSITION);
-            // mark this an inverted operands object
-            invertedOperandsLists
-                    .push((ArrayList<Object>) posGroup.get("operands"));
-            wrapOperandInClass(node, 2, 128 + classCounter++);
-            wrapOperandInClass(node, 1, 128 + classCounter++);
-            // EM: why bother inverting the operands and creating classes and focus? 
-            // can't we agree on the first operand to be the results, like in 
-            // operation:exclusion?
-
         }
 
         Map<String, Object> positionOptions;
@@ -568,12 +559,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                                 .get("classRefCheck"),
                         posGroup);
             }
-            posGroup = addClassFocus((boolean) positionOptions.get("matchall"),
-                    posGroup);
+//            posGroup = addClassFocus((boolean) positionOptions.get("matchall"),
+//                    posGroup);
         }
 
         // wrap in 'merge' operation if grouping option is set
-        if (positionOptions.containsKey("grouping")
+        if (!isExclusion && positionOptions.containsKey("grouping")
                 && (boolean) positionOptions.get("grouping")) {
             Map<String, Object> mergeOperation = KoralObjectGenerator
                     .makeGroup(KoralOperation.MERGE);
@@ -1154,31 +1145,32 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         ArrayList<ClassRefCheck> classRefCheck = new ArrayList<ClassRefCheck>();
         posOptions.put("matchall", false);
 
-        String posOption = null;
+        String posOption = "";
         if (posnode != null) {
             posOption = posnode.getChild(0).toStringTree().toUpperCase();
-            if (isExclusion) {
-                checkINWithExclusionOptions(posOption, positions,
-                        classRefCheck);
-            }
-            else {
-                checkINOptions(posOption, positions, classRefCheck);
-            }
+        }
+
+        if (isExclusion) {
+            checkINWithExclusionOptions(posOption, positions,
+                    classRefCheck);
         }
         else {
-            classRefCheck.add(ClassRefCheck.INCLUDES);
+            checkINOptions(posOption, positions, classRefCheck);
         }
 
         posOptions.put("frames", Converter.enumListToStringList(positions));
         posOptions.put("classRefCheck", classRefCheck);
-        if (rangenode != null) {
+        if (!isExclusion && rangenode != null) {
             String range = rangenode.getChild(0).toStringTree().toLowerCase();
-            if (range.equals("all")) {
-                posOptions.put("matchall", true);
+            // ALL is default in KorAP
+            // if (range.equals("all")) {
+                
+                // posOptions.put("matchall", true);
                 // Map<String,Object> ref =
                 // makeResetReference(); // reset all defined classes
                 // wrapOperand(node,2,ref);
-            }
+            //}
+            // HIT is default in C2
         }
 
         Boolean grouping = false;
@@ -1197,33 +1189,28 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             ArrayList<ClassRefCheck> classRefCheck) {
         switch (posOption) {
             case "L":
-                positions.add(KoralFrame.STARTS_WITH);
-                positions.add(KoralFrame.MATCHES);
-                //                    classRefCheck.add("classRefCheck:includes");
+                positions.add(KoralFrame.ALIGNS_LEFT);
                 break;
             case "R":
-                positions.add(KoralFrame.ENDS_WITH);
-                positions.add(KoralFrame.MATCHES);
-                //                    classRefCheck.add("classRefCheck:includes");
+                positions.add(KoralFrame.ALIGNS_RIGHT);
                 break;
             case "F":
-                positions.add(KoralFrame.MATCHES);
-                //                    classRefCheck.add("classRefCheck:includes");
                 break;
             case "FE":
-                positions.add(KoralFrame.MATCHES);
                 classRefCheck.add(ClassRefCheck.EQUALS);
                 break;
             case "FI":
-                positions.add(KoralFrame.MATCHES);
                 classRefCheck.add(ClassRefCheck.UNEQUALS);
-                //                    classRefCheck.add("classRefCheck:includes");
                 break;
             case "N":
-                positions.add(KoralFrame.IS_AROUND);
-                //                    classRefCheck.add("classRefCheck:includes");
+                positions.add(KoralFrame.IS_WITHIN);
                 break;
+            default:
+                positions.add(KoralFrame.ALIGNS_LEFT);
+                positions.add(KoralFrame.ALIGNS_RIGHT);
+                positions.add(KoralFrame.IS_WITHIN);
         }
+        positions.add(KoralFrame.MATCHES);
     }
 
 
@@ -1248,8 +1235,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else if (CosmasPosition.F.name().equals(posOption)) {}
         else {
-            // throw an error or add an exception;
-            return;
+            positions.add(KoralFrame.ALIGNS_LEFT);
+            positions.add(KoralFrame.ALIGNS_RIGHT);
+            positions.add(KoralFrame.IS_WITHIN);
         }
 
         positions.add(KoralFrame.MATCHES);
