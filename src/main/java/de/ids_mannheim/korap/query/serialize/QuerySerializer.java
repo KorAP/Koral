@@ -100,7 +100,7 @@ public class QuerySerializer {
 	 *            'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
 	 * @throws IOException
 	 */
-	public void run(String query, String queryLanguage) throws IOException {
+	public void run (String query, String queryLanguage) throws IOException {
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
 		} else if (queryLanguage.equalsIgnoreCase("cosmas2")) {
@@ -117,7 +117,7 @@ public class QuerySerializer {
 			throw new IllegalArgumentException(queryLanguage
 					+ " is not a supported query language!");
         }
-        toJSON();
+        System.out.println(this.toJSON());
     }
 
 	public QuerySerializer setQuery(String query, String ql, String version) {
@@ -167,7 +167,7 @@ public class QuerySerializer {
         String ser;
         try {
             ser = mapper.writeValueAsString(raw());
-            System.out.println(ser);
+			// System.out.println(ser);
 		} catch (JsonProcessingException e) {
             return "";
         }
