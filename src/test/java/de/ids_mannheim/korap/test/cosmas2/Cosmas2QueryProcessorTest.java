@@ -1678,6 +1678,16 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
     }
 
+    @Test
+    public void testWildcard () throws JsonProcessingException, IOException {
+        query = "meine* /+w1:2,s0 &Erfahrung";
+        qs.setQuery(query, "cosmas2");
+		res = mapper.readTree(qs.toJSON());
+        assertEquals("type:wildcard",
+					 res.at("/query/operands/0/operands/0/wrap/type").asText());
+        assertEquals("meine*",
+					 res.at("/query/operands/0/operands/0/wrap/key").asText());
+	};	
 
     @Test
     public void testErrors () throws JsonProcessingException, IOException {
