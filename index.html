@@ -33,7 +33,7 @@
           <span class="p-org">IDS</span>,
           <span class="p-locality">Mannheim</span></p>
         <p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-        <p>Last update: <time class="dt-updated" datetime="2017-07-05">2017/07/05</time></p>
+        <p>Last update: <time class="dt-updated" datetime="2017-09-11">2017/09/11</time></p>
       </div>
       
       <summary>
@@ -1028,7 +1028,7 @@ match:leq
                   <dl>
                     <dt><code class="att">type:string</code></dt>
                     <dt><code class="att">type:regex</code></dt>
-                    <dt><code class="att">type:wildcard</code></dt>
+                    <!--<dt><code class="att">type:wildcard</code></dt>-->
                     <dt><code class="att">type:punct</code></dt>
                   </dl>
                 </td>
@@ -1103,11 +1103,15 @@ match:leq
             of characters. The type <code>regex</code> indicates that
             <code class="att">key</code> and <code class="att">value</code>
             should be treated as <a href="#appendix-regex">regular
-              expressions.</a> The type
-            <code>wildcard</code> indicates that <code class="att">key</code> and
-            <code class="att">value</code> should be treated as character sequences with allowed gaps.
-            Characters representing gaps are the question mark <code>?</code> for a single
-            character gap and the star symbol <code>*</code> for an arbitrary long gap. The
+              expressions.</a>
+            <!--
+                The type
+                <code>wildcard</code> indicates that <code class="att">key</code> and
+                <code class="att">value</code> should be treated as character sequences with allowed gaps.
+                Characters representing gaps are the question mark <code>?</code> for a single
+                character gap and the star symbol <code>*</code> for an arbitrary long gap.
+            -->
+            The
             <code>punct</code> type defines that the <code class="att">key</code> attribute will
             be treated as a character class of punctuation symbols. In case the
             <code>punct</code> type is defined, the treatment of the
@@ -1855,7 +1859,7 @@ match:leq
 
         <section>
           <h2>Copyright</h2>
-          <p>Copyright (c) 2015, <a href="http://www.ids-mannheim.de/">IDS Mannheim</a>,
+          <p>Copyright (c) 2015-2017, <a href="http://www.ids-mannheim.de/">IDS Mannheim</a>,
             Germany, and the authors.</p>
           <!--
               <a href="http://creativecommons.org/licenses/by/2.0/"
@@ -1881,6 +1885,9 @@ match:leq
       <div class="changes">
         <pre>
 CHANGES:
+0.5.2 2017-09-11
+- Deprecated 'type:wildcard' in favor of 'type:regex'
+
 0.5.1 2017-07-05
 - Introduced 'operation:exclusion' in favour of the 'exclude' attribute
 - Introduced values for 'classrefCheck' and 'classrefOp'
