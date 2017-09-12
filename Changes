@@ -1,8 +1,13 @@
+0.27 2017-09-12
+	- Changed Cosmas2 wildcards serialization as regex (margaretha).  
+	- Updated C2 OP OV frames (margaretha).
+	
 0.26 2017-06-29
 	- Updated collection query grammar (margaretha)
 	- Updated maven dependency phase (margaretha)
     - Fixed handling of non-necessary brackets in tokens (diewald)
     - Improved error handling (margaretha)
+    - Added wrap to koral:span serialization (margaretha)
 
 0.25 2017-05-10
 	- Altered dominance and relation serialization (margaretha)
