@@ -40,10 +40,11 @@ import java.util.regex.Pattern;
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
-    private static Logger log = LoggerFactory
-            .getLogger(Cosmas2QueryProcessor.class);
+    private static Logger log =
+            LoggerFactory.getLogger(Cosmas2QueryProcessor.class);
 
-    private LinkedList<Map<String, Object>[]> toWrapStack = new LinkedList<Map<String, Object>[]>();
+    private LinkedList<Map<String, Object>[]> toWrapStack =
+            new LinkedList<Map<String, Object>[]>();
     /**
      * Field for repetition query (Kleene + or * operations, or
      * min/max queries: {2,4}
@@ -53,7 +54,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * Global control structure for fieldGroups, keeps track of open
      * fieldGroups.
      */
-    private LinkedList<ArrayList<Object>> openFieldGroups = new LinkedList<ArrayList<Object>>();
+    private LinkedList<ArrayList<Object>> openFieldGroups =
+            new LinkedList<ArrayList<Object>>();
     /**
      * Keeps track of how many toWrap objects there are to pop after
      * every recursion of {@link #processNode(ParseTree)}
@@ -83,8 +85,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * parent node of the argument, the number of the argument and an
      * object in whose operands list the argument shall be wrapped.
      */
-    private Table<Tree, Integer, Map<String, Object>> operandWrap = HashBasedTable
-            .create();
+    private Table<Tree, Integer, Map<String, Object>> operandWrap =
+            HashBasedTable.create();
 
     /**
      * Keeps track of all visited nodes in a tree
@@ -96,9 +98,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * A list of node categories that can be sequenced (i.e. which can
      * be in a sequence with any number of other nodes in this list)
      */
-    private final List<String> sequentiableNodeTypes = Arrays
-            .asList(new String[] { "OPWF", "OPLEM", "OPMORPH", "OPBEG", "OPEND",
-                    "OPIN", "OPBED", "OPELEM", "OPOR", "OPAND" });
+    private final List<String> sequentiableNodeTypes =
+            Arrays.asList(new String[] { "OPWF", "OPLEM", "OPMORPH", "OPBEG",
+                    "OPEND", "OPIN", "OPBED", "OPELEM", "OPOR", "OPAND" });
     /**
      * Keeps track of sequenced nodes, i.e. nodes that implicitly
      * govern a sequence, as in (C2PQ (OPWF der) (OPWF Mann)). This is
@@ -116,13 +118,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * inverted order (e.g. the IN() operator) compared to their AST
      * representation.
      */
-    private LinkedList<ArrayList<Object>> invertedOperandsLists = new LinkedList<ArrayList<Object>>();
+    private LinkedList<ArrayList<Object>> invertedOperandsLists =
+            new LinkedList<ArrayList<Object>>();
 
     public static Pattern wildcardStarPattern = Pattern.compile("([*])");
     public static Pattern wildcardPlusPattern = Pattern.compile("([+])");
     public static Pattern wildcardQuestionPattern = Pattern.compile("([?])");
-    
-    
+
+
     /**
      * @param tree
      *            The syntax tree as returned by ANTLR
@@ -363,13 +366,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         // Step I: create group
         int optsChild = node.getChildCount() - 1;
-        Tree begConditions = getFirstChildWithCat(node.getChild(optsChild),
-                "TPBEG");
-        Tree endConditions = getFirstChildWithCat(node.getChild(optsChild),
-                "TPEND");
+        Tree begConditions =
+                getFirstChildWithCat(node.getChild(optsChild), "TPBEG");
+        Tree endConditions =
+                getFirstChildWithCat(node.getChild(optsChild), "TPEND");
 
-        Map<String, Object> submatchgroup = KoralObjectGenerator
-                .makeReference(classCounter + 128);
+        Map<String, Object> submatchgroup =
+                KoralObjectGenerator.makeReference(classCounter + 128);
         ArrayList<Object> submatchOperands = new ArrayList<Object>();
         submatchgroup.put("operands", submatchOperands);
         putIntoSuperObject(submatchgroup);
@@ -377,7 +380,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // Step II: collect all conditions, create groups for them in
         // processPositionCondition()
         ArrayList<Object> distributedOperands = new ArrayList<Object>();
-        ArrayList<Map<String, Object>> conditionGroups = new ArrayList<Map<String, Object>>();
+        ArrayList<Map<String, Object>> conditionGroups =
+                new ArrayList<Map<String, Object>>();
         if (begConditions != null) {
             for (Tree condition : getChildren(begConditions)) {
                 conditionGroups.add(processPositionCondition(condition,
@@ -403,11 +407,11 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             else if (conditionCount < conditionGroups.size()) {
                 ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
                 frames.add(KoralFrame.MATCHES);
-                Map<String, Object> matchesGroup = KoralObjectGenerator
-                        .makePosition(frames);
+                Map<String, Object> matchesGroup =
+                        KoralObjectGenerator.makePosition(frames);
                 @SuppressWarnings("unchecked")
-                ArrayList<Object> matchesOperands = (ArrayList<Object>) matchesGroup
-                        .get("operands");
+                ArrayList<Object> matchesOperands =
+                        (ArrayList<Object>) matchesGroup.get("operands");
                 matchesOperands.add(conditionGroup);
                 // matches groups that are embedded at the second or
                 // lower level receive an additional
@@ -438,8 +442,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 classCounter + 128 + 2 };
         // classRef.add(classCounter + 1); // yes, do this twice (two
         // classes)!
-        Map<String, Object> group = KoralObjectGenerator
-                .makeReference(classCounter + 128);
+        Map<String, Object> group =
+                KoralObjectGenerator.makeReference(classCounter + 128);
         Map<String, Object> classRefCheck = KoralObjectGenerator.makeClassRefOp(
                 ClassRefOp.INVERSION, classRef, classCounter + 128);
         ArrayList<Object> operands = new ArrayList<Object>();
@@ -474,8 +478,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     private boolean isExclusion (Tree node) {
         Tree exclnode = getFirstChildWithCat(node, "EXCL");
-        if (exclnode != null && exclnode.getChild(0).toStringTree()
-                .equals("YES")) { return true; }
+        if (exclnode != null
+                && exclnode.getChild(0).toStringTree().equals("YES")) {
+            return true;
+        }
         return false;
     }
 
@@ -484,8 +490,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             ArrayList<ClassRefCheck> check, Map<String, Object> group) {
 
         int classOut = classCounter + 128;
-        ArrayList<Integer> classIn = new ArrayList<Integer>();
+        Set<Integer> classIn = new HashSet<Integer>();
+//        ArrayList<Integer> classIn = new ArrayList<Integer>();
         if (check.contains(ClassRefCheck.INCLUDES)) {
+            classIn.add(classCounter + 128 - 1);
             classIn.add(classCounter + 128);
             classOut = classCounter + 128 + 1;
         }
@@ -498,9 +506,11 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             classIn.add(classCounter + 128 - 2);
             classIn.add(classCounter + 128 - 1);
         }
+        
+        ArrayList<Integer> classInList = new ArrayList<Integer>(classIn);
         // wrap position in a classRefCheck
         Map<String, Object> topGroup = KoralObjectGenerator
-                .makeClassRefCheck(check, classIn, classOut);
+                .makeClassRefCheck(check, classInList, classOut);
         ((ArrayList<Object>) topGroup.get("operands")).add(group);
         return topGroup;
     }
@@ -553,15 +563,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         objectStack.push(posGroup);
         stackedObjects++;
 
-        ArrayList<ClassRefCheck> checkList = (ArrayList<ClassRefCheck>) positionOptions
-                .get("classRefCheck");
+        ArrayList<ClassRefCheck> checkList =
+                (ArrayList<ClassRefCheck>) positionOptions.get("classRefCheck");
 
         // Step II: wrap in classRefCheck and/or focus and decide where to put
         if (!checkList.isEmpty()) {
-            posGroup = addClassRefCheck(
-                    (ArrayList<ClassRefCheck>) positionOptions
-                            .get("classRefCheck"),
-                    posGroup);
+            posGroup =
+                    addClassRefCheck((ArrayList<ClassRefCheck>) positionOptions
+                            .get("classRefCheck"), posGroup);
         }
         //            posGroup = addClassFocus((boolean) positionOptions.get("matchall"),
         //                    posGroup);
@@ -569,10 +578,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // wrap in 'merge' operation if grouping option is set
         if (!isExclusion && positionOptions.containsKey("grouping")
                 && (boolean) positionOptions.get("grouping")) {
-            Map<String, Object> mergeOperation = KoralObjectGenerator
-                    .makeGroup(KoralOperation.MERGE);
-            ArrayList<Object> mergeOperands = (ArrayList<Object>) mergeOperation
-                    .get("operands");
+            Map<String, Object> mergeOperation =
+                    KoralObjectGenerator.makeGroup(KoralOperation.MERGE);
+            ArrayList<Object> mergeOperands =
+                    (ArrayList<Object>) mergeOperation.get("operands");
             mergeOperands.add(posGroup);
             posGroup = mergeOperation;
         }
@@ -587,8 +596,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         Tree typ = prox_opts.getChild(0);
         Tree dist_list = prox_opts.getChild(1);
         // Step I: create group
-        Map<String, Object> group = KoralObjectGenerator
-                .makeGroup(KoralOperation.SEQUENCE);
+        Map<String, Object> group =
+                KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
 
         ArrayList<Object> constraints = new ArrayList<Object>();
         boolean exclusion = typ.getChild(0).toStringTree().equals("EXCL");
@@ -632,8 +641,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             if (!meas.equals("w") && min == 0) {
                 processSpanDistance(meas, min, max);
             }
-            Map<String, Object> distance = KoralObjectGenerator
-                    .makeDistance(meas, min, max);
+            Map<String, Object> distance =
+                    KoralObjectGenerator.makeDistance(meas, min, max);
             // override @type, min/max to be treated according to 
             // Cosmas particularities
             distance.put("@type", KoralType.COSMAS_DISTANCE.toString());
@@ -670,8 +679,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             classCounter++;
         }
         else if (openNodeCats.get(1).equals("OPNHIT")) {
-            Map<String, Object> repetition = KoralObjectGenerator
-                    .makeRepetition(min, max);
+            Map<String, Object> repetition =
+                    KoralObjectGenerator.makeRepetition(min, max);
             ((ArrayList<Object>) repetition.get("operands"))
                     .add(KoralObjectGenerator.makeToken());
             // TODO go on with this: put the repetition into a class
@@ -705,8 +714,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         //        }
         //        else {
         if (invertedOperands) {
-            ArrayList<Object> operands = (ArrayList<Object>) embeddedSequence
-                    .get("operands");
+            ArrayList<Object> operands =
+                    (ArrayList<Object>) embeddedSequence.get("operands");
             invertedOperandsLists.push(operands);
         }
         // Step II: decide where to put
@@ -720,8 +729,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     private void processOPOR (Tree node) {
         // Step I: create group
-        Map<String, Object> disjunction = KoralObjectGenerator
-                .makeGroup(KoralOperation.DISJUNCTION);
+        Map<String, Object> disjunction =
+                KoralObjectGenerator.makeGroup(KoralOperation.DISJUNCTION);
         disjunction.put("inOrder", false); // Order is not important 
         objectStack.push(disjunction);
         stackedObjects++;
@@ -733,12 +742,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private void processOPAND_OPNOT (Tree node) {
         // Step I: create group
         String nodeCat = getNodeCat(node);
-        Map<String, Object> distgroup = KoralObjectGenerator
-                .makeGroup(KoralOperation.SEQUENCE);
+        Map<String, Object> distgroup =
+                KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
         distgroup.put("inOrder", false); // Order is not important 
         ArrayList<Object> distances = new ArrayList<Object>();
-        Map<String, Object> zerodistance = KoralObjectGenerator
-                .makeDistance("t", 0, 0);
+        Map<String, Object> zerodistance =
+                KoralObjectGenerator.makeDistance("t", 0, 0);
         zerodistance.put("@type", "cosmas:distance"); // overwrite @type: cosmas:distance! 
         if (nodeCat.equals("OPNOT")) zerodistance.put("exclude", true);
         distances.add(zerodistance);
@@ -785,8 +794,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 span.put("key", elnameNode.getChild(0).toStringTree()
                         .toLowerCase());
                 */
-                Map<String, Object> fm = termToFieldMap(
-                        elnameNode.getChild(0).toStringTree());
+                Map<String, Object> fm =
+                        termToFieldMap(elnameNode.getChild(0).toStringTree());
 
                 if (fm == null) return;
 
@@ -814,13 +823,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                  */
                 Map<String, Object> termGroup = KoralObjectGenerator
                         .makeTermGroup(KoralTermGroupRelation.AND);
-                ArrayList<Object> termGroupOperands = (ArrayList<Object>) termGroup
-                        .get("operands");
+                ArrayList<Object> termGroupOperands =
+                        (ArrayList<Object>) termGroup.get("operands");
                 for (int i = elname; i < node.getChildCount(); i++) {
                     Tree attrNode = node.getChild(i);
                     if (attrNode.getChildCount() == 2) {
-                        Map<String, Object> term = KoralObjectGenerator
-                                .makeTerm();
+                        Map<String, Object> term =
+                                KoralObjectGenerator.makeTerm();
                         termGroupOperands.add(term);
                         String layer = attrNode.getChild(0).toStringTree();
                         String[] splitted = layer.split("/");
@@ -830,20 +839,22 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                         }
                         term.put("layer", translateMorph(layer));
                         term.put("key", attrNode.getChild(1).toStringTree());
-                        KoralMatchOperator match = getNodeCat(attrNode)
-                                .equals("EQ") ? KoralMatchOperator.EQUALS
+                        KoralMatchOperator match =
+                                getNodeCat(attrNode).equals("EQ")
+                                        ? KoralMatchOperator.EQUALS
                                         : KoralMatchOperator.NOT_EQUALS;
                         term.put("match", match.toString());
                     }
                     else {
                         Map<String, Object> subTermGroup = KoralObjectGenerator
                                 .makeTermGroup(KoralTermGroupRelation.AND);
-                        ArrayList<Object> subTermGroupOperands = (ArrayList<Object>) subTermGroup
-                                .get("operands");
+                        ArrayList<Object> subTermGroupOperands =
+                                (ArrayList<Object>) subTermGroup
+                                        .get("operands");
                         int j;
                         for (j = 1; j < attrNode.getChildCount(); j++) {
-                            Map<String, Object> term = KoralObjectGenerator
-                                    .makeTerm();
+                            Map<String, Object> term =
+                                    KoralObjectGenerator.makeTerm();
                             String layer = attrNode.getChild(0).toStringTree();
                             String[] splitted = layer.split("/");
                             if (splitted.length > 1) {
@@ -853,8 +864,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                             term.put("layer", translateMorph(layer));
                             term.put("key",
                                     attrNode.getChild(j).toStringTree());
-                            KoralMatchOperator match = getNodeCat(attrNode)
-                                    .equals("EQ") ? KoralMatchOperator.EQUALS
+                            KoralMatchOperator match =
+                                    getNodeCat(attrNode).equals("EQ")
+                                            ? KoralMatchOperator.EQUALS
                                             : KoralMatchOperator.NOT_EQUALS;
                             term.put("match", match.toString());
                             if (node.getChildCount() == elname + 1) {
@@ -892,8 +904,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     private void processOPMORPH (Tree node) {
         // Step I: get info
-        String[] morphterms = node.getChild(0).toStringTree().replace(" ", "")
-                .split("&");
+        String[] morphterms =
+                node.getChild(0).toStringTree().replace(" ", "").split("&");
         Map<String, Object> token = KoralObjectGenerator.makeToken();
         ArrayList<Object> terms = new ArrayList<Object>();
         Map<String, Object> fieldMap = null;
@@ -901,7 +913,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         for (String morphterm : morphterms) {
 
             fieldMap = termToFieldMap(morphterm);
-            if (fieldMap == null) { return; };
+            if (fieldMap == null) {
+                return;
+            };
 
             terms.add(fieldMap);
         }
@@ -944,27 +958,27 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/platzhalter.html
         boolean isFound = false;
         Matcher m = wildcardStarPattern.matcher(value);
-        if (m.find()){
+        if (m.find()) {
             isFound = true;
             value = m.replaceAll(".$1");
         }
         m.reset();
         m = wildcardQuestionPattern.matcher(value);
-        if (m.find()){
+        if (m.find()) {
             isFound = true;
             value = m.replaceAll(".");
         }
         m.reset();
         m = wildcardPlusPattern.matcher(value);
-        if (m.find()){
+        if (m.find()) {
             isFound = true;
             value = m.replaceAll(".?");
         }
-        
-        if (isFound){
+
+        if (isFound) {
             fieldMap.put("type", "type:regex");
         }
-        
+
         if (value.startsWith("$")) {
             value = value.substring(1);
             ArrayList<String> flags = new ArrayList<String>();
@@ -1120,12 +1134,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // as operands, possibly wrapped in spanRefs
         ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
         frames.add(position);
-        Map<String, Object> positionGroup = KoralObjectGenerator
-                .makePosition(frames);
+        Map<String, Object> positionGroup =
+                KoralObjectGenerator.makePosition(frames);
         if (negated) positionGroup.put("exclude", true);
         ArrayList<Object> posOperands = new ArrayList<Object>();
-        Map<String, Object> classGroup = KoralObjectGenerator
-                .makeSpanClass(128 + classCounter++);
+        Map<String, Object> classGroup =
+                KoralObjectGenerator.makeSpanClass(128 + classCounter++);
         classGroup.put("operands", distributedOperands);
         positionGroup.put("operands", posOperands);
         Map<String, Object> span = KoralObjectGenerator.makeSpan(elem);
@@ -1188,20 +1202,33 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             // HIT is default in C2
             if (!range.equals("all")) {
                 // EM: check in the arg2 is a complex query
-                Tree arg2Operator = getFirstChildWithCat(node, "ARG2")
-                        .getChild(0);
+                Tree arg2Operator =
+                        getFirstChildWithCat(node, "ARG2").getChild(0);
                 if (getFirstChildWithCat(arg2Operator, "ARG2") != null) {
                     classRefCheck.add(ClassRefCheck.INCLUDES);
                 }
             }
         }
-        posOptions.put("classRefCheck", classRefCheck);
-        if (classRefCheck.contains(ClassRefCheck.EQUALS)
+
+        
+        if (classRefCheck.contains(ClassRefCheck.INCLUDES)) {
+            wrapOperandInClass(node, 1, 128 + classCounter++);
+            
+            if (classRefCheck.contains(ClassRefCheck.EQUALS)){
+                classRefCheck.remove(ClassRefCheck.EQUALS);
+            }
+            else if (classRefCheck.contains(ClassRefCheck.UNEQUALS)){
+                wrapOperandInClass(node, 2, 128 + classCounter++);
+            }
+        }
+        else if (classRefCheck.contains(ClassRefCheck.EQUALS)
                 || classRefCheck.contains(ClassRefCheck.UNEQUALS)) {
             wrapOperandInClass(node, 1, 128 + classCounter++);
             wrapOperandInClass(node, 2, 128 + classCounter++);
         }
-
+        
+        posOptions.put("classRefCheck", classRefCheck);
+        
         Boolean grouping = false;
         if (groupnode != null && groupnode.getChild(0).toStringTree()
                 .equalsIgnoreCase("max")) {
@@ -1323,7 +1350,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         posOptions.put("frames", Converter.enumListToStringList(positions));
         posOptions.put("classRefCheck", classRefCheck);
-        if (!classRefCheck.isEmpty()){
+        if (!classRefCheck.isEmpty()) {
             wrapOperandInClass(node, 1, 128 + classCounter++);
             wrapOperandInClass(node, 2, 128 + classCounter++);
         }
@@ -1363,8 +1390,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private Map<String, Object> wrap (Map<String, Object>[] wrapCascade) {
         int i;
         for (i = 0; i < wrapCascade.length - 1; i++) {
-            ArrayList<Object> containerOperands = (ArrayList<Object>) wrapCascade[i
-                    + 1].get("operands");
+            ArrayList<Object> containerOperands =
+                    (ArrayList<Object>) wrapCascade[i + 1].get("operands");
             containerOperands.add(0, wrapCascade[i]);
         }
         return wrapCascade[i];
@@ -1375,8 +1402,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private void putIntoSuperObject (Map<String, Object> object,
             int objStackPosition) {
         if (objectStack.size() > objStackPosition) {
-            ArrayList<Object> topObjectOperands = (ArrayList<Object>) objectStack
-                    .get(objStackPosition).get("operands");
+            ArrayList<Object> topObjectOperands =
+                    (ArrayList<Object>) objectStack.get(objStackPosition)
+                            .get("operands");
             if (!invertedOperandsLists.contains(topObjectOperands)) {
                 topObjectOperands.add(object);
             }
@@ -1406,17 +1434,17 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         while (m.find()) {
             String match = m.group();
             String conditionsString = match.split(":")[1];
-            Pattern conditionPattern = Pattern
-                    .compile("(\\+|-)?(sa|se|pa|pe|ta|te)");
-            Matcher conditionMatcher = conditionPattern
-                    .matcher(conditionsString);
+            Pattern conditionPattern =
+                    Pattern.compile("(\\+|-)?(sa|se|pa|pe|ta|te)");
+            Matcher conditionMatcher =
+                    conditionPattern.matcher(conditionsString);
             String replacement = "#BED(" + m.group(1) + " , ";
             while (conditionMatcher.find()) {
                 replacement = replacement + conditionMatcher.group() + ",";
             }
             // remove trailing comma and close parenthesis
-            replacement = replacement.substring(0, replacement.length() - 1)
-                    + ")";
+            replacement =
+                    replacement.substring(0, replacement.length() - 1) + ")";
             rewrittenQuery = rewrittenQuery.replace(match, replacement);
         }
         return rewrittenQuery;
@@ -1481,19 +1509,19 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private Tree parseCosmasQuery (String query) {
         query = rewritePositionQuery(query);
         Tree tree = null;
-        Antlr3DescriptiveErrorListener errorListener = new Antlr3DescriptiveErrorListener(
-                query);
+        Antlr3DescriptiveErrorListener errorListener =
+                new Antlr3DescriptiveErrorListener(query);
         try {
             ANTLRStringStream ss = new ANTLRStringStream(query);
             c2psLexer lex = new c2psLexer(ss);
-            org.antlr.runtime.CommonTokenStream tokens = new org.antlr.runtime.CommonTokenStream(
-                    lex); // v3
+            org.antlr.runtime.CommonTokenStream tokens =
+                    new org.antlr.runtime.CommonTokenStream(lex); // v3
             parser = new c2psParser(tokens);
             // Use custom error reporters
             lex.setErrorReporter(errorListener);
             ((c2psParser) parser).setErrorReporter(errorListener);
-            c2psParser.c2ps_query_return c2Return = ((c2psParser) parser)
-                    .c2ps_query(); // statt t().
+            c2psParser.c2ps_query_return c2Return =
+                    ((c2psParser) parser).c2ps_query(); // statt t().
             // AST Tree anzeigen:
             tree = (Tree) c2Return.getTree();
 

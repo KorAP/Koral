@@ -1690,9 +1690,9 @@ public class Cosmas2QueryProcessorTest {
         query = "meine* /+w1:2,s0 &Erfahrung";
         qs.setQuery(query, "cosmas2");
 		res = mapper.readTree(qs.toJSON());
-        assertEquals("type:wildcard",
+        assertEquals("type:regex",
 					 res.at("/query/operands/0/operands/0/wrap/type").asText());
-        assertEquals("meine*",
+        assertEquals("meine.*",
 					 res.at("/query/operands/0/operands/0/wrap/key").asText());
 	};	
 

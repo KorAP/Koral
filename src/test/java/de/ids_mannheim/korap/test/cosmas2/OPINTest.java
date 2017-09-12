@@ -162,14 +162,14 @@ public class OPINTest {
         query = "gilt #IN(N,HIT) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        
+//        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefCheck:includes",
                 res.at("/query/classRefCheck/0").asText());
         assertEquals(1, res.at("/query/classRefCheck").size());
         assertEquals(129, res.at("/query/classIn/0").asInt());
-        assertEquals(130, res.at("/query/classOut").asInt());
+        assertEquals(131, res.at("/query/classOut").asInt());
 
         assertEquals("operation:position",
                 res.at("/query/operands/0/operation").asText());
@@ -177,17 +177,21 @@ public class OPINTest {
                 res.at("/query/operands/0/frames/0").asText());
         assertEquals("frames:matches",
                 res.at("/query/operands/0/frames/1").asText());
+        
+        assertEquals("operation:class",
+                res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("gilt",
-                res.at("/query/operands/0/operands/0/wrap/key").asText());
+                res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
+        
         assertEquals("operation:sequence",
                 res.at("/query/operands/0/operands/1/operation").asText());
 
         // sequence operands
         res = res.at("/query/operands/0/operands/1/operands");
         assertEquals("gelten", res.at("/0/operands/0/wrap/key").asText());
-        assertEquals(129, res.at("/0/classOut").asInt());
+        assertEquals(130, res.at("/0/classOut").asInt());
         assertEquals("zurecht", res.at("/1/operands/0/wrap/key").asText());
-        assertEquals(129, res.at("/1/classOut").asInt());
+        assertEquals(130, res.at("/1/classOut").asInt());
     }
     
     @Test
@@ -196,16 +200,16 @@ public class OPINTest {
         query = "gilt #IN(FE,HIT) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        
+//        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
-        assertEquals("classRefCheck:equals",
-                res.at("/query/classRefCheck/0").asText());
+//        assertEquals("classRefCheck:equals",
+//                res.at("/query/classRefCheck/0").asText());
         assertEquals("classRefCheck:includes",
-                res.at("/query/classRefCheck/1").asText());
-        assertEquals(2, res.at("/query/classRefCheck").size());
-        assertEquals(3, res.at("/query/classIn").size());
-        assertEquals(132, res.at("/query/classOut").asInt());
+                res.at("/query/classRefCheck/0").asText());
+        assertEquals(1, res.at("/query/classRefCheck").size());
+        assertEquals(2, res.at("/query/classIn").size());
+        assertEquals(131, res.at("/query/classOut").asInt());
 
         assertEquals("operation:position",
                 res.at("/query/operands/0/operation").asText());
@@ -216,14 +220,13 @@ public class OPINTest {
         assertEquals("gilt",
                 res.at("/0/operands/0/wrap/key").asText());
         assertEquals(129, res.at("/0/classOut").asInt());
-        assertEquals(130, res.at("/1/classOut").asInt());
         
         // sequence operands
-        res = res.at("/1/operands/0/operands");        
+        res = res.at("/1/operands");        
         assertEquals("gelten", res.at("/0/operands/0/wrap/key").asText());
-        assertEquals(131, res.at("/0/classOut").asInt());
+        assertEquals(130, res.at("/0/classOut").asInt());
         assertEquals("zurecht", res.at("/1/operands/0/wrap/key").asText());
-        assertEquals(131, res.at("/1/classOut").asInt());
+        assertEquals(130, res.at("/1/classOut").asInt());
     }
     
     @Test
@@ -232,7 +235,7 @@ public class OPINTest {
         query = "gilt #IN(FI,HIT) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        
+//        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefCheck:unequals",
