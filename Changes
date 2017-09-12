@@ -1,3 +1,7 @@
+0.27 2017-09-12
+	- Changed Cosmas2 wildcards serialization as regex (margaretha).  
+	- Updated C2 OP OV frames (margaretha).
+	
 0.26 2017-06-29
 	- Updated collection query grammar (margaretha)
 	- Updated maven dependency phase (margaretha)

@@ -31,8 +31,7 @@ public class OPINTest {
         res = mapper.readTree(qs.toJSON());
 
         assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:position",
-                res.at("/query/operation").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals(4, res.at("/query/frames").size());
         assertEquals("frames:alignsLeft", res.at("/query/frames/0").asText());
         assertEquals("frames:alignsRight", res.at("/query/frames/1").asText());
@@ -50,57 +49,45 @@ public class OPINTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:position",
-                res.at("/query/operation").asText());
-        assertEquals("frames:isWithin",
-                res.at("/query/frames/0").asText());
-        assertEquals("wegen",
-                res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("s",
-                res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
+        assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
     }
-    
-    
+
+
     @Test
     public void testOPINWithOptionL ()
             throws JsonProcessingException, IOException {
         query = "wegen #IN(L) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        
-        assertEquals("operation:position",
-                res.at("/query/operation").asText());
-        assertEquals(2, res.at("/query/frames").size());
-        assertEquals("frames:alignsLeft",
-                res.at("/query/frames/0").asText());
-        assertEquals("frames:matches",
-                res.at("/query/frames/1").asText());
 
-        assertEquals("wegen",
-                res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("s",
-                res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals(2, res.at("/query/frames").size());
+        assertEquals("frames:alignsLeft", res.at("/query/frames/0").asText());
+        assertEquals("frames:matches", res.at("/query/frames/1").asText());
+
+        assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
     }
-    
+
+
     @Test
     public void testOPINWithOptionR ()
             throws JsonProcessingException, IOException {
         query = "wegen #IN(R) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        
-        assertEquals("operation:position",
-                res.at("/query/operation").asText());
-        assertEquals("frames:alignsRight",
-                res.at("/query/frames/0").asText());
-        assertEquals("frames:matches",
-                res.at("/query/frames/1").asText());
+
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:alignsRight", res.at("/query/frames/0").asText());
+        assertEquals("frames:matches", res.at("/query/frames/1").asText());
         assertEquals(2, res.at("/query/frames").size());
-        assertEquals("wegen",
-                res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("s",
-                res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
     }
+
 
     @Test
     public void testOPINwithOptionF ()
@@ -110,10 +97,8 @@ public class OPINTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals(true,
                 res.at("/query/operands/0/classRefCheck").isMissingNode());
-        assertEquals("frames:matches",
-                res.at("/query/frames/0").asText());
-        assertEquals(true,
-                res.at("/query/frames/1").isMissingNode());
+        assertEquals("frames:matches", res.at("/query/frames/0").asText());
+        assertEquals(true, res.at("/query/frames/1").isMissingNode());
     }
 
 
@@ -127,9 +112,9 @@ public class OPINTest {
                 res.at("/query/classRefCheck/0").asText());
         assertEquals("frames:matches",
                 res.at("/query/operands/0/frames/0").asText());
-        assertEquals(true, res.at("/query/operands/0/frames/1")
-                .isMissingNode());
-        
+        assertEquals(true,
+                res.at("/query/operands/0/frames/1").isMissingNode());
+
     }
 
 
@@ -143,9 +128,10 @@ public class OPINTest {
                 res.at("/query/classRefCheck/0").asText());
         assertEquals("frames:matches",
                 res.at("/query/operands/0/frames/0").asText());
-        assertEquals(true, res.at("/query/operands/0/frames/1")
-                .isMissingNode());
+        assertEquals(true,
+                res.at("/query/operands/0/frames/1").isMissingNode());
     }
+
 
     @Test
     public void testOPINWithOptionN_ALL ()
@@ -155,41 +141,130 @@ public class OPINTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:position",
-                res.at("/query/operation").asText());
-        assertEquals("frames:isWithin",
-                res.at("/query/frames/0").asText());
-        assertEquals("frames:matches",
-                res.at("/query/frames/1").asText());
-        assertEquals("sich",
-                res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
+        assertEquals("frames:matches", res.at("/query/frames/1").asText());
+        assertEquals("sich", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("gelten",
-                res.at("/query/operands/1/operands/0/operands/0/wrap/key").asText());
+                res.at("/query/operands/1/operands/0/operands/0/wrap/key")
+                        .asText());
         assertEquals("zurecht",
-                res.at("/query/operands/1/operands/1/operands/0/wrap/key").asText());
+                res.at("/query/operands/1/operands/1/operands/0/wrap/key")
+                        .asText());
     }
-    
+
+
+    // Default
+
     @Test
     public void testOPINWithOptionN_HIT ()
             throws JsonProcessingException, IOException {
-        // EM: KorAP does not support matching in multiple hits?   
         query = "gilt #IN(N,HIT) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        
         assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:class", res.at("/query/operation").asText());
+        assertEquals("classRefCheck:includes",
+                res.at("/query/classRefCheck/0").asText());
+        assertEquals(1, res.at("/query/classRefCheck").size());
+        assertEquals(129, res.at("/query/classIn/0").asInt());
+        assertEquals(130, res.at("/query/classOut").asInt());
+
         assertEquals("operation:position",
-                res.at("/query/operation").asText());
+                res.at("/query/operands/0/operation").asText());
         assertEquals("frames:isWithin",
-                res.at("/query/frames/0").asText());
+                res.at("/query/operands/0/frames/0").asText());
         assertEquals("frames:matches",
-                res.at("/query/frames/1").asText());
-        assertEquals("wegen",
-                res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("s",
-                res.at("/query/operands/1/wrap/key").asText());
+                res.at("/query/operands/0/frames/1").asText());
+        assertEquals("gilt",
+                res.at("/query/operands/0/operands/0/wrap/key").asText());
+        assertEquals("operation:sequence",
+                res.at("/query/operands/0/operands/1/operation").asText());
+
+        // sequence operands
+        res = res.at("/query/operands/0/operands/1/operands");
+        assertEquals("gelten", res.at("/0/operands/0/wrap/key").asText());
+        assertEquals(129, res.at("/0/classOut").asInt());
+        assertEquals("zurecht", res.at("/1/operands/0/wrap/key").asText());
+        assertEquals(129, res.at("/1/classOut").asInt());
     }
     
     @Test
+    public void testOPINWithOptionFE_HIT ()
+            throws JsonProcessingException, IOException {
+        query = "gilt #IN(FE,HIT) (&gelten /w5:10 zurecht)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:class", res.at("/query/operation").asText());
+        assertEquals("classRefCheck:equals",
+                res.at("/query/classRefCheck/0").asText());
+        assertEquals("classRefCheck:includes",
+                res.at("/query/classRefCheck/1").asText());
+        assertEquals(2, res.at("/query/classRefCheck").size());
+        assertEquals(3, res.at("/query/classIn").size());
+        assertEquals(132, res.at("/query/classOut").asInt());
+
+        assertEquals("operation:position",
+                res.at("/query/operands/0/operation").asText());
+        assertEquals("frames:matches",
+                res.at("/query/operands/0/frames/0").asText());
+        // positions operands
+        res = res.at("/query/operands/0/operands");
+        assertEquals("gilt",
+                res.at("/0/operands/0/wrap/key").asText());
+        assertEquals(129, res.at("/0/classOut").asInt());
+        assertEquals(130, res.at("/1/classOut").asInt());
+        
+        // sequence operands
+        res = res.at("/1/operands/0/operands");        
+        assertEquals("gelten", res.at("/0/operands/0/wrap/key").asText());
+        assertEquals(131, res.at("/0/classOut").asInt());
+        assertEquals("zurecht", res.at("/1/operands/0/wrap/key").asText());
+        assertEquals(131, res.at("/1/classOut").asInt());
+    }
+    
+    @Test
+    public void testOPINWithOptionFI_HIT ()
+            throws JsonProcessingException, IOException {
+        query = "gilt #IN(FI,HIT) (&gelten /w5:10 zurecht)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:class", res.at("/query/operation").asText());
+        assertEquals("classRefCheck:unequals",
+                res.at("/query/classRefCheck/0").asText());
+        assertEquals("classRefCheck:includes",
+                res.at("/query/classRefCheck/1").asText());
+        assertEquals(2, res.at("/query/classRefCheck").size());
+        assertEquals(3, res.at("/query/classIn").size());
+        assertEquals(132, res.at("/query/classOut").asInt());
+
+        assertEquals("operation:position",
+                res.at("/query/operands/0/operation").asText());
+        assertEquals("frames:matches",
+                res.at("/query/operands/0/frames/0").asText());
+        // positions operands
+        res = res.at("/query/operands/0/operands");
+        assertEquals("gilt",
+                res.at("/0/operands/0/wrap/key").asText());
+        assertEquals(129, res.at("/0/classOut").asInt());
+        assertEquals(130, res.at("/1/classOut").asInt());
+        
+        // sequence operands
+        res = res.at("/1/operands/0/operands");        
+        assertEquals("gelten", res.at("/0/operands/0/wrap/key").asText());
+        assertEquals(131, res.at("/0/classOut").asInt());
+        assertEquals("zurecht", res.at("/1/operands/0/wrap/key").asText());
+        assertEquals(131, res.at("/1/classOut").asInt());
+    }
+
+
+    @Test
+    @Ignore
     public void testOPINWithOptionN_MAX ()
             throws JsonProcessingException, IOException {
         // EM: Fix operation:merge

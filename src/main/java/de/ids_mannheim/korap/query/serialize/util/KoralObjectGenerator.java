@@ -142,12 +142,12 @@ public class KoralObjectGenerator {
 
 
     public static Map<String, Object> makeClassRefCheck (
-            ArrayList<ClassRefCheck> checks, Integer[] classIn, int classOut) {
+            ArrayList<ClassRefCheck> checks, ArrayList<Integer> classIn, int classOut) {
         Map<String, Object> group = new HashMap<String, Object>();
         group.put("@type", KoralType.GROUP.toString());
         group.put("operation", KoralOperation.CLASS.toString());
         group.put("classRefCheck", Converter.enumListToStringList(checks));
-        group.put("classIn", Arrays.asList(classIn));
+        group.put("classIn", classIn);
         group.put("classOut", classOut);
         group.put("operands", new ArrayList<Object>());
         return group;
