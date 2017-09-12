@@ -763,11 +763,11 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("classRefCheck:intersects",
                 res.at("/query/classRefCheck/0").asText());
         assertEquals("frames:alignsLeft",
-                res.at("/query/operands/0/frames/0").asText());
-        assertEquals("frames:overlapsLeft",
                 res.at("/query/operands/0/frames/1").asText());
-        assertEquals("frames:matches",
+        assertEquals("frames:overlapsLeft",
                 res.at("/query/operands/0/frames/2").asText());
+        assertEquals("frames:matches",
+                res.at("/query/operands/0/frames/0").asText());
 
         query = "wegen #OV(F) <s>";
         qs.setQuery(query, "cosmas2");
@@ -782,8 +782,10 @@ public class Cosmas2QueryProcessorTest {
         query = "wegen #OV(FI) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("classRefCheck:unequals",
+        assertEquals("classRefCheck:intersects",
                 res.at("/query/classRefCheck/0").asText());
+        assertEquals("classRefCheck:unequals",
+                res.at("/query/classRefCheck/1").asText());
         assertEquals("frames:matches",
                 res.at("/query/operands/0/frames/0").asText());
 

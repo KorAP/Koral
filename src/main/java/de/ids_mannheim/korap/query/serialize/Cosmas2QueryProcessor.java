@@ -498,11 +498,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             classOut = classCounter + 128 + 1;
         }
         if (check.contains(ClassRefCheck.EQUALS)
-                || check.contains(ClassRefCheck.UNEQUALS)) {
-            classIn.add(classCounter + 128 - 2);
-            classIn.add(classCounter + 128 - 1);
-        }
-        else if (check.contains(ClassRefCheck.INTERSECTS)) {
+                || check.contains(ClassRefCheck.UNEQUALS) 
+                || check.contains(ClassRefCheck.INTERSECTS)
+                || check.contains(ClassRefCheck.DISJOINT)) {
             classIn.add(classCounter + 128 - 2);
             classIn.add(classCounter + 128 - 1);
         }
@@ -554,7 +552,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             positionOptions = parseOPINOptions(node, isExclusion);
         }
         else {
-            positionOptions = parseOPOVOptions(node);
+            positionOptions = parseOPOVOptions(node,isExclusion);
         }
 
         posGroup.put("frames", positionOptions.get("frames"));
@@ -1243,6 +1241,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private void checkINOptions (String posOption,
             ArrayList<KoralFrame> positions,
             ArrayList<ClassRefCheck> classRefCheck) {
+        positions.add(KoralFrame.MATCHES);
         switch (posOption) {
             case "L":
                 positions.add(KoralFrame.ALIGNS_LEFT);
@@ -1260,13 +1259,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 break;
             case "N":
                 positions.add(KoralFrame.IS_WITHIN);
+                positions.remove(KoralFrame.MATCHES);
                 break;
             default:
                 positions.add(KoralFrame.ALIGNS_LEFT);
                 positions.add(KoralFrame.ALIGNS_RIGHT);
                 positions.add(KoralFrame.IS_WITHIN);
         }
-        positions.add(KoralFrame.MATCHES);
+        
     }
 
 
@@ -1300,8 +1300,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     }
 
 
-    private Map<String, Object> parseOPOVOptions (Tree node) {
-        boolean negatePosition = false;
+    private Map<String, Object> parseOPOVOptions (Tree node, boolean isExclusion) {
         Tree posnode = getFirstChildWithCat(node, "POS");
         Tree rangenode = getFirstChildWithCat(node, "RANGE");
         Tree exclnode = getFirstChildWithCat(node, "EXCL");
@@ -1313,38 +1312,17 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         String posOption = null;
         if (posnode != null) {
             posOption = posnode.getChild(0).toStringTree();
-            switch (posOption) {
-                case "L":
-                    positions.add(KoralFrame.ALIGNS_LEFT);
-                    positions.add(KoralFrame.OVERLAPS_LEFT);
-                    positions.add(KoralFrame.MATCHES);
-                    classRefCheck.add(ClassRefCheck.INTERSECTS);
-                    break;
-                case "R":
-                    positions.add(KoralFrame.ALIGNS_RIGHT);
-                    positions.add(KoralFrame.OVERLAPS_RIGHT);
-                    positions.add(KoralFrame.MATCHES);
-                    classRefCheck.add(ClassRefCheck.INTERSECTS);
-                    break;
-                case "F":
-                    positions.add(KoralFrame.MATCHES);
-                    classRefCheck.add(ClassRefCheck.INTERSECTS);
-                    break;
-                case "FE":
-                    positions.add(KoralFrame.MATCHES);
-                    classRefCheck.add(ClassRefCheck.EQUALS);
-                    break;
-                case "FI":
-                    positions.add(KoralFrame.MATCHES);
-                    classRefCheck.add(ClassRefCheck.UNEQUALS);
-                    break;
-                case "X":
-                    positions.add(KoralFrame.IS_WITHIN);
-                    classRefCheck.add(ClassRefCheck.INTERSECTS);
-                    break;
+            if (isExclusion){
+                checkOVExclusionOptions(posOption, positions, classRefCheck);
+            }
+            else{
+                checkOVOptions(posOption, positions, classRefCheck);
             }
         }
-        else {
+        else if (isExclusion){
+            classRefCheck.add(ClassRefCheck.DISJOINT);
+        }
+        else{
             classRefCheck.add(ClassRefCheck.INTERSECTS);
         }
 
@@ -1354,11 +1332,11 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             wrapOperandInClass(node, 1, 128 + classCounter++);
             wrapOperandInClass(node, 2, 128 + classCounter++);
         }
-        if (exclnode != null) {
-            if (exclnode.getChild(0).toStringTree().equals("YES")) {
-                negatePosition = !negatePosition;
-            }
-        }
+//        if (exclnode != null) {
+//            if (exclnode.getChild(0).toStringTree().equals("YES")) {
+//                negatePosition = !negatePosition;
+//            }
+//        }
 
         if (rangenode != null) {
             String range = rangenode.getChild(0).toStringTree().toLowerCase();
@@ -1370,9 +1348,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             }
         }
 
-        if (negatePosition) {
-            posOptions.put("exclude", "true");
-        }
+//        if (negatePosition) {
+//            posOptions.put("exclude", "true");
+//        }
 
         boolean grouping = false;
         if (groupnode != null) {
@@ -1383,6 +1361,70 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         posOptions.put("grouping", grouping);
 
         return posOptions;
+    }
+
+
+    private void checkOVExclusionOptions (String posOption,
+            ArrayList<KoralFrame> positions,
+            ArrayList<ClassRefCheck> classRefCheck) {
+        positions.add(KoralFrame.MATCHES);
+        switch (posOption) {
+            case "L":
+                positions.add(KoralFrame.ALIGNS_LEFT);
+                positions.add(KoralFrame.OVERLAPS_LEFT);
+                classRefCheck.add(ClassRefCheck.INTERSECTS);
+                classRefCheck.add(ClassRefCheck.DISJOINT);
+                break;
+            case "R":
+                positions.add(KoralFrame.ALIGNS_RIGHT);
+                positions.add(KoralFrame.OVERLAPS_RIGHT);
+                classRefCheck.add(ClassRefCheck.INTERSECTS);
+                classRefCheck.add(ClassRefCheck.DISJOINT);
+                break;
+            case "FE":
+                classRefCheck.add(ClassRefCheck.UNEQUALS);
+                break;
+            case "FI":
+                classRefCheck.add(ClassRefCheck.EQUALS);
+                break;
+            case "X":
+                positions.add(KoralFrame.IS_WITHIN);
+                positions.remove(KoralFrame.MATCHES);
+                break;
+        }
+        
+    }
+
+
+    private void checkOVOptions (String posOption, 
+            ArrayList<KoralFrame> positions, 
+            ArrayList<ClassRefCheck> classRefCheck) {
+        classRefCheck.add(ClassRefCheck.INTERSECTS);
+        positions.add(KoralFrame.MATCHES);
+        switch (posOption) {
+            case "L":
+                positions.add(KoralFrame.ALIGNS_LEFT);
+                positions.add(KoralFrame.OVERLAPS_LEFT);
+                break;
+            case "R":
+                positions.add(KoralFrame.ALIGNS_RIGHT);
+                positions.add(KoralFrame.OVERLAPS_RIGHT);
+                break;
+            case "F":
+                break;
+            case "FE":
+                classRefCheck.add(ClassRefCheck.EQUALS);
+                classRefCheck.remove(ClassRefCheck.INTERSECTS);
+                break;
+            case "FI":
+                classRefCheck.add(ClassRefCheck.UNEQUALS);
+                break;
+            case "X":
+                positions.add(KoralFrame.IS_WITHIN);
+                positions.remove(KoralFrame.MATCHES);
+                break;
+        }
+        
     }
 
 

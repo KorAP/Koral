@@ -1,6 +1,7 @@
 0.27 2017-09-12
-	- Changed Cosmas2 wildcards serialization as regex (margaretha).  
-	- Updated C2 OP OV frames (margaretha).
+	- Changed Cosmas2 wildcards serialization as regex (margaretha)  
+	- Fixed OP IN with classRefCheck.INCLUDES (margaretha)
+	- Implemented OP PV with exclusion (margaretha)
 	
 0.26 2017-06-29
 	- Updated collection query grammar (margaretha)
