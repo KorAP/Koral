@@ -54,6 +54,10 @@ public class OPINWithExclusionTest {
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
         assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+
+		// ND: I think, this requires
+		//     ["frames:alignsLeft","frames:alignsRight", "frames:matches"]
+		//     and not ["frames:within"] ..
     }
 
 
@@ -69,9 +73,11 @@ public class OPINWithExclusionTest {
                 res.at("/query/operation").asText());
         assertEquals(2, res.at("/query/frames").size());
         assertEquals("frames:alignsLeft", res.at("/query/frames/0").asText());
-        assertEquals("frames:matches", res.at("/query/frames/1").asText());
+        // assertEquals("frames:matches", res.at("/query/frames/1").asText());
         assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+
+		// ND: I think, frames:matches is wrong here ...
     }
 
 
@@ -86,8 +92,10 @@ public class OPINWithExclusionTest {
                 res.at("/query/operation").asText());
         assertEquals(2, res.at("/query/frames").size());
         assertEquals("frames:alignsRight", res.at("/query/frames/0").asText());
-        assertEquals("frames:matches", res.at("/query/frames/1").asText());
-    }
+        // assertEquals("frames:matches", res.at("/query/frames/1").asText());
+
+		// ND: I think, frames:matches is wrong here ...		
+	}
 
 
     @Test
@@ -110,6 +118,7 @@ public class OPINWithExclusionTest {
         query = "wegen #IN(%, FE) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+		System.err.println(res.toString());
 
         assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefCheck:unequals",
@@ -121,6 +130,19 @@ public class OPINWithExclusionTest {
         assertEquals(1, classRefCheckOperand.at("/frames").size());
         assertEquals("frames:matches",
                 classRefCheckOperand.at("/frames/0").asText());
+
+		// ND: Oh - that's a tough one ... and unfortunately
+		//     I don't think it works that way.
+		//     (I'm thinking here about the more complicated with a complex Y in HIT sense.)
+		//     The problem is, this will rule out any matching Y at all before checking
+		//     the classes.
+		//     There are no classes left to check.
+		//     So - I think you may even need an or-query here.
+		//     Something like
+		//     or(
+		//       exclusion(['matches'],X,Y),
+		//       focus(1:classRefCheck(['differs',1,2],position(['matches'],{1:X},{2:Y})))
+		//     )
     }
 
 
