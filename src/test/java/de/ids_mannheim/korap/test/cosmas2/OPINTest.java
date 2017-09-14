@@ -39,6 +39,7 @@ public class OPINTest {
         assertEquals("frames:isWithin", res.at("/query/frames/3").asText());
         assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
+		// ND: This should fail with a focus requirement on the first operand!
     }
 
 
@@ -48,12 +49,12 @@ public class OPINTest {
         query = "wegen #IN(N) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
         assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
+		// ND: This should fail with a focus requirement on the first operand!
     }
 
 
@@ -65,12 +66,16 @@ public class OPINTest {
         res = mapper.readTree(qs.toJSON());
 
         assertEquals("operation:position", res.at("/query/operation").asText());
-        assertEquals(2, res.at("/query/frames").size());
-        assertEquals("frames:matches", res.at("/query/frames/0").asText());
-        assertEquals("frames:alignsLeft", res.at("/query/frames/1").asText());
+        assertEquals(1, res.at("/query/frames").size());
+
+		// ND: Matches seems to violate the L-rule:
+		//     "rechtes Wort von X und Y stimmen nicht überein."
+        // assertEquals("frames:matches", res.at("/query/frames/0").asText());
+        assertEquals("frames:alignsLeft", res.at("/query/frames/0").asText());
 
         assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
+		// ND: This should fail with a focus requirement on the first operand!
     }
 
 
@@ -82,12 +87,16 @@ public class OPINTest {
         res = mapper.readTree(qs.toJSON());
 
         assertEquals("operation:position", res.at("/query/operation").asText());
-        assertEquals("frames:matches", res.at("/query/frames/0").asText());
-        assertEquals("frames:alignsRight", res.at("/query/frames/1").asText());
 
-        assertEquals(2, res.at("/query/frames").size());
+		// ND: Matches seems to violate the L-rule:
+		//     "linkes Wort von X und Y stimmen nicht überein."
+        // assertEquals("frames:matches", res.at("/query/frames/0").asText());
+        assertEquals("frames:alignsRight", res.at("/query/frames/0").asText());
+        assertEquals(1, res.at("/query/frames").size());
+
         assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
+		// ND: This should fail with a focus requirement on the first operand!
     }
 
 
@@ -110,13 +119,27 @@ public class OPINTest {
         query = "wegen #IN(FI) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("classRefCheck:unequals",
+		assertEquals("classRefCheck:unequals",
                 res.at("/query/classRefCheck/0").asText());
         assertEquals("frames:matches",
                 res.at("/query/operands/0/frames/0").asText());
         assertEquals(true,
                 res.at("/query/operands/0/frames/1").isMissingNode());
 
+		// ND: unequals is not a defined value for classRefCheck, so it is unclear
+		//     what it means. I think classRefCheck "differs" is correct here.
+		//     Or did we agree on changing this in KoralQuery? I can't remember.
+		//     I talked to @bodmo about the interpretation of
+		//     FI: "Linkes und rechtes Wort von X und Y stimmen überein,
+		//          aber nicht alle anderen Wörter"
+		//     and it means we satisfy the first constraint with match and
+		//     the second constraint means, there is at least one word in X
+		//     that is not in Y - so it's "differs".
+		// ND: The classOut seems to be useless here
+		// ND: This should fail with a focus requirement on the first operand!
+		// ND: The serialization is correct, though the query optimizer
+		//     should be able to see that no match can satisfy this query when
+		//     X and Y are non-complex operands
     }
 
 
@@ -132,17 +155,24 @@ public class OPINTest {
                 res.at("/query/operands/0/frames/0").asText());
         assertEquals(true,
                 res.at("/query/operands/0/frames/1").isMissingNode());
-    }
+		// ND: The classOut seems to be useless here
+		// ND: This should fail with a focus requirement on the first operand!		
+		// ND: The serialization is otherwise okay, although #IN(FE) is equal to #IN(F)
+		//     in case X and Y are not complex
+	}
 
 
     @Test
     public void testOPINWithOptionN_ALL ()
             throws JsonProcessingException, IOException {
         // ALL is default in KorAP
+		// ND: We may not be able to switch defaults, I guess,
+		//     and in the tests above, if I understand correctly, you are already
+		//     using HIT implicitely
         query = "sich #IN(N,ALL) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:group", res.at("/query/@type").asText());
+		assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
         assertEquals("sich", res.at("/query/operands/0/wrap/key").asText());
@@ -163,7 +193,6 @@ public class OPINTest {
         query = "gilt #IN(N,HIT) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefCheck:includes",
@@ -191,6 +220,13 @@ public class OPINTest {
         assertEquals(130, res.at("/0/classOut").asInt());
         assertEquals("zurecht", res.at("/1/operands/0/wrap/key").asText());
         assertEquals(130, res.at("/1/classOut").asInt());
+
+		// ND: It's hard to get my head around this one, but I have the assumption
+		//     that classRefCheck is not really necessary here, as isWithin satisfies
+		//     already both constraints for a non-complex X, but I think
+		//     that's not important as it is a special case.
+		// ND: The classOut seems to be useless here
+		// ND: This should fail with a focus requirement on the first operand!		
     }
     
     @Test
@@ -199,13 +235,14 @@ public class OPINTest {
         query = "gilt #IN(FE,HIT) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-//        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
-//        assertEquals("classRefCheck:equals",
-//                res.at("/query/classRefCheck/0").asText());
-        assertEquals("classRefCheck:includes",
+
+		// ND: Why did you mark "equals" as wrong?
+        assertEquals("classRefCheck:equals",
                 res.at("/query/classRefCheck/0").asText());
+        //        assertEquals("classRefCheck:includes",
+        //                res.at("/query/classRefCheck/0").asText());
         assertEquals(1, res.at("/query/classRefCheck").size());
         assertEquals(2, res.at("/query/classIn").size());
         assertEquals(131, res.at("/query/classOut").asInt());
@@ -226,6 +263,11 @@ public class OPINTest {
         assertEquals(130, res.at("/0/classOut").asInt());
         assertEquals("zurecht", res.at("/1/operands/0/wrap/key").asText());
         assertEquals(130, res.at("/1/classOut").asInt());
+
+		// ND: The query optimizer should directly find out that
+		//     this query will never match.
+		// ND: The classOut seems to be useless here
+		// ND: This should fail with a focus requirement on the first operand!		
     }
     
     @Test
@@ -234,15 +276,19 @@ public class OPINTest {
         query = "gilt #IN(FI,HIT) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-//        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefCheck:unequals",
                 res.at("/query/classRefCheck/0").asText());
-        assertEquals("classRefCheck:includes",
-                res.at("/query/classRefCheck/1").asText());
-        assertEquals(2, res.at("/query/classRefCheck").size());
-        assertEquals(3, res.at("/query/classIn").size());
+
+		// ND: I don't think 'includes' is necessary here
+        // assertEquals("classRefCheck:includes",
+        //        res.at("/query/classRefCheck/1").asText());
+        assertEquals(1, res.at("/query/classRefCheck").size());
+
+		// ND: The class 130, in my opinion, somehow invalidates the HIT constraint, right?
+		//     see my comment in https://github.com/KorAP/Koral/issues/43
+        assertEquals(2, res.at("/query/classIn").size());
         assertEquals(132, res.at("/query/classOut").asInt());
 
         assertEquals("operation:position",
@@ -262,6 +308,10 @@ public class OPINTest {
         assertEquals(131, res.at("/0/classOut").asInt());
         assertEquals("zurecht", res.at("/1/operands/0/wrap/key").asText());
         assertEquals(131, res.at("/1/classOut").asInt());
+
+		// ND: Regarding 'unequals' see before.
+		// ND: The classOut seems to be useless here
+		// ND: This should fail with a focus requirement on the first operand!				
     }
 
 
