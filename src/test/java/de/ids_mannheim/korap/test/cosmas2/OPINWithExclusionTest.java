@@ -58,6 +58,9 @@ public class OPINWithExclusionTest {
 		// ND: I think, this requires
 		//     ["frames:alignsLeft","frames:alignsRight", "frames:matches"]
 		//     and not ["frames:within"] ..
+        
+        // EM: I thought exclusion of ["frames:alignsLeft","frames:alignsRight", "frames:matches"]
+        // is the same as frame:isWithin
     }
 
 
@@ -71,13 +74,13 @@ public class OPINWithExclusionTest {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:exclusion",
                 res.at("/query/operation").asText());
-        assertEquals(2, res.at("/query/frames").size());
+        assertEquals(1, res.at("/query/frames").size());
         assertEquals("frames:alignsLeft", res.at("/query/frames/0").asText());
-        // assertEquals("frames:matches", res.at("/query/frames/1").asText());
         assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
 
 		// ND: I think, frames:matches is wrong here ...
+        // EM: fixed
     }
 
 
@@ -90,11 +93,10 @@ public class OPINWithExclusionTest {
 
         assertEquals("operation:exclusion",
                 res.at("/query/operation").asText());
-        assertEquals(2, res.at("/query/frames").size());
+        assertEquals(1, res.at("/query/frames").size());
         assertEquals("frames:alignsRight", res.at("/query/frames/0").asText());
-        // assertEquals("frames:matches", res.at("/query/frames/1").asText());
-
-		// ND: I think, frames:matches is wrong here ...		
+		// ND: I think, frames:matches is wrong here ...
+        // EM: fixed
 	}
 
 
@@ -143,6 +145,9 @@ public class OPINWithExclusionTest {
 		//       exclusion(['matches'],X,Y),
 		//       focus(1:classRefCheck(['differs',1,2],position(['matches'],{1:X},{2:Y})))
 		//     )
+        
+        // EM: hm, but the second OR operand means X matches Y which is not a correct answer 
+        // (not an exclusion, it should not match).
     }
 
 
@@ -167,6 +172,7 @@ public class OPINWithExclusionTest {
 
 
     // EM: MIN, MAX does not matter with %
+    
     
     @Test
     public void testOPINwithExclusionFE_MIN ()

@@ -75,13 +75,11 @@ public class OPOVWithExclusionTest {
         JsonNode classRefCheckOperand = res.at("/query/operands/0");
         assertEquals("operation:exclusion",
                 classRefCheckOperand.at("/operation").asText());
-        assertEquals(3, classRefCheckOperand.at("/frames").size());
-        assertEquals("frames:matches",
-                classRefCheckOperand.at("/frames/0").asText());
+        assertEquals(2, classRefCheckOperand.at("/frames").size());
         assertEquals("frames:alignsLeft",
-                classRefCheckOperand.at("/frames/1").asText());
+                classRefCheckOperand.at("/frames/0").asText());
         assertEquals("frames:overlapsLeft",
-                classRefCheckOperand.at("/frames/2").asText());
+                classRefCheckOperand.at("/frames/1").asText());
         
         JsonNode exclusionOperands = classRefCheckOperand.at("/operands/0");
         assertEquals("operation:class", exclusionOperands.at("/operation").asText());
@@ -114,13 +112,11 @@ public class OPOVWithExclusionTest {
         JsonNode classRefCheckOperand = res.at("/query/operands/0");
         assertEquals("operation:exclusion",
                 classRefCheckOperand.at("/operation").asText());
-        assertEquals(3, classRefCheckOperand.at("/frames").size());
-        assertEquals("frames:matches",
-                classRefCheckOperand.at("/frames/0").asText());
+        assertEquals(2, classRefCheckOperand.at("/frames").size());
         assertEquals("frames:alignsRight",
-                classRefCheckOperand.at("/frames/1").asText());
+                classRefCheckOperand.at("/frames/0").asText());
         assertEquals("frames:overlapsRight",
-                classRefCheckOperand.at("/frames/2").asText());
+                classRefCheckOperand.at("/frames/1").asText());
     }
     
     @Test

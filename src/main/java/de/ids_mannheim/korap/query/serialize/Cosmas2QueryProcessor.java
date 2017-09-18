@@ -1241,7 +1241,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private void checkINOptions (String posOption,
             ArrayList<KoralFrame> positions,
             ArrayList<ClassRefCheck> classRefCheck) {
-        positions.add(KoralFrame.MATCHES);
+        
         switch (posOption) {
             case "L":
                 positions.add(KoralFrame.ALIGNS_LEFT);
@@ -1250,21 +1250,24 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 positions.add(KoralFrame.ALIGNS_RIGHT);
                 break;
             case "F":
+                positions.add(KoralFrame.MATCHES);
                 break;
             case "FE":
                 classRefCheck.add(ClassRefCheck.EQUALS);
+                positions.add(KoralFrame.MATCHES);
                 break;
             case "FI":
                 classRefCheck.add(ClassRefCheck.UNEQUALS);
+                positions.add(KoralFrame.MATCHES);
                 break;
             case "N":
                 positions.add(KoralFrame.IS_WITHIN);
-                positions.remove(KoralFrame.MATCHES);
                 break;
             default:
                 positions.add(KoralFrame.ALIGNS_LEFT);
                 positions.add(KoralFrame.ALIGNS_RIGHT);
                 positions.add(KoralFrame.IS_WITHIN);
+                positions.add(KoralFrame.MATCHES);
         }
         
     }
@@ -1284,19 +1287,23 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             positions.add(KoralFrame.ALIGNS_RIGHT);
         }
         else if (CosmasPosition.FE.name().equals(posOption)) {
+            positions.add(KoralFrame.MATCHES);
             classRefCheck.add(ClassRefCheck.UNEQUALS);
         }
         else if (CosmasPosition.FI.name().equals(posOption)) {
+            positions.add(KoralFrame.MATCHES);
             classRefCheck.add(ClassRefCheck.EQUALS);
         }
-        else if (CosmasPosition.F.name().equals(posOption)) {}
+        else if (CosmasPosition.F.name().equals(posOption)) {
+            positions.add(KoralFrame.MATCHES);
+        }
         else {
             positions.add(KoralFrame.ALIGNS_LEFT);
             positions.add(KoralFrame.ALIGNS_RIGHT);
             positions.add(KoralFrame.IS_WITHIN);
+            positions.add(KoralFrame.MATCHES);
         }
 
-        positions.add(KoralFrame.MATCHES);
     }
 
 
@@ -1367,7 +1374,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private void checkOVExclusionOptions (String posOption,
             ArrayList<KoralFrame> positions,
             ArrayList<ClassRefCheck> classRefCheck) {
-        positions.add(KoralFrame.MATCHES);
+        
         switch (posOption) {
             case "L":
                 positions.add(KoralFrame.ALIGNS_LEFT);
@@ -1381,15 +1388,19 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 classRefCheck.add(ClassRefCheck.INTERSECTS);
                 classRefCheck.add(ClassRefCheck.DISJOINT);
                 break;
+            case "F":
+                positions.add(KoralFrame.MATCHES);
+                break;
             case "FE":
                 classRefCheck.add(ClassRefCheck.UNEQUALS);
+                positions.add(KoralFrame.MATCHES);
                 break;
             case "FI":
                 classRefCheck.add(ClassRefCheck.EQUALS);
+                positions.add(KoralFrame.MATCHES);
                 break;
             case "X":
                 positions.add(KoralFrame.IS_WITHIN);
-                positions.remove(KoralFrame.MATCHES);
                 break;
         }
         
@@ -1400,7 +1411,6 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             ArrayList<KoralFrame> positions, 
             ArrayList<ClassRefCheck> classRefCheck) {
         classRefCheck.add(ClassRefCheck.INTERSECTS);
-        positions.add(KoralFrame.MATCHES);
         switch (posOption) {
             case "L":
                 positions.add(KoralFrame.ALIGNS_LEFT);
@@ -1411,12 +1421,15 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 positions.add(KoralFrame.OVERLAPS_RIGHT);
                 break;
             case "F":
+                positions.add(KoralFrame.MATCHES);
                 break;
             case "FE":
+                positions.add(KoralFrame.MATCHES);
                 classRefCheck.add(ClassRefCheck.EQUALS);
                 classRefCheck.remove(ClassRefCheck.INTERSECTS);
                 break;
             case "FI":
+                positions.add(KoralFrame.MATCHES);
                 classRefCheck.add(ClassRefCheck.UNEQUALS);
                 break;
             case "X":

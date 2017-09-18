@@ -68,9 +68,6 @@ public class OPINTest {
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/frames").size());
 
-		// ND: Matches seems to violate the L-rule:
-		//     "rechtes Wort von X und Y stimmen nicht überein."
-        // assertEquals("frames:matches", res.at("/query/frames/0").asText());
         assertEquals("frames:alignsLeft", res.at("/query/frames/0").asText());
 
         assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
@@ -88,9 +85,6 @@ public class OPINTest {
 
         assertEquals("operation:position", res.at("/query/operation").asText());
 
-		// ND: Matches seems to violate the L-rule:
-		//     "linkes Wort von X und Y stimmen nicht überein."
-        // assertEquals("frames:matches", res.at("/query/frames/0").asText());
         assertEquals("frames:alignsRight", res.at("/query/frames/0").asText());
         assertEquals(1, res.at("/query/frames").size());
 
@@ -108,6 +102,7 @@ public class OPINTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals(true,
                 res.at("/query/operands/0/classRefCheck").isMissingNode());
+        //EM: should include classRefCheck:include
         assertEquals("frames:matches", res.at("/query/frames/0").asText());
         assertEquals(true, res.at("/query/frames/1").isMissingNode());
     }
@@ -119,6 +114,7 @@ public class OPINTest {
         query = "wegen #IN(FI) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+//        System.out.println(res.toString());
 		assertEquals("classRefCheck:unequals",
                 res.at("/query/classRefCheck/0").asText());
         assertEquals("frames:matches",
@@ -129,17 +125,27 @@ public class OPINTest {
 		// ND: unequals is not a defined value for classRefCheck, so it is unclear
 		//     what it means. I think classRefCheck "differs" is correct here.
 		//     Or did we agree on changing this in KoralQuery? I can't remember.
+        
+        // EM: Yes, I think it was unequals in the code, and differs in the documentation. 
+        //     So I picked unequals.
+        
 		//     I talked to @bodmo about the interpretation of
 		//     FI: "Linkes und rechtes Wort von X und Y stimmen überein,
 		//          aber nicht alle anderen Wörter"
 		//     and it means we satisfy the first constraint with match and
 		//     the second constraint means, there is at least one word in X
 		//     that is not in Y - so it's "differs".
-		// ND: The classOut seems to be useless here
+        // EM: Ok.
+		
+        // ND: The classOut seems to be useless here
+        // EM: Yes, it is always generated for classRefCheck. 
+        //     What is the criteria that a classOut is needed?
+        
 		// ND: This should fail with a focus requirement on the first operand!
 		// ND: The serialization is correct, though the query optimizer
 		//     should be able to see that no match can satisfy this query when
 		//     X and Y are non-complex operands
+        // EM: You mean query optimizer in Krill?
     }
 
 
@@ -169,6 +175,9 @@ public class OPINTest {
 		// ND: We may not be able to switch defaults, I guess,
 		//     and in the tests above, if I understand correctly, you are already
 		//     using HIT implicitely
+        
+        //EM: right, the implementation assumes HIT as default. should I switch this?
+        
         query = "sich #IN(N,ALL) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -239,6 +248,7 @@ public class OPINTest {
         assertEquals("operation:class", res.at("/query/operation").asText());
 
 		// ND: Why did you mark "equals" as wrong?
+        // EM: because you said includes implicitly equals. Is it the other way around?
         assertEquals("classRefCheck:equals",
                 res.at("/query/classRefCheck/0").asText());
         //        assertEquals("classRefCheck:includes",
@@ -284,6 +294,11 @@ public class OPINTest {
 		// ND: I don't think 'includes' is necessary here
         // assertEquals("classRefCheck:includes",
         //        res.at("/query/classRefCheck/1").asText());
+        // EM: now I think includes is always need for F because we need to check 
+        // the the left and the right words, so in this case:
+        // - gilt has to be the identical to &gelten and 
+        // - gilt has to be identical to zurecht.
+        // besides you have a discussion in the position frames doc regarding IN(FI).
         assertEquals(1, res.at("/query/classRefCheck").size());
 
 		// ND: The class 130, in my opinion, somehow invalidates the HIT constraint, right?
