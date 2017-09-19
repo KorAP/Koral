@@ -36,8 +36,8 @@ public class OPINWithExclusionTest {
         assertEquals("frames:alignsRight", res.at("/query/frames/1").asText());
         assertEquals("frames:matches", res.at("/query/frames/3").asText());
         assertEquals("frames:isWithin", res.at("/query/frames/2").asText());
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());
+        
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
     }
 
@@ -53,8 +53,8 @@ public class OPINWithExclusionTest {
                 res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/frames").size());
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());
+        
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
 
 		// ND: I think, this requires
@@ -78,8 +78,8 @@ public class OPINWithExclusionTest {
                 res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/frames").size());
         assertEquals("frames:alignsLeft", res.at("/query/frames/0").asText());
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());
+        
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
 
 		// ND: I think, frames:matches is wrong here ...
@@ -225,8 +225,8 @@ public class OPINWithExclusionTest {
                 res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/frames").size());
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());
+        
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
     }
 
@@ -242,8 +242,8 @@ public class OPINWithExclusionTest {
                 res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/frames").size());
         assertEquals("frames:alignsLeft", res.at("/query/frames/0").asText());
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());
+        
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
     }
 
@@ -262,8 +262,8 @@ public class OPINWithExclusionTest {
                 res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/frames").size());
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());    }
+        
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());    }
 
     @Test
     public void testOPINwithExclusionN_ALL_MAX ()
@@ -277,8 +277,8 @@ public class OPINWithExclusionTest {
                 res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/frames").size());
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());
+        
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
     }
     
     @Test
@@ -317,24 +317,24 @@ public class OPINWithExclusionTest {
         query = "wegen #IN(N,HIT,%) (wegen /w5:10 des)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-//        System.out.println(res);
+        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:exclusion",
                 res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/frames").size());
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
-        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());
+        
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
         
         assertEquals("operation:sequence", res.at("/query/operands/1/operation").asText());
         
         JsonNode seqOperand = res.at("/query/operands/1/operands");
                 
         assertEquals("operation:class", seqOperand.at("/0/operation").asText());
-        assertEquals(130, seqOperand.at("/0/classOut").asInt());
+        assertEquals(129, seqOperand.at("/0/classOut").asInt());
         
         assertEquals("operation:class", seqOperand.at("/1/operation").asText());
-        assertEquals(130, seqOperand.at("/1/classOut").asInt());
+        assertEquals(129, seqOperand.at("/1/classOut").asInt());
     }
     
 }

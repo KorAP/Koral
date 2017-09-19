@@ -534,7 +534,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     @SuppressWarnings("unchecked")
     private void processOPIN_OPOV (Tree node) {
         String nodeCat = getNodeCat(node);
-        wrapOperandInClass(node, 1, 128 + classCounter++);
+        
         // Map<String, Object> posgroup =
         // makePosition(null);
         boolean isExclusion = isExclusion(node);
@@ -544,6 +544,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             posGroup = KoralObjectGenerator.makeGroup(KoralOperation.EXCLUSION);
         }
         else {
+            wrapOperandInClass(node, 1, 128 + classCounter++);
             posGroup = KoralObjectGenerator.makeGroup(KoralOperation.POSITION);
         }
 
