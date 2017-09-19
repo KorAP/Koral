@@ -29,7 +29,7 @@ public class OPINTest {
         query = "wegen #IN <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-
+//        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals(4, res.at("/query/frames").size());
@@ -37,9 +37,10 @@ public class OPINTest {
         assertEquals("frames:alignsLeft", res.at("/query/frames/1").asText());
         assertEquals("frames:alignsRight", res.at("/query/frames/2").asText());
         assertEquals("frames:isWithin", res.at("/query/frames/3").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
+        
+        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
+        assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-		// ND: This should fail with a focus requirement on the first operand!
     }
 
 
@@ -49,12 +50,15 @@ public class OPINTest {
         query = "wegen #IN(N) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+//        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
-        assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
+        
+        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
+        assertEquals("wegen", res.at("/query/operands/0/operands/0/wrap/key").asText());
+        
         assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
-		// ND: This should fail with a focus requirement on the first operand!
     }
 
 
@@ -68,11 +72,10 @@ public class OPINTest {
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/frames").size());
 
-        assertEquals("frames:alignsLeft", res.at("/query/frames/0").asText());
+        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
+        assertEquals("wegen", res.at("/query/operands/0/operands/0/wrap/key").asText());
 
-        assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
-		// ND: This should fail with a focus requirement on the first operand!
     }
 
 
@@ -88,9 +91,9 @@ public class OPINTest {
         assertEquals("frames:alignsRight", res.at("/query/frames/0").asText());
         assertEquals(1, res.at("/query/frames").size());
 
-        assertEquals("wegen", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
+        assertEquals("wegen", res.at("/query/operands/0/operands/0/wrap/key").asText());
         assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
-		// ND: This should fail with a focus requirement on the first operand!
     }
 
 
@@ -100,11 +103,15 @@ public class OPINTest {
         query = "wegen #IN(F) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+//        System.out.println(res);
         assertEquals(true,
                 res.at("/query/operands/0/classRefCheck").isMissingNode());
         //EM: should include classRefCheck:include
         assertEquals("frames:matches", res.at("/query/frames/0").asText());
         assertEquals(true, res.at("/query/frames/1").isMissingNode());
+        
+        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
+        assertEquals("wegen", res.at("/query/operands/0/operands/0/wrap/key").asText());
     }
 
 
@@ -184,7 +191,9 @@ public class OPINTest {
 		assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isWithin", res.at("/query/frames/0").asText());
-        assertEquals("sich", res.at("/query/operands/0/wrap/key").asText());
+        
+        assertEquals("operation:class", res.at("/query/operands/0/operation").asText());
+        assertEquals("sich", res.at("/query/operands/0/operands/0/wrap/key").asText());
         assertEquals("gelten",
                 res.at("/query/operands/1/operands/0/operands/0/wrap/key")
                         .asText());
@@ -244,6 +253,7 @@ public class OPINTest {
         query = "gilt #IN(FE,HIT) (&gelten /w5:10 zurecht)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
 

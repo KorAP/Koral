@@ -534,7 +534,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     @SuppressWarnings("unchecked")
     private void processOPIN_OPOV (Tree node) {
         String nodeCat = getNodeCat(node);
-
+        wrapOperandInClass(node, 1, 128 + classCounter++);
         // Map<String, Object> posgroup =
         // makePosition(null);
         boolean isExclusion = isExclusion(node);
@@ -1210,7 +1210,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         
         if (classRefCheck.contains(ClassRefCheck.INCLUDES)) {
-            wrapOperandInClass(node, 1, 128 + classCounter++);
+//            wrapOperandInClass(node, 1, 128 + classCounter++);
             
             if (classRefCheck.contains(ClassRefCheck.EQUALS)){
                 classRefCheck.remove(ClassRefCheck.EQUALS);
@@ -1221,7 +1221,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else if (classRefCheck.contains(ClassRefCheck.EQUALS)
                 || classRefCheck.contains(ClassRefCheck.UNEQUALS)) {
-            wrapOperandInClass(node, 1, 128 + classCounter++);
+//            wrapOperandInClass(node, 1, 128 + classCounter++);
             wrapOperandInClass(node, 2, 128 + classCounter++);
         }
         
@@ -1253,21 +1253,22 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 positions.add(KoralFrame.MATCHES);
                 break;
             case "FE":
-                classRefCheck.add(ClassRefCheck.EQUALS);
                 positions.add(KoralFrame.MATCHES);
+                classRefCheck.add(ClassRefCheck.EQUALS);
                 break;
             case "FI":
-                classRefCheck.add(ClassRefCheck.UNEQUALS);
                 positions.add(KoralFrame.MATCHES);
+                classRefCheck.add(ClassRefCheck.UNEQUALS);
                 break;
             case "N":
                 positions.add(KoralFrame.IS_WITHIN);
                 break;
             default:
+                positions.add(KoralFrame.MATCHES);
                 positions.add(KoralFrame.ALIGNS_LEFT);
                 positions.add(KoralFrame.ALIGNS_RIGHT);
                 positions.add(KoralFrame.IS_WITHIN);
-                positions.add(KoralFrame.MATCHES);
+                
         }
         
     }
@@ -1336,7 +1337,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         posOptions.put("frames", Converter.enumListToStringList(positions));
         posOptions.put("classRefCheck", classRefCheck);
         if (!classRefCheck.isEmpty()) {
-            wrapOperandInClass(node, 1, 128 + classCounter++);
+//            wrapOperandInClass(node, 1, 128 + classCounter++);
             wrapOperandInClass(node, 2, 128 + classCounter++);
         }
 //        if (exclnode != null) {
