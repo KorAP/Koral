@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 
-// EM: OPIN always returns the combination span of both operands
+// EM: OPIN only returns the first operand.
 // MAX groups all first operand spans that are in a same second operand span
 
 public class OPINTest {

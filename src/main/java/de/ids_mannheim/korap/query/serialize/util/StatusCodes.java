@@ -13,4 +13,5 @@ public class StatusCodes {
 	public final static int UNSUPPORTED_VERSION = 310;
 	public final static int QUERY_TOO_COMPLEX = 311;
 	public final static int UNKNOWN_QUERY_ERROR = 399;
+	public final static int SERIALIZATION_FAILED = 300;
 }
