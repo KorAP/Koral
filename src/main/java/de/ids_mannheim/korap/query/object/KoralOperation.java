@@ -7,7 +7,7 @@ package de.ids_mannheim.korap.query.object;
  * 
  */
 public enum KoralOperation {
-    SEQUENCE, POSITION, DISJUNCTION, REPETITION, CLASS, MERGE, RELATION, FOCUS, EXCLUSION, HIERARCHY;
+    SEQUENCE, POSITION, DISJUNCTION, REPETITION, CLASS, MERGE, RELATION, FOCUS, EXCLUSION, HIERARCHY, AND, OR;
 
     @Override
     public String toString () {
