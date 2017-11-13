@@ -29,7 +29,7 @@ public class OPINTest {
         query = "wegen #IN <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-//        System.out.println(res);
+        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals(4, res.at("/query/frames").size());

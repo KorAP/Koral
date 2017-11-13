@@ -27,7 +27,7 @@ public class OPINWithExclusionTest {
         query = "wegen #IN(%) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res);
+//        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:exclusion",
                 res.at("/query/operation").asText());
@@ -72,7 +72,7 @@ public class OPINWithExclusionTest {
         query = "wegen #IN(%, L) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-
+//        System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:exclusion",
                 res.at("/query/operation").asText());
@@ -123,7 +123,7 @@ public class OPINWithExclusionTest {
         query = "wegen #IN(%, FE) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-		System.err.println(res.toString());
+//		System.err.println(res.toString());
 
         assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals("classRefCheck:unequals",

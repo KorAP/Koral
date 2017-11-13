@@ -166,15 +166,15 @@ public class RelationTests {
         query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 ->malt/d[func=\"PP\"] #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-
+        
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:relation", res.at("/query/operation").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("VP", res.at("/query/operands/0/key").asText());
-        assertEquals("c", res.at("/query/operands/0/layer").asText());
+        assertEquals("VP", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/0/wrap/layer").asText());
         assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("NP", res.at("/query/operands/1/key").asText());
-        assertEquals("c", res.at("/query/operands/1/layer").asText());
+        assertEquals("NP", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("c", res.at("/query/operands/1/wrap/layer").asText());
 
         assertEquals("koral:relation", res.at("/query/relType/@type").asText());
         assertEquals("koral:term",

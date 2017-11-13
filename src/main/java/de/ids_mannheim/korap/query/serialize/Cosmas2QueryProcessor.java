@@ -1338,7 +1338,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         posOptions.put("frames", Converter.enumListToStringList(positions));
         posOptions.put("classRefCheck", classRefCheck);
         if (!classRefCheck.isEmpty()) {
-//            wrapOperandInClass(node, 1, 128 + classCounter++);
+            wrapOperandInClass(node, 1, 128 + classCounter++);
             wrapOperandInClass(node, 2, 128 + classCounter++);
         }
 //        if (exclnode != null) {
