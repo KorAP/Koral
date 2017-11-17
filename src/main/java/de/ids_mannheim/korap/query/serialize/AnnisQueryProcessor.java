@@ -430,7 +430,7 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
             // TODO generalize the list below -> look up layers associated with
             // tokens rather than spans somewhere
             Map<String, Object> qNameParse = parseQNameNode(node.getChild(0));
-            if (Arrays.asList(new String[] { "p", "lemma", "m", "orth" })
+            if (Arrays.asList(new String[] { "p", "l", "m", "orth" })
                     .contains(qNameParse.get("layer"))) {
                 object = KoralObjectGenerator.makeToken();
                 Map<String, Object> term = KoralObjectGenerator.makeTerm();

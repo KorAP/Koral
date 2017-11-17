@@ -68,7 +68,7 @@ public class RelationTests {
         assertEquals("PP", res.at("/query/relType/wrap/key").asText());
         assertTrue(res.at("/query/relType/wrap/value").isMissingNode());
     }
-    
+
     @Test
     public void testTypedRelationWithoutLabel ()
             throws JsonProcessingException, IOException {
@@ -87,7 +87,7 @@ public class RelationTests {
         assertTrue(res.at("/query/relType/wrap/key").isMissingNode());
         assertTrue(res.at("/query/relType/wrap/value").isMissingNode());
     }
-    
+
     //EM: needs rewrite default foundry in Kustvakt
     @Test
     public void testTypedRelationWithoutFoundry ()
@@ -159,14 +159,14 @@ public class RelationTests {
         assertEquals("KONJ", res.at("/query/relType/wrap/key").asText());
         assertTrue(res.at("/query/relType/wrap/value").isMissingNode());
     }
-    
+
     @Test
     public void testTypedRelationWithAnnotationNodes ()
             throws JsonProcessingException, IOException {
         query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 ->malt/d[func=\"PP\"] #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        
+
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:relation", res.at("/query/operation").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
@@ -192,7 +192,7 @@ public class RelationTests {
         query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 ->malt/d[func=\"PP\"] * #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        
+
         assertEquals("koral:relation", res.at("/query/relType/@type").asText());
         assertEquals("koral:term",
                 res.at("/query/relType/wrap/@type").asText());
@@ -201,25 +201,27 @@ public class RelationTests {
         assertEquals("match:eq", res.at("/query/relType/wrap/match").asText());
         assertEquals("PP", res.at("/query/relType/wrap/key").asText());
         assertTrue(res.at("/query/relType/wrap/value").isMissingNode());
-        
-        assertEquals("koral:boundary", res.at("/query/relType/boundary/@type").asText());
+
+        assertEquals("koral:boundary",
+                res.at("/query/relType/boundary/@type").asText());
         assertEquals(0, res.at("/query/relType/boundary/min").asInt());
         assertTrue(res.at("/query/relType/boundary/max").isMissingNode());
     }
-    
+
     @Test
     public void testSpecificIndirectTypedRelation ()
             throws JsonProcessingException, IOException {
         query = "corenlp/c=\"VP\" & corenlp/c=\"NP\" & #1 ->malt/d[func=\"PP\"] 2,4 #2";
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        
-        assertEquals("koral:boundary", res.at("/query/relType/boundary/@type").asText());
+
+        assertEquals("koral:boundary",
+                res.at("/query/relType/boundary/@type").asText());
         assertEquals(2, res.at("/query/relType/boundary/min").asInt());
         assertEquals(4, res.at("/query/relType/boundary/max").asInt());
     }
 
-    
+
 
     @Test
     public void testTypedRelationWithMultipleLabels ()
@@ -229,5 +231,15 @@ public class RelationTests {
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
         assertEquals(302, res.at("/errors/0/0").asInt());
+    }
+
+    @Test
+    public void testRelationLemmaBug () throws IOException {
+        query = "tt/l=\"die\" ->malt/d[func=\"DET\"] node";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:term",
+                res.at("/query/operands/0/wrap/@type").asText());
     }
 }
