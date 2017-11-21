@@ -158,8 +158,9 @@ public class QuerySerializer {
         }
         else if (ql.equalsIgnoreCase("fcsql")) {
             if (version == null) {
-                ast.addError(StatusCodes.MISSING_VERSION,
-                        "SRU Version is missing!");
+                ast = new FCSQLQueryProcessor(query);
+//                ast.addError(StatusCodes.MISSING_VERSION,
+//                        "SRU Version is missing!");
             }
             else {
                 ast = new FCSQLQueryProcessor(query, version);

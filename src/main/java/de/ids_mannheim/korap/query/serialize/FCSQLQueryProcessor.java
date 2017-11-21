@@ -36,6 +36,10 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
 
     private final QueryParser fcsParser = new QueryParser();
     private String version;
+    
+    public FCSQLQueryProcessor (String query) {
+        this(query, VERSION_2_0);
+    }
 
     /** Constructs FCSQLQueryProcessor for the given query and version.
      * @param query an FCS query string
