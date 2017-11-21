@@ -1249,10 +1249,15 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (foundryNode != null)
             fields.put("foundry", foundryNode.getChild(0).toStringTree(parser));
         String layer = layerNode.getChild(0).toStringTree(parser);
-        if (layer.equals("pos"))
+        if (layer.equals("pos")){
             layer = "p";
-        if (layer.equals("cat"))
+        }
+        else if (layer.equals("lemma")){
+            layer = "l";
+        }
+        else if (layer.equals("cat")){
             layer = "c";
+        }
         fields.put("layer", layer);
         return fields;
     }

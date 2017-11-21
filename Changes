@@ -1,6 +1,7 @@
-0.28 2017-11-17 
-	- Added some enums of koral:operation (margaretha)
+0.28 2017-11-21 
+	- Added some enums for koral:operation (margaretha)
 	- Fixed node serialization of Annis QL containing lemma (margaretha)
+	- Added serialization for Annis keyword "lemma" (margaretha)
 	
 0.27 2017-09-12
 	- Changed Cosmas2 wildcards serialization as regex (margaretha)  
