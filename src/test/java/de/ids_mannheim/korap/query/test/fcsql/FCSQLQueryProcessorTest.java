@@ -29,7 +29,7 @@ public class FCSQLQueryProcessorTest {
 
     public static void runAndValidate(String query, String jsonLd)
             throws JsonProcessingException {
-        FCSQLQueryProcessor processor = new FCSQLQueryProcessor(query, "2.0");
+        FCSQLQueryProcessor processor = new FCSQLQueryProcessor(query);
         String serializedQuery = mapper.writeValueAsString(processor
                 .getRequestMap().get("query"));
         assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
@@ -37,7 +37,7 @@ public class FCSQLQueryProcessorTest {
 
     public static void validateNode(String query, String path, String jsonLd)
             throws JsonProcessingException, IOException {
-        qs.setQuery(query, "fcsql", "2.0");
+        qs.setQuery(query, "fcsql");
         node = mapper.readTree(qs.toJSON());
         String serializedQuery = mapper.writeValueAsString(node.at(path));
         assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
@@ -46,19 +46,6 @@ public class FCSQLQueryProcessorTest {
     public static List<Object> getError(FCSQLQueryProcessor processor) {
         List<Object> errors = (List<Object>) processor.getRequestMap().get("errors");
         return (List<Object>) errors.get(0);
-    }
-
-    @Test
-    public void testVersion() throws JsonProcessingException {
-        error = getError(new FCSQLQueryProcessor("\"Sonne\"", "1.0"));
-        assertEquals(310, error.get(0));
-        assertEquals("Only supports SRU version 2.0.",
-                error.get(1));
-
-        error = getError(new FCSQLQueryProcessor("\"Sonne\"", null));
-        assertEquals(309, error.get(0));
-        assertEquals("Version number is missing.",
-                error.get(1));
     }
 
     // regexp ::= quoted-string
@@ -116,15 +103,13 @@ public class FCSQLQueryProcessorTest {
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap", jsonLd);
 
         query = "\"Fliegen\" /l";
-        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
-                "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         String msg = (String) error.get(1);
         assertEquals(true, msg.startsWith("Regexflags"));
 
         query = "\"Fliegen\" /d";
-        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
-                "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         assertEquals(
                 "Regexflag: IGNORE_DIACRITICS is unsupported.",
@@ -300,7 +285,7 @@ public class FCSQLQueryProcessorTest {
                 + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:ne}]}}";
         //FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
         
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        error = getError(new FCSQLQueryProcessor(query));
         assertEquals(399, error.get(0));
         assertEquals(
                 "Query cannot be parsed, an unexpcected occured exception while parsing",
@@ -311,35 +296,35 @@ public class FCSQLQueryProcessorTest {
     public void testExceptions() throws JsonProcessingException {
         // unsupported lemma und qualifier
         query = "[opennlp:lemma = \"sein\"]";
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        error = getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         assertEquals(
                 "Layer lemma with qualifier opennlp is unsupported.",
                 error.get(1));
 
         query = "[tt:morph = \"sein\"]";
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        error = getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         assertEquals("Layer morph is unsupported.",
                 error.get(1));
 
         // unsupported qualifier
         query = "[malt:lemma = \"sein\"]";
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        error = getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         assertEquals("Qualifier malt is unsupported.",
                 error.get(1));
 
         // unsupported layer
         query = "[cnx:morph = \"heit\"]";
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        error = getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         assertEquals("Layer morph is unsupported.",
                 error.get(1));
 
         // missing layer
         query = "[cnx=\"V\"]";
-        error = getError(new FCSQLQueryProcessor(query, "2.0"));
+        error = getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         assertEquals("Layer cnx is unsupported.",
                 error.get(1));

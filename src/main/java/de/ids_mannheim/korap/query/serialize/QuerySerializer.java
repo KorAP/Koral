@@ -1,15 +1,21 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
-import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 /**
  * Main class for Koral, serializes queries from concrete QLs to KoralQuery
@@ -118,7 +124,7 @@ public class QuerySerializer {
             ast = new CqlQueryProcessor(query);
         }
         else if (queryLanguage.equalsIgnoreCase("fcsql")) {
-            ast = new FCSQLQueryProcessor(query, "2.0");
+            ast = new FCSQLQueryProcessor(query);
         }
         else if (queryLanguage.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
@@ -157,14 +163,7 @@ public class QuerySerializer {
             }
         }
         else if (ql.equalsIgnoreCase("fcsql")) {
-            if (version == null) {
-                ast = new FCSQLQueryProcessor(query);
-//                ast.addError(StatusCodes.MISSING_VERSION,
-//                        "SRU Version is missing!");
-            }
-            else {
-                ast = new FCSQLQueryProcessor(query, version);
-            }
+            ast = new FCSQLQueryProcessor(query);
         }
         else if (ql.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);

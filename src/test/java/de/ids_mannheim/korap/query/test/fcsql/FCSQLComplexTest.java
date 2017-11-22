@@ -382,8 +382,7 @@ public class FCSQLComplexTest {
                 .validateNode(query, "/query/operands/0", jsonLd);
 
         query = "[cnx:pos=\"VVFIN\"] within u";
-        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
-                "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(311, error.get(0));
         assertEquals(
                 "Within scope UTTERANCE is currently unsupported.",
@@ -435,24 +434,20 @@ public class FCSQLComplexTest {
         
         // expression should always be within a segment
         query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
-        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
-                "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(399, error.get(0));
         assertEquals(errorMessage, error.get(1).toString());
 
         query = "![mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
-        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
-                "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(errorMessage, error.get(1).toString());
 
         query = "(\"blaue\"&\"grüne\")";
-        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
-                "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(errorMessage, error.get(1).toString());
 
         query = "[pos=\"NN\"]&[text=\"Mann\"]";
-        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query,
-                "2.0"));
+        error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(399, error.get(0));
         assertEquals(errorMessage, error.get(1).toString());
     }

@@ -12,8 +12,9 @@ import eu.clarin.sru.server.fcs.parser.QueryNode;
 import eu.clarin.sru.server.fcs.parser.QueryParser;
 import eu.clarin.sru.server.fcs.parser.QueryParserException;
 
-/** FCSQLQueryProcessor is accountable for the serialization of FCSQL to KoralQuery.
- * The KoralQuery is structured as a map containing parts of JSON-LD serializations of KoralObjects.  
+/** FCSQLQueryProcessor is accountable for the serialization of FCSQL 
+ *  to KoralQuery. The KoralQuery is structured as a map containing 
+ *  parts of JSON-LD serializations of KoralObjects.  
  * 
  * @author margaretha
  * 
@@ -32,22 +33,13 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
         }
     }
 
-    private static final String VERSION_2_0 = "2.0";
-
     private final QueryParser fcsParser = new QueryParser();
-    private String version;
     
-    public FCSQLQueryProcessor (String query) {
-        this(query, VERSION_2_0);
-    }
-
     /** Constructs FCSQLQueryProcessor for the given query and version.
      * @param query an FCS query string
-     * @param version the FCSQL version of the query
      */
-    public FCSQLQueryProcessor (String query, String version) {
+    public FCSQLQueryProcessor (String query) {
         super();
-        this.version = version;
         process(query);
     }
 
@@ -58,31 +50,15 @@ public class FCSQLQueryProcessor extends AbstractQueryProcessor {
 
     @Override
     public void process(String query) {
-        if (isVersionValid()) {
-            FCSSRUQuery fcsSruQuery = parseQueryStringtoFCSQuery(query);
-            if (fcsSruQuery != null) {
-                QueryNode fcsQueryNode = fcsSruQuery.getParsedQuery();
-                try {
-					parseFCSQueryToKoralQuery(fcsQueryNode);
-				} catch (KoralException e) {
-					addError(e.getStatusCode(), e.getMessage());
-				}
-            }
+        FCSSRUQuery fcsSruQuery = parseQueryStringtoFCSQuery(query);
+        if (fcsSruQuery != null) {
+            QueryNode fcsQueryNode = fcsSruQuery.getParsedQuery();
+            try {
+				parseFCSQueryToKoralQuery(fcsQueryNode);
+			} catch (KoralException e) {
+				addError(e.getStatusCode(), e.getMessage());
+			}
         }
-    }
-
-    private boolean isVersionValid() {
-        if (version == null || version.isEmpty()) {
-            addError(StatusCodes.MISSING_VERSION,
-                    "Version number is missing.");
-            return false;
-        }
-        else if (!version.equals(VERSION_2_0)) {
-            addError(StatusCodes.UNSUPPORTED_VERSION,
-                    "Only supports SRU version 2.0.");
-            return false;
-        }
-        return true;
     }
 
     /** Translates the given FCS query string into an FCSSSRUQuery object.
