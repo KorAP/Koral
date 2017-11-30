@@ -62,6 +62,11 @@ DOUBLECOLON:'::';
 SLASH:'/';
 QMARK : '?';
 
+ID :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-')*;
+//ID :	('a'..'z'|'A'..'Z'|'_'|'['|']') ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-'|'['|']')*;
+
+FOUNDRY : ID SLASH;
+
 /*
  * Regular expressions (delimited by slashes in Annis)
  */
@@ -89,12 +94,7 @@ REF
 :	'#' ( '0' .. '9'|'a'..'z'|'A'..'Z')+
 ;
 
-ID :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-')*;
-//ID :	('a'..'z'|'A'..'Z'|'_'|'['|']') ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-'|'['|']')*;
-
 DIGITS : ('0'..'9')+;
-
-
 
 //START_TEXT_REGEX : '/' -> pushMode(IN_REGEX);
 START_TEXT_PLAIN:'"' -> pushMode(IN_TEXT);

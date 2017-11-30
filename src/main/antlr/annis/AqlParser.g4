@@ -54,14 +54,15 @@ rangeSpec
 ;
 
 qName
-:	(foundry '/')? layer
+: foundry layer
+| layer
 ;
 
 edgeType
 : ID;
 
 edgeAnno
-:	((foundry '/')? (layer COLON)? key eqOperator)? textSpec
+: ((foundry layer? COLON)? key eqOperator)? textSpec
 ;
 
 edgeSpec
@@ -141,7 +142,8 @@ operator
 ;
 
 foundry
-: ID;
+: FOUNDRY
+| ID;
 
 layer
 : ID;
@@ -178,8 +180,8 @@ varDef
 expr
 : varDef variableExpr # NamedVariableTermExpr
 | variableExpr # VariableTermExpr
-|	unary_linguistic_term # UnaryTermExpr
-|	n_ary_linguistic_term # BinaryTermExpr
+| unary_linguistic_term # UnaryTermExpr
+| n_ary_linguistic_term # BinaryTermExpr
 | META DOUBLECOLON id=qName op=EQ txt=textSpec # MetaTermExpr
 ;
 

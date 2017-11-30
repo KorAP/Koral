@@ -18,6 +18,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1246,8 +1247,13 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         Map<String, Object> fields = new HashMap<String, Object>();
         ParseTree layerNode = getFirstChildWithCat(node, "layer");
         ParseTree foundryNode = getFirstChildWithCat(node, "foundry");
-        if (foundryNode != null)
-            fields.put("foundry", foundryNode.getChild(0).toStringTree(parser));
+        if (foundryNode != null){
+            String foundry = foundryNode.getChild(0).toStringTree(parser);
+            if (foundry.endsWith("/")){
+                foundry = foundry.substring(0, foundry.length()-1);
+            }
+            fields.put("foundry", foundry);
+        }
         String layer = layerNode.getChild(0).toStringTree(parser);
         if (layer.equals("pos")){
             layer = "p";
