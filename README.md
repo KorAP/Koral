@@ -13,7 +13,7 @@ Koral supports the following corpus query languages (QLs):
 
 ## Usage Example
 
-You can use the main class QuerySerializer to translate and serialize queries. Valid QL identifiers are `cosmas2`, `annis`, `poliqarp`, `poliqarpplus`, `cql` and `fcscql`.
+You can use the main class QuerySerializer to translate and serialize queries. Valid QL identifiers are `cosmas2`, `annis`, `poliqarp`, `poliqarpplus`, `cql` and `fcsql`.
 
 ```java
 import de.ids_mannheim.korap.query.serialize.QuerySerialzer;
