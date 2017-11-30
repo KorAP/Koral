@@ -8,12 +8,12 @@ Koral supports the following corpus query languages (QLs):
 * [Cosmas-II QL](http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/) 
 * [ANNIS QL](http://annis-tools.org/aql.html)
 * [Poliqarp QL](http://korpus.pl/en/cheatsheet/node3.html) (extended by numerous operators to "PoliqarpPlus" QL)
-* [CQL] (http://www.loc.gov/standards/sru/cql/spec.html) (for basic search as described in [the CLARIN FCS 1.0 Specification] (https://www.clarin.eu/content/federated-content-search-clarin-fcs) )
+* [CQL](http://www.loc.gov/standards/sru/cql/spec.html) (for basic search as described in [the CLARIN FCS 1.0 Specification](https://www.clarin.eu/content/federated-content-search-clarin-fcs) )
 * FCSQL (based on [CQP](http://cwb.sourceforge.net/files/CQP_Tutorial/), for advanced search as described in the CLARIN FCS 2.0 specification draft)
 
 ## Usage Example
 
-You can use the main class QuerySerializer to translate and serialize queries. Valid QL identifiers are `cosmas2`, `annis`, `poliqarp`, `poliqarpplus` and `cql`.
+You can use the main class QuerySerializer to translate and serialize queries. Valid QL identifiers are `cosmas2`, `annis`, `poliqarp`, `poliqarpplus`, `cql` and `fcscql`.
 
 ```java
 import de.ids_mannheim.korap.query.serialize.QuerySerialzer;
@@ -99,7 +99,7 @@ There is also a command line version. After installation, simply run
    
 ## Prerequisites
 
-* Java 7 (OpenJDK or Oracle JDK with [JCE] (http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html))
+* Java 7 (OpenJDK or Oracle JDK with [JCE](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html))
 * [Git](http://git-scm.com/)
 * At least [Maven 3.2.1](https://maven.apache.org/)
 * Further dependencies are resolved by Maven.
@@ -125,6 +125,6 @@ Carsten Schnober for their valuable input.
 ## License
 
 Koral is published under the BSD-2 License.
-See also the attached LICENSE.
+See also the attached [LICENSE](https://github.com/KorAP/Koral/blob/master/LICENSE).
 
 The [ANNIS grammar](https://github.com/korpling/ANNIS/tree/develop/annis-service/src/main/antlr4/annis/ql) is licensed under the Apache License 2.0.
