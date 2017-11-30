@@ -4,7 +4,7 @@ Koral is a translator tool for converting different corpus query
 languages to [KoralQuery](https://korap.github.io/Koral/), a JSON-LD-based protocol for the common representation
 of linguistic queries. KoralQuery specifications are described extensively in Bingel (2015). This work has been carried out within the KorAP project. 
 
-Koral v0.23 supports the following corpus query languages (QLs):
+Koral supports the following corpus query languages (QLs):
 * [Cosmas-II QL](http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/) 
 * [ANNIS QL](http://annis-tools.org/aql.html)
 * [Poliqarp QL](http://korpus.pl/en/cheatsheet/node3.html) (extended by numerous operators to "PoliqarpPlus" QL)
@@ -17,6 +17,7 @@ You can use the main class QuerySerializer to translate and serialize queries. V
 
 ```java
 import de.ids_mannheim.korap.query.serialize.QuerySerialzer;
+
 QuerySerializer qs = new QuerySerializer();
 String query = "contains(<s>,[orth=zu][pos=ADJA])";
 qs.setQuery(query, "poliqarpplus");
