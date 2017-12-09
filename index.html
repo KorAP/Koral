@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KoralQuery 0.5.1</title>
+    <title>KoralQuery 0.5.3</title>
     <link rel="stylesheet" href="misc/font/koral-fontello.css">
     <!--[if IE 7]><link rel="stylesheet" href="misc/font/koral-fontello-ie7.css"><![endif]-->
     <link rel="stylesheet" href="misc/style.css" type="text/css" />
@@ -33,7 +33,7 @@
           <span class="p-org">IDS</span>,
           <span class="p-locality">Mannheim</span></p>
         <p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-        <p>Last update: <time class="dt-updated" datetime="2017-09-11">2017/09/11</time></p>
+        <p>Last update: <time class="dt-updated" datetime="2017-12-09">2017/12/09</time></p>
       </div>
       
       <summary>
@@ -514,7 +514,7 @@ match:leq
               If the <code class="att">operation</code> attribute contains an undefined
               identifier,
               the query has to be rejected and an error has to be raised.</p>
-            <p>If the <code att="att">operands</code> list is empty,
+            <p>If the <code class="att">operands</code> list is empty,
               the resulting collection is empty.
               If the <code class="att">operands</code> list has only one entry,
               the resulting collection is identical to the resulting collection
@@ -1300,7 +1300,7 @@ match:leq
           <pre>
 {
   "@type" : "koral:termGroup",
-  "relation" : "relation:and",
+  "operation" : "operation:and",
   "operands" : [...]
 }       
 </pre>
@@ -1321,15 +1321,51 @@ match:leq
                 <td><code class="att">koral:termGroup</code></td>
               </tr>
               <tr>
-                <td>relation</td>
+                <td>operation</td>
                 <td>@id</td>
                 <td></td>
-                <td><code>and</code> Conjunction of constraints<br/>
-                  <code>or</code> Disjunction of constraints<br/>
+                <td>
+                  <code class="att">operation:and</code><br/>
+                  <code class="att">operation:or</code>
                 </td>
+              </tr>
+              <tr>
+                <td>operands</td>
+                <td>[<code class="att">koral:term</code>, <code class="att">koral:termGroup</code>]</td>
+                <td></td>
+                <td>Arguments of the paradigmatic relation.</td>
               </tr>
             </tbody>
           </table>
+
+          <p>A <code class="att">koral:termGroup</code> object defines paradigmatic relations
+            between <code class="att">koral:term</code> objects to describe that
+            term annotations may or may not occur at the same position (e.g. a word is
+            annotated as a specific lemma with a specific part-of-speech tag).</p>
+          <p>A <code class="att">koral:termGroup</code> object may specify an arbitrary
+            number of operands that refer to the same defined operation.
+            To specify a different operation in the same <code class="att">koral:token</code>
+            position, it is possible
+            to nest a <code class="att">koral:termGroup</code>.</p>
+
+          <section class="guide">
+            <h4>Implementation Guide</h4>
+            <p>The <code class="att">operation</code> attribute is mandatory.
+              If the attribute is missing, the query has to be rejected and an error
+              has to be raised.
+              If the <code class="att">operation</code> attribute contains an undefined
+              identifier,
+              the query has to be rejected and an error has to be raised.</p>
+            <p>If the <code class="att">operands</code> list is empty,
+              the resulting span is undefined, therefore the wrapping object
+              is empty.</p>
+          </section>
+
+          <p style="color:red"><code class="att">operation</code> was previously named
+            <code class="att">relation</code>. For improved compatibility, a
+            KoralQuery consumption service may accept both variants and
+            a KoralQuery generation service may generate both variants.</p>
+
         </section>
 
         <section>
@@ -1885,6 +1921,9 @@ match:leq
       <div class="changes">
         <pre>
 CHANGES:
+0.5.3 2017-12-09
+- Renamed 'relation' to 'operation' in 'koral:termGroup'
+
 0.5.2 2017-09-11
 - Deprecated 'type:wildcard' in favor of 'type:regex'
 
