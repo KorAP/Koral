@@ -750,15 +750,15 @@ match:leq
                 <td></td>
                 <td>Set-theoretic condition on input classes. Results that do not fulfil this condition are excluded from the result set.
                   <dl>
-                    <dt><code class="att">classrefCheck:disjoints</code></dt>
+                    <dt><code class="att">classRefCheck:disjoints</code></dt>
                     <dd>The intersection between the classes in <code>classIn</code> is empty.</dd> 
-                    <dt><code class="att">classrefCheck:intersects</code></dt>
+                    <dt><code class="att">classRefCheck:intersects</code></dt>
                     <dd>The intersection between the classes in <code>classIn</code> is not empty.</dd> 
-                    <dt><code class="att">classrefCheck:includes</code></dt>
+                    <dt><code class="att">classRefCheck:includes</code></dt>
                     <dd>The intersection between the first class and the second class in <code>classIn</code> equals the second class.</dd> 
-                    <dt><code class="att">classrefCheck:equals</code></dt>
+                    <dt><code class="att">classRefCheck:equals</code></dt>
                     <dd>The intersection between the classes in <code>classIn</code> equals their union.</dd> 
-                    <dt><code class="att">classrefCheck:differs</code></dt>
+                    <dt><code class="att">classRefCheck:differs</code></dt>
                     <dd>The intersection between the classes in <code>classIn</code> does not equal their union.</dd>
                   </dl>
                 </td>
@@ -769,13 +769,13 @@ match:leq
                 <td></td>
                 <td>Set-theoretic operation on input classes. Creates new output class in <code>classOut</code>.
                   <dl>
-                    <dt><code class="att">classrefOp:union</code></dt>
+                    <dt><code class="att">classRefOp:union</code></dt>
                     <dd>The class contains all spans defined in at least one <code>classIn</code> class.</dd>
-                    <dt><code class="att">classrefOp:intersection</code></dt>
+                    <dt><code class="att">classRefOp:intersection</code></dt>
                     <dd>The class contains all spans defined in all of the <code>classIn</code> classes.</dd>
-                    <dt><code class="att">classrefOp:inversion</code></dt>
+                    <dt><code class="att">classRefOp:inversion</code></dt>
                     <dd>Defines the class over all spans that are not part of the classes listed in <code>classIn</code>.</dd>
-                    <dt><code class="att">classrefOp:deletion</code></dt>
+                    <dt><code class="att">classRefOp:deletion</code></dt>
                     <dd>Deletes previously defined classes inside the operands (as indicated by <code>classIn</code>).</dd>
                   </dl>
                 </td>
@@ -838,7 +838,7 @@ match:leq
                     <dd>Matches <code class="config">[A[B..B]..A]</code></dd>
 
                     <dt><code class="att">frames:alignsLeft</code></dt>
-                    <dd>Matches <code class="config">[A[B..A]..B]</code></dd>
+                    <dd>Matches <code class="config">[B[A..A]..B]</code></dd>
 
                     <dt><code class="att">frames:matches</code></dt>
                     <dd>Matches <code class="config">[A[B..B]A]</code></dd>
@@ -1942,7 +1942,7 @@ CHANGES:
 
 0.5.1 2017-07-05
 - Introduced 'operation:exclusion' in favour of the 'exclude' attribute
-- Introduced values for 'classrefCheck' and 'classrefOp'
+- Introduced values for 'classRefCheck' and 'classRefOp'
 
 0.5.0 2017-04-04
 - Introduced import format
