@@ -135,7 +135,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             putIntoSuperObject(term);
         }
 
-        if (nodeCat.equals("dateconstraint")) {
+        if (nodeCat.equals("dateConstraint")) {
             ParseTree fieldNode = getFirstChildWithCat(node, "field");
             String field = fieldNode.getChild(0).toStringTree(parser);
             ParseTree dateOpNode = getFirstChildWithCat(node, "dateOp");
@@ -554,6 +554,12 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             // Tokenize input data
             ANTLRInputStream input = new ANTLRInputStream(query);
             lexer.setInputStream(input);
+            
+//            List<? extends Token> allTokens = lexer.getAllTokens();
+//            for (Token token : allTokens){
+//                System.out.println(token);
+//            }
+            
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             parser = new CollectionQueryParser(tokens);
 

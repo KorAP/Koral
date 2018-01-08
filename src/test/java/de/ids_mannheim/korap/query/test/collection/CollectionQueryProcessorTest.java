@@ -112,7 +112,20 @@ public class CollectionQueryProcessorTest {
         assertEquals("match:contains", res.at("/collection/match").asText());
     }
 
-
+    @Test
+    public void testFlag () throws JsonProcessingException, IOException {
+        collection = "textClass=politik/i";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        System.out.println(res);
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("textClass", res.at("/collection/key").asText());
+        assertEquals("politik", res.at("/collection/value").asText());
+        assertEquals("match:eq", res.at("/collection/match").asText());
+        
+    }
+    
 	@Test
     public void testRegex () throws JsonProcessingException, IOException {
         collection = "textClass=/politik/";
