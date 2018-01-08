@@ -62,7 +62,7 @@ public class OPOVWithExclusionTest {
         query = "wegen #OV(%, L) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res);
+        // System.out.println(res);
 
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
@@ -99,7 +99,7 @@ public class OPOVWithExclusionTest {
         query = "wegen #OV(%, R) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res);
+        // System.out.println(res);
 
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
@@ -140,7 +140,7 @@ public class OPOVWithExclusionTest {
         query = "wegen #OV(%, FE) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res);
+        // System.out.println(res);
 
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());

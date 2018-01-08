@@ -63,7 +63,7 @@ NL                  : [\r\n] -> skip;
 WORD				: ALPHABET+;
 //WORD                : ALPHABET* ALPHA ALPHABET*;  // needs to have at least one alphabetical letter (non-numeric)
 
-REGEX     		     : SLASH .* SLASH; 
+REGEX     		     : SLASH .*? SLASH; 
 
 
 

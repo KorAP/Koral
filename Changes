@@ -1,9 +1,11 @@
-0.28 2017-11-30 
+0.28 2018-01-08
 	- Added some enums for koral:operation (margaretha)
 	- Fixed node serialization of Annis QL containing lemma (margaretha)
 	- Added serialization for Annis keyword "lemma" (margaretha)
 	- Removed version from FCSQL processor (margaretha)
 	- Fixed Annis regex bug regarding slash after foundry (margaretha)
+  - Fixed use of regular expressions in corpus queries
+    (margaretha, diewald)
 	
 0.27 2017-09-12
 	- Changed Cosmas2 wildcards serialization as regex (margaretha)  

@@ -118,7 +118,6 @@ public class CollectionQueryProcessorTest {
         qs.setQuery(query, ql);
         qs.setCollection(collection);
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res);
         assertEquals("koral:doc", res.at("/collection/@type").asText());
         assertEquals("textClass", res.at("/collection/key").asText());
         assertEquals("politik", res.at("/collection/value").asText());
@@ -137,6 +136,25 @@ public class CollectionQueryProcessorTest {
         assertEquals("politik", res.at("/collection/value").asText());
         assertEquals("type:regex", res.at("/collection/type").asText());
         assertEquals("match:eq", res.at("/collection/match").asText());
+
+        collection = "textClass=/politik/ or textClass=/kultur.*/";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:docGroup", res.at("/collection/@type").asText());
+        assertEquals("operation:or", res.at("/collection/operation").asText());
+
+        assertEquals("koral:doc", res.at("/collection/operands/0/@type").asText());
+        assertEquals("textClass", res.at("/collection/operands/0/key").asText());
+        assertEquals("politik", res.at("/collection/operands/0/value").asText());
+        assertEquals("match:eq", res.at("/collection/operands/0/match").asText());
+        assertEquals("type:regex", res.at("/collection/operands/0/type").asText());
+
+		assertEquals("koral:doc", res.at("/collection/operands/1/@type").asText());
+        assertEquals("textClass", res.at("/collection/operands/1/key").asText());
+        assertEquals("kultur.*", res.at("/collection/operands/1/value").asText());
+        assertEquals("match:eq", res.at("/collection/operands/1/match").asText());
+        assertEquals("type:regex", res.at("/collection/operands/1/type").asText());
     }
 
 	@Test

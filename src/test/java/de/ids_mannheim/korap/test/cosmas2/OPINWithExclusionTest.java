@@ -317,7 +317,7 @@ public class OPINWithExclusionTest {
         query = "wegen #IN(N,HIT,%) (wegen /w5:10 des)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        System.out.println(res);
+        // System.out.println(res);
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:exclusion",
                 res.at("/query/operation").asText());
