@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b91b38c_1e2063d7",
+        "filename": "src/main/antlr/collection/CollectionQueryLexer.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2018-01-09T19:03:55Z",
+      "side": 1,
+      "message": "what do you mean with ?\n.* should be enough if there is nothing",
+      "range": {
+        "startLine": 66,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 36
+      },
+      "revId": "ce995cf0f382f928cc64ef51705fcf19e17c225b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c",
+      "unresolved": false
+    }
+  ]
+}
