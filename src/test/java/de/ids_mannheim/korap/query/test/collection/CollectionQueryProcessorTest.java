@@ -615,6 +615,17 @@ public class CollectionQueryProcessorTest {
         assertEquals("textTypeArt", res.at("/collection/operands/1/operands/0/key").asText());
         assertEquals(".*Kommentar.*", res.at("/collection/operands/1/operands/0/value").asText());
         assertEquals("operation:and", res.at("/collection/operation").asText());
+
+        collection = "corpusSigle = /HMP[0-9][0-9]/ and (textTypeArt=/.*Kommentar.*/ OR textTypeArt=/.*Leitartikel.*/)";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("corpusSigle", res.at("/collection/operands/0/key").asText());
+        assertEquals("HMP[0-9][0-9]", res.at("/collection/operands/0/value").asText());
+        assertEquals("operation:or", res.at("/collection/operands/1/operation").asText());
+        assertEquals("textTypeArt", res.at("/collection/operands/1/operands/0/key").asText());
+        assertEquals(".*Kommentar.*", res.at("/collection/operands/1/operands/0/value").asText());
+        assertEquals("operation:and", res.at("/collection/operation").asText());
 	}	
 
     @Test
