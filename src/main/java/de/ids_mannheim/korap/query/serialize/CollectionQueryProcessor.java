@@ -97,8 +97,13 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
          */
 
         if (nodeCat.equals("relation")) {
-            String operator = getNodeCat(node.getChild(1).getChild(0)).equals(
-                    "&") ? "and" : "or";
+			String operator = getNodeCat(node.getChild(1).getChild(0));
+			if (operator.equals("&") || operator.equals("and") || operator.equals("AND")) {
+				operator = "and";
+			}
+			else {
+				operator = "or";
+			};
             Map<String, Object> relationGroup = KoralObjectGenerator
                     .makeDocGroup(operator);
             putIntoSuperObject(relationGroup);

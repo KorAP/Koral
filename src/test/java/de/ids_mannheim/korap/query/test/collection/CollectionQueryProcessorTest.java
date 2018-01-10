@@ -79,8 +79,6 @@ public class CollectionQueryProcessorTest {
         assertEquals("match:eq", res.at("/collection/wrap/match").asText());
     }
 
-    ;
-
 
     @Test
     public void testContains () throws JsonProcessingException, IOException {
@@ -607,17 +605,16 @@ public class CollectionQueryProcessorTest {
 
 	@Test
     public void testRegexInGroup () throws JsonProcessingException, IOException {
-        collection = "corpusSigle = /HMP[0-9][0-9]/ and (textTypeArt=/.*Kommentar.*/ or textTypeArt=/.*Leitartikel.*/)";
+        collection = "corpusSigle = /HMP[0-9][0-9]/ AND (textTypeArt=/.*Kommentar.*/ or textTypeArt=/.*Leitartikel.*/)";
         qs.setQuery(query, ql);
         qs.setCollection(collection);
         res = mapper.readTree(qs.toJSON());
-		/*
-        assertEquals("koral:doc", res.at("/collection/@type").asText());
-        assertEquals("pubDate", res.at("/collection/key").asText());
-        assertEquals("2000-02", res.at("/collection/value").asText());
-        assertEquals("type:date", res.at("/collection/type").asText());
-        assertEquals("match:eq", res.at("/collection/match").asText());
-		*/
+        assertEquals("corpusSigle", res.at("/collection/operands/0/key").asText());
+        assertEquals("HMP[0-9][0-9]", res.at("/collection/operands/0/value").asText());
+        assertEquals("operation:or", res.at("/collection/operands/1/operation").asText());
+        assertEquals("textTypeArt", res.at("/collection/operands/1/operands/0/key").asText());
+        assertEquals(".*Kommentar.*", res.at("/collection/operands/1/operands/0/value").asText());
+        assertEquals("operation:and", res.at("/collection/operation").asText());
 	}	
 
     @Test
