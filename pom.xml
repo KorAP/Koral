@@ -136,6 +136,35 @@
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 		<outputDirectory>${basedir}/target/classes</outputDirectory>
 		<plugins>
+		  <plugin>
+		    <artifactId>maven-clean-plugin</artifactId>
+		    <version>3.0.0</version>
+		    <configuration>
+		      <filesets>
+		        <fileset>
+		          <directory>${basedir}/src/main/java/de/ids_mannheim/korap/query/parse</directory>
+		          <includes>
+		          	<include>**/*.java</include>
+		            <include>**/*.tokens</include>
+		          </includes>
+		          <excludes>
+		          	<exclude>**/IErrorReporter.java</exclude>
+		          	<exclude>**/c2ps_opAnnot.java</exclude>
+		          	<exclude>**/c2ps_opBED.java</exclude>
+		          	<exclude>**/c2ps_opELEM.java</exclude>
+		          	<exclude>**/c2ps_opIN.java</exclude>
+		          	<exclude>**/c2ps_opOV.java</exclude>
+		          	<exclude>**/c2ps_opPROX.java</exclude>
+		          	<exclude>**/c2ps_opWF.java</exclude>
+		          	<exclude>**/c2ps_optCase.java</exclude>
+		          	<exclude>**/.gitignore</exclude>
+		          	<exclude>fcsql/*</exclude>
+		          </excludes>
+		          <followSymlinks>false</followSymlinks>
+		        </fileset>
+		      </filesets>
+		    </configuration>
+		  </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
