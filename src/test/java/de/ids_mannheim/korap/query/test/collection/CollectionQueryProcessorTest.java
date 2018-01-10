@@ -605,6 +605,20 @@ public class CollectionQueryProcessorTest {
         assertEquals("match:leq", res.at("/collection/match").asText());
     }
 
+	@Test
+    public void testRegexInGroup () throws JsonProcessingException, IOException {
+        collection = "corpusSigle = /HMP[0-9][0-9]/ and (textTypeArt=/.*Kommentar.*/ or textTypeArt=/.*Leitartikel.*/)";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+		/*
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("pubDate", res.at("/collection/key").asText());
+        assertEquals("2000-02", res.at("/collection/value").asText());
+        assertEquals("type:date", res.at("/collection/type").asText());
+        assertEquals("match:eq", res.at("/collection/match").asText());
+		*/
+	}	
 
     @Test
     public void testDateValidate () {
