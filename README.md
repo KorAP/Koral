@@ -86,10 +86,19 @@ translate queries to a common format before sending them to its search engine.
 
 ## Installation
 
+Koral requires Java 1.7 particularly to compile
+Cosmas2 ANTLR grammars. In pom.xml, specify the javac location of your Java 1.7
+in the ```<java1.7>``` property. By default it set to ```/usr/local/java/jdk1.7.0_79```.
+
+	<properties>
+		<java1.7>/usr/local/java/jdk1.7.0_79</java1.7>
+	</properties>
+
 Installation is straightforward (Maven3 required):
 
     git clone https://github.com/korap/Koral [install-dir]
     cd [install-dir]
+    mvn compile
     mvn test -Dhttps.protocols=TLSv1.2
     mvn install
 
