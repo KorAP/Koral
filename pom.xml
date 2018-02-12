@@ -37,7 +37,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>		
 		<jackson.version>2.9.1</jackson.version>
-		<java1.7>/usr/local/java/jdk1.7.0_79</java1.7>
 	</properties>
 	
 	<repositories>
@@ -183,7 +182,6 @@
 				<configuration>
 					<verbose>true</verbose>
 		          	<fork>true</fork>
-		         	<executable>${java1.7}/bin/javac</executable>
 					<compilerVersion>1.7</compilerVersion>
 					<source>1.7</source>
 					<target>1.7</target>
@@ -325,7 +323,7 @@
 					recipe is based on http://stackoverflow.com/questions/15310628/ customize-maven-to-automatically-create-antlr4-grammar-java-files-on-build -->
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr3-maven-plugin</artifactId>
-				<version>3.5.1</version>
+				<version>3.5.2</version>
 				<configuration>
 					<sourceDirectory>${basedir}/src/main/antlr/cosmas</sourceDirectory>
 					<outputDirectory>${basedir}/src/main/java/de/ids_mannheim/korap/query/parse/cosmas</outputDirectory>
