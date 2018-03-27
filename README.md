@@ -84,19 +84,23 @@ Koral and KoralQuery have been designed and developed within the
 [KorAP Project](http://korap.ids-mannheim.de/), and are used in KorAP to 
 translate queries to a common format before sending them to its search engine.
 
-## Installation
+## Setup
 
-Installation is straightforward (Maven3 required):
+Setup is straightforward (Maven3 required):
 
     git clone https://github.com/korap/Koral [install-dir]
     cd [install-dir]
-    mvn package
     mvn test -Dhttps.protocols=TLSv1.2    
+    mvn package
 
-There is also a command line version. After installation, simply run
+There is also a command line version. After setup, simply run
 
     java -jar target/Koral-0.2.jar [query] [queryLanguage]
-   
+
+Build a Koral library and install it in your local Maven repository (needed for Kustvakt)
+
+    mvn install -Dhttps.protocols=TLSv1.2
+
 ## Prerequisites
 
 * Java 8 (OpenJDK or Oracle JDK with JCE)
