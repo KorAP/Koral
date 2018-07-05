@@ -44,6 +44,7 @@ public class PoliqarpPlusQueryProcessorTest {
     public void testSingleTokens () throws JsonProcessingException, IOException {
         query = "[base=Mann]";
         qs.setQuery(query, "poliqarpplus");
+		assertFalse(qs.hasErrors());
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("Mann", res.at("/query/wrap/key").asText());
@@ -52,6 +53,7 @@ public class PoliqarpPlusQueryProcessorTest {
 
         query = "[orth!=Frau]";
         qs.setQuery(query, "poliqarpplus");
+		assertFalse(qs.hasErrors());
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("Frau", res.at("/query/wrap/key").asText());
@@ -60,6 +62,7 @@ public class PoliqarpPlusQueryProcessorTest {
 
         query = "[p!=NN]";
         qs.setQuery(query, "poliqarpplus");
+		assertFalse(qs.hasErrors());
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("NN", res.at("/query/wrap/key").asText());
@@ -68,6 +71,7 @@ public class PoliqarpPlusQueryProcessorTest {
 
         query = "[!p!=NN]";
         qs.setQuery(query, "poliqarpplus");
+		assertFalse(qs.hasErrors());
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("NN", res.at("/query/wrap/key").asText());
@@ -76,6 +80,7 @@ public class PoliqarpPlusQueryProcessorTest {
 
         query = "[base=schland/x]";
         qs.setQuery(query, "poliqarpplus");
+		assertFalse(qs.hasErrors());
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals(".*?schland.*?", res.at("/query/wrap/key").asText());
@@ -84,6 +89,21 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
     }
 
+	@Test
+    public void testFailure () throws JsonProcessingException, IOException {
+        query = "[base=Mann";
+        qs.setQuery(query, "poliqarpplus");
+		assertTrue(qs.hasErrors());
+        res = mapper.readTree(qs.toJSON());
+        assertEquals(302, res.at("/errors/0/0").asInt());
+        assertEquals(302, res.at("/errors/1/0").asInt());
+		/*
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("Mann", res.at("/query/wrap/key").asText());
+        assertEquals("lemma", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+		*/
+	}
 
     @Test
     public void testNegatedTokens () throws JsonProcessingException,
@@ -389,12 +409,6 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals(7, operands.get(1).at("/value").asInt());
         assertEquals("match:ne", operands.get(1).at("/match").asText());
     }
-
-
-    
-
-
-    
     
     @Test
     public void testRepetition () throws JsonProcessingException, IOException {

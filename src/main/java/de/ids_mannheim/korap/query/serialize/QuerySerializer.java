@@ -21,8 +21,9 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
  * Main class for Koral, serializes queries from concrete QLs to KoralQuery
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de), Michael Hanl
- *         (hanl@ids-mannheim.de), Eliza Margaretha (margaretha@ids-mannheim.de)
- * @version 0.3.0
+ *         (hanl@ids-mannheim.de), Eliza Margaretha (margaretha@ids-mannheim.de),
+ *         Nils Diewald (diewald@ids-mannheim.de)
+ * @version 0.3.1
  * @since 0.1.0
  */
 public class QuerySerializer {
@@ -201,6 +202,18 @@ public class QuerySerializer {
         return raw();
     }
 
+	/**
+	 * Checks, if a query object contains errors.
+	 */
+	public boolean hasErrors () {
+		if (ast != null) {
+			if (!ast.getErrors().isEmpty()) {
+				return true;
+			};
+		};
+		return false;
+	}
+	
     @SuppressWarnings("unchecked")
     private Map<String, Object> raw () {
         if (ast != null) {
