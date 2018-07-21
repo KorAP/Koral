@@ -44,9 +44,14 @@ regex
 : REGEX
 ;
 
+verbatim
+: SQUOTE (~SQUOTE | ESC_SQUOTE)* SQUOTE;
+
+
 key
 : (WORD
 | regex
+| verbatim
 | NUMBER)
 ;
 

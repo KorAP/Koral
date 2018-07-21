@@ -1,5 +1,7 @@
-0.29 2018-07-05
+0.29 2018-07-21
   - Added check for errors on QuerySerializer object (diewald)
+  - Support verbatim string values in Poliqarp
+    (fixes #42; diewald)
 
 0.28 2018-01-10
 	- Added some enums for koral:operation (margaretha)

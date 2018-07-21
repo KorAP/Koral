@@ -799,8 +799,22 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             // process foundry
             if (foundryNode != null)
                 term.put("foundry", foundryNode.getText());
-            // process key: 'normal' or regex?
-            key = keyNode.getText();
+
+            // process key: 'normal', 'verbatim' or regex?
+			if (getNodeCat(keyNode.getChild(0)).equals("verbatim")) {
+
+				// Get stream from hidden channel
+				TokenStream stream = parser.getTokenStream();
+				key = stream.getText(keyNode.getChild(0).getSourceInterval());
+
+				if (key.startsWith("'") && key.endsWith("'"))
+					key = key.substring(1, key.length()-1);
+
+			}
+			else {
+				key = keyNode.getText();
+			};
+
             if (getNodeCat(keyNode.getChild(0)).equals("regex")) {
                 isRegex = true;
                 term.put("type", "type:regex");
@@ -830,8 +844,10 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 }
             }
             // process value
-            if (valueNode != null)
+            if (valueNode != null) {
                 term.put("value", valueNode.getText());
+			};
+				
             // process operator ("match" property)
             if (termOpNode != null) {
                 String termOp = termOpNode.getText();

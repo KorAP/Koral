@@ -97,12 +97,6 @@ public class PoliqarpPlusQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals(302, res.at("/errors/0/0").asInt());
         assertEquals(302, res.at("/errors/1/0").asInt());
-		/*
-        assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals("Mann", res.at("/query/wrap/key").asText());
-        assertEquals("lemma", res.at("/query/wrap/layer").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());
-		*/
 	}
 
     @Test
@@ -131,6 +125,26 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("mate", res.at("/query/wrap/foundry").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
     }
+
+	@Test
+    public void testVerbatimKeys () throws JsonProcessingException, IOException {
+        query = "[mate/b='Der + Mann']";
+        qs.setQuery(query, "poliqarpplus");
+		assertFalse(qs.hasErrors());
+		res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("Der + Mann", res.at("/query/wrap/key").asText());
+        assertEquals("b", res.at("/query/wrap/layer").asText());
+        assertEquals("mate", res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+
+		query = "[mate/b='D\\'Ma nn']";
+        qs.setQuery(query, "poliqarpplus");
+		assertFalse(qs.hasErrors());
+		res = mapper.readTree(qs.toJSON());
+        assertEquals("D\\'Ma nn", res.at("/query/wrap/key").asText());
+	}
 
 
     // todo:

@@ -276,9 +276,9 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 
         TokenStream stream = parser.getTokenStream();
         String stm = stream.getText(valueNode.getChild(0).getSourceInterval());
-        // todo: is this correct?
+
         if (stm.startsWith("\"") && stm.endsWith("\""))
-            stm = stm.replaceAll("\"", "");
+			stm = stm.substring(1, stm.length()-1);
 
         if ("regex".equals(node_cat)) {
 			

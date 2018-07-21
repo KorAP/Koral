@@ -51,7 +51,7 @@ FLAG_ix      : '/' ( ('i'|'I') ('x'|'X')? );
 
 
 /** Simple strings and Simple queries */
-WS                  : [ \t]  -> skip ;
+WS                  : [ \t]  -> channel(HIDDEN);
 fragment FOCC       : '{' WS* ( [0-9]* WS* ',' WS* [0-9]+ | [0-9]+ WS* ','? ) WS* '}';
 fragment NO_RE      : ~[ \t\/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
@@ -61,6 +61,7 @@ NUMBER              : [0-9]+;
 NL                  : [\r\n] -> skip;
 
 WORD                : ALPHABET+;
+
 
 /* Complex queries */
 LPAREN      : '[';
@@ -84,6 +85,8 @@ CARET 		: '^';
 STAR		: '*';
 PLUS		: '+';
 EMPTYREL	: '@';
+BACKSLASH	: '\\';
+SQUOTE      : '\'';
 
 /* Regular expressions and Regex queries */
 fragment RE_symbol     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']'
@@ -101,7 +104,9 @@ fragment RE_plus     : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '+';
 fragment RE_occ      : (RE_char | RE_chgroup | ( '(' RE_expr ')')) FOCC;
 fragment RE_group    : '(' RE_expr ')';
 fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant | RE_group)+;
-fragment RE_dquote            : '"'  (RE_expr | '\'' | ':' )* '"';
-fragment RE_squote            : '\''  (RE_expr | '\"' | ':' )* '\'';
+fragment RE_dquote   : '"'  (RE_expr | '\'' | ':' )* '"';
+// fragment RE_squote   : '\''  (RE_expr | '\"' | ':' )* '\'';
  
-REGEX             : ( RE_dquote | RE_squote );
+REGEX             : RE_dquote;
+
+ESC_SQUOTE        : BACKSLASH SQUOTE;
