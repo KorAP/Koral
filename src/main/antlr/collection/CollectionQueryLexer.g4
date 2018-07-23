@@ -22,6 +22,7 @@ FLAG_xi      : '/' (('x'|'X') ('i'|'I')? );
 FLAG_ix      : '/' (('i'|'I') ('x'|'X')? );
  
 QUOTE				: '"'; 
+BACKSLASH           : '\\'; 
 LRB					: '(';
 RRB					: ')';
 LB					: '[';
@@ -50,6 +51,8 @@ fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | '
                     | '(' | ')' | '|' | '"' | ',' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' );
 // EM: allow ':' in ALPHABET 
 fragment ALPHA		: [a-zA-Z];
+
+ESC_QUOTE          : BACKSLASH QUOTE;
 
 
 DIGIT		: [0-9];

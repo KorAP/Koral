@@ -277,8 +277,10 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         TokenStream stream = parser.getTokenStream();
         String stm = stream.getText(valueNode.getChild(0).getSourceInterval());
 
-        if (stm.startsWith("\"") && stm.endsWith("\""))
-			stm = stm.substring(1, stm.length()-1);
+		// Fix verbatim keys
+        if (stm.startsWith("\"") && stm.endsWith("\"")) {
+			stm = stm.substring(1, stm.length()-1).replaceAll("\\\\\\\\","\\\\").replaceAll("\\\\\"", "\"");
+		};
 
         if ("regex".equals(node_cat)) {
 			
