@@ -139,11 +139,11 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("mate", res.at("/query/wrap/foundry").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
 
-		query = "[mate/b='D\\'Ma nn']";
+		query = "[mate/b='D\\'Ma \\\\nn']";
         qs.setQuery(query, "poliqarpplus");
 		assertFalse(qs.hasErrors());
 		res = mapper.readTree(qs.toJSON());
-        assertEquals("D\\'Ma nn", res.at("/query/wrap/key").asText());
+        assertEquals("D'Ma \\nn", res.at("/query/wrap/key").asText());
 	}
 
 

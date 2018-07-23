@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
  * 
  * @author Michael Hanl (hanl@ids-mannheim.de)
  * @author Joachim Bingel (bingel@ids-mannheim.de)
+ * @author Nils Diewald (diewald@ids-mannheim.de)
  * @version 0.3.0
  * @since 0.1.0
  */

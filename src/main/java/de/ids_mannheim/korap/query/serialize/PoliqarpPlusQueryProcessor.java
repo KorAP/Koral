@@ -35,6 +35,7 @@ import java.util.*;
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @author Eliza Margaretha (margaretha@ids-mannheim.de)
+ * @author Nils Diewald (diewald@ids-mannheim.de)
  * @version 0.3.0
  * @since 0.1.0
  */
@@ -808,7 +809,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 				key = stream.getText(keyNode.getChild(0).getSourceInterval());
 
 				if (key.startsWith("'") && key.endsWith("'"))
-					key = key.substring(1, key.length()-1);
+					key = key.substring(1, key.length()-1).replaceAll("\\\\\\\\","\\\\").replaceAll("\\\\'", "'");
 
 			}
 			else {
