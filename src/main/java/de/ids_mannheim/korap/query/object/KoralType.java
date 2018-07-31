@@ -10,7 +10,8 @@ public enum KoralType {
     TERMGROUP("koral:termGroup"), TERM("koral:term"), TOKEN("koral:token"), 
     SPAN("koral:span"), GROUP("koral:group"), BOUNDARY("koral:boundary"), 
     RELATION("koral:relation"), DISTANCE("koral:distance"), REFERENCE(
-    "koral:reference"), DOCUMENT("koral:doc"), DOCUMENTGROUP("koral:docGroup"),
+    "koral:reference"), DOCUMENT("koral:doc"), DOCUMENT_GROUP("koral:docGroup"),
+    DOCUMENT_GROUP_REF("koral:docGroupRef"),
     COSMAS_DISTANCE("cosmas:distance");
 
     String value;

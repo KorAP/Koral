@@ -1,65 +1,69 @@
+0.30 2018-07-31
+    - Introduced docGroupRef and added VC reference in collection query (margaretha)
+    - Fixed checking error in QuerySerializer (margaretha)
+
 0.29 2018-07-23
-  - Added check for errors on QuerySerializer object (diewald)
-  - Support verbatim string values in Poliqarp
+    - Added check for errors on QuerySerializer object (diewald)
+    - Support verbatim string values in Poliqarp
     (fixes #42; diewald)
-  - Fix support for verbatim string values in collection queries
+    - Fix support for verbatim string values in collection queries
     (diewald)
 
 0.28 2018-01-10
-	- Added some enums for koral:operation (margaretha)
-	- Fixed node serialization of Annis QL containing lemma (margaretha)
-	- Added serialization for Annis keyword "lemma" (margaretha)
-	- Removed version from FCSQL processor (margaretha)
-	- Fixed Annis regex bug regarding slash after foundry (margaretha)
-  - Fixed use of regular expressions in corpus queries
-    (margaretha, diewald)
-  - Fixed treatment of 'AND' and 'and' in vc serialization (diewald)
-	
+    - Added some enums for koral:operation (margaretha)
+    - Fixed node serialization of Annis QL containing lemma (margaretha)
+    - Added serialization for Annis keyword "lemma" (margaretha)
+    - Removed version from FCSQL processor (margaretha)
+    - Fixed Annis regex bug regarding slash after foundry (margaretha)
+    - Fixed use of regular expressions in corpus queries
+      (margaretha, diewald)
+    - Fixed treatment of 'AND' and 'and' in vc serialization (diewald)
+    
 0.27 2017-09-12
-	- Changed Cosmas2 wildcards serialization as regex (margaretha)  
-	- Fixed OP IN with classRefCheck.INCLUDES (margaretha)
-	- Implemented OP PV with exclusion (margaretha)
-	
+    - Changed Cosmas2 wildcards serialization as regex (margaretha)  
+    - Fixed OP IN with classRefCheck.INCLUDES (margaretha)
+    - Implemented OP PV with exclusion (margaretha)
+    
 0.26 2017-06-29
-	- Updated collection query grammar (margaretha)
-	- Updated maven dependency phase (margaretha)
+    - Updated collection query grammar (margaretha)
+    - Updated maven dependency phase (margaretha)
     - Fixed handling of non-necessary brackets in tokens (diewald)
     - Improved error handling (margaretha)
     - Added wrap to koral:span serialization (margaretha)
 
 0.25 2017-05-10
-	- Altered dominance and relation serialization (margaretha)
-	 
+    - Altered dominance and relation serialization (margaretha)
+     
 0.24 2017-05-03
-	- Fixed serialization of regexes for VCs (diewald)	
-	- Implemented exclusion in Cosmas2 IN operation (margaretha)
-	- Restructured test suite (margaretha)
-	
+    - Fixed serialization of regexes for VCs (diewald)    
+    - Implemented exclusion in Cosmas2 IN operation (margaretha)
+    - Restructured test suite (margaretha)
+    
 0.23 2016-10-27
-	- Added tests and comments for FCSQL (margaretha)
-	- Added quantifier for FCSQL QueryGroup (margaretha)
-	- Improved Poliqarp+ test suite (diewald)
-  - Removed redundant min serialization in repetitions (diewald)
+    - Added tests and comments for FCSQL (margaretha)
+    - Added quantifier for FCSQL QueryGroup (margaretha)
+    - Improved Poliqarp+ test suite (diewald)
+    - Removed redundant min serialization in repetitions (diewald)
 
 0.22 2016-06-15
     - Spans now always wrap terms (diewald)
-	- Cosmas-II "und", "oder", and "nicht" operations
-	  now serialize to unordered sequences (diewald)
-	- Cleanup POM (diewald)
-	- Fixed deserialization of unnecessary brackets
-	  around terms and termGroups in Poliqarp (diewald)
-	- Support for FCS 2.0 (margaretha)
-	- Fixed handling of escapes in regex
-	  (issue #21; diewald)
+    - Cosmas-II "und", "oder", and "nicht" operations
+      now serialize to unordered sequences (diewald)
+    - Cleanup POM (diewald)
+    - Fixed deserialization of unnecessary brackets
+      around terms and termGroups in Poliqarp (diewald)
+    - Support for FCS 2.0 (margaretha)
+    - Fixed handling of escapes in regex
+      (issue #21; diewald)
 
 0.21 2015-10-27
     - Improved meta query builder (hanl)
 
 0.2 2015-06-25
-        - Switch to "koral:" prefix (bingel)
-	- Coverage of KoralQuery 0.3
-	  (see http://korap.github.io/Koral/)
-          (bingel)
+    - Switch to "koral:" prefix (bingel)
+    - Coverage of KoralQuery 0.3
+      (see http://korap.github.io/Koral/)
+      (bingel)
 
 0.1 2015-02-10
-        - First version published to GitHub (bingel)
+    - First version published to GitHub (bingel)

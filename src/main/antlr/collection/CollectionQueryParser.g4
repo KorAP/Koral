@@ -27,13 +27,22 @@ dateOp
 | ON
 ;
 
+vcOp
+: REF
+;
+
 operator
 :	(NEG? EQ) | LT | GT | LEQ | GEQ | TILDE | NEGTILDE;
 
 expr
 : constraint
 | dateConstraint
+| vcConstraint
 | token
+;
+
+vcConstraint
+: vcOp vcName 
 ;
 
 dateConstraint
@@ -43,6 +52,11 @@ dateConstraint
 
 constraint
 : field operator value flag?
+;
+
+vcName
+: WORD
+| WORD SLASH WORD
 ;
 
 token

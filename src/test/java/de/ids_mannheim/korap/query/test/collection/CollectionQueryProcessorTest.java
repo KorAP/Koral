@@ -1,5 +1,13 @@
 package de.ids_mannheim.korap.query.test.collection;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
+import org.junit.Test;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,27 +15,33 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 import de.ids_mannheim.korap.query.serialize.QueryUtils;
 
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-
 public class CollectionQueryProcessorTest {
 
-    String query = "foo";
-    String ql = "poliqarpplus";
-    String collection;
-    ArrayList<JsonNode> operands;
+    private String query = "foo";
+    private String ql = "poliqarpplus";
+    private String collection;
 
-    QuerySerializer qs = new QuerySerializer();
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode res;
+    public static final QuerySerializer qs = new QuerySerializer();
+    public static final ObjectMapper mapper = new ObjectMapper();
+    private JsonNode res;
 
-
+    @Test
+    public void testVCRef () throws IOException {
+        collection = "referTo vc-filename";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:docGroupRef", res.at("/collection/@type").asText());
+        assertEquals("vc-filename", res.at("/collection/ref").asText());
+        
+        collection = "referTo mickey/MyVC";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:docGroupRef", res.at("/collection/@type").asText());
+        assertEquals("mickey/MyVC", res.at("/collection/ref").asText());
+    }
+    
     @Test
     public void testContext () throws JsonProcessingException, IOException {
         collection = "textClass=politik";

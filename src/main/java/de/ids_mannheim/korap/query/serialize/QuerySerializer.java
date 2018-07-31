@@ -211,6 +211,10 @@ public class QuerySerializer {
 				return true;
 			};
 		};
+		
+		if (!errors.isEmpty()){
+		    return true;
+		}
 		return false;
 	}
 	

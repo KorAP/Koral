@@ -112,7 +112,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             stackedObjects++;
         }
 
-        if (nodeCat.equals("constraint")) {
+        else if (nodeCat.equals("constraint")) {
             ParseTree fieldNode = getFirstChildWithCat(node, "field");
             String field = fieldNode.getChild(0).toStringTree(parser);
             ParseTree operatorNode = getFirstChildWithCat(node, "operator");
@@ -141,7 +141,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             putIntoSuperObject(term);
         }
 
-        if (nodeCat.equals("dateConstraint")) {
+        else if (nodeCat.equals("dateConstraint")) {
             ParseTree fieldNode = getFirstChildWithCat(node, "field");
             String field = fieldNode.getChild(0).toStringTree(parser);
             ParseTree dateOpNode = getFirstChildWithCat(node, "dateOp");
@@ -166,8 +166,25 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             putIntoSuperObject(term);
 
         }
-
-        if (nodeCat.equals("token")) {
+        
+        else if (nodeCat.equals("vcConstraint")) {
+            ParseTree vcOp = getFirstChildWithCat(node, "vcOp");
+            String vcOpStr = vcOp.getChild(0).toString();
+            if (!vcOpStr.equals("referTo")){
+                addError(StatusCodes.UNKNOWN_QUERY_ELEMENT,
+                        "Unknown vc operator: "+vcOpStr);
+            }
+            
+            ParseTree vcName = getFirstChildWithCat(node, "vcName");
+            String vcNameStr = "";
+            for (int i=0; i < vcName.getChildCount(); i++){
+                vcNameStr = vcNameStr+vcName.getChild(i).toString();
+            }
+            Map<String, Object> term = KoralObjectGenerator.makeDocGroupRef(vcNameStr);
+            putIntoSuperObject(term);
+        }
+        
+        else if (nodeCat.equals("token")) {
             Map<String, Object> token = KoralObjectGenerator
                     .makeToken();
             // handle negation
@@ -218,6 +235,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             visited.add(node.getChild(0));
             visited.add(node.getChild(2));
         }
+        
         objectsToPop.push(stackedObjects);
 
         /*

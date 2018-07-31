@@ -45,6 +45,7 @@ SINCE				: 'since';
 UNTIL				: 'until';
 IN					: 'in';
 ON					: 'on';
+REF                 : 'referTo';
 WS 					: ( ' ' | '\t' | '\r' | '\n' )+ -> channel(HIDDEN);
 fragment NO_RE      : ~[ \t\/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
@@ -66,7 +67,4 @@ NL                  : [\r\n] -> skip;
 WORD				: ALPHABET+;
 //WORD                : ALPHABET* ALPHA ALPHABET*;  // needs to have at least one alphabetical letter (non-numeric)
 
-REGEX     		     : SLASH .*? SLASH; 
-
-
-
+REGEX     		    : SLASH .*? SLASH; 

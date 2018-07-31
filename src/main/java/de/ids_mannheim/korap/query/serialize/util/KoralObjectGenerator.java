@@ -62,11 +62,18 @@ public class KoralObjectGenerator {
         term.put("@type", KoralType.DOCUMENT.toString());
         return term;
     }
+    
+    public static Map<String, Object> makeDocGroupRef (String ref) {
+        Map<String, Object> term = new HashMap<String, Object>();
+        term.put("@type", KoralType.DOCUMENT_GROUP_REF.toString());
+        term.put("ref", ref);
+        return term;
+    }
 
 
     public static Map<String, Object> makeDocGroup (String relation) {
         Map<String, Object> term = new HashMap<String, Object>();
-        term.put("@type", KoralType.DOCUMENTGROUP.toString());
+        term.put("@type", KoralType.DOCUMENT_GROUP.toString());
         term.put("operation", "operation:" + relation);
         term.put("operands", new ArrayList<Object>());
         return term;
