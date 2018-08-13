@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KoralQuery 0.5.3</title>
+    <title>KoralQuery 0.5.4</title>
     <link rel="stylesheet" href="misc/font/koral-fontello.css">
     <!--[if IE 7]><link rel="stylesheet" href="misc/font/koral-fontello-ie7.css"><![endif]-->
     <link rel="stylesheet" href="misc/style.css" type="text/css" />
@@ -33,7 +33,7 @@
           <span class="p-org">IDS</span>,
           <span class="p-locality">Mannheim</span></p>
         <p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-        <p>Last update: <time class="dt-updated" datetime="2017-12-11">2017/12/11</time></p>
+        <p>Last update: <time class="dt-updated" datetime="2018-08-13">2018/08/13</time></p>
       </div>
       
       <summary>
@@ -268,7 +268,7 @@
               </tr>
               <tr>
                 <td>value</td>
-                <td>xsd:string</td>
+                <td>xsd:string, [xsd:string]</td>
                 <td></td>
                 <td>The field value.</td>
               </tr>
@@ -324,7 +324,9 @@
             <code class="att">match</code> attribute in the
             field defined by the <code class="att">key</code> attribute.
             This may, for example, be the name of the author <code>Theodor Fontane</code>,
-            in case of a <code class="att">key</code> field for <code>author</code>.</p>
+            in case of a <code class="att">key</code> field for <code>author</code>.
+            If the <code class="att">value</code> attribute is defined as an array,
+            the document is expected to match for any of the given values.</p>
           <p>The <code class="att">type</code> attribute defines the nature of the
             <code class="att">value</code> attribute. This may represent a string,
             a date or a <a href="#appendix-regex">regular expression</a>. Dates have to follow the
@@ -1934,6 +1936,9 @@ match:leq
       <div class="changes">
         <pre>
 CHANGES:
+0.5.4 2018-08-13
+- Introduced value vectors to 'koral:doc'
+
 0.5.3 2017-12-09
 - Renamed 'relation' to 'operation' in 'koral:termGroup'
 
