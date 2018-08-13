@@ -524,6 +524,48 @@ match:leq
               the resulting collection is identical to the resulting collection
               of the only entry, independent of the <code class="att">operation</code>.</p>
           </section>
+
+
+          <h4 class="koral-type"><a name="koral-docGroupRef"
+                                    id="koral-docGroupRef"
+                                    href="#koral-docGroupRef">koral:docGroupRef</a></h4>
+          <pre>
+{
+  "@type" : "koral:docGroupRef",
+  "ref" : "https://korap.ids-mannheim.de/@ndiewald/MyCorpus"
+}</pre>
+
+          <table class="koral-type">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Values</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>@type</td>
+                <td>@id</td>
+                <td></td>
+                <td><code class="att">koral:docGroupRef</code></td>
+              </tr>
+              <tr>
+                <td>ref</td>
+                <td>xsd:string</td>
+                <td></td>
+                <td>A unique reference to a virtual corpus.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>A <code class="att">koral:docGroupRef</code> references a
+            collection type object with criteria a document in the collection has to satisfy.</p>
+          <p>The <code class="att">ref</code> attribute is a unique identifier by which
+            a KoralQuery consumer references a collection type object to be embedded in place of
+            the <code class="att">koral:docGroupRef</code> object, e.g. stored as a JSON-LD file.</p>
+          
         </section>
 
         <section>
@@ -1938,6 +1980,7 @@ match:leq
 CHANGES:
 0.5.4 2018-08-13
 - Introduced value vectors to 'koral:doc'
+- Introduced 'koral:docGroupRef'
 
 0.5.3 2017-12-09
 - Renamed 'relation' to 'operation' in 'koral:termGroup'
