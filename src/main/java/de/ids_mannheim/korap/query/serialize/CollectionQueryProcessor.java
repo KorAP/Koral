@@ -177,9 +177,20 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             
             ParseTree vcName = getFirstChildWithCat(node, "vcName");
             String vcNameStr = "";
-            for (int i=0; i < vcName.getChildCount(); i++){
-                vcNameStr = vcNameStr+vcName.getChild(i).toString();
-            }
+
+			String node_cat = getNodeCat(vcName.getChild(0));
+
+			if (node_cat.equals("multiword")) {
+				TokenStream stream = parser.getTokenStream();
+				vcNameStr = stream.getText(vcName.getChild(0).getSourceInterval());
+				// Fix verbatim keys
+				vcNameStr= vcNameStr.substring(1, vcNameStr.length()-1)
+					.replaceAll("\\\\\\\\","\\\\").replaceAll("\\\\\"", "\"");
+			}
+			else {
+				vcNameStr = vcName.getChild(0).toString();
+			};
+
             Map<String, Object> term = KoralObjectGenerator.makeDocGroupRef(vcNameStr);
             putIntoSuperObject(term);
         }

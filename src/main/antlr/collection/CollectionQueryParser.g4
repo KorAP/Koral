@@ -56,7 +56,7 @@ constraint
 
 vcName
 : WORD
-| WORD SLASH WORD
+| multiword
 ;
 
 token

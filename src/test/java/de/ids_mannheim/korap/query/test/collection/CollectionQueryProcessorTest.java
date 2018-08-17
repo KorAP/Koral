@@ -34,13 +34,20 @@ public class CollectionQueryProcessorTest {
         assertEquals("koral:docGroupRef", res.at("/collection/@type").asText());
         assertEquals("vc-filename", res.at("/collection/ref").asText());
         
-        collection = "referTo mickey/MyVC";
+        collection = "referTo \"mickey/MyVC\"";
         qs.setQuery(query, ql);
         qs.setCollection(collection);
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:docGroupRef", res.at("/collection/@type").asText());
         assertEquals("mickey/MyVC", res.at("/collection/ref").asText());
-    }
+
+        collection = "referTo \"http://korap.ids-mannheim.de/user/vc/myCorpus\"";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:docGroupRef", res.at("/collection/@type").asText());
+        assertEquals("http://korap.ids-mannheim.de/user/vc/myCorpus", res.at("/collection/ref").asText());
+	}
     
     @Test
     public void testContext () throws JsonProcessingException, IOException {
