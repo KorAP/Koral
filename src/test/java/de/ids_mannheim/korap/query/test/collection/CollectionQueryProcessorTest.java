@@ -48,6 +48,41 @@ public class CollectionQueryProcessorTest {
         assertEquals("koral:docGroupRef", res.at("/collection/@type").asText());
         assertEquals("http://korap.ids-mannheim.de/user/vc/myCorpus", res.at("/collection/ref").asText());
 	}
+
+    @Test
+    public void testNestedVCRef () throws IOException {
+        collection = "availability = /CC-BY.*/ & referTo \"DeReKo-CoRoLa-comp-subcorpus\"";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:docGroup", res.at("/collection/@type").asText());
+        assertEquals("koral:doc", res.at("/collection/operands/0/@type").asText());
+
+        assertEquals("type:regex", res.at("/collection/operands/0/type").asText());
+        assertEquals("availability", res.at("/collection/operands/0/key").asText());
+        assertEquals("CC-BY.*", res.at("/collection/operands/0/value").asText());
+        
+        assertEquals("koral:docGroupRef", res.at("/collection/operands/1/@type").asText());
+        assertEquals("DeReKo-CoRoLa-comp-subcorpus", res.at("/collection/operands/1/ref").asText());
+
+        collection = "(availability = /CC-BY.*/ & referTo \"DeReKo-CoRoLa-comp-subcorpus\")";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:docGroup", res.at("/collection/@type").asText());
+        assertEquals("koral:doc", res.at("/collection/operands/0/@type").asText());
+
+        assertEquals("type:regex", res.at("/collection/operands/0/type").asText());
+        assertEquals("availability", res.at("/collection/operands/0/key").asText());
+        assertEquals("CC-BY.*", res.at("/collection/operands/0/value").asText());
+        
+        assertEquals("koral:docGroupRef", res.at("/collection/operands/1/@type").asText());
+        assertEquals("DeReKo-CoRoLa-comp-subcorpus", res.at("/collection/operands/1/ref").asText());
+
+
+    }
     
     @Test
     public void testContext () throws JsonProcessingException, IOException {
