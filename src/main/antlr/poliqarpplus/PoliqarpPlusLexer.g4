@@ -13,6 +13,9 @@ language=Java;
  -- author: Joachim Bingel
  -- date: 14-06-27
 
+ -- updated: 28-09-2018 (diewald) 
+
+
  Poliqarp Query Language lexer
 
  Language documentations:
@@ -104,9 +107,8 @@ fragment RE_plus     : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '+';
 fragment RE_occ      : (RE_char | RE_chgroup | ( '(' RE_expr ')')) FOCC;
 fragment RE_group    : '(' RE_expr ')';
 fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant | RE_group)+;
-fragment RE_dquote   : '"'  (RE_expr | '\'' | ':' )* '"';
-// fragment RE_squote   : '\''  (RE_expr | '\"' | ':' )* '\'';
- 
+fragment RE_dquote   : ('"'|'„')  (RE_expr | '\'' | ':' )* ('"'|'“');
+
 REGEX             : RE_dquote;
 
 ESC_SQUOTE        : BACKSLASH SQUOTE;
