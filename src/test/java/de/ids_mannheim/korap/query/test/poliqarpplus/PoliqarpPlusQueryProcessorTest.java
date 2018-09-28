@@ -180,6 +180,27 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("orth", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
 
+        // issue #56
+        query = "„.*?Mann.*?“";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals(".*?Mann.*?", res.at("/query/wrap/key").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("orth", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+
+        query = "“.*?Mann.*?”";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals(".*?Mann.*?", res.at("/query/wrap/key").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("orth", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        
         query = "z.B./x";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
