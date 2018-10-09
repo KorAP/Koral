@@ -101,6 +101,15 @@ Build a Koral library and install it in your local Maven repository (needed for 
 
     mvn install -Dhttps.protocols=TLSv1.2
 
+To update an existing installation, change into the ```[install-dir]```,
+and pull the latest version ...
+
+```
+$ git pull origin master
+```
+
+Afterwards, rerun the test suite and package or install the library.
+
 ## Prerequisites
 
 * Java 8 (OpenJDK or Oracle JDK with JCE)
