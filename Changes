@@ -1,4 +1,4 @@
-0.30 2018-07-31
+0.30 2018-10-09
     - Introduced docGroupRef and added VC reference in collection query (margaretha)
     - Fixed checking error in QuerySerializer (margaretha)
 
@@ -8,6 +8,7 @@
     (fixes #42; diewald)
     - Fix support for verbatim string values in collection queries
     (diewald)
+    - Added hint to update the library (diewald)
 
 0.28 2018-01-10
     - Added some enums for koral:operation (margaretha)
