@@ -1,6 +1,8 @@
-0.31 2018-10-22
+0.31 2018-10-31
     - [bugfix] Security upgrade of Jackson for CVE-2017-17485 and
       CVE-2018-7489 (diewald)
+    - [bugfix] OpenJDK8u181-workaround (see Debian Bug report #911925)
+      (diewald)
 
 0.30 2018-10-09
     - Introduced docGroupRef and added VC reference in collection query
