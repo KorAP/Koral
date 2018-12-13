@@ -111,8 +111,7 @@ value
 ;
 
 multiword
-//: '"' ~'"'* '"'
-: QUOTE (~QUOTE  | ESC_QUOTE)* QUOTE
+: MULTIWORD
 ;
 
 relation

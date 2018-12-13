@@ -318,7 +318,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 			// remove leading and trailing slashes
 			if (stm.startsWith("/") && stm.endsWith("/")) {
-				stm = stm.substring(1, stm.length() - 1);
+				stm = stm.substring(1, stm.length() - 1)
+                    .replaceAll("\\\\\\\\","\\\\").replaceAll("\\\\/", "/");
 			};
             map.put("value", stm);
 		}

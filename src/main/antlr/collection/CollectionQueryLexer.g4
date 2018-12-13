@@ -48,13 +48,12 @@ ON					: 'on';
 REF                 : 'referTo';
 WS 					: ( ' ' | '\t' | '\r' | '\n' )+ -> channel(HIDDEN);
 fragment NO_RE      : ~[ \t\/];
-fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
-                    | '(' | ')' | '|' | '"' | ',' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' );
+fragment ALPHABET   : ~('\t' |
+      ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
+    | '(' | ')' | '|' | ',' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>'
+    | '"' );
 // EM: allow ':' in ALPHABET 
 fragment ALPHA		: [a-zA-Z];
-
-ESC_QUOTE          : BACKSLASH QUOTE;
-
 
 DIGIT		: [0-9];
 DATE
@@ -67,4 +66,5 @@ NL                  : [\r\n] -> skip;
 WORD				: ALPHABET+;
 //WORD                : ALPHABET* ALPHA ALPHABET*;  // needs to have at least one alphabetical letter (non-numeric)
 
-REGEX     		    : SLASH .*? SLASH; 
+REGEX     		    : SLASH ~['/']*? (BACKSLASH SLASH ~['/']*?)* SLASH;
+MULTIWORD   		    : QUOTE ~['"']*? (BACKSLASH QUOTE ~['"']*?)* QUOTE; 
