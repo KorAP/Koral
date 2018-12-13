@@ -112,7 +112,7 @@ value
 
 multiword
 //: '"' ~'"'* '"'
-: QUOTE (~QUOTE  | ESC_QUOTE)* QUOTE
+: QUOTE (~QUOTE | VERBATIM | ESC_QUOTE)* QUOTE
 ;
 
 relation

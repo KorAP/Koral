@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.junit.Ignore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -118,7 +119,7 @@ public class CollectionQueryProcessorTest {
         assertEquals("match:ne", res.at("/collection/match").asText());
     }
 
-
+    
     @Test
     public void testSpecialCharacters () throws JsonProcessingException,
             IOException {
@@ -178,6 +179,37 @@ public class CollectionQueryProcessorTest {
         assertEquals("match:contains", res.at("/collection/match").asText());
    }
 
+    @Test
+    public void testVerbatimSpecial () throws JsonProcessingException, IOException {
+        collection = "corpusAuthor=\"Goethe, Johann Wolfgang von\"";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("corpusAuthor", res.at("/collection/key").asText());
+        assertEquals("Goethe, Johann Wolfgang von", res.at("/collection/value").asText());
+        assertEquals("match:eq", res.at("/collection/match").asText());
+    }
+
+    @Test
+    @Ignore
+    public void testVerbatimNonGreedy () throws JsonProcessingException, IOException {
+        collection = "foundries=\"corenlp/constituency\" & foundries=\"corenlp/morpho\"";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        System.err.println(qs.toJSON());
+        assertEquals("koral:docGroup", res.at("/collection/@type").asText());
+        assertEquals("operation:and", res.at("/collection/operation").asText());
+        assertEquals("koral:doc", res.at("/collection/operands/0/@type").asText());
+        assertEquals("foundries", res.at("/collection/operands/0/key").asText());
+        assertEquals("corenlp/constituency", res.at("/collection/operands/0/value").asText());
+        assertEquals("koral:doc", res.at("/collection/operands/1/@type").asText());
+        assertEquals("foundries", res.at("/collection/operands/1/key").asText());
+        assertEquals("corenlp/morpho", res.at("/collection/operands/1/value").asText());
+    }
+
+    
     @Test
     public void testFlag () throws JsonProcessingException, IOException {
         collection = "textClass=politik/i";
