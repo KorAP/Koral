@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "671bc133_9a5daa3d",
+        "filename": "Changes",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2019-01-08T15:12:42Z",
+      "side": 0,
+      "message": "There is a 0.32 release - please upgrade to 0.33",
+      "range": {
+        "startLine": 1,
+        "startChar": 2,
+        "endLine": 1,
+        "endChar": 4
+      },
+      "revId": "c9fc40cb4cfdacfedeec35d36a64ecf8137f4d11",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c",
+      "unresolved": false
+    }
+  ]
+}
