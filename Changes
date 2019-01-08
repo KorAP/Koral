@@ -1,5 +1,6 @@
-0.32 2018-12-13
+0.32 2019-01-08
     - [bugfix] Support verbatim string queries (#57; diewald).
+    - Added debug flag (margaretha)
 
 0.31 2018-10-31
     - [bugfix] Security upgrade of Jackson for CVE-2017-17485 and
