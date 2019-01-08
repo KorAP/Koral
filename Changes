@@ -1,3 +1,6 @@
+0.33 2019-01-08
+    - Added debug flags (margaretha)
+    
 0.32 2018-12-13
     - [bugfix] Support verbatim string queries (#57; diewald).
 
