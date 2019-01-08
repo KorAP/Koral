@@ -52,6 +52,7 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
  * @since 0.1.0
  */
 public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
+    private static final boolean DEBUG = false;
     private static Logger log = LoggerFactory
             .getLogger(AnnisQueryProcessor.class);
     /**
@@ -187,9 +188,13 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         else {
             throw new NullPointerException("Parser has not been instantiated!");
         }
-        log.info("Processing Annis query: " + query);
+        if (DEBUG) {
+            log.info("Processing Annis query: " + query);
+        }
         if (tree != null) {
-            log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
+            if (DEBUG) {
+                log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
+            }
             processNode(tree);
             // Last check to see if all relations have left the queue
             if (!queuedRelations.isEmpty()) {

@@ -41,6 +41,7 @@ import java.util.*;
  */
 public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
 
+    private static final boolean DEBUG = false;
     private static Logger log = LoggerFactory
             .getLogger(PoliqarpPlusQueryProcessor.class);
     private int classCounter = 1;
@@ -57,7 +58,9 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     public PoliqarpPlusQueryProcessor (String query) {
         KoralObjectGenerator.setQueryProcessor(this);
         process(query);
-        log.info(">>> " + requestMap.get("query") + " <<<");
+        if (DEBUG) { 
+            log.debug(">>> " + requestMap.get("query") + " <<<");
+        }
     }
 
 
@@ -67,9 +70,13 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         tree = parsePoliqarpQuery(query);
         // fixme: not required!?
         super.parser = this.parser;
-        log.info("Processing PoliqarpPlus query: " + query);
+        if (DEBUG) {
+            log.debug("Processing PoliqarpPlus query: " + query);
+        }
         if (tree != null) {
-            log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
+            if (DEBUG){
+                log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
+            }
             processNode(tree);
         }
         else {

@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
  */
 public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 
+    private static final boolean DEBUG = false;
     private static Logger log = LoggerFactory
             .getLogger(CollectionQueryProcessor.class);
 
@@ -66,9 +67,13 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         else {
             throw new NullPointerException("Parser has not been instantiated!");
         }
-        log.info("Processing virtual collection query: " + query);
+        if (DEBUG) {
+            log.debug("Processing virtual collection query: " + query);
+        }
         if (tree != null) {
-            log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
+            if (DEBUG) {
+                log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
+            }
             processNode(tree);
         }
         else {

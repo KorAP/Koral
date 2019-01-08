@@ -29,6 +29,7 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
  * @since 0.1.0
  */
 public class TreeTemplate extends Antlr4AbstractQueryProcessor {
+    private static final boolean DEBUG = false;
     private static Logger log = LoggerFactory.getLogger(TreeTemplate.class);
 
 
@@ -51,7 +52,9 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
         ParseTree tree = parseQuery(query);
         super.parser = this.parser;
         if (tree != null) {
-            log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
+            if (DEBUG) {
+                log.debug("ANTLR parse tree: " + tree.toStringTree(parser));
+            }
             processNode(tree);
         }
         else {

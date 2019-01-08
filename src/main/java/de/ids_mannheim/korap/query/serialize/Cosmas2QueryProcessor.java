@@ -40,6 +40,8 @@ import java.util.regex.Pattern;
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
+    private static final boolean DEBUG = false;
+
     private static Logger log =
             LoggerFactory.getLogger(Cosmas2QueryProcessor.class);
 
@@ -138,7 +140,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         KoralObjectGenerator.setQueryProcessor(this);
         this.query = query;
         process(query);
-        log.info(">>> " + requestMap.get("query") + " <<<");
+        if (DEBUG) { 
+            log.debug(">>> " + requestMap.get("query") + " <<<");
+        }
     }
 
 
@@ -146,9 +150,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     public void process (String query) {
         Tree tree = null;
         tree = parseCosmasQuery(query);
-        log.info("Processing CosmasII query: " + query);
+        if (DEBUG) { 
+            log.debug("Processing CosmasII query: " + query);
+        }
         if (tree != null) {
-            log.debug("ANTLR parse tree: " + tree.toStringTree());
+            if (DEBUG) { 
+                log.debug("ANTLR parse tree: " + tree.toStringTree());
+            }
             processNode(tree);
         }
     }
