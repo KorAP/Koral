@@ -867,23 +867,36 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
             // process possible flags
             if (flagNode != null) {
-                ArrayList<String> flags = new ArrayList<String>();
                 // substring removes leading slash
                 String flag = getNodeCat(flagNode.getChild(0)).substring(1);
-
-                if (flag.contains("i"))
-                    flags.add("flags:caseInsensitive");
-                if (flag.contains("x")) {
-                    if (!isRegex) {
-                        key = QueryUtils.escapeRegexSpecialChars(key);
+                
+                // EM: handling flagnode as layer
+                if (node.getChild(1).equals(flagNode)){
+                    if (layerNode == null) {
+                        term.put("layer", flag);
                     }
-                    // flag 'x' allows submatches:
-                    // overwrite key with appended .*?
-                    term.put("key", ".*?" + key + ".*?"); //
-                    term.put("type", "type:regex");
+                    else{
+                        String layer = (String) term.get("layer");
+                        term.put("layer", flag+layer);
+                    }
                 }
-                if (!flags.isEmpty()) {
-                    term.put("flags", flags);
+                else {
+                    //
+                    ArrayList<String> flags = new ArrayList<String>();
+
+                    if (flag.contains("i")) flags.add("flags:caseInsensitive");
+                    if (flag.contains("x")) {
+                        if (!isRegex) {
+                            key = QueryUtils.escapeRegexSpecialChars(key);
+                        }
+                        // flag 'x' allows submatches:
+                        // overwrite key with appended .*?
+                        term.put("key", ".*?" + key + ".*?"); //
+                        term.put("type", "type:regex");
+                    }
+                    if (!flags.isEmpty()) {
+                        term.put("flags", flags);
+                    }
                 }
             }
             return term;
@@ -1042,11 +1055,13 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(
                 query);
         // Like p. 111
+        CommonTokenStream tokens = null;
         try {
             // Tokenize input data
             ANTLRInputStream input = new ANTLRInputStream(query);
             lexer.setInputStream(input);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            tokens = new CommonTokenStream(lexer);
+            
             parser = new PoliqarpPlusParser(tokens);
 
             // Don't throw out erroneous stuff
