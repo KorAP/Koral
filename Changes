@@ -1,5 +1,7 @@
 0.33 2019-01-08
     - Added debug flags (margaretha)
+    - [bugfix] Fixed poliqarp layer bug (#52; margaretha)
+    - Replaced log4j with log4j2 (margaretha)
     
 0.32 2018-12-13
     - [bugfix] Support verbatim string queries (#57; diewald).

@@ -867,23 +867,29 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
             // process possible flags
             if (flagNode != null) {
-                ArrayList<String> flags = new ArrayList<String>();
                 // substring removes leading slash
                 String flag = getNodeCat(flagNode.getChild(0)).substring(1);
-
-                if (flag.contains("i"))
-                    flags.add("flags:caseInsensitive");
-                if (flag.contains("x")) {
-                    if (!isRegex) {
-                        key = QueryUtils.escapeRegexSpecialChars(key);
+                
+                // EM: handling flagnode as layer
+                if (node.getChild(1).equals(flagNode)){
+                    if (layerNode == null) {
+                        term.put("layer", flag);
                     }
-                    // flag 'x' allows submatches:
-                    // overwrite key with appended .*?
-                    term.put("key", ".*?" + key + ".*?"); //
-                    term.put("type", "type:regex");
+                    else{
+                        String layer = (String) term.get("layer");
+                        term.put("layer", flag+layer);
+                    }
+                    
+                    // EM: check for other flags
+                    List<ParseTree> list = getChildrenWithCat(node, "flag");
+                    for (int i=1; i < list.size(); i++){
+                        ParseTree n = list.get(i);
+                        flag = getNodeCat(n.getChild(0)).substring(1);
+                        parseFlag(flag, isRegex, key, term);
+                    }
                 }
-                if (!flags.isEmpty()) {
-                    term.put("flags", flags);
+                else {
+                    term = parseFlag(flag, isRegex, key, term);
                 }
             }
             return term;
@@ -937,6 +943,26 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
+    private Map<String, Object> parseFlag (String flag, boolean isRegex,
+            String key, Map<String, Object> term) {
+        ArrayList<String> flags = new ArrayList<String>();
+
+        if (flag.contains("i")) flags.add("flags:caseInsensitive");
+        if (flag.contains("x")) {
+            if (!isRegex) {
+                key = QueryUtils.escapeRegexSpecialChars(key);
+            }
+            // flag 'x' allows submatches:
+            // overwrite key with appended .*?
+            term.put("key", ".*?" + key + ".*?"); //
+            term.put("type", "type:regex");
+        }
+        if (!flags.isEmpty()) {
+            term.put("flags", flags);
+        }
+        return term;
+    }
+    
     /**
      * Puts an object into the operands list of its governing (or
      * "super") object which had been placed on the
@@ -1042,11 +1068,13 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(
                 query);
         // Like p. 111
+        CommonTokenStream tokens = null;
         try {
             // Tokenize input data
             ANTLRInputStream input = new ANTLRInputStream(query);
             lexer.setInputStream(input);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            tokens = new CommonTokenStream(lexer);
+            
             parser = new PoliqarpPlusParser(tokens);
 
             // Don't throw out erroneous stuff

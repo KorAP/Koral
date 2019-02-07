@@ -70,6 +70,7 @@ value
 /* Fields */
 term       
 : NEG* (foundry SLASH)? layer termOp key (COLON value)? flag?
+| NEG* foundry flag layer? termOp key (COLON value)? flag?
 | LRPAREN term RRPAREN
 ;
 
