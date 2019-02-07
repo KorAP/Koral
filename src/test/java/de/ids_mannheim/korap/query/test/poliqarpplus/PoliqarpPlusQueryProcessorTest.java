@@ -29,7 +29,53 @@ public class PoliqarpPlusQueryProcessorTest {
     ObjectMapper mapper = new ObjectMapper();
     JsonNode res;
 
+    @Test
+    public void testUnknownLayerLikeCase () throws IOException {
+        query = "[mate/i=Baum]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("i", res.at("/query/wrap/layer").asText());
+        
+        query = "[mate/xi=Baum]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("xi", res.at("/query/wrap/layer").asText());
+        
+        query = "[mate/xib=Baum]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("xib", res.at("/query/wrap/layer").asText());
+    }
+    
+    @Test
+    public void testUnknownLayer () throws IOException {
+        query = "[mate/b=Baum]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("b", res.at("/query/wrap/layer").asText());
+        
+        query = "[mate/bi=Baum]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("bi", res.at("/query/wrap/layer").asText());
+    }
 
+    @Test
+    public void testLayerWithFlag () throws IOException {
+        query = "[base=Baum/i]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("lemma", res.at("/query/wrap/layer").asText());
+        assertEquals("flags:caseInsensitive", res.at("/query/wrap/flags/0").asText());
+
+        query = "[mate/x=Baum/i]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("x", res.at("/query/wrap/layer").asText());
+        assertEquals("flags:caseInsensitive", res.at("/query/wrap/flags/0").asText());
+    }
+
+    
     @Test
     public void testContext () throws JsonProcessingException, IOException {
         query = "foo";
