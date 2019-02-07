@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +68,7 @@ public class QuerySerializer {
         /*
          * just for testing...
          */
-        BasicConfigurator.configure();
+//        BasicConfigurator.configure();
         QuerySerializer jg = new QuerySerializer();
         int i = 0;
         String[] queries = null;
