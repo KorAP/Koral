@@ -36,6 +36,10 @@ public class KoralObjectGenerator {
         span.put("@type", KoralType.SPAN.toString());
         Map<String, Object> term = makeTerm();
         term.put("key", key);
+        // EM: adding structure layer
+        if (key.equals("s")){
+            term.put("layer", "s");
+        }
         span.put("wrap", term);
         return span;
     }
@@ -149,13 +153,12 @@ public class KoralObjectGenerator {
 
 
     public static Map<String, Object> makeClassRefCheck (
-            ArrayList<ClassRefCheck> checks, ArrayList<Integer> classIn, int classOut) {
+            ArrayList<ClassRefCheck> checks, ArrayList<Integer> classIn) {
         Map<String, Object> group = new HashMap<String, Object>();
         group.put("@type", KoralType.GROUP.toString());
         group.put("operation", KoralOperation.CLASS.toString());
         group.put("classRefCheck", Converter.enumListToStringList(checks));
         group.put("classIn", classIn);
-        group.put("classOut", classOut);
         group.put("operands", new ArrayList<Object>());
         return group;
     }
