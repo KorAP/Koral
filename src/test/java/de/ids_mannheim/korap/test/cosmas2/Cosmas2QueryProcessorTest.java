@@ -1,18 +1,20 @@
 package de.ids_mannheim.korap.test.cosmas2;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.junit.Ignore;
 import org.junit.Test;
-
-import de.ids_mannheim.korap.query.serialize.QuerySerializer;
-import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.ids_mannheim.korap.query.serialize.QuerySerializer;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 /**
  * Tests for JSON-LD serialization of Cosmas II queries.
@@ -704,6 +706,7 @@ public class Cosmas2QueryProcessorTest {
 
 
     @Test
+    @Ignore
     public void testOPOV () throws JsonProcessingException, IOException {
         query = "wegen #OV <s>";
         qs.setQuery(query, "cosmas2");
@@ -785,7 +788,7 @@ public class Cosmas2QueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("classRefCheck:intersects",
                 res.at("/query/classRefCheck/0").asText());
-        assertEquals("classRefCheck:unequals",
+        assertEquals("classRefCheck:differs",
                 res.at("/query/classRefCheck/1").asText());
         assertEquals("frames:matches",
                 res.at("/query/operands/0/frames/0").asText());

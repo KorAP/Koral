@@ -2,7 +2,7 @@ package de.ids_mannheim.korap.query.object;
 
 public enum ClassRefCheck {
     
-    INTERSECTS, EQUALS, UNEQUALS, INCLUDES, DISJOINT;
+    INTERSECTS, EQUALS, DIFFERS, INCLUDES, DISJOINT;
     
     @Override
     public String toString() {

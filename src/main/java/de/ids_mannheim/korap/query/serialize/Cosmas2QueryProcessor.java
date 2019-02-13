@@ -471,6 +471,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         String nodeCat = getNodeCat(node);
         Tree parent = node.getParent();
         if (operandWrap.containsRow(parent)) {
+            
             // Step I: create group
             int argNr = nodeCat.equals("ARG1") ? 1 : 2;
             Map<String, Object> container = operandWrap.row(parent).get(argNr);
@@ -494,36 +495,26 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     }
 
 
+    @SuppressWarnings("unchecked")
     private Map<String, Object> addClassRefCheck (
-            ArrayList<ClassRefCheck> check, Map<String, Object> group) {
+            ArrayList<ClassRefCheck> check, Map<String, Object> group,
+            int classCounter) {
 
-        int classOut = classCounter + 128;
         Set<Integer> classIn = new HashSet<Integer>();
-//        ArrayList<Integer> classIn = new ArrayList<Integer>();
-        if (check.contains(ClassRefCheck.INCLUDES)) {
-            classIn.add(classCounter + 128 - 1);
-            classIn.add(classCounter + 128);
-            classOut = classCounter + 128 + 1;
-        }
-        if (check.contains(ClassRefCheck.EQUALS)
-                || check.contains(ClassRefCheck.UNEQUALS) 
-                || check.contains(ClassRefCheck.INTERSECTS)
-                || check.contains(ClassRefCheck.DISJOINT)) {
-            classIn.add(classCounter + 128 - 2);
-            classIn.add(classCounter + 128 - 1);
-        }
-        
+        classIn.add(classCounter + 128 - 1);
+        classIn.add(classCounter + 128);
+
         ArrayList<Integer> classInList = new ArrayList<Integer>(classIn);
         // wrap position in a classRefCheck
         Map<String, Object> topGroup = KoralObjectGenerator
-                .makeClassRefCheck(check, classInList, classOut);
+                .makeClassRefCheck(check, classInList);
         ((ArrayList<Object>) topGroup.get("operands")).add(group);
         return topGroup;
     }
 
 
     private Map<String, Object> addClassFocus (boolean isMatchAll,
-            Map<String, Object> posGroup) {
+            Map<String, Object> posGroup, int startClassCounter) {
         Map<String, Object> focusGroup = null;
         if (isMatchAll) {
             focusGroup = KoralObjectGenerator.makeClassRefOp(ClassRefOp.DELETE,
@@ -532,8 +523,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else { // match only first argument
             focusGroup = KoralObjectGenerator.wrapInReference(posGroup,
-                    classCounter + 128 - 1);
-            classCounter++;
+                    startClassCounter + 128 - 1);
+//            classCounter++;
         }
         return focusGroup;
     }
@@ -547,18 +538,27 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // makePosition(null);
         boolean isExclusion = isExclusion(node);
 
+        int focusClassCounter = classCounter;
         Map<String, Object> posGroup;
         if (isExclusion) {
             posGroup = KoralObjectGenerator.makeGroup(KoralOperation.EXCLUSION);
         }
         else {
-            wrapOperandInClass(node, 1, 128 + classCounter++);
+            if (!isComplexQuery(node, "ARG1")){
+                wrapOperandInClass(node, 1, 128 + classCounter++);
+                focusClassCounter = classCounter;
+            }
             posGroup = KoralObjectGenerator.makeGroup(KoralOperation.POSITION);
+            if (DEBUG) log.debug(posGroup.toString());
+            
         }
 
         Map<String, Object> positionOptions;
         if (nodeCat.equals("OPIN")) {
             positionOptions = parseOPINOptions(node, isExclusion);
+            if (nodeCat.equals("OPIN")) {
+                invertedOperandsLists.add((ArrayList<Object>) posGroup.get("operands"));
+            }
         }
         else {
             positionOptions = parseOPOVOptions(node,isExclusion);
@@ -569,18 +569,19 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // posGroup.put("frame", positionOptions.get("frame"));
         objectStack.push(posGroup);
         stackedObjects++;
-
+        
         ArrayList<ClassRefCheck> checkList =
                 (ArrayList<ClassRefCheck>) positionOptions.get("classRefCheck");
-
+        
         // Step II: wrap in classRefCheck and/or focus and decide where to put
         if (!checkList.isEmpty()) {
             posGroup =
                     addClassRefCheck((ArrayList<ClassRefCheck>) positionOptions
-                            .get("classRefCheck"), posGroup);
+                            .get("classRefCheck"), posGroup, 2);
         }
-        //            posGroup = addClassFocus((boolean) positionOptions.get("matchall"),
-        //                    posGroup);
+        // add focus
+        posGroup = addClassFocus((boolean) positionOptions.get("matchall"),
+                posGroup, focusClassCounter);
 
         // wrap in 'merge' operation if grouping option is set
         if (!isExclusion && positionOptions.containsKey("grouping")
@@ -1175,7 +1176,6 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private Map<String, Object> parseOPINOptions (Tree node,
             boolean isExclusion) {
         Tree posnode = getFirstChildWithCat(node, "POS");
-        Tree rangenode = getFirstChildWithCat(node, "RANGE");
         Tree groupnode = getFirstChildWithCat(node, "GROUP");
 
         Map<String, Object> posOptions = new HashMap<String, Object>();
@@ -1192,47 +1192,41 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             checkINWithExclusionOptions(posOption, positions, classRefCheck);
         }
         else {
-            checkINOptions(posOption, positions, classRefCheck);
+            checkINOptions(node,posOption, positions, classRefCheck);
         }
 
         posOptions.put("frames", Converter.enumListToStringList(positions));
 
-        if (!isExclusion && rangenode != null) {
-            String range = rangenode.getChild(0).toStringTree().toLowerCase();
-            // if (range.equals("all")) {
-
-            // posOptions.put("matchall", true);
-            // Map<String,Object> ref =
-            // makeResetReference(); // reset all defined classes
-            // wrapOperand(node,2,ref);
-            //}
-            // HIT is default in C2
-            if (!range.equals("all")) {
-                // EM: check in the arg2 is a complex query
-                Tree arg2Operator =
-                        getFirstChildWithCat(node, "ARG2").getChild(0);
-                if (getFirstChildWithCat(arg2Operator, "ARG2") != null) {
-                    classRefCheck.add(ClassRefCheck.INCLUDES);
-                }
+        if (isComplexQuery(node, "ARG2")) {
+            if (!posOption.equals("FI") && !posOption.equals("FE")) {
+                classRefCheck.add(ClassRefCheck.INCLUDES);
             }
+            checkRange(classRefCheck, node, posOption);
         }
-
-        
-        if (classRefCheck.contains(ClassRefCheck.INCLUDES)) {
-//            wrapOperandInClass(node, 1, 128 + classCounter++);
-            
-            if (classRefCheck.contains(ClassRefCheck.EQUALS)){
-                classRefCheck.remove(ClassRefCheck.EQUALS);
-            }
-            else if (classRefCheck.contains(ClassRefCheck.UNEQUALS)){
+        else if (!isExclusion) {
+            if (!classRefCheck.isEmpty()) {
                 wrapOperandInClass(node, 2, 128 + classCounter++);
             }
+            else{
+                checkRange(classRefCheck, node, posOption);
+            }
         }
-        else if (classRefCheck.contains(ClassRefCheck.EQUALS)
-                || classRefCheck.contains(ClassRefCheck.UNEQUALS)) {
-//            wrapOperandInClass(node, 1, 128 + classCounter++);
-            wrapOperandInClass(node, 2, 128 + classCounter++);
-        }
+        
+//        if (classRefCheck.contains(ClassRefCheck.INCLUDES)) {
+////            wrapOperandInClass(node, 1, 128 + classCounter++);
+//            
+////            if (classRefCheck.contains(ClassRefCheck.EQUALS)){
+////                classRefCheck.remove(ClassRefCheck.EQUALS);
+////            }
+//            if (classRefCheck.contains(ClassRefCheck.DIFFERS)){
+//                wrapOperandInClass(node, 2, 128 + classCounter++);
+//            }
+//        }
+//        else if (classRefCheck.contains(ClassRefCheck.EQUALS)
+//                || classRefCheck.contains(ClassRefCheck.DIFFERS)) {
+////            wrapOperandInClass(node, 1, 128 + classCounter++);
+//            wrapOperandInClass(node, 2, 128 + classCounter++);
+//        }
         
         posOptions.put("classRefCheck", classRefCheck);
         
@@ -1246,17 +1240,46 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         return posOptions;
     }
 
+    private void checkRange (ArrayList<ClassRefCheck> classRefCheck,
+            Tree node, String posOption) {
+        // if (range.equals("all")) {
 
-    private void checkINOptions (String posOption,
+        // posOptions.put("matchall", true);
+        // Map<String,Object> ref =
+//         makeResetReference(); // reset all defined classes
+        // wrapOperand(node,2,ref);
+        //}
+        
+        Tree rangenode = getFirstChildWithCat(node, "RANGE");
+        if (rangenode != null){
+            String range = rangenode.getChild(0).toStringTree().toLowerCase();
+            // HIT is default in C2
+            if (range.equals("all")){
+                wrapOperandInClass(node, 2, 128 + classCounter++);
+            }
+        }
+    }
+    
+    private boolean isComplexQuery (Tree node, String arg) {
+        Tree argNode =
+                getFirstChildWithCat(node, arg).getChild(0);
+        if (getFirstChildWithCat(argNode, "ARG2") != null) {
+            return true;
+        }
+        return false;
+
+    }
+
+    private void checkINOptions (Tree node, String posOption,
             ArrayList<KoralFrame> positions,
             ArrayList<ClassRefCheck> classRefCheck) {
         
         switch (posOption) {
             case "L":
-                positions.add(KoralFrame.ALIGNS_LEFT);
+                positions.add(KoralFrame.STARTS_WITH);
                 break;
             case "R":
-                positions.add(KoralFrame.ALIGNS_RIGHT);
+                positions.add(KoralFrame.ENDS_WITH);
                 break;
             case "F":
                 positions.add(KoralFrame.MATCHES);
@@ -1267,16 +1290,16 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 break;
             case "FI":
                 positions.add(KoralFrame.MATCHES);
-                classRefCheck.add(ClassRefCheck.UNEQUALS);
+                classRefCheck.add(ClassRefCheck.DIFFERS);
                 break;
             case "N":
-                positions.add(KoralFrame.IS_WITHIN);
+                positions.add(KoralFrame.IS_AROUND);
                 break;
             default:
                 positions.add(KoralFrame.MATCHES);
-                positions.add(KoralFrame.ALIGNS_LEFT);
-                positions.add(KoralFrame.ALIGNS_RIGHT);
-                positions.add(KoralFrame.IS_WITHIN);
+                positions.add(KoralFrame.STARTS_WITH);
+                positions.add(KoralFrame.ENDS_WITH);
+                positions.add(KoralFrame.IS_AROUND);
                 
         }
         
@@ -1298,7 +1321,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else if (CosmasPosition.FE.name().equals(posOption)) {
             positions.add(KoralFrame.MATCHES);
-            classRefCheck.add(ClassRefCheck.UNEQUALS);
+            classRefCheck.add(ClassRefCheck.DIFFERS);
         }
         else if (CosmasPosition.FI.name().equals(posOption)) {
             positions.add(KoralFrame.MATCHES);
@@ -1402,7 +1425,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 positions.add(KoralFrame.MATCHES);
                 break;
             case "FE":
-                classRefCheck.add(ClassRefCheck.UNEQUALS);
+                classRefCheck.add(ClassRefCheck.DIFFERS);
                 positions.add(KoralFrame.MATCHES);
                 break;
             case "FI":
@@ -1440,7 +1463,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 break;
             case "FI":
                 positions.add(KoralFrame.MATCHES);
-                classRefCheck.add(ClassRefCheck.UNEQUALS);
+                classRefCheck.add(ClassRefCheck.DIFFERS);
                 break;
             case "X":
                 positions.add(KoralFrame.IS_WITHIN);
@@ -1589,7 +1612,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     ((c2psParser) parser).c2ps_query(); // statt t().
             // AST Tree anzeigen:
             tree = (Tree) c2Return.getTree();
-
+            if (DEBUG) log.debug(tree.toStringTree());
         }
         catch (RecognitionException e) {
             log.error(
