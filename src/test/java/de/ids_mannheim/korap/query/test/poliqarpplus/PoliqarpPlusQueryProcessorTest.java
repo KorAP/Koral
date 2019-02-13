@@ -1568,8 +1568,21 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/layer").asText());
         assertEquals("VVFIN", res.at("/query/operands/1/wrap/key").asText());
     }
+    
+//    @Test
+//    public void testWithinElement () throws JsonProcessingException, IOException {
+//        query = "[p=VVFIN] within <base/s=s>";
+//        qs.setQuery(query, "poliqarpplus");
+//        res = mapper.readTree(qs.toJSON());
+//        System.out.println(res);
+//        assertEquals("operation:position", res.at("/query/operation").asText());
+//        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
+//        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+//        assertEquals("VVFIN", res.at("/query/operands/1/wrap/key").asText());
+//    }
 
 
     @Test
