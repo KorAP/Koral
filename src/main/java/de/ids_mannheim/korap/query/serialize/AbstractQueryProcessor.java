@@ -184,7 +184,9 @@ public abstract class AbstractQueryProcessor {
     public void addError (int code, String[] details) {
         List<Object> error = new ArrayList<Object>();
         error.add(code);
-        error.add(details);
+        for (String detail : details) {
+            error.add(detail);
+        };
         errors.add(error);
     }
 
