@@ -77,8 +77,11 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             processNode(tree);
         }
         else {
-            addError(StatusCodes.MALFORMED_QUERY, new String[]{"Could not parse query >>> "
-                    + query + " <<<.", query});
+            ArrayList<Object> errors = new ArrayList<>(3);
+            errors.add(StatusCodes.MALFORMED_QUERY);
+            errors.add("Could not parse query >>> "+ query + " <<<.");
+            errors.add(query);
+            addError(errors);
         }
     }
 
@@ -129,8 +132,13 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             term.put("match", "match:" + interpretMatchOperator(match));
 
             if (!checkOperatorValueConformance(term)) {
-                addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND, 
-                        new String[]{"Operator "+match+" is not acceptable.", match});
+                ArrayList<Object> errors = new ArrayList<>(3);
+                errors.add(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND);
+                errors.add("Operator "+match+" is not acceptable.");
+                errors.add(match);
+                addError(errors);
+//                addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND, 
+//                        new String[]{"Operator "+match+" is not acceptable.", match});
                 requestMap = new HashMap<String, Object>();
                 return;
             }

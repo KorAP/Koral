@@ -279,10 +279,23 @@ public class CollectionQueryProcessorTest {
         assertEquals("match:eq", res.at("/collection/match").asText());
     } 
 
+	@Test
+    public void testRegexFailure () throws JsonProcessingException, IOException {    
+        collection = "textClass=/po/litik/";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        qs.resetMsgs();
+        assertEquals("302", res.at("/errors/0/0").asText());
+        assertEquals("Could not parse query >>> textClass=/po/litik/ <<<.",
+                     res.at("/errors/0/1").asText());
+        assertEquals("", res.at("/errors/1/0").asText());
+    }
 
     @Test
     public void testNotDate () throws JsonProcessingException, IOException {
         collection = "author=\"firefighter1974\"";
+        qs.resetMsgs();
         qs.setQuery(query, ql);
         qs.setCollection(collection);
         res = mapper.readTree(qs.toJSON());
