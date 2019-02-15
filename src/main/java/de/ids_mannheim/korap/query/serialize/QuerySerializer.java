@@ -61,6 +61,16 @@ public class QuerySerializer {
         this.messages = new ArrayList<>();
     }
 
+
+    /**
+     * Remove all messages from the query serialization.
+     */
+    public void resetMsgs () {
+        this.errors.clear();
+        this.warnings.clear();
+        this.messages.clear();
+    }
+
     /**
      * @param args
      */
