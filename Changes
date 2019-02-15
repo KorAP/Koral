@@ -1,8 +1,9 @@
-0.33 2019-01-08
+0.33 2019-02-15
     - Added debug flags (margaretha)
     - [bugfix] Fixed poliqarp layer bug (#52; margaretha)
     - Replaced log4j with log4j2 (margaretha)
     - Fixed issue #43 - C2 OPIN (margaretha)
+    - [bugfix] Flatten serialization of query errors (diewald) 
     
 0.32 2018-12-13
     - [bugfix] Support verbatim string queries (#57; diewald).
