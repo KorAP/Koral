@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -702,104 +701,6 @@ public class Cosmas2QueryProcessorTest {
                 res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
 
-    }
-
-
-    @Test
-    @Ignore
-    public void testOPOV () throws JsonProcessingException, IOException {
-        query = "wegen #OV <s>";
-        qs.setQuery(query, "cosmas2");
-        res = mapper.readTree(qs.toJSON());
-        // System.out.println(res);
-        assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:class", res.at("/query/operation")
-                .asText());
-        assertEquals("classRefCheck:intersects",
-                res.at("/query/classRefCheck/0").asText());
-        //		assertEquals("classRefOp:merge",            res.at("/query/operands/0/classRefOp").asText());
-//        assertEquals(132, res.at("/query/classOut").asInt());
-//        assertEquals(131, res.at("/query/classIn/0").asInt());
-//        assertEquals(130, res.at("/query/classIn/1").asInt());
-        assertEquals("koral:group", res
-                .at("/query/operands/0/@type").asText());
-        assertEquals("operation:position",
-                res.at("/query/operands/0/operation").asText());
-        assertEquals(true, res.at("/query/operands/0/frames/0")
-                .isMissingNode());
-        assertEquals("koral:group", res
-                .at("/query/operands/0/@type").asText());
-        assertEquals("operation:class",
-                res.at("/query/operands/0/operands/0/operation")
-                        .asText());
-        assertEquals(130,
-                res.at("/query/operands/0/operands/0/classOut")
-                        .asInt());
-        assertEquals(
-                "koral:token",
-                res.at("/query/operands/0/operands/0/operands/0/@type")
-                        .asText());
-        assertEquals(
-                "wegen",
-                res.at("/query/operands/0/operands/0/operands/0/wrap/key")
-                        .asText());
-        assertEquals("koral:group",
-                res.at("/query/operands/0/operands/1/@type")
-                        .asText());
-        assertEquals("operation:class",
-                res.at("/query/operands/0/operands/1/operation")
-                        .asText());
-        assertEquals(131,
-                res.at("/query/operands/0/operands/1/classOut")
-                        .asInt());
-        assertEquals(
-                "koral:span",
-                res.at("/query/operands/0/operands/1/operands/0/@type")
-                        .asText());
-        assertEquals(
-                "s",
-                res.at("/query/operands/0/operands/1/operands/0/wrap/key")
-                        .asText());
-
-        query = "wegen #OV(L) <s>";
-        qs.setQuery(query, "cosmas2");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("classRefCheck:intersects",
-                res.at("/query/classRefCheck/0").asText());
-        assertEquals("frames:alignsLeft",
-                res.at("/query/operands/0/frames/0").asText());
-        assertEquals("frames:overlapsLeft",
-                res.at("/query/operands/0/frames/1").asText());
-//        assertEquals("frames:matches",
-//                res.at("/query/operands/0/frames/0").asText());
-
-        query = "wegen #OV(F) <s>";
-        qs.setQuery(query, "cosmas2");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("classRefCheck:intersects",
-                res.at("/query/classRefCheck/0").asText());
-        assertEquals("frames:matches",
-                res.at("/query/operands/0/frames/0").asText());
-        assertEquals(true, res.at("/query/operands/0/operands/0/frames/1")
-                .isMissingNode());
-
-        query = "wegen #OV(FI) <s>";
-        qs.setQuery(query, "cosmas2");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("classRefCheck:intersects",
-                res.at("/query/classRefCheck/0").asText());
-        assertEquals("classRefCheck:differs",
-                res.at("/query/classRefCheck/1").asText());
-        assertEquals("frames:matches",
-                res.at("/query/operands/0/frames/0").asText());
-
-        query = "wegen #OV(FE) <s>";
-        qs.setQuery(query, "cosmas2");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("classRefCheck:equals",
-                res.at("/query/classRefCheck/0").asText());
-        assertEquals("frames:matches",
-                res.at("/query/operands/0/frames/0").asText());
     }
 
 
