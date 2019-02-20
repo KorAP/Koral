@@ -15,6 +15,7 @@ grammar c2ps_opOV;
 
 options {output=AST;}
 tokens  {OPOV;
+     RANGE; ALL; HIT; 
 	 POS; 
 	 EXCL; YES;
 	 GROUP; MIN; MAX; }
@@ -42,7 +43,11 @@ opOV	:	'#OV'            -> ^(OPOV)
 
 opts	:	opt (',' opt)*   -> opt*;
 
-opt	:	(optPos | optExcl | optGrp);
+opt	:	(optRange |optPos | optExcl | optGrp);
+
+// Bereich:
+optRange:	('ALL' | 'all') -> ^(RANGE ALL) 
+	| 	('HIT' | 'hit')	-> ^(RANGE HIT); 
 
 // Position:
 optPos	:	POSTYP 
