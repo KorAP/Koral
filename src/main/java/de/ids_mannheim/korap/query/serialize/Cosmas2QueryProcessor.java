@@ -511,6 +511,22 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         ((ArrayList<Object>) topGroup.get("operands")).add(group);
         return topGroup;
     }
+    
+    private Map<String, Object> addClassRefOp (
+            ClassRefOp operation, Map<String, Object> group,
+            int classCounter) {
+
+        Integer[] classIn = new Integer[2];
+        classIn[0] = (classCounter + 128 - 1);
+        classIn[1] = (classCounter + 128);
+
+        int classOut = classCounter + 128 + 1;
+        // wrap position in a classRefCheck
+        Map<String, Object> topGroup = KoralObjectGenerator
+                .makeClassRefOp(operation, classIn, classOut);
+        ((ArrayList<Object>) topGroup.get("operands")).add(group);
+        return topGroup;
+    }
 
 
     private Map<String, Object> addClassFocus (boolean isMatchAll,
@@ -579,10 +595,16 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     addClassRefCheck((ArrayList<ClassRefCheck>) positionOptions
                             .get("classRefCheck"), posGroup, 2);
         }
-        // add focus
-        posGroup = addClassFocus((boolean) positionOptions.get("matchall"),
-                posGroup, focusClassCounter);
-
+        
+        if (nodeCat.equals("OPIN")) {
+            // add focus
+            posGroup = addClassFocus((boolean) positionOptions.get("matchall"),
+                    posGroup, focusClassCounter);
+        }
+        else{
+            posGroup = addClassRefOp(ClassRefOp.UNION, posGroup, 2);
+        }
+        
         // wrap in 'merge' operation if grouping option is set
         if (!isExclusion && positionOptions.containsKey("grouping")
                 && (boolean) positionOptions.get("grouping")) {
@@ -1201,14 +1223,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             if (!posOption.equals("FI") && !posOption.equals("FE")) {
                 classRefCheck.add(ClassRefCheck.INCLUDES);
             }
-            checkRange(classRefCheck, node, posOption);
+            checkRange(node);
         }
         else if (!isExclusion) {
             if (!classRefCheck.isEmpty()) {
                 wrapOperandInClass(node, 2, 128 + classCounter++);
             }
             else{
-                checkRange(classRefCheck, node, posOption);
+                checkRange(node);
             }
         }
         
@@ -1240,8 +1262,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         return posOptions;
     }
 
-    private void checkRange (ArrayList<ClassRefCheck> classRefCheck,
-            Tree node, String posOption) {
+    private void checkRange (Tree node) {
         // if (range.equals("all")) {
 
         // posOptions.put("matchall", true);
@@ -1342,51 +1363,41 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     private Map<String, Object> parseOPOVOptions (Tree node, boolean isExclusion) {
         Tree posnode = getFirstChildWithCat(node, "POS");
-        Tree rangenode = getFirstChildWithCat(node, "RANGE");
         Tree exclnode = getFirstChildWithCat(node, "EXCL");
         Tree groupnode = getFirstChildWithCat(node, "GROUP");
         Map<String, Object> posOptions = new HashMap<String, Object>();
         ArrayList<KoralFrame> positions = new ArrayList<KoralFrame>();
         ArrayList<ClassRefCheck> classRefCheck = new ArrayList<ClassRefCheck>();
         posOptions.put("matchall", false);
-        String posOption = null;
+        String posOption = "";
         if (posnode != null) {
             posOption = posnode.getChild(0).toStringTree();
-            if (isExclusion){
-                checkOVExclusionOptions(posOption, positions, classRefCheck);
-            }
-            else{
-                checkOVOptions(posOption, positions, classRefCheck);
-            }
         }
-        else if (isExclusion){
+        
+        if (isExclusion){
             classRefCheck.add(ClassRefCheck.DISJOINT);
+            checkOVExclusionOptions(posOption, positions, classRefCheck);
         }
         else{
-            classRefCheck.add(ClassRefCheck.INTERSECTS);
+            checkOVOptions(posOption, positions, classRefCheck);
         }
-
+        
         posOptions.put("frames", Converter.enumListToStringList(positions));
         posOptions.put("classRefCheck", classRefCheck);
-        if (!classRefCheck.isEmpty()) {
-            wrapOperandInClass(node, 1, 128 + classCounter++);
+        if (isComplexQuery(node, "ARG2")) {
+            checkRange(node);
+        }
+        else if (!classRefCheck.isEmpty()){
             wrapOperandInClass(node, 2, 128 + classCounter++);
+        }
+        else{
+            checkRange(node);
         }
 //        if (exclnode != null) {
 //            if (exclnode.getChild(0).toStringTree().equals("YES")) {
 //                negatePosition = !negatePosition;
 //            }
 //        }
-
-        if (rangenode != null) {
-            String range = rangenode.getChild(0).toStringTree().toLowerCase();
-            if (range.equals("all")) {
-                posOptions.put("matchall", true);
-                // Map<String,Object> ref =
-                // makeResetReference(); // reset all defined classes
-                // wrapOperand(node,2,ref);
-            }
-        }
 
 //        if (negatePosition) {
 //            posOptions.put("exclude", "true");
@@ -1466,8 +1477,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 classRefCheck.add(ClassRefCheck.DIFFERS);
                 break;
             case "X":
-                positions.add(KoralFrame.IS_WITHIN);
-                positions.remove(KoralFrame.MATCHES);
+                positions.add(KoralFrame.IS_AROUND);
+                break;
+            default:
+                positions.add(KoralFrame.MATCHES);
+                positions.add(KoralFrame.ALIGNS_LEFT);
+                positions.add(KoralFrame.ALIGNS_RIGHT);
+                positions.add(KoralFrame.IS_AROUND);
                 break;
         }
         
