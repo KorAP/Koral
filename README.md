@@ -125,7 +125,9 @@ J. Bingel and N. Diewald, "KoralQuery – a General Corpus Query Protocol," in P
 ## Authorship
 
 Koral and KoralQuery were developed by Joachim Bingel,
-Nils Diewald, Michael Hanl and Eliza Margaretha at IDS Mannheim.
+Nils Diewald, Michael Hanl and Eliza Margaretha at the 
+[Leibniz Institute for the German Language (IDS)](http://ids-mannheim.de/),
+member of the [Leibniz Association](https://www.leibniz-gemeinschaft.de/en/home/).
 
 The ANTLR grammars for parsing ANNIS QL and COSMAS II QL were developed by 
 Thomas Krause (HU Berlin) and Franck Bodmer (IDS Mannheim), respectively.
