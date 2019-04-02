@@ -181,14 +181,6 @@ public abstract class AbstractQueryProcessor {
         errors.add(error);
     }
     
-    public void addError (int code, String[] details) {
-        List<Object> error = new ArrayList<Object>();
-        error.add(code);
-        error.add(details);
-        errors.add(error);
-    }
-
-
     /**
      * Adds an error to {@link #errors}.
      * 

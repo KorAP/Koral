@@ -155,6 +155,8 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("NN", res.at("/query/wrap/key").asText());
         assertEquals("p", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("", res.at("/errors/0/0").asText());
+        assertEquals("", res.at("/errors/1/0").asText());
     }
 
 
