@@ -246,7 +246,7 @@ op1	:	opBEG | opEND | opNHIT | opALL | opBED;
 // #BED(serchExpr, B).
 // B muss nachtrÃ¤glich in einer lokalen Grammatik Ã¼berprÃ¼ft werden.
 
-opBED	:	'#BED(' searchExpr opBEDEnd -> ^(OPBED searchExpr ^(OPTS {$opBEDEnd.tree})) ;
+opBED	:	( '#COND(' | '#BED(' ) searchExpr opBEDEnd -> ^(OPBED searchExpr ^(OPTS {$opBEDEnd.tree})) ;
 
 // c2ps_opBED.check() returns an AST that is returned by rule opBEDEnd.
 // for this action inside a rewrite rule, no ';' behind the function call.
