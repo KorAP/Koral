@@ -36,15 +36,14 @@ import eu.clarin.sru.server.fcs.parser.RegexFlag;
  */
 public class ExpressionParser {
 
-    private static final String FOUNDRY_CNX = "cnx";
+    private static final String FOUNDRY_CORENLP = "corenlp";
     private static final String FOUNDRY_OPENNLP = "opennlp";
     private static final String FOUNDRY_TT = "tt";
-    private static final String FOUNDRY_MATE = "mate";
-    private static final String FOUNDRY_XIP = "xip";
+    private static final String FOUNDRY_MARMOT = "marmot";
 
-    private List<String> supportedFoundries = Arrays
-            .asList(new String[] { FOUNDRY_CNX, FOUNDRY_OPENNLP, FOUNDRY_TT,
-                    FOUNDRY_MATE, FOUNDRY_XIP });
+    private List<String> supportedFoundries =
+            Arrays.asList(new String[] { FOUNDRY_CORENLP, FOUNDRY_OPENNLP,
+                    FOUNDRY_TT, FOUNDRY_MARMOT });
 
     /**
      * Parses the given query node and constructs a koral object
