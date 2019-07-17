@@ -561,6 +561,36 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("Mond", res.at("/query/operands/1/operands/0/wrap/key")
                 .asText());
 
+        // Order of min and max is irrelevant in C2
+        query = "Sonne /+w4:1,s0,p3:1 Mond";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:sequence", res.at("/query/operation").asText());
+        assertEquals("cosmas:distance", res.at("/query/distances/0/@type")
+                .asText());
+        assertEquals("w", res.at("/query/distances/0/key").asText());
+        assertEquals(1, res.at("/query/distances/0/boundary/min").asInt());
+        assertEquals(4, res.at("/query/distances/0/boundary/max").asInt());
+        assertEquals("s", res.at("/query/distances/1/key").asText());
+        assertEquals(0, res.at("/query/distances/1/boundary/min").asInt());
+        assertEquals("p", res.at("/query/distances/2/key").asText());
+        assertEquals(1, res.at("/query/distances/2/boundary/min").asInt());
+        assertEquals(3, res.at("/query/distances/2/boundary/max").asInt());
+        assertEquals(true, res.at("/query/inOrder").asBoolean());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:class", res.at("/query/operands/0/operation")
+                .asText());
+        assertEquals(129, res.at("/query/operands/0/classOut").asInt());
+        assertEquals(129, res.at("/query/operands/1/classOut").asInt());
+        assertEquals("koral:token", res
+                .at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("Sonne", res.at("/query/operands/0/operands/0/wrap/key")
+                .asText());
+        assertEquals("Mond", res.at("/query/operands/1/operands/0/wrap/key")
+                .asText());
+
+        
         query = "Sonne /+w4 Mond";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());

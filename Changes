@@ -1,3 +1,7 @@
+0.34 2019-07-17
+    - [bugfix] Ignore min:max order in distance operators
+      (#67; diewald)
+
 0.33 2019-02-20
     - Added debug flags (margaretha)
     - [bugfix] Fixed poliqarp layer bug (#52; margaretha)
@@ -23,9 +27,9 @@
 0.29 2018-07-23
     - Added check for errors on QuerySerializer object (diewald)
     - Support verbatim string values in Poliqarp
-    (fixes #42; diewald)
+      (fixes #42; diewald)
     - Fix support for verbatim string values in collection queries
-    (diewald)
+      (diewald)
     - Added hint to update the library (diewald)
 
 0.28 2018-01-10

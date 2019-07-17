@@ -641,7 +641,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         boolean putIntoOverlapDisjunction = false;
 
-        int min = 0, max = 0;
+        int tmin, min = 0, max = 0;
         // possibly several distance constraints
         for (int i = 0; i < dist_list.getChildCount(); i++) {
             String direction = dist_list.getChild(i).getChild(0).getChild(0)
@@ -672,6 +672,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             if (!meas.equals("w") && min == 0) {
                 processSpanDistance(meas, min, max);
             }
+
+            if (max < min) {
+                tmin = min;
+                min = max;
+                max = tmin;
+            }
+            
             Map<String, Object> distance =
                     KoralObjectGenerator.makeDistance(meas, min, max);
             // override @type, min/max to be treated according to 
