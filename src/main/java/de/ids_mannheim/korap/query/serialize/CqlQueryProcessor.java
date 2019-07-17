@@ -159,7 +159,7 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         distanceMap.put("key", "s");
         
         Map<String, Object> boundary = new LinkedHashMap<String, Object>();
-        boundary.put("type", "koral:boundary");
+        boundary.put("@type", "koral:boundary");
         boundary.put("min", "0");
         boundary.put("max", "0");
         distanceMap.put("boundary", boundary);
