@@ -1,14 +1,22 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-
-import org.z3950.zing.cql.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.z3950.zing.cql.CQLAndNode;
+import org.z3950.zing.cql.CQLBooleanNode;
+import org.z3950.zing.cql.CQLNode;
+import org.z3950.zing.cql.CQLOrNode;
+import org.z3950.zing.cql.CQLParseException;
+import org.z3950.zing.cql.CQLParser;
+import org.z3950.zing.cql.CQLRelation;
+import org.z3950.zing.cql.CQLTermNode;
+import org.z3950.zing.cql.Modifier;
+
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 /**
  * @author margaretha
@@ -63,6 +71,7 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
         // requestMap.put("query", sentenceWrapper(queryMap));
     }
 
+    @Deprecated
     private Map<String, Object> sentenceWrapper(Map<String, Object> m) {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
         map.put("@type", "koral:group");
@@ -146,10 +155,15 @@ public class CqlQueryProcessor extends AbstractQueryProcessor {
 
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         Map<String, Object> distanceMap = new LinkedHashMap<String, Object>();
-        distanceMap.put("@type", "koral:distance");
+        distanceMap.put("@type", "cosmas:distance");
         distanceMap.put("key", "s");
-        distanceMap.put("min", "0");
-        distanceMap.put("max", "0");
+        
+        Map<String, Object> boundary = new LinkedHashMap<String, Object>();
+        boundary.put("type", "koral:boundary");
+        boundary.put("min", "0");
+        boundary.put("max", "0");
+        distanceMap.put("boundary", boundary);
+        
         list.add(distanceMap);
         map.put("distances", list);
 
