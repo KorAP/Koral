@@ -18,6 +18,7 @@ public class CqlQueryProcessorTest {
     String VERSION = "1.2";
     ObjectMapper mapper = new ObjectMapper();
 
+    @SuppressWarnings("unchecked")
     private List<Object> getError(CqlQueryProcessor processor) {
         List<Object> errors = (List<Object>) processor.getRequestMap().get("errors");
         return (List<Object>) errors.get(0);
@@ -60,7 +61,7 @@ public class CqlQueryProcessorTest {
         query = "(Sonne) and (scheint)";
         String jsonLd = "{@type : koral:group, operation : operation:sequence, inOrder : false,"
                 + "distances:[ "
-                + "{@type : koral:distance, key : s, min : 0, max : 0 } ],"
+                + "{@type : cosmas:distance, key : s, boundary:{type:koral:boundary,min:0,max:0}} ],"
                 + "operands : ["
                 + "{@type : koral:token, wrap : {@type : koral:term,key : Sonne, layer : orth, match : match:eq}},"
                 + "{@type : koral:token,wrap : {@type : koral:term,key : scheint,layer : orth,match : match:eq}"
@@ -83,7 +84,7 @@ public class CqlQueryProcessorTest {
             Exception {
         query = "((Sonne) or (Mond)) and (scheint)";
         String jsonLd = "{@type:koral:group, operation:operation:sequence, inOrder : false, distances:["
-                + "{@type:koral:distance, key:s, min:0, max:0}"
+                + "{@type:cosmas:distance, key:s, boundary:{type:koral:boundary,min:0,max:0}}"
                 + "], operands:["
                 + "{@type:koral:group, operation:operation:or, operands:["
                 + "{@type:koral:token, wrap:{@type:koral:term, key:Sonne, layer:orth, match:match:eq}},"
@@ -98,7 +99,7 @@ public class CqlQueryProcessorTest {
 
         query = "(scheint) and ((Sonne) or (Mond))";
         jsonLd = "{@type:koral:group, operation:operation:sequence, inOrder : false, distances:["
-                + "{@type:koral:distance, key:s, min:0, max:0}"
+                + "{@type:cosmas:distance, key:s, boundary:{type:koral:boundary,min:0,max:0}}"
                 + "], operands:["
                 + "{@type:koral:token, wrap:{@type:koral:term, key:scheint, layer:orth, match:match:eq}},"
                 + "{@type:koral:group, operation:operation:or, operands:["
