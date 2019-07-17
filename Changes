@@ -4,6 +4,7 @@
     - [feature] Support #COND() operator alias in C2 (#70; diewald)
     - [bugfix] Fixed the distance serialization in CQL boolean queries
       (#69; margaretha)
+    - Updated supported foundries for FCSQL (margaretha)   
 
 0.33 2019-02-20
     - Added debug flags (margaretha)
