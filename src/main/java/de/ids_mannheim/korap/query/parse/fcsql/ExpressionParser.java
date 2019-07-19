@@ -6,14 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.omg.CosNaming.IstringHelper;
-
 import de.ids_mannheim.korap.query.object.KoralMatchOperator;
 import de.ids_mannheim.korap.query.object.KoralObject;
-import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
 import de.ids_mannheim.korap.query.object.KoralTerm;
 import de.ids_mannheim.korap.query.object.KoralTerm.KoralTermType;
 import de.ids_mannheim.korap.query.object.KoralTermGroup;
+import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
 import de.ids_mannheim.korap.query.object.KoralToken;
 import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
