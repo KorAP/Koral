@@ -32,6 +32,7 @@ public class FCSQLQueryProcessorTest {
         FCSQLQueryProcessor processor = new FCSQLQueryProcessor(query);
         String serializedQuery = mapper.writeValueAsString(processor
                 .getRequestMap().get("query"));
+        System.out.println(serializedQuery);
         assertEquals(jsonLd.replace(" ", ""), serializedQuery.replace("\"", ""));
     }
 
@@ -120,9 +121,9 @@ public class FCSQLQueryProcessorTest {
     // | "!=" /* non-equals */
     @Test
     public void testOperator() throws IOException {
-        query = "[cnx:pos != \"N\"]";
+        query = "[corenlp:pos != \"N\"]";
         jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:N, "
-                + "foundry:cnx, layer:p, type:type:regex, match:match:ne}}";
+                + "foundry:corenlp, layer:p, type:type:regex, match:match:ne}}";
         runAndValidate(query, jsonLd);
     }
 
@@ -153,14 +154,14 @@ public class FCSQLQueryProcessorTest {
     // qualified-attribute ::= identifier ":" identifier
     @Test
     public void testTermQueryWithQualifier() throws JsonProcessingException {
-        query = "[mate:lemma = \"sein\"]";
+        query = "[tt:lemma = \"sein\"]";
         jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:sein, "
-                + "foundry:mate, layer:l, type:type:regex, match:match:eq}}";
+                + "foundry:tt, layer:l, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
 
-        query = "[cnx:pos = \"N\"]";
+        query = "[corenlp:pos = \"N\"]";
         jsonLd = "{@type:koral:token, wrap:{@type:koral:term, key:N, "
-                + "foundry:cnx, layer:p, type:type:regex, match:match:eq}}";
+                + "foundry:corenlp, layer:p, type:type:regex, match:match:eq}}";
         runAndValidate(query, jsonLd);
     }
 
@@ -174,17 +175,17 @@ public class FCSQLQueryProcessorTest {
     // | expression "|" expression /* or */
     @Test
     public void testExpressionOr() throws IOException {
-        query = "[mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
+        query = "[tt:lemma=\"sein\" | tt:pos=\"PPOSS\"]";
         jsonLd = "{@type: koral:token,"
                 + " wrap: { @type: koral:termGroup,"
                 + "relation: relation:or,"
                 + " operands:["
-                + "{@type: koral:term, key: sein, foundry: mate, layer: l, type:type:regex, match: match:eq},"
-                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq}]}}";
+                + "{@type: koral:term, key: sein, foundry: tt, layer: l, type:type:regex, match: match:eq},"
+                + "{@type: koral:term, key: PPOSS, foundry: tt, layer: p, type:type:regex, match: match:eq}]}}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
-        query = "[cnx:lemma=\"sein\" | mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
-        jsonLd = "{@type: koral:term, key: sein, foundry: cnx, layer: l, type:type:regex, match: match:eq}";
+        query = "[corenlp:lemma=\"sein\" | tt:lemma=\"sein\" | tt:pos=\"PPOSS\"]";
+        jsonLd = "{@type: koral:term, key: sein, foundry: corenlp, layer: l, type:type:regex, match: match:eq}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/0",
                 jsonLd);
     }
@@ -192,13 +193,13 @@ public class FCSQLQueryProcessorTest {
     // | expression "&" expression /* and */
     @Test
     public void testExpressionAnd() throws IOException {
-        query = "[mate:lemma=\"sein\" & mate:pos=\"PPOSS\"]";
+        query = "[tt:lemma=\"sein\" & tt:pos=\"PPOSS\"]";
         jsonLd = "{@type: koral:token,"
                 + " wrap: { @type: koral:termGroup,"
                 + "relation: relation:and,"
                 + " operands:["
-                + "{@type: koral:term, key: sein, foundry: mate, layer: l, type:type:regex, match: match:eq},"
-                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq}]}}";
+                + "{@type: koral:term, key: sein, foundry: tt, layer: l, type:type:regex, match: match:eq},"
+                + "{@type: koral:term, key: PPOSS, foundry: tt, layer: p, type:type:regex, match: match:eq}]}}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
 
@@ -224,27 +225,27 @@ public class FCSQLQueryProcessorTest {
 
     @Test
     public void testMultipleBooleanExpressions() throws IOException {
-        query = "[mate:lemma=\"sein\" & (mate:pos=\"PPOSS\"|mate:pos=\"VAFIN\")]";
+        query = "[tt:lemma=\"sein\" & (tt:pos=\"PPOSS\"|tt:pos=\"VAFIN\")]";
         jsonLd = "{@type: koral:termGroup,"
                 + "relation: relation:or,"
                 + " operands:["
-                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq},"
-                + "{@type: koral:term, key: VAFIN, foundry: mate, layer: p, type:type:regex, match: match:eq}]}";
+                + "{@type: koral:term, key: PPOSS, foundry: tt, layer: p, type:type:regex, match: match:eq},"
+                + "{@type: koral:term, key: VAFIN, foundry: tt, layer: p, type:type:regex, match: match:eq}]}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/1",
                 jsonLd);
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/relation",
                 "relation:and");
         
-        query = "[(cnx:lemma=\"sein\" | mate:pos=\"PPOSS\") | mate:pos=\"VAFIN\"]";
+        query = "[(corenlp:lemma=\"sein\" | tt:pos=\"PPOSS\") | tt:pos=\"VAFIN\"]";
         jsonLd = "{@type: koral:termGroup,"
                 + "relation: relation:or,"
                 + " operands:["
-                + "{@type: koral:term, key: sein, foundry: cnx, layer: l, type:type:regex, match: match:eq},"
-                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:eq}]}";
+                + "{@type: koral:term, key: sein, foundry: corenlp, layer: l, type:type:regex, match: match:eq},"
+                + "{@type: koral:term, key: PPOSS, foundry: tt, layer: p, type:type:regex, match: match:eq}]}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/0",
                 jsonLd);
         
-        query = "[(cnx:lemma=\"sein\" | mate:pos=\"PPOSS\") & text=\"ist\"]";
+        query = "[(corenlp:lemma=\"sein\" | tt:pos=\"PPOSS\") & text=\"ist\"]";
         jsonLd = "{@type: koral:term, key: ist, foundry: opennlp, layer: orth, type:type:regex, match: match:eq}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/wrap/operands/1",
                 jsonLd);
@@ -262,27 +263,27 @@ public class FCSQLQueryProcessorTest {
         query = "[!!!pos != \"NN\"]";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
-        query = "[mate:lemma=\"sein\" & !mate:pos=\"PPOSS\"]";
+        query = "[tt:lemma=\"sein\" & !tt:pos=\"PPOSS\"]";
         jsonLd = "{@type: koral:token,"
                 + " wrap: { "
                 + "@type: koral:termGroup,"
                 + "relation: relation:and,"
                 + " operands:["
-                + "{@type: koral:term, key: sein, foundry: mate, layer: l, type:type:regex, match: match:eq},"
-                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:ne}]}}";
+                + "{@type: koral:term, key: sein, foundry: tt, layer: l, type:type:regex, match: match:eq},"
+                + "{@type: koral:term, key: PPOSS, foundry: tt, layer: p, type:type:regex, match: match:ne}]}}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
     
     @Test
     public void testNotExpressionGroup() throws JsonProcessingException {
-        query = "[!(mate:lemma=\"sein\" & mate:pos=\"PPOSS\")]";
+        query = "[!(tt:lemma=\"sein\" & tt:pos=\"PPOSS\")]";
         jsonLd = "{@type: koral:token,"
                 + " wrap: { "
                 + "@type: koral:termGroup,"
                 + "relation: relation:or,"
                 + " operands:["
-                + "{@type: koral:term, key: sein, foundry: mate, layer: l, type:type:regex, match: match:ne},"
-                + "{@type: koral:term, key: PPOSS, foundry: mate, layer: p, type:type:regex, match: match:ne}]}}";
+                + "{@type: koral:term, key: sein, foundry: tt, layer: l, type:type:regex, match: match:ne},"
+                + "{@type: koral:term, key: PPOSS, foundry: tt, layer: p, type:type:regex, match: match:ne}]}}";
         //FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
         
         error = getError(new FCSQLQueryProcessor(query));
@@ -316,17 +317,17 @@ public class FCSQLQueryProcessorTest {
                 error.get(1));
 
         // unsupported layer
-        query = "[cnx:morph = \"heit\"]";
+        query = "[corenlp:morph = \"heit\"]";
         error = getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         assertEquals("Layer morph is unsupported.",
                 error.get(1));
 
         // missing layer
-        query = "[cnx=\"V\"]";
+        query = "[corenlp=\"V\"]";
         error = getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
-        assertEquals("Layer cnx is unsupported.",
+        assertEquals("Layer corenlp is unsupported.",
                 error.get(1));
     }
 }

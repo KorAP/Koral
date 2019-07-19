@@ -41,8 +41,8 @@ public class FCSQLComplexTest {
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
         // group and disjunction
-        query = "([pos=\"NN\"]|[cnx:pos=\"N\"]|[text=\"Mann\"])";
-        jsonLd = "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}";
+        query = "([pos=\"NN\"]|[corenlp:pos=\"N\"]|[text=\"Mann\"])";
+        jsonLd = "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:corenlp,layer:p,type:type:regex,match:match:eq}}";
         FCSQLQueryProcessorTest
                 .validateNode(query, "/query/operands/1", jsonLd);
 
@@ -111,31 +111,31 @@ public class FCSQLComplexTest {
                 .validateNode(query, "/query/operands/1", jsonLd);
 
         // sequence and disjunction
-        query = "([pos=\"NN\"]|[cnx:pos=\"N\"])[text=\"Mann\"]";
+        query = "([pos=\"NN\"]|[corenlp:pos=\"N\"])[text=\"Mann\"]";
         jsonLd = "{@type:koral:group,"
                 + "operation:operation:sequence,"
                 + "operands:["
                 + "{@type:koral:group,"
                 + "operation:operation:disjunction,"
                 + "operands:[{@type:koral:token,wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
-                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:corenlp,layer:p,type:type:regex,match:match:eq}}"
                 + "]},"
                 + "{@type:koral:token,wrap:{@type:koral:term,key:Mann,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}}"
                 + "]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
         
-        query = "[text=\"Mann\"]([pos=\"NN\"]|[cnx:pos=\"N\"])";
+        query = "[text=\"Mann\"]([pos=\"NN\"]|[corenlp:pos=\"N\"])";
         jsonLd = "{@type:koral:group,"
                 + "operation:operation:disjunction,"
                 + "operands:[{@type:koral:token,wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
-                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:corenlp,layer:p,type:type:regex,match:match:eq}}"
                 + "]}";
         FCSQLQueryProcessorTest.validateNode(query, "/query/operands/1", jsonLd);
     }
 
     @Test
     public void testSequenceOfQueryGroups() throws IOException {
-        query = "(\"blaue\"|\"grüne\")([pos=\"NN\"]|[cnx:pos=\"N\"])";
+        query = "(\"blaue\"|\"grüne\")([pos=\"NN\"]|[corenlp:pos=\"N\"])";
         FCSQLQueryProcessorTest.validateNode(query, "/query/@type",
                 "koral:group");
         FCSQLQueryProcessorTest.validateNode(query, "/query/operation",
@@ -153,7 +153,7 @@ public class FCSQLComplexTest {
         jsonLd = "{@type:koral:group,operation:operation:disjunction,"
                 + "operands:["
                 + "{@type:koral:token,wrap:{@type:koral:term,key:NN,foundry:tt,layer:p,type:type:regex,match:match:eq}},"
-                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:N,foundry:corenlp,layer:p,type:type:regex,match:match:eq}}"
                 + "]}";
         FCSQLQueryProcessorTest
                 .validateNode(query, "/query/operands/1", jsonLd);
@@ -200,10 +200,10 @@ public class FCSQLComplexTest {
         FCSQLQueryProcessorTest.validateNode(query, "/query/boundary", jsonLd);
 
         // segment query with quantifier
-        query = "[cnx:pos=\"A\"]*";
+        query = "[corenlp:pos=\"A\"]*";
         jsonLd = "{@type:koral:group,"
                 + "operation:operation:repetition,"
-                + "operands:[{@type:koral:token,wrap:{@type:koral:term,key:A,foundry:cnx,layer:p,type:type:regex,match:match:eq}}],"
+                + "operands:[{@type:koral:token,wrap:{@type:koral:term,key:A,foundry:corenlp,layer:p,type:type:regex,match:match:eq}}],"
                 + "boundary:{@type:koral:boundary,min:0}}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
@@ -254,9 +254,9 @@ public class FCSQLComplexTest {
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
         // sequence with extension
-        query = "[cnx:pos=\"A\"] \"Hund\"[]{2}";
+        query = "[corenlp:pos=\"A\"] \"Hund\"[]{2}";
         jsonLd = "["
-                + "{@type:koral:token,wrap:{@type:koral:term,key:A,foundry:cnx,layer:p,type:type:regex,match:match:eq}},"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:A,foundry:corenlp,layer:p,type:type:regex,match:match:eq}},"
                 + "{@type:koral:token,wrap:{@type:koral:term,key:Hund,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
                 + "{@type:koral:group,operation:operation:repetition,operands:["
                 + "{@type:koral:token}],boundary:{@type:koral:boundary,min:2,max:2}}"
@@ -320,7 +320,7 @@ public class FCSQLComplexTest {
                 jsonLd);
 
         // multiple occurrences of wildcards
-        query = "\"Katze\" []{3} \"Hund\" []{1,2} [cnx:pos=\"V\"]";
+        query = "\"Katze\" []{3} \"Hund\" []{1,2} [corenlp:pos=\"V\"]";
         jsonLd = "{@type:koral:group,"
                 + "operation:operation:sequence,"
                 + "inOrder:true,"
@@ -337,7 +337,7 @@ public class FCSQLComplexTest {
                 + "],"
                 + "operands:["
                 + "{@type:koral:token,wrap:{@type:koral:term,key:Hund,foundry:opennlp,layer:orth,type:type:regex,match:match:eq}},"
-                + "{@type:koral:token,wrap:{@type:koral:term,key:V,foundry:cnx,layer:p,type:type:regex,match:match:eq}}]}"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:V,foundry:corenlp,layer:p,type:type:regex,match:match:eq}}]}"
                 + "]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
@@ -359,29 +359,29 @@ public class FCSQLComplexTest {
                 + "]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
         
-        query = "[cnx:pos=\"VVFIN\"] within s";
+        query = "[corenlp:pos=\"VVFIN\"] within s";
         jsonLd = "{@type:koral:group,"
                 + "operation:operation:position,"
                 + "operands:["
                 + "{@type:koral:span,wrap:{@type:koral:term,key:s,foundry:base,layer:s}},"
-                + "{@type:koral:token,wrap:{@type:koral:term,key:VVFIN,foundry:cnx,layer:p,type:type:regex,match:match:eq}}"
+                + "{@type:koral:token,wrap:{@type:koral:term,key:VVFIN,foundry:corenlp,layer:p,type:type:regex,match:match:eq}}"
                 + "]}";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
-        query = "[cnx:pos=\"VVFIN\"] within sentence";
+        query = "[corenlp:pos=\"VVFIN\"] within sentence";
         FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
 
-        query = "[cnx:pos=\"VVFIN\"] within p";
+        query = "[corenlp:pos=\"VVFIN\"] within p";
         jsonLd = "{@type:koral:span,wrap:{@type:koral:term,key:p,foundry:base,layer:s}}";
         FCSQLQueryProcessorTest
                 .validateNode(query, "/query/operands/0", jsonLd);
 
-        query = "[cnx:pos=\"VVFIN\"] within text";
+        query = "[corenlp:pos=\"VVFIN\"] within text";
         jsonLd = "{@type:koral:span,wrap:{@type:koral:term,key:t,foundry:base,layer:s}}";
         FCSQLQueryProcessorTest
                 .validateNode(query, "/query/operands/0", jsonLd);
 
-        query = "[cnx:pos=\"VVFIN\"] within u";
+        query = "[corenlp:pos=\"VVFIN\"] within u";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(311, error.get(0));
         assertEquals(
@@ -433,12 +433,12 @@ public class FCSQLComplexTest {
         String errorMessage = "Query cannot be parsed, an unexpcected occured exception while parsing";
         
         // expression should always be within a segment
-        query = "!(mate:lemma=\"sein\" | mate:pos=\"PPOSS\")";
+        query = "!(tt:lemma=\"sein\" | tt:pos=\"PPOSS\")";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(399, error.get(0));
         assertEquals(errorMessage, error.get(1).toString());
 
-        query = "![mate:lemma=\"sein\" | mate:pos=\"PPOSS\"]";
+        query = "![tt:lemma=\"sein\" | tt:pos=\"PPOSS\"]";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(errorMessage, error.get(1).toString());
 
