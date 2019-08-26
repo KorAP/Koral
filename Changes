@@ -1,10 +1,11 @@
-0.34 2019-07-17
+0.34 2019-08-26
     - [bugfix] Ignore min:max order in distance operators
       (#67; diewald)
     - [feature] Support #COND() operator alias in C2 (#70; diewald)
     - [bugfix] Fixed the distance serialization in CQL boolean queries
       (#69; margaretha)
-    - Updated supported foundries for FCSQL (margaretha)   
+    - Updated supported foundries for FCSQL (margaretha)
+    - Improved context conversion in MetaQueryBuilder (Kustvakt#32; diewald)
 
 0.33 2019-02-20
     - Added debug flags (margaretha)

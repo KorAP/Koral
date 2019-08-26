@@ -5,22 +5,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
- * @author hanl
- * @date 07/02/2014
+ * @author hanl, ndiewald
  */
 public class MetaQueryBuilder {
 
     private static Pattern p = Pattern
-            .compile("\\s*\\d+-(?:c(?:hars?)?|t(?:okens?)?)");
+            .compile("\\s*(\\d+)-(c(?:hars?)?|t(?:okens?)?)\\s*,\\s*(\\d+)-(c(?:hars?)?|t(?:okens?)?)\\s*");
     private Map meta;
     private SpanContext spanContext;
 
 
     public MetaQueryBuilder () {
         this.meta = new LinkedHashMap();
-        //        this.meta.put("fields", new LinkedList<>());
     }
 
 
@@ -57,14 +56,31 @@ public class MetaQueryBuilder {
      */
     public MetaQueryBuilder setSpanContext (String context) {
         if (context != null) {
-            if (!p.matcher(context).find())
+
+            Matcher m = p.matcher(context);
+            
+            if (!m.matches())
                 this.spanContext = new SpanContext(context);
             else {
-                String[] ct = context.replaceAll("\\s+", "").split(",");
-                String[] lc = ct[0].split("-");
-                String[] rc = ct[1].split("-");
-                this.spanContext = new SpanContext(Integer.valueOf(lc[0]),
-                        lc[1], Integer.valueOf(rc[0]), rc[1]);
+                int lcLen = Integer.valueOf(m.group(1));
+                String lcType = m.group(2);
+                int rcLen = Integer.valueOf(m.group(3));
+                String rcType = m.group(4);
+
+                if (lcType.startsWith("t")) {
+                    lcType = "token";
+                } else if (lcType.startsWith("c")) {
+                    lcType = "char";
+                }
+
+                if (rcType.startsWith("t")) {
+                    rcType = "token";
+                } else if (rcType.startsWith("c")) {
+                    rcType = "char";
+                }
+                
+                this.spanContext = new SpanContext(lcLen,
+                        lcType, rcLen, rcType);
             }
         }
         return this;
