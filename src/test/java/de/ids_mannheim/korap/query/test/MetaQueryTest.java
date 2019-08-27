@@ -63,6 +63,13 @@ public class MetaQueryTest {
 
         mqb.setSpanContext("2-r,4-r");
         node = mapper.valueToTree(mqb.getSpanContext().raw());
-        assertEquals(node.at("/context").asText(),"2-r,4-r");
+        assertEquals(node.at("/context/left/0").asText(),"r");
+        assertEquals(node.at("/context/right/0").asText(),"r");
+        assertEquals(node.at("/context/left/1").asInt(),2);
+        assertEquals(node.at("/context/right/1").asInt(),4);       
+
+        mqb.setSpanContext("element");
+        node = mapper.valueToTree(mqb.getSpanContext().raw());
+        assertEquals(node.at("/context").asText(),"element");
     }
 }

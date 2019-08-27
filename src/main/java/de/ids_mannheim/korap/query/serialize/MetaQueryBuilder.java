@@ -12,8 +12,8 @@ import java.util.regex.Matcher;
  */
 public class MetaQueryBuilder {
 
-    private static Pattern p = Pattern
-            .compile("\\s*(\\d+)-(c(?:hars?)?|t(?:okens?)?)\\s*,\\s*(\\d+)-(c(?:hars?)?|t(?:okens?)?)\\s*");
+    private static Pattern p = Pattern.compile("\\s*(\\d+)-([^,\\s]+?)\\s*,\\s*(\\d+)-([^,\\s]+?)\\s*");
+
     private Map meta;
     private SpanContext spanContext;
 
@@ -67,15 +67,15 @@ public class MetaQueryBuilder {
                 int rcLen = Integer.valueOf(m.group(3));
                 String rcType = m.group(4);
 
-                if (lcType.startsWith("t")) {
+                if (lcType.equals("t") || lcType.equals("token") || lcType.equals("tokens")) {
                     lcType = "token";
-                } else if (lcType.startsWith("c")) {
+                } else if (lcType.equals("c") || lcType.equals("char") || lcType.equals("chars")) {
                     lcType = "char";
                 }
 
-                if (rcType.startsWith("t")) {
+                if (rcType.equals("t") || rcType.equals("token") || rcType.equals("tokens")) {
                     rcType = "token";
-                } else if (rcType.startsWith("c")) {
+                } else if (rcType.equals("c") || rcType.equals("char") || rcType.equals("chars")) {
                     rcType = "char";
                 }
                 
