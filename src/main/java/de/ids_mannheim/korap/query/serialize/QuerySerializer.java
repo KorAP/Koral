@@ -350,4 +350,15 @@ public class QuerySerializer {
         map.put("collection", collection);
         return mapper.writeValueAsString(map);
     }
+    
+    public void addWarning (int statusCode, String message,
+            List<String> entities) {
+        ArrayList<Object> warning = new ArrayList<>();
+        warning.add(statusCode);
+        warning.add(message);
+        if (entities != null) {
+            warning.addAll(entities);
+        }
+        this.warnings.add(warning);
+    }
 }
