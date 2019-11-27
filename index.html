@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KoralQuery 0.5.4</title>
+    <title>KoralQuery 0.5.5</title>
     <link rel="stylesheet" href="misc/font/koral-fontello.css">
     <!--[if IE 7]><link rel="stylesheet" href="misc/font/koral-fontello-ie7.css"><![endif]-->
     <link rel="stylesheet" href="misc/style.css" type="text/css" />
@@ -955,7 +955,7 @@ match:leq
               </tr>
               <tr>
                 <td class="opt">spanRef</td>
-                <td>[@xsd:integer]</td>
+                <td>[xsd:integer]</td>
                 <td></td>
                 <td>Defined subspans to refer to.<br />
                   Expects one or to integers.
@@ -1055,13 +1055,13 @@ match:leq
               </tr>
               <tr>
                 <td>key</td>
-                <td>xsd:string</td>
+                <td>[xsd:string]</td>
                 <td></td>
                 <td>The term key</td>
               </tr>
               <tr>
                 <td class="opt">value</td>
-                <td>xsd:string</td>
+                <td>[xsd:string]</td>
                 <td></td>
                 <td>The term value</td>
               </tr>
@@ -1125,14 +1125,16 @@ match:leq
             need all of these attributes to define a term, only the <code class="att">key</code>
             attribute is mandatory.</p>
 
-          <p>The <code class="att">key</code> attribute represents a single annotation like the
+          <p>The <code class="att">key</code> attribute represents a annotations like the
             part-of-speech tag <code>noun</code> or <code>verb</code>, or the surface token
-            <code>Tree</code>. Sometimes, annotations have to be represented as key and value
+            <code>Tree</code>. It can be given as a single string or as an array of alternative strings.
+            Sometimes annotations have to be represented as key and value
             pairs, for example in morphological annotations a key of the term may be
             <code>number</code> and the value of the key may be <code>plural</code>. In that
             case, the <code class="att">key</code> attribute will hold the term
             <code>number</code> and the <code class="att">value</code> attribute will hold the
-            value <code>plural</code>.</p>
+            value <code>plural</code>. Values can be given as single strings or as an array of
+            alternative strings.</p>
 
           <p>The <code class="att">layer</code> attribute may define the annotation level of
             the term, for example <code>tokenization</code>, <code>part-of-speech</code> or
@@ -1978,6 +1980,9 @@ match:leq
       <div class="changes">
         <pre>
 CHANGES:
+0.5.5 2019-11-27
+- Introduced key and value vectors to 'koral:term'
+
 0.5.4 2018-08-13
 - Introduced value vectors to 'koral:doc'
 - Introduced 'koral:docGroupRef'
