@@ -1091,9 +1091,9 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         // Some things went wrong ...
         catch (Exception e) {
-            log.error("Could not parse query. "
-                    + "Please make sure it is well-formed.");
-            log.error(errorListener.generateFullErrorMsg().toString());
+//            log.error("Could not parse query. "
+//                    + "Please make sure it is well-formed.");
+//            log.error(errorListener.generateFullErrorMsg().toString());
             addError(errorListener.generateFullErrorMsg());
         }
         return tree;
