@@ -1691,4 +1691,20 @@ public class Cosmas2QueryProcessorTest {
         assertTrue(res.at("/errors/0/1").asText()
                 .startsWith("Early closing parenthesis"));
     }
+
+    @Test
+    public void testMultipleParenthesis () throws JsonProcessingException, IOException {
+        query = "(Pop-up OR Pop-ups) %s0 (Internet OR  Programm)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("Pop-up", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
+        assertEquals("Pop-ups", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
+        assertEquals("operation:disjunction", res.at("/query/operands/0/operands/0/operation").asText());
+        assertEquals(129, res.at("/query/operands/0/classOut").asInt());
+        assertEquals("operation:disjunction", res.at("/query/operands/1/operands/0/operation").asText());
+        assertEquals("cosmas:distance", res.at("/query/distances/0/@type").asText());
+        assertEquals(true, res.at("/query/distances/0/exclude").asBoolean());
+        assertEquals("s", res.at("/query/distances/0/key").asText());
+        assertEquals("operation:sequence", res.at("/query/operation").asText());
+    }
 }
