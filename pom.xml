@@ -7,7 +7,7 @@
 	<version>0.36</version>
 	<packaging>jar</packaging>
 	<name>Koral</name>
-	<url>http://maven.apache.org</url>
+	<url>https://korap.ids-mannheim.de</url>
 
 	<organization>
 		<name>IDS Mannheim</name>
