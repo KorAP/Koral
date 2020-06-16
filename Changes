@@ -1,4 +1,6 @@
-0.36 2020-01-21
+0.36 2020-06-16
+    - [security] Upgraded version of Google Guava
+      (CVE-2018-10237; diewald)
 
 0.35 2019-11-12
     - Added a method to add warnings in QuerySerializer (margaretha)
