@@ -1,6 +1,7 @@
 package de.ids_mannheim.korap.query.test.fcsql;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
@@ -430,25 +431,25 @@ public class FCSQLComplexTest {
     @Test
     public void testWrongQuery() throws IOException {
         
-        String errorMessage = "Query cannot be parsed, an unexpcected occured exception while parsing";
+        String errorMessage = "Query cannot be parsed";
         
         // expression should always be within a segment
         query = "!(tt:lemma=\"sein\" | tt:pos=\"PPOSS\")";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(399, error.get(0));
-        assertEquals(errorMessage, error.get(1).toString());
+        assertTrue(error.get(1).toString().startsWith(errorMessage));
 
         query = "![tt:lemma=\"sein\" | tt:pos=\"PPOSS\"]";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
-        assertEquals(errorMessage, error.get(1).toString());
+        assertTrue(error.get(1).toString().startsWith(errorMessage));
 
         query = "(\"blaue\"&\"grüne\")";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
-        assertEquals(errorMessage, error.get(1).toString());
+        assertTrue(error.get(1).toString().startsWith(errorMessage));
 
         query = "[pos=\"NN\"]&[text=\"Mann\"]";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(399, error.get(0));
-        assertEquals(errorMessage, error.get(1).toString());
+        assertTrue(error.get(1).toString().startsWith(errorMessage));
     }
 }

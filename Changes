@@ -1,6 +1,7 @@
-0.36 2020-06-16
+0.36 2020-07-24
     - [security] Upgraded version of Google Guava
       (CVE-2018-10237; diewald)
+    - Updated FCS support (dependabot, diewald)
 
 0.35 2019-11-12
     - Added a method to add warnings in QuerySerializer (margaretha)

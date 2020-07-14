@@ -1,6 +1,7 @@
 package de.ids_mannheim.korap.query.test.fcsql;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
@@ -106,7 +107,7 @@ public class FCSQLQueryProcessorTest {
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         String msg = (String) error.get(1);
-        assertEquals(true, msg.startsWith("Regexflags"));
+        assertEquals(true, msg.startsWith("Regexflag"));
 
         query = "\"Fliegen\" /d";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
@@ -287,9 +288,7 @@ public class FCSQLQueryProcessorTest {
         
         error = getError(new FCSQLQueryProcessor(query));
         assertEquals(399, error.get(0));
-        assertEquals(
-                "Query cannot be parsed, an unexpcected occured exception while parsing",
-                error.get(1));
+        assertTrue(error.get(1).toString().startsWith("Query cannot be parsed"));
     }
 
     @Test

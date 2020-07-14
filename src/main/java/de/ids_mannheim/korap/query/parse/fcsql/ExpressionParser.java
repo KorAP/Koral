@@ -314,10 +314,10 @@ public class ExpressionParser {
         Iterator<RegexFlag> i = set.iterator();
         while (i.hasNext()) {
             RegexFlag f = i.next();
-            if (f == RegexFlag.CASE_SENSITVE) {
+            if (f == RegexFlag.CASE_SENSITIVE) {
                 koralTerm.setCaseSensitive(true);
             }
-            else if (f == RegexFlag.CASE_INSENSITVE) {
+            else if (f == RegexFlag.CASE_INSENSITIVE) {
                 koralTerm.setCaseSensitive(false);
             }
             else {
