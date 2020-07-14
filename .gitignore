@@ -10,6 +10,7 @@
 *~
 .*
 !.gitignore
+!.github
 
 # /src/main/antlr/cosmas/
 /src/main/antlr/cosmas/c2ps_regex.g
