@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-maven-plugin</artifactId>
-			<version>4.2</version>
+			<version>4.8-1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
@@ -294,7 +294,7 @@
 					recipe is based on http://stackoverflow.com/questions/15310628/ customize-maven-to-automatically-create-antlr4-grammar-java-files-on-build -->
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
-				<version>4.2</version>
+				<version>4.8-1</version>
 				<executions>
 					<execution>
 						<id>poliqarpplus</id>
