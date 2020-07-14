@@ -107,7 +107,7 @@ public class FCSQLQueryProcessorTest {
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
         assertEquals(306, error.get(0));
         String msg = (String) error.get(1);
-        assertTrue(msg.startsWith("Regexflags"));
+        assertTrue(msg.startsWith("Regexflag"));
 
         query = "\"Fliegen\" /d";
         error = FCSQLQueryProcessorTest.getError(new FCSQLQueryProcessor(query));
@@ -288,9 +288,7 @@ public class FCSQLQueryProcessorTest {
         
         error = getError(new FCSQLQueryProcessor(query));
         assertEquals(399, error.get(0));
-        assertEquals(
-                "Query cannot be parsed, an unexpcected occured exception while parsing",
-                error.get(1));
+        assertTrue(error.get(1).toString().startsWith("Query cannot be parsed"));
     }
 
     @Test
