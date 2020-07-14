@@ -56,7 +56,7 @@ FLAG_ix      : '/' ( ('i'|'I') ('x'|'X')? );
 /** Simple strings and Simple queries */
 WS                  : [ \t]  -> channel(HIDDEN);
 fragment FOCC       : '{' WS* ( [0-9]* WS* ',' WS* [0-9]+ | [0-9]+ WS* ','? ) WS* '}';
-fragment NO_RE      : ~[ \t\/];
+fragment NO_RE      : ~[ \t/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
                     | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' );
 NUMBER              : [0-9]+;
