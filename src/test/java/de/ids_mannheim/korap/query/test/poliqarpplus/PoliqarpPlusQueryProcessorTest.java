@@ -342,7 +342,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("koral:term", res.at("/query/wrap/@type").asText());
         assertEquals("deutscher", res.at("/query/wrap/key").asText());
-        assertEquals(true, res.at("/query/wrap/flags:caseInsensitive")
+        assertTrue(res.at("/query/wrap/flags:caseInsensitive")
                 .isMissingNode());
         assertEquals("flags:caseInsensitive", res.at("/query/wrap/flags/0")
                 .asText());
@@ -366,7 +366,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("koral:term", res.at("/query/wrap/@type").asText());
         assertEquals("deutscher", res.at("/query/wrap/key").asText());
-        assertEquals(true, res.at("/query/wrap/flags/0").isMissingNode());
+        assertTrue(res.at("/query/wrap/flags/0").isMissingNode());
         assertEquals("orth", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
 
@@ -386,7 +386,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("Bundestag", operands.get(1).at("/wrap/key").asText());
         assertEquals("orth", operands.get(1).at("/wrap/layer").asText());
         assertEquals("match:eq", operands.get(1).at("/wrap/match").asText());
-        assertEquals(true, operands.get(1).at("/wrap/flags/0").isMissingNode());
+        assertTrue(operands.get(1).at("/wrap/flags/0").isMissingNode());
 
         query = "deutscher/i Bundestag";
         qs.setQuery(query, "poliqarpplus");
@@ -404,7 +404,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("Bundestag", operands.get(1).at("/wrap/key").asText());
         assertEquals("orth", operands.get(1).at("/wrap/layer").asText());
         assertEquals("match:eq", operands.get(1).at("/wrap/match").asText());
-        assertEquals(true, operands.get(1).at("/wrap/flags:caseInsensitive")
+        assertTrue(operands.get(1).at("/wrap/flags:caseInsensitive")
                 .isMissingNode());
     }
 
@@ -515,7 +515,7 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals(3, res.at("/query/boundary/min").asInt());
-        assertEquals(true, res.at("/query/boundary/max").isMissingNode());
+        assertTrue(res.at("/query/boundary/max").isMissingNode());
 
         query = "der{3,7}";
         qs.setQuery(query, "poliqarpplus");
@@ -527,13 +527,13 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals(0, res.at("/query/boundary/min").asInt());
-        assertEquals(true, res.at("/query/boundary/max").isMissingNode());
+        assertTrue(res.at("/query/boundary/max").isMissingNode());
 
         query = "der+";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals(1, res.at("/query/boundary/min").asInt());
-        assertEquals(true, res.at("/query/boundary/max").isMissingNode());
+        assertTrue(res.at("/query/boundary/max").isMissingNode());
     };
 
 
@@ -555,7 +555,7 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals(3, res.at("/query/operands/1/boundary/min").asInt());
-        assertEquals(true, res.at("/query/operands/1/boundary/max")
+        assertTrue(res.at("/query/operands/1/boundary/max")
                 .isMissingNode());
 
         query = "contains(<s>, (der){,3})";
@@ -574,7 +574,7 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals(0, res.at("/query/operands/1/boundary/min").asInt());
-        assertEquals(true, res.at("/query/operands/1/boundary/max")
+        assertTrue(res.at("/query/operands/1/boundary/max")
                 .isMissingNode());
     };
 
@@ -587,7 +587,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
-        assertEquals(true, res.at("/query/frames/1").isMissingNode());
+        assertTrue(res.at("/query/frames/1").isMissingNode());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
@@ -629,7 +629,7 @@ public class PoliqarpPlusQueryProcessorTest {
                 res.at("/query/operands/1/operands/1/operation").asText());
         assertEquals(0, res.at("/query/operands/1/operands/1/boundary/min")
                 .asInt());
-        assertEquals(true, res.at("/query/operands/1/operands/1/boundary/max")
+        assertTrue(res.at("/query/operands/1/operands/1/boundary/max")
                 .isMissingNode());
         assertEquals("Mann",
                 res.at("/query/operands/1/operands/1/operands/0/wrap/key")
@@ -1041,7 +1041,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/classOut").asInt());
-        assertEquals(true, res.at("/query/classIn").isMissingNode());
+        assertTrue(res.at("/query/classIn").isMissingNode());
         assertEquals("Mann", res.at("/query/operands/0/wrap/key").asText());
 
         query = "{[base=Mann][orth=Frau]}";
@@ -1050,7 +1050,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:class", res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/classOut").asInt());
-        assertEquals(true, res.at("/query/classIn").isMissingNode());
+        assertTrue(res.at("/query/classIn").isMissingNode());
         assertEquals("Mann", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
         assertEquals("Frau", res.at("/query/operands/0/operands/1/wrap/key")
@@ -1067,7 +1067,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("operation:class", res.at("/query/operands/1/operation")
                 .asText());
         assertEquals(1, res.at("/query/operands/1/classOut").asInt());
-        assertEquals(true, res.at("/query/classIn").isMissingNode());
+        assertTrue(res.at("/query/classIn").isMissingNode());
         assertEquals("Mann", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
         assertEquals("Frau", res.at("/query/operands/1/operands/0/wrap/key")
@@ -1082,7 +1082,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("operation:class", res.at("/query/operands/1/operation")
                 .asText());
         assertEquals(1, res.at("/query/operands/1/classOut").asInt());
-        assertEquals(true, res.at("/query/operands/1/classIn").isMissingNode());
+        assertTrue(res.at("/query/operands/1/classIn").isMissingNode());
         assertEquals("Mann",
                 res.at("/query/operands/1/operands/0/operands/0/wrap/key")
                         .asText());
@@ -1099,7 +1099,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("operation:class", res.at("/query/operands/0/operation")
                 .asText());
         assertEquals(1, res.at("/query/operands/0/classOut").asInt());
-        assertEquals(true, res.at("/query/operands/0/classIn").isMissingNode());
+        assertTrue(res.at("/query/operands/0/classIn").isMissingNode());
         assertEquals("Mann",
                 res.at("/query/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
@@ -1226,7 +1226,7 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals(3, res.at("/query/classRef/0").asInt());
-        assertEquals(true, res.at("/query/classRef/1").isMissingNode());
+        assertTrue(res.at("/query/classRef/1").isMissingNode());
         assertEquals("koral:reference", res.at("/query/@type").asText());
         assertEquals("operation:split", res.at("/query/operation").asText());
 
@@ -1260,7 +1260,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:reference", res.at("/query/@type").asText());
         assertEquals("operation:focus", res.at("/query/operation").asText());
         assertEquals(1, res.at("/query/spanRef/0").asInt());
-        assertEquals(true, res.at("/query/spanRef/1").isMissingNode());
+        assertTrue(res.at("/query/spanRef/1").isMissingNode());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
 
         query = "submatch(1,4:<s>)";
@@ -1354,7 +1354,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("cnx", res.at("/query/relation/wrap/foundry").asText());
         assertEquals("c", res.at("/query/relation/wrap/layer").asText());
         assertEquals(0, res.at("/query/relation/boundary/min").asInt());
-        assertEquals(true, res.at("/query/relation/boundary/max")
+        assertTrue(res.at("/query/relation/boundary/max")
                 .isMissingNode());
 
         query = "dominates(cnx/c{1,5}:<vp>,<np>)";
@@ -1598,7 +1598,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
-        assertEquals(true, res.at("/query/frames/1").isMissingNode());
+        assertTrue(res.at("/query/frames/1").isMissingNode());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
@@ -1609,7 +1609,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
-        assertEquals(true, res.at("/query/frames/1").isMissingNode());
+        assertTrue(res.at("/query/frames/1").isMissingNode());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());

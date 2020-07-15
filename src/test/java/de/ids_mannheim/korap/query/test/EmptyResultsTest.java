@@ -10,8 +10,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.ArrayList;
 
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author hanl
@@ -27,8 +26,8 @@ public class EmptyResultsTest {
         QuerySerializer s = new QuerySerializer();
         s.setQuery("prox/unit=word/distance<=5", "cql");
         JsonNode node = mapper.valueToTree(s.build());
-        assertEquals(node.has("query"), false);
-        assertEquals(node.has("collection"), false);
+        assertFalse(node.has("query"));
+        assertFalse(node.has("collection"));
     }
 
 
@@ -38,8 +37,8 @@ public class EmptyResultsTest {
         s.setQuery("[base=Wort]", "poliqarp");
 
         JsonNode node = mapper.valueToTree(s.build());
-        assertEquals(node.has("query"), true);
-        assertEquals(node.has("collection"), false);
+        assertTrue(node.has("query"));
+        assertFalse(node.has("collection"));
     }
 
 
@@ -49,7 +48,7 @@ public class EmptyResultsTest {
         s.setQuery("[base=Wort]", "poliqarp");
 
         JsonNode node = mapper.valueToTree(s.build());
-        assertEquals(node.has("meta"), false);
+        assertFalse(node.has("meta"));
     }
 
     @Test
@@ -62,12 +61,12 @@ public class EmptyResultsTest {
         s.addWarning(16, "Beispiel 2", null);
 
         JsonNode node = mapper.valueToTree(s.build());
-        assertEquals(true, node.has("warnings"));
+        assertTrue(node.has("warnings"));
         assertEquals(14, node.at("/warnings/0/0").asInt());
         assertEquals("Beispiel", node.at("/warnings/0/1").asText());
         assertEquals("Hui", node.at("/warnings/0/2").asText());
         assertEquals(16, node.at("/warnings/1/0").asInt());
         assertEquals("Beispiel 2", node.at("/warnings/1/1").asText());
-        assertEquals(false, node.has("/warnings/1/2"));
+        assertFalse(node.has("/warnings/1/2"));
     }    
 }
