@@ -1,6 +1,8 @@
-0.36 2020-06-16
+0.36 2020-07-15
     - [security] Upgraded version of Google Guava
       (CVE-2018-10237; diewald)
+    - Optimize regular expressions to use character classes
+      instead of alternations (kupietz)
 
 0.35 2019-11-12
     - Added a method to add warnings in QuerySerializer (margaretha)
