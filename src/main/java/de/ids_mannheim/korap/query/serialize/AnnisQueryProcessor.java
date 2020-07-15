@@ -995,7 +995,6 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    @SuppressWarnings("unchecked")
     private Map<String, Object> parseOperatorNode (ParseTree operatorNode) {
         Map<String, Object> relation = null;
         String operator = getNodeCat(operatorNode);
@@ -1131,7 +1130,6 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    @SuppressWarnings("unchecked")
     private Map<String, Object> parseEdgeSpec (ParseTree edgeSpec) {
         List<ParseTree> annos = getChildrenWithCat(edgeSpec, "edgeAnno");
         if (annos.size() != 1) {
