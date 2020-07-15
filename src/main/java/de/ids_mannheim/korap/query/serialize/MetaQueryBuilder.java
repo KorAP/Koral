@@ -100,7 +100,7 @@ public class MetaQueryBuilder {
         return meta;
     }
 
-    public class SpanContext {
+    public static class SpanContext {
         private String left_type;
         private String right_type;
         private int left_size;
