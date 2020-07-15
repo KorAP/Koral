@@ -639,9 +639,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         CollectionQueryProcessor cq = new CollectionQueryProcessor(
                 node.getChild(1).getText());
         requestMap.put("collection", cq.getRequestMap().get("collection"));
-        for (ParseTree child : getChildren(node)) {
-            visited.add(child);
-        }
+        visited.addAll(getChildren(node));
     }
 
 

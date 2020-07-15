@@ -1550,14 +1550,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     Pattern.compile("(\\+|-)?(sa|se|pa|pe|ta|te)");
             Matcher conditionMatcher =
                     conditionPattern.matcher(conditionsString);
-            String replacement = "#BED(" + m.group(1) + " , ";
+            StringBuilder replacement = new StringBuilder("#BED(" + m.group(1) + " , ");
             while (conditionMatcher.find()) {
-                replacement = replacement + conditionMatcher.group() + ",";
+                replacement.append(conditionMatcher.group()).append(",");
             }
             // remove trailing comma and close parenthesis
-            replacement =
-                    replacement.substring(0, replacement.length() - 1) + ")";
-            rewrittenQuery = rewrittenQuery.replace(match, replacement);
+            replacement = new StringBuilder(replacement.substring(0, replacement.length() - 1) + ")");
+            rewrittenQuery = rewrittenQuery.replace(match, replacement.toString());
         }
         return rewrittenQuery;
     }

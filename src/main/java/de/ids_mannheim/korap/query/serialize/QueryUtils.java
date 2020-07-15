@@ -73,87 +73,86 @@ public class QueryUtils {
                 break;
         }
 
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("<query><cypher><![CDATA[");
-        buffer.append(cypher);
-        buffer.append("]]></cypher>");
-        buffer.append("<wordAliasPrefix>wtok_</wordAliasPrefix>");
-        buffer.append("<contextColumn>sent</contextColumn>");
-        buffer.append("<contextIdColumn>sid</contextIdColumn>");
-        buffer.append("<textColumn>txt</textColumn>");
-        buffer.append("<startIndex>");
-        buffer.append(page);
-        buffer.append("</startIndex>");
-        buffer.append("<itemsPerPage>");
-        buffer.append(limit);
-        buffer.append("</itemsPerPage>");
-        buffer.append("<context>");
-        buffer.append("<left>");
-        buffer.append("<" + sctypel + ">");
-        buffer.append(cl);
-        buffer.append("</" + sctypel + ">");
-        buffer.append("</left>");
-        buffer.append("<right>");
-        buffer.append("<" + sctyper + ">");
-        buffer.append(cr);
-        buffer.append("</" + sctyper + ">");
-        buffer.append("</right>");
-        buffer.append("</context>");
-        buffer.append("</query>");
-        return buffer.toString();
+        return new StringBuffer()
+                .append("<query><cypher><![CDATA[")
+                .append(cypher)
+                .append("]]></cypher>")
+                .append("<wordAliasPrefix>wtok_</wordAliasPrefix>")
+                .append("<contextColumn>sent</contextColumn>")
+                .append("<contextIdColumn>sid</contextIdColumn>")
+                .append("<textColumn>txt</textColumn>")
+                .append("<startIndex>")
+                .append(page)
+                .append("</startIndex>")
+                .append("<itemsPerPage>")
+                .append(limit)
+                .append("</itemsPerPage>")
+                .append("<context>")
+                .append("<left>")
+                .append("<").append(sctypel).append(">")
+                .append(cl)
+                .append("</").append(sctypel).append(">")
+                .append("</left>")
+                .append("<right>")
+                .append("<").append(sctyper).append(">")
+                .append(cr)
+                .append("</").append(sctyper).append(">")
+                .append("</right>")
+                .append("</context>")
+                .append("</query>")
+                .toString();
     }
 
 
     public static String buildDotQuery (long sid, String graphdb_id) {
-        StringBuffer b = new StringBuffer();
-        b.append("<query>");
-        b.append("<sentenceId>");
-        b.append(sid);
-        b.append("</sentenceId>");
-        b.append("<gdbId>");
-        b.append(graphdb_id);
-        b.append("</gdbId>");
-        b.append("<hls>");
-        b.append("<hl>");
-        b.append(40857);
-        b.append("</hl>");
-        b.append("<hl>");
-        b.append(40856);
-        b.append("</hl>");
-        b.append("</hls>");
-        b.append("</query>");
-
-        return b.toString();
+        return new StringBuffer()
+                .append("<query>")
+                .append("<sentenceId>")
+                .append(sid)
+                .append("</sentenceId>")
+                .append("<gdbId>")
+                .append(graphdb_id)
+                .append("</gdbId>")
+                .append("<hls>")
+                .append("<hl>")
+                .append(40857)
+                .append("</hl>")
+                .append("<hl>")
+                .append(40856)
+                .append("</hl>")
+                .append("</hls>")
+                .append("</query>")
+                .toString();
     }
 
 
     public String buildaggreQuery (String query) {
-        StringBuffer b = new StringBuffer();
-        b.append("<query><cypher><![CDATA[");
-        b.append(query);
-        b.append("]]></cypher>");
-        b.append("<columns>");
-        b.append("<column agg='true' sum='false'>");
-        b.append("<cypherAlias>");
-        b.append("aggBy");
-        b.append("</cypherAlias>");
-        b.append("<displayName>");
-        b.append("Aggregate");
-        b.append("</displayName>");
-        b.append("</column>");
+        return new StringBuffer()
+                .append("<query><cypher><![CDATA[")
+                .append(query)
+                .append("]]></cypher>")
+                .append("<columns>")
+                .append("<column agg='true' sum='false'>")
+                .append("<cypherAlias>")
+                .append("aggBy")
+                .append("</cypherAlias>")
+                .append("<displayName>")
+                .append("Aggregate")
+                .append("</displayName>")
+                .append("</column>")
 
-        b.append("<column agg='fals' sum='true'>");
-        b.append("<cypherAlias>");
-        b.append("cnt");
-        b.append("</cypherAlias>");
-        b.append("<displayName>");
-        b.append("Count");
-        b.append("</displayName>");
-        b.append("</column>");
-        b.append("</columns>");
+                .append("<column agg='fals' sum='true'>")
+                .append("<cypherAlias>")
+                .append("cnt")
+                .append("</cypherAlias>")
+                .append("<displayName>")
+                .append("Count")
+                .append("</displayName>")
+                .append("</column>")
+                .append("</columns>")
 
-        b.append("</query>");
-        return b.toString();
+                .append("</query>")
+                .toString();
     }
 
 
