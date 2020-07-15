@@ -201,7 +201,6 @@
 					<compilerVersion>2.0</compilerVersion>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
-					<argLine>-Xms512m</argLine>
 				</configuration>
 			</plugin>
 			<!-- <plugin>
