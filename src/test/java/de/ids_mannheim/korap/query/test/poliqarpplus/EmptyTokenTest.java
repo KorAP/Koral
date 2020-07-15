@@ -39,7 +39,7 @@ public class EmptyTokenTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals(true, res.at("/query/key").isMissingNode());
+        assertTrue(res.at("/query/key").isMissingNode());
     }
 
     @Test
@@ -107,7 +107,7 @@ public class EmptyTokenTest {
         res = mapper.readTree(qs.toJSON());
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
-        assertEquals(true, operands.get(0).at("/key").isMissingNode());
+        assertTrue(operands.get(0).at("/key").isMissingNode());
         assertEquals("koral:token", operands.get(1).at("/@type").asText());
         assertEquals("Mann", operands.get(1).at("/wrap/key").asText());
 
@@ -124,7 +124,7 @@ public class EmptyTokenTest {
         operands = Lists
                 .newArrayList(operands.get(0).at("/operands").elements());
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
-        assertEquals(true, operands.get(0).at("/key").isMissingNode());
+        assertTrue(operands.get(0).at("/key").isMissingNode());
     }
 
 
@@ -141,8 +141,7 @@ public class EmptyTokenTest {
         assertEquals(2, operands.get(0).at("/boundary/max").asInt());
         assertEquals("koral:token",
                 operands.get(0).at("/operands/0/@type").asText());
-        assertEquals(true,
-                operands.get(0).at("/operands/0/key").isMissingNode());
+        assertTrue(operands.get(0).at("/operands/0/key").isMissingNode());
         assertEquals("koral:token", operands.get(1).at("/@type").asText());
         assertEquals("bose", operands.get(1).at("/wrap/key").asText());
         assertEquals("koral:token", operands.get(2).at("/@type").asText());
@@ -157,7 +156,7 @@ public class EmptyTokenTest {
         res = mapper.readTree(qs.toJSON());
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         assertEquals("koral:token", operands.get(1).at("/@type").asText());
-        assertEquals(true, operands.get(1).at("/key").isMissingNode());
+        assertTrue(operands.get(1).at("/key").isMissingNode());
 
         query = "[base=Mann][]{3}";
         qs.setQuery(query, "poliqarpplus");
@@ -165,7 +164,7 @@ public class EmptyTokenTest {
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         res = operands.get(1);
         assertEquals("koral:group", res.at("/@type").asText());
-        assertEquals(true, res.at("/wrap/key").isMissingNode());
+        assertTrue(res.at("/wrap/key").isMissingNode());
         assertEquals("operation:repetition", res.at("/operation").asText());
         assertEquals(3, res.at("/boundary/min").asInt());
         assertEquals(3, res.at("/boundary/max").asInt());
@@ -199,7 +198,7 @@ public class EmptyTokenTest {
         assertEquals("lemma", operands.get(0).at("/wrap/layer").asText());
         assertEquals("match:eq", operands.get(0).at("/wrap/match").asText());
         assertEquals("koral:token", operands.get(1).at("/@type").asText());
-        assertEquals(true, operands.get(1).at("/wrap/key").isMissingNode());
+        assertTrue(operands.get(1).at("/wrap/key").isMissingNode());
         assertEquals("koral:token", operands.get(2).at("/@type").asText());
         assertEquals("Mann", operands.get(2).at("/wrap/key").asText());
         assertEquals("lemma", operands.get(2).at("/wrap/layer").asText());
@@ -228,7 +227,7 @@ public class EmptyTokenTest {
                 .newArrayList(operands.get(1).at("/operands").elements());
         assertEquals(1, operands.size());
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
-        assertEquals(true, operands.get(0).at("/wrap/key").isMissingNode());
+        assertTrue(operands.get(0).at("/wrap/key").isMissingNode());
 
     }
 
@@ -244,7 +243,7 @@ public class EmptyTokenTest {
         assertEquals(3, operands.size());
         
         assertEquals("koral:token", operands.get(1).at("/@type").asText());
-        assertEquals(true, operands.get(1).at("/wrap/key").isMissingNode());
+        assertTrue(operands.get(1).at("/wrap/key").isMissingNode());
         
         assertEquals("koral:group", operands.get(2).at("/@type").asText());
         assertEquals("operation:repetition",
@@ -277,7 +276,7 @@ public class EmptyTokenTest {
         assertEquals(1, operands.get(0).at("/boundary/max").asInt());
         
         assertEquals("koral:token", operands.get(1).at("/@type").asText());
-        assertEquals(true, operands.get(1).at("/wrap/key").isMissingNode());
+        assertTrue(operands.get(1).at("/wrap/key").isMissingNode());
         
         assertEquals("koral:group", operands.get(2).at("/@type").asText());
         assertEquals("operation:repetition",
@@ -310,7 +309,7 @@ public class EmptyTokenTest {
                 .newArrayList(operands.get(1).at("/operands").elements());
         assertEquals(1, operands.size());
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
-        assertEquals(true, operands.get(0).at("/wrap/key").isMissingNode());
+        assertTrue(operands.get(0).at("/wrap/key").isMissingNode());
     }
 
 
@@ -330,12 +329,12 @@ public class EmptyTokenTest {
         assertEquals("koral:boundary",
                 operands.get(1).at("/boundary/@type").asText());
         assertEquals(1, operands.get(1).at("/boundary/min").asInt());
-        assertEquals(true, operands.get(1).at("/boundary/max").isMissingNode());
+        assertTrue(operands.get(1).at("/boundary/max").isMissingNode());
         operands = Lists
                 .newArrayList(operands.get(1).at("/operands").elements());
         assertEquals(1, operands.size());
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
-        assertEquals(true, operands.get(0).at("/wrap/key").isMissingNode());
+        assertTrue(operands.get(0).at("/wrap/key").isMissingNode());
     }
 
 
@@ -356,12 +355,12 @@ public class EmptyTokenTest {
         assertEquals("koral:boundary",
                 operands.get(1).at("/boundary/@type").asText());
         assertEquals(0, operands.get(1).at("/boundary/min").asInt());
-        assertEquals(true, operands.get(1).at("/boundary/max").isMissingNode());
+        assertTrue(operands.get(1).at("/boundary/max").isMissingNode());
         operands = Lists
                 .newArrayList(operands.get(1).at("/operands").elements());
         assertEquals(1, operands.size());
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
-        assertEquals(true, operands.get(0).at("/wrap/key").isMissingNode());
+        assertTrue(operands.get(0).at("/wrap/key").isMissingNode());
     }
 
 
@@ -387,8 +386,7 @@ public class EmptyTokenTest {
         assertEquals(5, operands.get(1).at("/boundary/max").asInt());
         assertEquals("koral:token",
                 operands.get(1).at("/operands/0/@type").asText());
-        assertEquals(true,
-                operands.get(1).at("/operands/0/wrap/key").isMissingNode());
+        assertTrue(operands.get(1).at("/operands/0/wrap/key").isMissingNode());
 
         assertEquals("koral:token", operands.get(2).at("/@type").asText());
         assertEquals("Mann", operands.get(2).at("/wrap/key").asText());
@@ -402,8 +400,7 @@ public class EmptyTokenTest {
         assertEquals(2, operands.get(3).at("/boundary/max").asInt());
         assertEquals("koral:token",
                 operands.get(3).at("/operands/0/@type").asText());
-        assertEquals(true,
-                operands.get(3).at("/operands/0/wrap/key").isMissingNode());
+        assertTrue(operands.get(3).at("/operands/0/wrap/key").isMissingNode());
 
         assertEquals("koral:token", operands.get(4).at("/@type").asText());
         assertEquals("Frau", operands.get(4).at("/wrap/key").asText());
@@ -419,8 +416,8 @@ public class EmptyTokenTest {
 
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:sequence", res.at("/query/operation").asText());
-        assertEquals(true, res.at("/query/inOrder").isMissingNode());
-        assertEquals(true, res.at("/query/distances").isMissingNode());
+        assertTrue(res.at("/query/inOrder").isMissingNode());
+        assertTrue(res.at("/query/distances").isMissingNode());
 
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         assertEquals(4, operands.size());
@@ -443,7 +440,7 @@ public class EmptyTokenTest {
         assertEquals("koral:boundary",
                 operands.get(2).at("/boundary/@type").asText());
         assertEquals(0, operands.get(2).at("/boundary/min").asInt());
-        assertEquals(true, operands.get(2).at("/boundary/max").isMissingNode());
+        assertTrue(operands.get(2).at("/boundary/max").isMissingNode());
 
         assertEquals("koral:group", operands.get(3).at("/@type").asText());
         assertEquals("operation:position",
@@ -466,11 +463,11 @@ public class EmptyTokenTest {
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
-        assertEquals(true, res.at("/query/frames/1").isMissingNode());
+        assertTrue(res.at("/query/frames/1").isMissingNode());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
-        assertEquals(true, res.at("/query/operands/1/key").isMissingNode());
+        assertTrue(res.at("/query/operands/1/key").isMissingNode());
 
         query = "contains(<s>, []{3})";
         qs.setQuery(query, "poliqarpplus");
@@ -481,8 +478,7 @@ public class EmptyTokenTest {
                 res.at("/query/operands/1/operation").asText());
         assertEquals("koral:token",
                 res.at("/query/operands/1/operands/0/@type").asText());
-        assertEquals(true,
-                res.at("/query/operands/1/operands/0/key").isMissingNode());
+        assertTrue(res.at("/query/operands/1/operands/0/key").isMissingNode());
 
         query = "contains(<s>, {1:[]{3}})";
         qs.setQuery(query, "poliqarpplus");
@@ -495,7 +491,7 @@ public class EmptyTokenTest {
                 res.at("/query/operands/1/operands/0/operation").asText());
         assertEquals("koral:token", res
                 .at("/query/operands/1/operands/0/operands/0/@type").asText());
-        assertEquals(true, res.at("/query/operands/1/operands/0/operands/0/key")
+        assertTrue(res.at("/query/operands/1/operands/0/operands/0/key")
                 .isMissingNode());
 
         query = "startswith(<s>, [][base=Mann])";
@@ -507,7 +503,7 @@ public class EmptyTokenTest {
         operands = Lists.newArrayList(res.at("/query/operands"));
         operands = Lists.newArrayList(operands.get(1).at("/operands"));
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
-        assertEquals(true, operands.get(0).at("/key").isMissingNode());
+        assertTrue(operands.get(0).at("/key").isMissingNode());
     }
 
     @Test
@@ -517,8 +513,8 @@ public class EmptyTokenTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:sequence", res.at("/query/operation").asText());
-        assertEquals(true, res.at("/query/inOrder").isMissingNode());
-        assertEquals(true, res.at("/query/distances").isMissingNode());
+        assertTrue(res.at("/query/inOrder").isMissingNode());
+        assertTrue(res.at("/query/distances").isMissingNode());
         operands = Lists.newArrayList(res.at("/query/operands").elements());
         assertEquals("der", operands.get(0).at("/wrap/key").asText());
         assertEquals("Mann", operands.get(2).at("/wrap/key").asText());
@@ -529,7 +525,7 @@ public class EmptyTokenTest {
         operands = Lists
                 .newArrayList(operands.get(1).at("/operands").elements());
         assertEquals("koral:token", operands.get(0).at("/@type").asText());
-        assertEquals(true, operands.get(0).at("/wrap").isMissingNode());
+        assertTrue(operands.get(0).at("/wrap").isMissingNode());
         assertEquals(1, res.at("/meta/highlight/0").asInt());
     }
 

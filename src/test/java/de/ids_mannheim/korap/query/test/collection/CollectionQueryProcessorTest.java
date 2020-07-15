@@ -1,9 +1,5 @@
 package de.ids_mannheim.korap.query.test.collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 
 import org.junit.Test;
@@ -15,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 import de.ids_mannheim.korap.query.serialize.QueryUtils;
+
+import static org.junit.Assert.*;
 
 public class CollectionQueryProcessorTest {
 
@@ -105,7 +103,7 @@ public class CollectionQueryProcessorTest {
         assertEquals("koral:doc", res.at("/collection/@type").asText());
         assertEquals("textClass", res.at("/collection/key").asText());
         assertEquals("politik", res.at("/collection/value").asText());
-        assertFalse(res.at("/collection/type").asText().equals("type:regex"));
+        assertNotEquals("type:regex", res.at("/collection/type").asText());
         assertEquals("match:eq", res.at("/collection/match").asText());
 
         collection = "textClass!=politik";
@@ -115,7 +113,7 @@ public class CollectionQueryProcessorTest {
         assertEquals("koral:doc", res.at("/collection/@type").asText());
         assertEquals("textClass", res.at("/collection/key").asText());
         assertEquals("politik", res.at("/collection/value").asText());
-        assertFalse(res.at("/collection/type").asText().equals("type:regex"));
+        assertNotEquals("type:regex", res.at("/collection/type").asText());
         assertEquals("match:ne", res.at("/collection/match").asText());
     }
 
@@ -348,7 +346,7 @@ public class CollectionQueryProcessorTest {
                 .asText());
         assertEquals("pubDate", res.at("/collection/operands/1/key").asText());
         assertEquals("2014", res.at("/collection/operands/1/value").asText());
-        assertEquals(true, res.at("/collection/operands/1/type")
+        assertTrue(res.at("/collection/operands/1/type")
                 .isMissingNode());
         assertEquals("match:eq", res.at("/collection/operands/1/match")
                 .asText());
@@ -658,7 +656,7 @@ public class CollectionQueryProcessorTest {
         assertEquals("koral:doc", res.at("/collection/@type").asText());
         assertEquals("pubDate", res.at("/collection/key").asText());
         assertEquals("2000", res.at("/collection/value").asText());
-        assertEquals(true, res.at("/collection/type").isMissingNode());
+        assertTrue(res.at("/collection/type").isMissingNode());
         assertEquals("match:eq", res.at("/collection/match").asText());
 
         collection = "pubDate since 2000";
@@ -702,7 +700,7 @@ public class CollectionQueryProcessorTest {
         assertEquals("koral:doc", res.at("/collection/@type").asText());
         assertEquals("pubDate", res.at("/collection/key").asText());
         assertEquals("2000-12", res.at("/collection/value").asText());
-        assertEquals(true, res.at("/collection/type").isMissingNode());
+        assertTrue(res.at("/collection/type").isMissingNode());
         assertEquals("match:eq", res.at("/collection/match").asText());
 
         collection = "pubDate since 2000-02-01";
@@ -759,11 +757,11 @@ public class CollectionQueryProcessorTest {
         String date_1 = "2015-05";
         String date_2 = "2015-05-13";
         String date_3 = "2015-23-01";
-        assertEquals(false, QueryUtils.checkDateValidity(fake_date));
-        assertEquals(false, QueryUtils.checkDateValidity(fake_date_2));
-        assertEquals(true, QueryUtils.checkDateValidity(date));
-        assertEquals(true, QueryUtils.checkDateValidity(date_1));
-        assertEquals(true, QueryUtils.checkDateValidity(date_2));
-        assertEquals(false, QueryUtils.checkDateValidity(date_3));
+        assertFalse(QueryUtils.checkDateValidity(fake_date));
+        assertFalse(QueryUtils.checkDateValidity(fake_date_2));
+        assertTrue(QueryUtils.checkDateValidity(date));
+        assertTrue(QueryUtils.checkDateValidity(date_1));
+        assertTrue(QueryUtils.checkDateValidity(date_2));
+        assertFalse(QueryUtils.checkDateValidity(date_3));
     }
 }

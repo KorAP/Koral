@@ -156,11 +156,10 @@ public class OPINTest {
         res = mapper.readTree(qs.toJSON());
         checkFocus(res);
         res = res.at("/query/operands/0");
-        
-        assertEquals(true,
-                res.at("/query/operands/0/classRefCheck").isMissingNode());
+
+        assertTrue(res.at("/query/operands/0/classRefCheck").isMissingNode());
         assertEquals("frames:matches", res.at("/frames/0").asText());
-        assertEquals(true, res.at("/frames/1").isMissingNode());
+        assertTrue(res.at("/frames/1").isMissingNode());
     }
 
     @Test
@@ -182,8 +181,7 @@ public class OPINTest {
         
         assertEquals("frames:matches",
                 res.at("/operands/0/frames/0").asText());
-        assertEquals(true,
-                res.at("/operands/0/frames/1").isMissingNode());
+        assertTrue(res.at("/operands/0/frames/1").isMissingNode());
         assertEquals("operation:position",
                 res.at("/operands/0/operation").asText());
         
@@ -210,8 +208,7 @@ public class OPINTest {
         assertEquals(130, res.at("/classIn/1").asInt());
         assertEquals("frames:matches",
                 res.at("/operands/0/frames/0").asText());
-        assertEquals(true,
-                res.at("/operands/0/frames/1").isMissingNode());
+        assertTrue(res.at("/operands/0/frames/1").isMissingNode());
         
         JsonNode res1 = res.at("/operands/0/operands/0");
         assertEquals("operation:class", res1.at("/operation").asText());

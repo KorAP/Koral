@@ -1,7 +1,5 @@
 package de.ids_mannheim.korap.query.test.annis;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 
 import org.junit.Test;
@@ -12,6 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for JSON-LD serialization of ANNIS QL queries.
@@ -214,8 +214,8 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:sequence", res.at("/query/operation").asText());
         assertEquals("der", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("die", res.at("/query/operands/1/wrap/key").asText());
-        assertEquals(true, res.at("/query/inOrder").asBoolean());
-        assertEquals(true, res.at("/query/operands/2").isMissingNode());
+        assertTrue(res.at("/query/inOrder").asBoolean());
+        assertTrue(res.at("/query/operands/2").isMissingNode());
 
         query = "tok=\"der\" & tok=\"die\" & #1 .2,3 #2";
         qs.setQuery(query, "annis");
@@ -224,8 +224,8 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:sequence", res.at("/query/operation").asText());
         assertEquals("der", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("die", res.at("/query/operands/1/wrap/key").asText());
-        assertEquals(true, res.at("/query/inOrder").asBoolean());
-        assertEquals(true, res.at("/query/operands/2").isMissingNode());
+        assertTrue(res.at("/query/inOrder").asBoolean());
+        assertTrue(res.at("/query/operands/2").isMissingNode());
         assertEquals("koral:distance", res.at("/query/distances/0/@type")
                 .asText());
         assertEquals("koral:boundary",
@@ -240,14 +240,14 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:sequence", res.at("/query/operation").asText());
         assertEquals("der", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("die", res.at("/query/operands/1/wrap/key").asText());
-        assertEquals(true, res.at("/query/inOrder").asBoolean());
-        assertEquals(true, res.at("/query/operands/2").isMissingNode());
+        assertTrue(res.at("/query/inOrder").asBoolean());
+        assertTrue(res.at("/query/operands/2").isMissingNode());
         assertEquals("koral:distance", res.at("/query/distances/0/@type")
                 .asText());
         assertEquals("koral:boundary",
                 res.at("/query/distances/0/boundary/@type").asText());
         assertEquals(1, res.at("/query/distances/0/boundary/min").asInt());
-        assertEquals(true, res.at("/query/distances/0/boundary/max")
+        assertTrue(res.at("/query/distances/0/boundary/max")
                 .isMissingNode());
 
         query = "tok=\"der\" & tok=\"die\" & #1 .* #2";
@@ -256,7 +256,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("koral:boundary",
                 res.at("/query/distances/0/boundary/@type").asText());
         assertEquals(0, res.at("/query/distances/0/boundary/min").asInt());
-        assertEquals(true, res.at("/query/distances/0/boundary/max")
+        assertTrue(res.at("/query/distances/0/boundary/max")
                 .isMissingNode());
     }
 
@@ -270,8 +270,8 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:sequence", res.at("/query/operation").asText());
         assertEquals("der", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("die", res.at("/query/operands/1/wrap/key").asText());
-        assertEquals(false, res.at("/query/inOrder").asBoolean());
-        assertEquals(true, res.at("/query/operands/2").isMissingNode());
+        assertFalse(res.at("/query/inOrder").asBoolean());
+        assertTrue(res.at("/query/operands/2").isMissingNode());
 
         query = "tok=\"der\" & tok=\"die\" & #1 ^2,3 #2";
         qs.setQuery(query, "annis");
@@ -280,8 +280,8 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:sequence", res.at("/query/operation").asText());
         assertEquals("der", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("die", res.at("/query/operands/1/wrap/key").asText());
-        assertEquals(false, res.at("/query/inOrder").asBoolean());
-        assertEquals(true, res.at("/query/operands/2").isMissingNode());
+        assertFalse(res.at("/query/inOrder").asBoolean());
+        assertTrue(res.at("/query/operands/2").isMissingNode());
         assertEquals("koral:distance", res.at("/query/distances/0/@type")
                 .asText());
         assertEquals("koral:boundary",
@@ -295,9 +295,9 @@ public class AnnisQueryProcessorTest {
         assertEquals("koral:boundary",
                 res.at("/query/distances/0/boundary/@type").asText());
         assertEquals(0, res.at("/query/distances/0/boundary/min").asInt());
-        assertEquals(true, res.at("/query/distances/0/boundary/max")
+        assertTrue(res.at("/query/distances/0/boundary/max")
                 .isMissingNode());
-        assertEquals(false, res.at("/query/inOrder").asBoolean());
+        assertFalse(res.at("/query/inOrder").asBoolean());
     }
 
 
@@ -485,7 +485,7 @@ public class AnnisQueryProcessorTest {
         // the resulting query should be equivalent to PQ+:  focus(2:dominates(focus(1:{1:<A>}<B>),{2:<C>}))<D> 
         qs.setQuery(query, "annis");
         res = mapper.readTree(qs.toJSON());
-        assertEquals(true, res.at("/query/@type").isMissingNode());
+        assertTrue(res.at("/query/@type").isMissingNode());
         assertEquals(StatusCodes.UNBOUND_ANNIS_RELATION, res.at("/errors/0/0")
                 .asInt());
     }
@@ -930,7 +930,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("operation:focus", res.at("/query/operands/1/operation")
                 .asText());
         assertEquals(131, res.at("/query/operands/1/classRef/0").asInt());
-        assertEquals(true, res.at("/query/operands/1/operands").isMissingNode());
+        assertTrue(res.at("/query/operands/1/operands").isMissingNode());
     }
 
 
@@ -975,7 +975,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("NP", res.at("/query/wrap/key").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
         assertEquals("koral:term", res.at("/query/attr/@type").asText());
-        assertEquals(true, res.at("/query/attr/root").asBoolean());
+        assertTrue(res.at("/query/attr/root").asBoolean());
 
         query = "cnx/cat=\"NP\" & #1:root & #1:arity=2";
         qs.setQuery(query, "annis");
@@ -987,7 +987,7 @@ public class AnnisQueryProcessorTest {
         assertEquals("koral:termGroup", res.at("/query/attr/@type").asText());
         assertEquals("koral:term", res.at("/query/attr/operands/0/@type")
                 .asText());
-        assertEquals(true, res.at("/query/attr/operands/0/root").asBoolean());
+        assertTrue(res.at("/query/attr/operands/0/root").asBoolean());
         assertEquals("koral:term", res.at("/query/attr/operands/1/@type")
                 .asText());
         assertEquals("koral:boundary",
@@ -1044,10 +1044,8 @@ public class AnnisQueryProcessorTest {
                 "koral:span",
                 res.at("/query/operands/0/operands/0/operands/0/operands/0/@type")
                         .asText());
-        assertEquals(
-                true,
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/key")
-                        .isMissingNode());
+        assertTrue(res.at("/query/operands/0/operands/0/operands/0/operands/0/key")
+                .isMissingNode());
         assertEquals("koral:span",
                 res.at("/query/operands/0/operands/0/operands/1/@type")
                         .asText());
