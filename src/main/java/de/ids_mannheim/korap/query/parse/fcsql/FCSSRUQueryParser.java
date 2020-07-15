@@ -2,6 +2,7 @@ package de.ids_mannheim.korap.query.parse.fcsql;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import de.ids_mannheim.korap.query.object.KoralContext;
@@ -125,7 +126,7 @@ public class FCSSRUQueryParser {
     private KoralGroup parseWithinQuery(QueryWithWithin queryNode)
             throws KoralException {
         KoralGroup koralGroup = new KoralGroup(KoralOperation.POSITION);
-        koralGroup.setFrames(Arrays.asList(KoralFrame.IS_AROUND));
+        koralGroup.setFrames(Collections.singletonList(KoralFrame.IS_AROUND));
 
         List<KoralObject> operands = new ArrayList<KoralObject>();
         operands.add(parseQueryNode(queryNode.getWithin()));
