@@ -211,7 +211,7 @@ public class QueryUtils {
     public static String escapeRegexSpecialChars (String key) {
         key.replace("\\", "\\\\");
         Pattern p = Pattern
-                .compile("\\.|\\^|\\$|\\||\\?|\\*|\\+|\\(|\\)|\\[|\\]|\\{|\\}");
+                .compile("[.^$|?*+()\\[\\]{}]");
         Matcher m = p.matcher(key);
         while (m.find()) {
             String match = m.group();

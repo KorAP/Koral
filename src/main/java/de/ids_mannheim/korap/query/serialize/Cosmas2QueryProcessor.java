@@ -800,7 +800,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     private void processOPLABEL (Tree node) {
         // Step I: create element
-        String key = node.getChild(0).toStringTree().replaceAll("<|>", "");
+        String key = node.getChild(0).toStringTree().replaceAll("[<>]", "");
         Map<String, Object> elem = KoralObjectGenerator.makeSpan(key);
         // Step II: decide where to put
         putIntoSuperObject(elem);
@@ -1539,7 +1539,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
      * Normalises position operators to equivalents using #BED
      */
     private String rewritePositionQuery (String q) {
-        Pattern p = Pattern.compile("(\\w+):((\\+|-)?(sa|se|pa|pe|ta|te),?)+");
+        Pattern p = Pattern.compile("(\\w+):(([+\\-])?(sa|se|pa|pe|ta|te),?)+");
         Matcher m = p.matcher(q);
 
         String rewrittenQuery = q;
@@ -1547,7 +1547,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             String match = m.group();
             String conditionsString = match.split(":")[1];
             Pattern conditionPattern =
-                    Pattern.compile("(\\+|-)?(sa|se|pa|pe|ta|te)");
+                    Pattern.compile("([+\\-])?(sa|se|pa|pe|ta|te)");
             Matcher conditionMatcher =
                     conditionPattern.matcher(conditionsString);
             String replacement = "#BED(" + m.group(1) + " , ";
