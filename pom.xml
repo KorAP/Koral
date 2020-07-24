@@ -37,6 +37,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>		
 		<jackson.version>[2.9.5,)</jackson.version>
+		<antlr4.version>4.5.1</antlr4.version>
+		<antlr3.version>3.5.2</antlr3.version>
 		<java.version>1.8</java.version>
 		<log4j.version>2.13.3</log4j.version>
 	</properties>
@@ -59,17 +61,17 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
-			<version>4.8-1</version>
+			<version>${antlr4.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-maven-plugin</artifactId>
-			<version>4.8-1</version>
+			<version>${antlr4.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr-runtime</artifactId>
-			<version>3.5.2</version>
+			<version>${antlr3.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -339,7 +341,7 @@
 					recipe is based on http://stackoverflow.com/questions/15310628/ customize-maven-to-automatically-create-antlr4-grammar-java-files-on-build -->
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr3-maven-plugin</artifactId>
-				<version>3.5.2</version>
+				<version>${antlr3.version}</version>
 				<configuration>
 					<sourceDirectory>${basedir}/src/main/antlr/cosmas</sourceDirectory>
 					<outputDirectory>${basedir}/src/main/java/de/ids_mannheim/korap/query/parse/cosmas</outputDirectory>
