@@ -1615,6 +1615,39 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
     }
 
+    @Test
+    public void testQueryReferences () throws JsonProcessingException, IOException {
+        query = "{#test}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:queryRef", res.at("/query/@type").asText());
+        assertEquals("test", res.at("/query/ref").asText());
+
+        query = "{#admin/example}";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:queryRef", res.at("/query/@type").asText());
+        assertEquals("admin/example", res.at("/query/ref").asText());
+
+        query = "Der {#admin/example} [orth=Baum]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:queryRef", res.at("/query/operands/1/@type").asText());
+        assertEquals("admin/example", res.at("/query/operands/1/ref").asText());
+        assertEquals("koral:token", res.at("/query/operands/2/@type").asText());
+
+        query = "[orth=Der]{#admin/example}{1,}[orth=Baum]";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
+        assertEquals("koral:queryRef", res.at("/query/operands/1/operands/0/@type").asText());
+        assertEquals("admin/example", res.at("/query/operands/1/operands/0/ref").asText());
+        assertEquals("koral:token", res.at("/query/operands/2/@type").asText());
+    }
 
     @Test
     public void testMeta () throws JsonProcessingException, IOException {

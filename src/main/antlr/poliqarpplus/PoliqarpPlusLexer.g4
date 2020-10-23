@@ -13,7 +13,7 @@ language=Java;
  -- author: Joachim Bingel
  -- date: 14-06-27
 
- -- updated: 28-09-2018 (diewald) 
+ -- updated: 18-09-28 (diewald) 
 
 
  Poliqarp Query Language lexer
@@ -58,7 +58,7 @@ WS                  : [ \t]  -> channel(HIDDEN);
 fragment FOCC       : '{' WS* ( [0-9]* WS* ',' WS* [0-9]+ | [0-9]+ WS* ','? ) WS* '}';
 fragment NO_RE      : ~[ \t/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
-                    | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' );
+                    | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' | '#' );
 NUMBER              : [0-9]+;
 
 NL                  : [\r\n] -> skip;
@@ -90,6 +90,7 @@ PLUS		: '+';
 EMPTYREL	: '@';
 BACKSLASH	: '\\';
 SQUOTE      : '\'';
+HASH        : '#';
 
 /* Regular expressions and Regex queries */
 fragment RE_symbol     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']'

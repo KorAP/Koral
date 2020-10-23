@@ -74,7 +74,6 @@ public class KoralObjectGenerator {
         return term;
     }
 
-
     public static Map<String, Object> makeDocGroup (String relation) {
         Map<String, Object> term = new HashMap<String, Object>();
         term.put("@type", KoralType.DOCUMENT_GROUP.toString());
@@ -151,6 +150,12 @@ public class KoralObjectGenerator {
         return group;
     }
 
+    public static Map<String, Object> makeQueryRef (String ref) {
+        Map<String, Object> term = new HashMap<String, Object>();
+        term.put("@type", KoralType.QUERY_REF.toString());
+        term.put("ref", ref);
+        return term;
+    }
 
     public static Map<String, Object> makeClassRefCheck (
             ArrayList<ClassRefCheck> checks, ArrayList<Integer> classIn) {

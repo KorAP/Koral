@@ -1,3 +1,6 @@
+0.37 2020-10-23
+    - [feature] Introduced query references in Poliqarp (diewald)
+
 0.36 2020-07-24
     - [security] Upgraded version of Google Guava
       (CVE-2018-10237; diewald)

@@ -12,6 +12,7 @@ public enum KoralType {
     RELATION("koral:relation"), DISTANCE("koral:distance"), REFERENCE(
     "koral:reference"), DOCUMENT("koral:doc"), DOCUMENT_GROUP("koral:docGroup"),
     DOCUMENT_GROUP_REF("koral:docGroupRef"),
+    QUERY_REF("koral:queryRef"),
     COSMAS_DISTANCE("cosmas:distance");
 
     String value;

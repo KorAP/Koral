@@ -66,7 +66,7 @@ layer
 value
 : (WORD | NUMBER) | regex
 ;
- 
+
 /* Fields */
 term       
 : NEG* (foundry SLASH)? layer termOp key (COLON value)? flag?
@@ -185,6 +185,18 @@ distance
 : emptyTokenSequence
 ;
 
+user
+: WORD
+;
+
+ref
+: WORD
+;
+
+queryref
+: LBRACE HASH (user SLASH)? ref RBRACE 
+;
+
 spanclass
 : LBRACE spanclass_id? (segment|sequence) RBRACE
 ;
@@ -201,6 +213,7 @@ segment
   | LRPAREN segment RRPAREN
   | emptyTokenSequence
   | emptyTokenSequenceClass
+  | queryref
   ) 
   repetition?
  ; 

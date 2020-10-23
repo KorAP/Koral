@@ -188,6 +188,10 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             processSubmatch(node);
         }
 
+        if (nodeCat.equals("queryref")) {
+            processQueryref(node);
+        }
+
         if (nodeCat.equals("meta")) {
             processMeta(node);
         }
@@ -296,6 +300,26 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
         stackedObjects++;
     }
 
+
+    private void processQueryref (ParseTree node) {
+
+        String queryNameStr = "";
+        
+        if (getNodeCat(node.getChild(2)).equals("user")) {
+            queryNameStr = node.getChild(2).getText();
+            queryNameStr += '/';
+            queryNameStr += node.getChild(4).getText();
+        }
+        else {
+            queryNameStr = node.getChild(2).getText();
+        }
+
+        Map<String, Object> object = KoralObjectGenerator.makeQueryRef(queryNameStr);
+        putIntoSuperObject(object);
+        objectStack.push(object);
+        stackedObjects++;
+    }
+    
 
     private void processEmptyTokenSequenceClass (ParseTree node) {
         int classId = 1;
