@@ -60,6 +60,9 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     @Override
     public void process (String query) {
+        if (query == null || query.length() == 0)
+            return;
+
         ParseTree tree = parseCollectionQuery(query);
         if (this.parser != null) {
             super.parser = this.parser;
