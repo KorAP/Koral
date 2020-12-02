@@ -205,6 +205,18 @@ public class CollectionQueryProcessorTest {
         assertEquals("corenlp/morpho", res.at("/collection/operands/1/value").asText());
     }
 
+    @Test
+    public void testVerbatimApo () throws JsonProcessingException, IOException {
+        collection = "corpusTitle=\"C't\"";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        System.err.println(qs.toJSON());
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("corpusTitle", res.at("/collection/key").asText());
+        assertEquals("C't", res.at("/collection/value").asText());
+        assertEquals("match:eq", res.at("/collection/match").asText());
+    }   
     
     @Test
     public void testFlag () throws JsonProcessingException, IOException {
@@ -277,6 +289,19 @@ public class CollectionQueryProcessorTest {
         assertEquals("match:eq", res.at("/collection/match").asText());
     } 
 
+	@Test
+    public void testRegexApos () throws JsonProcessingException, IOException {    
+        collection = "textClass=/po.'litik/";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("textClass", res.at("/collection/key").asText());
+        assertEquals("po.'litik", res.at("/collection/value").asText());
+        assertEquals("type:regex", res.at("/collection/type").asText());
+        assertEquals("match:eq", res.at("/collection/match").asText());
+    } 
+    
 	@Test
     public void testRegexFailure () throws JsonProcessingException, IOException {    
         collection = "textClass=/po/litik/";

@@ -66,5 +66,5 @@ NL                  : [\r\n] -> skip;
 WORD				: ALPHABET+;
 //WORD                : ALPHABET* ALPHA ALPHABET*;  // needs to have at least one alphabetical letter (non-numeric)
 
-REGEX     		    : SLASH ~['/']*? (BACKSLASH SLASH ~['/']*?)* SLASH;
-MULTIWORD   		    : QUOTE ~['"']*? (BACKSLASH QUOTE ~['"']*?)* QUOTE; 
+REGEX     		    : SLASH ~[/]*? (BACKSLASH SLASH ~[/]*?)* SLASH;
+MULTIWORD   		    : QUOTE ~["]*? (BACKSLASH QUOTE ~["]*?)* QUOTE; 
