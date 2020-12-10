@@ -1,0 +1,153 @@
+1.:"copil";
+(request (query (segment (token (regex "copil")))) ;)
+
+2.:"copil.*";
+(request (query (segment (token (regex "copil.*")))) ;)
+
+3.:"copil(ul|a)";
+(request (query (segment (token (regex "copil(ul|a)")))) ;)
+
+4.:'copil(ul|a)';
+(request (query (segment (token (regex 'copil(ul|a)')))) ;)
+
+5.:"copil"%cd;
+(request (query (segment (token (regex "copil") (flag %cd)))) ;)
+
+6.:"22""-inch";
+(request (query (segment (token (regex "22""-inch")))) ;)
+
+7.:'anna''s house';
+(request (query (segment (token (regex 'anna''s house')))) ;)
+
+8.:[pos = "JJ"];
+(request (query (segment (token [ (term (layer pos) (termOp =) (regex "JJ")) ]))) ;)
+
+9.:[lemma = "pole" %c];
+(request (query (segment (token [ (term (layer lemma) (termOp =) (regex "pole") (flag %c)) ]))) ;)
+
+10.:[word = "\?" %l];
+(request (query (segment (token [ (term (layer word) (termOp =) (regex "\?") (flag %l)) ]))) ;)
+
+11.:[lemma="under.+" & pos="V.*"];
+(request (query (segment (token [ (termGroup (term (layer lemma) (termOp =) (regex "under.+")) (boolOp &) (term (layer pos) (termOp =) (regex "V.*"))) ]))) ;)
+
+12.:[(lemma="under.+") & !(pos="V.*")];
+(request (query (segment (token [ (termGroup (term ( (term (layer lemma) (termOp =) (regex "under.+")) )) (boolOp &) (term ! ( (term (layer pos) (termOp =) (regex "V.*")) ))) ]))) ;)
+
+13.:[(lemma="go") & !(word="went"%c | word = "gone" %c)];
+(request (query (segment (token [ (termGroup (term ( (term (layer lemma) (termOp =) (regex "go")) )) (boolOp &) (termGroup ! ( (termGroup (term (layer word) (termOp =) (regex "went") (flag %c)) (boolOp |) (term (layer word) (termOp =) (regex "gone") (flag %c))) ))) ]))) ;)
+
+14.:"on" "and" "on|off";
+(request (query (sequence (segment (token (regex "on"))) (segment (token (regex "and"))) (segment (token (regex "on|off"))))) ;)
+
+15.:"el" ("bueno"|"malo") [pos!="N.*"];
+(request (query (sequence (segment (token (regex "el"))) (segment (group ( (disjunction (segment (token (regex "bueno"))) | (segment (token (regex "malo")))) ))) (segment (token [ (term (layer pos) (termOp ! =) (regex "N.*")) ])))) ;)
+
+16.:"es" ("el" "bueno"|"el" "malo") [pos!="N.*"]; # it is not working like this: "es" ("el bueno"|"el malo") [pos!="N.*"];
+(request (query (sequence (segment (token (regex "es"))) (segment (group ( (disjunction (sequence (segment (token (regex "el"))) (segment (token (regex "bueno")))) | (sequence (segment (token (regex "el"))) (segment (token (regex "malo"))))) ))) (segment (token [ (term (layer pos) (termOp ! =) (regex "N.*")) ])))) ;)
+
+17.:"in" "any|every" [pos="NN"];
+(request (query (sequence (segment (token (regex "in"))) (segment (token (regex "any|every"))) (segment (token [ (term (layer pos) (termOp =) (regex "NN")) ])))) ;)
+
+18.:[!pos="ADJA"];
+(request (query (segment (token [ (term ! (layer pos) (termOp =) (regex "ADJA")) ]))) ;)
+
+19.:"on"|"off";
+(request (query (disjunction (segment (token (regex "on"))) | (segment (token (regex "off"))))) ;)
+
+20.:[word= "on"|word = "off"];
+(request (query (segment (token [ (termGroup (term (layer word) (termOp =) (regex "on")) (boolOp |) (term (layer word) (termOp =) (regex "off"))) ]))) ;)
+
+21.:[pos = "IN"] [pos = "DT"]? ([pos = "RB"]? [pos = "JJ.*"])* [pos = "N.*"]+;
+(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (regex "IN")) ])) (segment (token [ (term (layer pos) (termOp =) (regex "DT")) ]) (repetition (kleene ?))) (segment (group ( (sequence (segment (token [ (term (layer pos) (termOp =) (regex "RB")) ]) (repetition (kleene ?))) (segment (token [ (term (layer pos) (termOp =) (regex "JJ.*")) ]))) )) (repetition (kleene *))) (segment (token [ (term (layer pos) (termOp =) (regex "N.*")) ]) (repetition (kleene +))))) ;)
+
+22.:[pos!="N.*"] [!pos="V.*"];
+(request (query (sequence (segment (token [ (term (layer pos) (termOp ! =) (regex "N.*")) ])) (segment (token [ (term ! (layer pos) (termOp =) (regex "V.*")) ])))) ;)
+
+23.:([pos = "APPR"] [pos="ART"] | [pos = "ARPRART"]) ([pos="ADJD|ADV"]? [pos="ADJA"])* [pos="NN"]{,1};
+(request (query (sequence (segment (group ( (disjunction (sequence (segment (token [ (term (layer pos) (termOp =) (regex "APPR")) ])) (segment (token [ (term (layer pos) (termOp =) (regex "ART")) ]))) | (segment (token [ (term (layer pos) (termOp =) (regex "ARPRART")) ]))) ))) (segment (group ( (sequence (segment (token [ (term (layer pos) (termOp =) (regex "ADJD|ADV")) ]) (repetition (kleene ?))) (segment (token [ (term (layer pos) (termOp =) (regex "ADJA")) ]))) )) (repetition (kleene *))) (segment (token [ (term (layer pos) (termOp =) (regex "NN")) ]) (repetition (range { , (max 1) }))))) ;)
+
+24.:"right" []? "left";
+(request (query (sequence (segment (token (regex "right"))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene ?)))) (segment (token (regex "left"))))) ;)
+
+25.:"no" "sooner" []* "than" within s;
+(request (query (sequence (segment (token (regex "no"))) (segment (token (regex "sooner"))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (regex "than"))))) (within within s) ;)
+
+26.:"as" []{1,3} "as";
+(request (query (sequence (segment (token (regex "as"))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (range { (min 1) , (max 3) })))) (segment (token (regex "as"))))) ;)
+
+27.:"as" []{3} "as";
+(request (query (sequence (segment (token (regex "as"))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (range { (exactly 3) })))) (segment (token (regex "as"))))) ;)
+
+28.:"left" "to" "right" | "right" "to" "left";
+(request (query (disjunction (sequence (segment (token (regex "left"))) (segment (token (regex "to"))) (segment (token (regex "right")))) | (sequence (segment (token (regex "right"))) (segment (token (regex "to"))) (segment (token (regex "left")))))) ;)
+
+29.:<s> [pos="VBG"];
+(request (query (sequence (segment (struct < s >)) (segment (token [ (term (layer pos) (termOp =) (regex "VBG")) ])))) ;)
+
+30.:"in"  @[pos="DT"] [lemma="case"];
+(request (query (sequence (segment (token (regex "in"))) (segment (spanclass @ (segment (token [ (term (layer pos) (termOp =) (regex "DT")) ])))) (segment (token [ (term (layer lemma) (termOp =) (regex "case")) ])))) ;)
+
+31.:[pos="DT"] (@[pos="JJ.*"] ","?){2,} [pos="NNS"];
+(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (regex "DT")) ])) (segment (group ( (sequence (segment (spanclass @ (segment (token [ (term (layer pos) (termOp =) (regex "JJ.*")) ])))) (segment (token (regex ",")) (repetition (kleene ?)))) )) (repetition (range { (min 2) , }))) (segment (token [ (term (layer pos) (termOp =) (regex "NNS")) ])))) ;)
+
+32.:"in" @[pos="DT"] @1[pos="J.*"]? [lemma="case"];
+(request (query (sequence (segment (token (regex "in"))) (segment (spanclass @ (segment (token [ (term (layer pos) (termOp =) (regex "DT")) ])))) (segment (spanclass @1 (segment (token [ (term (layer pos) (termOp =) (regex "J.*")) ]) (repetition (kleene ?))))) (segment (token [ (term (layer lemma) (termOp =) (regex "case")) ])))) ;)
+
+33.:"in" @[] @1[pos="J.*"]? [lemma="case"];
+(request (query (sequence (segment (token (regex "in"))) (segment (spanclass @ (segment (emptyTokenSequence (emptyToken [ ]))))) (segment (spanclass @1 (segment (token [ (term (layer pos) (termOp =) (regex "J.*")) ]) (repetition (kleene ?))))) (segment (token [ (term (layer lemma) (termOp =) (regex "case")) ])))) ;)
+
+34.:adj: [pos="JJ.*"]; #label
+(request (query (segment (spanclass (label adj) : (segment (token [ (term (layer pos) (termOp =) (regex "JJ.*")) ]))))) ;)
+
+35.:[pos="DT"] a:[]? [pos="NNS?"];
+(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (regex "DT")) ])) (segment (spanclass (label a) : (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene ?)))))) (segment (token [ (term (layer pos) (termOp =) (regex "NNS?")) ])))) ;)
+
+36.:a:[] "and" b:[];
+(request (query (segment (spanclass (label a) : (sequence (segment (emptyTokenSequence (emptyToken [ ]))) (segment (token (regex "and"))) (segment (spanclass (label b) : (segment (emptyTokenSequence (emptyToken [ ]))))))))) ;)
+
+37.:a:[pos="PP"] []{0,5} b:[pos = "VB.*"];
+(request (query (segment (spanclass (label a) : (sequence (segment (token [ (term (layer pos) (termOp =) (regex "PP")) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (range { (min 0) , (max 5) })))) (segment (spanclass (label b) : (segment (token [ (term (layer pos) (termOp =) (regex "VB.*")) ])))))))) ;)
+
+38.:[_.pos = "NPS"];
+(request (query (segment (token [ (term (layer _.pos) (termOp =) (regex "NPS")) ]))) ;)
+
+39.:[pos = "VBG"] [pos = "SENT"]? </s>; # this sequence at the end of a sentence: endsWith() in PQ;
+(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (regex "VBG")) ])) (segment (token [ (term (layer pos) (termOp =) (regex "SENT")) ]) (repetition (kleene ?))) (segment (struct < / s >)))) ;)
+
+40.:<np> []* ([pos="JJ.*"] []*){3,} </np>; #contains (NP, sequence)
+(request (query (sequence (segment (struct < np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (group ( (sequence (segment (token [ (term (layer pos) (termOp =) (regex "JJ.*")) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) )) (repetition (range { (min 3) , }))) (segment (struct < / np >)))) ;)
+
+41.:<s> "copil" </s>;  #matches(<base/s=s>, "copil")
+(request (query (sequence (segment (struct < s >)) (segment (token (regex "copil"))) (segment (struct < / s >)))) ;)
+
+42.:<s><np>[]*</np> []* <np>[]*</np></s>;  #sentence that starts and ends with a noun phrase (NP); startsWith, endsWith;
+(request (query (sequence (segment (struct < s >)) (segment (struct < np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (struct < / np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (struct < np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (struct < / np >)) (segment (struct < / s >)))) ;)
+
+43.:[pos="NN"] []* [pos="NN"] within np;
+(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (regex "NN")) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token [ (term (layer pos) (termOp =) (regex "NN")) ])))) (within within np) ;)
+
+44.:(<np>|<np1>|<np2>) []* (</np2>|</np1>|</np>);
+(request (query (sequence (segment (group ( (disjunction (segment (struct < np >)) | (segment (struct < np1 >)) | (segment (struct < np2 >))) ))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (group ( (disjunction (segment (struct < / np2 >)) | (segment (struct < / np1 >)) | (segment (struct < / np >))) ))))) ;)
+
+45.:MU(meet "in" (meet "due" "course" 1 1) 1 1);
+(request (query (segment (matching MU ( (meet meet (segment (token (regex "in"))) ( (meet meet (sequence (segment (token (regex "due"))) (segment (token (regex "course")))) 1 1) ) 1 1) )))) ;)
+
+46.:MU(meet "in" (meet [] "course" 1 1) 1 1);
+(request (query (segment (matching MU ( (meet meet (segment (token (regex "in"))) ( (meet meet (sequence (segment (emptyTokenSequence (emptyToken [ ]))) (segment (token (regex "course")))) 1 1) ) 1 1) )))) ;)
+
+47.:MU(meet (meet "course" "due" -1 -1) "in" -2 -2);
+(request (query (segment (matching MU ( (meet meet ( (meet meet (sequence (segment (token (regex "course"))) (segment (token (regex "due")))) -1 -1) ) (segment (token (regex "in"))) -2 -2) )))) ;)
+
+48.:MU(meet (meet [pos="NN.*"] "virtue" 2 2) "of" 1 1);
+(request (query (segment (matching MU ( (meet meet ( (meet meet (sequence (segment (token [ (term (layer pos) (termOp =) (regex "NN.*")) ])) (segment (token (regex "virtue")))) 2 2) ) (segment (token (regex "of"))) 1 1) )))) ;)
+
+49.:MU(meet (meet "one" "hand" 1 1) (meet "other" "hand" 1 1));
+(request (query (segment (matching MU ( (meet meet ( (meet meet (sequence (segment (token (regex "one"))) (segment (token (regex "hand")))) 1 1) ) ( (meet meet (sequence (segment (token (regex "other"))) (segment (token (regex "hand")))) 1 1) )) )))) ;)
+
+50.:MU(meet "tea"%c "cakes"%c s);
+(request (query (segment (matching MU ( (meet meet (sequence (segment (token (regex "tea") (flag %c))) (segment (token (regex "cakes") (flag %c))) (segment (struct s)))) )))) ;)
+
+51.:MU(meet "der" [] "Mann");
+(request (query (segment (matching MU ( (meet meet (sequence (segment (token (regex "der"))) (segment (emptyTokenSequence (emptyToken [ ]))) (segment (token (regex "Mann"))))) )))) ;)
+
