@@ -32,6 +32,9 @@
 			<name>Eliza Margaretha</name>
 			<email>margaretha@ids-mannheim.de</email>
 		</developer>
+		<developer>
+			<name>Elena Irimia</name>
+		</developer>
 	</developers>
 
 	<properties>
@@ -41,6 +44,7 @@
 		<antlr3.version>3.5.2</antlr3.version>
 		<java.version>1.8</java.version>
 		<log4j.version>2.13.3</log4j.version>
+		<antlr4test.version>1.14</antlr4test.version>
 	</properties>
 	
 	<repositories>
@@ -146,7 +150,15 @@
 			<artifactId>fcs-simple-endpoint</artifactId>
 			<version>1.4.0</version>
 		</dependency>
-	</dependencies>
+    <dependency>
+      <groupId>com.khubla.antlr</groupId>
+      <artifactId>antlr4test-maven-plugin</artifactId>
+      <version>${antlr4test.version}</version>
+      <!--
+          <packaging>jar</packaging>
+          -->
+    </dependency>
+  </dependencies>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 		<outputDirectory>${basedir}/target/classes</outputDirectory>
@@ -334,7 +346,18 @@
 						</configuration>
 						<!-- <phase>generate-sources</phase> -->
 					</execution>
-				</executions>
+					<execution>
+						<id>cqp</id>
+						<goals>
+							<goal>antlr4</goal>
+						</goals>
+						<configuration>
+							<sourceDirectory>${basedir}/src/main/antlr/cqp</sourceDirectory>
+							<outputDirectory>${basedir}/src/main/java/de/ids_mannheim/korap/query/parse/cqp</outputDirectory>
+							<libDirectory>${basedir}/src/main/antlr/cqp</libDirectory>
+						</configuration>
+					</execution>
+        </executions>
 			</plugin>
 			<plugin>
 				<!-- This plugin will help to build the ANTLR3 grammar on the fly. The 
@@ -356,6 +379,26 @@
 					</execution>
 				</executions>
 			</plugin>
+      <plugin>
+	      <groupId>com.khubla.antlr</groupId>
+	      <artifactId>antlr4test-maven-plugin</artifactId>
+				<version>${antlr4test.version}</version>
+	      <configuration>
+		      <verbose>false</verbose>
+		      <showTree>false</showTree>
+		      <entryPoint>request</entryPoint>
+		      <grammarName>CQP</grammarName>
+		      <testFileExtension>.cqp</testFileExtension>
+		      <exampleFiles>src/test/resources/cqp/</exampleFiles>
+	      </configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+      </plugin>
 		</plugins>
 	</build>
 </project>
