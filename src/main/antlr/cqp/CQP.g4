@@ -10,31 +10,14 @@ language=Java;
 }*/
 
 /*
- -- author: Joachim Bingel
- -- date: 14-06-27
 
- -- updated: 28-09-2018 (diewald) 
-
-
- Poliqarp Query Language lexer
-
- Language documentations:
- - Adam Przepiórkowski (2004):
-   "The IPI PAN Corpus -- preliminary version", pp. 44
-
- Further information:
- - http://korpus.pl/index.php?page=poliqarp
- Statistical extension:
- - http://nlp.ipipan.waw.pl/Poliqarp/
- Based on CQP
+CQP grammar 
+--author Elena IRimia, based on PQ Plus grammer (author: Joachim BIngel)
+Based on CQP
  - http://cwb.sourceforge.net/files/CQP_Tutorial/
-
-Todo: Some special characters aren't supported in REGEX and strings.
-Todo: tags can be splittet at ':' in case the fieldname is 'tag'
 
 */
 
-request: query within? meta?  ';' ;
 POSITION_OP : ('matches' | 'overlaps') ; // not in PQ tutorial
 RELATION_OP	: ('dominates' | 'dependency' | 'relatesTo'); //not in PQ tutorial
 MATCH_OP 	: 'meet'; // | 'split');  split is not in PQ tutorial
@@ -44,23 +27,15 @@ META		: 'meta';
 SPANCLASS_ID: ('@'| '@1');
 
 
-
-
 /*
  Regular expression
- /x allows submatches like /^.*?RE.*?$/
- /X forces full matches
- /i means case insensitivity
- /I forces case sensitivity
  %c means case insensitivity
  %d ignore diacritics */
-/*FLAG_xi      : '/' ( ('x'|'X') ('i'|'I')? );
-FLAG_ix      : '/' ( ('i'|'I') ('x'|'X')? );*/
 
 FLAG_cd: '%' ('c' ('d')?);
 FLAG_dc: '%' ('d' ('c')?);
 
-/* l flag: alternative for escape character "\"; word="?" %*/
+/* l flag: alternative for escape character "\"; word="?"; not implemented in KoralQuery %*
 FLAG_l: '%' 'l';
 
 
@@ -76,8 +51,7 @@ NL                  : [\r\n] -> skip;
 
 WORD: ALPHABET+ ;
 
-
-/* Complex queries */
+/*Complex queries*/
 LPAREN      : '[';
 RPAREN      : ']';
 LRPAREN     : '(';
@@ -101,8 +75,6 @@ PLUS		: '+';
 EMPTYREL	: '@';
 BACKSLASH	: '\\';
 SQUOTE      : '\'';
-//MINUS: '-';
-
 //in PQ+, DQUOTE was not defined
 DQUOTE: ('"'|'„'|'“');
 
@@ -123,13 +95,14 @@ fragment RE_plus     : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '+';
 fragment RE_occ      : (RE_char | RE_chgroup | ( '(' RE_expr ')')) FOCC;
 fragment RE_group    : '(' RE_expr ')';
 fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant | RE_group)+;
-/* se pot face cautari dupa ghilimele sau apostrof, daca folosim pt marcarea regex apostrof respectiv gilimele: '"' sau "'"*/
+/* you can search for DQUOTE inside SQUOUTE, and viceversa:  '"' sau "'"; i don't know why COLON is here; */
 fragment RE_dquote   : DQUOTE  (RE_expr | '\'' | ':' )* DQUOTE;
 fragment RE_squote   : SQUOTE  (RE_expr | '"' | ':')* SQUOTE;
 
 
 REGEX: RE_dquote|RE_squote;
-ESC_SQUOTE        : BACKSLASH SQUOTE;
+//ESC_SQUOTE        : BACKSLASH SQUOTE;
+
 
 /*parser*/
 
@@ -252,27 +225,6 @@ position
 : POSITION_OP LRPAREN (segment|sequence) COMMA (segment|sequence) RRPAREN
 ;
 
-/*Elena */
-
-
-
-relation
-: RELATION_OP LRPAREN ((EMPTYREL|relSpec)? repetition? COLON)? (segment|sequence) COMMA (segment|sequence) RRPAREN
-;
-
-relSpec
-: (foundry SLASH)? layer (termOp key)?
-;
-
-submatch
-: SUBMATCH_OP LRPAREN startpos (COMMA length)? COLON (segment|sequence) RRPAREN
-;
-
-
-
-alignment
-: segment? ( (CARET segment)+ | CARET)
-;
 
 disjunction
 : (segment|sequence|group) (DISJ (segment|sequence|group))+
@@ -347,16 +299,42 @@ within
 meta               : META metaTermGroup;
 metaTermGroup	   : ( term | termGroup )+;
 
-/**
-    Entry point for all requests. Linguistic query is obligatory, metadata filtering
-    is optional.
-*/
+
+
+// PQ Plus rules that are not described in https://korap.ids-mannheim.de/doc/ql/fcsql#page-top; i don't know how they work;
+relation
+: RELATION_OP LRPAREN ((EMPTYREL|relSpec)? repetition? COLON)? (segment|sequence) COMMA (segment|sequence) RRPAREN
+;
+
+relSpec
+: (foundry SLASH)? layer (termOp key)?
+;
+
+submatch
+: SUBMATCH_OP LRPAREN startpos (COMMA length)? COLON (segment|sequence) RRPAREN
+;
+
+
+
+alignment
+: segment? ( (CARET segment)+ | CARET)
+;
 
 /* special CQP section*/
 
 
 //structural atributes instead of positional operators : cotains, startwith, endswith
-// LT and GT are optional to match the struct in meet
+/* LT and GT are optional to match the struct in meet;
+examples:
+----------------------------------------------------------------------
+positional operators in PQ+          ||     structural attributes in CQP
+-------------------------------------------------------------------------
+contains(<base/s=s>, "copil")        ||     <s> []* "copil" []* </s>;
+startsWith(<base/s=s>, "copil")      ||     <s>  "copil";
+endsWith(<base/s=s>, "copil")        ||    "copil" </s>;
+matches(<base/s=s>, "copil")         ||     <s>"copil"</s>;
+overlaps()                           ||       ??? 
+---------------------------------------------------------------------------*/
 struct:
 LT? '/'? WORD GT?
 ;
@@ -380,3 +358,11 @@ matching
 meet
 :(MATCH_OP (segment|sequence)  NUMBER?  NUMBER? WORD?) | (MATCH_OP ((LRPAREN meet RRPAREN) | (segment|sequence))+ NUMBER? NUMBER? WORD?)
 ;
+
+
+/**
+    Entry point for all requests. Linguistic query is obligatory, metadata filtering
+    is optional.
+*/
+
+request: query within? meta?  ';' ;
