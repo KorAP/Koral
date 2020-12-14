@@ -95,6 +95,16 @@ public class CollectionQueryProcessorTest {
 
 
     @Test
+    public void testEmpty () throws JsonProcessingException, IOException {
+        collection = "";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertFalse("Empty", res.has("/collection"));
+    }
+
+
+    @Test
     public void testSimple () throws JsonProcessingException, IOException {
         collection = "textClass=politik";
         qs.setQuery(query, ql);
