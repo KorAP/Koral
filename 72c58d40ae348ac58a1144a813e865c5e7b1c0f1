@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "384791b0_edfedd55",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2020-12-14T10:03:20Z",
+      "side": 1,
+      "message": "Double quotes mark regex in Poliqarp, while single quotes do not.",
+      "range": {
+        "startLine": 10,
+        "startChar": 16,
+        "endLine": 10,
+        "endChar": 22
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7533f7ad_352bcace",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2020-12-14T10:03:20Z",
+      "side": 1,
+      "message": "Yes, I would suggest a similar adoption as for PQ.",
+      "range": {
+        "startLine": 16,
+        "startChar": 100,
+        "endLine": 16,
+        "endChar": 136
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d62a75e0_3b950447",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2020-12-14T10:03:20Z",
+      "side": 1,
+      "message": "Is that patrt of the PQ description?\nI think our implementation is that ...{n} means exactly n as well. We don\u0027t use square brackets in  repetitions.",
+      "range": {
+        "startLine": 18,
+        "startChar": 2,
+        "endLine": 18,
+        "endChar": 26
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3269fb6a_2ba385cd",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2020-12-14T10:03:20Z",
+      "side": 1,
+      "message": "Is it necessary to have this a label or would it be possible to internally reference on the same number instead?",
+      "range": {
+        "startLine": 24,
+        "startChar": 129,
+        "endLine": 24,
+        "endChar": 151
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b987bc30_b559a78b",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2020-12-14T10:03:20Z",
+      "side": 1,
+      "message": "We rely on the Regex machine provided by the backend, which is currently Lucene. At the moment we can\u0027t change that.",
+      "range": {
+        "startLine": 46,
+        "startChar": 108,
+        "endLine": 46,
+        "endChar": 146
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c",
+      "unresolved": true
+    }
+  ]
+}
