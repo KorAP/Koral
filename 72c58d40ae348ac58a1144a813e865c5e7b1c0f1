@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "fb059edb_b2d9a834",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2020-12-14T12:08:19Z",
+      "side": 1,
+      "message": "oops,my bad: 1. i meant {n}, not [n]; 2. i had a wrong impression about the exactly feature missing in PQPlus;",
+      "parentUuid": "d62a75e0_3b950447",
+      "range": {
+        "startLine": 18,
+        "startChar": 2,
+        "endLine": 18,
+        "endChar": 26
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3269fb6a_2ba385cd",
         "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
         "patchSetId": 1
