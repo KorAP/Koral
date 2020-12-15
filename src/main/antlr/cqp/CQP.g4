@@ -1,13 +1,13 @@
 grammar CQP;
 
-/*@header {package de.ids_mannheim.korap.query.parse.poliqarpplus;}
+@header {package de.ids_mannheim.korap.query.parse.cqp;}
 
 
 
 options
 {
 language=Java;
-}*/
+}
 
 /*
 
