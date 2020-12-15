@@ -44,7 +44,6 @@
 		<antlr3.version>3.5.2</antlr3.version>
 		<java.version>1.8</java.version>
 		<log4j.version>2.13.3</log4j.version>
-		<antlr4test.version>1.14</antlr4test.version>
 	</properties>
 	
 	<repositories>
@@ -150,14 +149,6 @@
 			<artifactId>fcs-simple-endpoint</artifactId>
 			<version>1.4.0</version>
 		</dependency>
-    <dependency>
-      <groupId>com.khubla.antlr</groupId>
-      <artifactId>antlr4test-maven-plugin</artifactId>
-      <version>${antlr4test.version}</version>
-      <!--
-          <packaging>jar</packaging>
-          -->
-    </dependency>
   </dependencies>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
@@ -379,26 +370,6 @@
 					</execution>
 				</executions>
 			</plugin>
-      <plugin>
-	      <groupId>com.khubla.antlr</groupId>
-	      <artifactId>antlr4test-maven-plugin</artifactId>
-				<version>${antlr4test.version}</version>
-	      <configuration>
-		      <verbose>false</verbose>
-		      <showTree>false</showTree>
-		      <entryPoint>request</entryPoint>
-		      <grammarName>CQP</grammarName>
-		      <testFileExtension>.cqp</testFileExtension>
-		      <exampleFiles>src/test/resources/cqp/</exampleFiles>
-	      </configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test</goal>
-						</goals>
-					</execution>
-				</executions>
-      </plugin>
 		</plugins>
 	</build>
 </project>
