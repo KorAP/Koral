@@ -37,7 +37,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>		
 		<jackson.version>[2.9.5,)</jackson.version>
-		<antlr4.version>4.5.1</antlr4.version>
+		<antlr4.version>4.9.1</antlr4.version>
 		<antlr3.version>3.5.2</antlr3.version>
 		<java.version>1.8</java.version>
 		<log4j.version>2.13.3</log4j.version>
@@ -296,7 +296,7 @@
 					recipe is based on http://stackoverflow.com/questions/15310628/ customize-maven-to-automatically-create-antlr4-grammar-java-files-on-build -->
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
-				<version>4.2</version>
+				<version>4.9.1</version>
 				<executions>
 					<execution>
 						<id>poliqarpplus</id>
