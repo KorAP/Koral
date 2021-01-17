@@ -38,6 +38,8 @@ public class QuerySerializer {
                 new HashMap<String, Class<? extends AbstractQueryProcessor>>();
         qlProcessorAssignment.put("poliqarpplus",
                 PoliqarpPlusQueryProcessor.class);
+        qlProcessorAssignment.put("cqp",
+                CQPQueryProcessor.class);
         qlProcessorAssignment.put("cosmas2", Cosmas2QueryProcessor.class);
         qlProcessorAssignment.put("annis", AnnisQueryProcessor.class);
         qlProcessorAssignment.put("cql", CqlQueryProcessor.class);
@@ -117,7 +119,7 @@ public class QuerySerializer {
      *            The query string
      * @param queryLanguage
      *            The query language. As of 17 Dec 2014, this must be one of
-     *            'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
+     *            'poliqarpplus', 'cqp', 'cosmas2', 'annis' or 'cql'.
      * @throws IOException
      */
     public void run (String query, String queryLanguage) throws IOException {
@@ -132,6 +134,9 @@ public class QuerySerializer {
         }
         else if (queryLanguage.equalsIgnoreCase("cql")) {
             ast = new CqlQueryProcessor(query);
+        }
+        else if (queryLanguage.equalsIgnoreCase("cqp")) {
+            ast = new CQPQueryProcessor(query);
         }
         else if (queryLanguage.equalsIgnoreCase("fcsql")) {
             ast = new FCSQLQueryProcessor(query);
@@ -163,6 +168,9 @@ public class QuerySerializer {
         }
         else if (ql.equalsIgnoreCase("poliqarpplus")) {
             ast = new PoliqarpPlusQueryProcessor(query);
+        }
+        else if (ql.equalsIgnoreCase("cqp")) {
+            ast = new CQPQueryProcessor(query);
         }
         else if (ql.equalsIgnoreCase("cql")) {
             if (version == null) {

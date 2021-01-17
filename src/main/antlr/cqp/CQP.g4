@@ -18,11 +18,12 @@ Based on CQP
 
 */
 
-POSITION_OP : ('matches' | 'overlaps') ; // not in PQ tutorial
-RELATION_OP	: ('dominates' | 'dependency' | 'relatesTo'); //not in PQ tutorial
+//POSITION_OP : ('matches' | 'overlaps') ; // not in PQ tutorial
+//RELATION_OP	: ('dominates' | 'dependency' | 'relatesTo'); //not in PQ tutorial
 MATCH_OP 	: 'meet'; // | 'split');  split is not in PQ tutorial
-SUBMATCH_OP	: 'submatch';  //not in PQ tutorial
+//SUBMATCH_OP	: 'submatch';  //not in PQ tutorial
 WITHIN		: 'within';
+MU: 'MU';
 META		: 'meta';
 SPANCLASS_ID: ('@'| '@1');
 
@@ -32,19 +33,36 @@ SPANCLASS_ID: ('@'| '@1');
  %c means case insensitivity
  %d ignore diacritics */
 
-FLAG_cd: '%' ('c' ('d')?);
-FLAG_dc: '%' ('d' ('c')?);
+FLAG_lcd: '%' (('l'|'c'|'d'|'L'|'C'|'D') ('l'|'c'|'d'|'L'|'C'|'D')? ('l'|'c'|'d'|'L'|'C'|'D')?);
+/*FLAG_c: 'c';
+fragment FLAG_d: 'd';
+fragment FLAG_lc: 'lc';
+fragment FLAG_ld: 'ld';
+fragment FLAG_lcd: 'lcd';
+fragment FLAG_ldc: 'ldc';
+fragment FLAG_dc: 'dc';
+fragment FLAG_dl: 'dl';
+fragment FLAG_dcl: 'dcl';
+fragment FLAG_dlc: 'dlc';
+fragment FLAG_cl: 'cl';
+fragment FLAG_cd: 'cd';
+fragment FLAG_cdl: 'cdl';
+fragment FLAG_cld: 'cld';
+FLAG: (FLAG_lcd|FLAG_lc|FLAG_ldc|FLAG_ld|FLAG_l|FLAG_cdl|FLAG_cd|FLAG_cld|FLAG_cl|FLAG_c|FLAG_dlc|FLAG_dl|FLAG_dcl|FLAG_dc|FLAG_d);
+//FLAG_lcd: '%' ('d'|'D' ('c'|'C')?);
+//FLAG_ldc: '%' ('l'|'L' (('d'|'D') ('c'|'C')?)?);
 
-/* l flag: alternative for escape character "\"; word="?"; not implemented in KoralQuery %*
-FLAG_l: '%' 'l';
+/* l flag: alternative for escape character "\"; word="?"; not implemented in KoralQuery %*/
+
+
 
 
 /** Simple strings and Simple queries */
 WS                  : [ \t]  -> channel(HIDDEN);
 fragment FOCC       : '{' WS* ( [0-9]* WS* ',' WS* [0-9]+ | [0-9]+ WS* ','? ) WS* '}'; // i don;t know what is this;
-fragment NO_RE      : ~[ \t/];
+//fragment NO_RE      : ~[ \t/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '+' | '{' | '}' | '[' | ']'
-                    | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' | ';' | '?' | '@');
+                    | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' | ';' | '?' | '@' |'%');
 NUMBER              : ('-')? [0-9]+;
 
 NL                  : [\r\n] -> skip;
@@ -72,11 +90,11 @@ EQ			: '=';
 CARET 		: '^';
 STAR		: '*';
 PLUS		: '+';
-EMPTYREL	: '@';
+EMPTYREL	: '@'; //take care: two tokens, EMPTYREL and SPANCLAS_ID, matching the same input;
 BACKSLASH	: '\\';
 SQUOTE      : '\'';
 //in PQ+, DQUOTE was not defined
-DQUOTE: ('"'|'„'|'“');
+DQUOTE: ('"'|'„'|'“'|'”');
 
 
 /* Regular expressions and Regex queries */
@@ -100,15 +118,19 @@ fragment RE_dquote   : DQUOTE  (RE_expr | '\'' | ':' )* DQUOTE;
 fragment RE_squote   : SQUOTE  (RE_expr | '"' | ':')* SQUOTE;
 
 
+
 REGEX: RE_dquote|RE_squote;
-//ESC_SQUOTE        : BACKSLASH SQUOTE;
+ESC_SQUOTE        : SQUOTE SQUOTE;
+ESC_DQUOTE        : DQUOTE DQUOTE;
+
+
 
 
 /*parser*/
 
 
 flag
-: FLAG_l | FLAG_cd | FLAG_dc
+: FLAG_lcd
 ;
 
 
@@ -121,18 +143,13 @@ regex
 ;
 
 verbatim
-: SQUOTE (~SQUOTE | ESC_SQUOTE)* SQUOTE;
+: SQUOTE|DQUOTE (~SQUOTE | ESC_SQUOTE| DQUOTE | ESC_DQUOTE)* SQUOTE|DQOUOTE;
 
 
 key
-: (WORD
-| regex
-| verbatim
-| NUMBER)
-;
+: (regex| verbatim);
 
-
-// i don't know how to represent it in cqp: maybe think of the whole "foundry\layer" string as a key (p=-attribute in cqp)?
+// think of the whole "foundry\layer" string as a key (p=-attribute in cqp), like in PQPlus grammar
 foundry
 : WORD
 ;
@@ -147,7 +164,7 @@ value
  
 /* Fields */
 term
-:  NEG* (foundry SLASH)? layer termOp regex (COLON value)? flag? | NEG* foundry flag layer? termOp regex (COLON value)? flag? | NEG* LRPAREN term RRPAREN 
+:  NEG* (foundry SLASH)? layer termOp key (COLON value)? flag? | NEG* foundry flag layer? termOp key (COLON value)? flag? | NEG* LRPAREN term RRPAREN 
 ;
 
 termOp
@@ -207,7 +224,7 @@ token
 : NEG* 
     ( LPAREN term RPAREN
     | LPAREN termGroup RPAREN
-    | regex flag?
+    | key flag?
     )
 ;
 
@@ -231,7 +248,7 @@ group
 ; 
 
 spanclass
-: (SPANCLASS_ID (segment|sequence) | label ':' (segment|sequence))
+: (SPANCLASS_ID token | label COLON (segment|sequence))
 ;
 
 label: WORD;
@@ -241,7 +258,7 @@ emptyTokenSequence
 ;
 
 emptyTokenSequenceClass
-: SPANCLASS_ID emptyTokenSequence     // class defined around empty tokens 
+: (SPANCLASS_ID emptyTokenSequence | label COLON emptyTokenSequence)    // class defined around empty tokens 
 ;
 
 
@@ -269,7 +286,7 @@ segment
  ; 
 
 sequence
-: alignment segment* 	// give precedence to this subrule over the next to make sure preceding segments come into 'alignment'
+: alignment segment*  // give precedence to this subrule over the next to make sure preceding segments come into 'alignment'
 | segment+ alignment segment*
 | segment segment+
 
@@ -332,7 +349,7 @@ matches(<base/s=s>, "copil")         ||     <s>"copil"</s>;
 overlaps()                           ||       ??? 
 ---------------------------------------------------------------------------*/
 struct:
-LT? '/'? WORD GT?
+LT '/'? WORD GT
 ;
 
 /* MU queries instead of focus operator; CQP offers search-engine like Boolean queries in a special meet-union (MU) notation. This
@@ -349,10 +366,12 @@ match, nor marked in any other way.
 focus(der {Baum}) = MU(meet(Baum, der))
 */
 matching
-: 'MU' LRPAREN meet RRPAREN
+: MU LRPAREN meetunion RRPAREN
 ;
-meet
-:(MATCH_OP (segment|sequence)  NUMBER?  NUMBER? WORD?) | (MATCH_OP ((LRPAREN meet RRPAREN) | (segment|sequence))+ NUMBER? NUMBER? WORD?)
+
+//maybe eliminate MATCH_OP from the meet rule?
+meetunion
+:(MATCH_OP segment segment  ((NUMBER NUMBER) | WORD)) | (MATCH_OP ((LRPAREN meetunion RRPAREN) | segment) ((LRPAREN meetunion RRPAREN) | segment) ((NUMBER  NUMBER) | WORD))
 ;
 
 
@@ -361,4 +380,4 @@ meet
     is optional.
 */
 
-request: query within? meta?  ';' ;
+request: query within? meta?  ';'? ;
