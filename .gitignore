@@ -76,3 +76,6 @@
 /src/main/java/de/ids_mannheim/korap/query/serialize/SerializationSandbox.java
 /lib/
 /bin/
+
+
+/src/main/java/de/ids_mannheim/korap/query/parse

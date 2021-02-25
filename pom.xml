@@ -32,6 +32,9 @@
 			<name>Eliza Margaretha</name>
 			<email>margaretha@ids-mannheim.de</email>
 		</developer>
+		<developer>
+			<name>Elena Irimia</name>
+		</developer>
 	</developers>
 
 	<properties>
@@ -162,7 +165,7 @@
 			<artifactId>fcs-simple-endpoint</artifactId>
 			<version>1.4.0</version>
 		</dependency>
-	</dependencies>
+  </dependencies>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 		<outputDirectory>${basedir}/target/classes</outputDirectory>
@@ -350,7 +353,18 @@
 						</configuration>
 						<!-- <phase>generate-sources</phase> -->
 					</execution>
-				</executions>
+					<execution>
+						<id>cqp</id>
+						<goals>
+							<goal>antlr4</goal>
+						</goals>
+						<configuration>
+							<sourceDirectory>${basedir}/src/main/antlr/cqp</sourceDirectory>
+							<outputDirectory>${basedir}/src/main/java/de/ids_mannheim/korap/query/parse/cqp</outputDirectory>
+							<libDirectory>${basedir}/src/main/antlr/cqp</libDirectory>
+						</configuration>
+					</execution>
+        </executions>
 			</plugin>
 			<plugin>
 				<!-- This plugin will help to build the ANTLR3 grammar on the fly. The 

@@ -212,6 +212,13 @@ public abstract class AbstractQueryProcessor {
         highlightClasses.add(classId);
         meta.put("highlight", highlightClasses);
     }
+    public void removeExcessHighlightClass () {
+        for (int i=1; i<highlightClasses.size(); i++)
+        {
+    	highlightClasses.remove(i);
+        }
+       
+    }
 
 
     public void addAlignment (int leftClassId, int rightClassId) {
