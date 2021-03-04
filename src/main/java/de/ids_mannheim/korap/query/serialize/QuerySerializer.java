@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Map;
+import java.io.InputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+
 
 /**
  * Main class for Koral, serializes queries from concrete QLs to KoralQuery
@@ -27,6 +30,20 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
  */
 public class QuerySerializer {
 
+    private String version = "Unknown";
+    private String name = "Unknown";
+    private static Properties info;
+
+        {
+          
+            loadInfo();
+            if (info != null) {
+                this.version = info.getProperty("koral.version");
+                this.name = info.getProperty("koral.name");
+            };
+        }
+
+    
     // fixme: not used in any way!
     @Deprecated
     static HashMap<String, Class<? extends AbstractQueryProcessor>> qlProcessorAssignment;
@@ -361,4 +378,47 @@ public class QuerySerializer {
         }
         this.warnings.add(warning);
     }
+
+
+    /**
+     * Get the version number of Koral.
+     * 
+     * @return A string containing the version number of Koral.
+     */
+    public String getVersion () {
+        return this.version;
+    }
+
+
+    /**
+     * Get the name of Koral.
+     * 
+     * @return A string containing the name of Koral.
+     */
+    public String getName () {
+        return this.name;
+    }
+
+
+    // Load version info from file
+    public static Properties loadInfo () {
+        try {
+            info = new Properties();
+            InputStream iFile = QuerySerializer.class.getClassLoader()
+                    .getResourceAsStream("koral.info");
+
+            if (iFile == null) {
+                qllogger.error("Cannot find koral.info");
+                return null;
+            };
+
+            info.load(iFile);
+            iFile.close();
+        }
+        catch (IOException e) {
+            qllogger.error(e.getLocalizedMessage());
+            return null;
+        };
+        return info;
+    };
 }

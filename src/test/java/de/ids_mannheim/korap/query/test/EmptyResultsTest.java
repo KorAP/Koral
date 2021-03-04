@@ -69,4 +69,13 @@ public class EmptyResultsTest {
         assertEquals("Beispiel 2", node.at("/warnings/1/1").asText());
         assertFalse(node.has("/warnings/1/2"));
     }    
+
+    @Test
+    public void testVersion () {
+        QuerySerializer s = new QuerySerializer();
+        assertTrue(s.getVersion().matches("^\\d+(\\.\\d+)+$"));
+        assertFalse(s.getVersion().equals("Unknown"));
+        assertTrue(s.getName().length() > 3);
+        assertFalse(s.getName().equals("Unknown"));
+    }
 }

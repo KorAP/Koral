@@ -1,0 +1,2 @@
+koral.version = ${project.version}
+koral.name = ${project.name}
