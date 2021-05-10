@@ -67,7 +67,14 @@
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-maven-plugin</artifactId>
 			<version>${antlr4.version}</version>
-		</dependency>
+			<!-- <scope>provided</scope> -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.sonatype.sisu</groupId>
+					<artifactId>sisu-guava</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency> 
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr-runtime</artifactId>
@@ -108,7 +115,7 @@
 		<dependency>
 			<groupId>org.z3950.zing</groupId>
 			<artifactId>cql-java</artifactId>
-			<version>1.13</version>
+			<version>1.12</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -296,7 +303,7 @@
 					recipe is based on http://stackoverflow.com/questions/15310628/ customize-maven-to-automatically-create-antlr4-grammar-java-files-on-build -->
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
-				<version>4.2</version>
+				<version>${antlr4.version}</version>
 				<executions>
 					<execution>
 						<id>poliqarpplus</id>
