@@ -46,7 +46,7 @@
 	<repositories>
 		<repository>
 			<id>id-maven-repo</id>
-			<url>http://maven.indexdata.com</url>
+			<url>https://maven.indexdata.com</url>
 		</repository>
 		<repository>
 			<id>CLARIN</id>
@@ -115,7 +115,7 @@
 		<dependency>
 			<groupId>org.z3950.zing</groupId>
 			<artifactId>cql-java</artifactId>
-			<version>1.12</version>
+			<version>1.13</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
