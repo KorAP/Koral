@@ -69,12 +69,21 @@
 			<version>${antlr4.version}</version>
 			<!-- <scope>provided</scope> -->
 			<exclusions>
+				<!-- incompatible with mock server -->
 				<exclusion>
 					<groupId>org.sonatype.sisu</groupId>
 					<artifactId>sisu-guava</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency> 
+		</dependency>
+		<!-- adding manually due to Shell Command Injection and Directory Traversal
+		https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-1000487 
+		https://cwe.mitre.org/data/definitions/22.html --> 
+		<dependency>
+		    <groupId>org.codehaus.plexus</groupId>
+		    <artifactId>plexus-utils</artifactId>
+		    <version>3.3.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr-runtime</artifactId>
