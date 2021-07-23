@@ -81,7 +81,7 @@ independent of any specific query languages. The systems only need to have Koral
 and feed the translated query to their search engine. Several query languages can be supported without further adjustments to the search engine.
 
 Koral and KoralQuery have been designed and developed within the 
-[KorAP Project](http://korap.ids-mannheim.de/), and are used in KorAP to 
+[KorAP Project](https://korap.ids-mannheim.de/), and are used in KorAP to 
 translate queries to a common format before sending them to its search engine.
 
 ## Setup
@@ -126,7 +126,7 @@ J. Bingel and N. Diewald, "KoralQuery – a General Corpus Query Protocol," in P
 
 Koral and KoralQuery were developed by Joachim Bingel,
 Nils Diewald, Michael Hanl and Eliza Margaretha at the 
-[Leibniz Institute for the German Language (IDS)](http://ids-mannheim.de/),
+[Leibniz Institute for the German Language (IDS)](https://www.ids-mannheim.de/),
 member of the [Leibniz Association](https://www.leibniz-gemeinschaft.de).
 
 The ANTLR grammars for parsing ANNIS QL and COSMAS II QL were developed by 
