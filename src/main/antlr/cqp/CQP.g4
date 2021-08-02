@@ -12,18 +12,19 @@ language=Java;
 /*
 
 CQP grammar 
---author Elena IRimia, based on PQ Plus grammer (author: Joachim BIngel)
+--author Elena IRimia, based on PQ Plus grammar (author: Joachim BIngel)
 Based on CQP
  - http://cwb.sourceforge.net/files/CQP_Tutorial/
-
-*/
+&& - elemente de scos din gramatica!
+ */
 
 //POSITION_OP : ('matches' | 'overlaps') ; // not in PQ tutorial
-POSITION_OP : ('contains');
-//RELATION_OP	: ('dominates' | 'dependency' | 'relatesTo'); //not in PQ tutorial
+POSITION_OP : 'contains' | 'lbound' | 'rbound'; //&&
+REGION_OP: 'region';
+RELATION_OP	: ('dominates' | 'dependency' | 'relatesTo'); //not in PQ tutorial &&
 MATCH_OPM : 'meet' ;
-MATCH_OPF: 'focus'; // | 'split');  split is not in PQ tutorial
-//SUBMATCH_OP	: 'submatch';  //not in PQ tutorial
+MATCH_OPF: 'focus'; // | 'split');  split is not in PQ tutorial &&
+SUBMATCH_OP	: 'submatch';  //not in PQ tutorial &&
 WITHIN		: 'within';
 MU: 'MU';
 META		: 'meta';
@@ -83,8 +84,8 @@ DISJ        : '|';
 COMMA		: ',';
 LT			: '<';
 GT			: '>';
-LBRACE		: '{';
-RBRACE		: '}';
+LBRACE		: '{'; //&&
+RBRACE		: '}'; //&&
 SLASH		: '/';
 COLON		: ':';
 TILDE		: '~';
@@ -92,11 +93,11 @@ EQ			: '=';
 CARET 		: '^';
 STAR		: '*';
 PLUS		: '+';
-EMPTYREL	: '@'; //take care: two tokens, EMPTYREL and SPANCLAS_ID, matching the same input;
+EMPTYREL	: '@'; //take care: two tokens, EMPTYREL and SPANCLAS_ID, matching the same input; &&
 BACKSLASH	: '\\';
 SQUOTE      : '\'';
 //in PQ+, DQUOTE was not defined
-DQUOTE: ('"'|'„'|'“'|'”');
+DQUOTE: ('"'|'„'|'“'|'“'|'”');
 
 
 /* Regular expressions and Regex queries */
@@ -145,7 +146,7 @@ regex
 ;
 
 verbatim
-: SQUOTE|DQUOTE (~SQUOTE | ESC_SQUOTE| DQUOTE | ESC_DQUOTE)* SQUOTE|DQOUOTE;
+: SQUOTE|DQUOTE (~SQUOTE | ESC_SQUOTE| DQUOTE | ESC_DQUOTE)* SQUOTE|DQUOTE;
 
 
 key
@@ -156,7 +157,7 @@ skey
 : WORD
 ; 
 
-// think of the whole "foundry\layer" string as a key (p=-attribute in cqp), like in PQPlus grammar
+// think of the whole "foundry\layer" string as a key (p-attribute in cqp), like in PQPlus grammar
 foundry
 : WORD
 ;
@@ -170,13 +171,17 @@ value
 | NUMBER 
 | regex
 ;
- 
+ ///////
 /* Fields */
 term
-: NEG* (foundry SLASH)? layer termOp key (COLON value)? flag? 
-| NEG* foundry flag layer? termOp key (COLON value)? flag? 
+: NEG* (foundry SLASH)? layer termOp key (COLON value)? flag?
+| NEG* foundry flag layer? termOp key (COLON value)? flag?
+| NEG* LRPAREN (foundry SLASH)? layer termOp key (COLON value)? flag? RRPAREN  (CONJ position)+ // for position ops
+| NEG* LRPAREN foundry flag layer? termOp key (COLON value)? flag? RRPAREN (CONJ position)+ // for position ops
 | NEG* LRPAREN term RRPAREN 
+| key flag? (CONJ position)+ // for position ops
 ;
+
 
 termOp
 : (NEG? EQ? EQ | NEG? TILDE? TILDE)
@@ -191,11 +196,11 @@ max
 ;
 
 
-startpos
+startpos //&&
 : NUMBER
 ;
 
-length
+length //&&
 : NUMBER
 ;
 
@@ -239,20 +244,21 @@ token
     )
 ;
 
-
-//span is not implemented like this in CQP-- see struct
 // i changed key with word!!
 span
-: LT ((foundry SLASH)? layer termOp)? '/'? skey NEG* ((LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? | (term|termGroup)?) GT
+: (skey // for lbound/sbound; check how it works for meet!
+  | LT '/'? ((foundry SLASH)? layer termOp)? '/'? skey NEG* ((LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? | (term|termGroup)?) GT
+  )
 ;
 
-position
-: POSITION_OP LRPAREN (segment|sequence) COMMA (segment|sequence) RRPAREN
+position //&&
+//: POSITION_OP LRPAREN (segment|sequence) COMMA (segment|sequence) RRPAREN
+: POSITION_OP LRPAREN span RRPAREN 
 ;
 
 
 disjunction
-: (segment|sequence|group) (DISJ (segment|sequence|group))+
+: (segment|sequence|group) (DISJ (segment|sequence|group))+ // do i need group here? test!
 ;
 
 group
@@ -260,7 +266,7 @@ group
 ; 
 
 spanclass
-: (SPANCLASS_ID (token|segment|group)
+: (SPANCLASS_ID (token|segment|group| LRBRACE sequence RRBRACE) // ai adaugat sequence! vezi de ce nu intra pe ea, si daca intra, vezi cum ruleaza procesorul; am nevoie de token si group aici?
   | label COLON (segment|sequence) 
   | LBRACE SPANCLASS_ID? (segment|sequence) RBRACE /* do i need this???*/
   | MATCH_OPM segment // for simple meet
@@ -268,7 +274,7 @@ spanclass
   )
 ;
 
-label: WORD;
+label: WORD; //&&
 
 emptyTokenSequence
 : (emptyToken repetition?)+
@@ -278,18 +284,10 @@ emptyTokenSequenceClass
 : (SPANCLASS_ID emptyTokenSequence | label COLON emptyTokenSequence)    // class defined around empty tokens 
 ;
 
-
-/*distance    // not used in the grammar
-: emptyTokenSequence
-;
-*/
-
-//| struct
 segment
-: ( position 
-  | token 
-  | span 
+: (  token 
   | group
+  | region
   | spanclass 
   | matching
   | submatch
@@ -313,7 +311,7 @@ sequence
 /** Entry point for linguistic queries */
 
 query
-: segment | sequence | disjunction
+: segment | sequence | disjunction | struct
 ;
 
 within
@@ -339,7 +337,7 @@ relSpec
 : (foundry SLASH)? layer (termOp key)?
 ;
 
-submatch
+submatch //&&
 : SUBMATCH_OP LRPAREN startpos (COMMA length)? COLON (segment|sequence) RRPAREN
 ;
 
@@ -361,12 +359,17 @@ positional operators in PQ+          ||     structural attributes in CQP
 contains(<base/s=s>, "copil")        ||     <s> []* "copil" []* </s>;
 startsWith(<base/s=s>, "copil")      ||     <s>  "copil";
 endsWith(<base/s=s>, "copil")        ||    "copil" </s>;
-matches(<base/s=s>, "copil")         ||     <s>"copil"</s>;
+matches(<base/s=s>, "copil")         ||     
 overlaps()                           ||       ??? 
 ---------------------------------------------------------------------------*/
-/*struct:
-LT '/'? WORD GT
-;*/
+
+
+
+struct: matches | startswith | endswith ;// for column B implementation
+matches : span (segment|sequence) span;
+startswith: span (segment|sequence);
+endswith: (segment|sequence) span;
+region: SLASH REGION_OP LPAREN span RPAREN;
 
 /* MU queries instead of focus operator; CQP offers search-engine like Boolean queries in a special meet-union (MU) notation. This
 feature goes back to the original developer of CWB and is not supported officially. In particular,

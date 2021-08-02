@@ -153,15 +153,18 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
      *            The currently processed node. The process(String
      *            query) method calls this method with the root.
      */
-    private void processNode (ParseTree node, boolean skipvisited) {
+    private void processNode (ParseTree node, boolean putvisited) {
         // Top-down processing
-        if (visited.contains(node))
+        if (visited.contains(node))  /*** if the node was visited in previous steps ***/
             return;
         else
-           if (skipvisited) visited.add(node);
+        	/** if skipvisited is false, we need the node to be visited again in future operations;  ***/
+        	/** so we don't put it in visited! ***/ 
+        	if (putvisited) visited.add(node); 
 
         String nodeCat = getNodeCat(node);
         openNodeCats.push(nodeCat);
+       
 
         stackedObjects = 0;
 
@@ -196,7 +199,9 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             processSequence(node);
         }
         if (nodeCat.equals("meetunion")) {
-            processMeetunion(node);
+            
+        	/*** for the outer meet, of whatever type, putvisited is true and the node is put in visited****/
+        	processMeetunion(node, putvisited);
         }
 
         if (nodeCat.equals("emptyTokenSequence")) {
@@ -210,22 +215,54 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (nodeCat.equals("token")) {
             processToken(node);
         }
-
+        if (nodeCat.equals("tokenstruct")) {
+            processTokenStruct(node);
+        }
+        
         if (nodeCat.equals("alignment")) {
             processAlignment(node);
         }
 
-        if (nodeCat.equals("span")) {
-            processSpan(node);
+        if (nodeCat.equals("span") && getNodeCat(node.getChild(0))!="skey") {
+        	 String nCat0 = getNodeCat(node.getChild(0));
+        	 if (nCat0.equals("skey"))
+        	        {
+        	        	// for unlayered spans: \region[np], lbound(np), etc!
+        		        processSpan(node);
+        	        }
+        	 else
+        	 {
+        		 // for struct like <s> ... </s>; check if the span is a closing one;
+        		 spanNodeCats.push(nodeCat);
+        		 String nCat = getNodeCat(node.getChild(1));
+        		 int nspan = spanNodeCats.size();
+        		 if (!nCat.equals("/"))
+        		 { 
+        			 //check if two operators situation (lbound and rbound); probably we don't need this!!!
+        			/* if (!objectStack.isEmpty())
+        			 {
+        				 Map <String, Object> top = objectStack.getFirst();
+        				 Object ops =  top.get("operands");
+        				 if((ops!=null)&&(!ops.toString().contains("koral:span")))		
+        				 processSpan(node);
+        			 }
+        			 else */processSpan(node);
+        				 
+        		 }
+        		 else
+        		 {
+        			 if (nspan==1) // for situations like: sequence </s>, endsWith
+        			 {
+        				 processSpan(node);
+        			 }
+        		 }
+        	 }
         }
-
+      
         if (nodeCat.equals("disjunction")) {
             processDisjunction(node);
         }
 
-        if (nodeCat.equals("position")) {
-            processPosition(node);
-        }
 
         if (nodeCat.equals("relation")) {
             processRelation(node);
@@ -250,13 +287,19 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (nodeCat.equals("meta")) {
             processMeta(node);
         }
+       
         if (nodeCat.equals("struct")){
-        	//processStruct(node);
+        	
+        	processPosition(node);
+        }
+        if (nodeCat.equals("position")){
+        	
         	processPosition(node);
         }
         	
+        	
         if (nodeCat.equals("within")
-                && !getNodeCat(node.getParent()).equals("position")) {
+                && !getNodeCat(node.getParent()).equals("position")) { // why this condition??
             processWithin(node);
         }
 
@@ -270,11 +313,22 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
          ****************************************************************
          */
         for (int i = 0; i < node.getChildCount(); i++) {
-            ParseTree child = node.getChild(i);
-           // skipvisisted is used in meet union processing
-            if (skipvisited)  {	processNode(child, true);}
-           else {processNode(child, false);}
-           
+        		ParseTree child = node.getChild(i);
+                
+        		if (!nodeCat.equals("meetunion") )
+                {
+        			  processNode(child, putvisited); // we propagate putvisited down in the tree;
+                }
+        	    else
+        	    {
+        	    	/*** if the node is meetunion, check if it has a span meet parent; ****/
+        	    	/*** if the parent is span meet, we don not process child nodes; they were processed with putvisited false? ??? ***/
+        	    	if(!checkifparentisSpanMeet(node))
+        	    	{
+        	    		processNode(child, putvisited);
+        	    	}
+        	    }
+         
         }
 
         // Stuff that happens when leaving a node (taking items off stacks)
@@ -336,366 +390,478 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         stackedObjects++;
     }
     
-    @SuppressWarnings("unchecked")
-	private void processMeetunion (ParseTree node) {
-    	boolean disj = false;
+    private boolean checkifRecurrsiveMeet(ParseTree node) {
+        boolean recurrence=false;
+        // first segment and second segment are parsed differently in the antlr grammar, see if you can fix!!!
     	ParseTree firstsegment;
     	ParseTree secondsegment;	
     	List<ParseTree> segments = getChildrenWithChildren(node); // the others are terminal nodes in the MU syntax
         firstsegment = segments.get(0);
         secondsegment = segments.get(1);
-    	//check if meet span
-        try
-        { 
-        	Integer[] window = new Integer[] {0,0};
-        	int offposition1= node.getChildCount()-2;
-        	int offposition2= node.getChildCount()-1;
-        	window = new Integer[] { Integer.parseInt(node.getChild(offposition1).getText()), Integer.parseInt(node.getChild(offposition2).getText()) }; // if fails, it is a meet span
-        	if ((window[0]==0)||(window[1]==0))
+        List<ParseTree> desc1=  getDescendantsWithCat(firstsegment, "meetunion");
+        if (getNodeCat(firstsegment).equals("meetunion")) desc1.add(firstsegment);
+        List<ParseTree> desc2=  getDescendantsWithCat(secondsegment, "meetunion");
+        if (getNodeCat(secondsegment).equals("meetunion")) desc2.add(secondsegment);
+        if((!desc1.isEmpty())||(!desc2.isEmpty()))
+            {
+                recurrence = true;
+            }
+        return recurrence;
+    }
+
+
+    private boolean checkifparentisSpanMeet (ParseTree node) {
+
+    	boolean parentspanmeet=false;
+    	if (getNodeCat(node.getParent().getParent().getParent()).equals("meetunion") )
+                {
+                    // check if last child of the parent meet  is integer, otherwise the parent meet is a span meet
+                    ParseTree testnode = node.getParent().getParent().getParent();
+                    int lastchild = testnode.getChildCount()-1;
+                    
+                    try {
+                    	int test = Integer.parseInt(testnode.getChild(lastchild).getText());
+                    
+                        }
+                    catch (NumberFormatException nfe)
+                    	{ 
+                        	parentspanmeet=true;
+                    	}     
+                }
+                
+                if (getNodeCat(node.getParent()).equals("meetunion") )
+                {
+                    // check if last child of the parent meet  is integer, otherwise the parent meet is a span meet
+                    ParseTree testnode = node.getParent();
+                    int lastchild = testnode.getChildCount()-1;
+                    
+                    try {
+                    int test = Integer.parseInt(testnode.getChild(lastchild).getText());
+                    
+                            }
+                    catch (NumberFormatException nfe)
+                    { 
+                        parentspanmeet=true;
+                    }
+                    
+                }
+            return parentspanmeet;    
+    }
+    private Integer computeSegmentDistance(ParseTree node) {
+    	
+    	int distance=0;
+    	//outer offsets
+    	int ooffs1=0;
+    	int ooffs2=0;
+    	//first inner offsets; if there is no 1st inner meet, the offsets remain 0
+    	int foffs1=0;
+    	int foffs2=0;
+    	//second inner offsets;  if there is no 2nd inner meet, the offsets remain 0
+    	int soffs1=0;
+    	int soffs2=0;
+    	ooffs1= Integer.parseInt(node.getChild(node.getChildCount()-2).getText());
+    	// we don't need both offs because they are equal!
+    	ooffs2= Integer.parseInt(node.getChild(node.getChildCount()-1).getText());
+    	
+       	ParseTree firstsegment;
+    	ParseTree secondsegment;	
+    	List<ParseTree> segments = getChildrenWithChildren(node); // the others are terminal nodes in the MU syntax
+        firstsegment = segments.get(0);
+        secondsegment = segments.get(1);
+        List<ParseTree> desc1=  getDescendantsWithCat(firstsegment, "meetunion");
+        if (getNodeCat(firstsegment).equals("meetunion")) desc1.add(firstsegment);
+        List<ParseTree> desc2=  getDescendantsWithCat(secondsegment, "meetunion");
+        if (getNodeCat(secondsegment).equals("meetunion")) desc2.add(secondsegment);
+        if((!desc1.isEmpty()))
+            {
+        		foffs1= Integer.parseInt(desc1.get(0).getChild(desc1.get(0).getChildCount()-2).getText());
+        		// we don't need both offs because they are equal!
+        		foffs2= Integer.parseInt(desc1.get(0).getChild(desc1.get(0).getChildCount()-1).getText());
+            }
+        
+        if((!desc2.isEmpty()))
         	{
-        		System.out.println("The meetunion offsets cannot be 0!!");
-        		return;
+        		soffs1= Integer.parseInt(desc2.get(0).getChild(desc2.get(0).getChildCount()-2).getText());
+        		// we don't need both offs because they are equal!
+        		soffs2= Integer.parseInt(desc2.get(0).getChild(desc2.get(0).getChildCount()-1).getText());
         	}
+        if ((foffs1>0&&soffs1>0&&ooffs1>0) || (foffs1>0&&soffs1>0&&ooffs1<0) || (foffs1>0&&soffs1==0&&ooffs1>0) || (foffs1<0&&soffs1==0&&ooffs1<0))
+        	{ 
+        		if (Math.abs(ooffs1)-Math.abs(foffs1)-1>=0)
+        			{
+        				distance = Math.abs(ooffs1)-Math.abs(foffs1)-1;
+        			}
+        		else
+        		{
+        			System.out.println("Incompatible offset values! The differene between the absolute values of the outer offsets and the first inner offsets should not be smaller than 1!");
+        			
+        		}
+        	}
+        else
+        {
+        	if ((foffs1<0&&soffs1>0&&ooffs1>0) || (foffs1<0&&soffs1==0&&ooffs1>0) || (foffs1>0&&soffs1==0&&ooffs1<0) || (foffs1==0&&soffs1>0&&ooffs1>0))
+         		{ 
+        	 		if (Math.abs(ooffs1)-1>=0)
+        	 			{
+        	 				distance = Math.abs(ooffs1)-1;
+        	 			}
+        	 		else
+        	 		{
+        	 			System.out.println("Incompatible offset values! The absolute values of the outer offsets should not be smaller than 1!"); // this is also checked in the processMeetunion function, when comparing offsets with zero
+        	 		}
+         		}
         	else
         	{
-        		if (window[0]>window[1])
+        		if (foffs1<0&&soffs1>0&&ooffs1<0)
+        			{ 
+        				if (Math.abs(ooffs1)-Math.abs(foffs1)-Math.abs(soffs1)-1>=0)
+        				{
+        					distance = Math.abs(ooffs1)-Math.abs(foffs1)-Math.abs(soffs1)-1;
+        				}
+        				else
+        				{
+        					System.out.println("Incompatible offset values! The differene between the absolute values of the outer offsets and the sum of the first inner and the second inner offsets should not be smaller than 1!");
+        				}
+        			}
+        		else
         		{
-        			System.out.println("Left meetunion offset is bigger than the right one!");
-        			return;
+        			if (foffs1==0&&soffs1>0&&ooffs1<0)
+        				{ 
+        					if (Math.abs(ooffs1)-Math.abs(soffs1)-1>=0)
+        						{
+        							distance = Math.abs(ooffs1)-Math.abs(soffs1)-1;
+        						}
+        					else
+        					{
+        						System.out.println("Incompatible offset values! The differene between the absolute values of the outer offsets and the second inner offsets should not be smaller than 1!");
+        					}
+        				}
+        			else
+        			{
+        				System.out.println("Incompatible offset values! See the cqp tutorial!");
+        			}
+        		}
+        	}
+        }
+    	return distance;
+     }
+
+   
+    
+    @SuppressWarnings("unchecked")
+	private void processMeetunion (ParseTree node, boolean putvisited) {
+    	
+	boolean disj = false;
+	ParseTree firstsegment;
+	ParseTree secondsegment;	
+	List<ParseTree> segments = getChildrenWithChildren(node); // the others are terminal nodes in the MU syntax
+    firstsegment = segments.get(0);
+    secondsegment = segments.get(1);
+	
+    try
+    { 
+    	/************** this processes meet with offsets ************/
+    	
+    	Integer[] window = new Integer[] {0,0};
+    	int offposition1= node.getChildCount()-2;
+    	int offposition2= node.getChildCount()-1;
+    	window = new Integer[] { Integer.parseInt(node.getChild(offposition1).getText()), Integer.parseInt(node.getChild(offposition2).getText()) }; // if fails, it is a meet span
+    	if ((window[0]==0)||(window[1]==0))
+    	{
+    		System.out.println("The meetunion offsets cannot be 0!!");
+    		return;
+    	}
+    	else
+    	{
+    		if (window[0]>window[1])
+    		{
+    			System.out.println("Left meetunion offset is bigger than the right one!");
+    			return;
+    		}
+    		else
+    		{
+    			/****  correct offsets ****/
+    			Map<String, Object> object = null;
+    			/******* check if this is a recurrent meetunion *******/ 
+    	   	    boolean recurrence = false;    
+                recurrence = checkifRecurrsiveMeet(node); // check if the actual meet is a recursive one
+		
+    			// the numbers in meet function behave like window offsets, not like the quantifiers in repetitions; 
+    			//they are translated into quantifiers here below!
+   
+    			if(window[0].equals(window[1])) 
+        		{
+    				/***** equal offsets; the distance is exactly window[1]=window[2] ****/
+                    Integer segmentDistance=0; /*** the distance between the first inner meet seq and the second inner meet seq; ****/
+                    
+                    /**** create the meet sequence ****/
+            		Map<String, Object> sequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+			    	putIntoSuperObject(sequence);
+			    	objectStack.push(sequence);
+			    	stackedObjects++;
+					
+                    if (window[0]>0)
+        				{
+        				  /** positive equal offsets; segmentDistance is exactly window[0]=window[1] and the order of the segments is kept ***/
+        					
+        			    	/*** first meet segment *****/
+        			    	 // propagate the putvisited to the segments
+        			    	processNode(firstsegment, putvisited);
+
+        			    	if (recurrence==false) 
+        			    	{
+        			    		/*** non-recurrence ***/
+        			    		/***** if window=[1, 1] no distance is necessary; ****/
+        			    		if (window[0]>1) 
+        			    		{
+        			    			 sequence.put("distances", KoralObjectGenerator.makeDistance("w", window[0]-1 , window[1]-1));
+        			    			
+        			    		}
+        			    	}
+        			    	else
+        			    	{
+        			    		/*** recurrence ****/
+        			    		segmentDistance = computeSegmentDistance(node);
+            			    	//insert empty token repetition 
+            					if (segmentDistance>0)
+            					{
+            						sequence.put("distances", KoralObjectGenerator.makeDistance("w", segmentDistance, segmentDistance));
+            					}
+            				}
+        					
+        			    	/*** second meet segment; put again into stack for recurrence situations ****/
+        			    	if (recurrence == true) objectStack.push(sequence);
+        			         //propagate the putvisited to the segments
+        			    	processNode(secondsegment, putvisited);
+        				}
+        				else
+        				{
+        					/**** negative equal offsets; the distance is exactly  window[0]=window[1] and the order of the segments is changed ***/
+        					/*** second meet segment ***/
+        				    processNode(secondsegment, putvisited);
+        					   
+        					   if (recurrence==false) 
+                               {
+        							if (window[0]<-1)
+        							{
+        								sequence.put("distances", KoralObjectGenerator.makeDistance("w", (-window[1])-1 , (-window[0])-1));
+        							}
+        							//if window=[-1, -1], we just need to change the order of processing the segments
+        						}
+        						else
+        						{	
+        							segmentDistance = computeSegmentDistance(node);
+        							if (segmentDistance>0)
+        							{
+  
+        								sequence.put("distances", KoralObjectGenerator.makeDistance("w", segmentDistance, segmentDistance));
+        							}
+        						}
+            					
+        					   
+        					   /*** first meet segment; put again into stack for recurrence situations ****/
+        						if (recurrence==true) objectStack.push(sequence);
+        						processNode(firstsegment, putvisited);
+        					
+        				}
         		}
         		else
         		{
-        			Map<String, Object> object = null;
-        			// check if this is a recurrent meetunion 
-        			boolean recurrence = false;    
-        			// first segment and second segment are parsed differently in the antlr grammar, see if you can fix!!!
-        			List<ParseTree> desc1=  getDescendantsWithCat(firstsegment, "meetunion");
-        			if (getNodeCat(firstsegment).equals("meetunion")) desc1.add(firstsegment);
-        			List<ParseTree> desc2=  getDescendantsWithCat(secondsegment, "meetunion");
-        			if (getNodeCat(secondsegment).equals("meetunion")) desc2.add(secondsegment);
-        			if((!desc1.isEmpty())||(!desc2.isEmpty()))
-        			{
-        				recurrence = true;
-        			}
-        			//check if parent span meet!
-        			boolean parentspanmeet=false;
-        			if (getNodeCat(node.getParent().getParent().getParent()).equals("meetunion") )
-        			{
-        				// check if last child of the parent meet  is integer, otherwise the parent meet is a span meet
-        				ParseTree testnode = node.getParent().getParent().getParent();
-        				int lastchild = testnode.getChildCount()-1;
-        				
-        				try {
-        				int test = Integer.parseInt(testnode.getChild(lastchild).getText());
-        				
-        						}
-        				catch (NumberFormatException nfe)
-        				{ 
-        					parentspanmeet=true;
-        				}
-        				
-        			}
-        			
-        			if (getNodeCat(node.getParent()).equals("meetunion") )
-        			{
-        				// check if last child of the parent meet  is integer, otherwise the parent meet is a span meet
-        				ParseTree testnode = node.getParent().getParent();
-        				int lastchild = testnode.getChildCount()-1;
-        				
-        				try {
-        				int test = Integer.parseInt(testnode.getChild(lastchild).getText());
-        				
-        						}
-        				catch (NumberFormatException nfe)
-        				{ 
-        					parentspanmeet=true;
-        				}
-        				
-        			}
-        			
-        				
-        				
-        				
-        				
-        				// the numbers in meet function behave like window offsets, not like the quantifiers in repetitions; 
-        			//they are translated into quantifiers here below!
-       
-        			if(window[0].equals(window[1])) // the distance is exactly window[1]=window[2]
-            			{
-            			if (window[0]>0)
-            				{
-            				// the distance is exactly window[0]=window[1] and the order of the segments is kept
-            					
-            					Map<String, Object> sequence = KoralObjectGenerator
-            		                .makeGroup(KoralOperation.SEQUENCE);
-            			    	putIntoSuperObject(sequence);
-            			    	
-            			    	objectStack.push(sequence);
-            			    	stackedObjects++;
-            					// first meet segment
-            			    	if (parentspanmeet==true) processNode(firstsegment, false);
-            			    	else processNode(firstsegment, true);
-            			    	/*if window=[1, 1] no empty token repetition is necessary; same if window =[2,2]
-            			    	 and the meetunion has a meetunion child - recurrence*/
-            			    	if (recurrence==false) {
-            			    		if (window[0]>1) 
-            			    		{
-            			    			//insert empty token repetition 
-            			    			Map<String, Object> emptyToken = KoralObjectGenerator
-            								.makeToken();
-            			    			object = KoralObjectGenerator.makeRepetition(window[0]-1, window[1]-1);
-            			    			((ArrayList<Object>) object.get("operands")).add(emptyToken);
-            			    			((ArrayList<Object>) sequence.get("operands")).add(object);
-            			    		}
-            			    	}
-            			    	else
-            			    	{
-            			    		if (window[0]>2) 
-                					{
-                			    	//insert empty token repetition 
-                						Map<String, Object> emptyToken = KoralObjectGenerator
-                								.makeToken();
-                						object = KoralObjectGenerator.makeRepetition(window[0]-2, window[1]-2);
-                						((ArrayList<Object>) object.get("operands")).add(emptyToken);
-                						((ArrayList<Object>) sequence.get("operands")).add(object);
-                					}
-            			    	}
-            					//second meet segment; put again into stack for recurrence situations
-            			    	objectStack.push(sequence);
-            			    	if (parentspanmeet==true) processNode(secondsegment, false);
-            			    	else processNode(secondsegment, true);
-            				}
-            				else
-            				{
-            				
-            					// the distance is exactly  window[0]=window[1] and the order of the segments is changed
-            					   Map<String, Object> sequence = KoralObjectGenerator
-            				                .makeGroup(KoralOperation.SEQUENCE);
-            				       putIntoSuperObject(sequence);
-            				       objectStack.push(sequence);
-            				       stackedObjects++;
-            				        // first meet segment
-            				       if (parentspanmeet==true) processNode(secondsegment, false);
-               			    	   else processNode(secondsegment, true);
-            					   //if window=[-1, -1], we just need to change the order of processing the segments
-            					   if (recurrence==false) {
-            							if (window[0]<-1)
-            							{
-            								//insert empty token sequence
-            								Map<String, Object> emptyToken = KoralObjectGenerator
-            										.makeToken();
-            								object = KoralObjectGenerator.makeRepetition((-window[1])-1,(-window[0])-1);
-            								((ArrayList<Object>) object.get("operands")).add(emptyToken);
-            								((ArrayList<Object>) sequence.get("operands")).add(object);
-            							}
-            						}
-            						else
-            						{
-            							//insert empty token sequence
-            							if (window[0]<-2)
-            							{
-            								Map<String, Object> emptyToken = KoralObjectGenerator
-            										.makeToken();
-            								object = KoralObjectGenerator.makeRepetition((-window[1])-2,(-window[0])-2);
-            								((ArrayList<Object>) object.get("operands")).add(emptyToken);
-            								((ArrayList<Object>) sequence.get("operands")).add(object);
-            							}
-            							
-            						}
-                					//second meet segment; push again into stack for recurrence
-            						objectStack.push(sequence);
-            						if (parentspanmeet==true) processNode(firstsegment, false);
-                			    	else processNode(firstsegment, true);
-            					
-            				}
-            			}
-            		 else
-            		 {
-            			//the offsets are not equal
-            			if ((window[0]<0) && (window[1]>0))
-            			{
-            				//  implementing disjunction of sequences
-            				disj= true;
-            				Map<String, Object> disjunction = KoralObjectGenerator.makeGroup(KoralOperation.DISJUNCTION);
-            				putIntoSuperObject(disjunction);
-            				objectStack.push(disjunction);
-            				stackedObjects++;
-            		
-            				// first disjunct, keep order of segments, distance is []{0,window[1]}
-            				Map<String, Object> firstsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
-            				putIntoSuperObject(firstsequence);
-            				objectStack.push(firstsequence);
-            				stackedObjects++;
-            			
-            				processNode(firstsegment, false);
-            				if(window[1]>1)
-            				{
-            					Map<String, Object> emptyToken1 = KoralObjectGenerator.makeToken();
-            					Map<String, Object> object1 = KoralObjectGenerator.makeRepetition(0, window[1]-1);
-            					((ArrayList<Object>) object1.get("operands")).add(emptyToken1);
-            					((ArrayList<Object>) firstsequence.get("operands")).add(object1);
-            				}
-            				processNode(secondsegment, false);
-    				
-            				// second disjunct, change order of segments, distance is []{0,-window[0]}
-            				Map<String, Object> secondsequence = KoralObjectGenerator
-                            .makeGroup(KoralOperation.SEQUENCE);
-            				objectStack.push(secondsequence);
-            				stackedObjects++;
-            				((ArrayList<Object>) disjunction.get("operands")).add(secondsequence);
-            				processNode(secondsegment, true);
-            				if(window[0]<-1)
-            				{
-            					Map<String, Object> emptyToken2 = KoralObjectGenerator
-            							.makeToken();
-            					Map<String, Object> object2 = KoralObjectGenerator.makeRepetition(0, (-window[0])-1);
-            					((ArrayList<Object>) object2.get("operands")).add(emptyToken2);
-            					((ArrayList<Object>) secondsequence.get("operands")).add(object2);
-            				}
-            				processNode(firstsegment, true);
-    				
-            		   }
-            		   else
-            		   {
-            			    if (window[0]>0 && window[1]>0)
-            				{
-            					Map<String, Object> sequence = KoralObjectGenerator
-                		                .makeGroup(KoralOperation.SEQUENCE);
-                			    	putIntoSuperObject(sequence);
-                			    	objectStack.push(sequence);
-                			    	stackedObjects++;
-                					// first meet segment
-                			    	if (parentspanmeet==true) processNode(firstsegment, false);
-                			    	else processNode(firstsegment, true);
-                			    	
-                			    	//insert empty token repetition 
-                						Map<String, Object> emptyToken = KoralObjectGenerator
-                								.makeToken();
-                						object = KoralObjectGenerator.makeRepetition(window[0]-1, window[1]-1);
-                						((ArrayList<Object>) object.get("operands")).add(emptyToken);
-                						((ArrayList<Object>) sequence.get("operands")).add(object);
-                					
-                					//second meet segment 
-                					if (parentspanmeet==true) processNode(secondsegment, false);
-                    			    else processNode(secondsegment, true);
-            				}
-            				if (window[0]<0 && window[1]<0)
-            				{
-            					// change order of segments
-            					
-            					Map<String, Object> sequence = KoralObjectGenerator
-        				                .makeGroup(KoralOperation.SEQUENCE);
-        				        putIntoSuperObject(sequence);
-        				        objectStack.push(sequence);
-        				        stackedObjects++;
-        				        // second meet segment
-        				        if (parentspanmeet==true) processNode(secondsegment, false);
-            			    	else processNode(secondsegment, true);
-        					
-        						Map<String, Object> emptyToken = KoralObjectGenerator
-            	                .makeToken();
-            					object = KoralObjectGenerator.makeRepetition((-window[1])-1,(-window[0])-1);
-            					((ArrayList<Object>) object.get("operands")).add(emptyToken);
-            					((ArrayList<Object>) sequence.get("operands")).add(object);
-        						
-            					//first meet segment
-            					if (parentspanmeet==true) processNode(firstsegment, false);
-            			    	else processNode(firstsegment, true);
-            				}
-            			}
-            	   }
-        	    }
-        	}
-        }
-        catch (NumberFormatException nfe)
-        {
-        	// process meet span
-        	Map<String, Object> position = parseFrame(node.getChild(node.getChildCount()-1));
-            putIntoSuperObject(position);
-            objectStack.push(position);
-            stackedObjects++; 
-            
-            // add span node
-            Map<String, Object> span = KoralObjectGenerator.makeSpan();
-            Map<String, Object> wrappedTerm = KoralObjectGenerator
-                    .makeTerm();
-            span.put("wrap", wrappedTerm);
-           
-            wrappedTerm.put("type", "type:regex");
-            wrappedTerm.put("key", node.getChild(node.getChildCount()-1).getText());
-            putIntoSuperObject(span);
-            objectStack.push(span);
-    		
-            stackedObjects++;
-            objectStack.push(position);
-            
-            disj= true;
-			Map<String, Object> disjunction = KoralObjectGenerator.makeGroup(KoralOperation.DISJUNCTION);
-			putIntoSuperObject(disjunction);
-			objectStack.push(disjunction);
-			stackedObjects++;
-	
-			// first disjunct, keep order of segments, 
-			Map<String, Object> firstsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
-			putIntoSuperObject(firstsequence);
-			objectStack.push(firstsequence);
-			stackedObjects++;
-		
-			processNode(firstsegment, false);
-			Map<String, Object> emptyToken1 = KoralObjectGenerator
-	                .makeToken();
-		    Map<String, Object> object1 = null;
-			object1 = KoralObjectGenerator.makeRepetition(0,null);
-			((ArrayList<Object>) object1.get("operands")).add(emptyToken1);
-			((ArrayList<Object>) firstsequence.get("operands")).add(object1);
-			objectStack.push(firstsequence); // for recurrence
-			processNode(secondsegment, false);
-	
-			// second disjunct, change order of segments, 
-			
-			Map<String, Object> secondsequence = KoralObjectGenerator
-            .makeGroup(KoralOperation.SEQUENCE);
-			objectStack.push(secondsequence);
-			stackedObjects++;
-			((ArrayList<Object>) disjunction.get("operands")).add(secondsequence);
-			processNode(secondsegment, true);
-			Map<String, Object> emptyToken2 = KoralObjectGenerator
-	                .makeToken();
-		    Map<String, Object> object2 = null;
-			object2 = KoralObjectGenerator.makeRepetition(0,null);
-			((ArrayList<Object>) object2.get("operands")).add(emptyToken2);
-			((ArrayList<Object>) secondsequence.get("operands")).add(object2);
-			objectStack.push(secondsequence); // for recurrence
-			processNode(firstsegment, true);
-        }
-       if (disj==false) removeExcessHighlightClass(); // highlightClass has to keep classes for both disjuncts
-        
-    }
+        			/*** the offsets are not equal; we don't use putvisited here, because we did not implement recursive or span recursive meet for this situation ***/
+        			if (recurrence==true)
+                    {
+                        System.out.println("We did not implement recursive meet with different offsets");// a more user-friendly message would be nice
+                        return;
+                    }
+                    else
+                    {
+                        if ((window[0]<0) && (window[1]>0))
+                        {
 
-    @SuppressWarnings("unchecked")
+                            /***  implementing disjunction of sequences ***/
+        				    
+                        	disj= true;
+        				    Map<String, Object> disjunction = KoralObjectGenerator.makeGroup(KoralOperation.DISJUNCTION);
+        				    putIntoSuperObject(disjunction);
+        				    objectStack.push(disjunction);
+        				    stackedObjects++;
+        		
+        				    /**** first disjunct, keep order of segments, distance is []{0,window[1]} ****/
+        				    
+        				    Map<String, Object> firstsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+        				    putIntoSuperObject(firstsequence);
+        				    objectStack.push(firstsequence);
+        				    stackedObjects++;
+        				    processNode(firstsegment, false);
+        				    if(window[1]>1)
+        				    {
+        					  firstsequence.put("distances", KoralObjectGenerator.makeDistance("w", 0, window[1]-1));
+        				    }
+        				    processNode(secondsegment, false);
+				
+        				    /*** second disjunct, change order of segments, distance is []{0,-window[0]} ***/
+        				    
+        				    Map<String, Object> secondsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+        				    objectStack.push(secondsequence);
+        				    stackedObjects++;
+        				    ((ArrayList<Object>) disjunction.get("operands")).add(secondsequence);
+        				    processNode(secondsegment, true);
+        				    if(window[0]<-1)
+        				    {
+        					  secondsequence.put("distances", KoralObjectGenerator.makeDistance("w", 0, (-window[0])-1));
+        				    }
+        				    processNode(firstsegment, true);
+				        }
+                        
+        		        else
+        		        {
+        		        	/**** offsets are either both > 0 or both < 0 ****/
+        		        	Map<String, Object> sequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+                            putIntoSuperObject(sequence);
+                            objectStack.push(sequence);
+                            stackedObjects++;
+                            
+        		        	if (window[0]>0 && window[1]>0)
+        				    {
+        					   /*** both offsets are positive ***/
+                               /**** first meet segment ****/
+                               			
+                               processNode(firstsegment, true);
+                               sequence.put("distances", KoralObjectGenerator.makeDistance("w", window[0]-1, window[1]-1));
+            					
+            					
+                               processNode(secondsegment, true);
+        				    
+        				    }
+        		        	else
+        		        	{
+                            	/*** both offsets are negative; change order of segments ****/
+    				         	/**** second meet segment ****/
+    				         		
+                            	processNode(secondsegment, true);
+    				            sequence.put("distances", KoralObjectGenerator.makeDistance("w", (-window[1])-1,(-window[0])-1));
+
+    				            /**** first meet segment ******/
+    				            	
+    				            processNode(firstsegment, true);
+        				    }
+                        }
+                    }
+                }
+    	    }
+    	}
+    }
+    
+    catch (NumberFormatException nfe)
+    {
+    	/**** process meet  with span ***/
+    	
+    	ParseTree firstsequence = firstsegment;
+    	ParseTree secondsequence = secondsegment;
+    	Map<String, Object> position = parseFrame(node.getChild(node.getChildCount()-1));
+        putIntoSuperObject(position);
+        objectStack.push(position);
+        stackedObjects++; 
+        
+        // add span node
+        Map<String, Object> span = KoralObjectGenerator.makeSpan();
+        Map<String, Object> wrappedTerm = KoralObjectGenerator
+                .makeTerm();
+        span.put("wrap", wrappedTerm);
+       
+        wrappedTerm.put("type", "type:regex");
+        wrappedTerm.put("key", node.getChild(node.getChildCount()-1).getText());
+        putIntoSuperObject(span);
+        objectStack.push(span);
+		
+        stackedObjects++;
+        objectStack.push(position); // pune position de doua ori in stack?
+        
+    /*    disj= true;
+		Map<String, Object> disjunction = KoralObjectGenerator.makeGroup(KoralOperation.DISJUNCTION);
+		putIntoSuperObject(disjunction);
+		objectStack.push(disjunction);
+		stackedObjects++;*/
+
+		// first disjunct, keep order of segments, 
+	/*	Map<String, Object> firstdisjunct = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+		//putIntoSuperObject(firstdisjunct);
+		objectStack.push(firstdisjunct);
+		stackedObjects++;
+		((ArrayList<Object>) disjunction.get("operands")).add(firstdisjunct);*/
+		Map<String, Object> spannedsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+		putIntoSuperObject(spannedsequence);
+		objectStack.push(spannedsequence);
+		stackedObjects++;
+		
+		
+		processNode(firstsequence, true); // putvisited is false, we need to visit the segment again in secondsequence
+		objectStack.push(spannedsequence); // for recurrence; the firstsequence was first in stack before;
+		processNode(secondsequence, true);  // putvisited is false, we need to visit the segment again in secondsequence
+		/** distance between first sequence and second sequence can be anything in meet span**/
+		spannedsequence.put("distances", KoralObjectGenerator.makeDistance("w", 0, null));
+		spannedsequence.put("inOrder", false);
+		
+		
+		// second disjunct, change order of segments, 
+		/*Map<String, Object> seconddisjunct = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+		objectStack.push(seconddisjunct);
+		stackedObjects++;
+		((ArrayList<Object>) disjunction.get("operands")).add(seconddisjunct);
+		
+		processNode(secondsequence, true);
+		objectStack.push(seconddisjunct); // for recurrence; the secondsequence was first in stack before;
+		processNode(firstsequence, true);
+		/** distance between first sequence and second sequence can be anything in meet span**/
+		/*seconddisjunct.put("distances", KoralObjectGenerator.makeDistance("w", 0, null));*/
+    }
+  // if (disj==false) removeExcessHighlightClass(); // highlightClass has to keep classes for both disjuncts
+    
+}
+
+	@SuppressWarnings("unchecked")
     /**
      * empty tokens at beginning/end of sequence
      * 
      * @param node
      */
     private void processEmptyTokenSequence (ParseTree node) {
-        Integer[] minmax = parseEmptySegments(node);
-        // object will be either a repetition group or a single empty
-        // token
-        Map<String, Object> object;
-        Map<String, Object> emptyToken = KoralObjectGenerator
-                .makeToken();
-        if (minmax[0] != 1 || minmax[1] == null || minmax[1] != 1) {
-            object = KoralObjectGenerator.makeRepetition(minmax[0], minmax[1]);
-            ((ArrayList<Object>) object.get("operands")).add(emptyToken);
-        }
-        else {
-            object = emptyToken;
-        }
-        putIntoSuperObject(object);
-        objectStack.push(object);
-        stackedObjects++;
-    }
+	    
+		Map<String, Object> lastobj= objectStack.getLast();
+		
+				Integer[] minmax = parseEmptySegments(node);
+				// object will be either a repetition group or a single empty
+				// token
+				Map<String, Object> object;
+				Map<String, Object> emptyToken = KoralObjectGenerator.makeToken();
+				if (minmax[0] != 1 || minmax[1] == null || minmax[1] != 1) 
+				{
+					object = KoralObjectGenerator.makeRepetition(minmax[0], minmax[1]);
+					((ArrayList<Object>) object.get("operands")).add(emptyToken);
+				}
+				else 
+				{
+					object = emptyToken;
+				}
+				if (lastobj.containsKey("frames")) // check is frames:isAround and ignore the emptyTokens if the case, for the <s> []* token []* </s> situations;
+				{
+				
+					if (!lastobj.get("frames").toString().contains("isAround"))
+					{
+						putIntoSuperObject(object);
+						objectStack.push(object);
+						stackedObjects++;
+					}
+				}
+				else
+				{
+					putIntoSuperObject(object);
+					objectStack.push(object);
+					stackedObjects++;
+				}
+				
+			}
+		
 
 
     private void processQueryref (ParseTree node) {
@@ -803,6 +969,94 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         else {
             // child is 'term' or 'termGroup' -> process in extra method
+            //check if the token has a position condition
+        	
+        	if  (hasChild(node.getChild(termOrTermGroupChildId), "position"))
+        	{
+        		ParseTree positionNode=  getFirstChildWithCat(node.getChild(termOrTermGroupChildId), "position"); 
+        		processPosition(positionNode);
+        	}
+        	
+        	Map<String, Object> termOrTermGroup = parseTermOrTermGroup(
+                    node.getChild(termOrTermGroupChildId), negated);
+            token.put("wrap", termOrTermGroup);
+        }
+        putIntoSuperObject(token);
+        visited.addAll(getChildren(node));
+    }
+    
+    
+    private void processTokenStruct (ParseTree node) {
+    	// differs from processToken because it doesn't require/have [] around the token
+        Map<String, Object> token = KoralObjectGenerator.makeToken();
+        // handle negation
+        List<ParseTree> negations = getChildrenWithCat(node, "!");
+        int termOrTermGroupChildId = 0;
+        boolean negated = false;
+        boolean isRegex = false;
+        if (negations.size() % 2 == 1) {
+            negated = true;
+            termOrTermGroupChildId += negations.size();
+        }
+
+        if (getNodeCat(node.getChild(0)).equals("key")) {
+            // no 'term' child, but direct key specification: process here
+            Map<String, Object> term = KoralObjectGenerator
+                    .makeTerm();
+
+            String key = node.getChild(0).getText();
+
+            if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
+                isRegex = true;
+                term.put("type", "type:regex");
+
+                // fixme: use stream with offset to get text!
+                // TokenStream stream = parser.getTokenStream();
+                // key = stream.getText(node.getChild(0).getSourceInterval());
+                key = key.substring(1, key.length() - 1);
+            }
+            term.put("layer", "orth");
+            term.put("key", key);
+            KoralMatchOperator matches = negated ? KoralMatchOperator.NOT_EQUALS
+                    : KoralMatchOperator.EQUALS;
+            term.put("match", matches.toString());
+            ParseTree flagNode = getFirstChildWithCat(node, "flag");
+            if (flagNode != null) {
+                ArrayList<String> flags = new ArrayList<String>();
+                // substring removes leading slash '/'
+                String flag = getNodeCat(flagNode.getChild(0)).substring(1);
+                if (flag.contains("c") || flag.contains("C"))
+                    flags.add("flags:caseInsensitive");
+                if (flag.contains("d") || flag.contains("D"))
+                    flags.add("flags:diacriticsInsensitive");
+                /*if (flag.contains("x")) {
+                    term.put("type", "type:regex");
+                    if (!isRegex) {
+                        key = QueryUtils.escapeRegexSpecialChars(key);
+                    }
+                    // overwrite key
+                    term.put("key", ".*?" + key + ".*?");
+                } */
+                if (flag.contains("l")|| flag.contains("L"))
+                { 
+                		ParseTree keyNode = node.getChild(0);
+
+        				// Get stream from hidden channel
+        				TokenStream stream = parser.getTokenStream();
+        				key = stream.getText(keyNode.getChild(0).getSourceInterval());
+        				key = key.substring(1, key.length()-1).replaceAll("\\\\\\\\","\\\\").replaceAll("\\\\'", "'");
+        				//override key and type:string
+        				term.put("key", key);
+        				term.put("type", "type:string");
+                }
+                if (!flags.isEmpty()) {
+                    term.put("flags", flags);
+                }
+            }
+            token.put("wrap", term);
+        }
+        else {
+            // child is 'term' or 'termGroup' -> process in extra method
             Map<String, Object> termOrTermGroup = parseTermOrTermGroup(
                     node.getChild(termOrTermGroupChildId), negated);
             token.put("wrap", termOrTermGroup);
@@ -810,6 +1064,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         putIntoSuperObject(token);
         visited.addAll(getChildren(node));
     }
+
 
 
     /**
@@ -860,8 +1115,9 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
     }
 
-
-    private void processSpan (ParseTree node) {
+    
+  
+        private void processSpan (ParseTree node) {
         List<ParseTree> negations = getChildrenWithCat(node, "!");
         boolean negated = false;
         if (negations.size() % 2 == 1)
@@ -934,9 +1190,18 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     private void processPosition (ParseTree node) {
         Map<String, Object> position = parseFrame(node.getChild(0));
+       
         putIntoSuperObject(position);
         objectStack.push(position);
         stackedObjects++;
+        if (hasChild(node, "span")) // for lboud and rbound, when span is child of position;
+        {
+        	ParseTree spanchildnode = getFirstChildWithCat (node, "span");
+        	processSpan(spanchildnode);
+        	
+        	objectStack.pop();
+        	stackedObjects=stackedObjects-2;
+        }
     }
 
 
@@ -1108,9 +1373,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         requestMap.put("collection", cq.getRequestMap().get("collection"));
         visited.addAll(getChildren(node));
     }
-    private void processStruct(ParseTree node) {
     
-    }
 
     @SuppressWarnings("unchecked")
     private void processWithin (ParseTree node) {
@@ -1196,32 +1459,68 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     private Map<String, Object> parseFrame (ParseTree node) {
         String operator = node.toStringTree(parser).toLowerCase();
+
         ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
         if (getNodeCat((node).getParent()).equals("meetunion"))
         		{
         			frames.add(KoralFrame.IS_AROUND);
         		}
-        switch (operator) {
-            case "contains":
-                frames.add(KoralFrame.IS_AROUND);
-                break;
-            case "matches":
-                frames.add(KoralFrame.MATCHES);
-                break;
-            case "startswith":
-                frames.add(KoralFrame.STARTS_WITH);
-                frames.add(KoralFrame.MATCHES);
-                break;
-            case "endswith":
-                frames.add(KoralFrame.ENDS_WITH);
-                frames.add(KoralFrame.MATCHES);
-                break;
-            case "overlaps":
-                frames.add(KoralFrame.OVERLAPS_LEFT);
-                frames.add(KoralFrame.OVERLAPS_RIGHT);
-                break;
-        }
-        return KoralObjectGenerator.makePosition(frames);
+       if (operator.contains("startswith"))
+       {
+    	   frames.add(KoralFrame.STARTS_WITH);
+           frames.add(KoralFrame.MATCHES);
+           
+       }
+       if (operator.contains("endswith"))
+       {
+    	   frames.add(KoralFrame.ENDS_WITH);
+           frames.add(KoralFrame.MATCHES);
+           
+       }
+       if (operator.contains("matches"))
+       {
+           ParseTree sequenceNode = node.getChild(1);
+           int snodeNofChildren = sequenceNode.getChildCount();
+    	   if ((getNodeCat((sequenceNode.getChild(0).getChild(0))).equals("emptyTokenSequence")) && (getNodeCat((sequenceNode.getChild(snodeNofChildren-1).getChild(0))).equals("emptyTokenSequence")))
+    	  { 
+    		  frames.add(KoralFrame.IS_AROUND);
+    		  
+          }
+    	  else
+    	  {
+           frames.add(KoralFrame.MATCHES);
+    	  }
+           
+       }
+       if (operator.contains("rbound"))
+              {
+    	   		frames.add(KoralFrame.ENDS_WITH);
+    	   		frames.add(KoralFrame.MATCHES);
+              }
+       if (operator.contains("lbound"))
+       {
+	   		frames.add(KoralFrame.STARTS_WITH);
+	   		frames.add(KoralFrame.MATCHES);
+       }
+        
+       
+       // this is to eliminate doubled KoralFrame.MATCHES; to delete if cleared in the ifs above
+       int matchescount=0;
+       for (int f=0; f< frames.size();f++) 
+       {
+    	   KoralFrame frame = frames.get(f);
+    	   String framevalue = frame.toString();
+    	   if (framevalue.equals("frames:matches"))
+    			   {
+    		   			matchescount++;
+    		   			if (matchescount>1)
+    		   	    	   frames.remove(f);
+    			   }
+    	}
+       
+       
+    	   
+       return KoralObjectGenerator.makePosition(frames);
     }
 
 
@@ -1253,8 +1552,8 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
         if (nodeCat.equals("term")) {
 
-            // Term is defined recursively with non-necessary brackets
-            if (getNodeCat(node.getChild(0)).equals("(")) {
+            // Term is defined recursively with non-necessary brackets; exception for lbound and rbound; // is it necessary to verify termGroup too??
+            if (getNodeCat(node.getChild(0)).equals("(") && ((getNodeCat(node.getChild(1)).equals("term")) || getNodeCat(node.getChild(1)).equals("termGroup"))){
                 return parseTermOrTermGroup(node.getChild(1), negatedGlobal,
                         mode);
             };

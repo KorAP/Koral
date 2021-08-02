@@ -38,6 +38,11 @@ public abstract class AbstractQueryProcessor {
      * Keeps track of open node categories.
      */
     protected LinkedList<String> openNodeCats = new LinkedList<String>();
+    
+    /**
+     * Keeps track of span node categories.
+     */
+    protected LinkedList<String> spanNodeCats = new LinkedList<String>();
     /**
      * Keeps track of all visited nodes in a tree.
      */
