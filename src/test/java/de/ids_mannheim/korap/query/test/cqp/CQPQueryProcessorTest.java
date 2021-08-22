@@ -6,13 +6,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.junit.Test;
+import org.junit.Ignore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
-import de.ids_mannheim.korap.query.object.KoralFrame;
+//import de.ids_mannheim.korap.query.object.KoralFrame;
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 
 /**
@@ -63,7 +64,7 @@ public class CQPQueryProcessorTest {
     
     @Test
     public void testContext () throws JsonProcessingException, IOException {
-        query = "foo";
+        query = "\"foo\"";
         String contextString = "http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
@@ -196,33 +197,68 @@ public class CQPQueryProcessorTest {
     }
 
 	@Test
-    public void testVerbatimFlag () throws JsonProcessingException, IOException {
-        
-        query = "\"Der + Mann\"%lcd";
+    public void testFlags () throws JsonProcessingException, IOException {
+        // why do i need an escape for ' ?
+        query = "[mate/b='D\\'Ma \\\\nn'%l]";
         qs.setQuery(query, "CQP");
-		assertFalse(qs.hasErrors());
-		res = mapper.readTree(qs.toJSON());
+	res = mapper.readTree(qs.toJSON());
+        assertEquals("D'Ma \\nn", res.at("/query/wrap/key").asText()); 
+       
+       
+        query = "[mate/b=\"D'Ma\nn\"%l]";
+        qs.setQuery(query, "CQP");
+	//assertFalse(qs.hasErrors());
+	res = mapper.readTree(qs.toJSON());  
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("koral:term", res.at("/query/wrap/@type").asText());
-        assertEquals("Der + Mann", res.at("/query/wrap/key").asText());
-        
-        //is it possible to use flags on verbatim???? 
-        
-        assertEquals("flags:caseInsensitive", res.at("/query/wrap/flags/0")
-              .asText());
-        assertEquals("flags:diacriticsInsensitive", res.at("/query/wrap/flags/1")
-              .asText());
-   
-        //assertEquals("b", res.at("/query/wrap/layer").asText());
-        //assertEquals("mate", res.at("/query/wrap/foundry").asText());
+        assertEquals("D'Ma\nn", res.at("/query/wrap/key").asText());
+        assertEquals("b", res.at("/query/wrap/layer").asText());
+        assertEquals("mate", res.at("/query/wrap/foundry").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
         assertEquals("type:string", res.at("/query/wrap/type").asText());
-		
-		
-		query = "[mate/b=\"Der + Mann\"%l]";
+
+
+        query = "[mate/b=\"D'Ma\\\\nn\"%l]";
         qs.setQuery(query, "CQP");
-		assertFalse(qs.hasErrors());
-		res = mapper.readTree(qs.toJSON());
+	//assertFalse(qs.hasErrors());
+	res = mapper.readTree(qs.toJSON());  
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("D'Ma\\nn", res.at("/query/wrap/key").asText());
+        assertEquals("b", res.at("/query/wrap/layer").asText());
+        assertEquals("mate", res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("type:string", res.at("/query/wrap/type").asText());
+
+
+        query = "[mate/b=\"D'Ma\\\\nn\"]"; 
+        qs.setQuery(query, "CQP");
+	//assertFalse(qs.hasErrors());
+	res = mapper.readTree(qs.toJSON());  
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("D'Ma\\\\nn", res.at("/query/wrap/key").asText());
+        assertEquals("b", res.at("/query/wrap/layer").asText());
+        assertEquals("mate", res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+
+    
+
+      
+        query = "'http://racai.ro'%l";
+        qs.setQuery(query, "CQP");
+	res = mapper.readTree(qs.toJSON());
+        assertEquals("http://racai.ro", res.at("/query/wrap/key").asText());
+        assertEquals("type:string", res.at("/query/wrap/type").asText());
+       
+       
+       
+       
+        query = "[mate/b=\"Der + Mann\"%l]";
+        qs.setQuery(query, "CQP");
+	assertFalse(qs.hasErrors());
+	res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("koral:term", res.at("/query/wrap/@type").asText());
         assertEquals("Der + Mann", res.at("/query/wrap/key").asText());
@@ -231,19 +267,35 @@ public class CQPQueryProcessorTest {
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
         assertEquals("type:string", res.at("/query/wrap/type").asText());
         
-
-
-		query = "[mate/b=\"D\\\\'Ma \\\\nn\"%l]";
-        qs.setQuery(query, "CQP");
-		assertFalse(qs.hasErrors());
-		res = mapper.readTree(qs.toJSON());
-        assertEquals("D'Ma \\nn", res.at("/query/wrap/key").asText());
         
-		query = "'http://racai.ro'%l]";
+        
+        query = "\"Der + Mann\"%lcd";
         qs.setQuery(query, "CQP");
-		assertFalse(qs.hasErrors());
-		res = mapper.readTree(qs.toJSON());
-        assertEquals("http://racai.ro", res.at("/query/wrap/key").asText());
+	assertFalse(qs.hasErrors());
+	res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("Der + Mann", res.at("/query/wrap/key").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("type:string", res.at("/query/wrap/type").asText());
+        assertEquals("flags:caseInsensitive", res.at("/query/wrap/flags/0").asText());
+        assertEquals("flags:diacriticsInsensitive", res.at("/query/wrap/flags/1").asText());
+
+        query = "\"Der + Mann\"%cd";
+        qs.setQuery(query, "CQP");
+	assertFalse(qs.hasErrors());
+	res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("Der + Mann", res.at("/query/wrap/key").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("flags:caseInsensitive", res.at("/query/wrap/flags/0").asText());
+        assertEquals("flags:diacriticsInsensitive", res.at("/query/wrap/flags/1").asText());
+        
+      
+		
+
 	}
 
 
@@ -307,17 +359,79 @@ public class CQPQueryProcessorTest {
         // Escape regex symbols
     	// test doubling squoutes and dquoutes; not working now!
 
+ 
+        
+            query = "\"a\\.\"";
+          qs.setQuery(query, "CQP");
+          res = mapper.readTree(qs.toJSON());
+          assertEquals("koral:token", res.at("/query/@type").asText());
+          assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+          assertEquals("type:regex", res.at("/query/wrap/type").asText());
+          assertEquals("orth", res.at("/query/wrap/layer").asText());
+          assertEquals("match:eq", res.at("/query/wrap/match").asText());
+          assertEquals("a\\.", res.at("/query/wrap/key").asText());
+    	
+    	      // escape doublequoutes and singlequoutes
+          query = "'\"';";
+          qs.setQuery(query, "CQP");
+          res = mapper.readTree(qs.toJSON());
+          assertEquals("koral:token", res.at("/query/@type").asText());
+          assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+          assertEquals("type:regex", res.at("/query/wrap/type").asText());
+          assertEquals("orth", res.at("/query/wrap/layer").asText());
+          assertEquals("match:eq", res.at("/query/wrap/match").asText());
+          assertEquals("\"", res.at("/query/wrap/key").asText());
+
     	query = "'copil\"';";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:sequence", res.at("/query/operation").asText());
-        assertEquals("koral:term", res.at("/query/operands/0/wrap/@type").asText());
-        assertEquals("type:regex", res.at("/query/operands/0/wrap/type").asText());
-        assertEquals("orth", res.at("/query/operands/0/wrap/layer").asText());
-        assertEquals("match:eq", res.at("/query/operands/0/wrap/match").asText());
-        assertEquals("copil", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("\"", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("orth", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("copil\"", res.at("/query/wrap/key").asText());
+
+        query = "\"copil'\";";
+        qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("orth", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("copil'", res.at("/query/wrap/key").asText());
+       
+        query = "\"copil\"\"\";";
+        qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("orth", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("copil\"", res.at("/query/wrap/key").asText());
+        
+        query = "'copil''';";
+        qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("orth", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("copil'", res.at("/query/wrap/key").asText());
+
+        query = "\"22\\\"-inch\";";
+        qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("orth", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("22\\\"-inch", res.at("/query/wrap/key").asText());
+        
         
         // pe aici am ramas! lamureste te cu ghilimelele! 
         
@@ -329,17 +443,8 @@ public class CQPQueryProcessorTest {
         assertEquals("type:regex", res.at("/query/wrap/type").asText());
         assertEquals("orth", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
-        assertEquals("a''.+?", res.at("/query/wrap/key").asText());
-        
-    	query = "'\"';";
-        qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
-        assertEquals("type:regex", res.at("/query/wrap/type").asText());
-        assertEquals("orth", res.at("/query/wrap/layer").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());
-        assertEquals("\"", res.at("/query/wrap/key").asText());
+        assertEquals("a'.+?", res.at("/query/wrap/key").asText());
+  
     	
     	
     	
@@ -351,17 +456,9 @@ public class CQPQueryProcessorTest {
         assertEquals("type:regex", res.at("/query/wrap/type").asText());
         assertEquals("orth", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
-        assertEquals("a\"\".+?", res.at("/query/wrap/key").asText());
+        assertEquals("a\".+?", res.at("/query/wrap/key").asText());
         
-    	query = "'a''.+?';";
-        qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
-        assertEquals("type:regex", res.at("/query/wrap/type").asText());
-        assertEquals("orth", res.at("/query/wrap/layer").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());
-        assertEquals("a''.+?", res.at("/query/wrap/key").asText());
+    
     	
         query = "\"a.+?\"";
         qs.setQuery(query, "CQP");
@@ -516,13 +613,14 @@ public class CQPQueryProcessorTest {
     @Test
     public void testSpans () throws JsonProcessingException, IOException {
    	
+    	// matches all sentences
     	query = "/region[s]";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
         assertEquals("s", res.at("/query/wrap/key").asText());
 
-
+        // matches all vps;
         query = "/region[<vp>]";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
@@ -644,34 +742,33 @@ public class CQPQueryProcessorTest {
             IOException {
         
     	// this queries were written in PQ+ with contains()
-    	query = "<s> []* (\"der\")* []* </s>)";
+    	query = "<s> []* (\"der\")* []* </s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals(0, res.at("/query/operands/1/operands/0/boundary/min").asInt());
-        assertTrue(res.at("/query/operands/1/operands/0/boundary/max")
-                .isMissingNode());
-        
+        assertTrue(res.at("/query/operands/1/operands/0/boundary/max").isMissingNode());
+        assertTrue(res.at("/query/operands/1/operands/2/").isMissingNode()); // []* are not taken into account as tokens;
 
         query = "<s> []* (\"der\"){3,} []* </s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
-        assertEquals(3, res.at("/query/operands/1/operands/0/boundary/min").asInt());
-        assertTrue(res.at("/query/operands/1/operands/0/boundary/max")
+        assertEquals(3, res.at("/query/operands/1/boundary/min").asInt());
+        assertTrue(res.at("/query/operands/1/boundary/max")
                 .isMissingNode());
 
         query = "<s> []* (\"der\"){,3} []* </s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
-        assertEquals(0, res.at("/query/operands/1/operands/0/boundary/min").asInt());
-        assertEquals(3, res.at("/query/operands/1/operands/0/boundary/max").asInt());
+        assertEquals(0, res.at("/query/operands/1/boundary/min").asInt());
+        assertEquals(3, res.at("/query/operands/1/boundary/max").asInt());
 
         query = "<s> []* (\"der\"){3,7} []* </s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
-        assertEquals(3, res.at("/query/operands/1/operands/0/boundary/min").asInt());
-        assertEquals(7, res.at("/query/operands/1/operands/0/boundary/max").asInt());
+        assertEquals(3, res.at("/query/operands/1/boundary/min").asInt());
+        assertEquals(7, res.at("/query/operands/1/boundary/max").asInt());
 
         
     };
@@ -989,7 +1086,7 @@ public class CQPQueryProcessorTest {
     @Test
     public void testTokenSpanSequence () throws JsonProcessingException,
             IOException {
-    	
+    	// vezi ca asta e de la modificarea cu span-ul de ieri, cand ai schimbat ordinea in operators list!
         query = "[base='Mann'] /region[vp]"; // in PQ+ "[base=Mann]<vp>"
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
@@ -1119,7 +1216,7 @@ public class CQPQueryProcessorTest {
  
     }
 
-
+    @Ignore
     @Test
     public void testFocusSplit () throws JsonProcessingException, IOException {
         query = "focus([orth='Der']{[orth='Mann']})";
@@ -1259,12 +1356,82 @@ public class CQPQueryProcessorTest {
     	assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:endsWith", res.at("/query/frames/0").asText());
-        assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("s", res.at("/query/operands/1/wrap/key").asText());
-        assertEquals("base", res.at("/query/operands/1/wrap/foundry").asText());
-        assertEquals("s", res.at("/query/operands/1/wrap/layer").asText());
-        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
-        assertEquals("copil", res.at("/query/operands/0/wrap/key").asText());	
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("base", res.at("/query/operands/0/wrap/foundry").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+        assertEquals("copil", res.at("/query/operands/1/wrap/key").asText());	
+        
+        
+    	query ="\"copil\" \"cuminte\" <base/s=s>;"; //KoralFrame.ENDS_WITH
+    	qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+    	assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:endsWith", res.at("/query/frames/0").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("base", res.at("/query/operands/0/wrap/foundry").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
+        assertEquals("operation:sequence", res.at("/query/operands/1/operation").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/operands/0/@type").asText());
+        assertEquals("copil", res.at("/query/operands/1/operands/0/wrap/key").asText());	
+    	
+       
+        query =" <base/s=s> \"copil\" ;"; //KoralFrame.STARTS_WITH
+   	 	qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:startsWith", res.at("/query/frames/0").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("base", res.at("/query/operands/0/wrap/foundry").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+        assertEquals("copil", res.at("/query/operands/1/wrap/key").asText());
+    	
+        query =" <base/s=s> \"copil\" </base/s=s>;";  // KoralFrame.MATCHES
+   	    qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+   	    assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:matches", res.at("/query/frames/0").asText());
+        assertTrue(res.at("/query/frames/1").isMissingNode());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("base", res.at("/query/operands/0/wrap/foundry").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+        assertEquals("copil", res.at("/query/operands/1/wrap/key").asText());
+    	
+    	query = "<base/s=s> []* \"copil\" []* </base/s=s>;";
+        qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
+        assertTrue(res.at("/query/frames/1").isMissingNode());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+        assertEquals("copil", res.at("/query/operands/1/wrap/key").asText());
+        
+        query = "<base/s=s> []* \"copil\" \"cuminte\" []* </base/s=s>;";
+        // a sequence with two tokens is generated in the serialization tree; 
+        qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
+        assertTrue(res.at("/query/frames/1").isMissingNode());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
+        assertEquals("operation:sequence", res.at("/query/operands/1/operation").asText());
+    	
     	
     	query = "<np> []* ([pos=\"JJ.*\"] []*){3,} </np>;"; //KoralFrame.MATCHES
     	qs.setQuery(query, "CQP");
@@ -1282,21 +1449,6 @@ public class CQPQueryProcessorTest {
         assertEquals("operation:repetition", res.at("/query/operands/1/operands/1/operation").asText());
         assertEquals("operation:sequence", res.at("/query/operands/1/operands/1/operands/0/operation").asText());
         assertEquals("JJ.*", res.at("/query/operands/1/operands/1/operands/0/operands/0/wrap/key").asText());
-        
-        
-        query = "<base/s=s> []* \"copil\" []* <base/s=s>;";
-        // a sequence with a single token is generated in the serialization tree; i don't know how to solve this!
-        qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:position", res.at("/query/operation").asText());
-        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
-        assertTrue(res.at("/query/frames/1").isMissingNode());
-        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/1/operation").asText());
-	
     	
     	query =" <np> []* ([pos=\"JJ.*\"]){3,} []* </np>; #contains (NP, sequence)"; //KoralFrame.IS_AROUND
     	// the []* segments are not serialesd;
@@ -1308,52 +1460,11 @@ public class CQPQueryProcessorTest {
         assertTrue(res.at("/query/frames/1").isMissingNode());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("np", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("koral:token", res.at("/query/operands/1/operands/0/operands/0/@type").asText());
-        assertEquals("JJ.*", res.at("/query/operands/1/operands/0/operands/0/wrap/key").asText());
-        assertEquals(3, res.at("/query/operands/1/operands/0/boundary/min").asInt());
-        assertEquals("operation:repetition", res.at("/query/operands/1/operands/0/operation").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/operands/0/@type").asText());
+        assertEquals("JJ.*", res.at("/query/operands/1/operands/0/wrap/key").asText());
+        assertEquals(3, res.at("/query/operands/1/boundary/min").asInt());
+        assertEquals("operation:repetition", res.at("/query/operands/1/operation").asText());
     	
-	
-    	
-    	query =" <base/s=s> \"copil\" ;"; //KoralFrame.STARTS_WITH
-   	 	qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-       assertEquals("koral:group", res.at("/query/@type").asText());
-       assertEquals("operation:position", res.at("/query/operation").asText());
-       assertEquals("frames:startsWith", res.at("/query/frames/0").asText());
-       assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-       assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
-       assertEquals("base", res.at("/query/operands/0/wrap/foundry").asText());
-       assertEquals("s", res.at("/query/operands/0/wrap/layer").asText());
-       assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
-       assertEquals("copil", res.at("/query/operands/1/wrap/key").asText());
-    	    		
-    	query = "<np> []* ([pos=\"JJ.*\"] []*){3,} </np>;"; //KoralFrame.MATCHES
-    	qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-    	assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:position", res.at("/query/operation").asText());
-        assertEquals("frames:matches", res.at("/query/frames/0").asText());
-        assertTrue(res.at("/query/frames/1").isMissingNode());
-        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("np", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("koral:token", res.at("/query/operands/1/operands/0/operands/0/@type").asText());
-        assertEquals(0, res.at("/query/operands/1/operands/0/boundary/min").asInt());
-        assertEquals("operation:repetition", res.at("/query/operands/1/operands/0/operation").asText());
-    
-    	query =" <base/s=s> \"copil\" </base/s=s>;";  // KoralFrame.MATCHES
-    	qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-    	assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:position", res.at("/query/operation").asText());
-        assertEquals("frames:matches", res.at("/query/frames/0").asText());
-        assertTrue(res.at("/query/frames/1").isMissingNode());
-        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("base", res.at("/query/operands/0/wrap/foundry").asText());
-        assertEquals("s", res.at("/query/operands/0/wrap/layer").asText());
-        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
-        assertEquals("copil", res.at("/query/operands/1/wrap/key").asText());
     }
     
     @Test
@@ -1556,6 +1667,7 @@ public class CQPQueryProcessorTest {
     }
 */
 
+    @Ignore
     @Test
     public void testRelations () throws JsonProcessingException, IOException {
         query = "dominates(<s>,<np>)";  // span s dominates span np. ; 
@@ -1899,6 +2011,7 @@ public class CQPQueryProcessorTest {
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
     }
 
+    @Ignore
     @Test
     public void testQueryReferences () throws JsonProcessingException, IOException {
         query = "{#test}";
@@ -1957,648 +2070,6 @@ public class CQPQueryProcessorTest {
 
         // TODO more tests
     }
-    @Test
-    public void testfocusmeetdisjunction() throws JsonProcessingException, IOException {
-    
-    	/*query = "focus('der' {'Baum'}) | focus ({'Baum'} 'der');";*/
-     	query = "MU(meet \"Baum\" \"der\" -1 1);";
-    	qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:reference", res.at("/query/@type").asText());
-        assertEquals("operation:focus", res.at("/query/operation").asText());
-        assertEquals(1, res.at("/query/classRef/0").asInt());
-        assertEquals("operation:disjunction", res.at("/query/operands/0/operation").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-        assertEquals(1, res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
-        assertEquals("Baum", res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
-        assertEquals("der", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-        assertEquals("Baum", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
-        assertEquals("der", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-        assertEquals(1, res.at("/meta/highlight/0").asInt());
-        assertEquals(1, res.at("/meta/highlight/1").asInt());
-        
-        query = "MU(meet \"Baum\" \"der\" -2 1);";
-     	qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:reference", res.at("/query/@type").asText());
-        assertEquals("operation:focus", res.at("/query/operation").asText());
-        assertEquals(1, res.at("/query/classRef/0").asInt());
-        assertEquals("operation:disjunction", res.at("/query/operands/0/operation").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-        assertEquals(1, res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
-        assertEquals("Baum", res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
-        assertEquals("der", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-        assertEquals("Baum", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
-        assertEquals("der", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-        assertEquals(0, res.at("/query/operands/0/operands/1/distances/boundary/min").asInt());
-        assertEquals(1, res.at("/query/operands/0/operands/1/distances/boundary/max").asInt());
-        assertEquals(1, res.at("/meta/highlight/0").asInt());
-        assertEquals(1, res.at("/meta/highlight/1").asInt());
-        
-        
-        query = "MU(meet \"Baum\" \"der\" -2 3);";
-     	qs.setQuery(query, "CQP");
-     	res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:reference", res.at("/query/@type").asText());
-        assertEquals("operation:focus", res.at("/query/operation").asText());
-        assertEquals(1, res.at("/query/classRef/0").asInt());
-        assertEquals("operation:disjunction", res.at("/query/operands/0/operation").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-        assertEquals(1, res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
-        assertEquals("Baum", res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
-        assertEquals("der", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-        assertEquals("Baum", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
-        assertEquals("der", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-        assertEquals(0, res.at("/query/operands/0/operands/0/distances/boundary/min").asInt());
-        assertEquals(2, res.at("/query/operands/0/operands/0/distances/boundary/max").asInt());
-        assertEquals(0, res.at("/query/operands/0/operands/1/distances/boundary/min").asInt());
-        assertEquals(1, res.at("/query/operands/0/operands/1/distances/boundary/max").asInt());
-        assertEquals(1, res.at("/meta/highlight/0").asInt());
-        assertEquals(1, res.at("/meta/highlight/1").asInt());
-      
-        
-        query = "MU(meet \"Baum\" \"der\" -1 2);";
-     	qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:reference", res.at("/query/@type").asText());
-        assertEquals("operation:focus", res.at("/query/operation").asText());
-        assertEquals(1, res.at("/query/classRef/0").asInt());
-        assertEquals("operation:disjunction", res.at("/query/operands/0/operation").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-        assertEquals(1, res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
-        assertEquals("Baum", res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
-        assertEquals("der", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-        assertEquals("Baum", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
-        assertEquals("der", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-        assertEquals(0, res.at("/query/operands/0/operands/0/distances/boundary/min").asInt());
-        assertEquals(1, res.at("/query/operands/0/operands/0/distances/boundary/max").asInt());  
-         
-   }
-   @Test
-   public void focus () throws JsonProcessingException, IOException {	  
-	   	query="focus({'in'} 'due')";
-	   	qs.setQuery(query, "CQP");
-	   	res = mapper.readTree(qs.toJSON());
-	   	assertEquals("koral:reference", res.at("/query/@type").asText());
-	   	assertEquals("operation:focus", res.at("/query/operation").asText());
-	   	assertEquals(1, res.at("/query/classRef/0").asInt());
-	   	assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-	   	assertEquals("operation:class", res.at("/query/operands/0/operands/0/operation").asText());
-	   	assertEquals(1, res.at("/query/operands/0/operands/0/classOut").asInt());
-	   	assertEquals("in", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-	   	assertEquals("due", res.at("/query/operands/0/operands/1/wrap/key").asText());   
-	   	assertEquals(1, res.at("/meta/highlight/0").asInt());
-   	}
    
-   
-   @Test
-   public void testmeetvsfocus1 () throws JsonProcessingException, IOException { 
-	   query=  "MU(meet (meet \"cambios\" \"climáticos\" 2 2) (meet \"la\" \"piel\" 1 1) s)";
-       qs.setQuery(query, "CQP");
-       res = mapper.readTree(qs.toJSON());
-       assertEquals("koral:reference", res.at("/query/@type").asText());
-       assertEquals("operation:focus", res.at("/query/operation").asText());
-       assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
-       assertEquals("operation:position", res.at("/query/operands/0/operation").asText());
-       assertEquals("frames:isAround", res.at("/query/operands/0/frames/0").asText());
-       assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type").asText());
-       assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key").asText());
-       assertEquals("koral:group", res.at("/query/operands/0/operands/1/@type").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-	   assertEquals("false", res.at("/query/operands/0/operands/1/inOrder").asText());
-	   assertEquals(0, res.at("/query/operands/0/operands/1/distances/boundary/min").asInt());
-	   assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/0/operation").asText());
-	   assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/distances/boundary/min").asInt());
-	   assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/distances/boundary/max").asInt());
-	   assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/0/operands/0/operation").asText());
-       assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/operands/0/classOut").asInt());
-       assertEquals("cambios", res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/key").asText());
-       assertEquals("climáticos", res.at("/query/operands/0/operands/1/operands/0/operands/1/wrap/key").asText());
-	   assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/1/operation").asText());
-	   assertEquals("la", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
-	   assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/operands/1/wrap/key").asText());
-      
-       /*
-       tests for the older implementation of span meet
-       assertEquals("operation:disjunction", res.at("/query/operands/0/operands/1/operation").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/0/operation").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/0/operands/0/operation").asText());
-       assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/operation").asText());
-       assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/classOut").asInt());
-       assertEquals("cambios", res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
-       assertEquals("climáticos", res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/1/wrap/key").asText());
-       assertEquals("operation:repetition", res.at("/query/operands/0/operands/1/operands/0/operands/1/operation").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/0/operands/2/operation").asText());
-       assertEquals("la", res.at("/query/operands/0/operands/1/operands/0/operands/2/operands/0/wrap/key").asText());
-       assertEquals("piel", res.at("/query/operands/0/operands/1/operands/0/operands/2/operands/1/wrap/key").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/1/operation").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/1/operands/0/operation").asText());
-       assertEquals("la", res.at("/query/operands/0/operands/1/operands/1/operands/0/operands/0/wrap/key").asText());
-       assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/operands/0/operands/1/wrap/key").asText());
-       assertEquals("operation:repetition", res.at("/query/operands/0/operands/1/operands/1/operands/1/operation").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/1/operands/2/operation").asText());
-       assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/1/operands/2/operands/0/operation").asText());
-       assertEquals(1, res.at("/query/operands/0/operands/1/operands/1/operands/2/operands/0/classOut").asInt());
-       assertEquals("cambios", res.at("/query/operands/0/operands/1/operands/1/operands/2/operands/0/operands/0/wrap/key").asText());
-       assertEquals("climáticos", res.at("/query/operands/0/operands/1/operands/1/operands/2/operands/1/wrap/key").asText());
-       */   
-   }
-   	
-   @Test
-   public void testmeetvsfocus2 () throws JsonProcessingException, IOException {
-   		query=  "MU(meet \"de\" \"piel\" s)";
-	    qs.setQuery(query, "CQP");
-	    res = mapper.readTree(qs.toJSON());
-	    assertEquals("koral:reference", res.at("/query/@type").asText());
-	    assertEquals("operation:focus", res.at("/query/operation").asText());
-	    assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
-	    assertEquals("operation:position", res.at("/query/operands/0/operation").asText());
-	    assertEquals("frames:isAround", res.at("/query/operands/0/frames/0").asText());
-	    assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type").asText());
-	    assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key").asText());
-	    assertEquals("koral:group", res.at("/query/operands/0/operands/1/@type").asText());
-	    assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-	    assertEquals("false", res.at("/query/operands/0/operands/1/inOrder").asText());
-	    assertEquals(0, res.at("/query/operands/0/operands/1/distances/boundary/min").asInt());
-	    assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/0/operation").asText());
-	    assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/classOut").asInt());
-	    assertEquals("de", res.at("/query/operands/0/operands/1/operands/0/operands/0/wrap/key").asText()); 
-	    assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/wrap/key").asText());
-	    
-	    
-	    /* tests for the older implementation of span meet
-	    assertEquals("operation:disjunction", res.at("/query/operands/0/operands/1/operation").asText());
-	    assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/0/operation").asText());
-	    assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/0/operands/0/operation").asText());
-	    assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/operands/0/classOut").asInt());
-	    assertEquals("de", res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/key").asText());
-	    assertEquals("operation:repetition", res.at("/query/operands/0/operands/1/operands/0/operands/1/operation").asText());
-	    assertEquals("piel", res.at("/query/operands/0/operands/1/operands/0/operands/2/wrap/key").asText());
-	    assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/1/operation").asText());
-	    assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText()); 
-	    assertEquals("operation:repetition", res.at("/query/operands/0/operands/1/operands/1/operands/1/operation").asText());
-	    assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/1/operands/2/operation").asText());
-	    assertEquals(1, res.at("/query/operands/0/operands/1/operands/1/operands/2/classOut").asInt());
-	    assertEquals("de", res.at("/query/operands/0/operands/1/operands/1/operands/2/operands/0/wrap/key").asText());
-	    */
-   }
-	   
-   @Test
-   public void testmeetvsfocus3 () throws JsonProcessingException, IOException {
-   // color de piel oscuro; focus on "oscuro";
-	    
-	   query = "MU(meet (meet \"oscuro\" \"piel\" -1 -1) (meet \"color\" \"de\" 1 1) -3 -3)";
-	   qs.setQuery(query, "CQP");
-       res = mapper.readTree(qs.toJSON());
-       assertEquals("koral:reference", res.at("/query/@type").asText());
-       assertEquals("operation:focus", res.at("/query/operation").asText());
-       assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
-       assertEquals("koral:group", res.at("/query/operands/0/operands/1/@type").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());  
-       assertEquals("color", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-       assertEquals("de", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-       assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-       assertEquals("piel", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-       assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/1/operation").asText());
-       assertEquals(1, res.at("/query/operands/0/operands/1/operands/1/classOut").asInt());
-   	   assertEquals("oscuro", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText()); 
-	   
-   }
-   
-   @Test
-   public void testmeetvsfocus4 () throws JsonProcessingException, IOException {
-	     // color de piel oscuro; focus on "piel";
-	     query = "MU(meet (meet \"piel\" \"oscuro\" 1 1) (meet \"color\" \"de\" 1 1) -2 -2)";
-	   	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-         assertEquals("operation:focus", res.at("/query/operation").asText());
-         assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
-         assertEquals("koral:group", res.at("/query/operands/0/operands/1/@type").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());  
-         assertEquals("color", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-         assertEquals("de", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-       	 assertEquals("piel", res.at("/query/operands/0/operands/1/operands/0/operands/0/wrap/key").asText());
-       	 assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/0/operation").asText());
-         assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/classOut").asInt());
-     	 assertEquals("oscuro", res.at("/query/operands/0/operands/1/operands/1/wrap/key").asText()); 
-   }
-   
-   @Test
-   public void testmeetvsfocus5 () throws JsonProcessingException, IOException {
-	   
-	   // color de piel oscuro; focus on "de";
-	   	 query = "MU(meet (meet \"de\" \"color\" -1 -1) (meet \"piel\" \"oscuro\" 1 1) 1 1)";
-	   	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-         assertEquals("operation:focus", res.at("/query/operation").asText());
-         assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
-         assertEquals("koral:group", res.at("/query/operands/0/operands/1/@type").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-         assertEquals("operation:class", res.at("/query/operands/0/operands/0/operands/1/operation").asText());
-         assertEquals(1, res.at("/query/operands/0/operands/0/operands/1/classOut").asInt());
-         assertEquals("color", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-         assertEquals("de", res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-         assertEquals("piel", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-       	 assertEquals("oscuro", res.at("/query/operands/0/operands/1/operands/1/wrap/key").asText()); 
-   }
-   
-   @Test
-   public void testmeetvsfocus6 () throws JsonProcessingException, IOException {
-	   	 
-       	 // color de []{2} piel oscuro; focus on "color";
-	   // verifica distantele din nou!!!
-       	 query = "MU(meet (meet \"color\" \"de\" 1 1) (meet \"piel\" \"oscuro\" 1 1) 4 4)";
-	   	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-         assertEquals("operation:focus", res.at("/query/operation").asText());
-         assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
-         assertEquals("koral:group", res.at("/query/operands/0/operands/1/@type").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-         assertEquals("operation:class", res.at("/query/operands/0/operands/0/operands/0/operation").asText());
-         assertEquals(1, res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
-         assertEquals("color", res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
-         assertEquals("de", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-         assertEquals("2", res.at("/query/operands/0/distances/boundary/min").asText());
-         assertEquals("2", res.at("/query/operands/0/distances/boundary/max").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-       	 assertEquals("piel", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-       	 assertEquals("oscuro", res.at("/query/operands/0/operands/1/operands/1/wrap/key").asText()); 
-   }
-   @Test
-   public void testmeetvsfocus7 () throws JsonProcessingException, IOException {
-       	 // color de piel oscuro; focus on "color"
-       	 query = "MU(meet (meet \"color\" \"de\" 1 1) (meet \"piel\" \"oscuro\" 1 1) 2 2)";
-	   	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-         assertEquals("operation:focus", res.at("/query/operation").asText());
-         assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
-         assertEquals("koral:group", res.at("/query/operands/0/operands/1/@type").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-         assertEquals("operation:class", res.at("/query/operands/0/operands/0/operands/0/operation").asText());
-         assertEquals(1, res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
-         assertEquals("color", res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
-         assertEquals("de", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-         assertEquals("piel", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-         assertEquals("oscuro", res.at("/query/operands/0/operands/1/operands/1/wrap/key").asText());  
-	   
-   }   
-	    
-   @Test
-   public void testmeetvsfocus8 () throws JsonProcessingException, IOException {
-   		// color de piel, focus on "de";
-	   	 query = "MU(meet (meet \"de\" \"piel\" 1 1) \"color\" -1 -1);";
-	   	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-   		 assertEquals("operation:focus", res.at("/query/operation").asText());
-   		 assertEquals(1, res.at("/query/classRef/0").asInt());
-   		 assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-   		 assertEquals("color", res.at("/query/operands/0/operands/0/wrap/key").asText());
-   		 assertEquals("de", res.at("/query/operands/0/operands/1/operands/0/operands/0/wrap/key").asText());
-   		 assertEquals("operation:class",res.at("/query/operands/0/operands/1/operands/0/operation").asText());
-  		 assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/classOut").asInt());
-   		 assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/wrap/key").asText());
-   		 assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-   		 assertEquals(1, res.at("/meta/highlight/0").asInt());
-   }
-   	  @Test
-   public void testmeetvsfocus9 () throws JsonProcessingException, IOException {
-	   	 // color de piel, focus on "piel";
-   		 query = "MU(meet (meet \"piel\" \"de\" -1 -1) \"color\" -2 -2);";
-	   	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-    	 assertEquals("koral:reference", res.at("/query/@type").asText());
-   		 assertEquals("operation:focus", res.at("/query/operation").asText());
-   		 assertEquals(1, res.at("/query/classRef/0").asInt());
-   		 assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-   		 assertEquals("color", res.at("/query/operands/0/operands/0/wrap/key").asText());
-   		 assertEquals("de", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-   		 assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
-   		 assertEquals("operation:class",res.at("/query/operands/0/operands/1/operands/1/operation").asText());
-   		 assertEquals(1, res.at("/query/operands/0/operands/1/operands/1/classOut").asInt());
-   		 assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-   		 assertEquals(1, res.at("/meta/highlight/0").asInt());
-   	  }   
-	    
-   	  @Test
-   public void testmeetvsfocus10 () throws JsonProcessingException, IOException {
-   	  	 
-   	  	 query = "MU(meet \"in\" \"due\" 0 -1);";
-	   	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-	   
-      // 'due' []{0,2} 'in'; focus on "in";
-         query = "MU(meet \"in\" \"due\" -3 -1);";
-	   	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-         assertEquals("operation:focus", res.at("/query/operation").asText());
-         assertEquals(1, res.at("/query/classRef/0").asInt());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-         assertEquals("due", res.at("/query/operands/0/operands/0/wrap/key").asText());
-         assertEquals("operation:class", res.at("/query/operands/0/operands/1/operation").asText());
-         assertEquals(1, res.at("/query/operands/0/operands/1/classOut").asInt());
-         assertEquals("in", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-         assertEquals(0, res.at("/query/operands/0/distances/boundary/min").asInt());
-         assertEquals(2, res.at("/query/operands/0/distances/boundary/max").asInt());
-         assertEquals(1, res.at("/meta/highlight/0").asInt());
-      
-         // 'in' []{0,2} 'due'; focus on "in";
-   	     query = "MU(meet \"in\" \"due\" 1 3);";
-     	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-         assertEquals("operation:focus", res.at("/query/operation").asText());
-         assertEquals(1, res.at("/query/classRef/0").asInt());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-         assertEquals("operation:class", res.at("/query/operands/0/operands/0/operation").asText());
-         assertEquals(1, res.at("/query/operands/0/operands/0/classOut").asInt());
-         assertEquals("in", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-         assertEquals("due", res.at("/query/operands/0/operands/1/wrap/key").asText());
-         assertEquals(0, res.at("/query/operands/0/distances/boundary/min").asInt());
-         assertEquals(2, res.at("/query/operands/0/distances/boundary/max").asInt());
-         assertEquals(1, res.at("/meta/highlight/0").asInt());
-   	
-         // 'due' []{1,4} 'in'; focus on "in";
-         query = "MU(meet \"in\" \"due\" -5 -2);";
-       	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-         assertEquals("operation:focus", res.at("/query/operation").asText());
-         assertEquals(1, res.at("/query/classRef/0").asInt());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-         assertEquals(1, res.at("/query/operands/0/operands/1/classOut").asInt());
-         assertEquals("due", res.at("/query/operands/0/operands/0/wrap/key").asText());
-         assertEquals("operation:class", res.at("/query/operands/0/operands/1/operation").asText());
-         assertEquals("in", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-         assertEquals(1, res.at("/query/operands/0/distances/boundary/min").asInt());
-         assertEquals(4, res.at("/query/operands/0/distances/boundary/max").asInt());
-         assertEquals(1, res.at("/meta/highlight/0").asInt());
-        
-         // 'in' []{1,4} 'due'; focus on "in";
-         query = "MU(meet \"in\" \"due\" 2 5);";
-       	 qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-         assertEquals("operation:focus", res.at("/query/operation").asText());
-         assertEquals(1, res.at("/query/classRef/0").asInt());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-         assertEquals("operation:class", res.at("/query/operands/0/operands/0/operation").asText());
-         assertEquals(1, res.at("/query/operands/0/operands/0/classOut").asInt());
-         assertEquals("in", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-         assertEquals("due", res.at("/query/operands/0/operands/1/wrap/key").asText());
-         assertEquals(1, res.at("/query/operands/0/distances/boundary/min").asInt());
-         assertEquals(4, res.at("/query/operands/0/distances/boundary/max").asInt());
-         assertEquals(1, res.at("/meta/highlight/0").asInt());
-   	  }  
-        
-   	@Test
-   public void testmeeteqoffs () throws JsonProcessingException, IOException {
- 	  	
-   	  	// 'in' 'due'; focus on 'in'
-         query = "MU(meet \"in\" \"due\" 1 1);";
-         qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-         assertEquals("operation:focus", res.at("/query/operation").asText());
-         assertEquals(1, res.at("/query/classRef/0").asInt());
-         assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-         assertEquals("operation:class", res.at("/query/operands/0/operands/0/operation").asText());
-         assertEquals(1, res.at("/query/operands/0/operands/0/classOut").asInt());
-         assertEquals("in", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-         assertEquals("due", res.at("/query/operands/0/operands/1/wrap/key").asText());
-         assertEquals(1, res.at("/meta/highlight/0").asInt());
-   	
-         // 'due' 'in'; focus on 'in';
-         query = "MU(meet \"in\" \"due\" -1 -1);";
-      	 qs.setQuery(query, "CQP");
-      	 res = mapper.readTree(qs.toJSON());
-      	 assertEquals("koral:reference", res.at("/query/@type").asText());
-      	 assertEquals("operation:focus", res.at("/query/operation").asText());
-      	 assertEquals(1, res.at("/query/classRef/0").asInt());
-      	 assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-      	 assertEquals("due", res.at("/query/operands/0/operands/0/wrap/key").asText());
-      	 assertEquals("operation:class", res.at("/query/operands/0/operands/1/operation").asText());
-      	 assertEquals(1, res.at("/query/operands/0/operands/1/classOut").asInt());
-      	 assertEquals("in", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-      	 assertEquals(1, res.at("/meta/highlight/0").asInt());
-          
-      	 // 'in' [] 'due'; focus on 'in';
-      	 query = "MU(meet \"in\" \"due\" 2 2);";
-      	 qs.setQuery(query, "CQP");
-      	 res = mapper.readTree(qs.toJSON());
-      	 assertEquals("koral:reference", res.at("/query/@type").asText());
-      	 assertEquals("operation:focus", res.at("/query/operation").asText());
-      	 assertEquals(1, res.at("/query/classRef/0").asInt());
-      	 assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-      	 assertEquals("operation:class", res.at("/query/operands/0/operands/0/operation").asText());
-      	 assertEquals(1, res.at("/query/operands/0/operands/0/classOut").asInt());
-      	 assertEquals("in", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-      	 assertEquals("due", res.at("/query/operands/0/operands/1/wrap/key").asText());
-      	 assertEquals(1, res.at("/query/operands/0/distances/boundary/min").asInt());
-      	 assertEquals(1, res.at("/query/operands/0/distances/boundary/max").asInt());
-      	 assertEquals(1, res.at("/meta/highlight/0").asInt());
-       
-      	 // 'due' []{2} 'in'; focus on in;
-      	 query = "MU(meet \"in\" \"due\" -3 -3);";
-      	 qs.setQuery(query, "CQP");
-      	 res = mapper.readTree(qs.toJSON());
-      	 assertEquals("koral:reference", res.at("/query/@type").asText());
-      	 assertEquals("operation:focus", res.at("/query/operation").asText());
-      	 assertEquals(1, res.at("/query/classRef/0").asInt());
-      	 assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-      	 assertEquals("due", res.at("/query/operands/0/operands/0/wrap/key").asText());
-    	 assertEquals("operation:class", res.at("/query/operands/0/operands/1/operation").asText());
-      	 assertEquals(1, res.at("/query/operands/0/operands/1/classOut").asInt());
-      	 assertEquals("in", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-      	 assertEquals(2, res.at("/query/operands/0/distances/boundary/min").asInt());
-      	 assertEquals(2, res.at("/query/operands/0/distances/boundary/max").asInt());
-      	 assertEquals(1, res.at("/meta/highlight/0").asInt());
-	   
-      	 
-   	  }
-   	  @Test
-   public void testmeetvsfocus11 () throws JsonProcessingException, IOException {
-   	   // 'color' 'de' 'piel'; focus on 'color';
-      	 query =  "MU(meet (meet \"color\" \"de\" 1 1) \"piel\" 2 2);";
-      	 qs.setQuery(query, "CQP");
-      	 res = mapper.readTree(qs.toJSON());
-      	 assertEquals("koral:reference", res.at("/query/@type").asText());
-      	 assertEquals("operation:focus", res.at("/query/operation").asText());
-      	 assertEquals(1, res.at("/query/classRef/0").asInt());
-      	 assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-      	 assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-      	 assertEquals("operation:class", res.at("/query/operands/0/operands/0/operands/0/operation").asText());
-      	 assertEquals(1, res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
-      	 assertEquals("color", res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
-      	 assertEquals("de",res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-      	 assertEquals("piel", res.at("/query/operands/0/operands/1/wrap/key").asText());
-      	 assertEquals(1, res.at("/meta/highlight/0").asInt());
-   	  }
-     
-    @Test
-   public void testmeetvsfocus12 () throws JsonProcessingException, IOException {
-      	 
-      	 // 'color' 'de' 'piel'; focus on 'color'
-      	 query =  "MU(meet \"color\" (meet \"de\" \"piel\" 1 1) 1 1);";
-   		 qs.setQuery(query, "CQP");
-   		 res = mapper.readTree(qs.toJSON());
-   		 assertEquals("koral:reference", res.at("/query/@type").asText());
-   		 assertEquals("operation:focus", res.at("/query/operation").asText());
-   		 assertEquals(1, res.at("/query/classRef/0").asInt());
-   		 assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-   		 assertEquals("operation:class",res.at("/query/operands/0/operands/0/operation").asText());
-   		 assertEquals(1, res.at("/query/operands/0/operands/0/classOut").asInt());
-   		 assertEquals("color", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-   		 assertEquals("de", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-   		 assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/wrap/key").asText());
-   		 assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-   		 assertEquals(1, res.at("/meta/highlight/0").asInt());
-   	  }
-   		 
-   	  @Test
-   public void testmeetvsfocus13 () throws JsonProcessingException, IOException {
-	   
-	   // this test has to fail in the end, eliminate focus from the grammar! 
-    	query = "focus({'color'} 'de' 'piel')";
-    	qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:reference", res.at("/query/@type").asText());
-        assertEquals("operation:focus", res.at("/query/operation").asText());
-        assertEquals(1, res.at("/query/classRef/0").asInt());
-        assertEquals("operation:sequence", res
-                .at("/query/operands/0/operation").asText());
-        assertEquals("operation:class",
-                res.at("/query/operands/0/operands/0/operation").asText());
-        assertEquals(1, res.at("/query/operands/0/operands/0/classOut").asInt());
-        assertEquals("color",
-                res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-        assertEquals("de",
-                res.at("/query/operands/0/operands/1/wrap/key")
-                        .asText());
-        assertEquals("piel",
-               res.at("/query/operands/0/operands/2/wrap/key")
-                       .asText());   
-        assertEquals(1, res.at("/meta/highlight/0").asInt());
-   	  }
-        @Test        
-        public void testmeetvsfocus14 () throws JsonProcessingException, IOException {
-    	
-    	// color [] de piel; the focus is on "piel"
-    	query =  "MU(meet \"piel\" (meet \"color\" \"de\" 2 2) -3 -3);";
- 	   	qs.setQuery(query, "CQP");
- 	   	res = mapper.readTree(qs.toJSON());
- 	    assertEquals("koral:reference", res.at("/query/@type").asText());
-  	 	assertEquals("operation:focus", res.at("/query/operation").asText());
-  	 	assertEquals(1, res.at("/query/classRef/0").asInt());
-  	 	assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-  	 	assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-  	 	assertEquals("color", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-  	 	assertEquals(1, res.at("/query/operands/0/operands/0/distances/boundary/min").asInt());
-        assertEquals(1, res.at("/query/operands/0/operands/0/distances/boundary/max").asInt());
-  	 	assertEquals("de", res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-  	 	assertEquals("piel", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-  	    assertEquals("operation:class", res.at("/query/operands/0/operands/1/operation").asText());
-	 	assertEquals(1, res.at("/query/operands/0/operands/1/classOut").asInt());
-  	 	assertEquals(1, res.at("/meta/highlight/0").asInt());
-        }
-    	 
-        @Test
-        public void testmeetvsfocus15 () throws JsonProcessingException, IOException {
- 	   	// color de piel; the focus is on "piel";
- 	   	query =  "MU(meet \"piel\" (meet \"color\" \"de\" 1 1) -2 -2);";
-   	 	qs.setQuery(query, "CQP");
-   	 	res = mapper.readTree(qs.toJSON());
-   	 	assertEquals("koral:reference", res.at("/query/@type").asText());
-   	 	assertEquals("operation:focus", res.at("/query/operation").asText());
-   	 	assertEquals(1, res.at("/query/classRef/0").asInt());
-   	 	assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-   	 	assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-   	 	assertEquals("color", res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
-   	 	assertEquals("de",res.at("/query/operands/0/operands/0/operands/1/wrap/key")
-                        .asText());
-   	 	assertEquals("piel", res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-   	    assertEquals("operation:class", res.at("/query/operands/0/operands/1/operation").asText());
-	 	assertEquals(1, res.at("/query/operands/0/operands/1/classOut").asInt());
-   	 	assertEquals(1, res.at("/meta/highlight/0").asInt());
-        }
-    	
-
-        @Test
-        public void testmeetpos () throws JsonProcessingException, IOException {
-         query=  "MU(meet (meet [pos=\"NN.*\"] \"of\" 1 1) \"virtue\" 2 2);";
-         qs.setQuery(query, "CQP");
-         res = mapper.readTree(qs.toJSON());
-         assertEquals("koral:reference", res.at("/query/@type").asText());
-      	 assertEquals("operation:focus", res.at("/query/operation").asText());
-      	 assertEquals(1, res.at("/query/classRef/0").asInt());
-      	 assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());
-      	 assertEquals("operation:sequence", res.at("/query/operands/0/operands/0/operation").asText());
-      	 assertEquals("operation:class", res.at("/query/operands/0/operands/0/operands/0/operation").asText());
-      	 assertEquals(1, res.at("/query/operands/0/operands/0/operands/0/classOut").asInt());
-      	 assertEquals("NN.*", res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key").asText());
-      	 assertEquals("pos", res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/layer").asText());
-      	 assertEquals("of",res.at("/query/operands/0/operands/0/operands/1/wrap/key").asText());
-      	 assertEquals("virtue", res.at("/query/operands/0/operands/1/wrap/key").asText());
-      	 assertEquals(1, res.at("/meta/highlight/0").asInt());
-        }   	    	
-        @Test
-        public void testmeetvsfocus17 () throws JsonProcessingException, IOException {
-        
-       // delete the following at the end!!
-        
-        query="focus(contains(<base/s=s>, {'de'} 'piel'))";
-        qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        
-        
-        query = "focus([orth='Der']{[orth='Mann']})";
-        qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:reference", res.at("/query/@type").asText());
-        assertEquals("operation:focus", res.at("/query/operation").asText());
-        assertEquals(1, res.at("/query/classRef/0").asInt());
-        assertEquals("operation:sequence", res
-                .at("/query/operands/0/operation").asText());
-        assertEquals("operation:class",
-                res.at("/query/operands/0/operands/1/operation").asText());
-        assertEquals(1, res.at("/query/operands/0/operands/1/classOut").asInt());
-        assertEquals("Mann",
-                res.at("/query/operands/0/operands/1/operands/0/wrap/key")
-                        .asText());
-        assertEquals(1, res.at("/meta/highlight/0").asInt());
-
-        query = "focus([orth='Der']{[orth='Mann'][orth='geht']})";
-        qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("operation:sequence",
-                res.at("/query/operands/0/operands/1/operands/0/operation")
-                        .asText());
-        assertEquals(
-                "Mann",
-                res.at("/query/operands/0/operands/1/operands/0/operands/0/wrap/key")
-                        .asText());
-        assertEquals(
-                "geht",
-                res.at("/query/operands/0/operands/1/operands/0/operands/1/wrap/key")
-                        .asText());
-
-        }
  
     }

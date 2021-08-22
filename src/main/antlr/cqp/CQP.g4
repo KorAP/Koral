@@ -104,7 +104,7 @@ DQUOTE: ('"'|'„'|'“'|'“'|'”');
 fragment RE_symbol     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']'
                      | '(' | ')' | '|' | '\\' | '"' | ':' | '\'');
 fragment RE_esc      : (('\\' ('.' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
-                     | '(' | ')' | '|' | '\\' | ':'))| '\'' '\'' |  '"' '"');
+                     | '(' | ')' | '|' | '\\' | ':' | '"' | '\''))| '\'' '\'' |  '"' '"');
 fragment RE_char     : (RE_symbol | RE_esc );
 fragment RE_alter    : ((RE_char | ('(' RE_expr ')') | RE_chgroup) '|' RE_expr )+;
 
@@ -123,8 +123,8 @@ fragment RE_squote   : SQUOTE  (RE_expr | '"' | ':')* SQUOTE;
 
 
 REGEX: RE_dquote|RE_squote;
-ESC_SQUOTE        : SQUOTE SQUOTE;
-ESC_DQUOTE        : DQUOTE DQUOTE;
+//ESC_SQUOTE        : SQUOTE SQUOTE;
+//ESC_DQUOTE        : DQUOTE DQUOTE;
 
 
 
@@ -145,12 +145,12 @@ regex
 : REGEX
 ;
 
-verbatim
-: SQUOTE|DQUOTE (~SQUOTE | ESC_SQUOTE| DQUOTE | ESC_DQUOTE)* SQUOTE|DQUOTE;
+/*verbatim
+: SQUOTE|DQUOTE (~SQUOTE | ESC_SQUOTE| DQUOTE | ESC_DQUOTE)* SQUOTE|DQUOTE;*/
 
 
 key
-: (regex| verbatim);
+: regex; // | verbatim
 
 // key for spans
 skey
@@ -390,7 +390,7 @@ matching
 
 //maybe eliminate MATCH_OP from the meet rule?
 meetunion
-:(segment segment  ((NUMBER NUMBER) | WORD)) | (((LRPAREN meetunion RRPAREN) | segment) ((LRPAREN meetunion RRPAREN) | segment) ((NUMBER  NUMBER) | WORD))
+:(segment segment  ((NUMBER NUMBER) | span)) | (((LRPAREN meetunion RRPAREN) | segment) ((LRPAREN meetunion RRPAREN) | segment) ((NUMBER  NUMBER) | span))
 ;
 
 
