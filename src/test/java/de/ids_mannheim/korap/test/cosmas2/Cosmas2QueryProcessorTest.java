@@ -607,9 +607,9 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("w", res.at("/query/distances/0/key").asText());
         assertEquals(0, res.at("/query/distances/0/boundary/min").asInt());
         assertEquals(4, res.at("/query/distances/0/boundary/max").asInt());
-        assertEquals("Mond", res.at("/query/operands/0/operands/0/wrap/key")
+        assertEquals("Sonne", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
-        assertEquals("Sonne", res.at("/query/operands/1/operands/0/wrap/key")
+        assertEquals("Mond", res.at("/query/operands/1/operands/0/wrap/key")
                 .asText());
 
         query = "Sonne /w4 Mond";
@@ -679,11 +679,11 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("Sonne", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
         assertEquals(
-                "Sterne",
+                "Mond",
                 res.at("/query/operands/1/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals(
-                "Mond",
+                "Sterne",
                 res.at("/query/operands/1/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
 
@@ -701,33 +701,33 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
         assertEquals("operation:class", res.at("/query/operands/1/operation")
                 .asText());
-        assertEquals(129, res.at("/query/operands/1/classOut").asInt());
-        assertEquals("Sonne", res.at("/query/operands/1/operands/0/wrap/key")
+        assertEquals(129, res.at("/query/operands/0/classOut").asInt());
+        assertEquals("Sonne", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
         assertEquals(129, res.at("/query/operands/0/classOut").asInt());
         assertEquals("operation:sequence",
-                res.at("/query/operands/0/operands/0/operation").asText());
+                res.at("/query/operands/1/operands/0/operation").asText());
         assertEquals("w", res
-                .at("/query/operands/0/operands/0/distances/0/key").asText());
+                .at("/query/operands/1/operands/0/distances/0/key").asText());
         assertEquals(0,
-                res.at("/query/operands/0/operands/0/distances/0/boundary/min")
+                res.at("/query/operands/1/operands/0/distances/0/boundary/min")
                         .asInt());
         assertEquals(2,
-                res.at("/query/operands/0/operands/0/distances/0/boundary/max")
+                res.at("/query/operands/1/operands/0/distances/0/boundary/max")
                         .asInt());
         assertEquals(130,
-                res.at("/query/operands/0/operands/0/operands/0/classOut")
+                res.at("/query/operands/1/operands/0/operands/0/classOut")
                         .asInt());
         assertEquals(
                 "Mond",
-                res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key")
+                res.at("/query/operands/1/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals(130,
-                res.at("/query/operands/0/operands/0/operands/1/classOut")
+                res.at("/query/operands/1/operands/0/operands/1/classOut")
                         .asInt());
         assertEquals(
                 "Sterne",
-                res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key")
+                res.at("/query/operands/1/operands/0/operands/1/operands/0/wrap/key")
                         .asText());
 
     }
