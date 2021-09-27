@@ -6,6 +6,7 @@
     - [feature] Added getVersion() and getName() methods (diewald)
     - [bugfix] Updated plexus-utils used in antlr4-maven-plugin 
       manually due to CVE-2017-1000487 (margaretha)
+    - [bugfix] Fixed C2 OPPROX serialization with minus (margaretha)  
 
 0.36 2020-07-24
     - [security] Upgraded version of Google Guava
