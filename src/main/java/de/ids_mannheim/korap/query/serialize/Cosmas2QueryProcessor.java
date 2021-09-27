@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static Logger log =
             LoggerFactory.getLogger(Cosmas2QueryProcessor.class);
@@ -696,7 +696,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 }
                 else if (direction.equals("minus")) {
                     inOrder = true;
-                    invertedOperands = true;
+//                    invertedOperands = true;
                 }
                 else if (direction.equals("both")) {
                     inOrder = false;
