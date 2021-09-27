@@ -48,6 +48,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7467385f_b1d46346",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2021-09-27T14:10:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3997974d_8c16f15f",
+      "range": {
+        "startLine": 694,
+        "startChar": 15,
+        "endLine": 697,
+        "endChar": 52
+      },
+      "revId": "c5cfa717aef92107ff7b65f37b209d176c6b4027",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "30a52fa8_3fe60ccb",
@@ -61,6 +85,24 @@
       "writtenOn": "2021-09-27T13:48:28Z",
       "side": 1,
       "message": "These Tests are merely identical - where is the difference in the serialization tested?",
+      "revId": "c5cfa717aef92107ff7b65f37b209d176c6b4027",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "941ec537_0b224a0a",
+        "filename": "src/test/java/de/ids_mannheim/korap/test/cosmas2/Cosmas2QueryProcessorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2021-09-27T14:10:02Z",
+      "side": 1,
+      "message": "sorry the test was correct.",
+      "parentUuid": "30a52fa8_3fe60ccb",
       "revId": "c5cfa717aef92107ff7b65f37b209d176c6b4027",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
