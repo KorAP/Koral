@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ce43f5aa_7c8b4bd9",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2021-09-27T13:48:28Z",
+      "side": 1,
+      "message": "So + and - are identical?",
+      "range": {
+        "startLine": 694,
+        "startChar": 15,
+        "endLine": 697,
+        "endChar": 52
+      },
+      "revId": "c5cfa717aef92107ff7b65f37b209d176c6b4027",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "30a52fa8_3fe60ccb",
+        "filename": "src/test/java/de/ids_mannheim/korap/test/cosmas2/Cosmas2QueryProcessorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2021-09-27T13:48:28Z",
+      "side": 1,
+      "message": "These Tests are merely identical - where is the difference in the serialization tested?",
+      "revId": "c5cfa717aef92107ff7b65f37b209d176c6b4027",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
