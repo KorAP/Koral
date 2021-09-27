@@ -696,7 +696,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 }
                 else if (direction.equals("minus")) {
                     inOrder = true;
-                    invertedOperands = true;
+//                    invertedOperands = true;
                 }
                 else if (direction.equals("both")) {
                     inOrder = false;
