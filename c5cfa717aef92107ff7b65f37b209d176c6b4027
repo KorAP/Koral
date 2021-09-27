@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "3997974d_8c16f15f",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2021-09-27T14:09:25Z",
+      "side": 1,
+      "message": "sorry i mixed up the operators / and %",
+      "parentUuid": "ce43f5aa_7c8b4bd9",
+      "range": {
+        "startLine": 694,
+        "startChar": 15,
+        "endLine": 697,
+        "endChar": 52
+      },
+      "revId": "c5cfa717aef92107ff7b65f37b209d176c6b4027",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "30a52fa8_3fe60ccb",
         "filename": "src/test/java/de/ids_mannheim/korap/test/cosmas2/Cosmas2QueryProcessorTest.java",
         "patchSetId": 2
