@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f55616ce_cd7748bb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2021-09-27T15:55:01Z",
+      "side": 1,
+      "message": "If I understand you correctly, this is already rolled out at /instance/test - but then https://korap.ids-mannheim.de/instance/test?q\u003dVatileaks+%25-w1+mit\u0026cq\u003davailability+%3D+%2FCC-BY.*%2F+%26+docSigle+%3D+%22WDD17%2FE59%22\u0026ql\u003dcosmas2\u0026cutoff\u003d1\u0026pipe\u003d shouldn\u0027t find \"mit Vatileaks\", right?",
+      "revId": "135f99fe6f2d05d81fe7cb3426a7a82f1e6f1a05",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c0e0f590_c6a0790d",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2021-09-27T15:55:01Z",
+      "side": 1,
+      "message": "But this means %+ and %- are identical?",
+      "range": {
+        "startLine": 699,
+        "startChar": 20,
+        "endLine": 699,
+        "endChar": 35
+      },
+      "revId": "135f99fe6f2d05d81fe7cb3426a7a82f1e6f1a05",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
