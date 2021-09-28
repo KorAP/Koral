@@ -18,6 +18,23 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a4643d9c_31b63dd1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2021-09-28T14:49:50Z",
+      "side": 1,
+      "message": "Citing my comment from Slack:\n\n  The problem is, I guess, that the distanceconstraint has no option for reversed operands. So a `not preceded by b` is !\u003d `b not followed by a`. I guess the most elegant way to do that would be to have negative minDistance and maxDistance values, but I don\u0027t know if that works correctly, because that would change how to forward spans.",
+      "revId": "135f99fe6f2d05d81fe7cb3426a7a82f1e6f1a05",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c0e0f590_c6a0790d",
