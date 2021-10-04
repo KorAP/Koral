@@ -35,6 +35,23 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4122055c_985be75d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2021-10-04T16:27:53Z",
+      "side": 1,
+      "message": "I would like to postpone this commit. Should we leave it in gerrit or abandon it?",
+      "revId": "135f99fe6f2d05d81fe7cb3426a7a82f1e6f1a05",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c0e0f590_c6a0790d",
@@ -48,6 +65,30 @@
       "writtenOn": "2021-09-27T15:55:01Z",
       "side": 1,
       "message": "But this means %+ and %- are identical?",
+      "range": {
+        "startLine": 699,
+        "startChar": 20,
+        "endLine": 699,
+        "endChar": 35
+      },
+      "revId": "135f99fe6f2d05d81fe7cb3426a7a82f1e6f1a05",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "38b6748b_b3eeaffa",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2021-10-04T16:27:53Z",
+      "side": 1,
+      "message": "we agree to add a new attribute \"reversedOrder\" in \"koral:distance\", see https://github.com/KorAP/Koral/issues/97.",
+      "parentUuid": "c0e0f590_c6a0790d",
       "range": {
         "startLine": 699,
         "startChar": 20,
