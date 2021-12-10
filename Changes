@@ -1,11 +1,12 @@
-0.37 2021-06-24
+0.37 2021-12-10
     - [feature] Introduced query references in Poliqarp (diewald)
     - [bugfix] Ignore empty corpus queries (diewald)
     - [bugfix] Fix handling of apostrophes in multiword and regex
       values in virtual corpora (#85; diewald)
     - [feature] Added getVersion() and getName() methods (diewald)
-    - [bugfix] Updated plexus-utils used in antlr4-maven-plugin 
+    - [security] Updated plexus-utils used in antlr4-maven-plugin 
       manually due to CVE-2017-1000487 (margaretha)
+    - [security] Updated log4j due to CVE-2021-44228 (diewald)
 
 0.36 2020-07-24
     - [security] Upgraded version of Google Guava
