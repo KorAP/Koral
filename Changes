@@ -1,3 +1,9 @@
+0.38 2021-12-10
+    - [security] Updated log4j due to CVE-2021-44228 (diewald)
+    - [bugfix] Updated dependencies following dependabot
+
+    !!! This is a security fix - please update!
+
 0.37 2021-12-10
     - [feature] Introduced query references in Poliqarp (diewald)
     - [bugfix] Ignore empty corpus queries (diewald)
@@ -6,7 +12,6 @@
     - [feature] Added getVersion() and getName() methods (diewald)
     - [security] Updated plexus-utils used in antlr4-maven-plugin 
       manually due to CVE-2017-1000487 (margaretha)
-    - [security] Updated log4j due to CVE-2021-44228 (diewald)
 
 0.36 2020-07-24
     - [security] Upgraded version of Google Guava
