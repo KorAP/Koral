@@ -572,8 +572,8 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     	window = new Integer[] { Integer.parseInt(node.getChild(offposition1).getText()), Integer.parseInt(node.getChild(offposition2).getText()) }; // if fails, it is a meet span
     	if ((window[0]==0)||(window[1]==0))
     	{
-    		addWarning("The MeetUnion offsets cannot be 0!!");
-    		//addError(StatusCodes.MALFORMED_QUERY,"The MeetUnion offsets cannot be 0!!");
+    		//addWarning("The MeetUnion offsets cannot be 0!!");
+    		addError(StatusCodes.MALFORMED_QUERY,"The MeetUnion offsets cannot be 0!!");
     		
     		return;
     	}
@@ -868,15 +868,16 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 				{
 					object = emptyToken;
 				}
-				if (lastobj.containsKey("frames")) // check is frames:isAround and ignore the emptyTokens if the case, for the <s> []* token []* </s> situations;
+				if (lastobj.containsKey("frames")) // check if frames:isAround and ignore the emptyTokens if the case, for the <s> []* token []* </s> situations;
 				{
-				
-					if (!lastobj.get("frames").toString().contains("isAround"))
-					{
-						putIntoSuperObject(object);
+                   // String category= getNodeCat(node.getParent());
+                    if (!getNodeCat(node.getParent()).equals("emptyTokenSequenceAround"))
+                    {
+                        putIntoSuperObject(object);
 						objectStack.push(object);
 						stackedObjects++;
-					}
+                    }
+                  
 				}
 				else
 				{
@@ -1508,21 +1509,21 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
            frames.add(KoralFrame.MATCHES);
            
        }
-       if (operator.contains("matches"))
+       if (operator.contains("isaround"))
        {
-           ParseTree sequenceNode = node.getChild(1);
-           int snodeNofChildren = sequenceNode.getChildCount();
-    	   if ((getNodeCat((sequenceNode.getChild(0).getChild(0))).equals("emptyTokenSequence")) && (getNodeCat((sequenceNode.getChild(snodeNofChildren-1).getChild(0))).equals("emptyTokenSequence")))
-    	  { 
+          
     		  frames.add(KoralFrame.IS_AROUND);
-    		  
+              frames.add(KoralFrame.STARTS_WITH);
+              frames.add(KoralFrame.ENDS_WITH);
+              frames.add(KoralFrame.MATCHES);
           }
-    	  else
-    	  {
-           frames.add(KoralFrame.MATCHES);
-    	  }
+    	
            
-       }
+          if (operator.contains("matches"))
+          {
+            frames.add(KoralFrame.MATCHES);
+        }
+       
        if (operator.contains("rbound"))
               {
     	   		frames.add(KoralFrame.ENDS_WITH);

@@ -140,7 +140,7 @@ public class CQPMeetProcessorTest {
    
    @Test
    public void testMeetVsFocus1 () throws JsonProcessingException, IOException { 
-	query=  "MU(meet (meet \"cambios\" \"climáticos\" 2 2) (meet \"la\" \"piel\" 1 1) s)";
+	    query=  "MU(meet (meet \"cambios\" \"climáticos\" 2 2) (meet \"la\" \"piel\" 1 1) s)";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:reference", res.at("/query/@type").asText());
@@ -153,21 +153,21 @@ public class CQPMeetProcessorTest {
         assertEquals("koral:term", res.at("/query/operands/0/operands/0/wrap/@type").asText());
         assertEquals("koral:group", res.at("/query/operands/0/operands/1/@type").asText());
         assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operation").asText());
-	assertEquals("false", res.at("/query/operands/0/operands/1/inOrder").asText());
-	assertEquals(0, res.at("/query/operands/0/operands/1/distances/0/boundary/min").asInt());
-	assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/0/operation").asText());
-	assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/distances/0/boundary/min").asInt());
-	assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/distances/0/boundary/max").asInt());
-	assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/0/operands/0/operation").asText());
+	    assertEquals("false", res.at("/query/operands/0/operands/1/inOrder").asText());
+	    assertEquals(0, res.at("/query/operands/0/operands/1/distances/0/boundary/min").asInt());
+	    assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/0/operation").asText());
+	    assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/distances/0/boundary/min").asInt());
+	    assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/distances/0/boundary/max").asInt());
+	    assertEquals("operation:class", res.at("/query/operands/0/operands/1/operands/0/operands/0/operation").asText());
         assertEquals(1, res.at("/query/operands/0/operands/1/operands/0/operands/0/classOut").asInt());
         assertEquals("cambios", res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/key").asText());
         assertEquals("type:regex", res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/type").asText());
         assertEquals("climáticos", res.at("/query/operands/0/operands/1/operands/0/operands/1/wrap/key").asText());
-	assertEquals("type:regex", res.at("/query/operands/0/operands/1/operands/0/operands/1/wrap/type").asText());
+	    assertEquals("type:regex", res.at("/query/operands/0/operands/1/operands/0/operands/1/wrap/type").asText());
         assertEquals("operation:sequence", res.at("/query/operands/0/operands/1/operands/1/operation").asText());
-	assertEquals("la", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
+	    assertEquals("la", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
         assertEquals("type:regex", res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/type").asText());
-	assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/operands/1/wrap/key").asText());
+	    assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/operands/1/wrap/key").asText());
         assertEquals("type:regex", res.at("/query/operands/0/operands/1/operands/1/operands/1/wrap/type").asText());
    }
    	
@@ -373,12 +373,19 @@ public class CQPMeetProcessorTest {
    	assertEquals(1, res.at("/meta/highlight/0").asInt());
   }   
 	    
+
+  @Test
+  public void testMeetVsFocuserrors () throws JsonProcessingException, IOException {
+     query = "MU(meet \"in\" \"due\" 0 -1);";
+     qs.setQuery(query, "CQP");
+     assertTrue(qs.hasErrors());
+     res = mapper.readTree(qs.toJSON());
+     assertEquals(302, res.at("/errors/0/0").asInt());;
+     assertEquals("The MeetUnion offsets cannot be 0!!", res.at("/errors/0/1").asText());
+}
     @Test
     public void testMeetVsFocus10 () throws JsonProcessingException, IOException {
-   	query = "MU(meet \"in\" \"due\" 0 -1);";
-	qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("The MeetUnion offsets cannot be 0!!", res.at("/warnings/0/0").asText());
+   
         
         // 'due' []{0,2} 'in'; focus on "in";
         query = "MU(meet \"in\" \"due\" -3 -1);";

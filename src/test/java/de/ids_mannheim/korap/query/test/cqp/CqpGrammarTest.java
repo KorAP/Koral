@@ -443,12 +443,17 @@ public class CqpGrammarTest {
     	assertEquals( 
     		"(request (query (sequence (segment (token [ (term (layer base) (termOp =) (key (regex \"Mann\"))) ])) (segment (region / region [ (span (skey vp)) ])))))",
     		treeString("[base=\"Mann\"] /region[vp]"));
+			assertEquals( 
+        		"(request (query (segment (region / region [ (span < (foundry cnx) / (layer c) (termOp ! =) (skey vp) ( (termGroup (term (layer class) (termOp ! =) (key (regex \"header\"))) (boolOp &) (term (layer id) (termOp =) (key (regex \"7\")))) ) >) ]))))",
+        		treeString("/region[<cnx/c!=vp (class!=\"header\" & id=\"7\")>]")); 
 
     	
     	
     };
+
+
     @Ignore
-    @Test
+	@Test
     public void testStructDisj () {
 
     	 	// structural attributes as spans!!! not working
@@ -487,7 +492,7 @@ public class CqpGrammarTest {
     public void testStructContains1bis () {
 
     	 	assertEquals( 
-    		"(request (query (struct (matches (span < (skey np) >) (sequence (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment ( (segment (token [ (term (layer pos) (termOp =) (key (regex \"JJ.*\"))) ])) ) (repetition (range { (min 3) , }))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) (span < / (skey np) >)))) ;)",
+    		"(request (query (struct (isaround (span < (skey np) >) (emptyTokenSequenceAround (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment ( (segment (token [ (term (layer pos) (termOp =) (key (regex \"JJ.*\"))) ])) ) (repetition (range { (min 3) , }))) (emptyTokenSequenceAround (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (span < / (skey np) >)))) ;)",
     		treeString(" <np> []* ([pos=\"JJ.*\"]){3,} []* </np>; #contains (NP, sequence)")
     		);
     };
@@ -496,9 +501,13 @@ public class CqpGrammarTest {
     public void testStructContains1tris () {
 
 	 	assertEquals( 
-		"(request (query (struct (matches (span < (skey np) >) (sequence (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"copil\")))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) (span < / (skey np) >)))) ;)",
-		treeString(" <np> []* \"copil\" []* </np>; #contains (NP, copil)")
-		);
+			 "(request (query (struct (isaround (span < (skey np) >) (emptyTokenSequenceAround (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"copil\")))) (emptyTokenSequenceAround (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (span < / (skey np) >)))) ;)",
+		treeString(" <np> []* \"copil\" []* </np>; #contains (NP, copil)"));
+
+
+		assertEquals( 
+			"(request (query (struct (isaround (span < (foundry base) / (layer s) (termOp =) (skey s) >) (emptyTokenSequenceAround (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (sequence (segment (token (key (regex \"copil\")))) (segment (emptyTokenSequence (emptyToken [ ]))) (segment (token (key (regex \"cuminte\"))))) (emptyTokenSequenceAround (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (span < / (foundry base) / (layer s) (termOp =) (skey s) >)))))",
+		treeString("<base/s=s> []* \"copil\" [] \"cuminte\" []* </base/s=s>")); 
 };
 
     @Test

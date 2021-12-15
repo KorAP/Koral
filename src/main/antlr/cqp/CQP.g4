@@ -152,6 +152,7 @@ regex
 key
 : regex; // | verbatim
 
+
 // key for spans
 skey
 : WORD
@@ -280,6 +281,12 @@ emptyTokenSequence
 : (emptyToken repetition?)+
 ;
 
+emptyTokenSequenceAround
+: emptyTokenSequence
+;
+
+
+
 emptyTokenSequenceClass
 : (SPANCLASS_ID emptyTokenSequence | label COLON emptyTokenSequence)    // class defined around empty tokens 
 ;
@@ -365,8 +372,9 @@ overlaps()                           ||       ???
 
 
 
-struct: matches | startswith | endswith ;// for column B implementation
-matches : span (segment|sequence) span;
+struct: isaround | matches | startswith | endswith;// for column B implementation
+isaround :  span emptyTokenSequenceAround (segment|sequence) emptyTokenSequenceAround span; // span (segment|sequence) span | 
+matches:  span  (segment|sequence)  span; 
 startswith: span (segment|sequence);
 endswith: (segment|sequence) span;
 region: SLASH REGION_OP LPAREN span RPAREN;
