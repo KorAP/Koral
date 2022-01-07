@@ -80,8 +80,12 @@ fragment RE_opt      : (RE_char | RE_chgroup | ( '(' REGEX ')')) '?';
 fragment RE_star     : (RE_char | RE_chgroup | ( '(' REGEX ')')) '*';
 fragment RE_plus     : (RE_char | RE_chgroup | ( '(' REGEX ')')) '+';
 fragment RE_occ      : (RE_char | RE_chgroup | ( '(' REGEX ')')) FOCC;
+fragment RE_expr     : '.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant;
+fragment RE_orgroup  : '(' RE_expr* ('|' RE_expr+ )* ')' ;
 fragment RE_group    : '(' REGEX ')';
-REGEX     		     : SLASH ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant | RE_group)* SLASH;
+//REGEX     		     : SLASH ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant | RE_group)* SLASH;
+
+REGEX     		     : SLASH (RE_expr | RE_group | RE_orgroup)* SLASH;
 
 
 WS : ( ' ' | '\t' | '\r' | '\n' )+ -> skip ;

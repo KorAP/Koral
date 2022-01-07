@@ -1,4 +1,6 @@
-0.38.1 2021-12-17
+0.38.1 2022-01-07
+
+	- Fixed Annis OR group (resolved #96) 
 
 0.38 2021-12-10
     - [security] Updated log4j due to CVE-2021-44228 (diewald)
