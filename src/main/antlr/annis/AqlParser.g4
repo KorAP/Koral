@@ -191,5 +191,5 @@ andTopExpr
 
 
 exprTop
-: andTopExpr (OR andTopExpr)* # OrTop
+: BRACE_OPEN? andTopExpr (OR andTopExpr)* BRACE_CLOSE? # OrTop
 ;
