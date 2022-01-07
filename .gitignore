@@ -72,6 +72,8 @@
 /src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/PoliqarpPlusParser.tokens
 /src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/PoliqarpPlusLexer.java
 
+/src/main/java/de/ids_mannheim/korap/query/parse/cqp
+
 # /src/main/java/de/ids_mannheim/korap/query/serialize/
 /src/main/java/de/ids_mannheim/korap/query/serialize/SerializationSandbox.java
 /lib/
