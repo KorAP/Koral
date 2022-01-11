@@ -16,6 +16,23 @@
       "message": "I agree that `RE_group : \u0027(\u0027 REGEX \u0027)\u0027;` is likely wrong. ",
       "revId": "e1020e8ac22265e889346fe380d1e6dafb9bc0e9",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "21c67299_75874066",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2022-01-11T07:59:21Z",
+      "side": 1,
+      "message": "Thanks. I will update the regex rules in another commit.",
+      "revId": "e1020e8ac22265e889346fe380d1e6dafb9bc0e9",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
