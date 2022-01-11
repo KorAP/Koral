@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "912cf6ea_05ea489e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2022-01-11T07:58:50Z",
+      "side": 1,
+      "message": "Is this some old commit that should be abandoned?",
+      "revId": "709b9aa0dc80597bf885cfce55bbf24aaafb28fd",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
