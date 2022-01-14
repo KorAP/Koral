@@ -77,9 +77,4 @@
 /lib/
 /bin/
 
-
-/src/main/java/de/ids_mannheim/korap/query/parse/cqp/CQPLexer.java
-/src/main/java/de/ids_mannheim/korap/query/parse/cqp/CQPLexer.tokens
-/src/main/java/de/ids_mannheim/korap/query/parse/cqp/CQPListener.java
-/src/main/java/de/ids_mannheim/korap/query/parse/cqp/CQPParser.java
-/src/main/java/de/ids_mannheim/korap/query/parse/cqp/CQP.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/cqp/

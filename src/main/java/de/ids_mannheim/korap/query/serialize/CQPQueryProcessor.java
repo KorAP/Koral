@@ -63,59 +63,11 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             log.debug(">>> " + requestMap.get("query") + " <<<");
         }
     }
-   /* public boolean is_meet_disjunction (String query) {
-    	boolean is_md= false;
-    	String[] elements = query.split(" ");
-    	if (elements.length == 5) // it is a meet window query; for the meet-s query, elements should have length 4
-    	{
-    		String[] splits = elements[4].replace(')',' ').split(" ");
-    		int w1= Integer.parseInt(elements[3]);
-    		int w2= Integer.parseInt(splits[0]);
-    		if ((w1<0) && (w2>0))
-    		{is_md=true;}
-    	}
-    	return is_md;
-    }*/
-  /*  public String rewrite(String query)
-    {
-    	String rquery ="";
-    	String[] elements = query.split(" ");
-    	String[] splits = elements[4].replace(')',' ').split(" ");
-    	
-    	int w1= Integer.parseInt(elements[3]);
-    	int w2= Integer.parseInt(splits[0]);
-    	
-    	if ((w1==-1) && (w2==1))
-    	{
-    		rquery = "focus(" + elements[2] + " {" + elements[1] + "}) | focus ({" + elements[1] + "} " + elements[2] + ")";
-    	}
-    	if ((w1==-1) && (w2>1))
-    	{
-    		rquery = "focus(" + elements[2] + " {" + elements[1] + "}) | focus ({" + elements[1] + "} []{,"+ (w2-1) + "} "+ elements[2] + ")";
-    	}
-    	if ((w1<-1) && (w2==1))
-    	{
-    		rquery = "focus(" + elements[2] + " []{," + (-(w1+1)) + "} {" + elements[1] + "}) | focus ({" + elements[1] + "} " + elements[2] + ")";
-    	}
-    	if ((w1<-1) && (w2>1))
-    	{
-    		rquery = "focus(" + elements[2] + " []{," +(-(w1+1)) + "} {" + elements[1] + "}) | focus ({" + elements[1]  + "} []{,"+ (w2-1) + "} "+ elements[2] + ")";
-    	}
-    	
-    	
-    	return rquery;
-    	
-    }
-*/
+
+
     @Override
     public void process (String query) {
-    	// rewrite the query if it is a meet disjunction;
-    /*	if (is_meet_disjunction(query))
-    	{
-    		String rquery = rewrite(query);
-    		query = rquery;
-    	}
-    		*/
+
         ParseTree tree;
         tree = parseCQPQuery(query);  
         // fixme: not required!?
@@ -288,7 +240,12 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             processMeta(node);
         }
        
-        if (nodeCat.equals("struct")){
+        if (nodeCat.equals("sstruct")){
+        	
+        	processPosition(node);
+        }
+           
+        if (nodeCat.equals("qstruct")){
         	
         	processPosition(node);
         }
@@ -322,7 +279,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         	    else
         	    {
         	    	/*** if the node is meetunion, check if it has a span meet parent; ****/
-        	    	/*** if the parent is span meet, we don not process child nodes; they were processed with putvisited false? ??? ***/
+        	    	/*** if the parent is span meet, we do not process child nodes; they were processed with putvisited false? ??? ***/
         	    	if(!checkIfParentIsSpanMeet(node))
         	    	{
         	    		processNode(child, putvisited);
@@ -383,9 +340,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
         }
         
-        // skip for <s> []* "copil" []* </s>
-        if ((node.getChildCount()==3) && getNodeCat(node.getChild(0).getChild(0)).startsWith("emptyTokenSequence") && getNodeCat(node.getChild(2).getChild(0)).startsWith("emptyTokenSequence"))
-        		{ return;}
+
         Map<String, Object> sequence = KoralObjectGenerator
                 .makeGroup(KoralOperation.SEQUENCE);
 
@@ -396,7 +351,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     
     private boolean checkIfRecurrsiveMeet(ParseTree node) {
         boolean recurrence=false;
-        // first segment and second segment are parsed differently in the antlr grammar, see if you can fix!!!
+        // first segment and second segment are parsed differently in the antlr grammar
     	ParseTree firstsegment;
     	ParseTree secondsegment;	
     	List<ParseTree> segments = getChildrenWithChildren(node); // the others are terminal nodes in the MU syntax
@@ -417,9 +372,10 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     private boolean checkIfParentIsSpanMeet (ParseTree node) {
 
     	boolean parentspanmeet=false;
-    	if (getNodeCat(node.getParent().getParent().getParent()).equals("meetunion") )
+    	// check if last child of the parent meet is integer, otherwise the parent meet is a span meet
+        if (getNodeCat(node.getParent().getParent().getParent()).equals("meetunion") )
                 {
-                    // check if last child of the parent meet  is integer, otherwise the parent meet is a span meet
+                    
                     ParseTree testnode = node.getParent().getParent().getParent();
                     int lastchild = testnode.getChildCount()-1;
                     
@@ -435,7 +391,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                 
                 if (getNodeCat(node.getParent()).equals("meetunion") )
                 {
-                    // check if last child of the parent meet  is integer, otherwise the parent meet is a span meet
+                
                     ParseTree testnode = node.getParent();
                     int lastchild = testnode.getChildCount()-1;
                     
@@ -454,18 +410,14 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     private Integer computeSegmentDistance(ParseTree node) {
     	
     	int distance=0;
-    	//outer offsets
+    	//outer offsets; they are equal
     	int ooffs1=0;
-    	//int ooffs2=0;
     	//first inner offsets; if there is no 1st inner meet, the offsets remain 0
     	int foffs1=0;
-    	//int foffs2=0;
     	//second inner offsets;  if there is no 2nd inner meet, the offsets remain 0
     	int soffs1=0;
-    	//int soffs2=0;
     	ooffs1= Integer.parseInt(node.getChild(node.getChildCount()-2).getText());
-    	// we don't need both offs because they are equal!
-    //	ooffs2= Integer.parseInt(node.getChild(node.getChildCount()-1).getText());
+    
     	
        	ParseTree firstsegment;
     	ParseTree secondsegment;	
@@ -478,16 +430,14 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (getNodeCat(secondsegment).equals("meetunion")) desc2.add(secondsegment);
         if((!desc1.isEmpty()))
             {
-        		foffs1= Integer.parseInt(desc1.get(0).getChild(desc1.get(0).getChildCount()-2).getText());
         		// we don't need both offs because they are equal!
-        		//foffs2= Integer.parseInt(desc1.get(0).getChild(desc1.get(0).getChildCount()-1).getText());
+                foffs1= Integer.parseInt(desc1.get(0).getChild(desc1.get(0).getChildCount()-2).getText());
             }
         
         if((!desc2.isEmpty()))
         	{
-        		soffs1= Integer.parseInt(desc2.get(0).getChild(desc2.get(0).getChildCount()-2).getText());
         		// we don't need both offs because they are equal!
-        		//soffs2= Integer.parseInt(desc2.get(0).getChild(desc2.get(0).getChildCount()-1).getText());
+                soffs1= Integer.parseInt(desc2.get(0).getChild(desc2.get(0).getChildCount()-2).getText());
         	}
         if ((foffs1>0&&soffs1>0&&ooffs1>0) || (foffs1>0&&soffs1>0&&ooffs1<0) || (foffs1>0&&soffs1==0&&ooffs1>0) || (foffs1<0&&soffs1==0&&ooffs1<0))
         	{ 
@@ -587,7 +537,6 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     		else
     		{
     			/****  correct offsets ****/
-    		//	Map<String, Object> object = null;
     			/******* check if this is a recurrent meetunion *******/ 
     	   	    boolean recurrence = false;    
                 recurrence = checkIfRecurrsiveMeet(node); // check if the actual meet is a recursive one
@@ -681,10 +630,10 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         		}
         		else
         		{
-        			/*** the offsets are not equal; we don't use putvisited here, because we did not implement recursive or span recursive meet for this situation ***/
+        			/*** the offsets are not equal; we don't use putvisited here, because we did not implement recursive meet for this situation ***/
         			if (recurrence==true)
                     {
-                        System.out.println("We did not implement recursive meet with different offsets");// a more user-friendly message would be nice
+                        addError(StatusCodes.MALFORMED_QUERY,"We did not implement recursive meet with different offsets!!");
                         return;
                     }
                     else
@@ -777,7 +726,8 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     
     catch (NumberFormatException nfe)
     {
-    	/**** process meet  with span ***/
+    	
+        /**** process meet  with span ***/
     	
     	ParseTree firstsequence = firstsegment;
     	ParseTree secondsequence = secondsegment;
@@ -785,63 +735,26 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         putIntoSuperObject(position);
         objectStack.push(position);
         stackedObjects++; 
-        processNode(node.getChild(node.getChildCount()-1), true);
-        /* add span node
-        Map<String, Object> span = KoralObjectGenerator.makeSpan();
-        Map<String, Object> wrappedTerm = KoralObjectGenerator
-                .makeTerm();
-        span.put("wrap", wrappedTerm);
-       
-      //  wrappedTerm.put("type", "type:regex");
-        wrappedTerm.put("key", node.getChild(node.getChildCount()-1).getText());
-        putIntoSuperObject(span);
-        objectStack.push(span);*/
-		
+        processNode(node.getChild(node.getChildCount()-1), true);		
         stackedObjects++;
-        objectStack.push(position); // pune position de doua ori in stack?
+  //      objectStack.push(position); 
         
-    /*    disj= true;
-		Map<String, Object> disjunction = KoralObjectGenerator.makeGroup(KoralOperation.DISJUNCTION);
-		putIntoSuperObject(disjunction);
-		objectStack.push(disjunction);
-		stackedObjects++;*/
-
-		// first disjunct, keep order of segments, 
-	/*	Map<String, Object> firstdisjunct = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
-		//putIntoSuperObject(firstdisjunct);
-		objectStack.push(firstdisjunct);
-		stackedObjects++;
-		((ArrayList<Object>) disjunction.get("operands")).add(firstdisjunct);*/
+   
 		Map<String, Object> spannedsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
 		putIntoSuperObject(spannedsequence);
 		objectStack.push(spannedsequence);
-		stackedObjects++;
-		
-		
-		processNode(firstsequence, true); // putvisited is false, we need to visit the segment again in secondsequence
+		stackedObjects++;		
+		processNode(firstsequence, true); 
 		objectStack.push(spannedsequence); // for recurrence; the firstsequence was first in stack before;
-		processNode(secondsequence, true);  // putvisited is false, we need to visit the segment again in secondsequence
+		processNode(secondsequence, true);  
 		/** distance between first sequence and second sequence can be anything in meet span**/
 		ArrayList<Object> distances = new ArrayList<Object>();
         spannedsequence.put("distances", distances);
         ((ArrayList<Object>) spannedsequence.get("distances")).add( KoralObjectGenerator.makeDistance("w", 0, null));
-		spannedsequence.put("inOrder", false);
-		
-		
-		// second disjunct, change order of segments, 
-		/*Map<String, Object> seconddisjunct = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
-		objectStack.push(seconddisjunct);
-		stackedObjects++;
-		((ArrayList<Object>) disjunction.get("operands")).add(seconddisjunct);
-		
-		processNode(secondsequence, true);
-		objectStack.push(seconddisjunct); // for recurrence; the secondsequence was first in stack before;
-		processNode(firstsequence, true);
-		/** distance between first sequence and second sequence can be anything in meet span**/
-		/*seconddisjunct.put("distances", KoralObjectGenerator.makeDistance("w", 0, null));*/
+		spannedsequence.put("inOrder", false);		
+	
     }
-  // if (disj==false) removeExcessHighlightClass(); // highlightClass has to keep classes for both disjuncts
-    
+  
 }
 
 	@SuppressWarnings("unchecked")
@@ -855,8 +768,8 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 		Map<String, Object> lastobj= objectStack.getLast();
 		
 				Integer[] minmax = parseEmptySegments(node);
-				// object will be either a repetition group or a single empty
-				// token
+				// object will be either a repetition group or a single empty token
+			
 				Map<String, Object> object;
 				Map<String, Object> emptyToken = KoralObjectGenerator.makeToken();
 				if (minmax[0] != 1 || minmax[1] == null || minmax[1] != 1) 
@@ -1061,14 +974,6 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                     flags.add("flags:caseInsensitive");
                 if (flag.contains("d") || flag.contains("D"))
                     flags.add("flags:diacriticsInsensitive");
-                /*if (flag.contains("x")) {
-                    term.put("type", "type:regex");
-                    if (!isRegex) {
-                        key = QueryUtils.escapeRegexSpecialChars(key);
-                    }
-                    // overwrite key
-                    term.put("key", ".*?" + key + ".*?");
-                } */
                 if (flag.contains("l")|| flag.contains("L"))
                 { 
                 		ParseTree keyNode = node.getChild(0);
@@ -1278,20 +1183,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     private void processSpanClass (ParseTree node) {
         // Step I: get info
         int classId = 1;
-      /*  if (getNodeCat(node.getChild(1)).equals("spanclass_id")) {
-            String ref = node.getChild(1).getChild(0).toStringTree(parser);
-            try {
-                classId = Integer.parseInt(ref);
-            }
-            catch (NumberFormatException e) {
-                String msg = "The specified class reference in the "
-                        + "focus/split-Operator is not a number: " + ref;
-                classId = 0;
-                log.error(msg);
-                addError(StatusCodes.INVALID_CLASS_REFERENCE, msg);
-            }
-        }
-        */
+
         if (getNodeCat(node.getChild(0)).equals("@1")) {
             
                 classId = 2;
@@ -1299,7 +1191,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         // check meetunion
         if (getNodeCat(node.getParent().getParent()).equals("meetunion"))
         		{
-        		  // we want to maintain only the class of the focus of the outer meet!		
+        		  // we want to maintain only the class of the focus of the leftmost  meet!		
         		if (!hasDescendantWithCat(node, "meetunion") && (!getNodeCat(node.getParent().getParent().getParent()).equals("meetunion")))
         				{
         				   Map<String, Object> classGroup = KoralObjectGenerator
@@ -1324,7 +1216,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     }
 
-
+// verifica si asta!!!
     private void processMatching (ParseTree node) {
         // Step I: get info
         ArrayList<Integer> classRefs = new ArrayList<Integer>();
@@ -1475,6 +1367,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                 min = 0;
             else {
                 min = max;
+                // mai avem exprimare a claselor asa??
                 // addWarning("Your query contains a segment of the form {n}, where n is some number. This expression is ambiguous. " +
                 // "It could mean a repetition (\"Repeat the previous element n times!\") or a word form that equals the number, "+
                 // "enclosed by a \"class\" (which is denoted by braces like '{x}', see the documentation on classes)."+
@@ -1513,9 +1406,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
        {
           
     		  frames.add(KoralFrame.IS_AROUND);
-              frames.add(KoralFrame.STARTS_WITH);
-              frames.add(KoralFrame.ENDS_WITH);
-              frames.add(KoralFrame.MATCHES);
+          
           }
     	
            
@@ -1758,15 +1649,24 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             // establish boolean relation
             ParseTree boolOp = getFirstChildWithCat(node, "boolOp");
 
-			// Create group
-            if (boolOp.getText().equals("&")) {
+			// Create group// De Morgan's laws
+            if (boolOp.getText().equals("&") && negatedGlobal==false) {
                 termGroup = KoralObjectGenerator
                         .makeTermGroup(KoralTermGroupRelation.AND);
             }
-            else {
+            if (boolOp.getText().equals("|") && negatedGlobal==false) {
                 termGroup = KoralObjectGenerator
                         .makeTermGroup(KoralTermGroupRelation.OR);
             }
+            if (boolOp.getText().equals("&") && negatedGlobal==true) {
+                termGroup = KoralObjectGenerator
+                        .makeTermGroup(KoralTermGroupRelation.OR);
+            }
+            if (boolOp.getText().equals("|") && negatedGlobal==true) {
+                termGroup = KoralObjectGenerator
+                        .makeTermGroup(KoralTermGroupRelation.AND);
+            }
+          
             ArrayList<Object> operands = (ArrayList<Object>) termGroup
                     .get("operands");
             // recursion with left/right operands
@@ -1788,13 +1688,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         {
         	flags.add("flags:diacriticsInsensitive");
         }
-       /* if (flag.contains("l"))
-        this operation is applied twice, in processTerm and here!
-        {
-  
-				key = key.substring(1, key.length()-1).replaceAll("\\\\\\\\","\\\\").replaceAll("\\\\'", "'");
-        }
-        */
+     
         if (!flags.isEmpty()) {
             term.put("flags", flags);
         }
