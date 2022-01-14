@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7089a760_c96fdf22",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2022-01-14T10:38:52Z",
+      "side": 1,
+      "message": "@Elena: please make a patch to fix the invalid test in \n\nde.ids_mannheim.korap.query.test.cqp.CQPQueryProcessorTest.testSpanSerialization()",
+      "revId": "d43ae1e918a3bc5a7d90fc0cd452317cff97674a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
