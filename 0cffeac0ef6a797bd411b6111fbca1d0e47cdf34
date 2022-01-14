@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "df008737_2e192a3d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2022-01-14T07:36:01Z",
+      "side": 1,
+      "message": "@Elena: Can I also abandon this?",
+      "revId": "0cffeac0ef6a797bd411b6111fbca1d0e47cdf34",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
