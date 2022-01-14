@@ -71,6 +71,16 @@ public class CQPQueryProcessorTest {
         assertEquals(contextString, res.get("@context").asText());
     }
 
+    @Test
+    public void testFailure () throws JsonProcessingException, IOException {
+        query = "[base=Mann";
+        qs.setQuery(query, "CQP");
+	assertTrue(qs.hasErrors());
+        res = mapper.readTree(qs.toJSON());
+        assertEquals(302, res.at("/errors/0/0").asInt());
+        assertEquals(302, res.at("/errors/1/0").asInt());
+	}
+
 
     @Test
     public void testSingleTokens () throws JsonProcessingException, IOException {
@@ -84,14 +94,23 @@ public class CQPQueryProcessorTest {
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
         
         
-        query = "[base=\"Mann\"]";
+        query = "[!base=\"Mann\"]";
         qs.setQuery(query, "CQP");
 		assertFalse(qs.hasErrors());
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("Mann", res.at("/query/wrap/key").asText());
         assertEquals("lemma", res.at("/query/wrap/layer").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("match:ne", res.at("/query/wrap/match").asText());
+        
+        query = "![base=\"Mann\"]";
+        qs.setQuery(query, "CQP");
+		assertFalse(qs.hasErrors());
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("Mann", res.at("/query/wrap/key").asText());
+        assertEquals("lemma", res.at("/query/wrap/layer").asText());
+        assertEquals("match:ne", res.at("/query/wrap/match").asText());
 
         query = "[orth!=\"Frau\"]";
         qs.setQuery(query, "CQP");
@@ -120,30 +139,6 @@ public class CQPQueryProcessorTest {
         assertEquals("p", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
 
-       /* query = "[base=\"schland/x\"]";
-        qs.setQuery(query, "CQP");
-		assertFalse(qs.hasErrors());
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals(".*?schland.*?", res.at("/query/wrap/key").asText());
-        assertEquals("lemma", res.at("/query/wrap/layer").asText());
-        assertEquals("type:regex", res.at("/query/wrap/type").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());*/
-    }
-
-	@Test
-    public void testFailure () throws JsonProcessingException, IOException {
-        query = "[base=Mann";
-        qs.setQuery(query, "CQP");
-	assertTrue(qs.hasErrors());
-        res = mapper.readTree(qs.toJSON());
-        assertEquals(302, res.at("/errors/0/0").asInt());
-        assertEquals(302, res.at("/errors/1/0").asInt());
-	}
-
-    @Test
-    public void testNegatedTokens () throws JsonProcessingException,
-            IOException {
         query = "![p!=\"NN\"]";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
@@ -153,9 +148,13 @@ public class CQPQueryProcessorTest {
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
         assertEquals("", res.at("/errors/0/0").asText());
         assertEquals("", res.at("/errors/1/0").asText());
+  
     }
+
+   
     
     
+//    @Ignore
     @Test
     public void testNegatedTerms () throws JsonProcessingException,
     IOException {
@@ -170,25 +169,51 @@ public class CQPQueryProcessorTest {
         assertEquals("", res.at("/errors/0/0").asText());
         assertEquals("", res.at("/errors/1/0").asText());
         
+        // negating conjunction and disjunction testing
+       // relation or shoud become and because of negation! see De Morgan's laws; not implemented correctly in PQ+ too...
         query = "[(lemma=\"ir\") & !(word=\"ido\"%c | word=\"voy\"%c)];";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:termGroup", res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", res.at("/query/wrap/relation").asText());
         operands = Lists.newArrayList(res.at("/query/wrap/operands").elements());
         assertEquals("koral:term", operands.get(0).at("/@type").asText());
-        assertEquals("koral:termGroup", operands.get(1).at("/@type").asText());
         assertEquals("ir", operands.get(0).at("/key").asText());
         assertEquals("lemma", operands.get(0).at("/layer").asText());
         assertEquals("match:eq", operands.get(0).at("/match").asText());
+        assertEquals("koral:termGroup", operands.get(1).at("/@type").asText());
+        assertEquals("relation:and", operands.get(1).at("/relation").asText());
         assertEquals("koral:term", operands.get(1).at("/operands/0/@type").asText());
-		assertEquals("koral:term", operands.get(1).at("/operands/1/@type").asText());
-		assertEquals("ido", operands.get(1).at("/operands/0/key").asText());
+	assertEquals("koral:term", operands.get(1).at("/operands/1/@type").asText());
+	assertEquals("ido", operands.get(1).at("/operands/0/key").asText());
         assertEquals("word", operands.get(1).at("/operands/0/layer").asText());
         assertEquals("match:ne", operands.get(1).at("/operands/0/match").asText());
         assertEquals("voy", operands.get(1).at("/operands/1/key").asText());
         assertEquals("word", operands.get(1).at("/operands/1/layer").asText());
         assertEquals("match:ne", operands.get(1).at("/operands/1/match").asText());
        
+       // !(a&!b) = !a | !!b = !a | b
+        query = "![(lemma=\"ir\") & !(word=\"ido\"%c | word=\"voy\"%c)];";
+        qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:termGroup", res.at("/query/wrap/@type").asText());
+        assertEquals("relation:or", res.at("/query/wrap/relation").asText());
+        operands = Lists.newArrayList(res.at("/query/wrap/operands").elements());
+        assertEquals("koral:term", operands.get(0).at("/@type").asText());
+        assertEquals("ir", operands.get(0).at("/key").asText());
+        assertEquals("lemma", operands.get(0).at("/layer").asText());
+        assertEquals("match:ne", operands.get(0).at("/match").asText());
+        assertEquals("koral:termGroup", operands.get(1).at("/@type").asText());
+        assertEquals("relation:or", operands.get(1).at("/relation").asText());
+        assertEquals("koral:term", operands.get(1).at("/operands/0/@type").asText());
+	assertEquals("koral:term", operands.get(1).at("/operands/1/@type").asText());
+	assertEquals("ido", operands.get(1).at("/operands/0/key").asText());
+        assertEquals("word", operands.get(1).at("/operands/0/layer").asText());
+        assertEquals("match:eq", operands.get(1).at("/operands/0/match").asText());
+        assertEquals("voy", operands.get(1).at("/operands/1/key").asText());
+        assertEquals("word", operands.get(1).at("/operands/1/layer").asText());
+        assertEquals("match:eq", operands.get(1).at("/operands/1/match").asText());
+
     }
 
 
@@ -670,7 +695,7 @@ public class CQPQueryProcessorTest {
             IOException {
         
     	// this queries were written in PQ+ with contains()
-    	query = "<s> []* (\"der\")* []* </s>";
+    	query = "<s> []+ (\"der\")* []+ </s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
@@ -679,20 +704,20 @@ public class CQPQueryProcessorTest {
         assertTrue(res.at("/query/operands/1/operands/0/boundary/max").isMissingNode());
         assertTrue(res.at("/query/operands/1/operands/2/").isMissingNode()); // []* are not taken into account as tokens;
 
-        query = "<s> []* (\"der\"){3,} []* </s>";
+        query = "<s> []+ (\"der\"){3,} []+ </s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals(3, res.at("/query/operands/1/boundary/min").asInt());
         assertTrue(res.at("/query/operands/1/boundary/max")
                 .isMissingNode());
 
-        query = "<s> []* (\"der\"){,3} []* </s>";
+        query = "<s> []+ (\"der\"){,3} []+ </s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals(0, res.at("/query/operands/1/boundary/min").asInt());
         assertEquals(3, res.at("/query/operands/1/boundary/max").asInt());
 
-        query = "<s> []* (\"der\"){3,7} []* </s>";
+        query = "<s> []+ (\"der\"){3,7} []+ </s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals(3, res.at("/query/operands/1/boundary/min").asInt());
@@ -1275,28 +1300,59 @@ public class CQPQueryProcessorTest {
     @Test
     public void testPositionsSpan () throws JsonProcessingException, IOException {
       
+       
+       
+        query ="\"copil\" \"cuminte\" <base/s=s>;"; //KoralFrame.ENDS_WITH
+        qs.setQuery(query, "CQP");
+        res = mapper.readTree(qs.toJSON());
+       
+               
+        assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
+        assertEquals("copil", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:sequence", res.at("/query/operation").asText());
+        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
+        assertEquals("operation:position", res.at("/query/operands/1/operation").asText());
+        assertEquals("frames:endsWith", res.at("/query/operands/1/frames/0").asText());
+        assertEquals("koral:span", res.at("/query/operands/1/operands/0/@type").asText());
+        assertEquals("s", res.at("/query/operands/1/operands/0/wrap/key").asText());
+        assertEquals("base", res.at("/query/operands/1/operands/0/wrap/foundry").asText());
+        assertEquals("s", res.at("/query/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/operands/1/@type").asText());
+        assertEquals("cuminte", res.at("/query/operands/1/operands/1/wrap/key").asText());
+   
         query = "<base/s=s> []* \"copil\" [] \"cuminte\" []* </base/s=s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
-        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
-        assertEquals("frames:startsWith", res.at("/query/frames/1").asText());
-        assertEquals("frames:endsWith", res.at("/query/frames/2").asText());
-        assertEquals("frames:matches", res.at("/query/frames/3").asText());
+      //  assertEquals("frames:isAround", res.at("/query/frames/0").asText());
+      //  assertEquals("frames:startsWith", res.at("/query/frames/1").asText());
+     //   assertEquals("frames:endsWith", res.at("/query/frames/2").asText());
+        assertEquals("frames:matches", res.at("/query/frames/0").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
         assertEquals("operation:sequence", res.at("/query/operands/1/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/1/operands/0/@type").asText());
-        // first element in sequence is "copil", not empty token
-        assertEquals("copil", res.at("/query/operands/1/operands/0/wrap/key").asText());
-        assertEquals("koral:token", res.at("/query/operands/1/operands/1/@type").asText());
-        assertTrue(res.at("/query/operands/1/operands/1/wrap/key").isMissingNode());
+        assertEquals("koral:group", res.at("/query/operands/1/operands/0/@type").asText());
+        
+        // []*
+        assertEquals("operation:repetition", res.at("/query/operands/1/operands/0/operation").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/operands/0/operands/0/@type").asText());
+        // copil
+        assertEquals("copil", res.at("/query/operands/1/operands/1/wrap/key").asText());
+        // []
         assertEquals("koral:token", res.at("/query/operands/1/operands/2/@type").asText());
-        assertEquals("cuminte", res.at("/query/operands/1/operands/2/wrap/key").asText());
-        //last element in sequence is "copil", not empty token
-        assertTrue(res.at("/query/operands/1/operands/3/@type").isMissingNode());
+        assertTrue(res.at("/query/operands/1/operands/2/wrap/key").isMissingNode());
+        // cuminte
+        assertEquals("koral:token", res.at("/query/operands/1/operands/3/@type").asText());
+        assertEquals("cuminte", res.at("/query/operands/1/operands/3/wrap/key").asText());
+        
+        //[]*
+        assertEquals("koral:group", res.at("/query/operands/1/operands/4/@type").asText());
+        assertEquals("operation:repetition", res.at("/query/operands/1/operands/4/operation").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/operands/4/operands/0/@type").asText());
+     
 
         
         query = "<base/s=s> []* \"copil\" []* </base/s=s>;";
@@ -1304,11 +1360,15 @@ public class CQPQueryProcessorTest {
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
-        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
+        assertEquals("frames:matches", res.at("/query/frames/0").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
-        assertEquals("copil", res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
+        assertEquals("operation:sequence", res.at("/query/operands/1/operation").asText());
+        assertEquals("koral:group", res.at("/query/operands/1/operands/0/@type").asText());
+        assertEquals("operation:repetition", res.at("/query/operands/1/operands/0/operation").asText());
+        assertEquals("koral:token", res.at("/query/operands/1/operands/0/operands/0/@type").asText());
+        assertEquals("copil", res.at("/query/operands/1/operands/1/wrap/key").asText());
         
         query ="\"copil\" <base/s=s>;"; //KoralFrame.ENDS_WITH
     	qs.setQuery(query, "CQP");
@@ -1324,23 +1384,7 @@ public class CQPQueryProcessorTest {
         assertEquals("copil", res.at("/query/operands/1/wrap/key").asText());	
         
         
-    	query ="\"copil\" \"cuminte\" <base/s=s>;"; //KoralFrame.ENDS_WITH
-    	qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-    	assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:position", res.at("/query/operation").asText());
-        assertEquals("frames:endsWith", res.at("/query/frames/0").asText());
-        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
-        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("base", res.at("/query/operands/0/wrap/foundry").asText());
-        assertEquals("s", res.at("/query/operands/0/wrap/layer").asText());
-        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
-        assertEquals("operation:sequence", res.at("/query/operands/1/operation").asText());
-        assertEquals("koral:token", res.at("/query/operands/1/operands/0/@type").asText());
-        assertEquals("copil", res.at("/query/operands/1/operands/0/wrap/key").asText());	
-        assertEquals("koral:token", res.at("/query/operands/1/operands/1/@type").asText());
-        assertEquals("cuminte", res.at("/query/operands/1/operands/1/wrap/key").asText());
-       
+    	
         query =" <base/s=s> \"copil\" ;"; //KoralFrame.STARTS_WITH
    	 	qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
@@ -1370,23 +1414,20 @@ public class CQPQueryProcessorTest {
     	
     
         
-        query = "<base/s=s> []* \"copil\" \"cuminte\" []* </base/s=s>;";
-        // a sequence with two tokens is generated in the serialization tree; 
+        query = "<base/s=s> []+ \"copil\" \"cuminte\" []+ </base/s=s>;";
+  
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group", res.at("/query/@type").asText());
         assertEquals("operation:position", res.at("/query/operation").asText());
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
-        assertEquals("frames:startsWith", res.at("/query/frames/1").asText());
-        assertEquals("frames:endsWith", res.at("/query/frames/2").asText());
-        assertEquals("frames:matches", res.at("/query/frames/3").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
         assertEquals("operation:sequence", res.at("/query/operands/1/operation").asText());
     	
     	
-    	query = "<np> []* ([pos=\"JJ.*\"] []*){3,} </np>;"; //KoralFrame.MATCHES
+    	query = "<np> []+ ([pos=\"JJ.*\"] []+){3,} </np>;"; //KoralFrame.MATCHES
     	qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
     	assertEquals("koral:group", res.at("/query/@type").asText());
@@ -1396,15 +1437,16 @@ public class CQPQueryProcessorTest {
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("np", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("koral:token", res.at("/query/operands/1/operands/0/operands/0/@type").asText());
-        assertEquals(0, res.at("/query/operands/1/operands/0/boundary/min").asInt());
+        assertEquals(1, res.at("/query/operands/1/operands/0/boundary/min").asInt());
         assertEquals("operation:repetition", res.at("/query/operands/1/operands/0/operation").asText());
         assertEquals("koral:group", res.at("/query/operands/1/operands/1/@type").asText());
         assertEquals("operation:repetition", res.at("/query/operands/1/operands/1/operation").asText());
         assertEquals("operation:sequence", res.at("/query/operands/1/operands/1/operands/0/operation").asText());
         assertEquals("JJ.*", res.at("/query/operands/1/operands/1/operands/0/operands/0/wrap/key").asText());
+        assertEquals("1", res.at("/query/operands/1/operands/1/operands/0/operands/1/boundary/min").asText());
     	
-    	query =" <np> []* ([pos=\"JJ.*\"]){3,} []* </np>; #contains (NP, sequence)"; //KoralFrame.IS_AROUND
-    	// the []* segments are not serialesd;
+    	query =" <np> []+ ([pos=\"JJ.*\"]){3,} []+ </np>; #contains (NP, sequence)"; //KoralFrame.IS_AROUND
+    	
     	qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
     	assertEquals("koral:group", res.at("/query/@type").asText());
@@ -1412,10 +1454,12 @@ public class CQPQueryProcessorTest {
         assertEquals("frames:isAround", res.at("/query/frames/0").asText());
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("np", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("koral:token", res.at("/query/operands/1/operands/0/@type").asText());
+        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
+        assertEquals("operation:repetition", res.at("/query/operands/1/operation").asText());
         assertEquals("JJ.*", res.at("/query/operands/1/operands/0/wrap/key").asText());
         assertEquals(3, res.at("/query/operands/1/boundary/min").asInt());
-        assertEquals("operation:repetition", res.at("/query/operands/1/operation").asText());
+        // the []+ segments are not serialesd;
+        assertTrue(res.at("/query/operands/2").isMissingNode());
     	
     }
     
@@ -1617,8 +1661,8 @@ public class CQPQueryProcessorTest {
         assertEquals("Haus", res.at("/query/operands/0/operands/1/wrap/key")
                 .asText());
     }
-*/
 
+*/
     @Ignore
     @Test
     public void testRelations () throws JsonProcessingException, IOException {
@@ -1939,8 +1983,9 @@ public class CQPQueryProcessorTest {
     public void testSpanSerialization () throws JsonProcessingException,
             IOException {
 
-        // Both constructs should be serialized identically when the problem with []* is solved!
-        query = "<s> []* 'der' []* </s>)";
+      //  query = "<s> []+ 'der' []+ </s>)"; and query = "'der' within s"; should serialize identically
+      
+        query = "<s> []+ 'der' []+ </s>)";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
 
@@ -1953,6 +1998,7 @@ public class CQPQueryProcessorTest {
         assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
         assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
         assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+
 
         query = "'der' within s";
         qs.setQuery(query, "CQP");

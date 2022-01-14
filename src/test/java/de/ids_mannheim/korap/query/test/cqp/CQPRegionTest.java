@@ -28,10 +28,11 @@ public class CQPRegionTest extends BaseQueryTest {
     @Test
     public void testMatchingAttributeForAllRegion ()
             throws JsonMappingException, JsonProcessingException {
-        JsonNode n = runQuery("/region[(class=\"header\")]");
-//        System.out.println(n.toPrettyString());
-        // EM: is this the expected result?
-        
+
+        // /region needs a span argument
+         JsonNode n = runQuery("/region[(class=\"header\")]");
+
+        // EM: is this the expected result? Elena: i guess so...
         assertEquals(StatusCodes.MALFORMED_QUERY, n.at("/errors/0/0").asInt());
     }
 
@@ -39,8 +40,14 @@ public class CQPRegionTest extends BaseQueryTest {
     @Test
     public void testMatchingAttributeInSentence ()
             throws JsonMappingException, JsonProcessingException {
-        JsonNode n = runQuery("/region[<s (class=\"header\")]");
-        // EM: please add some checks here
+        JsonNode res = runQuery("/region[<s (class=\"header\")>]");
+        assertEquals("s", res.at("/query/wrap/key").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("koral:term", res.at("/query/attr/@type").asText());
+        assertEquals("class", res.at("/query/attr/key").asText());
+        assertEquals("header", res.at("/query/attr/value").asText());
+        assertEquals("match:eq", res.at("/query/attr/match").asText());
+        
     }
 
 
@@ -72,7 +79,6 @@ public class CQPRegionTest extends BaseQueryTest {
         assertEquals("vp", res.at("/query/wrap/key").asText());
         assertEquals("cnx", res.at("/query/wrap/foundry").asText());
         assertEquals("c", res.at("/query/wrap/layer").asText());
-        // assertEquals("match:eq", res.at("/query/wrap/match").asText());
         assertEquals("koral:termGroup", res.at("/query/attr/@type").asText());
         assertEquals("relation:and", res.at("/query/attr/relation").asText());
         operands = Lists
@@ -92,7 +98,6 @@ public class CQPRegionTest extends BaseQueryTest {
         assertEquals("vp", res.at("/query/wrap/key").asText());
         assertEquals("cnx", res.at("/query/wrap/foundry").asText());
         assertEquals("c", res.at("/query/wrap/layer").asText());
-        //assertEquals("match:ne", res.at("/query/wrap/match").asText());
         assertEquals("class", res.at("/query/attr/key").asText());
         assertEquals("header", res.at("/query/attr/value").asText());
         assertEquals("match:eq", res.at("/query/attr/match").asText());
