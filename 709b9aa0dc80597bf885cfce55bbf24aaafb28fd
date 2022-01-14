@@ -16,6 +16,23 @@
       "message": "Is this some old commit that should be abandoned?",
       "revId": "709b9aa0dc80597bf885cfce55bbf24aaafb28fd",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3b0c0c5e_512da4e0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2022-01-14T07:40:53Z",
+      "side": 1,
+      "message": "Elena said in an email that this can be abandoned.",
+      "revId": "709b9aa0dc80597bf885cfce55bbf24aaafb28fd",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
