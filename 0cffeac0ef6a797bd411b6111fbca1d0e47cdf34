@@ -16,6 +16,24 @@
       "message": "@Elena: Can I also abandon this?",
       "revId": "0cffeac0ef6a797bd411b6111fbca1d0e47cdf34",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "53aa7d9a_3a120c72",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-01-14T10:04:37Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "df008737_2e192a3d",
+      "revId": "0cffeac0ef6a797bd411b6111fbca1d0e47cdf34",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
