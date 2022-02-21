@@ -267,12 +267,12 @@ p.todo {
 table.koral-type tbody td:nth-of-type(1),
 table.koral-type tbody td:nth-of-type(2),
 table.koral-type tbody td:nth-of-type(3) {
-  font-family: Consolas, "Lucida Console", "DejaVu Sans Mono", monospace;
+  font-family: Consolas, "Inconsolata", "Lucida Console", "DejaVu Sans Mono", monospace;
 }
 
 
 code, h4.koral-type {
-  font-family: Consolas, "Lucida Console", "DejaVu Sans Mono", monospace;
+  font-family: Consolas, "Inconsolatas", "Lucida Console", "DejaVu Sans Mono", monospace;
   border-radius: 4px;
   padding-left: 5pt;
   padding-right: 5pt;
@@ -323,4 +323,107 @@ div.values:target {
   padding:1em;
 }
 
+@media print, screen {
+  body {
+    background-color: white;
+    font-size: 10pt;
+    line-height: 1.3em;
+  }
+  
+  div.hentry {
+    color: black;
+    background-color: white;
+    margin: 0;
+    width: 100%;
+    box-shadow: none;
+    max-width: inherit !important;
+    min-width: inherit;
+    border: none;
+    padding: 0;
+  }
 
+  dl {
+    margin-left: 0;
+  }
+
+  dl > dt {
+    margin-top: 1em;
+  }
+
+  h2 {
+    margin-top: 2em;
+  }
+
+  code {
+    background-color: white;
+  }
+
+  #banner {
+    display: none;
+  }
+  a:link, a:visited, a:active {
+    text-decoration: underline;
+    color: black;
+  }
+  body {
+    background-color: white;
+  }
+  h1 {
+    background-image: none;
+    height: auto !important;
+    padding-top: .7em;
+  }
+  h1 > span {
+    margin-left: 0;
+  }
+  p.todo, pre {
+    padding: 5pt;
+    border-radius: 5px;
+  }
+  pre {
+    color: black;
+    background-color: white;
+    border-color: black;
+    font-size: 80%;
+  }
+
+  h4.koral-type {
+    margin-bottom: 0;
+  }
+
+  main section.guide {
+    border: 2pt dashed black;
+    background-color: white;
+  }
+
+  table {
+    border-collapse: separate;
+    border-width: 0;
+    font-size: 100%;
+  }
+  
+  thead {
+    background-color: black;
+    border-color: black;
+  }
+  td, th {
+    border: 1px solid black;
+  }
+
+  td > dl > dd {
+    margin-left: 1em;
+    margin-right: 0;
+  }
+  
+  tbody tr {
+    background-color: white;
+  }
+
+  tbody tr:nth-child(odd) {
+    background-color: white;
+  }
+ 
+  thead tr th:last-child {
+    min-width: 70%;
+  }
+}
