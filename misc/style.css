@@ -323,7 +323,7 @@ div.values:target {
   padding:1em;
 }
 
-@media print, screen {
+@media print {
   body {
     background-color: white;
     font-size: 10pt;
