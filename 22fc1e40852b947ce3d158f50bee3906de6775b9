@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e58d3076_66a84219",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2022-05-09T06:52:32Z",
+      "side": 1,
+      "message": "Hi Elena, I have fixed this on another commit https://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/5712 because it needs a new change-id. \n\nCould you please check if it includes all your changes?",
+      "revId": "22fc1e40852b947ce3d158f50bee3906de6775b9",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
