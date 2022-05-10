@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -155,16 +156,21 @@ public class CQPRegionTest extends BaseQueryTest {
         assertEquals("class", res.at("/query/attr/key").asText());
         assertEquals("header", res.at("/query/attr/value").asText());
         assertEquals("match:eq", res.at("/query/attr/match").asText());
+    }
+    
 
+    @Test
+    public void testRegionAttributeGroupNegation ()
+            throws JsonMappingException, JsonProcessingException {
         query = "/region[<cnx/c!=vp !(class=\"header\" & id=\"7\")>]";
-        res = runQuery(query);
+        JsonNode res = runQuery(query);
         assertEquals("koral:span", res.at("/query/@type").asText());
         assertEquals("vp", res.at("/query/wrap/key").asText());
         assertEquals("cnx", res.at("/query/wrap/foundry").asText());
         assertEquals("c", res.at("/query/wrap/layer").asText());
         assertEquals("match:ne", res.at("/query/wrap/match").asText());
         assertEquals("koral:termGroup", res.at("/query/attr/@type").asText());
-        assertEquals("relation:and", res.at("/query/attr/relation").asText());
+        assertEquals("relation:or", res.at("/query/attr/relation").asText());
         operands = Lists
                 .newArrayList(res.at("/query/attr/operands").elements());
         assertEquals("koral:term", operands.get(0).at("/@type").asText());
