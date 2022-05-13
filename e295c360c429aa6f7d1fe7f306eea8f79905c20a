@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "487e35c0_e882a263",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2022-05-13T11:40:35Z",
+      "side": 1,
+      "message": "Dear Elena,\n\nI have reviewed most of the tests in CQPQueryProcessorTest until testPunct(), and made new test files for some of the tests. I hope it is okay.\n\nI haven\u0027t reviewed CqpGrammarTest and CQPMeetProcessorTest, but I am not sure if I can review them all. So please go ahead if you would like to make changes.\n\nI will just use this commit and run it on the test instance probably next week.\n",
+      "revId": "e295c360c429aa6f7d1fe7f306eea8f79905c20a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
