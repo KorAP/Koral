@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,7 +23,6 @@ public class CQPRegionTest extends BaseQueryTest {
     public CQPRegionTest () {
         super("CQP");
     }
-
 
     @Test
     public void testMatchingAttributeForAllRegion ()
@@ -183,4 +181,38 @@ public class CQPRegionTest extends BaseQueryTest {
         assertEquals("match:ne", operands.get(1).at("/match").asText());
     }
 
+    @Test
+    public void testRegionAndTokenSequence () throws JsonProcessingException,
+            IOException {
+        // vezi ca asta e de la modificarea cu span-ul de ieri, cand ai schimbat ordinea in operators list!
+        query = "[base='Mann'] /region[vp]"; // in PQ+ "[base=Mann]<vp>"
+        JsonNode result = runQuery(query);
+        
+        assertEquals("koral:group", result.at("/query/@type").asText());
+        assertEquals("operation:sequence", result.at("/query/operation").asText());
+        assertEquals("koral:token", result.at("/query/operands/0/@type").asText());
+        assertEquals("Mann", result.at("/query/operands/0/wrap/key").asText());
+        assertEquals("koral:span", result.at("/query/operands/1/@type").asText());
+        assertEquals("vp", result.at("/query/operands/1/wrap/key").asText());
+
+        query = "/region[<coreNLP/c=NP>] [base='Mann']"; // region with foundry and layer
+        result = runQuery(query);
+        
+        assertEquals("koral:group", result.at("/query/@type").asText());
+        assertEquals("operation:sequence", result.at("/query/operation").asText());
+        assertEquals("koral:span", result.at("/query/operands/0/@type").asText());
+        assertEquals("NP", result.at("/query/operands/0/wrap/key").asText());
+        assertEquals("coreNLP", result.at("/query/operands/0/wrap/foundry").asText());
+        assertEquals("c", result.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("koral:token", result.at("/query/operands/1/@type").asText());
+        assertEquals("Mann", result.at("/query/operands/1/wrap/key").asText());
+        
+
+        query = "/region[vp] [base=\"Mann\"] /region[pp] /region[np]";
+        result = runQuery(query);
+        
+        assertEquals("pp", result.at("/query/operands/2/wrap/key").asText());
+        assertEquals("np", result.at("/query/operands/3/wrap/key").asText());
+       
+    }
 }
