@@ -20,7 +20,47 @@ public class CqpGrammarTest {
     String query;
     Lexer lexer = new CQPLexer((CharStream) null);
     ParserRuleContext tree = null;
-    @Test
+	@Test
+	public void squoutes_verbatim () {
+
+		
+		assertEquals(
+			"(request (query \" ? \"))",  // it should not parse the query
+			treeString("\"?\"")
+			);
+		assertNotEquals(
+			"(request (query \" \" \"))",  // it should not parse the query
+			treeString("\"\"\"")
+			);
+		assertEquals(
+		"(request (query (segment (token (key (regex 'copil'))))))", 
+		treeString("'copil'")
+		);
+		assertEquals(
+		"(request (query (segment (token (key (regex 'copil')) (flag %l)))))", 
+		treeString("'copil'%l")
+		);
+
+		assertEquals(
+		"(request (query (segment (token (key (regex '\\''))))))",  
+		treeString("'\\''")
+		);
+		assertEquals(
+		"(request (query (segment (token (key (regex '\\'')) (flag %l)))))",  
+		treeString("'\\''%l")
+		);
+		
+		assertEquals(
+			"(request (query (segment (token (key (regex ''))))))",  // it should not parse the query
+			treeString("'''")
+			);
+		
+		
+	
+	  
+}
+	
+	@Test
     public void testRegex$1 () {
 
     	 	 assertEquals(
@@ -96,7 +136,9 @@ public class CqpGrammarTest {
     public void testRegexEscapedQuoutes () {
 
         // escape by doubling the double quote 	
-    	assertEquals( 
+    	
+		
+		assertEquals( 
     		"(request (query (segment (token (key (regex \"22\"\"-inch\"))))) ;)", 
     		treeString("\"22\"\"-inch\";")
     		);
@@ -120,7 +162,12 @@ public class CqpGrammarTest {
     @Test
     public void testRegexEscapedSquoutes () {
     		// escape by doubling the single quote
-    	 	assertEquals( 
+    	 	
+			assertEquals( 
+    		"(request (query (segment (token (key (regex ''))))))", 
+    		treeString("''';") // this should not parse!! should signal an error! the regex is constructed when the parser finds the second '  !
+    		);  // how are these situations treated in PQ+?
+			assertEquals( 
     		"(request (query (segment (token (key (regex 'anna''s house'))))) ;)", 
     		treeString("'anna''s house';")
     		);
@@ -482,6 +529,16 @@ public class CqpGrammarTest {
     		treeString(" (<np>|<np1>|<np2>) []* (</np2>|</np1>|</np>);")
     		);
     };
+////////////////////////////
+@Ignore
+@Test
+public void testStructContains3 () {
+// not working!!! imbricated struct is not implemented
+		 assertEquals( 
+		"(request (query (sequence (segment (struct < s >)) (segment (struct < np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (struct < / np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (struct < np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (struct < / np >)) (segment (struct < / s >)))) ;)",
+		treeString(" <s><np>[]*</np> []* <np>[]*</np></s>; #sentence that starts and ends with a noun phrase (NP); startsWith, endsWith;")
+		);
+};
 
     @Test
     public void testStructStartsWith () {
@@ -515,7 +572,7 @@ public class CqpGrammarTest {
     public void testStructSegmEndsWith () {
 
     	 	assertEquals( 
-    		"(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (key (regex \"VBG\"))) ])) (sstruct (endswith (segment (token [ (term (layer pos) (termOp =) (key (regex \"SENT\"))) ]) (repetition (kleene ?))) (span < / (foundry base) / (layer s) (termOp =) (skey s) >))))) ;)",
+    		"(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (key (regex \"VBG\"))) ])) (sstruct (endswith (segment (token [ (term (layer pos) (termOp =) (key (regex \"SENT\"))) ]) (repetition (kleene ?))) (closingspan < / (foundry base) / (layer s) (termOp =) (skey s) >))))) ;)",
     		treeString("[pos = \"VBG\"] [pos = \"SENT\"]? </base/s=s>;"));
 
     };
@@ -526,7 +583,7 @@ public class CqpGrammarTest {
     public void testStructContainsVsMatches1 () {
 
     	 	assertEquals( 
-    		"(request (query (qstruct (matches (span < (skey np) >) (sequence (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (group ( (sequence (segment (token [ (term (layer pos) (termOp =) (key (regex \"JJ.*\"))) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) )) (repetition (range { (min 3) , })))) (span < / (skey np) >)))) ;)",
+    		"(request (query (qstruct (matches (span < (skey np) >) (sequence (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (group ( (sequence (segment (token [ (term (layer pos) (termOp =) (key (regex \"JJ.*\"))) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) )) (repetition (range { (min 3) , })))) (closingspan < / (skey np) >)))) ;)",
     		treeString(" <np> []* ([pos=\"JJ.*\"] []*){3,} </np>;")
     		);
     };
@@ -535,7 +592,7 @@ public class CqpGrammarTest {
     public void ttestStructContainsVsMatches2 () {
 
     	 	assertEquals( 
-    		"(request (query (qstruct (isaround (span < (skey np) >) (emptyTokenSequenceAround (emptyToken [ ]) +) (segment ( (segment (token [ (term (layer pos) (termOp =) (key (regex \"JJ.*\"))) ])) ) (repetition (range { (min 3) , }))) (emptyTokenSequenceAround (emptyToken [ ]) +) (span < / (skey np) >)))) ;)",
+    		"(request (query (qstruct (isaround (span < (skey np) >) (emptyTokenSequenceAround (emptyToken [ ]) +) (segment ( (segment (token [ (term (layer pos) (termOp =) (key (regex \"JJ.*\"))) ])) ) (repetition (range { (min 3) , }))) (emptyTokenSequenceAround (emptyToken [ ]) +) (closingspan < / (skey np) >)))) ;)",
     		treeString(" <np> []+ ([pos=\"JJ.*\"]){3,} []+ </np>; #contains (NP, sequence)")
     		);
     };
@@ -544,16 +601,16 @@ public class CqpGrammarTest {
     public void testStructContains1 () {
 // isAround ; equivalent with contains in PQ+
 	 	assertEquals( 
-			 "(request (query (qstruct (isaround (span < (skey np) >) (emptyTokenSequenceAround (emptyToken [ ]) +) (segment (token (key (regex \"copil\")))) (emptyTokenSequenceAround (emptyToken [ ]) +) (span < / (skey np) >)))) ;)",
+			 "(request (query (qstruct (isaround (span < (skey np) >) (emptyTokenSequenceAround (emptyToken [ ]) +) (segment (token (key (regex \"copil\")))) (emptyTokenSequenceAround (emptyToken [ ]) +) (closingspan < / (skey np) >)))) ;)",
 		treeString(" <np> []+ \"copil\" []+ </np>; #contains (NP, copil)"));
 
 	//	 matches []* \"copil\" [] \"cuminte\" []*;
 		assertEquals( 
-			"(request (query (qstruct (matches (span < (foundry base) / (layer s) (termOp =) (skey s) >) (sequence (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"copil\")))) (segment (emptyTokenSequence (emptyToken [ ]))) (segment (token (key (regex \"cuminte\")))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) (span < / (foundry base) / (layer s) (termOp =) (skey s) >)))))",
+			"(request (query (qstruct (matches (span < (foundry base) / (layer s) (termOp =) (skey s) >) (sequence (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"copil\")))) (segment (emptyTokenSequence (emptyToken [ ]))) (segment (token (key (regex \"cuminte\")))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) (closingspan < / (foundry base) / (layer s) (termOp =) (skey s) >)))))",
 		treeString("<base/s=s> []* \"copil\" [] \"cuminte\" []* </base/s=s>")); 
 // matches []* \"copil\"  []*
 		assertEquals( 
-			"(request (query (qstruct (matches (span < (foundry base) / (layer s) (termOp =) (skey s) >) (sequence (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"copil\")))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) (span < / (foundry base) / (layer s) (termOp =) (skey s) >)))))",
+			"(request (query (qstruct (matches (span < (foundry base) / (layer s) (termOp =) (skey s) >) (sequence (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"copil\")))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) (closingspan < / (foundry base) / (layer s) (termOp =) (skey s) >)))))",
 		treeString("<base/s=s> []* \"copil\" []* </base/s=s>")); 
 };
 
@@ -561,7 +618,7 @@ public class CqpGrammarTest {
     public void testStructMatchesWholeSent () {
 // matches
     	 	assertEquals( 
-    		"(request (query (qstruct (matches (span < (foundry base) / (layer s) (termOp =) (skey s) >) (segment (token (key (regex \"copil\")))) (span < / (foundry base) / (layer s) (termOp =) (skey s) >)))) ;)",
+    		"(request (query (qstruct (matches (span < (foundry base) / (layer s) (termOp =) (skey s) >) (segment (token (key (regex \"copil\")))) (closingspan < / (foundry base) / (layer s) (termOp =) (skey s) >)))) ;)",
     		treeString(" <base/s=s> \"copil\" </base/s=s>;")
     		);
     };
@@ -578,8 +635,8 @@ public class CqpGrammarTest {
     public void testStructEndsWith () {
 //endswith
 	 	assertEquals( 
-		"(request (query (sstruct (endswith (segment (token (key (regex \"copil\")))) (span < (foundry base) / (layer s) (termOp =) (skey s) >)))) ;)",
-		treeString("\"copil\" <base/s=s>;")
+		"(request (query (sstruct (endswith (segment (token (key (regex \"copil\")))) (closingspan < / (foundry base) / (layer s) (termOp =) (skey s) >)))) ;)",
+		treeString("\"copil\" </base/s=s>;")
 		);
 
 };
@@ -588,8 +645,8 @@ public class CqpGrammarTest {
 public void testStructSeqEndsWith () {
 //endswith
 	 assertEquals( 
-	"(request (query (sequence (segment (token (key (regex \"copil\")))) (sstruct (endswith (segment (token (key (regex \"cuminte\")))) (span < (foundry base) / (layer s) (termOp =) (skey s) >))))) ;)",
-	treeString("\"copil\" \"cuminte\" <base/s=s>;")
+	"(request (query (sequence (segment (token (key (regex \"copil\")))) (sstruct (endswith (segment (token (key (regex \"cuminte\")))) (closingspan < / (foundry base) / (layer s) (termOp =) (skey s) >))))) ;)",
+	treeString("\"copil\" \"cuminte\" </base/s=s>;")
 	);
 
 };
@@ -626,16 +683,6 @@ public void testPositionOpsRBoundSequence () {
 };
 
 
-////////////////////////////
-    @Ignore
-	@Test
-    public void testStructContains3 () {
-// not working!!! not implemented
-    	 	assertEquals( 
-    		"(request (query (sequence (segment (struct < s >)) (segment (struct < np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (struct < / np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (struct < np >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (struct < / np >)) (segment (struct < / s >)))) ;)",
-    		treeString(" <s><np>[]*</np> []* <np>[]*</np></s>; #sentence that starts and ends with a noun phrase (NP); startsWith, endsWith;")
-    		);
-    };
 
 
     @Test

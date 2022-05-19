@@ -83,8 +83,8 @@ DQUOTE: ('"'|'„'|'“'|'“'|'”');
 /* Regular expressions and Regex queries */
 fragment RE_symbol     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']'
                      | '(' | ')' | '|' | '\\' | '"' | ':' | '\'');
-fragment RE_esc      : (('\\' ('.' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
-                     | '(' | ')' | '|' | '\\' | ':' | '"' | '\''))| '\'' '\'' |  '"' '"');
+fragment RE_esc      : ('\\' ('.' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
+                     | '(' | ')' | '|' | '\\' | ':' | '"' | '\''))| '\'' '\'' |  '"' '"';
 fragment RE_char     : (RE_symbol | RE_esc );
 fragment RE_alter    : ((RE_char | ('(' RE_expr ')') | RE_chgroup) '|' RE_expr )+;
 
@@ -97,12 +97,13 @@ fragment RE_occ      : (RE_char | RE_chgroup | ( '(' RE_expr ')')) FOCC;
 fragment RE_group    : '(' RE_expr ')';
 fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant | RE_group)+;
 /* you can search for DQUOTE inside SQUOUTE, and viceversa:  '"' or "'"; */
-fragment RE_dquote   : DQUOTE  (RE_expr | '\'' | ':' )* DQUOTE;
-fragment RE_squote   : SQUOTE  (RE_expr | '"' | ':')* SQUOTE;
+fragment RE_dquote   : DQUOTE  (RE_expr | '\'' | ':' )* DQUOTE; // DQOUTE is not good, modify like verbatim in PQ+!
+fragment RE_squote   : SQUOTE  (RE_expr | '"' | ':')* SQUOTE; 
 
 
 
 REGEX: RE_dquote|RE_squote;
+
 
 
 
@@ -123,8 +124,6 @@ regex
 : REGEX
 ;
 
-/*verbatim
-: SQUOTE|DQUOTE (~SQUOTE | ESC_SQUOTE| DQUOTE | ESC_DQUOTE)* SQUOTE|DQUOTE;*/
 
 
 key
@@ -226,8 +225,13 @@ token
 
 span
 : (skey // for lbound/sbound; check how it works for meet!
-  | LT '/'? ((foundry SLASH)? layer termOp)? '/'? skey NEG* ((LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? | (term|termGroup)?) GT
+  | LT ((foundry SLASH)? layer termOp)? '/'? skey NEG* ((LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? | (term|termGroup)?) GT
   )
+;
+
+closingspan
+:
+LT '/' ((foundry SLASH)? layer termOp)? '/'? skey NEG* ((LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? | (term|termGroup)?) GT
 ;
 
 position //&&
@@ -269,6 +273,44 @@ emptyTokenSequenceClass
 : (SPANCLASS_ID emptyTokenSequence | label COLON emptyTokenSequence)    // class defined around empty tokens 
 ;
 
+
+/* special CQP section*/
+
+
+//structural atributes instead of positional operators : cotains, startwith, endswith
+/* LT and GT are optional to match the struct in meet;
+examples:
+----------------------------------------------------------------------
+positional operators in PQ+          ||     structural attributes in CQP
+-------------------------------------------------------------------------
+contains(<base/s=s>, "copil")        ||     <s> []+ "copil" []+ </s>;
+startsWith(<base/s=s>, "copil")      ||     <s>  "copil";
+endsWith(<base/s=s>, "copil")        ||    "copil" </s>;
+matches(<base/s=s>, "copil")         ||     <s> copil </s>
+overlaps()                           ||       ??? 
+---------------------------------------------------------------------------*/
+
+
+
+qstruct: isaround | matches; // the query itself is a struct
+sstruct: startswith  |  endswith ; // struct is a segment in a query;
+isaround :  span emptyTokenSequenceAround (segment|sequence) emptyTokenSequenceAround closingspan; 
+matches:  span  (segment|sequence)  closingspan; 
+startswith: span segment;
+endswith: segment closingspan; // (segment|sequence)
+region: SLASH REGION_OP LPAREN span RPAREN;
+
+
+
+sequence
+: segment+ sstruct
+| sstruct segment+
+| alignment segment*  // give precedence to this subrule over the next to make sure preceding segments come into 'alignment'
+| segment+ alignment segment*
+| segment segment+
+| alignment (segment|sequence) alignment?
+;
+
 segment
 : (  token 
   | group
@@ -280,25 +322,16 @@ segment
   | LRPAREN segment RRPAREN
   | emptyTokenSequence
   | emptyTokenSequenceClass
+  | span
+  | closingspan
   ) 
   repetition?
  ; 
 
-sequence
-: alignment segment*  // give precedence to this subrule over the next to make sure preceding segments come into 'alignment'
-| segment+ alignment segment*
-| segment segment+
-| segment+ sstruct
-| sstruct segment+
-
-//| alignment (segment|sequence) alignment?
-;
-
-
 /** Entry point for linguistic queries */
 
 query
-: segment | sequence | disjunction | qstruct | sstruct
+: qstruct | sstruct | segment | sequence | disjunction 
 ;
 
 within
@@ -334,31 +367,6 @@ alignment
 : segment? ( (CARET segment)+ | CARET)
 ;
 
-/* special CQP section*/
-
-
-//structural atributes instead of positional operators : cotains, startwith, endswith
-/* LT and GT are optional to match the struct in meet;
-examples:
-----------------------------------------------------------------------
-positional operators in PQ+          ||     structural attributes in CQP
--------------------------------------------------------------------------
-contains(<base/s=s>, "copil")        ||     <s> []+ "copil" []+ </s>;
-startsWith(<base/s=s>, "copil")      ||     <s>  "copil";
-endsWith(<base/s=s>, "copil")        ||    "copil" </s>;
-matches(<base/s=s>, "copil")         ||     <s> copil </s>
-overlaps()                           ||       ??? 
----------------------------------------------------------------------------*/
-
-
-
-qstruct: isaround | matches; // the query itself is a struct
-sstruct: startswith  |  endswith ; // struct is a segment in a query;
-isaround :  span emptyTokenSequenceAround (segment|sequence) emptyTokenSequenceAround span; // span (segment|sequence) span | 
-matches:  span  (segment|sequence)  span; 
-startswith: span segment;
-endswith: segment span; // (segment|sequence)
-region: SLASH REGION_OP LPAREN span RPAREN;
 
 /* MU queries instead of focus operator; CQP offers search-engine like Boolean queries in a special meet-union (MU) notation. This
 feature goes back to the original developer of CWB and is not supported officially. In particular,

@@ -2,6 +2,7 @@ package de.ids_mannheim.korap.query.test.cqp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
+import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 import de.ids_mannheim.korap.query.test.BaseQueryTest;
 
 public class CQPFlagTest extends BaseQueryTest {
@@ -18,9 +20,22 @@ public class CQPFlagTest extends BaseQueryTest {
 
     public CQPFlagTest () {
         super("CQP");
+       
     }
 
 
+    @Test
+    public void testLiteralx () throws JsonProcessingException {
+        query = "[mate/b=\"Der + Mann\"]";
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("Der + Mann", result.at("/query/wrap/key").asText());
+        assertEquals("b", result.at("/query/wrap/layer").asText());
+        assertEquals("mate", result.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("type:regex", result.at("/query/wrap/type").asText());
+    }
     @Test
     public void testLiteral () throws JsonProcessingException {
         query = "[mate/b=\"Der + Mann\"%l]";
@@ -33,7 +48,6 @@ public class CQPFlagTest extends BaseQueryTest {
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
         assertEquals("type:string", result.at("/query/wrap/type").asText());
     }
-
 
     @Test
     public void testLiteralWithEscape () throws JsonProcessingException {
@@ -113,6 +127,9 @@ public class CQPFlagTest extends BaseQueryTest {
         assertEquals("mate", result.at("/query/wrap/foundry").asText());
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
         assertEquals("type:string", result.at("/query/wrap/type").asText());
+
+      
+
     }
 
 

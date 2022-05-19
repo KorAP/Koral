@@ -187,12 +187,32 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("mate", res.at("/query/wrap/foundry").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
 
-		query = "[mate/b='D\\'Ma \\\\nn']";
+        query = "[mate/b=\"Der + Mann\"]";
         qs.setQuery(query, "poliqarpplus");
 		assertFalse(qs.hasErrors());
 		res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("Der + Mann", res.at("/query/wrap/key").asText());
+        assertEquals("b", res.at("/query/wrap/layer").asText());
+        assertEquals("mate", res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+
+
+      // ' and " in the same verbatim query
+        query = "[mate/b='D\\'Ma \\\\nn - \"yeah!\" - works']";
+        qs.setQuery(query, "poliqarpplus");
+	assertFalse(qs.hasErrors());
+	res = mapper.readTree(qs.toJSON());
+        assertEquals("D'Ma \\nn - \"yeah!\" - works", res.at("/query/wrap/key").asText());
+
+        
+        query = "[mate/b='D\\'Ma \\\\nn']";  
+        qs.setQuery(query, "poliqarpplus");
+	assertFalse(qs.hasErrors());
+	res = mapper.readTree(qs.toJSON());
         assertEquals("D'Ma \\nn", res.at("/query/wrap/key").asText());
-	}
+}
 
 
     // todo:
@@ -263,6 +283,10 @@ public class PoliqarpPlusQueryProcessorTest {
     @Test
     public void testRegexEscape () throws JsonProcessingException, IOException {
         // Escape regex symbols
+        query = "\"\"a.+?\"";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        
         query = "\"a.+?\"";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
@@ -471,7 +495,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("header", res.at("/query/attr/value").asText());
         assertEquals("match:eq", res.at("/query/attr/match").asText());
 
-        query = "<cnx/c!=vp !(class=header & id=7)>";
+        query = "<cnx/c!=vp !(class=header & id=7)>"; //de Morgan's Laws
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:span", res.at("/query/@type").asText());
@@ -480,7 +504,7 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("c", res.at("/query/wrap/layer").asText());
         assertEquals("match:ne", res.at("/query/wrap/match").asText());
         assertEquals("koral:termGroup", res.at("/query/attr/@type").asText());
-        assertEquals("relation:and", res.at("/query/attr/relation").asText());
+        assertEquals("relation:or", res.at("/query/attr/relation").asText());
         operands = Lists
                 .newArrayList(res.at("/query/attr/operands").elements());
         assertEquals("koral:term", operands.get(0).at("/@type").asText());
@@ -581,6 +605,23 @@ public class PoliqarpPlusQueryProcessorTest {
 
     @Test
     public void testPositions () throws JsonProcessingException, IOException {
+        
+        
+        query= "contains(<np>, ([pos=\"JJ.*\"]){3,})";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+       
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:position", res.at("/query/operation").asText());
+        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
+        assertEquals("koral:span", res.at("/query/operands/0/@type").asText());
+        assertEquals("np", res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
+        assertEquals("operation:repetition", res.at("/query/operands/1/operation").asText());
+        assertEquals("JJ.*", res.at("/query/operands/1/operands/0/wrap/key").asText());
+        assertEquals(3, res.at("/query/operands/1/boundary/min").asInt());
+    
+        
         query = "contains(<s>, der)";
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
@@ -1671,6 +1712,6 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("author", res.at("/collection/operands/1/key").asText());
         assertEquals("Smith", res.at("/collection/operands/1/value").asText());
 
-        // TODO more tests
+      
     }
 }

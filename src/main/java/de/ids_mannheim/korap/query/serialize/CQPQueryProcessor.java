@@ -175,7 +175,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             processAlignment(node);
         }
 
-        if (nodeCat.equals("span") && getNodeCat(node.getChild(0))!="skey") {
+        if ((nodeCat.equals("span") || nodeCat.equals("closingspan")) && getNodeCat(node.getChild(0))!="skey") {
         	 String nCat0 = getNodeCat(node.getChild(0));
         	 if (nCat0.equals("skey"))
         	        {
@@ -1517,7 +1517,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                 // remove leading and trailing quotes
                 //process verbatim flag %l
                 if (flagNode!=null) {
-                if (getNodeCat(flagNode.getChild(0)).contains("l")) {
+                if (getNodeCat(flagNode.getChild(0)).contains("l") || getNodeCat(flagNode.getChild(0)).contains("L"))  {
 
     				// Get stream from hidden channel
     				TokenStream stream = parser.getTokenStream();

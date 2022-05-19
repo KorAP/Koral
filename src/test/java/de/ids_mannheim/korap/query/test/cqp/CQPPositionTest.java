@@ -33,12 +33,18 @@ public class CQPPositionTest extends BaseQueryTest{
         assertEquals("copil", result.at("/query/operands/1/wrap/key").asText());
     }
     
-    // EM: the result is incorrect, please fix
+    // EM: the result is incorrect, please fix // done!!
     @Test
     public void testSequenceStartsWithEndSentence () throws JsonProcessingException {
-        query =" </base/s=s> \"copil\" ;"; //KoralFrame.STARTS_WITH
+        query =" </base/s=s> \"copil\" ;"; 
         result = runQuery(query);
-//        System.out.println(result.toPrettyString());
+     
+        assertEquals("koral:group", result.at("/query/@type").asText());
+        assertEquals("operation:sequence", result.at("/query/operation").asText());
+        assertEquals("koral:span", result.at("/query/operands/0/@type").asText());
+        assertEquals("koral:token", result.at("/query/operands/1/@type").asText());
+        assertEquals("type:regex", result.at("/query/operands/1/wrap/type").asText());
+        assertEquals("copil", result.at("/query/operands/1/wrap/key").asText());
     }
 
 
@@ -60,7 +66,7 @@ public class CQPPositionTest extends BaseQueryTest{
         assertEquals("s", result.at("/query/operands/0/wrap/layer").asText());
         
         assertEquals("koral:token", result.at("/query/operands/1/@type").asText());
-        assertEquals("koral:term", result.at("/query/operands/1/wrap/type").asText());
+        assertEquals("type:regex", result.at("/query/operands/1/wrap/type").asText());
         assertEquals("copil", result.at("/query/operands/1/wrap/key").asText());
 
     }
@@ -93,21 +99,36 @@ public class CQPPositionTest extends BaseQueryTest{
         assertEquals("cuminte", result.at("/query/operands/1/operands/1/wrap/key").asText());
     }
     
-    // EM: the result is incorrect, please fix 
+    // EM: the result is incorrect, please fix // DONE!!
     // it should be a simple sequence without frame
     @Test
     public void testSequenceEndsWithStartSentence () throws JsonProcessingException{
-        query ="\"copil\" <base/s=s>;"; //KoralFrame.ENDS_WITH
-        result = runQuery(query);
-//        System.out.println(result.toPrettyString());
+        query ="\"copil\" <base/s=s>;"; 
+        result = runQuery(query);     
+        assertEquals("koral:group", result.at("/query/@type").asText());
+        assertEquals("operation:sequence", result.at("/query/operation").asText());
+        assertEquals("koral:span", result.at("/query/operands/1/@type").asText());
+        assertEquals("koral:token", result.at("/query/operands/0/@type").asText());
+        assertEquals("type:regex", result.at("/query/operands/0/wrap/type").asText());
+        assertEquals("copil", result.at("/query/operands/0/wrap/key").asText());
+
     }
     
-    // EM: the result is incorrect, please fix
+    // EM: the result is incorrect, please fix DONE!!
     @Test
     public void testLongerSequenceEndsWithStartSentence () throws JsonProcessingException{
         query ="\"copil\" \"cuminte\" <base/s=s>;"; //KoralFrame.ENDS_WITH
         result = runQuery(query);
-//        System.out.println(result.toPrettyString());
+        assertEquals("koral:group", result.at("/query/@type").asText());
+        assertEquals("operation:sequence", result.at("/query/operation").asText());
+        assertEquals("koral:span", result.at("/query/operands/2/@type").asText());
+        assertEquals("koral:token", result.at("/query/operands/0/@type").asText());
+        assertEquals("type:regex", result.at("/query/operands/0/wrap/type").asText());
+        assertEquals("copil", result.at("/query/operands/0/wrap/key").asText());
+        assertEquals("koral:token", result.at("/query/operands/1/@type").asText());
+        assertEquals("type:regex", result.at("/query/operands/1/wrap/type").asText());
+        assertEquals("cuminte", result.at("/query/operands/1/wrap/key").asText());
+
    }
     
     @Test

@@ -24,17 +24,12 @@ public class CQPRegionTest extends BaseQueryTest {
         super("CQP");
     }
 
-<<<<<<< HEAD
 
     @Test
     public void testMatchingAttributeForAllRegion ()
             throws JsonMappingException, JsonProcessingException {
-=======
-    @Test
-    public void testMatchingAttributeForAllRegion ()
-            throws JsonMappingException, JsonProcessingException {
 
->>>>>>> e295c360c429aa6f7d1fe7f306eea8f79905c20a
+
         // /region needs a span argument
          JsonNode n = runQuery("/region[(class=\"header\")]");
 
@@ -161,11 +156,7 @@ public class CQPRegionTest extends BaseQueryTest {
         assertEquals("class", res.at("/query/attr/key").asText());
         assertEquals("header", res.at("/query/attr/value").asText());
         assertEquals("match:eq", res.at("/query/attr/match").asText());
-<<<<<<< HEAD
 
-        query = "/region[<cnx/c!=vp !(class=\"header\" & id=\"7\")>]";
-        res = runQuery(query);
-=======
     }
     
 
@@ -174,18 +165,16 @@ public class CQPRegionTest extends BaseQueryTest {
             throws JsonMappingException, JsonProcessingException {
         query = "/region[<cnx/c!=vp !(class=\"header\" & id=\"7\")>]";
         JsonNode res = runQuery(query);
->>>>>>> e295c360c429aa6f7d1fe7f306eea8f79905c20a
+
         assertEquals("koral:span", res.at("/query/@type").asText());
         assertEquals("vp", res.at("/query/wrap/key").asText());
         assertEquals("cnx", res.at("/query/wrap/foundry").asText());
         assertEquals("c", res.at("/query/wrap/layer").asText());
         assertEquals("match:ne", res.at("/query/wrap/match").asText());
         assertEquals("koral:termGroup", res.at("/query/attr/@type").asText());
-<<<<<<< HEAD
-        assertEquals("relation:and", res.at("/query/attr/relation").asText());
-=======
+
         assertEquals("relation:or", res.at("/query/attr/relation").asText());
->>>>>>> e295c360c429aa6f7d1fe7f306eea8f79905c20a
+
         operands = Lists
                 .newArrayList(res.at("/query/attr/operands").elements());
         assertEquals("koral:term", operands.get(0).at("/@type").asText());
@@ -198,41 +187,5 @@ public class CQPRegionTest extends BaseQueryTest {
         assertEquals("match:ne", operands.get(1).at("/match").asText());
     }
 
-<<<<<<< HEAD
-=======
-    @Test
-    public void testRegionAndTokenSequence () throws JsonProcessingException,
-            IOException {
-        // vezi ca asta e de la modificarea cu span-ul de ieri, cand ai schimbat ordinea in operators list!
-        query = "[base='Mann'] /region[vp]"; // in PQ+ "[base=Mann]<vp>"
-        JsonNode result = runQuery(query);
-        
-        assertEquals("koral:group", result.at("/query/@type").asText());
-        assertEquals("operation:sequence", result.at("/query/operation").asText());
-        assertEquals("koral:token", result.at("/query/operands/0/@type").asText());
-        assertEquals("Mann", result.at("/query/operands/0/wrap/key").asText());
-        assertEquals("koral:span", result.at("/query/operands/1/@type").asText());
-        assertEquals("vp", result.at("/query/operands/1/wrap/key").asText());
 
-        query = "/region[<coreNLP/c=NP>] [base='Mann']"; // region with foundry and layer
-        result = runQuery(query);
-        
-        assertEquals("koral:group", result.at("/query/@type").asText());
-        assertEquals("operation:sequence", result.at("/query/operation").asText());
-        assertEquals("koral:span", result.at("/query/operands/0/@type").asText());
-        assertEquals("NP", result.at("/query/operands/0/wrap/key").asText());
-        assertEquals("coreNLP", result.at("/query/operands/0/wrap/foundry").asText());
-        assertEquals("c", result.at("/query/operands/0/wrap/layer").asText());
-        assertEquals("koral:token", result.at("/query/operands/1/@type").asText());
-        assertEquals("Mann", result.at("/query/operands/1/wrap/key").asText());
-        
-
-        query = "/region[vp] [base=\"Mann\"] /region[pp] /region[np]";
-        result = runQuery(query);
-        
-        assertEquals("pp", result.at("/query/operands/2/wrap/key").asText());
-        assertEquals("np", result.at("/query/operands/3/wrap/key").asText());
-       
-    }
->>>>>>> e295c360c429aa6f7d1fe7f306eea8f79905c20a
 }
