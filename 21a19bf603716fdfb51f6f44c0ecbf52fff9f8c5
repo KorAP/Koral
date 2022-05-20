@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8cbf2181_99433370",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPPositionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2022-05-20T08:33:02Z",
+      "side": 1,
+      "message": "The serialization is still incorrect since it should be end of sentence.",
+      "revId": "21a19bf603716fdfb51f6f44c0ecbf52fff9f8c5",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
