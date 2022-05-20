@@ -16,6 +16,29 @@
       "message": "The serialization is still incorrect since it should be end of sentence.",
       "revId": "21a19bf603716fdfb51f6f44c0ecbf52fff9f8c5",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0ba68739_a05851f7",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/poliqarpplus/PoliqarpPlusQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2022-05-20T09:41:03Z",
+      "side": 1,
+      "message": "@Elena: could you please finish the test since there has been no check for the result yet?",
+      "range": {
+        "startLine": 286,
+        "startChar": 8,
+        "endLine": 286,
+        "endChar": 13
+      },
+      "revId": "21a19bf603716fdfb51f6f44c0ecbf52fff9f8c5",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
