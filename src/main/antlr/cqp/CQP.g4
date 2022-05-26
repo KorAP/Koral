@@ -382,8 +382,9 @@ match, nor marked in any other way.
 focus(der {Baum}) = MU(meet(Baum, der))
 */
 matching
-: (MU LRPAREN meetunion RRPAREN) | (MATCH_OPF LRPAREN SPANCLASS_ID? (segment|sequence)? RRPAREN)
+: (MU LRPAREN meetunion RRPAREN)
 ;
+////  | (MATCH_OPF LRPAREN SPANCLASS_ID? (segment|sequence)? RRPAREN)
 
 meetunion
 : 

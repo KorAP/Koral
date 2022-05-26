@@ -281,11 +281,53 @@ public class PoliqarpPlusQueryProcessorTest {
     }
 
     @Test
+    public void testRegexDQuoute () throws JsonProcessingException, IOException {
+
+    // tests for issue https://github.com/KorAP/Koral/issues/110
+    //this query is not parsed vs. the following 2 queries are. why?
+    query = "\"\"a.+?\"";
+    qs.setQuery(query, "poliqarpplus");
+    assertTrue(qs.hasErrors());
+
+    query = "\"\"a\"";
+    qs.setQuery(query, "poliqarpplus");
+    res = mapper.readTree(qs.toJSON());
+    assertEquals("koral:group", res.at("/query/@type").asText());
+    assertEquals("koral:token", res.at("/query/operands/0/@type").asText());
+    assertEquals("type:regex", res.at("/query/operands/0/wrap/type").asText());
+    assertEquals("orth", res.at("/query/operands/0/wrap/layer").asText());
+    assertEquals("match:eq", res.at("/query/operands/0/wrap/match").asText());
+    assertEquals("", res.at("/query/operands/0/wrap/key").asText());
+
+    assertEquals("koral:token", res.at("/query/operands/1/@type").asText());
+    assertNotEquals("type:regex", res.at("/query/operands/1/wrap/type").asText());
+    assertEquals("orth", res.at("/query/operands/1/wrap/layer").asText());
+    assertEquals("match:eq", res.at("/query/operands/1/wrap/match").asText());
+    assertEquals("a", res.at("/query/operands/1/wrap/key").asText());
+
+ 
+    query = "\"\"\"";
+    qs.setQuery(query, "poliqarpplus");
+    res = mapper.readTree(qs.toJSON());
+    assertEquals("koral:token", res.at("/query/@type").asText());
+    assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+    assertEquals("type:regex", res.at("/query/wrap/type").asText());
+    assertEquals("orth", res.at("/query/wrap/layer").asText());
+    assertEquals("match:eq", res.at("/query/wrap/match").asText());
+    assertEquals("", res.at("/query/wrap/key").asText());
+}
+
+
+
+    @Test
     public void testRegexEscape () throws JsonProcessingException, IOException {
         // Escape regex symbols
-        query = "\"\"a.+?\"";
-        qs.setQuery(query, "poliqarpplus");
-        res = mapper.readTree(qs.toJSON());
+        
+       
+   
+        
+        
+
         
         query = "\"a.+?\"";
         qs.setQuery(query, "poliqarpplus");
