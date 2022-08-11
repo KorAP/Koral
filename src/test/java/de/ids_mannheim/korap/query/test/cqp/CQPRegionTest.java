@@ -55,6 +55,9 @@ public class CQPRegionTest extends BaseQueryTest {
     @Test
     public void testSpans () throws JsonProcessingException, IOException {
 
+        
+        
+        
         JsonNode res = runQuery(
                 "/region[<cnx/c!=vp (class!=\"header\" & id=\"7\")>]");
         assertEquals("koral:span", res.at("/query/@type").asText());
@@ -74,6 +77,8 @@ public class CQPRegionTest extends BaseQueryTest {
         assertEquals("id", operands.get(1).at("/key").asText());
         assertEquals(7, operands.get(1).at("/value").asInt());
         assertEquals("match:eq", operands.get(1).at("/match").asText());
+
+        
 
         res = runQuery("/region[<cnx/c=vp (class!=\"header\" & id=\"7\")>]");
         assertEquals("koral:span", res.at("/query/@type").asText());
@@ -115,6 +120,7 @@ public class CQPRegionTest extends BaseQueryTest {
         assertEquals("koral:span", res.at("/query/@type").asText());
         assertEquals("vp", res.at("/query/wrap/key").asText());
 
+        
 
         query = "/region[<cnx/c=vp>]";
         res = runQuery(query);

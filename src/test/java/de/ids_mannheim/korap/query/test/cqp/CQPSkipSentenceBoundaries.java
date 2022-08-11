@@ -35,6 +35,21 @@ public class CQPSkipSentenceBoundaries extends BaseQueryTest {
     }
     
     @Test
+    public void spansegment () throws JsonProcessingException, IOException {
+    query = "<corenlp/c=NP>;";
+    qs.setQuery(query, "CQP");
+    res = mapper.readTree(qs.toJSON());
+   
+  // this is not yet implempented!
+    query = "[(pos = \"NNS?\") & !np ]";
+    qs.setQuery(query, "CQP");
+    res = mapper.readTree(qs.toJSON());
+    assertNotEquals("koral:group", res.at("/query/@type").asText());
+}
+    
+    
+    @Test
+
     public void skipendswith () throws JsonProcessingException, IOException {
 
         query = "\"copil\" []{,5} \"cuminte\" </base/s=s>";
@@ -108,18 +123,23 @@ public class CQPSkipSentenceBoundaries extends BaseQueryTest {
            query = "\"copil\" []{,5} \"cuminte\" <base/s=s>";
            qs.setQuery(query, "CQP");
            res = mapper.readTree(qs.toJSON());
-           assertEquals("koral:group", res.at("/query/@type").asText());
-           assertEquals("operation:sequence", res.at("/query/operation").asText());
-           assertEquals("copil", res.at("/query/operands/0/wrap/key").asText());
-           assertEquals("operation:repetition",
-                   res.at("/query/operands/1/operation").asText());
-           assertEquals("koral:token",
-                   res.at("/query/operands/1/operands/0/@type").asText());
-           assertEquals("0", res.at("/query/operands/1/boundary/min").asText());
-           assertEquals("5", res.at("/query/operands/1/boundary/max").asText());
-           assertEquals("cuminte", res.at("/query/operands/2/wrap/key").asText());
-           assertEquals("koral:span", res.at("/query/operands/3/@type").asText());
+           assertEquals("koral:reference", res.at("/query/@type").asText());
+           assertEquals("operation:focus", res.at("/query/operation").asText());
+           assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+           assertEquals("operation:sequence", res.at("/query/operands/0/operation").asText());  
+         assertEquals("koral:token", res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("type:regex", res.at("/query/operands/0/operands/0/wrap/type").asText());
+        assertEquals("copil", res.at("/query/operands/0/operands/0/wrap/key").asText());
+        assertEquals("koral:group", res.at("/query/operands/0/operands/1/@type").asText());
+        assertEquals("operation:repetition", res.at("/query/operands/0/operands/1/operation").asText());
+        assertEquals("koral:token", res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("0", res.at("/query/operands/0/operands/1/boundary/min").asText());
+        assertEquals("5", res.at("/query/operands/0/operands/1/boundary/max").asText());
+       
+        assertEquals("type:regex", res.at("/query/operands/0/operands/2/operands/0/wrap/type").asText());
+        assertEquals("cuminte", res.at("/query/operands/0/operands/2/operands/0/wrap/key").asText());
         
+        assertEquals("koral:span", res.at("/query/operands/0/operands/3/@type").asText());
         
        
     }

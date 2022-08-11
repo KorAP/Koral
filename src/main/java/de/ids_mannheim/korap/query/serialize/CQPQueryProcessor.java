@@ -315,6 +315,35 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             objectStack.push(quantGroup);
             stackedObjects++;
         }
+        
+        // for segments following closingspan or preceding span
+        if (node.getParent().getChild(0).getChild(0)!=null)
+        {
+            if (getNodeCat(node.getParent().getChild(0).getChild(0)).equals("closingspan") && node.equals(node.getParent().getChild(1)))
+            {
+                 Map<String, Object> classGroup = KoralObjectGenerator
+        			                .makeSpanClass(1);
+        			        
+        			       addHighlightClass(1);
+        			       putIntoSuperObject(classGroup);
+        			       objectStack.push(classGroup);
+        			       stackedObjects++;
+            }
+        }
+       int nchild = node.getParent().getChildCount();
+      if (node.getParent().getChild(nchild-1).getChild(0)!=null)
+      { 
+        if (getNodeCat( node.getParent().getChild(nchild-1).getChild(0)).equals("span") && node.equals(node.getParent().getChild(nchild-2)))
+            {
+                Map<String, Object> classGroup = KoralObjectGenerator
+        			                .makeSpanClass(1);
+        			        
+        			       addHighlightClass(1);
+        			       putIntoSuperObject(classGroup);
+        			       objectStack.push(classGroup);
+        			       stackedObjects++;
+            }
+        }
     }
 
 
@@ -339,7 +368,25 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                 return;
             }
         }
+        if (getNodeCat(node.getChild(0).getChild(0)).equals("closingspan") || getNodeCat(node.getChild(node.getChildCount()-1).getChild(0)).equals("span"))
+        {
+            
+            ArrayList<Integer> classRefs = new ArrayList<Integer>();
+           
+            classRefs.add(1); 
+            Map<String, Object> referenceGroup = KoralObjectGenerator.makeReference(classRefs);
+            // Default is focus(), if deviating catch here
+    
+           referenceGroup.put("operation", "operation:focus");
+           ArrayList<Object> referenceOperands = new ArrayList<Object>();
+          referenceGroup.put("operands", referenceOperands);
+          // Step II: decide where to put the group
+          putIntoSuperObject(referenceGroup);
+          objectStack.push(referenceGroup);
+          stackedObjects++;
+         // visited.add(node.getChild(0));
         
+         }
 
         Map<String, Object> sequence = KoralObjectGenerator
                 .makeGroup(KoralOperation.SEQUENCE);

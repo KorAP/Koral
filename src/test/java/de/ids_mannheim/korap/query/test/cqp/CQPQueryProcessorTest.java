@@ -68,6 +68,11 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
         assertEquals("mate", result.at("/query/wrap/foundry").asText());
         assertEquals("x", result.at("/query/wrap/layer").asText());
         assertEquals("flags:caseInsensitive", result.at("/query/wrap/flags/0").asText());
+
+        result = runQuery("[mate/x=\"\"%c]");
+        assertEquals("mate", result.at("/query/wrap/foundry").asText());
+        assertEquals("x", result.at("/query/wrap/layer").asText());
+        assertEquals("flags:caseInsensitive", result.at("/query/wrap/flags/0").asText());
     }
 
     
@@ -263,6 +268,16 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
         assertEquals("koral:term", result.at("/query/wrap/@type").asText());
         assertEquals("temp", result.at("/query/wrap/key").asText());
         assertEquals("pres", result.at("/query/wrap/value").asText());
+        assertEquals("m", result.at("/query/wrap/layer").asText());
+        assertEquals("mate", result.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+
+        query = "[mate/m=\"number\":\"pl\"]";
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("number", result.at("/query/wrap/key").asText());
+        assertEquals("pl", result.at("/query/wrap/value").asText());
         assertEquals("m", result.at("/query/wrap/layer").asText());
         assertEquals("mate", result.at("/query/wrap/foundry").asText());
         assertEquals("match:eq", result.at("/query/wrap/match").asText());

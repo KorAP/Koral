@@ -172,7 +172,7 @@ public class CQPFlagTest extends BaseQueryTest {
 
     @Test
     public void testCaseSensitivityFlag () throws JsonProcessingException {
-        query = "[orth=\"deutscher\" %c]";
+        query = "[orth=\"deutscher\"%c]";
         result = runQuery(query);
         assertEquals("koral:token", result.at("/query/@type").asText());
         assertEquals("koral:term", result.at("/query/wrap/@type").asText());
