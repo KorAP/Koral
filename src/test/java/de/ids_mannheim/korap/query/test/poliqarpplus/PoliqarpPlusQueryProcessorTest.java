@@ -258,6 +258,21 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("type:regex", res.at("/query/wrap/type").asText());
         assertEquals("orth", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
+
+        query = "\"d[^ae]r^\"";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("d[^ae]r^", res.at("/query/wrap/key").asText());
+        assertEquals("type:regex", res.at("/query/wrap/type").asText());
+        assertEquals("orth", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        
+        query = "\"d[a^e]r\"";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("302", res.at("/errors/0/0").asText());
     }
 
     @Test
