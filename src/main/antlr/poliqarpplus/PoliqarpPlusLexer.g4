@@ -2,7 +2,7 @@ lexer grammar PoliqarpPlusLexer;
 
 @header {package de.ids_mannheim.korap.query.parse.poliqarpplus;}
 
-
+import Regex;
 
 options
 {
@@ -55,7 +55,6 @@ FLAG_ix      : '/' ( ('i'|'I') ('x'|'X')? );
 
 /** Simple strings and Simple queries */
 WS                  : [ \t]  -> channel(HIDDEN);
-fragment FOCC       : '{' WS* ( [0-9]* WS* ',' WS* [0-9]+ | [0-9]+ WS* ','? ) WS* '}';
 fragment NO_RE      : ~[ \t/];
 fragment ALPHABET   : ~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
                     | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' | '#' );
@@ -91,24 +90,6 @@ EMPTYREL	: '@';
 BACKSLASH	: '\\';
 SQUOTE      : '\'';
 HASH        : '#';
-
-/* Regular expressions and Regex queries */
-fragment RE_symbol     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']'
-                     | '(' | ')' | '|' | '\\' | '"' | ':' | '\'');
-fragment RE_esc      : '\\' ('.' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
-                     | '(' | ')' | '|' | '\\' | '"' | ':' | '\'');
-fragment RE_char     : (RE_symbol | RE_esc );
-fragment RE_alter    : ((RE_char | ('(' RE_expr ')') | RE_chgroup) '|' RE_expr )+;
-
-fragment RE_chgroup  : '[' RE_char+ ']';
-fragment RE_quant	 : (RE_star | RE_plus | RE_occ) QMARK?;
-fragment RE_opt      : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '?';
-fragment RE_star     : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '*';
-fragment RE_plus     : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '+';
-fragment RE_occ      : (RE_char | RE_chgroup | ( '(' RE_expr ')')) FOCC;
-fragment RE_group    : '(' RE_expr ')';
-fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant | RE_group)+;
-fragment RE_dquote   : ('"'|'„'|'“')  (RE_expr | '\'' | ':' )* ('"'|'“'|'”');
 
 REGEX             : RE_dquote;
 
