@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4591e95e_62ffd1e8",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-08-31T16:04:38Z",
+      "side": 1,
+      "message": "What do these comments mean?",
+      "range": {
+        "startLine": 23,
+        "startChar": 79,
+        "endLine": 23,
+        "endChar": 81
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1c0ce346_a58dc35d",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-08-31T16:04:38Z",
+      "side": 1,
+      "message": "Does that mean the l-flag is just like the \u0027\u0027-strings in PQ+?",
+      "range": {
+        "startLine": 37,
+        "startChar": 61,
+        "endLine": 37,
+        "endChar": 89
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3ce55e66_6c50b6f1",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-08-31T16:04:38Z",
+      "side": 1,
+      "message": "I introduced https://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/6023, so this path can be simplified.",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 43
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "89f45c4f_f3dedb07",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-08-31T16:04:38Z",
+      "side": 1,
+      "message": "Can you give an example for that pattern? Removing this line (and line 158) does not change the test behaviour, so it\u0027s at least not tested, I guess.",
+      "range": {
+        "startLine": 156,
+        "startChar": 7,
+        "endLine": 156,
+        "endChar": 26
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3d698826_3912bea7",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-08-31T16:04:38Z",
+      "side": 1,
+      "message": "This currently allows for, e.g., `\u003ccorenlp/c\u003dNP!!!!\u003e`",
+      "range": {
+        "startLine": 228,
+        "startChar": 4,
+        "endLine": 228,
+        "endChar": 129
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3ff1a05d_213e28e8",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-08-31T16:04:38Z",
+      "side": 1,
+      "message": "This currently allows for, e.g., `\u003c/corenlp/c\u003dNP!!!!\u003e`",
+      "range": {
+        "startLine": 234,
+        "startChar": 7,
+        "endLine": 234,
+        "endChar": 129
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
