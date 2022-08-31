@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1b6ac816_6f7fa4c3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-08-31T14:36:41Z",
+      "side": 1,
+      "message": "This splits out the regex rules from PQ+ so they can be reused by CQP. Because Antlr4 can\u0027t load grammars from arbitrary paths, the file needs to be copied by Maven in the CQP directory.",
+      "revId": "df4c5f627563ceefe9d423df8ec61c1a470f04d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
