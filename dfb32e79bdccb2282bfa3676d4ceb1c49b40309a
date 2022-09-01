@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "de2a69d3_2da819ec",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPMeetProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-01T15:30:31Z",
+      "side": 1,
+      "message": "Is there a need for a nested sequence or is it just easier to create? There is no problem here, just want to make sure you just wrap it because you didn\u0027t think of sequences with more than 2 operands.",
+      "range": {
+        "startLine": 373,
+        "startChar": 17,
+        "endLine": 373,
+        "endChar": 86
+      },
+      "revId": "dfb32e79bdccb2282bfa3676d4ceb1c49b40309a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
