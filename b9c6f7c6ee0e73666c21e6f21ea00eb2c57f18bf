@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fa944de4_7d181488",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-01T12:55:20Z",
+      "side": 1,
+      "message": "This should fix\n\nassertEquals(\n  \"(request (query \\\" ? \\\"))\",  // it should not parse the query\n  treeString(\"\\\"?\\\"\")\n);\n\nin CQPGrammarTest, when reused for CQP.",
+      "revId": "b9c6f7c6ee0e73666c21e6f21ea00eb2c57f18bf",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
