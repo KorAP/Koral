@@ -20,6 +20,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "d9010dca_fb9b5d2a",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPRegexTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-01T14:13:08Z",
+      "side": 1,
+      "message": "I think this is wrong - and should just have a simple escape. If I understand the CQP regex handling correctly, the query should be identical to\n\n  query \u003d \"\\\"22\\\"\\\"-inch\\\";\"\n  \nbut it\u0027s not.",
+      "range": {
+        "startLine": 143,
+        "startChar": 21,
+        "endLine": 143,
+        "endChar": 34
+      },
+      "revId": "21a19bf603716fdfb51f6f44c0ecbf52fff9f8c5",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "261d3cbc_567ae12e",
         "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
         "patchSetId": 1
