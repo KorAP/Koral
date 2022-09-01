@@ -1,8 +1,9 @@
-0.38.2 2022-08-31
+0.38.2 2022-10-05
     - [feature] Improve regex treatment of negative
       character classes (diewald)
+    - [bugfix] Improve quantifiers in Regex (diewald)
 
-0.38.1 2022-10-05
+0.38.1 2022-01-07
     - [security] Updated log4j (diewald)
     - Fixed Annis OR group (resolved #96) 
     - [security] Updated jackson (diewald)

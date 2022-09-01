@@ -273,6 +273,12 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("302", res.at("/errors/0/0").asText());
+
+        query = "\"?\"";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        System.err.println(qs.toJSON());
+        assertEquals(302, res.at("/errors/0/0").asInt());
     }
 
     @Test
