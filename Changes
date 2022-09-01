@@ -1,3 +1,6 @@
+0.38.2 2022-09-01
+    - [bugfix] Improve quantifiers in Regex (diewald)
+
 0.38.1 2022-01-07
     - [security] Updated log4j (diewald)
 	- Fixed Annis OR group (resolved #96) 
