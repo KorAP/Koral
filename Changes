@@ -3,6 +3,7 @@
       character classes (diewald)
     - [bugfix] Improve quantifiers in Regex (diewald)
     - [feature] Separated regex grammar for reuse (diewald)
+    - [cleanup] Reuse PQ Regex in CQP (diewald)
 
 0.38.1 2022-10-05
     - [security] Updated log4j (diewald)

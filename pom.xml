@@ -184,6 +184,32 @@
 		      </filesets>
 		    </configuration>
 		  </plugin>
+                  <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.0</version>
+                    <executions>
+                      <execution>
+                        <id>copy-resource-one</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                          <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                          <outputDirectory>${basedir}/src/main/antlr/cqp</outputDirectory>
+                          <resources>
+                            <resource>
+                              <directory>src/main/antlr/poliqarpplus</directory>
+                              <includes>
+                                <include>Regex.g4</include>
+                              </includes>
+                            </resource>
+                          </resources>
+                        </configuration>
+                      </execution>
+                    </executions>
+                  </plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -359,6 +385,7 @@
 					</execution>
 				</executions>
 			</plugin>
+                        
 		</plugins>
     <resources>
 			<resource>
