@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e89b77d5_9583cb5c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-06T16:09:05Z",
+      "side": 1,
+      "message": "Depends on CQP code and https://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/6023\n\nSimply copies the Regex fragment grammar into the CQP folder, before Antlr generates the parser.",
+      "revId": "8ac2018cdb10503630d74c379e6a618a2801c16d",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
