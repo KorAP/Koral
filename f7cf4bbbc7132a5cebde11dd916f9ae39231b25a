@@ -252,6 +252,144 @@
       },
       "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d4d43f44_73327126",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-06T10:08:09Z",
+      "side": 1,
+      "message": "Better remove these lines that are inappropriate for CQP.",
+      "range": {
+        "startLine": 708,
+        "startChar": 3,
+        "endLine": 712,
+        "endChar": 80
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "822a0467_7ab98ab4",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-06T10:08:09Z",
+      "side": 1,
+      "message": "Are these tests not ready?",
+      "range": {
+        "startLine": 849,
+        "startChar": 3,
+        "endLine": 849,
+        "endChar": 11
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "efac0329_010bbb7b",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 942,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-06T10:08:09Z",
+      "side": 1,
+      "message": "Can you show us examples for queries like\n\n`der (große|ganz^große) ^ Wagen`\n\nand what they do? (Just so we know how to interpret the result in the frontend.)",
+      "range": {
+        "startLine": 942,
+        "startChar": 16,
+        "endLine": 942,
+        "endChar": 26
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "46ea7e88_d9b69eec",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-06T10:08:09Z",
+      "side": 1,
+      "message": "Here I think ignoring is a good strategy - please keep it. We may want to extend CQP for query fragments and that\u0027s probably the right way to do in the future!",
+      "range": {
+        "startLine": 1203,
+        "startChar": 3,
+        "endLine": 1203,
+        "endChar": 11
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0fdaba48_6321af44",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPSkipSentenceBoundaries.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-06T10:08:09Z",
+      "side": 1,
+      "message": "Here is no test.",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 41,
+        "endChar": 39
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f923ff61_c9abb446",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPSkipSentenceBoundaries.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-06T10:08:09Z",
+      "side": 1,
+      "message": "What is this meant to do?",
+      "range": {
+        "startLine": 43,
+        "startChar": 2,
+        "endLine": 43,
+        "endChar": 34
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
