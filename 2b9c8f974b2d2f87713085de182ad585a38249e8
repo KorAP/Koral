@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fdb7921b_a8277112",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-06T16:11:07Z",
+      "side": 1,
+      "message": "And improvement would probably remove the file again, once used for compiling the parser.",
+      "revId": "2b9c8f974b2d2f87713085de182ad585a38249e8",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
