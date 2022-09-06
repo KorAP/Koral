@@ -78,3 +78,5 @@
 /src/main/java/de/ids_mannheim/korap/query/serialize/SerializationSandbox.java
 /lib/
 /bin/
+
+/src/main/antlr/cqp/Regex.g4
