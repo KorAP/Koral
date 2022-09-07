@@ -9,3 +9,10 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "org.antlr:antlr4-runtime"
+        versions:
+          - ">= 4.9.4"
+      - dependency-name: "org.antlr:antlr4-maven-plugin"
+        versions:
+          - ">= 4.9.4"
