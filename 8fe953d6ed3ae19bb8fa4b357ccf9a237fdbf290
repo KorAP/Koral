@@ -22,6 +22,30 @@
       },
       "revId": "8fe953d6ed3ae19bb8fa4b357ccf9a237fdbf290",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99dda99f_65f795e5",
+        "filename": ".github/dependabot.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-08T08:01:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19027c18_ca311614",
+      "range": {
+        "startLine": 13,
+        "startChar": 42,
+        "endLine": 13,
+        "endChar": 51
+      },
+      "revId": "8fe953d6ed3ae19bb8fa4b357ccf9a237fdbf290",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
