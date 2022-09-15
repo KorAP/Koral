@@ -65,6 +65,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ef1c94a3_bcaa5260",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPRegexTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-15T09:30:07Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a2382b7c_d48389f7",
+      "range": {
+        "startLine": 143,
+        "startChar": 21,
+        "endLine": 143,
+        "endChar": 34
+      },
+      "revId": "21a19bf603716fdfb51f6f44c0ecbf52fff9f8c5",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "261d3cbc_567ae12e",
