@@ -48,6 +48,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "10d589c6_5a3d87cc",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-15T09:32:16Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "29eb4e15_6e652aa4",
+      "range": {
+        "startLine": 23,
+        "startChar": 79,
+        "endLine": 23,
+        "endChar": 81
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1c0ce346_a58dc35d",
@@ -316,6 +340,30 @@
       "side": 1,
       "message": "As i understand specifications in Section 4.2 Structural attributes of the CQP tutorial (https://cwb.sourceforge.io/files/CQP_Manual.pdf),  specifically the citation: \"pairs of start/end tags enclose single region (if StrictRegions option is enabled)\" there may not be multiples sentences in between (if we assume StrictRegions option enabled). The searching in https://cqpweb.lancs.ac.uk/bncxmlweb/, for example, works like the option is enabled. I looked for: \u003cs\u003e []* \"child\" []* \u003c/s\u003e.",
       "parentUuid": "0295e23c_e0baa127",
+      "range": {
+        "startLine": 180,
+        "startChar": 17,
+        "endLine": 180,
+        "endChar": 57
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a271b482_fa9627b2",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPPositionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-09-15T09:32:16Z",
+      "side": 1,
+      "message": "Does that mean, depending on an option, the serialisation may be different?",
+      "parentUuid": "bf509d8b_6ffa97a7",
       "range": {
         "startLine": 180,
         "startChar": 17,
