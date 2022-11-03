@@ -16,6 +16,24 @@
       "message": "This should fix\n\nassertEquals(\n  \"(request (query \\\" ? \\\"))\",  // it should not parse the query\n  treeString(\"\\\"?\\\"\")\n);\n\nin CQPGrammarTest, when reused for CQP.",
       "revId": "b9c6f7c6ee0e73666c21e6f21ea00eb2c57f18bf",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a3dbadf8_5b47a561",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-03T13:59:59Z",
+      "side": 1,
+      "message": "I did the modifications in the CQP grammar too. Actually, in CQPGrammarTest it does not solve the problem with   \"(request (query \\\" ? \\\"))\", treeString(\"\\\"?\\\"\"));\n\nBut it does work in CQPRegexTest.java for the test:\nquery \u003d \"\\\"?\\\"\";\nresult \u003d runQuery(query);\nassertEquals(302, result.at(\"/errors/0/0\").asInt());\n\nI don\u0027t no why it behaves like this.",
+      "parentUuid": "fa944de4_7d181488",
+      "revId": "b9c6f7c6ee0e73666c21e6f21ea00eb2c57f18bf",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
