@@ -1,3 +1,7 @@
+0.39 2022-11-15
+    - Updated to Java 11
+    - Dependencies updated
+
 0.38.1 2022-10-05
     - [security] Updated log4j (diewald)
     - Fixed Annis OR group (resolved #96) 
