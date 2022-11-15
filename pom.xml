@@ -36,7 +36,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>		
-		<jackson.version>[2.14.0-rc1,)</jackson.version>
+		<jackson.version>2.14.0</jackson.version>
 		<antlr4.version>4.9.3</antlr4.version>
 		<antlr3.version>3.5.3</antlr3.version>
 		<log4j.version>[2.17.1,)</log4j.version>
