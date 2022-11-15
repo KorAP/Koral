@@ -39,8 +39,8 @@
 		<jackson.version>2.14.0</jackson.version>
 		<antlr4.version>4.9.3</antlr4.version>
 		<antlr3.version>3.5.3</antlr3.version>
-		<log4j.version>[2.17.1,)</log4j.version>
 		<java.version>11</java.version>
+		<log4j.version>2.19.0</log4j.version>
 	</properties>
 	
 	<repositories>
