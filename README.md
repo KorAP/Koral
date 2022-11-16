@@ -1,11 +1,12 @@
 ![Koral](https://raw.githubusercontent.com/KorAP/Koral/master/misc/koral.png)
 
-Koral is a translator tool for converting different corpus query 
+Koral is a translator tool for converting different corpus query
 languages to [KoralQuery](https://korap.github.io/Koral/), a JSON-LD-based protocol for the common representation
-of linguistic queries. KoralQuery specifications are described extensively in Bingel (2015). This work has been carried out within the KorAP project. 
+of linguistic queries. KoralQuery specifications are described extensively in Bingel (2015). This work has been carried out within the KorAP project.
 
 Koral supports the following corpus query languages (QLs):
-* [Cosmas-II QL](http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/) 
+
+* [Cosmas-II QL](http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/)
 * [ANNIS QL](http://annis-tools.org/aql.html)
 * [Poliqarp QL](http://korpus.pl/en/cheatsheet/node3.html) (extended by numerous operators to "PoliqarpPlus" QL)
 * [CQL](http://www.loc.gov/standards/sru/cql/spec.html) (for basic search as described in [the CLARIN FCS 1.0 Specification](https://www.clarin.eu/content/federated-content-search-clarin-fcs) )
@@ -73,67 +74,72 @@ operands, an *s* span and a sequence of two tokens.
 }
 ```
 
-
 ## Motivation
 
-Koral allows designing and implementating corpus query systems 
+Koral allows designing and implementating corpus query systems
 independent of any specific query languages. The systems only need to have Koral translate a query to a KoralQuery (see usage)
 and feed the translated query to their search engine. Several query languages can be supported without further adjustments to the search engine.
 
-Koral and KoralQuery have been designed and developed within the 
-[KorAP Project](https://korap.ids-mannheim.de/), and are used in KorAP to 
+Koral and KoralQuery have been designed and developed within the
+[KorAP Project](https://korap.ids-mannheim.de/), and are used in KorAP to
 translate queries to a common format before sending them to its search engine.
 
 ## Setup
 
 Setup is straightforward (Maven3 required):
 
-    git clone https://github.com/korap/Koral [install-dir]
-    cd [install-dir]
-    mvn test -Dhttps.protocols=TLSv1.2    
-    mvn package
+```bash
+git clone https://github.com/korap/Koral [install-dir]
+cd [install-dir]
+mvn test -Dhttps.protocols=TLSv1.2
+mvn package
+```
 
 There is also a command line version. After setup, simply run
 
-    java -jar target/Koral-0.2.jar [query] [queryLanguage]
+```bash
+java -jar target/Koral-0.2.jar [query] [queryLanguage]
+```
 
 Build a Koral library and install it in your local Maven repository (needed for Kustvakt)
 
-    mvn install -Dhttps.protocols=TLSv1.2
-
-To update an existing installation, pull the latest version at ```[install-dir]``` 
-
+```bash
+mvn install -Dhttps.protocols=TLSv1.2
 ```
-$ git pull origin master
+
+To update an existing installation, pull the latest version at ```[install-dir]```
+
+```bash
+git pull origin master
 ```
 
 Afterwards, rerun the test suite and package or install the library.
 
 ## Prerequisites
 
-* Java 8 (OpenJDK or Oracle JDK with JCE)
+* Java 11 (OpenJDK or Oracle JDK with JCE)
 * [Git](http://git-scm.com/)
 * At least [Maven 3.2.1](https://maven.apache.org/)
 * Further dependencies are resolved by Maven.
 
 ## Publications
 
-J. Bingel, "Instantiation and implementation of a corpus query lingua franca," M.S. thesis, University of Heidelberg, Heidelberg, 2015. 
+J. Bingel, "Instantiation and implementation of a corpus query lingua franca," M.S. thesis, University of Heidelberg, Heidelberg, 2015.
 
 J. Bingel and N. Diewald, "KoralQuery – a General Corpus Query Protocol," in Proceedings of the Workshop on Innovative Corpus Query and Visualization Tools at NODALIDA 2015, Vilnius, 2015, pp. 1-5.
 
 ## Authorship
 
 Koral and KoralQuery were developed by Joachim Bingel,
-Nils Diewald, Michael Hanl and Eliza Margaretha at the 
+Nils Diewald, Michael Hanl and Eliza Margaretha at the
 [Leibniz Institute for the German Language (IDS)](https://www.ids-mannheim.de/),
 member of the [Leibniz Association](https://www.leibniz-gemeinschaft.de).
 
-The ANTLR grammars for parsing ANNIS QL and COSMAS II QL were developed by 
+The ANTLR grammars for parsing ANNIS QL and COSMAS II QL were developed by
 Thomas Krause (HU Berlin) and Franck Bodmer (IDS Mannheim), respectively.
 Minor adaptations of those grammars were implemented by the Koral authors.
 
-The authors wish to thank Piotr Bański, Franck Bodmer, Elena Frick and 
+The authors wish to thank Piotr Bański, Franck Bodmer, Elena Frick and
 Carsten Schnober for their valuable input.
 
 ## License
