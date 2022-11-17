@@ -678,6 +678,30 @@
       },
       "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8eebd018_3a14d321",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPSkipSentenceBoundaries.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-17T14:41:15Z",
+      "side": 1,
+      "message": "According to the CQP tutorial, it should return all NOUNS (pos \u003d NNS) that are not parts of a NP...\n\"the name of a structural attribute (here NP) evaluates to TRUE if the corresponding token is contained in a region of this attribute (here, a \u003cnp\u003e region)\"",
+      "parentUuid": "f923ff61_c9abb446",
+      "range": {
+        "startLine": 43,
+        "startChar": 2,
+        "endLine": 43,
+        "endChar": 34
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
