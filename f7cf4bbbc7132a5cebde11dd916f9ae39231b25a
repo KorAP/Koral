@@ -588,6 +588,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "1039dc31_79a15503",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-17T13:59:43Z",
+      "side": 1,
+      "message": "yes, same situation as with relational operators and alignment, but here i also eliminated the rule from the grammar. (don\u0027t remember why i treated these cases differently...)",
+      "parentUuid": "46ea7e88_d9b69eec",
+      "range": {
+        "startLine": 1203,
+        "startChar": 3,
+        "endLine": 1203,
+        "endChar": 11
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "0fdaba48_6321af44",
         "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPSkipSentenceBoundaries.java",
         "patchSetId": 1
