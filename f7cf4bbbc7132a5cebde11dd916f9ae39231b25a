@@ -541,6 +541,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "fc3945b6_c38155bd",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 942,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-17T13:47:07Z",
+      "side": 1,
+      "message": "Alignment is in the same situation as relational operators: comes from the PQ+ implementation (together with the tests) and i couldn\u0027t find an equivalent in CQP; there are some display options, available as commands in cqp, but not this specific one. Same type of decision that we should take: keep the alignment mechanism as an extension of CQP or eliminate it from the implementation. At this point, all the tests in PQ are passing in CQP also, but i actually don\u0027t  understand how it works, didn\u0027t investigate it since i didn\u0027t know if we keep it. Therefore, i cannot show the examples you asked. Eliza pointed me to this link, section 3.8:  http://nkjp.pl/poliqarp/help/ense3.html",
+      "parentUuid": "efac0329_010bbb7b",
+      "range": {
+        "startLine": 942,
+        "startChar": 16,
+        "endLine": 942,
+        "endChar": 26
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "46ea7e88_d9b69eec",
         "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
         "patchSetId": 1
