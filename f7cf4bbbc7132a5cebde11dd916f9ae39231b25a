@@ -633,6 +633,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1dcdbd9d_aed46b82",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPSkipSentenceBoundaries.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-17T14:12:11Z",
+      "side": 1,
+      "message": "There will be asserts in the following commit.",
+      "parentUuid": "0fdaba48_6321af44",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 41,
+        "endChar": 39
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f923ff61_c9abb446",
