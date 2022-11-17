@@ -97,6 +97,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "c17edb87_e0828acf",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-17T11:08:40Z",
+      "side": 1,
+      "message": "l-flag is verbatim in CQP, which in PQ+ is treated with \"",
+      "parentUuid": "1c0ce346_a58dc35d",
+      "range": {
+        "startLine": 37,
+        "startChar": 61,
+        "endLine": 37,
+        "endChar": 89
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3ce55e66_6c50b6f1",
         "filename": "src/main/antlr/cqp/CQP.g4",
         "patchSetId": 1
