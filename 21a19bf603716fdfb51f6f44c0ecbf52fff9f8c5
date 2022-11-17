@@ -18,6 +18,24 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "32528c76_fa2a2d59",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPPositionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-17T14:45:26Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "8cbf2181_99433370",
+      "revId": "21a19bf603716fdfb51f6f44c0ecbf52fff9f8c5",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d9010dca_fb9b5d2a",
