@@ -494,6 +494,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "f924432d_23cbc2cd",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-17T13:33:11Z",
+      "side": 1,
+      "message": "These are tests concerning relational operators (relatesTo, dominates, dependency) that were present in the PQ grammar but i couldn\u0027t find equivalent in the CQP tutorial. I thought that if they are used in korap, we could extend the CQP implementation with these too at some point. Now, they are present in the CQP grammar and dealt with (partially) in the serializer: some of the tests you mentioned are passing and other don\u0027t. We should decide if:\n1. we want to extend the implementation to include them, keep them in the grammar and solve the remaining issues, include them in the tutorial.\nor 2. delete the rules from the grammar, the functions from the serializer and finally the tests.\nElena",
+      "parentUuid": "822a0467_7ab98ab4",
+      "range": {
+        "startLine": 849,
+        "startChar": 3,
+        "endLine": 849,
+        "endChar": 11
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "efac0329_010bbb7b",
         "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
         "patchSetId": 1
