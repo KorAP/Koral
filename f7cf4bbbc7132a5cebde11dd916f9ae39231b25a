@@ -400,6 +400,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "74a94eb3_1cbe9996",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPPositionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-17T12:56:29Z",
+      "side": 1,
+      "message": "As I understood it, the sole purpose of this type of query is to restrict the search to a single sentence, otherwise you can simply search for the string \"copil/child\". What would be the meaning of a result with multiple sentences in between the sentence markers? I assume the user wants to see the whole sentence context for the string and for this they can use the sentence markers. The tutorial specificies that StrictRegion should be enabled, but cqpweb, which is what i tried to emulate, assumes this option as implicitly enabled(cqpweb doesn\u0027t have the possibility to select such type of option and i assume we don\u0027t want to complicate things also). Therefore, i implemented this restriction to a single sentence.",
+      "parentUuid": "a271b482_fa9627b2",
+      "range": {
+        "startLine": 180,
+        "startChar": 17,
+        "endLine": 180,
+        "endChar": 57
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "d4d43f44_73327126",
         "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
         "patchSetId": 1
