@@ -237,6 +237,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a46374ad_c6026d0a",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-18T14:32:53Z",
+      "side": 1,
+      "message": "Solved as with the span rule.",
+      "parentUuid": "3ff1a05d_213e28e8",
+      "range": {
+        "startLine": 234,
+        "startChar": 7,
+        "endLine": 234,
+        "endChar": 129
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "f09f86a4_f1ebd5f2",
         "filename": "src/main/antlr/cqp/CQP.g4",
         "patchSetId": 1
