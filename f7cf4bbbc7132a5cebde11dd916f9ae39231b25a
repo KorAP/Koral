@@ -190,6 +190,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "aa6af7c9_73f4a7cc",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-18T14:31:39Z",
+      "side": 1,
+      "message": "It is coming from the PQ+ implementation, the NEG* there is meant to deal with the following types of query:\nquery \u003d \"\u003ccnx/c!\u003dvp !(class!\u003dheader)\u003e\"; \nquery \u003d \"\u003ccnx/c!\u003dvp !(class\u003dheader \u0026 id\u003d7)\u003e\";\n\nChanged the rule to:\nspan\n: (skey // for lbound/sbound; check how it works for meet!\n  | LT ((foundry SLASH)? layer termOp)? \u0027/\u0027? skey ((  NEG* LRPAREN term RRPAREN|  NEG* LRPAREN termGroup RRPAREN)? | ( NEG* term|  NEG* termGroup)?) GT\n  )\n;\n\nDid the same for closingspan in CQP and for span in PQ+. \nAdded tests to prove that  \u003ccorenlp/c\u003dNP!!!!\u003e doesn\u0027t pass anymore. \n\nDo you have ideas for simplifying the rules?",
+      "parentUuid": "3d698826_3912bea7",
+      "range": {
+        "startLine": 228,
+        "startChar": 4,
+        "endLine": 228,
+        "endChar": 129
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3ff1a05d_213e28e8",
         "filename": "src/main/antlr/cqp/CQP.g4",
         "patchSetId": 1
