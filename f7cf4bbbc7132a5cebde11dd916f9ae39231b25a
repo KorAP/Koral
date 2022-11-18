@@ -234,6 +234,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1c3afe1e_9dc2bc85",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-18T13:04:17Z",
+      "side": 1,
+      "message": "true, i deleted it.",
+      "parentUuid": "f09f86a4_f1ebd5f2",
+      "range": {
+        "startLine": 391,
+        "startChar": 0,
+        "endLine": 391,
+        "endChar": 43
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "540ddbe8_bfee1cb3",
