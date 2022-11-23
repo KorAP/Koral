@@ -22,6 +22,30 @@
       },
       "revId": "dfb32e79bdccb2282bfa3676d4ceb1c49b40309a",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "adbc2623_bcf94470",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPMeetProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-23T14:31:47Z",
+      "side": 1,
+      "message": "The nested sequence is due to the recursive implementation of the meet query parsing. Any time a new meet object is parsed, a new sequence is serialised.",
+      "parentUuid": "de2a69d3_2da819ec",
+      "range": {
+        "startLine": 373,
+        "startChar": 17,
+        "endLine": 373,
+        "endChar": 86
+      },
+      "revId": "dfb32e79bdccb2282bfa3676d4ceb1c49b40309a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
