@@ -119,6 +119,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9d232b12_b1403054",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T12:39:29Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c17edb87_e0828acf",
+      "range": {
+        "startLine": 37,
+        "startChar": 61,
+        "endLine": 37,
+        "endChar": 89
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3ce55e66_6c50b6f1",
@@ -214,6 +238,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "ae29a62e_f0b8ee51",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T12:39:29Z",
+      "side": 1,
+      "message": "I am not really sure ... but `( NEG ( term | termGroup | ( LRPAREN (term | termGroup) RRPAREN ) ) )?` should be fine, right?",
+      "parentUuid": "aa6af7c9_73f4a7cc",
+      "range": {
+        "startLine": 228,
+        "startChar": 4,
+        "endLine": 228,
+        "endChar": 129
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3ff1a05d_213e28e8",
         "filename": "src/main/antlr/cqp/CQP.g4",
         "patchSetId": 1
@@ -249,6 +297,30 @@
       "side": 1,
       "message": "Solved as with the span rule.",
       "parentUuid": "3ff1a05d_213e28e8",
+      "range": {
+        "startLine": 234,
+        "startChar": 7,
+        "endLine": 234,
+        "endChar": 129
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7ef9f06b_e6e0c2c7",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T12:39:29Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a46374ad_c6026d0a",
       "range": {
         "startLine": 234,
         "startChar": 7,
@@ -400,6 +472,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d77738cc_33cf93b6",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPPositionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T12:39:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3f20453d_c29a1922",
+      "range": {
+        "startLine": 61,
+        "startChar": 22,
+        "endLine": 61,
+        "endChar": 37
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cd233d78_4b94fd3c",
@@ -518,6 +614,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "41ec244a_3d290cf1",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPPositionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T12:39:29Z",
+      "side": 1,
+      "message": "That\u0027s interesting! I thought, CQP or rather Corpus Workbench wouldn\u0027t be able to check for pairing of these tags - but I wasn\u0027t able to find something cross-sentences. So your serialization is correct!",
+      "parentUuid": "74a94eb3_1cbe9996",
+      "range": {
+        "startLine": 180,
+        "startChar": 17,
+        "endLine": 180,
+        "endChar": 57
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d4d43f44_73327126",
@@ -614,6 +734,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "098109a8_f7255874",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T12:39:29Z",
+      "side": 1,
+      "message": "Hm ... good question. For the moment, better write a comment in there that says \"CQP doesn\u0027t support relational queries like that\", so we know, that \"Ignore\" doesn\u0027t mean: \"Not implemented yet\", but \"Probably will not be implemented at all\".",
+      "parentUuid": "f924432d_23cbc2cd",
+      "range": {
+        "startLine": 849,
+        "startChar": 3,
+        "endLine": 849,
+        "endChar": 11
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "efac0329_010bbb7b",
         "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
         "patchSetId": 1
@@ -661,6 +805,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a3385a05_aca6be35",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 942,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T12:39:29Z",
+      "side": 1,
+      "message": "I see. Here I would say: Keep it when it works. But I am still curious if a query like \"([base\u003da]^[base\u003db]^[base\u003dc])|[base\u003dd]\" is really valid. I didn\u0027t know we had this in the PQ+ grammar.",
+      "parentUuid": "fc3945b6_c38155bd",
+      "range": {
+        "startLine": 942,
+        "startChar": 16,
+        "endLine": 942,
+        "endChar": 26
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "46ea7e88_d9b69eec",
         "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
         "patchSetId": 1
@@ -696,6 +864,30 @@
       "side": 1,
       "message": "yes, same situation as with relational operators and alignment, but here i also eliminated the rule from the grammar. (don\u0027t remember why i treated these cases differently...)",
       "parentUuid": "46ea7e88_d9b69eec",
+      "range": {
+        "startLine": 1203,
+        "startChar": 3,
+        "endLine": 1203,
+        "endChar": 11
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eda48001_2507ac3a",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T12:39:29Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1039dc31_79a15503",
       "range": {
         "startLine": 1203,
         "startChar": 3,
@@ -790,6 +982,30 @@
       "side": 1,
       "message": "According to the CQP tutorial, it should return all NOUNS (pos \u003d NNS) that are not parts of a NP...\n\"the name of a structural attribute (here NP) evaluates to TRUE if the corresponding token is contained in a region of this attribute (here, a \u003cnp\u003e region)\"",
       "parentUuid": "f923ff61_c9abb446",
+      "range": {
+        "startLine": 43,
+        "startChar": 2,
+        "endLine": 43,
+        "endChar": 34
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "140d004b_8080aad7",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPSkipSentenceBoundaries.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T12:39:29Z",
+      "side": 1,
+      "message": "So this would translate to an \"operation:exclusion\" in KoralQuery, I guess? How can the parser know, that np is a region and not, say, a POS marker?",
+      "parentUuid": "8eebd018_3a14d321",
       "range": {
         "startLine": 43,
         "startChar": 2,
