@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4281ab4b_ec1b3c0c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T10:29:35Z",
+      "side": 1,
+      "message": "Okay - I see. But this commit throws two errors in the test suite - is that on purpose? Or fixed in a follow up commit?",
+      "revId": "dfb32e79bdccb2282bfa3676d4ceb1c49b40309a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "de2a69d3_2da819ec",
@@ -38,6 +55,30 @@
       "side": 1,
       "message": "The nested sequence is due to the recursive implementation of the meet query parsing. Any time a new meet object is parsed, a new sequence is serialised.",
       "parentUuid": "de2a69d3_2da819ec",
+      "range": {
+        "startLine": 373,
+        "startChar": 17,
+        "endLine": 373,
+        "endChar": 86
+      },
+      "revId": "dfb32e79bdccb2282bfa3676d4ceb1c49b40309a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c0b8f9f1_d114ff36",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPMeetProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T10:29:35Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "adbc2623_bcf94470",
       "range": {
         "startLine": 373,
         "startChar": 17,
