@@ -18,6 +18,23 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "73a94a45_4194f4c3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-24T10:32:21Z",
+      "side": 1,
+      "message": "Sorry - I forgot that only the last commit should be reviewed.",
+      "revId": "dfb32e79bdccb2282bfa3676d4ceb1c49b40309a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "de2a69d3_2da819ec",
