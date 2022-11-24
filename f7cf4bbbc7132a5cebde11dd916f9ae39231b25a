@@ -191,6 +191,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a22f6fc5_f8baede1",
+        "filename": "src/main/antlr/cqp/CQP.g4",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-24T14:24:22Z",
+      "side": 1,
+      "message": "This rule also comes from PQ+ implementation and is also tested there. When commenting the line, two tests are failing: testUnknownLayerLikeCase() and testLayerWithFlag().\nIn the example: query\u003d \"[mate/x\u003dBaum/i]\", /x is parsed as flag (I introduced a test for the grammar, to be more clear); later in the processor, it is dealt as layer again?? I don\u0027t know and trying to guess what was the intention for this...",
+      "parentUuid": "89f45c4f_f3dedb07",
+      "range": {
+        "startLine": 156,
+        "startChar": 7,
+        "endLine": 156,
+        "endChar": 26
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3d698826_3912bea7",
         "filename": "src/main/antlr/cqp/CQP.g4",
         "patchSetId": 1
