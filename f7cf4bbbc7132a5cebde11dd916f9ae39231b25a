@@ -1062,6 +1062,30 @@
       },
       "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0a8b1878_1c31ef59",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPSkipSentenceBoundaries.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-25T09:03:30Z",
+      "side": 1,
+      "message": "it could be recognised as an skey (key dedicated to spans, which is not enclosed in \"\"); we could allow term to be a span... Or we could ignore the feature 😊",
+      "parentUuid": "140d004b_8080aad7",
+      "range": {
+        "startLine": 43,
+        "startChar": 2,
+        "endLine": 43,
+        "endChar": 34
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
