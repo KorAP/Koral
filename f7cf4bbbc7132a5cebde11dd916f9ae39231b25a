@@ -899,6 +899,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e3a6644f_ed096d70",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 942,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-25T10:31:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a3385a05_aca6be35",
+      "range": {
+        "startLine": 942,
+        "startChar": 16,
+        "endLine": 942,
+        "endChar": 26
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "46ea7e88_d9b69eec",
@@ -1102,6 +1126,30 @@
       "side": 1,
       "message": "it could be recognised as an skey (key dedicated to spans, which is not enclosed in \"\"); we could allow term to be a span... Or we could ignore the feature 😊",
       "parentUuid": "140d004b_8080aad7",
+      "range": {
+        "startLine": 43,
+        "startChar": 2,
+        "endLine": 43,
+        "endChar": 34
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "175298dd_5a6b1320",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPSkipSentenceBoundaries.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2022-11-25T10:31:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "0a8b1878_1c31ef59",
       "range": {
         "startLine": 43,
         "startChar": 2,
