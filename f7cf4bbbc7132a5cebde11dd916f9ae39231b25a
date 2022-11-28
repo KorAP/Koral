@@ -828,6 +828,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ab4a4dbd_6c646bcf",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2022-11-28T09:40:20Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "098109a8_f7255874",
+      "range": {
+        "startLine": 849,
+        "startChar": 3,
+        "endLine": 849,
+        "endChar": 11
+      },
+      "revId": "f7cf4bbbc7132a5cebde11dd916f9ae39231b25a",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "efac0329_010bbb7b",
