@@ -198,7 +198,8 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         				 if((ops!=null)&&(!ops.toString().contains("koral:span")))		
         				 processSpan(node);
         			 }
-        			 else */processSpan(node);
+        			 else */
+                     processSpan(node);
         				 
         		 }
         		 else
@@ -319,12 +320,12 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         // for segments following closingspan or preceding span
         if (node.getParent().getChild(0).getChild(0)!=null)
         {
-            if (getNodeCat(node.getParent().getChild(0).getChild(0)).equals("closingspan") && node.equals(node.getParent().getChild(1)))
+            if (getNodeCat(node.getParent().getChild(0).getChild(0)).equals("closingspan") && !node.equals(node.getParent().getChild(0)))
             {
                  Map<String, Object> classGroup = KoralObjectGenerator
-        			                .makeSpanClass(1);
+        			                .makeSpanClass(200);
         			        
-        			       addHighlightClass(1);
+        			     //  addHighlightClass(200);
         			       putIntoSuperObject(classGroup);
         			       objectStack.push(classGroup);
         			       stackedObjects++;
@@ -333,17 +334,30 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
        int nchild = node.getParent().getChildCount();
       if (node.getParent().getChild(nchild-1).getChild(0)!=null)
       { 
-        if (getNodeCat( node.getParent().getChild(nchild-1).getChild(0)).equals("span") && node.equals(node.getParent().getChild(nchild-2)))
+        if (getNodeCat( node.getParent().getChild(nchild-1).getChild(0)).equals("span") && !node.equals(node.getParent().getChild(nchild-1)))
             {
                 Map<String, Object> classGroup = KoralObjectGenerator
-        			                .makeSpanClass(1);
+        			                .makeSpanClass(200);
         			        
-        			       addHighlightClass(1);
+        			    //   addHighlightClass(200);
         			       putIntoSuperObject(classGroup);
         			       objectStack.push(classGroup);
         			       stackedObjects++;
             }
         }
+
+
+        
+        if (getNodeCat(node.getParent().getParent()).equals("startswith") || getNodeCat(node.getParent().getParent()).equals("endswith"))
+            {
+                Map<String, Object> classGroup = KoralObjectGenerator
+        			                .makeSpanClass(200);
+        			        
+        			    //   addHighlightClass(200);
+        			       putIntoSuperObject(classGroup);
+        			       objectStack.push(classGroup);
+        			       stackedObjects++;
+            }
     }
 
 
@@ -368,12 +382,12 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                 return;
             }
         }
-        if (getNodeCat(node.getChild(0).getChild(0)).equals("closingspan") || getNodeCat(node.getChild(node.getChildCount()-1).getChild(0)).equals("span"))
+        if (getNodeCat(node.getChild(0).getChild(0)).equals("closingspan") || getNodeCat(node.getChild(node.getChildCount()-1).getChild(0)).equals("span") || getNodeCat(node.getParent()).equals("startswith") || getNodeCat(node.getParent()).equals("endswith"))
         {
             
             ArrayList<Integer> classRefs = new ArrayList<Integer>();
            
-            classRefs.add(1); 
+            classRefs.add(200); 
             Map<String, Object> referenceGroup = KoralObjectGenerator.makeReference(classRefs);
             // Default is focus(), if deviating catch here
     
@@ -1430,7 +1444,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
 
     private Map<String, Object> parseFrame (ParseTree node) {
-        String operator = node.toStringTree(parser).toLowerCase();
+                        String operator = node.toStringTree(parser).toLowerCase();
 
         ArrayList<KoralFrame> frames = new ArrayList<KoralFrame>();
         if (getNodeCat((node).getParent()).equals("meetunion"))

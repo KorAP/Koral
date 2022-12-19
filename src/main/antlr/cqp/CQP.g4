@@ -18,12 +18,11 @@ Based on CQP
 && - elemente de scos din gramatica!
  */
 
-POSITION_OP : 'lbound' | 'rbound'; //&& 'contains' | 
+POSITION_OP : 'lbound' | 'rbound';
 REGION_OP: 'region';
-RELATION_OP	: ('dominates' | 'dependency' | 'relatesTo'); //not in PQ tutorial &&
+RELATION_OP	: ('dominates' | 'dependency' | 'relatesTo'); //not in PQ tutorial
 MATCH_OPM : 'meet' ;
-//MATCH_OPF: 'focus'; // | 'split');  split is not in PQ tutorial &&
-SUBMATCH_OP	: 'submatch';  //not in PQ tutorial &&
+// SUBMATCH_OP	: 'submatch';  from PQ+ implementation
 WITHIN		: 'within';
 MU: 'MU';
 META		: 'meta';
@@ -73,11 +72,11 @@ EQ			: '=';
 CARET 		: '^';
 STAR		: '*';
 PLUS		: '+';
-EMPTYREL	: '@'; //take care: two tokens, EMPTYREL and SPANCLAS_ID, matching the same input; &&
+EMPTYREL	: '@'; //take care: two tokens, EMPTYREL and SPANCLAS_ID, matching the same input;
 BACKSLASH	: '\\';
 SQUOTE      : '\'';
 //in PQ+, DQUOTE was not defined
-DQUOTE: ('"'|'„'|'“'|'“'|'”');
+DQUOTE: ('"'|'„'|'“'|'”');
 
 
 /* Regular expressions and Regex queries */
@@ -89,13 +88,9 @@ fragment RE_char     : (RE_symbol | RE_esc );
 fragment RE_alter    : ((RE_char | ('(' RE_expr ')') | RE_chgroup) '|' RE_expr )+;
 
 fragment RE_chgroup  : '[' RE_char+ ']';
-fragment RE_quant	 : (RE_star | RE_plus | RE_occ) QMARK?;
-fragment RE_opt      : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '?';
-fragment RE_star     : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '*';
-fragment RE_plus     : (RE_char | RE_chgroup | ( '(' RE_expr ')')) '+';
-fragment RE_occ      : (RE_char | RE_chgroup | ( '(' RE_expr ')')) FOCC;
+fragment RE_quant      : ('.' | RE_char | RE_chgroup | ( '(' RE_expr ')')) ('?' | '*' | '+' | FOCC) QMARK?;
 fragment RE_group    : '(' RE_expr ')';
-fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_opt | RE_quant | RE_group)+;
+fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_quant | RE_group)+;
 /* you can search for DQUOTE inside SQUOUTE, and viceversa:  '"' or "'"; */
 fragment RE_dquote   : DQUOTE  (RE_expr | '\'' | ':' )* DQUOTE; // DQOUTE is not good, modify like verbatim in PQ+!
 fragment RE_squote   : SQUOTE  (RE_expr | '"' | ':')* SQUOTE; 
@@ -174,13 +169,13 @@ max
 ;
 
 
-startpos //&&
+/*startpos 
 : NUMBER
 ;
 
-length //&&
+length 
 : NUMBER
-;
+;*/
 
 
 range
@@ -224,17 +219,16 @@ token
 
 
 span
-: (skey // for lbound/sbound; check how it works for meet!
-  | LT ((foundry SLASH)? layer termOp)? '/'? skey NEG* ((LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? | (term|termGroup)?) GT
-  )
+: skey // for lbound/sbound; check how it works for meet!
+  | LT ((foundry SLASH)? layer termOp)? skey ((  NEG* (LRPAREN term RRPAREN|  LRPAREN termGroup RRPAREN | NEG* term | NEG* termGroup))? GT)
 ;
 
 closingspan
 :
-LT '/' ((foundry SLASH)? layer termOp)? '/'? skey NEG* ((LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? | (term|termGroup)?) GT
+LT '/' ((foundry SLASH)? layer termOp)? skey ((  NEG* (LRPAREN term RRPAREN|  LRPAREN termGroup RRPAREN | NEG* term | NEG* termGroup))? GT)
 ;
 
-position //&&
+position
 //: POSITION_OP LRPAREN (segment|sequence) COMMA (segment|sequence) RRPAREN
 : POSITION_OP LRPAREN span RRPAREN 
 ;
@@ -249,7 +243,7 @@ group
 ; 
 
 spanclass
-: (SPANCLASS_ID (token|segment|group| LRBRACE sequence RRBRACE) // ai adaugat sequence! vezi de ce nu intra pe ea, si daca intra, vezi cum ruleaza procesorul; am nevoie de token si group aici?
+: (SPANCLASS_ID (token|segment|group| ) //LRBRACE sequence RRBRACE) // ai adaugat sequence! vezi de ce nu intra pe ea, si daca intra, vezi cum ruleaza procesorul; am nevoie de token si group aici?
   | label COLON (segment|sequence) 
   | LBRACE SPANCLASS_ID? (segment|sequence) RBRACE /* do i need this???*/
   | MATCH_OPM LRPAREN meetunion RRPAREN // for recursive meet
@@ -268,44 +262,37 @@ emptyTokenSequenceAround
 ;
 
 
-
 emptyTokenSequenceClass
 : (SPANCLASS_ID emptyTokenSequence | label COLON emptyTokenSequence)    // class defined around empty tokens 
 ;
 
+sstruct: endswith | startswith   ; 
+qstruct:  isaround { 
+  String text1 = _localctx.getChild(0).getChild(0).getText();
+  text1 = text1.substring(1, text1.length()-1);
+  String text2 = _localctx.getChild(0).getChild(_localctx.getChild(0).getChildCount()-1).getText();
+  text2= text2.substring(2, text2.length()-1);
+}
+{text1.equals(text2)}?|  matches { 
+  String text1 = _localctx.getChild(0).getChild(0).getText();
+  text1 = text1.substring(1, text1.length()-1);
+  String text2 = _localctx.getChild(0).getChild(_localctx.getChild(0).getChildCount()-1).getText();
+  text2= text2.substring(2, text2.length()-1);
+}
 
-/* special CQP section*/
-
-
-//structural atributes instead of positional operators : cotains, startwith, endswith
-/* LT and GT are optional to match the struct in meet;
-examples:
-----------------------------------------------------------------------
-positional operators in PQ+          ||     structural attributes in CQP
--------------------------------------------------------------------------
-contains(<base/s=s>, "copil")        ||     <s> []+ "copil" []+ </s>;
-startsWith(<base/s=s>, "copil")      ||     <s>  "copil";
-endsWith(<base/s=s>, "copil")        ||    "copil" </s>;
-matches(<base/s=s>, "copil")         ||     <s> copil </s>
-overlaps()                           ||       ??? 
----------------------------------------------------------------------------*/
-
-
-
-qstruct: isaround | matches; // the query itself is a struct
-sstruct: startswith  |  endswith ; // struct is a segment in a query;
+{text1.equals(text2)}?; 
 isaround :  span emptyTokenSequenceAround (segment|sequence) emptyTokenSequenceAround closingspan; 
-matches:  span  (segment|sequence)  closingspan; 
-startswith: span segment;
-endswith: segment closingspan; // (segment|sequence)
+matches:  span  (sequence | segment)  closingspan;
+
+
+startswith: span (sequence|segment);
+endswith: (sequence|segment) closingspan;
 region: SLASH REGION_OP LPAREN span RPAREN;
 
 
 
 sequence
-: segment+ sstruct
-| sstruct segment+
-| alignment segment*  // give precedence to this subrule over the next to make sure preceding segments come into 'alignment'
+: alignment segment*  // give precedence to this subrule over the next to make sure preceding segments come into 'alignment'
 | segment+ alignment segment*
 | segment segment+
 | alignment (segment|sequence) alignment?
@@ -317,11 +304,12 @@ segment
   | region
   | spanclass 
   | matching
-  | submatch
+ // | submatch
   | relation
   | LRPAREN segment RRPAREN
   | emptyTokenSequence
   | emptyTokenSequenceClass
+  | qstruct
   | span
   | closingspan
   ) 
@@ -331,7 +319,7 @@ segment
 /** Entry point for linguistic queries */
 
 query
-: qstruct | sstruct | segment | sequence | disjunction 
+: qstruct  | (sequence|segment)* qstruct (sequence|segment)* | sstruct |segment | sequence | disjunction 
 ;
 
 within
@@ -357,10 +345,9 @@ relSpec
 : (foundry SLASH)? layer (termOp key)?
 ;
 
-submatch //&&
+/*submatch
 : SUBMATCH_OP LRPAREN startpos (COMMA length)? COLON (segment|sequence) RRPAREN
-;
-
+;*/
 
 
 alignment
@@ -368,29 +355,13 @@ alignment
 ;
 
 
-/* MU queries instead of focus operator; CQP offers search-engine like Boolean queries in a special meet-union (MU) notation. This
-feature goes back to the original developer of CWB and is not supported officially. In particular,
-there is no precise specifcation of the semantics of MU queries and the original implementation
-does not produce consistent results. A meet clause matches two token patterns within a specified distance of each other. More
-precisely, instances of the firrst pattern are altered, keeping only those where the second pattern
-occurs within the specified window. For example, the following query founds nouns that co-occur
-with the adjective lovely:
-> MU(meet [pos = "NN.*"] [lemma = "lovely"] -2 2);
-This query returns all nouns for which lovely occurs within two tokens to the left (window starting
-at offset -2) or right (window ending at offset +2)). The adjective lovely is not included in the
-match, nor marked in any other way.
-focus(der {Baum}) = MU(meet(Baum, der))
-*/
 matching
 : (MU LRPAREN meetunion RRPAREN);
 // //| (MATCH_OPF LRPAREN SPANCLASS_ID? (segment|sequence)? RRPAREN)
 meetunion
 : 
 (((LRPAREN meetunion RRPAREN) | segment) ((LRPAREN meetunion RRPAREN) | segment) ((NUMBER  NUMBER) | span))
-|
-(segment segment  ((NUMBER NUMBER) | span))
 ;
-
 
 /**
     Entry point for all requests. Linguistic query is obligatory, metadata filtering

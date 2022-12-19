@@ -278,6 +278,13 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("type:regex", res.at("/query/wrap/type").asText());
         assertEquals("orth", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        
+        
+        query = "\"?\"";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        System.err.println(qs.toJSON());
+        assertEquals(302, res.at("/errors/0/0").asInt());
     }
 
     public void testRegexDQuoute () throws JsonProcessingException, IOException {
@@ -505,6 +512,13 @@ public class PoliqarpPlusQueryProcessorTest {
         assertEquals("cnx", res.at("/query/wrap/foundry").asText());
         assertEquals("c", res.at("/query/wrap/layer").asText());
         assertEquals("match:ne", res.at("/query/wrap/match").asText());
+
+
+        query = "<cnx/c!=vp!!>";
+        qs.setQuery(query, "poliqarpplus");
+        res = mapper.readTree(qs.toJSON());
+        assertNotEquals("koral:span", res.at("/query/@type").asText());
+
 
         query = "<cnx/c!=vp class!=header>";
         qs.setQuery(query, "poliqarpplus");

@@ -1,6 +1,7 @@
 package de.ids_mannheim.korap.query.test.cqp;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Test;
 
@@ -65,6 +66,16 @@ public class CQPRegexTest extends BaseQueryTest {
         assertEquals("type:regex", result.at("/query/wrap/type").asText());
         assertEquals("orth", result.at("/query/wrap/layer").asText());
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        
+        
+        query = "\"?\"";
+        result = runQuery(query);
+        assertEquals(302, result.at("/errors/0/0").asInt());
+        
+        query = "\"\"\"";
+        result = runQuery(query);
+        assertEquals("", result.at("/query/wrap/key").asText());
+        assertNotEquals(302, result.at("/errors/0/0").asInt());
     }
 
 
