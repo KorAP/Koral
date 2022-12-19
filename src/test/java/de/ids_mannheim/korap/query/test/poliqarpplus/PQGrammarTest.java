@@ -44,6 +44,15 @@ public class PQGrammarTest {
                 treeString("'\\''")
                 );
     }
+    
+    @Test
+    public void layerWithFlag () {
+        assertEquals(
+                "(request (query (segment (token [ (term (foundry mate) (flag /x) (termOp =) (key Baum) (flag /i)) ]))) <EOF>)",  
+                treeString("[mate/x=Baum/i]")
+                );
+    };
+    
     @Test
     public void dquoutes () {
 
@@ -67,7 +76,14 @@ public class PQGrammarTest {
           treeString("'\\''")
           );
 }
-
+@Test
+    public void spantest () {
+        assertEquals(
+            "(request (query < cnx / c ! = vp ! ! >) <EOF>)",  // not parsing the query
+            treeString("<cnx/c!=vp!!>")
+            );
+    
+    }
     private String treeString (String query) {
         try {
             Method startRule = PoliqarpPlusParser.class.getMethod("request");
