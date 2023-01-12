@@ -1176,4 +1176,14 @@ public class AnnisQueryProcessorTest {
     }
      */
 
+    @Test
+    public void testReferenceBug () throws Exception {
+        query = "tok & tok & #1 .1,11 #2 & #1 == #2";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+
+        // Not sure the serialization is correct, but it no longer throws a null pointer exception
+        assertEquals("koral:reference", res.at("/query/operands/1/@type").asText());
+        assertEquals("operation:relation", res.at("/query/operation").asText());
+    }
 }

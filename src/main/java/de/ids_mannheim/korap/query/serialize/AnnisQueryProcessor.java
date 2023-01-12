@@ -718,7 +718,8 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
                     group = KoralObjectGenerator
                             .makeGroup(KoralOperation.RELATION);
                     Map<String, Object> relation = new HashMap<String, Object>();
-                    putAllBut(relation, operatorGroup, "groupType");
+                    if (operatorGroup != null)
+                        putAllBut(relation, operatorGroup, "groupType");
                     group.put("relType", relation);
                 }
                 else if (groupType.equals("sequence")) {
@@ -1348,3 +1349,4 @@ public class AnnisQueryProcessor extends Antlr4AbstractQueryProcessor {
         return tree;
     }
 }
+

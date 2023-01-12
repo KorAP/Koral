@@ -1,6 +1,7 @@
-0.39 2022-11-16
+0.39 2023-01-12
     - Updated to Java 11
     - Dependencies updated
+    - Fix reference bug in Annis (resolved #129, diewald)
 
 0.38.2 2022-10-05
     - [feature] Improve regex treatment of negative
