@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c42a842e_5744bf80",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-03-27T10:49:05Z",
+      "side": 1,
+      "message": "I don\u0027t know why, but my change is here: https://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/6778 Probably a problem with change-IDs?",
+      "revId": "300a78ad4244947b096826e9e184ad48d7c9808f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
