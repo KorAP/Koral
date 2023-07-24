@@ -20,6 +20,17 @@ public class CQPPositionTest extends BaseQueryTest{
     
     @Test
     public void testSequenceStartsWithStartSentence () throws JsonProcessingException {
+       
+         // throws error because of the FailedPredicateException; 
+        query =" <s> <np> \"copil\" </np> ;"; 
+        result = runQuery(query);
+        assertEquals("unmatched span tags!", result.at("/errors/0/1").asText());
+        assertEquals(302, result.at("/errors/1/0").asInt());
+
+        query = "<s> []+ (\"der\")* []+ </z>";
+        result = runQuery(query);
+        assertEquals("unmatched span tags!", result.at("/errors/0/1").asText());
+
         query =" <base/s=s> \"copil\" ;"; //KoralFrame.STARTS_WITH
         result = runQuery(query);
         assertEquals("koral:group", result.at("/query/@type").asText());
@@ -31,14 +42,33 @@ public class CQPPositionTest extends BaseQueryTest{
         assertEquals("s", result.at("/query/operands/0/wrap/layer").asText());
         assertEquals("koral:token", result.at("/query/operands/1/@type").asText());
         assertEquals("copil", result.at("/query/operands/1/wrap/key").asText());
+
+        // it is interpreted as a sentence starting/ended with a np, followed/preceded by "copil"; 
+        // np is a segment in the sequence, not a position operator, like s
+        query =" <s> <np> \"copil\" ;"; //KoralFrame.STARTS_WITH
+        result = runQuery(query);
+        assertEquals("koral:group", result.at("/query/@type").asText());
+        query ="\"copil\" </np> </s>;"; //KoralFrame.ENDS_WITH
+        result = runQuery(query);
+        assertEquals("koral:group", result.at("/query/@type").asText());
+        
+       
+    //    assertEquals("koral:group", result.at("/query/@type").asText());
+       // matches np imbricated in sentence; imbrication works for correct qstructures
+        query =" <s> <np> \"copil\" </np> \"mic\"</s>;"; 
+        result = runQuery(query);
+        assertEquals("koral:group", result.at("/query/@type").asText());
+
+       
     }
     
   
     @Test
     public void testSequenceStartsWithEndSentence () throws JsonProcessingException {
+        
+        // parsed as a sequence of span s and token copil; focus on the token;
         query =" </base/s=s> \"copil\" ;"; 
         result = runQuery(query);
-     
         assertEquals("koral:reference", result.at("/query/@type").asText());
         assertEquals("operation:focus", result.at("/query/operation").asText());
         assertEquals("koral:group", result.at("/query/operands/0/@type").asText());
@@ -49,8 +79,10 @@ public class CQPPositionTest extends BaseQueryTest{
         assertEquals("koral:token", result.at("/query/operands/0/operands/1/operands/0/@type").asText());
         assertEquals("type:regex", result.at("/query/operands/0/operands/1/operands/0/wrap/type").asText());
         assertEquals("copil", result.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
-
-        query =" </base/s=s> \"copil\" \"cuminte\";";  // (span class token} sequence; focus on "cuminte"!
+        
+        
+        // (span token token) sequence; focus on both tokens
+        query =" </base/s=s> \"copil\" \"cuminte\";";
         result = runQuery(query);
         assertEquals("koral:reference", result.at("/query/@type").asText());
         assertEquals("operation:focus", result.at("/query/operation").asText());
@@ -169,7 +201,7 @@ public class CQPPositionTest extends BaseQueryTest{
         
         assertEquals("koral:span", result.at("/query/operands/0/operands/2/@type").asText());
    }
-    
+
     @Test
     public void testSingleTokenInSentence () throws JsonProcessingException {
         query =" <base/s=s> \"copil\" </base/s=s>;";  // KoralFrame.MATCHES
@@ -280,6 +312,9 @@ public class CQPPositionTest extends BaseQueryTest{
     
     @Test
     public void testSequenceWithinSentence () throws JsonProcessingException {
+        // same as  "contains(<base/s=s>, \"copil\" \"cuminte\")"; in PQ+, checked!
+        // only if []+ is paired and emmbeding the searched string/sequence: []+ ... []+
+        
         query = "<base/s=s> []+ \"copil\" \"cuminte\" []+ </base/s=s>;";
         result = runQuery(query);
         
@@ -300,6 +335,7 @@ public class CQPPositionTest extends BaseQueryTest{
      */
     @Test
     public void testSequenceAtConstituentEnd () throws JsonProcessingException {
+        //if []+ is not embedding the rest of the expression, it is treated as token repetition;
         query = "<np> []+ ([pos=\"JJ.*\"] []+){3,} </np>;"; //KoralFrame.MATCHES
         result = runQuery(query);
         assertEquals("koral:group", result.at("/query/@type").asText());
@@ -345,7 +381,7 @@ public class CQPPositionTest extends BaseQueryTest{
     }
     @Test
     public void testEmbeddedStruct () throws JsonProcessingException {
-        query = "<s><np>[]*</np> []* <np>[]*</np></s>"; 
+        query = "<s><np>[]*</np> []* <np1>[]*</np1></s>"; 
         result = runQuery(query);
         assertEquals("koral:group", result.at("/query/@type").asText());
         assertEquals("operation:position", result.at("/query/operation").asText());
@@ -368,7 +404,7 @@ public class CQPPositionTest extends BaseQueryTest{
         assertEquals("koral:group", result.at("/query/operands/1/operands/2/@type").asText());
         assertEquals("operation:position", result.at("/query/operands/1/operands/2/operation").asText());
         assertEquals("frames:matches", result.at("/query/operands/1/operands/2/frames/0").asText());
-        assertEquals("np", result.at("/query/operands/1/operands/2/operands/0/wrap/key").asText());
+        assertEquals("np1", result.at("/query/operands/1/operands/2/operands/0/wrap/key").asText());
         assertEquals("koral:group", result.at("/query/operands/1/operands/2/operands/1/@type").asText());
         assertEquals("operation:repetition", result.at("/query/operands/1/operands/2/operands/1/operation").asText());
         assertEquals("koral:token", result.at("/query/operands/1/operands/2/operands/1/operands/0/@type").asText());
@@ -377,9 +413,6 @@ public class CQPPositionTest extends BaseQueryTest{
   
         
     }  
-
-
-
 
     @Test
     public void testSequenceWithinConstituent () throws JsonProcessingException {
@@ -404,6 +437,14 @@ public class CQPPositionTest extends BaseQueryTest{
     // match token at the end of a sentence
     @Test
     public void testRbound ()  throws JsonProcessingException {
+        query ="[\"copil\"  & rbound(<s>)];"; 
+        result = runQuery(query);
+        assertEquals("koral:group", result.at("/query/@type").asText());
+        
+        query ="[\"copil\"  & rbound(s)];"; 
+        result = runQuery(query);
+        assertEquals("koral:group", result.at("/query/@type").asText());
+
         query ="[\"copil\"  & rbound(<base/s=s>)];"; 
         result = runQuery(query);
         assertEquals("koral:group", result.at("/query/@type").asText());
@@ -442,6 +483,7 @@ public class CQPPositionTest extends BaseQueryTest{
     
     @Test
     public void testRBoundSequence () throws JsonProcessingException {
+        
         query ="[word = \"acest\"][\"copil\" & rbound(<base/s=s>)];"; 
         result = runQuery(query);
         assertEquals("koral:group", result.at("/query/@type").asText());

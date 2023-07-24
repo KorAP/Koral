@@ -6,6 +6,7 @@ import org.junit.Ignore;
 
 import de.ids_mannheim.korap.query.parse.cqp.CQPLexer;
 import de.ids_mannheim.korap.query.parse.cqp.CQPParser;
+import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
@@ -371,7 +372,7 @@ public class CqpGrammarTest {
     public void testEmptyTokenWithin () {
 
     	 	assertEquals( 
-    		"(request (query (sequence (segment (token (key (regex \"no\")))) (segment (token (key (regex \"sooner\")))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"than\")))))) (within within s) ;)",
+    		"(request (query (sequence (segment (token (key (regex \"no\")))) (segment (token (key (regex \"sooner\")))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"than\")))))) (within within (span (skey s))) ;)",
     		treeString("\"no\" \"sooner\" []* \"than\" within s;")
     		);
     };
@@ -548,17 +549,17 @@ public void testStructContains3 () {
 		"(request (query (qstruct (matches (span < (skey s) >) (sequence (segment (qstruct (matches (span < (skey np) >) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (closingspan < / (skey np) >)))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (qstruct (matches (span < (skey np) >) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (closingspan < / (skey np) >))))) (closingspan < / (skey s) >)))) ;)",
 		treeString(" <s><np>[]*</np> []* <np>[]*</np></s>; #sentence that starts and ends with a noun phrase (NP);")
 		);
-};
+}
+		
 
 @Test
 public void testmatchingspans () {
 	// embedded qstruct;
 		 
-	
-	assertEquals( 
-		"",
-		treeString("<s>[]*</z>;")
-		);
+	// the treeString is returned, but a FailedPredicateException error is also signaled;
+	     assertEquals("(request (query (qstruct (matches (span < (skey s) >) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (closingspan < / (skey z) >)))) ;)", 
+		 			treeString("<s>[]*</z>;"));
+		 assertEquals("rule qstruct failed predicate: {text1.equals(text2)}?", errorMessage("<s>[]*</z>;"));
 };
 
 
@@ -578,25 +579,25 @@ public void testStructtriple () {
 public void teststructstartswithsqstruct () {
 	
 		 assertEquals( 
-		"",
-		treeString(" <s><np>[]*</np> []* <np>[]*</np>;")
+		"(request (query (qstruct (matches (span < (skey s) >) (sequence (segment (qstruct (matches (span < (skey np) >) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (closingspan < / (skey np) >)))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (span < (skey np1) >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *))))) (closingspan < / (skey np1) >)))) ;)",
+		treeString(" <s><np>[]*</np> []* <np1>[]*</np1>;")
 		);
+		assertEquals("rule qstruct failed predicate: {text1.equals(text2)}?", errorMessage("<s>[]*</z>;"));
 };
 
 //@Ignore
 @Test
 public void teststructendswithqstruct () {
 	
-		 assertEquals( 
-		"(request (query ([qstruct (matches (span < (skey s) >) (sequence (segment (qstruct (matches (span < (skey np) >) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (closingspan < / (skey np) >)))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (qstruct (matches (span < (skey np) >) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (closingspan < / (skey np) >))))) (closingspan < / (skey s) >)))) ;)",
+		assertEquals( "(request (query (qstruct (matches (span < (skey np) >) (sequence (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (closingspan < / (skey np) >)) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (qstruct (matches (span < (skey np) >) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (closingspan < / (skey np) >))))) (closingspan < / (skey s) >)))) ;)",
 		treeString("<np>[]*</np> []* <np>[]*</np></s>;")
 		);
+		assertEquals("rule qstruct failed predicate: {text1.equals(text2)}?", errorMessage("<s>[]*</z>;"));
 };
 @Test
 public void testsegmentafterstruct () {
 
-		 assertEquals( 
-		"(request (query (qstruct (matches (span < (skey np) >) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (closingspan < / (skey np) >))) (segment (token (key (regex \"copil\"))))) ;)",
+		 assertEquals("(request (query (qstruct (matches (span < (skey np) >) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (closingspan < / (skey np) >))) (segment (token (key (regex \"copil\"))))) ;)",
 		treeString("<np>[]*</np> \"copil\" ;")
 		);
 };
@@ -760,7 +761,6 @@ public void testStructSeqEndsWith () {
 @Test
 public void testPositionOpsLBoundTerm () {
 
- 	// am nevoie de term in term here!!!! aici am ramas!
 	assertEquals( 
 	"(request (query (segment (token [ (term ! ( (layer lemma) (termOp =) (key (regex \"copil\")) ) & (position lbound ( (span < (foundry base) / (layer s) (termOp =) (skey s) >) ))) ]))) ;)",
 	treeString("[!(lemma=\"copil\") & lbound(<base/s=s>) ];") //
@@ -793,8 +793,13 @@ public void testPositionOpsRBoundSequence () {
     public void testWithinNp () {
 
     	 	assertEquals( 
-    		"(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])))) (within within np) ;)",
+    		"(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])))) (within within (span (skey np))) ;)",
     		treeString(" [pos=\"NN\"] []* [pos=\"NN\"] within np;")
+    		);
+
+			assertEquals( 
+    		"(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])))) (within within (span < (skey np) >)) ;)",
+    		treeString(" [pos=\"NN\"] []* [pos=\"NN\"] within <np>;")
     		);
     };
 
@@ -911,12 +916,43 @@ public void testPositionOpsRBoundSequence () {
         try {
             Method startRule = CQPParser.class.getMethod("request");
             ANTLRInputStream input = new ANTLRInputStream(query);
-            lexer.setInputStream(input);
+            Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(
+                query);
+			lexer.setInputStream(input);
+			lexer.removeErrorListeners();
+			lexer.addErrorListener(errorListener);
             CQPParser parser = new CQPParser(new CommonTokenStream(lexer));
-
+			parser.removeErrorListeners();
+            parser.addErrorListener(errorListener);
             // Get starting rule from parser
             tree = (ParserRuleContext) startRule.invoke(parser, (Object[]) null);
-            return Trees.toStringTree(tree, parser);
+				return Trees.toStringTree(tree, parser);
+			
+			
+        }
+        catch (Exception e) {
+            System.err.println(e);
+        };
+        return "";
+    }
+
+	 private String  errorMessage(String query) {
+        try {
+            Method startRule = CQPParser.class.getMethod("request");
+            ANTLRInputStream input = new ANTLRInputStream(query);
+            Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(
+                query);
+			lexer.setInputStream(input);
+			lexer.removeErrorListeners();
+			lexer.addErrorListener(errorListener);
+            CQPParser parser = new CQPParser(new CommonTokenStream(lexer));
+			parser.removeErrorListeners();
+            parser.addErrorListener(errorListener);
+            // Get starting rule from parser
+            tree = (ParserRuleContext) startRule.invoke(parser, (Object[]) null);
+            if(errorListener.getMessage().contains("text1"))
+			{return errorListener.getMessage();}
+			
         }
         catch (Exception e) {
             System.err.println(e);

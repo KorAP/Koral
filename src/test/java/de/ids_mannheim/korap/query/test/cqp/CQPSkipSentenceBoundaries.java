@@ -57,7 +57,7 @@ public class CQPSkipSentenceBoundaries extends BaseQueryTest {
     @Test
 
     public void skipendswith () throws JsonProcessingException, IOException {
-
+       // all the sequence is in the span of a sentence, at the end of it.
         query = "\"copil\" []{,5} \"cuminte\" </base/s=s>";
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
@@ -109,6 +109,8 @@ public class CQPSkipSentenceBoundaries extends BaseQueryTest {
     @Test
     public void skipstartswith () throws JsonProcessingException, IOException {
         query = "<base/s=s> \"copil\" []{,5} \"cuminte\"";
+        // all the sequence is in the span of a sentence, at the beggining of it.
+        
         qs.setQuery(query, "CQP");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:group", res.at("/query/@type").asText());

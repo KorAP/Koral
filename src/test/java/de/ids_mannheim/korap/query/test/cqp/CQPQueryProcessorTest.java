@@ -609,7 +609,7 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
 
     @Test
     public void testClasses () throws JsonProcessingException, IOException {
-        
+        // equivalent with  query = "{[base=Mann]}" in PQ+
     	query = "@[base='Mann']";
         qs.setQuery(query, "CQP");
         result = mapper.readTree(qs.toJSON());
@@ -1008,18 +1008,18 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
         
         
     }
-    
-//    @Test
-//    public void testWithinElement () throws JsonProcessingException, IOException {
-//        query = "[p=VVFIN] within <base/s=s>";
-//        qs.setQuery(query, "CQP");
-//        res = mapper.readTree(qs.toJSON());
-//        System.out.println(res);
-//        assertEquals("operation:position", res.at("/query/operation").asText());
-//        assertEquals("frames:isAround", res.at("/query/frames/0").asText());
-//        assertEquals("s", res.at("/query/operands/0/wrap/key").asText());
-//        assertEquals("VVFIN", res.at("/query/operands/1/wrap/key").asText());
-//    }
+
+   @Test
+   public void testWithinElement () throws JsonProcessingException, IOException {
+	   // within implemented with span now!
+        query = "[p='VVFIN'] within <base/s=s>";
+        qs.setQuery(query, "CQP");
+        result = mapper.readTree(qs.toJSON());
+        assertEquals("operation:position", result.at("/query/operation").asText());
+        assertEquals("frames:isAround", result.at("/query/frames/0").asText());
+        assertEquals("s", result.at("/query/operands/0/wrap/key").asText());
+        assertEquals("VVFIN", result.at("/query/operands/1/wrap/key").asText());
+        }
 
 
     @Test
@@ -1116,8 +1116,6 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
         assertEquals("Sport", result.at("/collection/operands/0/value").asText());
         assertEquals("author", result.at("/collection/operands/1/key").asText());
         assertEquals("Smith", result.at("/collection/operands/1/value").asText());
-
-        // TODO more tests
     }
    
  

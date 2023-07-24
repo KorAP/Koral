@@ -15,7 +15,6 @@ CQP grammar
 --author Elena IRimia, based on PQ Plus grammar (author: Joachim BIngel)
 Based on CQP
  - http://cwb.sourceforge.net/files/CQP_Tutorial/
-&& - elemente de scos din gramatica!
  */
 
 POSITION_OP : 'lbound' | 'rbound';
@@ -245,7 +244,6 @@ group
 spanclass
 : (SPANCLASS_ID (token|segment|group| ) //LRBRACE sequence RRBRACE) // ai adaugat sequence! vezi de ce nu intra pe ea, si daca intra, vezi cum ruleaza procesorul; am nevoie de token si group aici?
   | label COLON (segment|sequence) 
-  | LBRACE SPANCLASS_ID? (segment|sequence) RBRACE /* do i need this???*/
   | MATCH_OPM LRPAREN meetunion RRPAREN // for recursive meet
   | MATCH_OPM segment // for simple meet
   )
@@ -323,7 +321,7 @@ query
 ;
 
 within
-: WITHIN WORD
+: WITHIN span   //WORD
 ;
 
 /**
@@ -358,6 +356,8 @@ alignment
 matching
 : (MU LRPAREN meetunion RRPAREN);
 // //| (MATCH_OPF LRPAREN SPANCLASS_ID? (segment|sequence)? RRPAREN)
+
+
 meetunion
 : 
 (((LRPAREN meetunion RRPAREN) | segment) ((LRPAREN meetunion RRPAREN) | segment) ((NUMBER  NUMBER) | span))

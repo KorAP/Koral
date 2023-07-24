@@ -70,7 +70,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
         ParseTree tree;
         tree = parseCQPQuery(query);  
-        // fixme: not required!?
+
        
         super.parser = this.parser;
         if (DEBUG) {
@@ -110,7 +110,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (visited.contains(node))  /*** if the node was visited in previous steps ***/
             return;
         else
-        	/** if skipvisited is false, we need the node to be visited again in future operations;  ***/
+        	/** if putvisited is false, we need the node to be visited again in future operations;  ***/
         	/** so we don't put it in visited! ***/ 
         	if (putvisited) visited.add(node); 
 
@@ -167,9 +167,11 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         if (nodeCat.equals("token")) {
             processToken(node);
         }
+        /*
         if (nodeCat.equals("tokenstruct")) {
             processTokenStruct(node);
         }
+        */
         
         if (nodeCat.equals("alignment")) {
             processAlignment(node);
@@ -184,31 +186,23 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         	        }
         	 else
         	 {
-        		 // for struct like <s> ... </s>; check if the span is a closing one;
-        		 spanNodeCats.push(nodeCat);
-        		 String nCat = getNodeCat(node.getChild(1));
-        		 int nspan = spanNodeCats.size();
-        		 if (!nCat.equals("/"))
+        		 // for struct like <s> ... </s>; we don't want to serialize span s two times;
+        		String spankey ="";
+                 for (int i=0;i<node.getChildCount()-1; i++ )
+                 {
+        		    String nCat = getNodeCat(node.getChild(i));
+                    if (nCat.equals("skey"))
+                    {
+                            spankey = node.getChild(i).getText();
+                    }
+                 }
+        		if (!spanNodeCats.contains(spankey))
         		 { 
-        			 //check if two operators situation (lbound and rbound); probably we don't need this!!!
-        			/* if (!objectStack.isEmpty())
-        			 {
-        				 Map <String, Object> top = objectStack.getFirst();
-        				 Object ops =  top.get("operands");
-        				 if((ops!=null)&&(!ops.toString().contains("koral:span")))		
-        				 processSpan(node);
-        			 }
-        			 else */
+                     spanNodeCats.push(spankey);
                      processSpan(node);
         				 
         		 }
-        		 else
-        		 {
-        			 if (nspan==1) // for situations like: sequence </s>, endsWith
-        			 {
-        				 processSpan(node);
-        			 }
-        		 }
+        		
         	 }
         }
       
@@ -255,9 +249,9 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         	processPosition(node);
         }
         	
-        	
         if (nodeCat.equals("within")
-                && !getNodeCat(node.getParent()).equals("position")) { // why this condition??
+                && !getNodeCat(node.getParent()).equals("position")) { // why this condition??: elena: it is from
+                    // PQ+ implementation; couldn't find illustrative tests; 
             processWithin(node);
         }
 
@@ -272,21 +266,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
          */
         for (int i = 0; i < node.getChildCount(); i++) {
         		ParseTree child = node.getChild(i);
-                
-        		if (!nodeCat.equals("meetunion") )
-                {
-        			  processNode(child, putvisited); // we propagate putvisited down in the tree;
-                }
-        	    else
-        	    {
-        	    	/*** if the node is meetunion, check if it has a span meet parent; ****/
-        	    	/*** if the parent is span meet, we do not process child nodes; they were processed with putvisited false? ??? ***/
-        	    	if(!checkIfParentIsSpanMeet(node))
-        	    	{
-        	    		processNode(child, putvisited);
-        	    	}
-        	    }
-         
+                processNode(child, putvisited);
         }
 
         // Stuff that happens when leaving a node (taking items off stacks)
@@ -429,11 +409,14 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         return recurrence;
     }
 
+/*
+        // check if last child of the parent meet is integer, otherwise the parent meet is a span meet
+        // not used!!!
 
-    private boolean checkIfParentIsSpanMeet (ParseTree node) {
+        private boolean checkIfParentIsSpanMeet (ParseTree node) {
 
     	boolean parentspanmeet=false;
-    	// check if last child of the parent meet is integer, otherwise the parent meet is a span meet
+    	
         if (getNodeCat(node.getParent().getParent().getParent()).equals("meetunion") )
                 {
                     
@@ -468,6 +451,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                 }
             return parentspanmeet;    
     }
+     */
     private Integer computeSegmentDistance(ParseTree node) {
     	
     	int distance=0;
@@ -583,9 +567,8 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     	window = new Integer[] { Integer.parseInt(node.getChild(offposition1).getText()), Integer.parseInt(node.getChild(offposition2).getText()) }; // if fails, it is a meet span
     	if ((window[0]==0)||(window[1]==0))
     	{
-    		//addWarning("The MeetUnion offsets cannot be 0!!");
     		addError(StatusCodes.MALFORMED_QUERY,"The MeetUnion offsets cannot be 0!!");
-    		
+
     		return;
     	}
     	else
@@ -704,7 +687,6 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
                             /***  implementing disjunction of sequences ***/
         				    
-                     //   	disj= true;
         				    Map<String, Object> disjunction = KoralObjectGenerator.makeGroup(KoralOperation.DISJUNCTION);
         				    putIntoSuperObject(disjunction);
         				    objectStack.push(disjunction);
@@ -798,8 +780,6 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         stackedObjects++; 
         processNode(node.getChild(node.getChildCount()-1), true);		
         stackedObjects++;
-  //      objectStack.push(position); 
-        
    
 		Map<String, Object> spannedsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
 		putIntoSuperObject(spannedsequence);
@@ -844,7 +824,6 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 				}
 				if (lastobj.containsKey("frames")) // check if frames:isAround and ignore the emptyTokens if the case, for the <s> []* token []* </s> situations;
 				{
-                   // String category= getNodeCat(node.getParent());
                     if (!getNodeCat(node.getParent()).equals("emptyTokenSequenceAround"))
                     {
                         putIntoSuperObject(object);
@@ -905,7 +884,6 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         List<ParseTree> negations = getChildrenWithCat(node, "!");
         int termOrTermGroupChildId = 1;
         boolean negated = false;
-       // boolean isRegex = false;
         if (negations.size() % 2 == 1) {
             negated = true;
             termOrTermGroupChildId += negations.size();
@@ -991,7 +969,8 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         visited.addAll(getChildren(node));
     }
     
-    
+    /*
+    !! not used!
     private void processTokenStruct (ParseTree node) {
     	// differs from processToken because it doesn't require/have [] around the token
         Map<String, Object> token = KoralObjectGenerator.makeToken();
@@ -1063,7 +1042,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         visited.addAll(getChildren(node));
     }
 
-
+ */
 
     /**
      * Processes an 'alignment' node. These nodes represent alignment
@@ -1139,7 +1118,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             wrappedTerm.put("layer", layer);
         }
         
-        // modified for the new span with WORD insted of key
+        // modified for the new span with WORD instead of key
         String key="";
         if (keyNode!=null)
         	{
@@ -1277,7 +1256,6 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     }
 
-// verifica si asta!!!
     private void processMatching (ParseTree node) {
         // Step I: get info
         ArrayList<Integer> classRefs = new ArrayList<Integer>();
@@ -1363,7 +1341,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     @SuppressWarnings("unchecked")
     private void processWithin (ParseTree node) {
         ParseTree domainNode = node.getChild(1);
-        String domain = getNodeCat(domainNode);
+        String domain = getNodeCat(getFirstChildWithCat(domainNode,"skey").getChild(0));
         Map<String, Object> span = KoralObjectGenerator
                 .makeSpan(domain);
         Map<String, Object> queryObj = (Map<String, Object>) requestMap
@@ -1428,7 +1406,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                 min = 0;
             else {
                 min = max;
-                // mai avem exprimare a claselor asa??
+              
                 // addWarning("Your query contains a segment of the form {n}, where n is some number. This expression is ambiguous. " +
                 // "It could mean a repetition (\"Repeat the previous element n times!\") or a word form that equals the number, "+
                 // "enclosed by a \"class\" (which is denoted by braces like '{x}', see the documentation on classes)."+
@@ -1870,6 +1848,10 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
+    /**
+     * @param query
+     * @return
+     */
     private ParserRuleContext parseCQPQuery (String query) {
         Lexer lexer = new CQPLexer((CharStream) null);
         ParserRuleContext tree = null;
