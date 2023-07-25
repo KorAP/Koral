@@ -9,6 +9,9 @@ options
 language=Java;
 }
 
+@members {
+String text1, text2;
+}
 /*
 
 CQP grammar 
@@ -266,15 +269,15 @@ emptyTokenSequenceClass
 
 sstruct: endswith | startswith   ; 
 qstruct:  isaround { 
-  String text1 = _localctx.getChild(0).getChild(0).getText();
+  text1 = _localctx.getChild(0).getChild(0).getText();
   text1 = text1.substring(1, text1.length()-1);
-  String text2 = _localctx.getChild(0).getChild(_localctx.getChild(0).getChildCount()-1).getText();
+  text2 = _localctx.getChild(0).getChild(_localctx.getChild(0).getChildCount()-1).getText();
   text2= text2.substring(2, text2.length()-1);
 }
 {text1.equals(text2)}?|  matches { 
-  String text1 = _localctx.getChild(0).getChild(0).getText();
+  text1 = _localctx.getChild(0).getChild(0).getText();
   text1 = text1.substring(1, text1.length()-1);
-  String text2 = _localctx.getChild(0).getChild(_localctx.getChild(0).getChildCount()-1).getText();
+  text2 = _localctx.getChild(0).getChild(_localctx.getChild(0).getChildCount()-1).getText();
   text2= text2.substring(2, text2.length()-1);
 }
 
