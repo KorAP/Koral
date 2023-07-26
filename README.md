@@ -10,11 +10,12 @@ Koral supports the following corpus query languages (QLs):
 * [ANNIS QL](http://annis-tools.org/aql.html)
 * [Poliqarp QL](http://korpus.pl/en/cheatsheet/node3.html) (extended by numerous operators to "PoliqarpPlus" QL)
 * [CQL](http://www.loc.gov/standards/sru/cql/spec.html) (for basic search as described in [the CLARIN FCS 1.0 Specification](https://www.clarin.eu/content/federated-content-search-clarin-fcs) )
+* [CQP](http://cwb.sourceforge.net/files/CQP_Tutorial/)
 * FCSQL (based on [CQP](http://cwb.sourceforge.net/files/CQP_Tutorial/), for advanced search as described in the CLARIN FCS 2.0 specification draft)
 
 ## Usage Example
 
-You can use the main class QuerySerializer to translate and serialize queries. Valid QL identifiers are `cosmas2`, `annis`, `poliqarp`, `poliqarpplus`, `cql` and `fcsql`.
+You can use the main class QuerySerializer to translate and serialize queries. Valid QL identifiers are `cosmas2`, `annis`, `poliqarp`, `poliqarpplus`, `cql`, `cqp`, and `fcsql`.
 
 ```java
 import de.ids_mannheim.korap.query.serialize.QuerySerialzer;
@@ -134,6 +135,8 @@ Koral and KoralQuery were developed by Joachim Bingel,
 Nils Diewald, Michael Hanl and Eliza Margaretha at the
 [Leibniz Institute for the German Language (IDS)](https://www.ids-mannheim.de/),
 member of the [Leibniz Association](https://www.leibniz-gemeinschaft.de).
+
+The CQP implementation was authored by Elena Irimia.
 
 The ANTLR grammars for parsing ANNIS QL and COSMAS II QL were developed by
 Thomas Krause (HU Berlin) and Franck Bodmer (IDS Mannheim), respectively.
