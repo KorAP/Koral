@@ -59,22 +59,31 @@ public class Antlr4DescriptiveErrorListener extends BaseErrorListener {
 
     private String getDetailedErrorMessage () {
         // default message, in case no detailed info is available;
-        String msg = "Malformed query. Could not parse.";
-        char offendingSymbol = query.charAt(0);
-        if (query.length() > charPosition)
+        String msg ="";
+        if (message.contains("text1"))
+        {
+            // qstruct and sstruct FailedPredicateException message
+            msg = "unmatched span tags!";
+        }
+        else
+        {
+            msg = "Malformed query. Could not parse.";
+            char offendingSymbol = query.charAt(0);
+            if (query.length() > charPosition)
             offendingSymbol = query.charAt(charPosition);
-        msg = "Failing to parse at symbol: '" + offendingSymbol + "'";
-        // check for unbalanced parantheses
-        SimpleEntry<String, Integer> unbalanced = QueryUtils
+            msg = "Failing to parse at symbol: '" + offendingSymbol + "'";
+            // check for unbalanced parantheses
+            SimpleEntry<String, Integer> unbalanced = QueryUtils
                 .checkUnbalancedPars(query);
-        if (unbalanced != null) {
+            if (unbalanced != null) {
             msg = unbalanced.getKey();
             charPosition = unbalanced.getValue();
-        }
-        // check if more more arguments expected before closing operator
-        if (String.valueOf(offendingSymbol).equals(")")) {
+            }
+            // check if more arguments expected before closing operator
+            if (String.valueOf(offendingSymbol).equals(")")) {
             msg = "Early closing parenthesis. Possibly lacking arguments for operator.";
         }
+    }
         return msg;
     }
 
