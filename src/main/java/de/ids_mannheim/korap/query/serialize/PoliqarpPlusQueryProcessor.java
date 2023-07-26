@@ -140,64 +140,64 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             processSegment(node);
         }
 
-        if (nodeCat.equals("sequence")) {
+        else if (nodeCat.equals("sequence")) {
             processSequence(node);
         }
 
-        if (nodeCat.equals("emptyTokenSequence")) {
+        else if (nodeCat.equals("emptyTokenSequence")) {
             processEmptyTokenSequence(node);
         }
 
-        if (nodeCat.equals("emptyTokenSequenceClass")) {
+        else if (nodeCat.equals("emptyTokenSequenceClass")) {
             processEmptyTokenSequenceClass(node);
         }
 
-        if (nodeCat.equals("token")) {
+        else if (nodeCat.equals("token")) {
             processToken(node);
         }
 
-        if (nodeCat.equals("alignment")) {
+        else if (nodeCat.equals("alignment")) {
             processAlignment(node);
         }
 
-        if (nodeCat.equals("span")) {
+        else if (nodeCat.equals("span")) {
             processSpan(node);
         }
 
-        if (nodeCat.equals("disjunction")) {
+        else if (nodeCat.equals("disjunction")) {
             processDisjunction(node);
         }
 
-        if (nodeCat.equals("position")) {
+        else if (nodeCat.equals("position")) {
             processPosition(node);
         }
 
-        if (nodeCat.equals("relation")) {
+        else if (nodeCat.equals("relation")) {
             processRelation(node);
         }
 
-        if (nodeCat.equals("spanclass")) {
+        else if (nodeCat.equals("spanclass")) {
             processSpanclass(node);
         }
 
-        if (nodeCat.equals("matching")) {
+        else if (nodeCat.equals("matching")) {
             processMatching(node);
         }
 
-        if (nodeCat.equals("submatch")) {
+        else if (nodeCat.equals("submatch")) {
             processSubmatch(node);
         }
 
-        if (nodeCat.equals("queryref")) {
+        else if (nodeCat.equals("queryref")) {
             processQueryref(node);
         }
 
-        if (nodeCat.equals("meta")) {
+        else if (nodeCat.equals("meta")) {
             processMeta(node);
         }
 
-        if (nodeCat.equals("within")
-                && !getNodeCat(node.getParent()).equals("position")) {
+        else if (nodeCat.equals("within")
+                 && !getNodeCat(node.getParent()).equals("position")) {
             processWithin(node);
         }
 
@@ -211,8 +211,7 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
          ****************************************************************
          */
         for (int i = 0; i < node.getChildCount(); i++) {
-            ParseTree child = node.getChild(i);
-            processNode(child);
+            processNode(node.getChild(i));
         }
 
         // Stuff that happens when leaving a node (taking items off stacks)
