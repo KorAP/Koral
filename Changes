@@ -1,9 +1,13 @@
-0.39.1
+0.40 2023-07-26
+    - [feature] Initial support for CQP
+      (irimia, margaretha, diewald)
+      The commit consists of ~15 squashed commits mainly
+      authored by irimia.
 
 0.39 2023-01-12
-    - Updated to Java 11
-    - Dependencies updated
-    - Fix reference bug in Annis (resolved #129, diewald)
+    - [cleanup] Updated to Java 11
+    - [security] Dependencies updated
+    - [bugfix] Fix reference bug in Annis (resolved #129, diewald)
 
 0.38.2 2022-10-05
     - [feature] Improve regex treatment of negative
@@ -13,7 +17,7 @@
 
 0.38.1 2022-10-05
     - [security] Updated log4j (diewald)
-    - Fixed Annis OR group (resolved #96) 
+    - [bugfix] Fixed Annis OR group (resolved #96) 
     - [security] Updated jackson (diewald)
 
 0.38 2021-12-10
