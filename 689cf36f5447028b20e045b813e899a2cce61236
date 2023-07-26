@@ -16,6 +16,23 @@
       "message": "Here is a comment that you said was resolved, but seems not to be part of this commit:\nhttps://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/5783/1/src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java#56",
       "revId": "689cf36f5447028b20e045b813e899a2cce61236",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ed08a045_f9e888bd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 17
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-07-26T12:35:16Z",
+      "side": 1,
+      "message": "Here are further comments that seems to not be resolved, but were marked as resolved:\nhttps://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/5783/comment/d9010dca_fb9b5d2a/\n\nThis test seems to be missing: https://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/5723/1/src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPRegionTest.java#b185",
+      "revId": "689cf36f5447028b20e045b813e899a2cce61236",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
