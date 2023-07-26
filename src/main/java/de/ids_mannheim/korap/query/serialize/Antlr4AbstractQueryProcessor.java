@@ -138,7 +138,31 @@ public abstract class Antlr4AbstractQueryProcessor extends
         }
         return children;
     }
-
+    /**
+     * Returns all children of a node which are not terminal nodes
+     * 
+     * @param node
+     *            The node.
+   
+     * @return A (possibly empty) list containing all non-terminal children    */
+    protected List<ParseTree> getChildrenWithChildren (ParseTree node) {
+        ArrayList<ParseTree> children = new ArrayList<ParseTree>();
+        for (int i = 0; i < node.getChildCount(); i++) 
+        {
+        	
+        	
+        	ArrayList<ParseTree> childrenofchildren = new ArrayList<ParseTree>();
+        	for (int j=0; j< node.getChild(i).getChildCount(); j++)
+        	{
+        		childrenofchildren.add(node.getChild(i).getChild(j));
+        	}
+        		if (!childrenofchildren.isEmpty())
+        		{
+        			children.add(node.getChild(i));
+        		}
+        }
+        return children;
+    }
 
     /**
      * Returns all descendants (direct or indirect children) of a node
