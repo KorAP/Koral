@@ -38,6 +38,11 @@ public abstract class AbstractQueryProcessor {
      * Keeps track of open node categories.
      */
     protected LinkedList<String> openNodeCats = new LinkedList<String>();
+    
+    /**
+     * Keeps track of span node categories.
+     */
+    protected LinkedList<String> spanNodeCats = new LinkedList<String>();
     /**
      * Keeps track of all visited nodes in a tree.
      */
@@ -211,6 +216,13 @@ public abstract class AbstractQueryProcessor {
     public void addHighlightClass (int classId) {
         highlightClasses.add(classId);
         meta.put("highlight", highlightClasses);
+    }
+    public void removeExcessHighlightClass () {
+        for (int i=1; i<highlightClasses.size(); i++)
+        {
+    	highlightClasses.remove(i);
+        }
+       
     }
 
 
