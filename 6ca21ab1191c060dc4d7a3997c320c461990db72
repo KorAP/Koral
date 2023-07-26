@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d9cf02e6_593cdc0f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-07-26T11:32:45Z",
+      "side": 1,
+      "message": "Somehow this repeatedly checked nodecat before for every node.",
+      "revId": "6ca21ab1191c060dc4d7a3997c320c461990db72",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
