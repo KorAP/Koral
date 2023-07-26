@@ -945,14 +945,22 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
             // establish boolean relation
             ParseTree boolOp = getFirstChildWithCat(node, "boolOp");
 
-			// Create group
-            if (boolOp.getText().equals("&")) {
+			// Create group // de Morgan's Laws
+            if (boolOp.getText().equals("&") && negatedGlobal==false) {
                 termGroup = KoralObjectGenerator
                         .makeTermGroup(KoralTermGroupRelation.AND);
             }
-            else {
+            if (boolOp.getText().equals("|") && negatedGlobal==false) {
                 termGroup = KoralObjectGenerator
                         .makeTermGroup(KoralTermGroupRelation.OR);
+            }
+            if (boolOp.getText().equals("&") && negatedGlobal==true) {
+                termGroup = KoralObjectGenerator
+                        .makeTermGroup(KoralTermGroupRelation.OR);
+            }
+            if (boolOp.getText().equals("|") && negatedGlobal==true) {
+                termGroup = KoralObjectGenerator
+                        .makeTermGroup(KoralTermGroupRelation.AND);
             }
             ArrayList<Object> operands = (ArrayList<Object>) termGroup
                     .get("operands");
