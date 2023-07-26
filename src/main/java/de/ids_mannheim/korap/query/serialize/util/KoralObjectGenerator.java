@@ -37,9 +37,10 @@ public class KoralObjectGenerator {
         Map<String, Object> term = makeTerm();
         term.put("key", key);
         // EM: adding structure layer
-        if (key.equals("s")){
+        //EI: remove structure layer
+       /* if (key.equals("s")){
             term.put("layer", "s");
-        }
+        }*/
         span.put("wrap", term);
         return span;
     }
