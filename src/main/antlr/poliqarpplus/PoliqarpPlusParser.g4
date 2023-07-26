@@ -133,7 +133,7 @@ token
 ;
 
 span
-: LT ((foundry SLASH)? layer termOp)? key NEG* ((LRPAREN term RRPAREN|LRPAREN termGroup RRPAREN)? | (term|termGroup)?) GT
+: LT ((foundry SLASH)? layer termOp)? key  ((NEG* LRPAREN term RRPAREN| NEG* LRPAREN termGroup RRPAREN)? | (NEG* term| NEG* termGroup)?) GT
 ;
 
 position
