@@ -147,38 +147,40 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             processSegment(node);
         }
 
-        if (nodeCat.equals("sequence")) {
+        else if (nodeCat.equals("sequence")) {
             processSequence(node);
         }
-        if (nodeCat.equals("meetunion")) {
+
+        else if (nodeCat.equals("meetunion")) {
             
         	// for the outer meet, of whatever type, putvisited is
             // true and the node is put in visited
         	processMeetUnion(node, putvisited);
         }
 
-        if (nodeCat.equals("emptyTokenSequence")) {
+        else if (nodeCat.equals("emptyTokenSequence")) {
             processEmptyTokenSequence(node);
         }
 
-        if (nodeCat.equals("emptyTokenSequenceClass")) {
+        else if (nodeCat.equals("emptyTokenSequenceClass")) {
             processEmptyTokenSequenceClass(node);
         }
 
-        if (nodeCat.equals("token")) {
+        else if (nodeCat.equals("token")) {
             processToken(node);
         }
+
         /*
         if (nodeCat.equals("tokenstruct")) {
             processTokenStruct(node);
         }
         */
         
-        if (nodeCat.equals("alignment")) {
+        else if (nodeCat.equals("alignment")) {
             processAlignment(node);
         }
 
-        if ((nodeCat.equals("span") || nodeCat.equals("closingspan")) && getNodeCat(node.getChild(0))!="skey") {
+        else if ((nodeCat.equals("span") || nodeCat.equals("closingspan")) && getNodeCat(node.getChild(0))!="skey") {
             String nCat0 = getNodeCat(node.getChild(0));
             if (nCat0.equals("skey")) {
                 // for unlayered spans: \region[np], lbound(np), etc!
@@ -201,49 +203,49 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             }
         }
       
-        if (nodeCat.equals("disjunction")) {
+        else if (nodeCat.equals("disjunction")) {
             processDisjunction(node);
         }
 
-        if (nodeCat.equals("relation")) {
+        else if (nodeCat.equals("relation")) {
             processRelation(node);
         }
 
-        if (nodeCat.equals("spanclass")) {
+        else if (nodeCat.equals("spanclass")) {
             processSpanClass(node);
         }
 
-        if (nodeCat.equals("matching")) {
+        else if (nodeCat.equals("matching")) {
             processMatching(node);
         }
 
-        if (nodeCat.equals("submatch")) {
+        else if (nodeCat.equals("submatch")) {
             processSubMatch(node);
         }
 
-        if (nodeCat.equals("queryref")) {
+        else if (nodeCat.equals("queryref")) {
             processQueryRef(node);
         }
 
-        if (nodeCat.equals("meta")) {
+        else if (nodeCat.equals("meta")) {
             processMeta(node);
         }
        
-        if (nodeCat.equals("sstruct")){
+        else if (nodeCat.equals("sstruct")){
         	
         	processPosition(node);
         }
            
-        if (nodeCat.equals("qstruct")){
+        else if (nodeCat.equals("qstruct")){
         	
         	processPosition(node);
         }
-        if (nodeCat.equals("position")){
+        else if (nodeCat.equals("position")){
         	
         	processPosition(node);
         }
         	
-        if (nodeCat.equals("within")
+        else if (nodeCat.equals("within")
                 && !getNodeCat(node.getParent()).equals("position")) { // why this condition??: elena: it is from
                     // PQ+ implementation; couldn't find illustrative tests; 
             processWithin(node);
