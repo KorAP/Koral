@@ -171,9 +171,14 @@ public class CqpGrammarTest {
 
     @Test
     public void testRegexEscapedSquoutes () {
-    		// escape by doubling the single quote
-    	 	
-			assertEquals( 
+    		
+    	 	// escape with \
+				assertEquals( 
+    	    		"(request (query (segment (token (key (regex '22\\'-inch'))))) ;)", 
+    	    		treeString(query = "'22\\'-inch';")
+    	    		);	
+			// escape by doubling the single quote
+					assertEquals( 
     		"(request (query (segment (token (key (regex ''))))))", 
     		treeString("''';") // this should not parse!! should signal an error! the regex is constructed when the parser finds the second '  !
     		);  // how are these situations treated in PQ+?
@@ -195,6 +200,8 @@ public class CqpGrammarTest {
     	    		"(request (query (segment (token (key (regex 'anna\\'s house'))))) ;)", 
     	    		treeString("'anna\\'s house';")
     	    		);
+
+					
     };
     
     @Test
