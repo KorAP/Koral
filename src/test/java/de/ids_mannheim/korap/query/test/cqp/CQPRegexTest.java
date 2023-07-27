@@ -17,7 +17,30 @@ public class CQPRegexTest extends BaseQueryTest {
     public CQPRegexTest () {
         super("CQP");
     }
+       
+     @Test
+    public void testRegexError () throws JsonProcessingException {
+       
+        query = "\"?\"";
+        result = runQuery(query);
+        assertEquals(302, result.at("/errors/0/0").asInt());
+        assertEquals("Failing to parse at symbol: '\"'", result.at("/errors/0/1").asText());
+       
+        query = "\"\\\"";
+        result = runQuery(query);
+        assertEquals(302, result.at("/errors/0/0").asInt());
+        assertEquals("Failing to parse at symbol: '\"'", result.at("/errors/0/1").asText());
+        
+        query = "\"\"\"";
+        result = runQuery(query);
+        assertEquals(302, result.at("/errors/0/0").asInt());
+        assertEquals("Failing to parse at symbol: '\"'", result.at("/errors/0/1").asText());
 
+        query = "''';"; 
+        result = runQuery(query);
+        assertEquals(302, result.at("/errors/0/0").asInt());
+        assertEquals("Failing to parse at symbol: '\''", result.at("/errors/0/1").asText());
+    }
 
     @Test
     public void testRegex () throws JsonProcessingException {
@@ -68,14 +91,8 @@ public class CQPRegexTest extends BaseQueryTest {
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
         
         
-        query = "\"?\"";
-        result = runQuery(query);
-        assertEquals(302, result.at("/errors/0/0").asInt());
+ 
         
-        query = "\"\"\"";
-        result = runQuery(query);
-        assertEquals("", result.at("/query/wrap/key").asText());
-        assertNotEquals(302, result.at("/errors/0/0").asInt());
     }
 
 
@@ -83,6 +100,18 @@ public class CQPRegexTest extends BaseQueryTest {
     public void testRegexEscape () throws JsonProcessingException {
         // Escape regex symbols
 
+
+        
+        
+        query = "\"a\\.\\+\\?\\\\\""; //query = "a\.\+\?\\"
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", result.at("/query/wrap/type").asText());
+        assertEquals("orth", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("a\\.\\+\\?\\", result.at("/query/wrap/key").asText());
+        
         query = "\"a\\.\"";
         result = runQuery(query);
         assertEquals("koral:token", result.at("/query/@type").asText());
@@ -151,7 +180,7 @@ public class CQPRegexTest extends BaseQueryTest {
         assertEquals("type:regex", result.at("/query/wrap/type").asText());
         assertEquals("orth", result.at("/query/wrap/layer").asText());
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
-        assertEquals("22\\\"-inch", result.at("/query/wrap/key").asText());
+        assertEquals("22\"-inch", result.at("/query/wrap/key").asText());
 
 
         query = "'a''.+?';"; //query = 'a''.+?'
@@ -197,15 +226,7 @@ public class CQPRegexTest extends BaseQueryTest {
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
         assertEquals("a\\.", result.at("/query/wrap/key").asText());
 
-        query = "\"a\\.\\+\\?\\\\\""; //query = "a\.\+\?\\"
-        result = runQuery(query);
-
-        assertEquals("koral:token", result.at("/query/@type").asText());
-        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
-        assertEquals("type:regex", result.at("/query/wrap/type").asText());
-        assertEquals("orth", result.at("/query/wrap/layer").asText());
-        assertEquals("match:eq", result.at("/query/wrap/match").asText());
-        assertEquals("a\\.\\+\\?\\\\", result.at("/query/wrap/key").asText());
+     
     }
 
 

@@ -84,9 +84,9 @@ DQUOTE: ('"'|'„'|'“'|'“'|'”');
 /* Regular expressions and Regex queries */
 fragment RE_symbol     : ~('*' | '?' | '+' | '{' | '}' | '[' | ']'
                      | '(' | ')' | '|' | '\\' | '"' | ':' | '\'');
-fragment RE_esc      : ('\\' ('.' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
-                     | '(' | ')' | '|' | '\\' | ':' | '"' | '\''))| '\'' '\'' |  '"' '"';
-fragment RE_char     : (RE_symbol | RE_esc );
+fragment RE_esc      : '\\' ('.' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
+                     | '(' | ')' | '|' | '\\' | ':' | '"' | '\'')| '\'' '\'' |  '"' '"';
+fragment RE_char     : RE_symbol | RE_esc ;
 fragment RE_alter    : ((RE_char | ('(' RE_expr ')') | RE_chgroup) '|' RE_expr )+;
 
 fragment RE_chgroup  : '[' RE_char+ ']';
@@ -94,8 +94,8 @@ fragment RE_quant      : ('.' | RE_char | RE_chgroup | ( '(' RE_expr ')')) ('?' 
 fragment RE_group    : '(' RE_expr ')';
 fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_quant | RE_group)+;
 /* you can search for DQUOTE inside SQUOUTE, and viceversa:  '"' or "'"; */
-fragment RE_dquote   : DQUOTE  (RE_expr | '\'' | ':' )* DQUOTE; // DQOUTE is not good, modify like verbatim in PQ+!
-fragment RE_squote   : SQUOTE  (RE_expr | '"' | ':')* SQUOTE; 
+fragment RE_dquote   : DQUOTE  (RE_expr | '\'' | ':' )+ DQUOTE; // empty regex are no longer valid
+fragment RE_squote   : SQUOTE  (RE_expr | '"' | ':')+ SQUOTE; 
 
 
 
@@ -219,10 +219,9 @@ token
     )
 ;
 
-
-span
-: skey // for lbound/sbound; check how it works for meet!
-  | LT ((foundry SLASH)? layer termOp)? skey ((  NEG* (LRPAREN term RRPAREN|  LRPAREN termGroup RRPAREN | NEG* term | NEG* termGroup))? GT)
+spankey: skey; // simple span to be used only with operators (region, lbound,rbound, within, meet)
+span:
+ LT ((foundry SLASH)? layer termOp)? skey ((  NEG* (LRPAREN term RRPAREN|  LRPAREN termGroup RRPAREN | NEG* term | NEG* termGroup))? GT)
 ;
 
 closingspan
@@ -232,7 +231,7 @@ LT '/' ((foundry SLASH)? layer termOp)? skey ((  NEG* (LRPAREN term RRPAREN|  LR
 
 position
 //: POSITION_OP LRPAREN (segment|sequence) COMMA (segment|sequence) RRPAREN
-: POSITION_OP LRPAREN span RRPAREN 
+: POSITION_OP LRPAREN (span|spankey) RRPAREN 
 ;
 
 
@@ -288,7 +287,7 @@ matches:  span  (sequence | segment)  closingspan;
 
 startswith: span (sequence|segment);
 endswith: (sequence|segment) closingspan;
-region: SLASH REGION_OP LPAREN span RPAREN;
+region: SLASH REGION_OP LPAREN (span|spankey) RPAREN;
 
 
 
@@ -324,7 +323,7 @@ query
 ;
 
 within
-: WITHIN span   //WORD
+: WITHIN (span|spankey)   //WORD
 ;
 
 /**
@@ -363,7 +362,7 @@ matching
 
 meetunion
 : 
-(((LRPAREN meetunion RRPAREN) | segment) ((LRPAREN meetunion RRPAREN) | segment) ((NUMBER  NUMBER) | span))
+(((LRPAREN meetunion RRPAREN) | segment) ((LRPAREN meetunion RRPAREN) | segment) ((NUMBER  NUMBER) | span | spankey))
 ;
 
 /**
