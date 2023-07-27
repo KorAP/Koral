@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "af34d87b_43c51805",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-07-27T08:24:49Z",
+      "side": 1,
+      "message": "This is a failing test for the regex escaping issue. I guess, that\u0027s how it should work.",
+      "revId": "c44f2dcfd04eb5f029d54be18dc1dfc6058d9641",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
