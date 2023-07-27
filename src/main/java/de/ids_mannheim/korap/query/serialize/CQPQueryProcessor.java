@@ -178,12 +178,14 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             processAlignment(node);
         }
 
-        if ((nodeCat.equals("span") || nodeCat.equals("closingspan")) && getNodeCat(node.getChild(0))!="skey") {
-            String nCat0 = getNodeCat(node.getChild(0));
-            if (nCat0.equals("skey")) {
-                // for unlayered spans: \region[np], lbound(np), etc!
+        if (nodeCat.equals("spankey"))
+        {
+         
                 processSpan(node);
-            } else {
+        }
+          
+        if ((nodeCat.equals("span") || nodeCat.equals("closingspan")) && getNodeCat(node.getChild(0))!="skey") {
+       
                 // for struct like <s> ... </s>; we don't want to serialize span s two times;
         		String spankey ="";
                 int ccount = node.getChildCount();
@@ -198,7 +200,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                     spanNodeCats.push(spankey);
                     processSpan(node);
                 }
-            }
+           // }
         }
       
         if (nodeCat.equals("disjunction")) {
@@ -848,67 +850,72 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         List<ParseTree> negations = getChildrenWithCat(node, "!");
         int termOrTermGroupChildId = 1;
         boolean negated = false;
+        ArrayList<String> flags = new ArrayList<String>();
         if (negations.size() % 2 == 1) {
             negated = true;
             termOrTermGroupChildId += negations.size();
         }
-
+        
         if (getNodeCat(node.getChild(0)).equals("key")) {
             // no 'term' child, but direct key specification: process here
+            String type =""; // type depends on flag;
+            
             Map<String, Object> term = KoralObjectGenerator
                 .makeTerm();
-
-            String key = node.getChild(0).getText();
-
-            if (getNodeCat(node.getChild(0).getChild(0)).equals("regex")) {
-                //  isRegex = true;
-                term.put("type", "type:regex");
-
-                // fixme: use stream with offset to get text!
-                // TokenStream stream = parser.getTokenStream();
-                // key = stream.getText(node.getChild(0).getSourceInterval());
-                String first = key.substring(0, 1);
-                String last = key.substring(key.length()-1, key.length());
-                key = key.substring(1, key.length() - 1);
-                // treat the doubleqoutes and singlequoutes inside regex!
-                if (first.equals("\"") && last.equals("\"")) {
-                    key = key.replaceAll("\"\"", "\"");
+            TokenStream stream = parser.getTokenStream();
+            String key = stream.getText(node.getChild(0).getSourceInterval());
+            
+            ParseTree flagNode = getFirstChildWithCat(node, "flag");
+            String flag ="";
+            if (flagNode != null) {
+                // substring removes leading slash '/'
+                    flag = getNodeCat(flagNode.getChild(0)).substring(1);
+                    if (flag.contains("c") || flag.contains("C")){ 
+                        flags.add("flags:caseInsensitive");     
+                    }
+                    if (flag.contains("d") || flag.contains("D")){
+                        flags.add("flags:diacriticsInsensitive");  
+                    }
+                    if (flag.contains("l")|| flag.contains("L")) { 
+                    ParseTree keyNode = node.getChild(0);
+                    // Get stream from hidden channel
+                    stream = parser.getTokenStream();
+                    key = stream.getText(keyNode.getChild(0).getSourceInterval());
+                    // EI: i don't understand what this is doing;
+                    key = key.substring(1, key.length()-1).replaceAll("\\\\\\\\","\\\\"); //.replaceAll("\\\\'", "'");
+                    type = "type:string";
+                    }
                 }
+                 
+                if (!(flag.contains("l")|| flag.contains("L"))) { // either other flags than l/L or no flags
+                    type = "type:regex";
+                    String first = key.substring(0, 1);
+                    String last = key.substring(key.length()-1, key.length());
+                    key = key.substring(1, key.length() - 1);
+                    // treat escaping doubleqoutes and singlequoutes inside regex!
+                    if (first.equals("\"") && last.equals("\"")) {
+                        //remove escape by doubling ''
+                        key = key.replaceAll("\"\"", "\"");
+                        //remove the "\" escape for "
+                        key = key.replaceAll("\\\\\"", "\"");
+                    }
 
-                if (first.equals("'") && last.equals("'")) {
-                    key =  key.replaceAll("''", "'");
+                    if (first.equals("'") && last.equals("'")) {
+                        //remove escape by doubling ''
+                        key =  key.replaceAll("''", "'");
+                        //remove the "\" escape for ' 
+                        key =  key.replace("\\\'", "'");
+                    }
                 }
-            }
+            
+            term.put("type", type);  
             term.put("layer", "orth");
             term.put("key", key);
             KoralMatchOperator matches = negated ? KoralMatchOperator.NOT_EQUALS
                 : KoralMatchOperator.EQUALS;
             term.put("match", matches.toString());
-            ParseTree flagNode = getFirstChildWithCat(node, "flag");
-            if (flagNode != null) {
-                ArrayList<String> flags = new ArrayList<String>();
-                // substring removes leading slash '/'
-                String flag = getNodeCat(flagNode.getChild(0)).substring(1);
-                if (flag.contains("c") || flag.contains("C"))
-                    flags.add("flags:caseInsensitive");
-                if (flag.contains("d") || flag.contains("D"))
-                    flags.add("flags:diacriticsInsensitive");
-                
-                if (flag.contains("l")|| flag.contains("L")) { 
-                    ParseTree keyNode = node.getChild(0);
-
-                    // Get stream from hidden channel
-                    TokenStream stream = parser.getTokenStream();
-                    key = stream.getText(keyNode.getChild(0).getSourceInterval());
-                    key = key.substring(1, key.length()-1).replaceAll("\\\\\\\\","\\\\").replaceAll("\\\\'", "'");
-                    //override key and type:string
-                    term.put("key", key);
-                    term.put("type", "type:string");
-                }
-
-                if (!flags.isEmpty())
+            if (!flags.isEmpty())
                     term.put("flags", flags);
-            }
             token.put("wrap", term);
         }
 
@@ -1137,13 +1144,19 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         stackedObjects++;
 
         // for lboud and rbound, when span is child of position;
-        if (hasChild(node, "span")) {
+        if (hasChild(node, "span"))   {
         	ParseTree spanchildnode = getFirstChildWithCat (node, "span");
         	processSpan(spanchildnode);
-        	
         	objectStack.pop();
         	stackedObjects=stackedObjects-2;
         }
+        if (hasChild(node, "spankey"))   {
+        	ParseTree spanchildnode = getFirstChildWithCat (node, "spankey");
+        	processSpan(spanchildnode);
+        	objectStack.pop();
+        	stackedObjects=stackedObjects-2;
+        }
+
     }
 
 
@@ -1484,11 +1497,11 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             String key = null;
             String value = null;
+            String type = null;
             Map<String, Object> term = KoralObjectGenerator
                 .makeTerm();
             // handle negation
             boolean negated = negatedGlobal;
-            boolean isRegex = false;
             List<ParseTree> negations = getChildrenWithCat(node, "!");
             if (negations.size() % 2 == 1)
                 negated = !negated;
@@ -1504,11 +1517,11 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                 term.put("foundry", foundryNode.getText());
 
             //  process regex
-			
+	/* 		
             if (getNodeCat(keyNode.getChild(0)).equals("regex")) {
                 isRegex = true;
                 term.put("type", "type:regex");
-                // remove leading and trailing quotes
+                
                 //process verbatim flag %l
                 if (flagNode!=null) {
                     if (getNodeCat(flagNode.getChild(0)).contains("l") ||
@@ -1517,21 +1530,77 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                         // Get stream from hidden channel
                         TokenStream stream = parser.getTokenStream();
                         key = stream.getText(keyNode.getChild(0).getSourceInterval());
-                        key = key.substring(1, key.length()-1).replaceAll("\\\\\\\\","\\\\").replaceAll("\\\\'", "'");
+                        key = key.replaceAll("\\\\\\\\","\\\\").replaceAll("\\\\'", "'");
                         //override with type:string
                         term.put("type", "type:string");
     				} else {
         				key = keyNode.getText();
-        				key = key.substring(1, key.length() - 1);
                 	}
                 }
 
     			else {
     				key = keyNode.getText();
-    				key = key.substring(1, key.length() - 1);
     			};
             }
 
+                String first = key.substring(0, 1);
+                String last = key.substring(key.length()-1, key.length());
+                key = key.substring(1, key.length() - 1);
+                // treat escaping doubleqoutes and singlequoutes inside regex!
+                if (first.equals("\"") && last.equals("\"")) {
+                    //remove escape by doubling ''
+                    key = key.replaceAll("\"\"", "\"");
+                    //remove \ escape for "
+                    key = key.replaceAll("\\\\\"", "\"");
+                }
+
+                if (first.equals("'") && last.equals("'")) {
+                    //remove escape by doubling ''
+                    key =  key.replaceAll("''", "'");
+                    //remove \ escape for ' 
+                    key =  key.replace("\\\'", "'");
+                }
+            */    
+
+            TokenStream stream = parser.getTokenStream();
+            key = stream.getText(keyNode.getSourceInterval());
+            String flag ="";
+            if (flagNode != null) {
+                // substring removes leading slash '/'
+                    flag = getNodeCat(flagNode.getChild(0)).substring(1);
+                    if (flag.contains("l")|| flag.contains("L")) { 
+                    // Get stream from hidden channel
+                    stream = parser.getTokenStream();
+                    key = stream.getText(keyNode.getChild(0).getSourceInterval());
+                    // EI: i don't understand what this is doing;
+                    key = key.substring(1, key.length()-1).replaceAll("\\\\\\\\","\\\\"); //.replaceAll("\\\\'", "'");
+                    type = "type:string";
+                    }
+                }
+                 
+                if (!(flag.contains("l")|| flag.contains("L"))) { // either other flags than l/L or no flags
+                    type = "type:regex";
+                    String first = key.substring(0, 1);
+                    String last = key.substring(key.length()-1, key.length());
+                    key = key.substring(1, key.length() - 1);
+                    // treat escaping doubleqoutes and singlequoutes inside regex!
+                    if (first.equals("\"") && last.equals("\"")) {
+                        //remove escape by doubling ''
+                        key = key.replaceAll("\"\"", "\"");
+                        //remove the "\" escape for "
+                        key = key.replaceAll("\\\\\"", "\"");
+                    }
+
+                    if (first.equals("'") && last.equals("'")) {
+                        //remove escape by doubling ''
+                        key =  key.replaceAll("''", "'");
+                        //remove the "\" escape for ' 
+                        key =  key.replace("\\\'", "'");
+                    }
+                }
+            
+            
+            term.put("type", type); 
             if (mode.equals("span"))
                 term.put("value", key);
             else
@@ -1558,7 +1627,6 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
 
             // process value
             if (valueNode != null && getNodeCat(valueNode.getChild(0)).equals("regex")) {
-                isRegex = true;
                 term.put("type", "type:regex");
                 // remove leading and trailing quotes
                 value = valueNode.getText();
@@ -1579,7 +1647,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             // process possible flags
             if (flagNode != null) {
                 // substring removes leading %
-                String flag = getNodeCat(flagNode.getChild(0)).substring(1);
+                 flag = getNodeCat(flagNode.getChild(0)).substring(1);
                 
                 // EM: handling flagnode as layer
                 if (node.getChild(1).equals(flagNode)){
@@ -1596,11 +1664,11 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                     for (int i=1; i < list.size(); i++) {
                         ParseTree n = list.get(i);
                         flag = getNodeCat(n.getChild(0)).substring(1);
-                        parseFlag(flag, isRegex, key, term);
+                        parseFlag(flag, key, term);
                     }
                 }
                 else {
-                    term = parseFlag(flag, isRegex, key, term);
+                    term = parseFlag(flag, key, term);
                 }
             }
             return term;
@@ -1674,7 +1742,7 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
     }
 
 
-    private Map<String, Object> parseFlag (String flag, boolean isRegex,
+    private Map<String, Object> parseFlag (String flag,
                                            String key, Map<String, Object> term) {
         ArrayList<String> flags = new ArrayList<String>();
 
