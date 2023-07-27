@@ -1007,7 +1007,7 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
         assertEquals("VVFIN", result.at("/query/operands/1/wrap/key").asText());
         
         
-    }
+   }
 
    @Test
    public void testWithinElement () throws JsonProcessingException, IOException {
@@ -1019,8 +1019,7 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
         assertEquals("frames:isAround", result.at("/query/frames/0").asText());
         assertEquals("s", result.at("/query/operands/0/wrap/key").asText());
         assertEquals("VVFIN", result.at("/query/operands/1/wrap/key").asText());
-        }
-
+   }
 
     @Test
     public void testSpanSerialization () throws JsonProcessingException,
@@ -1059,6 +1058,7 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
         
         assertEquals(result1, result2);
     }
+
 
     @Ignore
     @Test
