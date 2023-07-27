@@ -1089,7 +1089,10 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
                 key = keyNode.getText();
         }
         else key = node.getChild(node.getChildCount()-2).getText();
-       
+        // for s-structures: <s>
+        if (key.equals("s")){
+               wrappedTerm.put("layer", "s");
+            }
         wrappedTerm.put("key", key);
         
         if (termOpNode != null) {
