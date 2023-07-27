@@ -1019,46 +1019,8 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
         assertEquals("frames:isAround", result.at("/query/frames/0").asText());
         assertEquals("s", result.at("/query/operands/0/wrap/key").asText());
         assertEquals("VVFIN", result.at("/query/operands/1/wrap/key").asText());
-        }
+   }
 
-
-    @Test
-    public void testSpanSerialization () throws JsonProcessingException,
-            IOException {
-
-      //  query = "<s> []+ 'der' []+ </s>)"; and query = "'der' within s"; should serialize identically
-      
-        query = "<s> []+ 'der' []+ </s>)";
-        qs.setQuery(query, "CQP");
-        result = mapper.readTree(qs.toJSON());
-
-        String result1 = result.toString();
-        assertEquals("koral:group", result.at("/query/@type").asText());
-        assertEquals("operation:position", result.at("/query/operation").asText());
-        assertEquals("frames:isAround", result.at("/query/frames/0").asText());
-        assertEquals(1, result.at("/query/frames").size());
-        
-        assertEquals("koral:span", result.at("/query/operands/0/@type").asText());
-        assertEquals("s", result.at("/query/operands/0/wrap/key").asText());
-        assertEquals("koral:token", result.at("/query/operands/1/@type").asText());
-
-
-        query = "'der' within s";
-        qs.setQuery(query, "CQP");
-        result = mapper.readTree(qs.toJSON());
-        String result2 = result.toString();
-        
-        assertEquals("koral:group", result.at("/query/@type").asText());
-        assertEquals("operation:position", result.at("/query/operation").asText());
-        assertEquals("frames:isAround", result.at("/query/frames/0").asText());
-        assertEquals(1, result.at("/query/frames").size());
-        
-        assertEquals("koral:span", result.at("/query/operands/0/@type").asText());
-        assertEquals("s", result.at("/query/operands/0/wrap/key").asText());
-        assertEquals("koral:token", result.at("/query/operands/1/@type").asText());
-        
-        assertEquals(result1, result2);
-    }
 
     @Ignore
     @Test

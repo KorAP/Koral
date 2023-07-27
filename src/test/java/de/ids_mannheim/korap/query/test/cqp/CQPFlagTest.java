@@ -22,22 +22,47 @@ public class CQPFlagTest extends BaseQueryTest {
         super("CQP");
        
     }
-
+  
 
     @Test
-    public void testLiteralx () throws JsonProcessingException {
-        query = "[mate/b=\"Der + Mann\"]";
+    public void testLiteral () throws JsonProcessingException {
+        query = "'22\\'-inch'%l";
         result = runQuery(query);
         assertEquals("koral:token", result.at("/query/@type").asText());
         assertEquals("koral:term", result.at("/query/wrap/@type").asText());
-        assertEquals("Der + Mann", result.at("/query/wrap/key").asText());
-        assertEquals("b", result.at("/query/wrap/layer").asText());
-        assertEquals("mate", result.at("/query/wrap/foundry").asText());
+        assertEquals("type:string", result.at("/query/wrap/type").asText());
+        assertEquals("orth", result.at("/query/wrap/layer").asText());
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
-        assertEquals("type:regex", result.at("/query/wrap/type").asText());
-    }
-    @Test
-    public void testLiteral () throws JsonProcessingException {
+        assertEquals("22\\'-inch", result.at("/query/wrap/key").asText()); // (no regex escape)
+
+        query = "\"22\\\"-inch\"%l;"; // query = "22\"-inch"; (without Java string escaping)
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("type:string", result.at("/query/wrap/type").asText());
+        assertEquals("orth", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("22\\\"-inch", result.at("/query/wrap/key").asText()); // (no regex escape)
+
+        query = "[mate/b='22\\'-inch'%l]";
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("type:string", result.at("/query/wrap/type").asText());
+        assertEquals("b", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("22\\'-inch", result.at("/query/wrap/key").asText()); // (no regex escape)
+
+        query = "[mate/b=\"22\\\"-inch\"%l];"; // query = "22\"-inch"; (without Java string escaping)
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("type:string", result.at("/query/wrap/type").asText());
+        assertEquals("b", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("22\\\"-inch", result.at("/query/wrap/key").asText()); // (no regex escape)
+        
+        
         query = "[mate/b=\"Der + Mann\"%l]";
         result = runQuery(query);
         assertEquals("koral:token", result.at("/query/@type").asText());
@@ -59,7 +84,16 @@ public class CQPFlagTest extends BaseQueryTest {
         assertEquals("koral:term", result.at("/query/wrap/@type").asText());
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
         assertEquals("type:string", result.at("/query/wrap/type").asText());
-        assertEquals("D'Ma \\nn", result.at("/query/wrap/key").asText());
+        assertEquals("D\\'Ma \\nn", result.at("/query/wrap/key").asText());
+        assertEquals("b", result.at("/query/wrap/layer").asText());
+        // escape by doubling + verbatim--> the doubling stays!
+        query = "[mate/b='D''Ma \\\\nn'%l]";
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("type:string", result.at("/query/wrap/type").asText());
+        assertEquals("D''Ma \\nn", result.at("/query/wrap/key").asText());
         assertEquals("b", result.at("/query/wrap/layer").asText());
     }
 
@@ -107,6 +141,16 @@ public class CQPFlagTest extends BaseQueryTest {
     @Test
     public void testDoubleQuoteWithinSingleQuote ()
             throws JsonProcessingException {
+        query = "'D\"Ma\\\\nn'";
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("D\"Ma\\\\nn", result.at("/query/wrap/key").asText());
+        assertEquals("orth", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("type:regex", result.at("/query/wrap/type").asText());
+
+        
         query = "[mate/b='D\"Ma\\\\nn']";
         result = runQuery(query);
         assertEquals("koral:token", result.at("/query/@type").asText());
@@ -117,7 +161,18 @@ public class CQPFlagTest extends BaseQueryTest {
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
         assertEquals("type:regex", result.at("/query/wrap/type").asText());
 
-        // with literal
+         // with literal/verbatim
+        query = "'D\"Ma\\\\nn'%l";
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("D\"Ma\\nn", result.at("/query/wrap/key").asText());
+        assertEquals("orth", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("type:string", result.at("/query/wrap/type").asText());
+
+
+        // with literal/verbatim
         query = "[mate/b='D\"Ma\\\\nn'%l]";
         result = runQuery(query);
         assertEquals("koral:token", result.at("/query/@type").asText());
@@ -126,12 +181,8 @@ public class CQPFlagTest extends BaseQueryTest {
         assertEquals("b", result.at("/query/wrap/layer").asText());
         assertEquals("mate", result.at("/query/wrap/foundry").asText());
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
-        assertEquals("type:string", result.at("/query/wrap/type").asText());
-
-      
-
+        assertEquals("type:string", result.at("/query/wrap/type").asText());  
     }
-
 
     @Test
     public void testURL () throws JsonProcessingException {
