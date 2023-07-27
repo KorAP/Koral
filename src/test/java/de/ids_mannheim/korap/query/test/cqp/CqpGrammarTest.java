@@ -21,18 +21,64 @@ public class CqpGrammarTest {
     String query;
     Lexer lexer = new CQPLexer((CharStream) null);
     ParserRuleContext tree = null;
+   @Test
+	public void Regex_without_quoutes () {
+
+			
+		assertEquals(
+			"(request (query kid))",  
+			treeString("kid")
+			);
+	}
 	@Test
 	public void squoutes_verbatim () {
 
-		
-		assertEquals(
-			"(request (query \" ? \"))",  // it should not parse the query
-			treeString("\"?\"")
+
+			// i don t know how to solve this problem, the following queries should not parse;
+			// same issue in the PQ+ grammar, see PQ+GrammarTest, line 61
+			// how it behaves
+			assertEquals(
+			"(request (query (segment (token (key (regex ''))))))",  
+			treeString("'''")
 			);
-		assertNotEquals(
+			// how i think it should behave
+			assertNotEquals(
+			"(request (query '''))",  // it should not parse the query
+			treeString("'''")
+			);
+			// but this behaves correctly
+			assertEquals(
+			"(request (query '' kid '))",  
+			treeString("''kid'")
+			);
+			
+			// how it behaves: "" is seen as an empty token, and the last " is ignored;
+			assertEquals(
+			"(request (query (segment (token (key (regex \"\"))))))",  
+			treeString("\"\"\"")
+			);
+			// how i think it should behave
+			assertNotEquals(
 			"(request (query \" \" \"))",  // it should not parse the query
 			treeString("\"\"\"")
 			);
+            // but this behaves correctly
+			assertEquals(
+			"(request (query \"\" kid \"))",  // it should not parse the query
+			treeString("\"\"kid\"")
+			);
+		
+			
+			assertEquals(
+			"(request (query \" ? \"))",  // it should not parse the query
+			treeString("\"?\"")
+			);
+
+			assertEquals(
+			"(request (query (segment (token (key (regex \"\\?\"))))))",  // it should not parse the query
+			treeString("\"\\?\"")
+			);
+
 		assertEquals(
 		"(request (query (segment (token (key (regex 'copil'))))))", 
 		treeString("'copil'")
@@ -46,15 +92,16 @@ public class CqpGrammarTest {
 		"(request (query (segment (token (key (regex '\\''))))))",  
 		treeString("'\\''")
 		);
+	    assertEquals(
+		"(request (query (segment (token (key (regex ''''))))))",  
+		treeString("''''")
+		);
 		assertEquals(
 		"(request (query (segment (token (key (regex '\\'')) (flag %l)))))",  
 		treeString("'\\''%l")
 		);
 		
-		assertEquals(
-			"(request (query (segment (token (key (regex ''))))))",  // it should not parse the query
-			treeString("'''")
-			);
+	
 	};
 		
 	
@@ -185,7 +232,12 @@ public class CqpGrammarTest {
 			assertNotEquals( 
     		"(request (query (segment (token (key (regex 'anna's house'))))) ;)", 
     		treeString("'anna's house';")
-    		);
+			);
+			// everything after 'anna' is parsed as span;
+			assertEquals( 
+    		"(request (query 'anna' s house ') ;)", 
+    		treeString("'anna's house';")
+			);
     	 	//escape by using double quotes to encapsulate expressions that contain single quotes
     	 	assertEquals( 
     	    		"(request (query (segment (token (key (regex \"anna's house\"))))) ;)", 
@@ -372,7 +424,7 @@ public class CqpGrammarTest {
     public void testEmptyTokenWithin () {
 
     	 	assertEquals( 
-    		"(request (query (sequence (segment (token (key (regex \"no\")))) (segment (token (key (regex \"sooner\")))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"than\")))))) (within within (span (skey s))) ;)",
+    		"(request (query (sequence (segment (token (key (regex \"no\")))) (segment (token (key (regex \"sooner\")))) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token (key (regex \"than\")))))) (within within (spankey (skey s))) ;)",
     		treeString("\"no\" \"sooner\" []* \"than\" within s;")
     		);
     };
@@ -518,7 +570,7 @@ public class CqpGrammarTest {
         		"(request (query (sequence (segment (token [ (term (layer base) (termOp =) (key (regex \"Mann\"))) ])) (segment (region / region [ (span < (foundry cnx) / (layer c) (termOp =) (skey vp) >) ])))))",
         		treeString("[base=\"Mann\"] /region[<cnx/c=vp>]")); 	
     	assertEquals( 
-    		"(request (query (sequence (segment (token [ (term (layer base) (termOp =) (key (regex \"Mann\"))) ])) (segment (region / region [ (span (skey vp)) ])))))",
+    		"(request (query (sequence (segment (token [ (term (layer base) (termOp =) (key (regex \"Mann\"))) ])) (segment (region / region [ (spankey (skey vp)) ])))))",
     		treeString("[base=\"Mann\"] /region[vp]"));
 			assertEquals( 
         		"(request (query (segment (region / region [ (span < (foundry cnx) / (layer c) (termOp ! =) (skey vp) ( (termGroup (term (layer class) (termOp ! =) (key (regex \"header\"))) (boolOp &) (term (layer id) (termOp =) (key (regex \"7\")))) ) >) ]))))",
@@ -775,6 +827,10 @@ public void testPositionOpsRBoundSegment () {
 	"(request (query (segment (token [ (term (key (regex \"copil\")) & (position rbound ( (span < (foundry base) / (layer s) (termOp =) (skey s) >) ))) ]))) ;)",
 	treeString("[\"copil\" & rbound(<base/s=s>)];") 
 	);
+	assertEquals( 
+	"(request (query (segment (token [ (term (key (regex \"copil\")) & (position rbound ( (spankey (skey s)) ))) ]))) ;)",
+	treeString("[\"copil\" & rbound(s)];") 
+	);
 };
 
 @Test
@@ -793,7 +849,7 @@ public void testPositionOpsRBoundSequence () {
     public void testWithinNp () {
 
     	 	assertEquals( 
-    		"(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])))) (within within (span (skey np))) ;)",
+    		"(request (query (sequence (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])) (segment (emptyTokenSequence (emptyToken [ ]) (repetition (kleene *)))) (segment (token [ (term (layer pos) (termOp =) (key (regex \"NN\"))) ])))) (within within (spankey (skey np))) ;)",
     		treeString(" [pos=\"NN\"] []* [pos=\"NN\"] within np;")
     		);
 
@@ -826,7 +882,7 @@ public void testPositionOpsRBoundSequence () {
     public void testMU01rec () {
 
 	 	assertEquals( 
-		"(request (query (segment (matching MU ( (meetunion (segment (spanclass meet ( (meetunion (segment (spanclass meet (segment (token (key (regex \"in\")))))) (segment (token (key (regex \"due\")))) -1 1) ))) (segment (token (key (regex \"time\")))) (span (skey s))) )))) ;)",
+		"(request (query (segment (matching MU ( (meetunion (segment (spanclass meet ( (meetunion (segment (spanclass meet (segment (token (key (regex \"in\")))))) (segment (token (key (regex \"due\")))) -1 1) ))) (segment (token (key (regex \"time\")))) (spankey (skey s))) )))) ;)",
 		treeString("MU(meet (meet \"in\" \"due\" -1 1) \"time\" s);")
 		);
     };
@@ -882,7 +938,7 @@ public void testPositionOpsRBoundSequence () {
     public void testMU5 () {
 
     	 	assertEquals( 
-    		"(request (query (segment (matching MU ( (meetunion (segment (spanclass meet ( (meetunion (segment (spanclass meet (segment (token (key (regex \"one\")))))) (segment (token (key (regex \"hand\")))) 1 1) ))) ( (meetunion (segment (spanclass meet (segment (token (key (regex \"other\")))))) (segment (token (key (regex \"hand\")))) 1 1) ) (span (skey s))) )))) ;)",
+    		"(request (query (segment (matching MU ( (meetunion (segment (spanclass meet ( (meetunion (segment (spanclass meet (segment (token (key (regex \"one\")))))) (segment (token (key (regex \"hand\")))) 1 1) ))) ( (meetunion (segment (spanclass meet (segment (token (key (regex \"other\")))))) (segment (token (key (regex \"hand\")))) 1 1) ) (spankey (skey s))) )))) ;)",
     		treeString(" MU(meet (meet \"one\" \"hand\" 1 1) (meet \"other\" \"hand\" 1 1) s);")
     		);
     };
@@ -892,20 +948,20 @@ public void testPositionOpsRBoundSequence () {
     public void testMUinS () {
 
     	 	assertEquals( 
-    		"(request (query (segment (matching MU ( (meetunion (segment (spanclass meet (segment (token (key (regex \"tea\")) (flag %c))))) (segment (token (key (regex \"cakes\")) (flag %c))) (span (skey s))) )))) ;)",
+    		"(request (query (segment (matching MU ( (meetunion (segment (spanclass meet (segment (token (key (regex \"tea\")) (flag %c))))) (segment (token (key (regex \"cakes\")) (flag %c))) (spankey (skey s))) )))) ;)",
     		treeString(" MU(meet \"tea\"%c \"cakes\"%c s);")
     		);
     };
 
 	@Test
     public void testMUInSrec () {
-		assertEquals( "(request (query (segment (matching MU ( (meetunion (segment (spanclass meet ( (meetunion (segment (spanclass meet (segment (token (key (regex \"piel\")))))) (segment (token (key (regex \"azul\")))) (span (skey np))) ))) (segment (token (key (regex \"de\")))) (span (skey s))) )))) ;)", 
+		assertEquals( "(request (query (segment (matching MU ( (meetunion (segment (spanclass meet ( (meetunion (segment (spanclass meet (segment (token (key (regex \"piel\")))))) (segment (token (key (regex \"azul\")))) (spankey (skey np))) ))) (segment (token (key (regex \"de\")))) (spankey (skey s))) )))) ;)", 
 		treeString("MU(meet (meet \"piel\" \"azul\" np)  \"de\" s);"));
 	}
 		
 	@Test
     public void testMUInSrec1 () {
-		assertEquals( "(request (query (segment (matching MU ( (meetunion (segment (spanclass meet ( (meetunion (segment (spanclass meet (segment (token (key (regex \"piel\")))))) (segment (token (key (regex \"azul\")))) (span (skey np))) ))) ( (meetunion (segment (spanclass meet (segment (token (key (regex \"de\")))))) (segment (token (key (regex \"color\")))) (span (skey pp))) ) (span (skey s))) )))) ;)", 
+		assertEquals( "(request (query (segment (matching MU ( (meetunion (segment (spanclass meet ( (meetunion (segment (spanclass meet (segment (token (key (regex \"piel\")))))) (segment (token (key (regex \"azul\")))) (spankey (skey np))) ))) ( (meetunion (segment (spanclass meet (segment (token (key (regex \"de\")))))) (segment (token (key (regex \"color\")))) (spankey (skey pp))) ) (spankey (skey s))) )))) ;)", 
 		treeString("MU(meet (meet \"piel\" \"azul\" np)  (meet \"de\" \"color\" pp) s);"));
 	}
 
