@@ -144,14 +144,14 @@ public class CQPRegexTest extends BaseQueryTest {
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
         assertEquals("copil'", result.at("/query/wrap/key").asText());
 
-        query = "\"22\\\"-inch\";"; // query = "22"-inch"
+        query = "\"22\\\"-inch\";"; // query = '"22\"-inch";' (without Java string escaping)
         result = runQuery(query);
         assertEquals("koral:token", result.at("/query/@type").asText());
         assertEquals("koral:term", result.at("/query/wrap/@type").asText());
         assertEquals("type:regex", result.at("/query/wrap/type").asText());
         assertEquals("orth", result.at("/query/wrap/layer").asText());
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
-        assertEquals("22\\\"-inch", result.at("/query/wrap/key").asText());
+        assertEquals("22\"-inch", result.at("/query/wrap/key").asText()); // (no regex escape)
 
 
         query = "'a''.+?';"; //query = 'a''.+?'
