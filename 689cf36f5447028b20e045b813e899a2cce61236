@@ -33,6 +33,24 @@
       "message": "Here are further comments that seems to not be resolved, but were marked as resolved:\nhttps://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/5783/comment/d9010dca_fb9b5d2a/\n\nThis test seems to be missing: https://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/5723/1/src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPRegionTest.java#b185",
       "revId": "689cf36f5447028b20e045b813e899a2cce61236",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3897b45f_3023f874",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 17
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-07-27T08:26:12Z",
+      "side": 1,
+      "message": "The regex problem from #5783 is now in a separate commit at https://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/7375",
+      "parentUuid": "ed08a045_f9e888bd",
+      "revId": "689cf36f5447028b20e045b813e899a2cce61236",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
