@@ -436,14 +436,26 @@ public class CQPPositionTest extends BaseQueryTest{
     // EM: rbound: last token in the region
     // match token at the end of a sentence
     @Test
+   
+   
+   
     public void testRbound ()  throws JsonProcessingException {
-        query ="[\"copil\"  & rbound(<s>)];"; 
-        result = runQuery(query);
-        assertEquals("koral:group", result.at("/query/@type").asText());
         
         query ="[\"copil\"  & rbound(s)];"; 
+        
         result = runQuery(query);
+        String res1 = result.toString();
         assertEquals("koral:group", result.at("/query/@type").asText());
+        assertEquals("koral:span", result.at("/query/operands/0/@type").asText());
+        
+        query ="[\"copil\"  & rbound(<s>)];"; 
+        result = runQuery(query);
+        String res2 = result.toString();
+        assertEquals("koral:group", result.at("/query/@type").asText());
+        assertEquals("koral:span", result.at("/query/operands/0/@type").asText());
+        assertEquals(res1, res2);
+        
+        
 
         query ="[\"copil\"  & rbound(<base/s=s>)];"; 
         result = runQuery(query);
