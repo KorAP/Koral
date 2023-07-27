@@ -81,7 +81,47 @@ public class CQPRegexTest extends BaseQueryTest {
 
     @Test
     public void testRegexEscape () throws JsonProcessingException {
-        // Escape regex symbols
+        // Escape regex symbols; tests for https://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/7375
+        
+        query = "'22\\'-inch'";
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", result.at("/query/wrap/type").asText());
+        assertEquals("orth", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("22'-inch", result.at("/query/wrap/key").asText()); // (no regex escape)
+
+        query = "\"22\\\"-inch\";"; // query = "22\"-inch"; (without Java string escaping)
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", result.at("/query/wrap/type").asText());
+        assertEquals("orth", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("22\"-inch", result.at("/query/wrap/key").asText()); // (no regex escape)
+        
+        query = "[mate/b='22\\'-inch']";
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", result.at("/query/wrap/type").asText());
+        assertEquals("mate", result.at("/query/wrap/foundry").asText());
+        assertEquals("b", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("22'-inch", result.at("/query/wrap/key").asText()); // (no regex escape)
+
+        query = "[mate/b=\"22\\\"-inch\"];"; // query = "22\"-inch"; (without Java string escaping)
+        result = runQuery(query);
+        assertEquals("koral:token", result.at("/query/@type").asText());
+        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", result.at("/query/wrap/type").asText());
+        assertEquals("mate", result.at("/query/wrap/foundry").asText());
+        assertEquals("b", result.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", result.at("/query/wrap/match").asText());
+        assertEquals("22\"-inch", result.at("/query/wrap/key").asText()); // (no regex escape)
+        
+       
 
         query = "\"a\\.\"";
         result = runQuery(query);
@@ -144,14 +184,7 @@ public class CQPRegexTest extends BaseQueryTest {
         assertEquals("match:eq", result.at("/query/wrap/match").asText());
         assertEquals("copil'", result.at("/query/wrap/key").asText());
 
-        query = "\"22\\\"-inch\";"; // query = "22"-inch"
-        result = runQuery(query);
-        assertEquals("koral:token", result.at("/query/@type").asText());
-        assertEquals("koral:term", result.at("/query/wrap/@type").asText());
-        assertEquals("type:regex", result.at("/query/wrap/type").asText());
-        assertEquals("orth", result.at("/query/wrap/layer").asText());
-        assertEquals("match:eq", result.at("/query/wrap/match").asText());
-        assertEquals("22\\\"-inch", result.at("/query/wrap/key").asText());
+        
 
 
         query = "'a''.+?';"; //query = 'a''.+?'
