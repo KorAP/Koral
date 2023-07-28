@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "313088dc_24ffd9ac",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 857,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-07-28T10:38:15Z",
+      "side": 1,
+      "message": "i don.t know what this does; it was done in PQ, after the comment line:\n  // process key: \u0027normal\u0027, \u0027verbatim\u0027 or regex?",
+      "range": {
+        "startLine": 856,
+        "startChar": 20,
+        "endLine": 857,
+        "endChar": 118
+      },
+      "revId": "e43e4685b343e9a3e9da07865aa6c87e4f0234d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
