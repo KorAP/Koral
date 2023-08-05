@@ -100,6 +100,21 @@ public abstract class Antlr4AbstractQueryProcessor extends
         return false;
     }
 
+    protected boolean hasAncestorWithCat (ParseTree node, String childCat) {
+        
+        if (node.getParent()!=null)    
+        {
+            ParseTree ancestor = node.getParent();
+            if (getNodeCat(ancestor).equals(childCat)) {
+                return true;
+            }
+            if (hasAncestorWithCat(ancestor, childCat)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Returns all children of a node.
