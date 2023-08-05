@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.junit.Ignore;
 import org.junit.Test;
 // import org.junit.Ignore;
 
@@ -24,28 +25,201 @@ public class CQPMeetProcessorTest {
     QuerySerializer qs = new QuerySerializer();
     ObjectMapper mapper = new ObjectMapper();
     JsonNode res;
+
+
     
     @Test
-    public void testMeetVsFocusErrors () throws JsonProcessingException, IOException {
+    public void testMeetErrors () throws JsonProcessingException, IOException {
+      // both error and warnings + query tree are returned;
+     
+     
+      // tests for recursive queries with different offsets;     
+       query = "MU(meet (meet \"in\" \"due\" 1 1) \"course\" -3 1))";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/errors/0/1").asText());
+       assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/warnings/0/0").asText());
+       // query is returned
+       assertEquals(0, res.at("/query/operands/0/operands/0/distances/0/boundary/min").asInt());
+       
+       query = "MU(meet (meet \"in\" \"due\" -1 1) \"course\" -3 1))";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/errors/0/1").asText()); 
+       assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/warnings/0/0").asText());
+       // query is returned
+       assertEquals(0, res.at("/query/operands/0/operands/0/distances/0/boundary/min").asInt());
+
+       query = "MU(meet (meet \"in\" \"due\" -1 1) \"course\" -3 -3))";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/errors/0/1").asText()); 
+       assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/warnings/0/0").asText());
+       // query is returned
+       assertEquals(0, res.at("/query/operands/0/operands/0/distances/0/boundary/min").asInt());
+       
+       query = "MU(meet (meet \"x\" \"y\" -1 1) \"due\" 1 1) \"course\" -3 -3))";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/errors/0/1").asText()); 
+       // query is returned
+       assertEquals(0, res.at("/query/operands/0/operands/0/distances/0/boundary/min").asInt());
+
+       query = "MU(meet (meet \"in\" \"due\" -3 2) (meet \"time\" \".*\" -1 1) -4 4);";
+       qs.setQuery(query, "CQP");
+       //assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(0, res.at("/query/operands/0/operands/0/distances/0/boundary/min").asInt());
+       assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/errors/0/1").asText()); 
+     
+     // tests for zero offsets
+     
        query = "MU(meet \"in\" \"due\" 0 -1);";
        qs.setQuery(query, "CQP");
        assertTrue(qs.hasErrors());
        res = mapper.readTree(qs.toJSON());
        assertEquals(302, res.at("/errors/0/0").asInt());;
-       assertEquals("The MeetUnion offsets cannot be 0!!", res.at("/errors/0/1").asText());
+       assertEquals("The MeetUnion offsets cannot be 0.", res.at("/errors/0/1").asText());
+
+       // first processes the outer meet and calls computedistance on it, adding "icompatible offset values" error
+       // and only later processes the firt inner meet and adds "The MeetUnion offsets cannot be 0" error.
+       query = "MU(meet (meet \"x\" \"y\" 0 1) (meet \"z\" \"w\" 1 1) -1 -1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/1/0").asInt());;
+       assertEquals("The MeetUnion offsets cannot be 0.", res.at("/errors/1/1").asText());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the second inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+
+       
+       query = "MU(meet (meet \"x\" \"y\" 0 0) (meet \"z\" \"w\" 1 1) -1 -1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/1/0").asInt());;
+       assertEquals("The MeetUnion offsets cannot be 0.", res.at("/errors/1/1").asText());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the second inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+
+       // does'n get to computeDistance for the outer offsets
+       query = "MU(meet (meet \"x\" \"y\" 1 1) (meet \"z\" \"w\" 1 1) 0 -1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("The MeetUnion offsets cannot be 0.", res.at("/errors/0/1").asText());
+       assertNotEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the second inner offsets should not be smaller than 1.", res.at("/errors/1/1").asText());
+       
+       query = "MU(meet (meet \"x\" \"y\" 2 2) (meet \"z\" \"w\" 1 1) 0 0);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertNotEquals(302, res.at("/errors/1/0").asInt());;
+       assertNotEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the first inner offsets should not be smaller than 1.", res.at("/errors/1/1").asText());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("The MeetUnion offsets cannot be 0.", res.at("/errors/0/1").asText());
+     
+       query = "MU(meet (meet \"x\" \"y\" 2 2) (meet \"z\" \"w\" -1 -1) -1 -1);";
+       qs.setQuery(query, "CQP");
+       assertFalse(qs.hasErrors());
+
+       query = "MU(meet (meet \"x\" \"y\" 2 2) (meet \"z\" \"w\" 0 0) -1 -1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("The MeetUnion offsets cannot be 0.", res.at("/errors/0/1").asText());
+
+       
+       // tests for equal offsets; distance incompatibilities, see computeSegmentDistance()
+       // foffs = first ofsetss; soffs = second offsets; oofs = outer offsets;
+     
+     // Math.abs(ooffs1) - Math.abs(foffs1) - Math.abs(soffs1) - 1 >= 0  
+       query = "MU(meet (meet \"x\" \"y\" -2 -2) (meet \"z\" \"w\" 1 1) -1 -1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the sum of the first inner and the second inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+      
+       query = "MU(meet (meet \"x\" \"y\" 2 2) (meet \"z\" \"w\" -1 -1) 1 1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the sum of the first inner and the second inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+     
+       // (Math.abs(ooffs1) - Math.abs(soffs1) - 1 >= 0)
+       query = "MU(meet \"x\" (meet \"z\" \"w\" 1 1) -1 -1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the second inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+
+       query = "MU(meet (meet \"x\" \"y\" 2 2) (meet \"z\" \"w\" 1 1) -1 -1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the second inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+
+       query = "MU(meet (meet \"x\" \"y\" -2 -2) (meet \"z\" \"w\" -1 -1) 1 1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the second inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+
+       // (Math.abs(ooffs1) - Math.abs(foffs1) - 1 >= 0)
+
+       query = "MU(meet (meet \"x\" \"y\" 2 2) (meet \"z\" \"w\" 1 1) 1 1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the first inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+
+       query = "MU(meet (meet \"x\" \"y\" -2 -2) (meet \"z\" \"w\" -1 -1) -1 -1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the first inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+
+       query = "MU(meet (meet \"x\" \"y\" -2 -2) \"z\" -1 -1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the first inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+
+       query = "MU(meet (meet \"x\" \"y\" 2 2) \"z\" 1 1);";
+       qs.setQuery(query, "CQP");
+       assertTrue(qs.hasErrors());
+       res = mapper.readTree(qs.toJSON());
+       assertEquals(302, res.at("/errors/0/0").asInt());;
+       assertEquals("Incompatible offset values. The difference between the absolute values of the outer offsets and the first inner offsets should not be smaller than 1.", res.at("/errors/0/1").asText());
+
+       
+
+
   }
     
     
     @Test
     public void testFocusMeetDisjunction() throws JsonProcessingException, IOException {     
     	
-        // ((color de | de color) pelo ) | (pelo (color de | de color))
-        query = "MU(meet(meet \"color\" \"de\" -1 1) \"pelo\"  -4 4);";
-    	   qs.setQuery(query, "CQP");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals(302, res.at("/errors/0/0").asInt());;
-        assertEquals("We did not implement recursive meet with different offsets!!", res.at("/errors/0/1").asText()); // any ideea for a better message here?
-        
+       
      
         /*query = "focus('der' {'Baum'}) | focus ({'Baum'} 'der');";*/
         query = "MU(meet \"Baum\" \"der\" -1 1);";
@@ -177,12 +351,16 @@ public class CQPMeetProcessorTest {
    	
    @Test
    public void testMeetSpan2 () throws JsonProcessingException, IOException {
-   	    
-     //"in due" | "due in" []* time in a span s
      
+     //"in due" | "due in" []* time in a span s
+     // for this type of query, at the moment it throws a warning, an error and also returns the tree; 
+     // this could be an useful type of query (this specific tree is correct), but also if the user complicates it with more level of imbrication, it becomes unstable/uncovered in the code;
+     // is it necessary to have both an error and warning message?
      query = "MU(meet (meet \"in\" \"due\" -1 1) \"time\" s)";  
      qs.setQuery(query, "CQP");
      res = mapper.readTree(qs.toJSON());
+     assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/errors/0/1").asText());
+     assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/warnings/0/0").asText());
      assertEquals("koral:reference", res.at("/query/@type").asText());
      assertEquals("operation:focus", res.at("/query/operation").asText());
      assertEquals(1, res.at("/query/classRef/0").asInt());
@@ -212,7 +390,7 @@ public class CQPMeetProcessorTest {
      assertEquals(1, res.at("/meta/highlight/1").asInt());
      
      
-     //"piel" []* "azul" in a span np,  folowed by "de" at any distance, in a span s
+     //"piel" []* "azul" in a span np,  folowed by "de" at any distance, in a span s, inOrder = false on both levels
          query = "MU(meet (meet \"piel\" \"azul\" np)  \"de\" s)";
          qs.setQuery(query, "CQP");
          res = mapper.readTree(qs.toJSON());
@@ -288,6 +466,29 @@ public class CQPMeetProcessorTest {
 	    assertEquals("piel", res.at("/query/operands/0/operands/1/operands/1/wrap/key").asText());
          assertEquals("type:string", res.at("/query/operands/0/operands/1/operands/1/wrap/type").asText());
 	   
+           // the querry tree is not correct here! this situations are covered just with warning/error;
+          query = "MU(meet (meet \"in\" \"due\" s) \"time\" 2 2)";  
+          qs.setQuery(query, "CQP");
+          res = mapper.readTree(qs.toJSON());
+          assertEquals("Recursiveness is not stable for span meet queries as an inner query.", res.at("/errors/0/1").asText());
+          assertEquals("Recursiveness is not stable for span meet queries as an inner query.", res.at("/warnings/0/0").asText());
+          assertEquals("koral:reference", res.at("/query/@type").asText());
+         
+          query = "MU(meet (meet \"in\" \"due\" s) \"time\" -2 2)";  
+          qs.setQuery(query, "CQP");
+          res = mapper.readTree(qs.toJSON());
+          assertEquals("302", res.at("/errors/0/0").asText());
+          assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/errors/0/1").asText());
+          assertEquals("Recursiveness is not stable for meet queries with different offsets.", res.at("/warnings/0/0").asText());
+          assertEquals("302", res.at("/errors/1/0").asText());
+          // the span warning/error is thrown for each term of the disjunction
+          assertEquals("Recursiveness is not stable for span meet queries as an inner query.", res.at("/errors/1/1").asText());
+          assertEquals("Recursiveness is not stable for span meet queries as an inner query.", res.at("/warnings/1/0").asText());
+          assertEquals("302", res.at("/errors/2/0").asText());
+          assertEquals("Recursiveness is not stable for span meet queries as an inner query.", res.at("/errors/2/1").asText());
+          assertEquals("Recursiveness is not stable for span meet queries as an inner query.", res.at("/warnings/2/0").asText());
+
+          assertEquals("koral:reference", res.at("/query/@type").asText()); 
    }
 
    // looking for 2 words with different/variable distances in between
