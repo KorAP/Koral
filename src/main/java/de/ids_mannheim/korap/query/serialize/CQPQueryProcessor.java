@@ -476,38 +476,45 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
 
         if ((foffs1 > 0 && soffs1 > 0 && ooffs1 > 0) ||
-            (foffs1 > 0 && soffs1 > 0 && ooffs1 < 0) ||
+            (foffs1 < 0 && soffs1 < 0 && ooffs1 < 0) ||
             (foffs1 > 0 && soffs1 == 0 && ooffs1 > 0) ||
             (foffs1 < 0 && soffs1 == 0 && ooffs1 < 0)) { 
             if (Math.abs(ooffs1) - Math.abs(foffs1) - 1 >= 0) {
                 distance = Math.abs(ooffs1)-Math.abs(foffs1)-1;
             } else {
-                System.out.println("Incompatible offset values! The differene between the absolute values of the outer offsets and the first inner offsets should not be smaller than 1!");
+                addError(StatusCodes.MALFORMED_QUERY, "Incompatible offset values. The difference between the absolute values of the outer offsets and the first inner offsets should not be smaller than 1.");
+                
             }
         } else {
-        	if ((foffs1 < 0 && soffs1 >0 && ooffs1 > 0) ||
-                (foffs1 < 0 && soffs1 ==0 && ooffs1 > 0) ||
-                (foffs1 > 0 && soffs1 ==0 && ooffs1 < 0) ||
-                (foffs1 == 0 && soffs1 >0 && ooffs1 > 0)) { 
+        	if ((foffs1 > 0 && soffs1 < 0 && ooffs1 < 0) ||
+                (foffs1 < 0 && soffs1 > 0 && ooffs1 > 0) ||    
+                (foffs1 < 0 && soffs1 == 0 && ooffs1 > 0) ||
+                (foffs1 > 0 && soffs1 == 0 && ooffs1 < 0) ||
+                (foffs1 == 0 && soffs1 > 0 && ooffs1 > 0) ||
+                (foffs1 == 0 && soffs1 < 0 && ooffs1 < 0) ||
+                (foffs1 == 0 && soffs1 < 0 && ooffs1 > 0)) { 
                 if (Math.abs(ooffs1) - 1 >= 0) {
                     distance = Math.abs(ooffs1)-1;
                 } else {
-                    // this is also checked in the processMeetUnion function, when comparing offsets with zero
-                    System.out.println("Incompatible offset values! The absolute values of the outer offsets should not be smaller than 1!");
+                    // not necessary, this is also checked in the processMeetUnion function, when comparing offsets with zero
+                    //System.out.println("Incompatible offset values! The absolute values of the outer offsets should not be smaller than 1!");
                 }
             } else {
-        		if (foffs1 < 0 && soffs1 > 0 && ooffs1 < 0) { 
+        		if ((foffs1 < 0 && soffs1 > 0 && ooffs1 < 0) ||
+                    (foffs1 > 0 && soffs1 < 0 && ooffs1 > 0))  { 
                     if (Math.abs(ooffs1) - Math.abs(foffs1) - Math.abs(soffs1) - 1 >= 0) {
                         distance = Math.abs(ooffs1) - Math.abs(foffs1) - Math.abs(soffs1) - 1;
                     } else {
-                        System.out.println("Incompatible offset values! The differene between the absolute values of the outer offsets and the sum of the first inner and the second inner offsets should not be smaller than 1!");
+                        addError(StatusCodes.MALFORMED_QUERY, "Incompatible offset values. The difference between the absolute values of the outer offsets and the sum of the first inner and the second inner offsets should not be smaller than 1.");
                     }
                 } else {
-        			if (foffs1 == 0 && soffs1 > 0 && ooffs1 < 0) { 
+        			if ((foffs1 == 0 && soffs1 > 0 && ooffs1 < 0) ||
+                        (foffs1 > 0 && soffs1 > 0 && ooffs1 < 0) ||
+                        (foffs1 < 0 && soffs1 < 0 && ooffs1 > 0)) { 
                         if (Math.abs(ooffs1) - Math.abs(soffs1) - 1 >= 0) {
                             distance = Math.abs(ooffs1) - Math.abs(soffs1) - 1;
                         } else {
-                            System.out.println("Incompatible offset values! The differene between the absolute values of the outer offsets and the second inner offsets should not be smaller than 1!");
+                            addError(StatusCodes.MALFORMED_QUERY, "Incompatible offset values. The difference between the absolute values of the outer offsets and the second inner offsets should not be smaller than 1.");
                         }
                     } else {
         				System.out.println("Incompatible offset values! See the cqp tutorial!");
@@ -542,11 +549,11 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
             }; // if fails, it is a meet span
 
             if ((window[0]==0)||(window[1]==0)) {
-                addError(StatusCodes.MALFORMED_QUERY,"The MeetUnion offsets cannot be 0!!");
+                addError(StatusCodes.MALFORMED_QUERY,"The MeetUnion offsets cannot be 0.");
                 return;
             } else {
                 if (window[0] > window[1]) {
-                    addError(StatusCodes.MALFORMED_QUERY, "Left meetunion offset is bigger than the right one!");
+                    addError(StatusCodes.MALFORMED_QUERY, "Left meetunion offset cannot be bigger than the right one.");
                     return;
                 } else {
                     /****  correct offsets ****/
@@ -633,93 +640,112 @@ public class CQPQueryProcessor extends Antlr4AbstractQueryProcessor {
         				}
                     } else {
                         /*** the offsets are not equal; we don't use putvisited here, because we did not implement recursive meet for this situation ***/
-                        if (recurrence==true) {
-                            addError(StatusCodes.MALFORMED_QUERY,"We did not implement recursive meet with different offsets!!");
-                            return;
-                        } else {
-                            if ((window[0] < 0) && (window[1] > 0)) {
+                        // i want warnings and still want the query tree to be complete with disjunction
+                        if (recurrence==true) {  
+                            addError(StatusCodes.MALFORMED_QUERY,"Recursiveness is not stable for meet queries with different offsets.");
+                            addWarning("Recursiveness is not stable for meet queries with different offsets.");
+                          //  return;
+                        } 
+                        else {
+                            if (hasAncestorWithCat(node,"meetunion"))
+                            {
+                                // the current node has a recursive meet node as ancestor
+                                    addError(StatusCodes.MALFORMED_QUERY, "Recursiveness is not stable for meet queries with different offsets.");
+                                    addWarning("Recursiveness is not stable for meet queries with different offsets.");
+                            //        return;
+                            }
+                        } 
+                         //   else {
+                        if ((window[0] < 0) && (window[1] > 0)) {
 
-                                /***  implementing disjunction of sequences ***/
+                                    /***  implementing disjunction of sequences ***/
         				    
-                                Map<String, Object> disjunction = KoralObjectGenerator.makeGroup(KoralOperation.DISJUNCTION);
-                                putIntoSuperObject(disjunction);
-                                objectStack.push(disjunction);
-                                stackedObjects++;
+                                    Map<String, Object> disjunction = KoralObjectGenerator.makeGroup(KoralOperation.DISJUNCTION);
+                                    putIntoSuperObject(disjunction);
+                                    objectStack.push(disjunction);
+                                    stackedObjects++;
         		
-                                /**** first disjunct, keep order of segments, distance is []{0,window[1]} ****/
+                                    /**** first disjunct, keep order of segments, distance is []{0,window[1]} ****/
         				    
-                                Map<String, Object> firstsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
-                                putIntoSuperObject(firstsequence);
-                                objectStack.push(firstsequence);
-                                stackedObjects++;
-                                processNode(firstsegment, false);
-                                if (window[1] > 1) {
-                                    ArrayList<Object> distances = new ArrayList<Object>();
-                                    firstsequence.put("distances", distances);
-                                    ((ArrayList<Object>) firstsequence.get("distances")).add(
-                                        KoralObjectGenerator.makeDistance("w", 0, window[1]-1)
-                                        );
-                                }
-                                processNode(secondsegment, false);
+                                    Map<String, Object> firstsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+                                    putIntoSuperObject(firstsequence);
+                                    objectStack.push(firstsequence);
+                                    stackedObjects++;
+                                    processNode(firstsegment, false);
+                                    if (window[1] > 1) {
+                                        ArrayList<Object> distances = new ArrayList<Object>();
+                                        firstsequence.put("distances", distances);
+                                        ((ArrayList<Object>) firstsequence.get("distances")).add(
+                                            KoralObjectGenerator.makeDistance("w", 0, window[1]-1)
+                                            );
+                                        }
+                                    processNode(secondsegment, false);
 				
-                                /*** second disjunct, change order of segments, distance is []{0,-window[0]} ***/
+                                    /*** second disjunct, change order of segments, distance is []{0,-window[0]} ***/
         				    
-                                Map<String, Object> secondsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
-                                objectStack.push(secondsequence);
-                                stackedObjects++;
-                                ((ArrayList<Object>) disjunction.get("operands")).add(secondsequence);
-                                processNode(secondsegment, true);
-                                if (window[0] < -1) {
-                                    ArrayList<Object> distances = new ArrayList<Object>();
-                                    secondsequence.put("distances", distances);
-                                    ((ArrayList<Object>) secondsequence.get("distances")).add(
-                                        KoralObjectGenerator.makeDistance("w", 0, (-window[0])-1)
-                                        );
-                                }
-                                processNode(firstsegment, true);
-                            } else {
-                                /**** offsets are either both > 0 or both < 0 ****/
-                                Map<String, Object> sequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
-                                putIntoSuperObject(sequence);
-                                objectStack.push(sequence);
-                                stackedObjects++;
+                                    Map<String, Object> secondsequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+                                    objectStack.push(secondsequence);
+                                    stackedObjects++;
+                                    ((ArrayList<Object>) disjunction.get("operands")).add(secondsequence);
+                                    processNode(secondsegment, true);
+                                    if (window[0] < -1) {
+                                        ArrayList<Object> distances = new ArrayList<Object>();
+                                        secondsequence.put("distances", distances);
+                                        ((ArrayList<Object>) secondsequence.get("distances")).add(
+                                            KoralObjectGenerator.makeDistance("w", 0, (-window[0])-1)
+                                            );
+                                         }
+                                    processNode(firstsegment, true);
+                                    } else {
+                                    /**** offsets are either both > 0 or both < 0 ****/
+                                    Map<String, Object> sequence = KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
+                                    putIntoSuperObject(sequence);
+                                    objectStack.push(sequence);
+                                    stackedObjects++;
                             
-                                if (window[0] > 0 && window[1] > 0) {
+                                    if (window[0] > 0 && window[1] > 0) {
                                     /*** both offsets are positive ***/
                                     /**** first meet segment ****/
                                			
-                                    processNode(firstsegment, true);
-                                    ArrayList<Object> distances = new ArrayList<Object>();
-                                    sequence.put("distances", distances);
-                                    ((ArrayList<Object>) sequence.get("distances")).add(
-                                        KoralObjectGenerator.makeDistance("w", window[0]-1, window[1]-1)
-                                        );
+                                        processNode(firstsegment, true);
+                                        ArrayList<Object> distances = new ArrayList<Object>();
+                                        sequence.put("distances", distances);
+                                        ((ArrayList<Object>) sequence.get("distances")).add(
+                                            KoralObjectGenerator.makeDistance("w", window[0]-1, window[1]-1)
+                                            );
             					
-                                    processNode(secondsegment, true);
-                                } else {
+                                        processNode(secondsegment, true);
+                                    } else {
                                     /*** both offsets are negative; change order of segments ****/
                                     /**** second meet segment ****/
     				         		
-                                    processNode(secondsegment, true);
+                                        processNode(secondsegment, true);
     				            
-                                    ArrayList<Object> distances = new ArrayList<Object>();
-                                    sequence.put("distances", distances);
-                                    ((ArrayList<Object>) sequence.get("distances")).add(
-                                        KoralObjectGenerator.makeDistance("w", (-window[1])-1,(-window[0])-1)
-                                        );
+                                        ArrayList<Object> distances = new ArrayList<Object>();
+                                        sequence.put("distances", distances);
+                                        ((ArrayList<Object>) sequence.get("distances")).add(
+                                            KoralObjectGenerator.makeDistance("w", (-window[1])-1,(-window[0])-1)
+                                            );
 
-                                    /**** first meet segment ******/
-                                    processNode(firstsegment, true);
+                                        /**** first meet segment ******/
+                                        processNode(firstsegment, true);
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            }
+              //  }
+           // }
         } catch (NumberFormatException nfe) {
     	
             /**** process meet  with span ***/
-    	
+            if (hasAncestorWithCat(node,"meetunion"))
+                {
+                    // the current node has a recursive meet node as ancestor
+                    addError(StatusCodes.MALFORMED_QUERY, "Recursiveness is not stable for span meet queries as an inner query.");
+                    addWarning("Recursiveness is not stable for span meet queries as an inner query.");
+                            //        return;
+                }
             ParseTree firstsequence = firstsegment;
             ParseTree secondsequence = secondsegment;
             Map<String, Object> position = parseFrame(node.getChild(node.getChildCount()-1));
