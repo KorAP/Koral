@@ -1,3 +1,6 @@
+0.41.1 2023-09-18
+    - [cleanup] Updated to Java 17
+
 0.41 2023-09-13
     - [feature] Finish support for CQP (irimia)
     - [bugfix] Disallow empty regex in PQ+ (diewald)
