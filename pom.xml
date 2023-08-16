@@ -4,7 +4,7 @@
 
 	<groupId>de.ids_mannheim.korap</groupId>
 	<artifactId>Koral</artifactId>
-	<version>0.40.0</version>
+	<version>0.40.1</version>
 	<packaging>jar</packaging>
 	<name>Koral</name>
 	<url>https://korap.ids-mannheim.de</url>
