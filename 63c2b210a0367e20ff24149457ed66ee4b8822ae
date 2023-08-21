@@ -16,6 +16,24 @@
       "message": "Should include a version bump, otherwise fine.",
       "revId": "63c2b210a0367e20ff24149457ed66ee4b8822ae",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3d541fda_f1e0b5c9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-08-21T15:00:12Z",
+      "side": 1,
+      "message": "I.e. merged with #7393.",
+      "parentUuid": "ccc95bbe_2ee5e418",
+      "revId": "63c2b210a0367e20ff24149457ed66ee4b8822ae",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
