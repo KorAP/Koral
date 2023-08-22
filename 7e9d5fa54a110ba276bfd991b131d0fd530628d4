@@ -16,6 +16,24 @@
       "message": "I guess I need some more advice, as this fails with CQPQueryProcessorTest.testSpanSerialization",
       "revId": "7e9d5fa54a110ba276bfd991b131d0fd530628d4",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "15d26fb1_79648c81",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-08-22T15:07:20Z",
+      "side": 1,
+      "message": "The issue may have been solved in this change: https://korap.ids-mannheim.de/gerrit/c/KorAP/Koral/+/7376. \nI remember that there was some problem with this test that occured, i assumed, because yet again another issue (probably mine, but i am not sure) with git/gerrit integration of different changes, I remember i had to checkout or actually copy paste the changes in 7376 at a later date, for this test to pass. But i am not sure of this, and i am now very busy with other things :(",
+      "parentUuid": "281409fb_06971573",
+      "revId": "7e9d5fa54a110ba276bfd991b131d0fd530628d4",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
