@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "281409fb_06971573",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-08-22T14:53:08Z",
+      "side": 1,
+      "message": "I guess I need some more advice, as this fails with CQPQueryProcessorTest.testSpanSerialization",
+      "revId": "7e9d5fa54a110ba276bfd991b131d0fd530628d4",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
