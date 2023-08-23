@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8caf5163_d88f5583",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-08-23T08:45:57Z",
+      "side": 1,
+      "message": "This looks very good! I am not sure, the double use of errors and warnings is good - I think, when something throws an error (i.e. is not processable) a warning is not helpful anymore. Otherwise: Looks good! Just minor issues.",
+      "revId": "c151f964596780fffafed097863617081f2b40e1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "80de0f24_43cd0541",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-08-23T08:45:57Z",
+      "side": 1,
+      "message": "I think a brief comment of what you check here would be recommended. It may be simplified and nested later on - but for the moment it\u0027s just pretty hard to understand what\u0027s going on.",
+      "range": {
+        "startLine": 478,
+        "startChar": 8,
+        "endLine": 478,
+        "endChar": 55
+      },
+      "revId": "c151f964596780fffafed097863617081f2b40e1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cbdf98fa_2647da0e",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-08-23T08:45:57Z",
+      "side": 1,
+      "message": "Should be removed.",
+      "range": {
+        "startLine": 518,
+        "startChar": 28,
+        "endLine": 518,
+        "endChar": 51
+      },
+      "revId": "c151f964596780fffafed097863617081f2b40e1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4cbdebf7_a04dbbb4",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-08-23T08:45:57Z",
+      "side": 1,
+      "message": "Should this also be an adderror-warning?",
+      "range": {
+        "startLine": 521,
+        "startChar": 12,
+        "endLine": 521,
+        "endChar": 32
+      },
+      "revId": "c151f964596780fffafed097863617081f2b40e1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cffa0015_d8e1c075",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-08-23T08:45:57Z",
+      "side": 1,
+      "message": "But is the doubling of errors and warnings helpful?",
+      "range": {
+        "startLine": 644,
+        "startChar": 26,
+        "endLine": 644,
+        "endChar": 104
+      },
+      "revId": "c151f964596780fffafed097863617081f2b40e1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
