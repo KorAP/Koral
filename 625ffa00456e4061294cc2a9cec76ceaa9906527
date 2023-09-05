@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8dcda4f7_9c54839a",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPFlagTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-05T11:35:30Z",
+      "side": 1,
+      "message": "Why is the \u0027 still escaped, though it was only required for the initial parsing. i think the former result was correct.",
+      "range": {
+        "startLine": 87,
+        "startChar": 23,
+        "endLine": 87,
+        "endChar": 25
+      },
+      "revId": "625ffa00456e4061294cc2a9cec76ceaa9906527",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d28cb864_ea1fc94e",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPFlagTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-05T11:35:30Z",
+      "side": 1,
+      "message": "This also should be undoubled.",
+      "range": {
+        "startLine": 96,
+        "startChar": 23,
+        "endLine": 96,
+        "endChar": 25
+      },
+      "revId": "625ffa00456e4061294cc2a9cec76ceaa9906527",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
