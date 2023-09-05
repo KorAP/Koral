@@ -43,6 +43,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "69d7ffd5_717bd131",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-05T08:35:07Z",
+      "side": 1,
+      "message": "I plan to do this at a later step, when dealing with the tutorial.",
+      "parentUuid": "80de0f24_43cd0541",
+      "range": {
+        "startLine": 478,
+        "startChar": 8,
+        "endLine": 478,
+        "endChar": 55
+      },
+      "revId": "c151f964596780fffafed097863617081f2b40e1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "cbdf98fa_2647da0e",
         "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
         "patchSetId": 1
@@ -54,6 +78,30 @@
       "writtenOn": "2023-08-23T08:45:57Z",
       "side": 1,
       "message": "Should be removed.",
+      "range": {
+        "startLine": 518,
+        "startChar": 28,
+        "endLine": 518,
+        "endChar": 51
+      },
+      "revId": "c151f964596780fffafed097863617081f2b40e1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b195e7f7_2b39dbce",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-05T08:35:07Z",
+      "side": 1,
+      "message": "I agree.",
+      "parentUuid": "cbdf98fa_2647da0e",
       "range": {
         "startLine": 518,
         "startChar": 28,
@@ -89,6 +137,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "10f241d2_d95e088f",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-05T08:35:07Z",
+      "side": 1,
+      "message": "yes, error or warning, whatever you think is needed.",
+      "parentUuid": "4cbdebf7_a04dbbb4",
+      "range": {
+        "startLine": 521,
+        "startChar": 12,
+        "endLine": 521,
+        "endChar": 32
+      },
+      "revId": "c151f964596780fffafed097863617081f2b40e1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "cffa0015_d8e1c075",
         "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
         "patchSetId": 1
@@ -100,6 +172,30 @@
       "writtenOn": "2023-08-23T08:45:57Z",
       "side": 1,
       "message": "But is the doubling of errors and warnings helpful?",
+      "range": {
+        "startLine": 644,
+        "startChar": 26,
+        "endLine": 644,
+        "endChar": 104
+      },
+      "revId": "c151f964596780fffafed097863617081f2b40e1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "58721fc3_112e0be2",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-05T08:35:07Z",
+      "side": 1,
+      "message": "i don t know, i implemented both just in case, at some point :)",
+      "parentUuid": "cffa0015_d8e1c075",
       "range": {
         "startLine": 644,
         "startChar": 26,
