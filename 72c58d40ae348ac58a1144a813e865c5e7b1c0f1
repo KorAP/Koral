@@ -41,6 +41,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3fb7fd59_d7d2000a",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-06T10:46:39Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "384791b0_edfedd55",
+      "range": {
+        "startLine": 10,
+        "startChar": 16,
+        "endLine": 10,
+        "endChar": 22
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7533f7ad_352bcace",
@@ -54,6 +78,30 @@
       "writtenOn": "2020-12-14T10:03:20Z",
       "side": 1,
       "message": "Yes, I would suggest a similar adoption as for PQ.",
+      "range": {
+        "startLine": 16,
+        "startChar": 100,
+        "endLine": 16,
+        "endChar": 136
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "daf887c6_cc7170f7",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-06T10:46:39Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "7533f7ad_352bcace",
       "range": {
         "startLine": 16,
         "startChar": 100,
@@ -111,6 +159,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "97bdf22f_aadaa86d",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-06T10:46:39Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "fb059edb_b2d9a834",
+      "range": {
+        "startLine": 18,
+        "startChar": 2,
+        "endLine": 18,
+        "endChar": 26
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3269fb6a_2ba385cd",
@@ -147,6 +219,30 @@
       "writtenOn": "2020-12-14T10:03:20Z",
       "side": 1,
       "message": "We rely on the Regex machine provided by the backend, which is currently Lucene. At the moment we can\u0027t change that.",
+      "range": {
+        "startLine": 46,
+        "startChar": 108,
+        "endLine": 46,
+        "endChar": 146
+      },
+      "revId": "72c58d40ae348ac58a1144a813e865c5e7b1c0f1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fe98b2f9_a9e0730b",
+        "filename": "src/main/antlr/cqp/importantdiffPQplusvsCQP",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-06T10:46:39Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "b987bc30_b559a78b",
       "range": {
         "startLine": 46,
         "startChar": 108,
