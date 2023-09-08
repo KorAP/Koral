@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e15ea694_a34d39fa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-08T12:01:29Z",
+      "side": 1,
+      "message": "I think, you can fail on (i.e. stop to process) weird expressions more aggressively. Otherwise: Seems to be fine!",
+      "revId": "1e1979266fd7657188df4780526126b1988f0cd0",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}

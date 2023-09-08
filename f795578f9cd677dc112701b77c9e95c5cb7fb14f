@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "40a8865d_3e2653c6",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 885,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-08T12:01:29Z",
+      "side": 1,
+      "message": "Is this from PQ+? You may want to remove it from PQ+ and check what happens i.e. which tests break.",
+      "range": {
+        "startLine": 885,
+        "startChar": 20,
+        "endLine": 885,
+        "endChar": 118
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f96dd406_1a57ebe0",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1565,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-08T12:01:29Z",
+      "side": 1,
+      "message": "Maybe you can simplify the code, so this isn\u0027t repeated?",
+      "range": {
+        "startLine": 1565,
+        "startChar": 12,
+        "endLine": 1565,
+        "endChar": 57
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0404e237_f43100a4",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-08T12:01:29Z",
+      "side": 1,
+      "message": "Shouldn\u0027t these fail completely and throw an error?",
+      "range": {
+        "startLine": 37,
+        "startChar": 1,
+        "endLine": 69,
+        "endChar": 5
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c5b0217a_99aba833",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-08T12:01:29Z",
+      "side": 1,
+      "message": "At least that should be parsed as a regex and then would fail when running in a regex engine, right?",
+      "range": {
+        "startLine": 71,
+        "startChar": 1,
+        "endLine": 75,
+        "endChar": 5
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a10ce2cb_b7745aa1",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-08T12:01:29Z",
+      "side": 1,
+      "message": "That\u0027s fine in my opinion.",
+      "range": {
+        "startLine": 77,
+        "startChar": 1,
+        "endLine": 80,
+        "endChar": 5
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "186d9c07_ce3dd444",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-08T12:01:29Z",
+      "side": 1,
+      "message": "Am I understanding that correctly, that it should be the regex /\u0027/, because the middle \u0027 is escaped by duplication? Or is the deduplication (unescaping) not done yet in that processing step?",
+      "range": {
+        "startLine": 95,
+        "startChar": 1,
+        "endLine": 98,
+        "endChar": 4
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "565a51b2_e3a02503",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-08T12:01:29Z",
+      "side": 1,
+      "message": "Wouldn\u0027t this be easier to fail? (Tested on https://cqpweb.lancs.ac.uk and it fails.)",
+      "range": {
+        "startLine": 238,
+        "startChar": 7,
+        "endLine": 238,
+        "endChar": 46
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
