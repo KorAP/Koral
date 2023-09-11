@@ -1,6 +1,7 @@
 0.41 2023-09-13
     - [feature] Finish support for CQP (irimia)
     - [bugfix] Disallow empty regex in PQ+ (diewald)
+    - [cleanup] Change of groupID.
 
 0.40 2023-07-26
     - [feature] Initial support for CQP
