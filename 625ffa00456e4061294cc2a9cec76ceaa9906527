@@ -73,6 +73,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "aa79d6a5_747bd103",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPFlagTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-11T14:05:48Z",
+      "side": 1,
+      "message": "solved, see next ammend",
+      "parentUuid": "2da44fdf_f86b8b22",
+      "range": {
+        "startLine": 87,
+        "startChar": 23,
+        "endLine": 87,
+        "endChar": 25
+      },
+      "revId": "625ffa00456e4061294cc2a9cec76ceaa9906527",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "d28cb864_ea1fc94e",
         "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPFlagTest.java",
         "patchSetId": 4
@@ -108,6 +132,30 @@
       "side": 1,
       "message": "\u003e This also should be undoubled.",
       "parentUuid": "d28cb864_ea1fc94e",
+      "range": {
+        "startLine": 96,
+        "startChar": 23,
+        "endLine": 96,
+        "endChar": 25
+      },
+      "revId": "625ffa00456e4061294cc2a9cec76ceaa9906527",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1bb21e30_39e6c71f",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPFlagTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-11T14:05:48Z",
+      "side": 1,
+      "message": "solved, see next ammend",
+      "parentUuid": "7f411a27_f4f1c954",
       "range": {
         "startLine": 96,
         "startChar": 23,

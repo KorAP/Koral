@@ -24,6 +24,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e0ec5273_7d2bd030",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 885,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-11T14:05:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "40a8865d_3e2653c6",
+      "range": {
+        "startLine": 885,
+        "startChar": 20,
+        "endLine": 885,
+        "endChar": 118
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f96dd406_1a57ebe0",
@@ -49,6 +73,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "93ad209d_29d53cb2",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1565,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-11T14:05:48Z",
+      "side": 1,
+      "message": "done, see the next ammend.",
+      "parentUuid": "f96dd406_1a57ebe0",
+      "range": {
+        "startLine": 1565,
+        "startChar": 12,
+        "endLine": 1565,
+        "endChar": 57
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "0404e237_f43100a4",
         "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
         "patchSetId": 6
@@ -60,6 +108,30 @@
       "writtenOn": "2023-09-08T12:01:29Z",
       "side": 1,
       "message": "Shouldn\u0027t these fail completely and throw an error?",
+      "range": {
+        "startLine": 37,
+        "startChar": 1,
+        "endLine": 69,
+        "endChar": 5
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "be039d09_76691fe5",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 36
+      },
+      "writtenOn": "2023-09-11T14:05:48Z",
+      "side": 1,
+      "message": "yes, but as i said in the comment, i don\u0027t know how to do this. the grammar is not catching the issue and a token object with an empty key is generated. i could force an error message whenever the key is the empty string, if this is ok with you?",
+      "parentUuid": "0404e237_f43100a4",
       "range": {
         "startLine": 37,
         "startChar": 1,
