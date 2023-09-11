@@ -1,3 +1,6 @@
+0.41 2023-09-11
+    - [cleanup] Change of groupID.
+
 0.40 2023-07-26
     - [feature] Initial support for CQP
       (irimia, margaretha, diewald)
