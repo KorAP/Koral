@@ -95,6 +95,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0f257f24_39dd5f33",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CQPQueryProcessor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1565,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-11T14:54:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "93ad209d_29d53cb2",
+      "range": {
+        "startLine": 1565,
+        "startChar": 12,
+        "endLine": 1565,
+        "endChar": 57
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0404e237_f43100a4",
@@ -132,6 +156,30 @@
       "side": 1,
       "message": "yes, but as i said in the comment, i don\u0027t know how to do this. the grammar is not catching the issue and a token object with an empty key is generated. i could force an error message whenever the key is the empty string, if this is ok with you?",
       "parentUuid": "0404e237_f43100a4",
+      "range": {
+        "startLine": 37,
+        "startChar": 1,
+        "endLine": 69,
+        "endChar": 5
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "830b798f_af2f93ed",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-11T14:54:47Z",
+      "side": 1,
+      "message": "When empty tokens are not valid in CQP that would be a good idea. It\u0027s weird though, that there is no indication of a failed process.",
+      "parentUuid": "be039d09_76691fe5",
       "range": {
         "startLine": 37,
         "startChar": 1,
