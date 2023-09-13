@@ -1,16 +1,26 @@
- // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-//												//
-// 	COSMAS II zeilenorientierten Suchanfragesprache (C2 plain syntax)			//
-// 	globale Grammatik (ruft lokale c2ps_x.g Grammatiken auf).				//
-//	17.12.12/FB										//
-//      v-0.6											//
-// TODO:											//
-// - se1: Einsetzen des Default-Operators in den kumulierten AST.				//
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+//												
+// 	COSMAS II zeilenorientierten Suchanfragesprache (C2 plain syntax)	
+// 	globale Grammatik (ruft lokale c2ps_x.g Grammatiken auf).			
+//	17.12.12/FB										
+//      v-0.6										
+// TODO:											
+// - se1: Einsetzen des Default-Operators in den kumulierten AST.		
+//
+//  v0.7 - 25.07.23/FB
+//    - added: #REG(x)
+//  v0.8 - 06.11.23/FB
+//    - accepts #BED(searchword, sa) : comma attached to searchword.
+//    - more generally: comma at end of searchword, which is not enclosed by "..." is
+//      excluded from searchword now.
+//    - a comma inside a searchword is accepted if enclosed by "...".
+//
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 grammar c2ps;
 
 options { output=AST; backtrack=true; k=5;}
+// tokens that will appear as node names in the resulting AST:
 tokens  {C2PQ; OPBED; OPTS; OPBEG; OPEND; OPNHIT; OPALL; OPLEM; OPPROX;
 	 ARG1; ARG2; 
 	 OPWF; OPLEM; OPANNOT;
@@ -21,6 +31,7 @@ tokens  {C2PQ; OPBED; OPTS; OPBEG; OPEND; OPNHIT; OPALL; OPLEM; OPPROX;
 	 OPNOT;
 	 OPEXPR1;
 	 OPMORPH; OPELEM;
+	 OPREG;
 	}
 
 @header {package de.ids_mannheim.korap.query.parse.cosmas;}
@@ -63,18 +74,49 @@ WS	:	(' '|'\r'|'\n')+ {skip();};
 
 fragment DISTVALUE
 	:	 ('0' .. '9')+ (':' ('0'..'9')+)? ;
-		
+
+fragment DISTTYPE // 30.11.23/FB
+	: 	('w'|'s'|'p'|'t');
+
+fragment DISTDIR // 30.11.23/FB
+	: 	('+'|'-');
+	
+/* old version (before 30.11.23/FB)
 fragment DIST
 	:	('+'|'-')? (DISTVALUE ('w'|'s'|'p'|'t') | ('w'|'s'|'p'|'t') DISTVALUE);
-	
+*/
+
+// accept these 3 options in any order.
+// afterwards, we will have to check if any of them is missing.
+// 30.11.23/FB
+
+fragment DIST // 30.11.23/FB
+	:	(DISTDIR | DISTTYPE | DISTVALUE )+;
+
 fragment GROUP
 	:	('min' | 'max');
 
-OP_PROX	:	('/' | '%') DIST (',' DIST)* (',' GROUP)? ;
+// version (12.01.24/FB):
+// accept correct and incorrect chars till the next blank, that way the incorrect chars
+// are submitted to the sub-grammer c2ps_opPROX where they are detected and an appropriate 
+// error message is inserted:
+OP_PROX		:	('/' | '%') DIST (~' ')*; 
+
+// old version: accepts only correctly formulated options, so the incorrect
+// chars/options are hard to detect:
+// OP_PROX	:	('/' | '%') DIST (',' DIST)* (',' GROUP)?  ;
 
 OP_IN	:	'#IN' | '#IN(' OP_IN_OPTS? ')' ; 
 
 OP_OV	:	'#OV' | '#OV(' OP_OV_OPTS? ')' ;
+
+// #REG(abc['"]) or #REG('abc\'s') or #REG("abc\"s"):
+
+OP_REG	: '#REG(' ' '* '\'' ('\\\''|~'\'')+  '\'' (' ')* ')'	
+			| 
+		  '#REG(' ' '* '"' ('\\"'|~'"')+ '"' (' ')* ')'
+		  	|
+		  '#REG(' ' '* ~('\''|'"'|' ') (~(')'))* ')';
 
 // EAVEXP wird hier eingesetzt fÃ¼r eine beliebige Sequenz von Zeichen bis zu ')'.
 fragment OP_IN_OPTS
@@ -111,8 +153,23 @@ SEARCHLEMMA
 	:	'&' SEARCHWORD1 ; // rewrite rules funktionieren im lexer nicht: -> ^(OPLEM $SEARCHWORD1.text); 
 
 // SEARCHWORD2: schluckt Blanks. Diese mÃ¼ssen nachtrÃ¤glich als Wortdelimiter erkannt werden.
+
+// current syntax, drawback is:
+// e.g. aber, -> SEARCHWORD1 = "aber,"
+// but correct should be -> SEARCHWORD1 = "aber"  
+//SEARCHWORD1
+//	:	~('"' | ' ' | '#' | ')' | '(' )+ ;
+
+// new syntax (06.11.23/FB):
+// accept for searchword1 either a single ',' or exclude trailing ',' from searchword1:
+// E.g. Haus, -> searchword1=Haus.
+// For a ',' inside a search word, see searchword2. 
+// exclude trailing "," from searchword1.
 SEARCHWORD1
-	:	~('"' | ' ' | '#' | ')' | '(' )+ ;
+	:	(',' | ~('"' | ' ' | '#' | ')' | '(' | ',')+)  ;
+
+// searchword2 accepts a ',' inside a searchword enclosed by "...".
+// E.g. "Haus,tür": OK.
 
 SEARCHWORD2
 	:	'"' (~('"') | '\\"')+ '"' ;
@@ -226,7 +283,7 @@ searchLabel
 op2	:	(opPROX | opIN | opOV | opAND | opOR | opNOT) ;
 		
 // AST with Options for opPROX is returned by c2ps_opPROX.check():
-opPROX	:	OP_PROX -> ^(OPPROX {c2ps_opPROX.check($OP_PROX.text, $OP_PROX.index)} );
+opPROX	:	OP_PROX -> ^(OPPROX {c2ps_opPROX.check($OP_PROX.text, $OP_PROX.pos)} );
 
 opIN	: 	OP_IN -> {c2ps_opIN.check($OP_IN.text, $OP_IN.index)};
 
@@ -241,7 +298,7 @@ opNOT	:	('nicht' | 'NICHT' | 'not' | 'NOT') -> ^(OPNOT);
 // OP1: Suchoperatoren mit 1 Argument:
 // -----------------------------------
 
-op1	:	opBEG | opEND | opNHIT | opALL | opBED; 
+op1	:	opBEG | opEND | opNHIT | opALL | opBED | opREG; 
 
 // #BED(serchExpr, B).
 // B muss nachtrÃ¤glich in einer lokalen Grammatik Ã¼berprÃ¼ft werden.
@@ -259,3 +316,5 @@ opEND	:	( '#END(' | '#RECHTS(' ) searchExpr ')'  -> ^(OPEND searchExpr) ;
 opNHIT	:	( '#NHIT(' | '#INKLUSIVE(' ) searchExpr ')' -> ^(OPNHIT searchExpr) ;
 
 opALL	:	( '#ALL(' | '#EXKLUSIVE(' ) searchExpr ')'  -> ^(OPALL searchExpr) ;
+
+opREG	:	OP_REG -> ^(OPREG {c2ps_opREG.encode($OP_REG.text, OPREG)}) ;

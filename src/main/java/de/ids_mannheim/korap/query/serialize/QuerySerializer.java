@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
+import com.fasterxml.jackson.core.JsonPointer;
 
 /**
  * Main class for Koral, serializes queries from concrete QLs to KoralQuery
@@ -33,7 +34,7 @@ public class QuerySerializer {
     private String version = "Unknown";
     private String name = "Unknown";
     private static Properties info;
-
+    private boolean bDebug = false;
         {
           
             loadInfo();
@@ -73,7 +74,9 @@ public class QuerySerializer {
     private List<Object> errors;
     private List<Object> warnings;
     private List<Object> messages;
-
+    
+    private boolean DEBUG = false;
+    
     public QuerySerializer () {
         this.errors = new ArrayList<>();
         this.warnings = new ArrayList<>();
@@ -102,20 +105,31 @@ public class QuerySerializer {
         int i = 0;
         String[] queries = null;
         String ql = "poliqarpplus";
+        boolean 
+        	bDebug = false;
+
         if (args.length < 2) {
-            System.err
-                    .println("Usage: QuerySerializer \"query\" queryLanguage");
+            System.err.println("\nUsage: QuerySerializer \"query\" queryLanguage [-show]");
             System.exit(1);
         }
         else {
             queries = new String[] { args[0] };
             ql = args[1];
         }
+        if( args.length >= 3 )
+	        {
+        	if( args[2].compareToIgnoreCase("-show") == 0 )
+	        	bDebug = true;	
+	        }
+        
         for (String q : queries) {
             i++;
             try {
-                jg.run(q, ql);
-                System.out.println();
+				if( bDebug ) 
+					System.out.printf("QuerySerialize: query = >>%s<< lang = %s.\n", q, ql);
+		            	
+				jg.run(q, ql, bDebug);
+		        	System.out.println();
             }
             catch (NullPointerException npe) {
                 npe.printStackTrace();
@@ -139,7 +153,10 @@ public class QuerySerializer {
      *            'poliqarpplus', 'cqp', 'cosmas2', 'annis' or 'cql'.
      * @throws IOException
      */
-    public void run (String query, String queryLanguage) throws IOException {
+    public void run (String query, String queryLanguage, boolean bDebug) throws IOException {
+
+    	ast.verbose = bDebug; // debugging: 01.09.23/FB
+
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
         }
@@ -165,7 +182,9 @@ public class QuerySerializer {
             throw new IllegalArgumentException(
                     queryLanguage + " is not a supported query language!");
         }
-        System.out.println(this.toJSON());
+        
+        if( bDebug )
+        	System.out.println(this.toJSON());
     }
 
     public QuerySerializer setQuery (String query, String ql, String version) {
@@ -221,7 +240,7 @@ public class QuerySerializer {
     public final String toJSON () {
         String ser;
         try {
-            ser = mapper.writeValueAsString(raw());
+        	ser = mapper.writeValueAsString(raw());
             // System.out.println(ser);
         }
         catch (JsonProcessingException e) {
