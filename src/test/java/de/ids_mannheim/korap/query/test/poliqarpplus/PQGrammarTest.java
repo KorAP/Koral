@@ -59,7 +59,7 @@ public class PQGrammarTest {
 
         // how it behaves
       assertEquals(
-        "(request (query (segment (token (key (regex \"\"))))) <EOF>)",
+        "(request query <EOF>)",  // see different behaviour of " and '; for ", the query is parsed and an empty regex is generated
         treeString("\"\"\"")
         );
        // how it should behave
@@ -68,7 +68,7 @@ public class PQGrammarTest {
     	 	 treeString("\"\"\"")
     	 	 );
         assertEquals(
-        "(request (query (sequence (segment (token (key (regex \"\")))) (segment (token (key -key))))) <EOF>)",  // see different behaviour of " and '; for ", the query is parsed and an empty regex is generated
+        "(request (query (segment (token (key -key)))) <EOF>)",  // see different behaviour of " and '; for ", the query is parsed and an empty regex is generated
         treeString("\"\"-key\"")
         );
         assertEquals(

@@ -15,4 +15,4 @@ fragment RE_chgroup  : '[' '^'? RE_char+ ']';
 fragment RE_quant    : ('.' | RE_char | RE_chgroup | ( '(' RE_expr ')')) ('?' | '*' | '+' | RE_focc) '?'?;
 fragment RE_group    : '(' RE_expr ')';
 fragment RE_expr     : ('.' | RE_char | RE_alter | RE_chgroup | RE_quant | RE_group | '^' )+;
-fragment RE_dquote   : ('"'|'„'|'“')  (RE_expr | '\'' | ':' )* ('"'|'“'|'”');
+fragment RE_dquote   : ('"'|'„'|'“')  (RE_expr | '\'' | ':' )+ ('"'|'“'|'”');
