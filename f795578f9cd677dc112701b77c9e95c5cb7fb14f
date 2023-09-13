@@ -355,6 +355,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f0edd19_247d358c",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-13T09:26:20Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "e4d101dd_b8cf0e66",
+      "range": {
+        "startLine": 95,
+        "startChar": 1,
+        "endLine": 98,
+        "endChar": 4
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "565a51b2_e3a02503",
@@ -392,6 +416,30 @@
       "side": 1,
       "message": "i think the comment about: // everything after \u0027anna\u0027 is parsed as span; is an old one and is not valid anymore. the assert indicates that the query is actually failing, is not parsed, no grammar tree is generated.",
       "parentUuid": "565a51b2_e3a02503",
+      "range": {
+        "startLine": 238,
+        "startChar": 7,
+        "endLine": 238,
+        "endChar": 46
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ff6940f2_5fe4e6ac",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-13T09:26:20Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "9779f259_90ffa87b",
       "range": {
         "startLine": 238,
         "startChar": 7,
