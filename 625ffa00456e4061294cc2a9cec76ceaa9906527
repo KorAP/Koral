@@ -48,6 +48,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "08701bb0_731af684",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CQPFlagTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-13T06:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "52c78504_51354615",
+      "range": {
+        "startLine": 81,
+        "startChar": 33,
+        "endLine": 81,
+        "endChar": 37
+      },
+      "revId": "625ffa00456e4061294cc2a9cec76ceaa9906527",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8dcda4f7_9c54839a",

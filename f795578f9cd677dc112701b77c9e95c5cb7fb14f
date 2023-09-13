@@ -237,6 +237,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "61fd7384_28749610",
+        "filename": "src/test/java/de/ids_mannheim/korap/query/test/cqp/CqpGrammarTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-09-13T06:19:11Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "c5b0217a_99aba833",
+      "range": {
+        "startLine": 71,
+        "startChar": 1,
+        "endLine": 75,
+        "endChar": 5
+      },
+      "revId": "f795578f9cd677dc112701b77c9e95c5cb7fb14f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a10ce2cb_b7745aa1",
