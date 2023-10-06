@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fda3e1ac_48a6c9e9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 28
+      },
+      "writtenOn": "2023-10-06T15:30:34Z",
+      "side": 1,
+      "message": "issue 66 (#REG-Operator) should be resolved with this extention.",
+      "revId": "ba896db304aba20d13e38a995db5740008e16527",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
