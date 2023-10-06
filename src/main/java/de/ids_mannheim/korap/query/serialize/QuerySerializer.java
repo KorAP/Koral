@@ -55,8 +55,6 @@ public class QuerySerializer {
                 new HashMap<String, Class<? extends AbstractQueryProcessor>>();
         qlProcessorAssignment.put("poliqarpplus",
                 PoliqarpPlusQueryProcessor.class);
-        qlProcessorAssignment.put("cqp",
-                CQPQueryProcessor.class);
         qlProcessorAssignment.put("cosmas2", Cosmas2QueryProcessor.class);
         qlProcessorAssignment.put("annis", AnnisQueryProcessor.class);
         qlProcessorAssignment.put("cql", CqlQueryProcessor.class);
@@ -74,6 +72,8 @@ public class QuerySerializer {
     private List<Object> warnings;
     private List<Object> messages;
 
+    private boolean DEBUG = false;
+    
     public QuerySerializer () {
         this.errors = new ArrayList<>();
         this.warnings = new ArrayList<>();
@@ -136,24 +136,25 @@ public class QuerySerializer {
      *            The query string
      * @param queryLanguage
      *            The query language. As of 17 Dec 2014, this must be one of
-     *            'poliqarpplus', 'cqp', 'cosmas2', 'annis' or 'cql'.
+     *            'poliqarpplus', 'cosmas2', 'annis' or 'cql'.
      * @throws IOException
      */
     public void run (String query, String queryLanguage) throws IOException {
+    	
+    	ast.verbose = DEBUG ? true : false; // debugging: 01.09.23/FB
+    	
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
         }
         else if (queryLanguage.equalsIgnoreCase("cosmas2")) {
             ast = new Cosmas2QueryProcessor(query);
+            //System.out.printf("\ncosmas2 AST='%s'.\n\n", ast.query);
         }
         else if (queryLanguage.equalsIgnoreCase("poliqarpplus")) {
             ast = new PoliqarpPlusQueryProcessor(query);
         }
         else if (queryLanguage.equalsIgnoreCase("cql")) {
             ast = new CqlQueryProcessor(query);
-        }
-        else if (queryLanguage.equalsIgnoreCase("cqp")) {
-            ast = new CQPQueryProcessor(query);
         }
         else if (queryLanguage.equalsIgnoreCase("fcsql")) {
             ast = new FCSQLQueryProcessor(query);
@@ -165,7 +166,8 @@ public class QuerySerializer {
             throw new IllegalArgumentException(
                     queryLanguage + " is not a supported query language!");
         }
-        System.out.println(this.toJSON());
+        
+       /*if( DEBUG )*/ System.out.println(this.toJSON());
     }
 
     public QuerySerializer setQuery (String query, String ql, String version) {
@@ -185,9 +187,6 @@ public class QuerySerializer {
         }
         else if (ql.equalsIgnoreCase("poliqarpplus")) {
             ast = new PoliqarpPlusQueryProcessor(query);
-        }
-        else if (ql.equalsIgnoreCase("cqp")) {
-            ast = new CQPQueryProcessor(query);
         }
         else if (ql.equalsIgnoreCase("cql")) {
             if (version == null) {
