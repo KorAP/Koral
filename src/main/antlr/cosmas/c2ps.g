@@ -1,16 +1,20 @@
- // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-//												//
-// 	COSMAS II zeilenorientierten Suchanfragesprache (C2 plain syntax)			//
-// 	globale Grammatik (ruft lokale c2ps_x.g Grammatiken auf).				//
-//	17.12.12/FB										//
-//      v-0.6											//
-// TODO:											//
-// - se1: Einsetzen des Default-Operators in den kumulierten AST.				//
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+//												
+// 	COSMAS II zeilenorientierten Suchanfragesprache (C2 plain syntax)	
+// 	globale Grammatik (ruft lokale c2ps_x.g Grammatiken auf).			
+//	17.12.12/FB										
+//      v-0.6										
+// TODO:											
+// - se1: Einsetzen des Default-Operators in den kumulierten AST.		
+//
+//  v0.7 - 25.07.23/FB
+//    - added: #REG(x)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 grammar c2ps;
 
 options { output=AST; backtrack=true; k=5;}
+// tokens that will appear as node names in the resulting AST:
 tokens  {C2PQ; OPBED; OPTS; OPBEG; OPEND; OPNHIT; OPALL; OPLEM; OPPROX;
 	 ARG1; ARG2; 
 	 OPWF; OPLEM; OPANNOT;
@@ -21,6 +25,7 @@ tokens  {C2PQ; OPBED; OPTS; OPBEG; OPEND; OPNHIT; OPALL; OPLEM; OPPROX;
 	 OPNOT;
 	 OPEXPR1;
 	 OPMORPH; OPELEM;
+	 OPREG;
 	}
 
 @header {package de.ids_mannheim.korap.query.parse.cosmas;}
@@ -75,6 +80,14 @@ OP_PROX	:	('/' | '%') DIST (',' DIST)* (',' GROUP)? ;
 OP_IN	:	'#IN' | '#IN(' OP_IN_OPTS? ')' ; 
 
 OP_OV	:	'#OV' | '#OV(' OP_OV_OPTS? ')' ;
+
+// #REG(abc['"]) or #REG('abc\'s') or #REG("abc\"s"):
+
+OP_REG	: '#REG(' ' '* '\'' ('\\\''|~'\'')+  '\'' (' ')* ')'	
+			| 
+		  '#REG(' ' '* '"' ('\\"'|~'"')+ '"' (' ')* ')'
+		  	|
+		  '#REG(' ' '* ~('\''|'"'|' ') (~(')'))* ')';
 
 // EAVEXP wird hier eingesetzt fÃ¼r eine beliebige Sequenz von Zeichen bis zu ')'.
 fragment OP_IN_OPTS
@@ -241,7 +254,7 @@ opNOT	:	('nicht' | 'NICHT' | 'not' | 'NOT') -> ^(OPNOT);
 // OP1: Suchoperatoren mit 1 Argument:
 // -----------------------------------
 
-op1	:	opBEG | opEND | opNHIT | opALL | opBED; 
+op1	:	opBEG | opEND | opNHIT | opALL | opBED | opREG; 
 
 // #BED(serchExpr, B).
 // B muss nachtrÃ¤glich in einer lokalen Grammatik Ã¼berprÃ¼ft werden.
@@ -259,3 +272,6 @@ opEND	:	( '#END(' | '#RECHTS(' ) searchExpr ')'  -> ^(OPEND searchExpr) ;
 opNHIT	:	( '#NHIT(' | '#INKLUSIVE(' ) searchExpr ')' -> ^(OPNHIT searchExpr) ;
 
 opALL	:	( '#ALL(' | '#EXKLUSIVE(' ) searchExpr ')'  -> ^(OPALL searchExpr) ;
+
+opREG	:	OP_REG -> ^(OPREG {c2ps_opREG.encode($OP_REG.text, OPREG)}) ; //^(OPREG OP_REG);  
+
