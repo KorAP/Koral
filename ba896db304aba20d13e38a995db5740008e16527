@@ -16,6 +16,23 @@
       "message": "issue 66 (#REG-Operator) should be resolved with this extention.",
       "revId": "ba896db304aba20d13e38a995db5740008e16527",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d7b4ea8c_c3767780",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-12T08:20:36Z",
+      "side": 1,
+      "message": "Thank you! Unfortunately it doesn\u0027t build for me, because after `mvn clean test` it says:\n\n  [INFO] ------------------------------------------------------------------------\n  [INFO] BUILD FAILURE\n  [INFO] ------------------------------------------------------------------------\n  [INFO] Total time:  11.728 s\n  [INFO] Finished at: 2023-10-12T10:12:33+02:00\n  [INFO] ------------------------------------------------------------------------\n  [ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project Koral: Compilation failure\n  [ERROR] /home/ndiewald/Repositories/korap-git/Koral/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2psParser.java:[3003,58] cannot find symbol\n  [ERROR]   symbol:   variable c2ps_opREG\n  [ERROR]   location: class de.ids_mannheim.korap.query.parse.cosmas.c2psParser\n\nMaybe a `/src/main/antlr/cosmas/c2ps_opREG.g` is missing? And shouldn\u0027t manual changes to `src/main/java/de/ids_mannheim/korap/query/parse/cosmas` be disallowed? I thought these files should in general be created by Antlr on build time - so changes would be overwritten (so maybe these files are missing in the .gitignore)?",
+      "revId": "ba896db304aba20d13e38a995db5740008e16527",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
