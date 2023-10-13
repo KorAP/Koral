@@ -177,6 +177,7 @@
 		          	<exclude>**/c2ps_opIN.java</exclude>
 		          	<exclude>**/c2ps_opOV.java</exclude>
 		          	<exclude>**/c2ps_opPROX.java</exclude>
+		          	<exclude>**/c2ps_opREG.java</exclude>
 		          	<exclude>**/c2ps_opWF.java</exclude>
 		          	<exclude>**/c2ps_optCase.java</exclude>
 		          	<exclude>**/.gitignore</exclude>
