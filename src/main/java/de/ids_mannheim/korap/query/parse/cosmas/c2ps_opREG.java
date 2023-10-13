@@ -299,7 +299,8 @@ public class c2ps_opREG
     						"#REG(abc[\"]ef)", 
     						"#REG('abc')", 			// ' fehlt: generates Syntax Error .
     						"#REG('abc\')",			// User input = #REG('abc\') : OK, nothing escaped.
-    						"#REG('abc\\')",		// User input = #REG('abc\') : OK, same behavior: \\ == \.
+     						"#REG('abc\'')",			// User input = #REG('abc\') : OK, nothing escaped.
+     					   	"#REG('abc\\')",		// User input = #REG('abc\') : OK, same behavior: \\ == \.
     						"#REG((a|b))",			// broken input, should use ".." or '..'.
     						"#REG('(a|b)')",		// OK.
     						"#REG(\"(a|b)\")",		// OK.

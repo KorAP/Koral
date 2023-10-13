@@ -1725,6 +1725,33 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("type:regex",  res.at("/query/wrap/type").asText());
         assertEquals("match:eq",    res.at("/query/wrap/match").asText());
 
+        query = "#REG('été\\'')";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("été'"	,       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG('été\' )";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("été"	,       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG('été\\')";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("été\\",       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
         query = "#REG(l'été)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
