@@ -19,7 +19,8 @@ import static org.junit.Assert.*;
  * 
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @author Nils Diewald
- * @version 1.1
+ * @author Franck Bodmer
+ * @version 1.2 - 21.09.23
  */
 public class Cosmas2QueryProcessorTest {
 
@@ -1701,5 +1702,163 @@ public class Cosmas2QueryProcessorTest {
         assertTrue(res.at("/query/distances/0/exclude").asBoolean());
         assertEquals("s", res.at("/query/distances/0/key").asText());
         assertEquals("operation:sequence", res.at("/query/operation").asText());
+    }
+    
+    /* Testing #REG(expr), #REG('expr') and #REG("expr").
+     * 21.09.23/FB
+     */
+     
+    @Test
+    public void testREG () throws JsonProcessingException, IOException {
+    	
+    	boolean debug = true;
+    	
+        query = "#REG(^aber$)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term",  res.at("/query/wrap/@type").asText());
+        assertEquals("^aber$",      res.at("/query/wrap/key").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("match:eq",    res.at("/query/wrap/match").asText());
+
+        query = "#REG('été\\'')";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("été'"	,       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG('été\' )";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("été"	,       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG('été\\')";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("été\\",       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG(l'été)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("l'été",       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG(l\\'été)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("l'été",       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG(\"l'été\")";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("l'été",       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG(\"l\\'été\")";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("l'été",       res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG('l\\'été.*')";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("l'été.*",     res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG('\\\"été\\\"$')"; // means user input is #REG('\"été\"').
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("\"été\"$",    res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        // checks the >>"<<:
+        query = "#REG(\\\"Abend\\\"-Ticket)"; // means user input = #REG(\"Abend\"-Ticket).
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("\"Abend\"-Ticket",res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG('\\\"Abend\\\"-Ticket')"; // means user input = #REG(\"Abend\"-Ticket).
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("\"Abend\"-Ticket",res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG('\"Abend\"-Ticket')"; // means user input = #REG('"Abend"-Ticket').
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("\"Abend\"-Ticket",res.at("/query/wrap/key").asText()); // key must be escaped, because converted to in "...".
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG(\"\\\"Abend\\\"-Ticket\")"; // means user input = #REG("\"Abend\"-Ticket") -> key: >>"Abend"-Ticket<<.
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
+        assertEquals("\"Abend\"-Ticket",res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+        //
+
+        query = "#REG('^(a|b)?+*$')";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("^(a|b)?+*$",     res.at("/query/wrap/key").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+
+        query = "#REG(\"[A-Z()]\")";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("[A-Z()]",     res.at("/query/wrap/key").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+
     }
 }

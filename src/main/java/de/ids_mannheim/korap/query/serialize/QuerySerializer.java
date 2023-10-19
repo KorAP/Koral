@@ -73,7 +73,9 @@ public class QuerySerializer {
     private List<Object> errors;
     private List<Object> warnings;
     private List<Object> messages;
-
+    
+    private boolean DEBUG = false;
+    
     public QuerySerializer () {
         this.errors = new ArrayList<>();
         this.warnings = new ArrayList<>();
@@ -102,6 +104,8 @@ public class QuerySerializer {
         int i = 0;
         String[] queries = null;
         String ql = "poliqarpplus";
+	boolean bDebug = true;
+
         if (args.length < 2) {
             System.err
                     .println("Usage: QuerySerializer \"query\" queryLanguage");
@@ -114,7 +118,9 @@ public class QuerySerializer {
         for (String q : queries) {
             i++;
             try {
-                jg.run(q, ql);
+		if( bDebug ) System.out.printf("QuerySerialize: query = >>%s<< lang = %s.\n", q, ql);
+            	
+		jg.run(q, ql);
                 System.out.println();
             }
             catch (NullPointerException npe) {
@@ -140,6 +146,9 @@ public class QuerySerializer {
      * @throws IOException
      */
     public void run (String query, String queryLanguage) throws IOException {
+
+	ast.verbose = DEBUG ? true : false; // debugging: 01.09.23/FB
+
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
             ast = new PoliqarpPlusQueryProcessor(query);
         }
