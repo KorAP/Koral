@@ -15,6 +15,7 @@ import de.ids_mannheim.korap.query.serialize.util.Converter;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+import de.ids_mannheim.korap.util.StringUtils;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.RecognitionException;
@@ -127,7 +128,6 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     public static Pattern wildcardPlusPattern = Pattern.compile("([+])");
     public static Pattern wildcardQuestionPattern = Pattern.compile("([?])");
 
-
     /**
      * @param tree
      *            The syntax tree as returned by ANTLR
@@ -142,6 +142,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         process(query);
         if (DEBUG) { 
             log.debug(">>> " + requestMap.get("query") + " <<<");
+        System.out.printf("Cosmas2QueryProcessor: >>%s<<.\n",  requestMap.get("query"));
         }
     }
 
@@ -151,14 +152,19 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         Tree tree = null;
         tree = parseCosmasQuery(query);
         if (DEBUG) { 
+        	System.out.printf("\nProcessing COSMAS II query: %s.\n\n", query);
             log.debug("Processing CosmasII query: " + query);
         }
-        if (tree != null) {
-            if (DEBUG) { 
-                log.debug("ANTLR parse tree: " + tree.toStringTree());
-            }
+        if (tree != null) 
+        	{
+            
+                if (DEBUG) {
+            	log.debug("ANTLR parse tree: " + tree.toStringTree());
+                System.out.printf("\nANTLR parse tree: %s.\n\n",  tree.toStringTree());
+                }
+
             processNode(tree);
-        }
+        	}
     }
 
 
@@ -278,6 +284,11 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         if (nodeCat.equals("OPBED")) {
             processOPBED(node);
         }
+        
+        if (nodeCat.equals("OPREG")) {
+            processOPREG(node);
+        }
+        
         objectsToPop.push(stackedObjects);
         toWrapsToPop.push(stackedToWrap);
 
@@ -443,6 +454,88 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             }
         }
     }
+
+        /* processOPREG:
+         * 
+         * - input Node structure is: (OPREG "regexpr").
+		 * - transforms tree into the corresponding Koral:token/Koral:term, like:
+		 *    e.g. #REG(abc[']?s) ->
+		 *     {
+		 *      "@type": "koral:term",
+		 *      "match": "match:eq",   // optional
+		 *      "type" : "type:regex",
+		 *      "key"  : "abc[']?s",
+		 *      "layer": "orth"
+		 *     }.
+		 *
+		 * - see doc: http://korap.github.io/Koral/
+		 * 
+		 * 06.09.23/FB
+		 */
+    	
+    private void processOPREG (Tree node) 
+    
+    {
+        int 
+        	nChild = node.getChildCount() - 1;
+        Tree
+        	nodeChild = node.getChild(0);
+        boolean
+        	bDebug = false;
+        
+        if( DEBUG )
+        	{
+        	//System.out.printf("Debug: processOPREG: node='%s' nChilds=%d.\n", node.toStringTree(), nChild+1);
+            System.out.printf("Debug: processOPREG: child: >>%s<< cat=%s type=%d.\n",
+            		nodeChild.getText(), getNodeCat(node), nodeChild.getType());
+            }
+        
+        // empty case (is that possible?):
+        if( nChild < 0 )
+        	return;
+        
+        // see processOPWF_OPWF_OPLEM
+        // for how to insert regexpr into Koral JSON-LD
+        
+        Map<String, Object> 
+        	token = KoralObjectGenerator.makeToken();
+        
+        objectStack.push(token);
+        stackedObjects++;
+        
+        Map<String, Object> 
+        	fieldMap = KoralObjectGenerator.makeTerm();
+        
+        token.put("wrap", fieldMap);
+        
+        // make category-specific fieldMap entry:
+        /*
+        System.out.printf("Debug: processOPREG: before replaceALL: >>%s<<.\n", nodeChild.toStringTree());
+        String 
+        	value = nodeChild.toStringTree().replaceAll("\"", "");
+        System.out.printf("Debug: processOPREG: after  replaceALL: >>%s<<.\n", value);
+        */
+        
+        /* replace replaceALL() by replaceIfNotEscaped() to delete every occurence of >>"<<
+         * which is not escaped by >>\<<, as it is important to keep the escaped sequence for
+         * the argument of #REG().
+         * This is not possible with replaceALL().
+         */
+        String
+        	value = nodeChild.toStringTree(); // old version: replaceDoubleQuotes(nodeChild.toStringTree());
+        
+        if( bDebug )
+        	System.out.printf("Debug: processOPREG: key: >>%s<<.\n", value);
+        
+        fieldMap.put("key",   value);
+        fieldMap.put("layer", "orth");
+        fieldMap.put("type",  "type:regex");
+        fieldMap.put("match", "match:eq");
+        
+        // decide where to put (objPos=1, not clear why, but it works only like that - 20.09.23/FB):
+        putIntoSuperObject(token,1); 
+        
+    } // processOPREG
 
 
     private void processOPNHIT (Tree node) {
@@ -1511,19 +1604,40 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
 
     @SuppressWarnings("unchecked")
-    private void putIntoSuperObject (Map<String, Object> object,
-            int objStackPosition) {
-        if (objectStack.size() > objStackPosition) {
+    private void putIntoSuperObject (Map<String, Object> object, int objStackPosition) 
+    
+    	{
+    	if( DEBUG )
+	    	{
+	    	System.out.printf("Debug: putIntosuperObject(<>,int): objectStack.size=%d objStackPos=%d object=%s.\n", 
+	    				objectStack.size(), objStackPosition, object == null ? "null" : "not null");
+	    
+	    	if( objectStack != null && objectStack.size() > 0 )
+	    		System.out.printf("Debug: putIntosuperObject: objectStack = %s.\n",  objectStack.toString());
+	    	
+	    	if( invertedOperandsLists != null )
+	    		System.out.printf("Debug: putIntosuperObject: invertedOperandsLists: [%s].\n", invertedOperandsLists.toString());
+	    	}
+
+
+    	if (objectStack.size() > objStackPosition) 
+        	{
             ArrayList<Object> topObjectOperands =
-                    (ArrayList<Object>) objectStack.get(objStackPosition)
-                            .get("operands");
-            if (!invertedOperandsLists.contains(topObjectOperands)) {
+                    (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
+            
+            if( DEBUG )
+            	System.out.printf("Debug: putIntosuperObject: topObjectOperands = [%s].\n", topObjectOperands == null ? "null" : "not null");
+            
+            objectStack.get(objStackPosition);
+            
+            if (!invertedOperandsLists.contains(topObjectOperands)) 
+            	{
                 topObjectOperands.add(object);
-            }
+            	}
             else {
                 topObjectOperands.add(0, object);
-            }
-        }
+            	}
+        	}
         else {
             requestMap.put("query", object);
         }
@@ -1618,7 +1732,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
 
     private Tree parseCosmasQuery (String query) {
-        query = rewritePositionQuery(query);
+        
+    	query = rewritePositionQuery(query);
         Tree tree = null;
         Antlr3DescriptiveErrorListener errorListener =
                 new Antlr3DescriptiveErrorListener(query);
@@ -1627,16 +1742,23 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             c2psLexer lex = new c2psLexer(ss);
             org.antlr.runtime.CommonTokenStream tokens =
                     new org.antlr.runtime.CommonTokenStream(lex); // v3
+            
+           // System.out.printf("parseCosmasQuery: tokens = %d\n",  tokens.size());
+           // System.out.printf("parseCosmasQuery: tokens = %s\n",  tokens.toString());
+           
             parser = new c2psParser(tokens);
+           
             // Use custom error reporters
             lex.setErrorReporter(errorListener);
             ((c2psParser) parser).setErrorReporter(errorListener);
+            
             c2psParser.c2ps_query_return c2Return =
                     ((c2psParser) parser).c2ps_query(); // statt t().
+
             // AST Tree anzeigen:
             tree = (Tree) c2Return.getTree();
             if (DEBUG) log.debug(tree.toStringTree());
-        }
+            }
         catch (RecognitionException e) {
             log.error(
                     "Could not parse query. Please make sure it is well-formed.");
