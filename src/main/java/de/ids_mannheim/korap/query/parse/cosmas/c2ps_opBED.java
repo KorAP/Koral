@@ -17,7 +17,8 @@ public class c2ps_opBED
         c2ps_opBEDParser.opBEDOpts_return c2PQReturn = null;
 
         /*
-        System.out.println("check opBED: " + index + ": " + input);
+        System.out.format("opBED: check: input='%s', index=%d.\n", input, index); 
+        System.out.format("opBED: tokens ='%s'.\n", tokens.toString());
         System.out.flush();
         */
 
@@ -68,7 +69,7 @@ public class c2ps_opBED
 
 
     public static void main (String args[]) throws Exception {
-        String[] input = { ",sa,se,-ta,-te/pa,-pe)", ",sa)", ",/pa,-pe)" };
+        String[] input = { ",sa,se,-ta,-te/pa,-pe)", ",sa)", ",/pa,-pe)"};
         Tree tree;
 
         for (int i = 0; i < input.length; i++) {
