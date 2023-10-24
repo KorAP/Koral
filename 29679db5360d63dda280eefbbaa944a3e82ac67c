@@ -16,6 +16,121 @@
       "message": "I made the static functions public, so they are testable.",
       "revId": "29679db5360d63dda280eefbbaa944a3e82ac67c",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "83fcab6a_fdd7d3d5",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opREG.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-24T08:13:56Z",
+      "side": 1,
+      "message": "This may better be put in a util class and made public - seems to be generally useful. I added tests for it.",
+      "range": {
+        "startLine": 51,
+        "startChar": 20,
+        "endLine": 51,
+        "endChar": 39
+      },
+      "revId": "29679db5360d63dda280eefbbaa944a3e82ac67c",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "289683f3_c1433881",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opREG.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-24T08:13:56Z",
+      "side": 1,
+      "message": "This may better be put in a util class and made public - seems to be generally useful. I added tests for it.",
+      "range": {
+        "startLine": 81,
+        "startChar": 20,
+        "endLine": 81,
+        "endChar": 43
+      },
+      "revId": "29679db5360d63dda280eefbbaa944a3e82ac67c",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b4a7d134_6e2e0ea8",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-24T08:13:56Z",
+      "side": 1,
+      "message": "This may better be put in a util class and made public - seems to be generally useful.",
+      "range": {
+        "startLine": 144,
+        "startChar": 23,
+        "endLine": 144,
+        "endChar": 42
+      },
+      "revId": "29679db5360d63dda280eefbbaa944a3e82ac67c",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a727adbb_7c643f77",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-24T08:13:56Z",
+      "side": 1,
+      "message": "This may better be put in a util class and made public - seems to be generally useful.",
+      "range": {
+        "startLine": 189,
+        "startChar": 23,
+        "endLine": 189,
+        "endChar": 42
+      },
+      "revId": "29679db5360d63dda280eefbbaa944a3e82ac67c",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b4c8c863_00a2e25a",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1841,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-24T08:13:56Z",
+      "side": 1,
+      "message": "This doubles the log and would be confusing in a production environment, I guess.",
+      "range": {
+        "startLine": 1841,
+        "startChar": 12,
+        "endLine": 1841,
+        "endChar": 76
+      },
+      "revId": "29679db5360d63dda280eefbbaa944a3e82ac67c",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
