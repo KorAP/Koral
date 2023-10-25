@@ -41,6 +41,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "11cf244c_c6411c8e",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opREG.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-25T05:49:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83fcab6a_fdd7d3d5",
+      "range": {
+        "startLine": 51,
+        "startChar": 20,
+        "endLine": 51,
+        "endChar": 39
+      },
+      "revId": "29679db5360d63dda280eefbbaa944a3e82ac67c",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "289683f3_c1433881",
@@ -54,6 +78,30 @@
       "writtenOn": "2023-10-24T08:13:56Z",
       "side": 1,
       "message": "This may better be put in a util class and made public - seems to be generally useful. I added tests for it.",
+      "range": {
+        "startLine": 81,
+        "startChar": 20,
+        "endLine": 81,
+        "endChar": 43
+      },
+      "revId": "29679db5360d63dda280eefbbaa944a3e82ac67c",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e87eb4e5_3384c586",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opREG.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-25T05:49:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "289683f3_c1433881",
       "range": {
         "startLine": 81,
         "startChar": 20,

@@ -16,6 +16,24 @@
       "message": "I think some tests of `#REG(...)` in context (in a sequence e.g.) and edge case like `#REG()`, `#REG(\"\")`, `#REG(\u0027  \u0027  )` would be helpful.",
       "revId": "fdc4e3930db676790f5c39490a458a46480032ab",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "910456fd_e588073a",
+        "filename": "src/test/java/de/ids_mannheim/korap/test/cosmas2/Cosmas2QueryProcessorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1864,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-25T05:49:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a602f98_4f3016e1",
+      "revId": "fdc4e3930db676790f5c39490a458a46480032ab",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }

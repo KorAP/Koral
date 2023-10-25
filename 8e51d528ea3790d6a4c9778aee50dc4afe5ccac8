@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c7940412_89e04add",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-25T05:49:07Z",
+      "side": 1,
+      "message": "That looks great! Thank you! It needs to be rebased due to some dependabot updates, but otherwise I think it\u0027s fine to submit!",
+      "revId": "8e51d528ea3790d6a4c9778aee50dc4afe5ccac8",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5fdc3784_6292af3f",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-25T05:49:07Z",
+      "side": 1,
+      "message": "You can using logging instead of System.out for print-debugging by adding the relevant classes to log4j2.properties in the resources.",
+      "range": {
+        "startLine": 144,
+        "startChar": 12,
+        "endLine": 144,
+        "endChar": 15
+      },
+      "revId": "8e51d528ea3790d6a4c9778aee50dc4afe5ccac8",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c163aad6_3254a2c5",
+        "filename": "src/main/java/de/ids_mannheim/korap/util/StringUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-25T05:49:07Z",
+      "side": 1,
+      "message": "I found no collisions, but Kustvakt has `utils.StringUtils`, while Krill is also using `util`, but has `KrillString` for String utilities. KorAP-Tokenizer uses package de.ids_mannheim.korap.tokenizer.Utils. :-) Maybe we should agree on a naming convention at some point ...",
+      "range": {
+        "startLine": 1,
+        "startChar": 30,
+        "endLine": 1,
+        "endChar": 34
+      },
+      "revId": "8e51d528ea3790d6a4c9778aee50dc4afe5ccac8",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
