@@ -33,6 +33,24 @@
       "message": "did pass the tests.",
       "revId": "1e7126b079db2f6f6e52378f8d829d6f5336da2f",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "20778b17_baf0cfb9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2023-10-25T05:51:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b22b0e5_b79d7dc2",
+      "revId": "1e7126b079db2f6f6e52378f8d829d6f5336da2f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
