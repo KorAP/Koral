@@ -483,7 +483,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         boolean
         	bDebug = false;
         
-        if( DEBUG )
+        if( bDebug )
         	{
         	//System.out.printf("Debug: processOPREG: node='%s' nChilds=%d.\n", node.toStringTree(), nChild+1);
             System.out.printf("Debug: processOPREG: child: >>%s<< cat=%s type=%d.\n",
@@ -646,7 +646,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // Map<String, Object> posgroup =
         // makePosition(null);
         boolean isExclusion = isExclusion(node);
-
+        boolean bDebug = false;
+        
         int focusClassCounter = classCounter;
         Map<String, Object> posGroup;
         
@@ -660,7 +661,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else {
             posGroup = KoralObjectGenerator.makeGroup(KoralOperation.POSITION);
-            if (DEBUG) log.debug(posGroup.toString());
+            if (bDebug) log.debug(posGroup.toString());
         }
 
         Map<String, Object> positionOptions;
@@ -1607,7 +1608,9 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private void putIntoSuperObject (Map<String, Object> object, int objStackPosition) 
     
     	{
-    	if( DEBUG )
+    	boolean bDebug = false;
+    	
+    	if( bDebug )
 	    	{
 	    	System.out.printf("Debug: putIntosuperObject(<>,int): objectStack.size=%d objStackPos=%d object=%s.\n", 
 	    				objectStack.size(), objStackPosition, object == null ? "null" : "not null");
@@ -1625,7 +1628,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             ArrayList<Object> topObjectOperands =
                     (ArrayList<Object>) objectStack.get(objStackPosition).get("operands");
             
-            if( DEBUG )
+            if( bDebug )
             	System.out.printf("Debug: putIntosuperObject: topObjectOperands = [%s].\n", topObjectOperands == null ? "null" : "not null");
             
             objectStack.get(objStackPosition);
