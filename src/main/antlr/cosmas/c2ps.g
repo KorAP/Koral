@@ -9,6 +9,12 @@
 //
 //  v0.7 - 25.07.23/FB
 //    - added: #REG(x)
+//  v0.8 - 06.11.23/FB
+//    - accepts #BED(searchword, sa) : comma attached to searchword.
+//    - more generally: comma at end of searchword, which is not enclosed by "..." is
+//      excluded from searchword.
+//    - a comma inside a searchword is accepted if enclosed by "...".
+//
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 grammar c2ps;
@@ -124,8 +130,23 @@ SEARCHLEMMA
 	:	'&' SEARCHWORD1 ; // rewrite rules funktionieren im lexer nicht: -> ^(OPLEM $SEARCHWORD1.text); 
 
 // SEARCHWORD2: schluckt Blanks. Diese mÃ¼ssen nachtrÃ¤glich als Wortdelimiter erkannt werden.
+
+// current syntax, drawback is:
+// e.g. aber, -> SEARCHWORD1 = "aber,"
+// but correct should be -> SEARCHWORD1 = "aber"  
+//SEARCHWORD1
+//	:	~('"' | ' ' | '#' | ')' | '(' )+ ;
+
+// new syntax (06.11.23/FB):
+// accept for searchword1 either a single ',' or exclude trailing ',' from searchword1:
+// E.g. Haus, -> searchword1=Haus.
+// For a ',' inside a search word, see searchword2. 
+// exclude trailing "," from searchword1.
 SEARCHWORD1
-	:	~('"' | ' ' | '#' | ')' | '(' )+ ;
+	:	(',' | ~('"' | ' ' | '#' | ')' | '(' | ',')+)  ;
+
+// searchword2 accepts a ',' inside a searchword enclosed by "...".
+// E.g. "Haus,tür": OK.
 
 SEARCHWORD2
 	:	'"' (~('"') | '\\"')+ '"' ;

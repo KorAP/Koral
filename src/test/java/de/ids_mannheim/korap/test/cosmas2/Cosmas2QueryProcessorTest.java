@@ -1925,4 +1925,28 @@ public class Cosmas2QueryProcessorTest {
         StringUtils.removeBlanksAtBothSides(sb);
         assertEquals("abc",sb.toString());
     }
+    
+    /* Testing #BED(expr,sa).
+     * 06.11.23/FB
+     */
+     
+    @Test
+    public void testBED () throws JsonProcessingException, IOException {
+    	
+    	boolean
+    		debug = true;
+    	String
+    		query = "#BED(Haus , se)"; 
+    			
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        if( debug ) 
+        	System.out.printf("testBED: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/operands/0").asText());
+        /*
+        assertEquals("\"Abend\"-Ticket",res.at("/query/wrap/key").asText()); // key must be escaped, because converted to in "...".
+        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
+        assertEquals("orth",        res.at("/query/wrap/layer").asText());
+		*/
+    }
+    
 }
