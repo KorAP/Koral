@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1197,7 +1198,9 @@ public class Cosmas2QueryProcessorTest {
 
     }
 
-
+    /* some tests added - 08.11.23/FB
+     */
+    
     @Test
     public void testOPBED () throws JsonProcessingException, IOException {
         query = "#BED(der , sa)";
@@ -1227,6 +1230,95 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
 
+        // 08.11.23/FB
+        // treats now "der," as "der" + ",":
+        query = "#BED(der, sa)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        assertEquals(129, res.at("/query/classRef/0").asInt());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position", res
+                .at("/query/operands/0/operation").asText());
+        assertEquals("frames:startsWith", res.at("/query/operands/0/frames/0")
+                .asText());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:class",
+                res.at("/query/operands/0/operands/1/operation").asText());
+        assertEquals(129, res.at("/query/operands/0/operands/1/classOut")
+                .asInt());
+        assertEquals("koral:token",
+                res.at("/query/operands/0/operands/1/operands/0/@type")
+                        .asText());
+        assertEquals("der",
+                res.at("/query/operands/0/operands/1/operands/0/wrap/key")
+                        .asText());
+        assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type")
+                .asText());
+        assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
+                .asText());
+        
+        
+        // 08.11.23/FB
+        // treats now "der,sa" as "der" + "," + "sa":
+        query = "#BED(der,sa)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        assertEquals(129, res.at("/query/classRef/0").asInt());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position", res
+                .at("/query/operands/0/operation").asText());
+        assertEquals("frames:startsWith", res.at("/query/operands/0/frames/0")
+                .asText());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:class",
+                res.at("/query/operands/0/operands/1/operation").asText());
+        assertEquals(129, res.at("/query/operands/0/operands/1/classOut")
+                .asInt());
+        assertEquals("koral:token",
+                res.at("/query/operands/0/operands/1/operands/0/@type")
+                        .asText());
+        assertEquals("der",
+                res.at("/query/operands/0/operands/1/operands/0/wrap/key")
+                        .asText());
+        assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type")
+                .asText());
+        assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
+                .asText());
+        
+        // 08.11.23/FB
+        // treats now "der,s0," as "der,s0" unchanged while written inside "...":
+        query = "#BED(\"der,so\", sa)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        assertEquals(129, res.at("/query/classRef/0").asInt());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position", res
+                .at("/query/operands/0/operation").asText());
+        assertEquals("frames:startsWith", res.at("/query/operands/0/frames/0")
+                .asText());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:class",
+                res.at("/query/operands/0/operands/1/operation").asText());
+        assertEquals(129, res.at("/query/operands/0/operands/1/classOut")
+                .asInt());
+        assertEquals("koral:token",
+                res.at("/query/operands/0/operands/1/operands/0/@type")
+                        .asText());
+        assertEquals("der,so",
+                res.at("/query/operands/0/operands/1/operands/0/wrap/key")
+                        .asText());
+        assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type")
+                .asText());
+        assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
+                .asText());
+        
         query = "#COND(der , sa)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -1926,27 +2018,6 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("abc",sb.toString());
     }
     
-    /* Testing #BED(expr,sa).
-     * 06.11.23/FB
-     */
-     
-    @Test
-    public void testBED () throws JsonProcessingException, IOException {
-    	
-    	boolean
-    		debug = true;
-    	String
-    		query = "#BED(Haus , se)"; 
-    			
-        qs.setQuery(query, "cosmas2");
-        res = mapper.readTree(qs.toJSON());
-        if( debug ) 
-        	System.out.printf("testBED: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/operands/0").asText());
-        /*
-        assertEquals("\"Abend\"-Ticket",res.at("/query/wrap/key").asText()); // key must be escaped, because converted to in "...".
-        assertEquals("type:regex",  res.at("/query/wrap/type").asText());
-        assertEquals("orth",        res.at("/query/wrap/layer").asText());
-		*/
-    }
+  
     
 }

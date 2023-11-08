@@ -12,7 +12,7 @@
 //  v0.8 - 06.11.23/FB
 //    - accepts #BED(searchword, sa) : comma attached to searchword.
 //    - more generally: comma at end of searchword, which is not enclosed by "..." is
-//      excluded from searchword.
+//      excluded from searchword now.
 //    - a comma inside a searchword is accepted if enclosed by "...".
 //
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
