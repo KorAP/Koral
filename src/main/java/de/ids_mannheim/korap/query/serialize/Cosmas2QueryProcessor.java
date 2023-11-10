@@ -24,6 +24,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
@@ -140,11 +142,22 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         KoralObjectGenerator.setQueryProcessor(this);
         this.query = query;
         process(query);
-        if (DEBUG) { 
-            log.debug(">>> " + requestMap.get("query") + " <<<");
-        System.out.printf("Cosmas2QueryProcessor: >>%s<<.\n",  requestMap.get("query"));
-        }
-    }
+        if (verbose) 
+        	{ 
+            //log.debug(">>> " + requestMap.get("query") + " <<<");
+            try {
+	        	// query from requestMap is unformatted JSON. Make it pretty before displaying:
+	        	ObjectMapper mapper = new ObjectMapper();
+	        	String jsonQuery = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(requestMap.get("query"));
+				System.out.printf("Cosmas2QueryProcessor: JSON output: %s\n\n", jsonQuery);
+				} 
+	        catch (JsonProcessingException e) 
+	        	{
+	        	System.out.printf("Cosmas2QueryProcessor: >>%s<<.\n",  requestMap.get("query"));
+	            //e.printStackTraObjectMapper mapper = new ObjectMapper();ce();
+				}
+        	}
+    	}
 
 
     @Override
@@ -157,11 +170,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         if (tree != null) 
         	{
-            
-                if (DEBUG) {
-            	log.debug("ANTLR parse tree: " + tree.toStringTree());
-                System.out.printf("\nANTLR parse tree: %s.\n\n",  tree.toStringTree());
-                }
+            if (verbose) {
+	        	log.debug("ANTLR parse tree: " + tree.toStringTree());
+	            System.out.printf("\nANTLR parse tree: %s.\n\n",  tree.toStringTree());
+	            }
 
             processNode(tree);
         	}
@@ -181,11 +193,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         stackedObjects = 0;
         stackedToWrap = 0;
 
-        if (verbose) {
+        /*
+         if (verbose) {
             System.err.println(" " + objectStack);
             System.out.println(openNodeCats);
         }
-
+        */
+        
         /* ***************************************
          * Processing individual node categories *
          * ***************************************
