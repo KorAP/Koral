@@ -108,8 +108,7 @@ public class QuerySerializer {
         boolean bDebug = false;
 
         if (args.length < 2) {
-            System.err
-                    .println("Usage: QuerySerializer \"query\" queryLanguage [-show]");
+            System.err.println("\nUsage: QuerySerializer \"query\" queryLanguage [-show]");
             System.exit(1);
         }
         else {

@@ -49,10 +49,10 @@ proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=pro
 		-> {$v1.tree != null}? ^(DIST {$proxDirection.tree} {$v1.tree} {$m1.tree})
 		-> 		       ^(DIST {$proxDirection.tree} {$v2.tree} {$m2.tree});
 
-proxDirection
-	:	(p='+'|m='-')?	-> {$p != null}? ^(DIR PLUS)
-				-> {$m != null}? ^(DIR MINUS)
-				->               ^(DIR BOTH) ;
+proxDirection:
+		(p='+'|m='-')?	-> {$p != null}? ^(DIR PLUS)
+						-> {$m != null}? ^(DIR MINUS)
+						->               ^(DIR BOTH) ;
 /*
 proxDistValue	// proxDistMin ( ':' proxDistMax)? ;
 	:	(m1=proxDistMin -> ^(DIST_RANGE VAL0 $m1)) (':' m2=proxDistMax -> ^(DIST_RANGE $m1 $m2))? ;
