@@ -11,7 +11,73 @@ public class c2ps_opPROX
 
 {
 
-    public static Tree check (String input, int index) {
+	/* encode():
+	 * - encodes Distance type, Direction and Distance value
+	 *   which are written in any order.
+	 * 28.11.23/FB
+	 */
+	
+	public static Tree encode(String input, int type)
+	{
+		StringBuffer sb = new StringBuffer("(DIST (DIR MINUS) (RANGE VAL0 0) (MEAS w))");
+		System.err.printf("Debug: encode: input = '%s' output = >>%s<<.\n", input, sb.toString());
+		CommonTree ctree = new CommonTree(new CommonToken(type, sb.toString()));
+		//CommonTree treeType = new CommonTree(new CommonToken(1, ""))
+		//CommonToken ct = ct.
+		System.err.printf("Debug: encode: CommonTree : '%s'.\n", ctree.toStringTree());
+		//return new CommonTree(new CommonToken(type, sb.toString()));
+		return ctree;
+	} // encode
+	
+	/* encodeDefaultDir():
+	 * - return a tree containing the default Prox Direction when there is no
+	 *   direction indication in the input query.
+	 * 28.11.23/FB
+	 */
+	
+	public static Tree encodeDefautDir(String input, int type)
+	{
+		StringBuffer sb = new StringBuffer("BOTH");
+		CommonTree tree = new CommonTree(new CommonToken(type, sb.toString()));
+		
+		System.err.printf("Debug: encodeDefaultDir: CommonTree : '%s'.\n", tree.toStringTree());
+
+		return tree;
+	} // encode
+		
+	/* encodeDefaultDir():
+	 * - return a tree containing the default Prox Direction when there is no
+	 *   direction indication in the input query.
+	 * 28.11.23/FB
+	 */
+	
+	public static Object encodeDIST(int type, Object ctDir, Object ctMeas, Object ctVal)
+	{
+		StringBuffer sb = new StringBuffer("BOTH");
+		CommonTree tree1 = (CommonTree)ctDir;
+		CommonTree tree2 = (CommonTree)ctMeas;
+		CommonTree tree3 = (CommonTree)ctVal;
+		
+		System.err.printf("Debug: encodeDIST: ctDir='%s' ctMeas='%s' ctVal='%s'.\n",
+				tree1 != null ? tree1.toStringTree() : "null",
+				tree2 != null ? tree2.toStringTree() : "null",
+				tree3 != null ? tree3.toStringTree() : "null");
+
+		if( ctDir == null )
+			{
+				
+			}
+		CommonTree 
+			tree = new CommonTree(new CommonToken(type, "DIST"));
+		
+		tree.addChild(tree1);
+		tree.addChild(tree3); // tree3 before tree2.
+		tree.addChild(tree2);
+		
+		return tree;
+	} // encodeDIST
+	
+	public static Tree check (String input, int index) {
         ANTLRStringStream ss = new ANTLRStringStream(input);
         c2ps_opPROXLexer lex = new c2ps_opPROXLexer(ss);
         CommonTokenStream tokens = new CommonTokenStream(lex);

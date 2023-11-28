@@ -16,6 +16,7 @@ tokens  { PROX_OPTS;
 	  MEAS; // measure
 	  DIR; PLUS; MINUS; BOTH;
 	  GRP; MIN; MAX; }
+	  
 @header {package de.ids_mannheim.korap.query.parse.cosmas;}
 @lexer::header {package de.ids_mannheim.korap.query.parse.cosmas;}
 
@@ -39,25 +40,53 @@ opPROX	:	proxTyp proxDist (',' proxDist)* (',' proxGroup)?
 		
 		-> ^(PROX_OPTS {$proxTyp.tree} ^(DIST_LIST proxDist+) {$proxGroup.tree});
 	
-proxTyp	:	  '/' -> ^(TYP PROX)	// klassischer Abstand.
-		| '%' -> ^(TYP EXCL);	// ausschließender Abstand.
+proxTyp	:  '/' -> ^(TYP PROX)	// klassischer Abstand.
+		|  '%' -> ^(TYP EXCL);	// ausschließender Abstand.
 
 // proxDist: e.g. +5w or -s0 or /w2:4 etc.
 // kein proxDirection? hier, weil der Default erst innerhalb von Regel proxDirection erzeugt werden kann.
+/* incomplete original version:
 proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=proxDistValue)
 
 		-> {$v1.tree != null}? ^(DIST {$proxDirection.tree} {$v1.tree} {$m1.tree})
 		-> 		       ^(DIST {$proxDirection.tree} {$v2.tree} {$m2.tree});
+*/
 
+// new version: accepts any order (28.11.23/FB):
+
+/*
+proxDist:	('s'|'w'|'p'|'t'|'+'|'-'|DISTVALUE)+ 
+
+		-> {c2ps_opPROX.encode($proxDist.text, DIST)};
+*/
+
+// new version: just use the grammar another way (28.11.23/FB):
+
+proxDist:	(d=proxDirection|v=proxDistValue|m=proxMeasure)+
+		//-> {$v.tree != null && $m.tree != null} ? ^(DIST DIST); //{c2ps_opPROX.encodeDIST(DIR, $d.tree, $m.tree, $v.tree)} );
+		->  {c2ps_opPROX.encodeDIST(DIST, $d.tree, $m.tree, $v.tree)};
+
+/* old rule for optional direction with default setting:
 proxDirection:
 		(p='+'|m='-')?	-> {$p != null}? ^(DIR PLUS)
 						-> {$m != null}? ^(DIR MINUS)
 						->               ^(DIR BOTH) ;
+*/
+
+// new rule with default setting. Default tree for direction set in c2ps_opPROX.encode():
+// 28.11.23/FB
+
+proxDirection
+		: '+'	-> ^(DIR PLUS)
+		| '-'	-> ^(DIR MINUS);
+
 /*
 proxDistValue	// proxDistMin ( ':' proxDistMax)? ;
 	:	(m1=proxDistMin -> ^(DIST_RANGE VAL0 $m1)) (':' m2=proxDistMax -> ^(DIST_RANGE $m1 $m2))? ;
 */
-proxDistValue	// proxDistMin ( ':' proxDistMax)? ;
+
+// proxDistMin ( ':' proxDistMax)? ;
+proxDistValue	
 	:	(m1=proxDistMin ) (':' m2=proxDistMax)? 
 	
 		-> {$m2.text != null}? ^(RANGE $m1  $m2)
