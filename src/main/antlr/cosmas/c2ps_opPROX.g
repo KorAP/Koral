@@ -29,6 +29,9 @@ tokens  { PROX_OPTS;
 DISTVALUE
 	:	('0' .. '9')+ ;
 	
+DISTOPTS
+	:	('s'|'p'|'w'|'t'|'+'|'-')+;
+	
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
 // 						PROX-Parser
@@ -52,20 +55,37 @@ proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=pro
 		-> 		       ^(DIST {$proxDirection.tree} {$v2.tree} {$m2.tree});
 */
 
+// +++ new version 29.11.23 by including all possible option ordering +++ //
+/*
+proxDist:	
+		proxDirection v1=proxDistValue m1=proxMeasure 
+			-> ^(DIST {$proxDirection.tree} {$v1.tree} {$m1.tree})
+	|	proxDirection m1=proxMeasure v1=proxDistValue
+			-> ^(DIST {$proxDirection.tree} {$v1.tree} {$m1.tree})
+	|	m1=proxMeasure d1=proxDirection v1=proxDistValue
+			-> ^(DIST {$d1.tree} {$v1.tree} {$m1.tree})
+	|	m1=proxMeasure v1=proxDistValue d1=proxDirection 
+			-> ^(DIST {$d1.tree} {$v1.tree} {$m1.tree})
+	|	v1=proxDistValue m1=proxMeasure d1=proxDirection 
+			-> ^(DIST {$d1.tree} {$v1.tree} {$m1.tree})
+	|	v1=proxDistValue d1=proxDirection m1=proxMeasure 
+			-> ^(DIST {$d1.tree} {$v1.tree} {$m1.tree});
+*/			
+
 // new version: accepts any order (28.11.23/FB):
 
-/*
-proxDist:	('s'|'w'|'p'|'t'|'+'|'-'|DISTVALUE)+ 
+proxDist:	(DISTOPTS|DISTVALUE)+ 
 
 		-> {c2ps_opPROX.encode($proxDist.text, DIST)};
+
+
+//+++++++++ new version: accepts options in any order (28.11.23/FB): +++++++ //
+	// -> {$v.tree != null && $m.tree != null} ? ^(DIST DIST); //{c2ps_opPROX.encodeDIST(DIR, $d.tree, $m.tree, $v.tree)} );
+/*
+proxDist:	(m=proxMeasure|d=proxDirection|v=proxDistValue)+
+		      
+		->  {c2ps_opPROX.encodeDIST(DIST, $m.tree, $m.tree, $m.tree)};
 */
-
-// new version: just use the grammar another way (28.11.23/FB):
-
-proxDist:	(d=proxDirection|v=proxDistValue|m=proxMeasure)+
-		//-> {$v.tree != null && $m.tree != null} ? ^(DIST DIST); //{c2ps_opPROX.encodeDIST(DIR, $d.tree, $m.tree, $v.tree)} );
-		->  {c2ps_opPROX.encodeDIST(DIST, $d.tree, $m.tree, $v.tree)};
-
 /* old rule for optional direction with default setting:
 proxDirection:
 		(p='+'|m='-')?	-> {$p != null}? ^(DIR PLUS)
@@ -73,25 +93,27 @@ proxDirection:
 						->               ^(DIR BOTH) ;
 */
 
-// new rule with default setting. Default tree for direction set in c2ps_opPROX.encode():
+// new rule accepts + and -. Default tree for direction is set in c2ps_opPROX.encode():
 // 28.11.23/FB
-
+/*
 proxDirection
 		: '+'	-> ^(DIR PLUS)
 		| '-'	-> ^(DIR MINUS);
-
+*/
 /*
 proxDistValue	// proxDistMin ( ':' proxDistMax)? ;
 	:	(m1=proxDistMin -> ^(DIST_RANGE VAL0 $m1)) (':' m2=proxDistMax -> ^(DIST_RANGE $m1 $m2))? ;
 */
 
 // proxDistMin ( ':' proxDistMax)? ;
+/*
 proxDistValue	
 	:	(m1=proxDistMin ) (':' m2=proxDistMax)? 
 	
 		-> {$m2.text != null}? ^(RANGE $m1  $m2)
 		->		       ^(RANGE VAL0 $m1);
-		
+*/
+/*
 proxMeasure
 	:	(m='w'|m='s'|m='p'|m='t') -> ^(MEAS $m);
 
@@ -100,7 +122,7 @@ proxDistMin
 	
 proxDistMax
 	:	DISTVALUE;
-	
+*/	
 proxGroup
 	:	'min' -> ^(GRP MIN)
 	|	'max' -> ^(GRP MAX);

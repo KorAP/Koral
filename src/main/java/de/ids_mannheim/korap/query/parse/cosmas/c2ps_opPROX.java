@@ -46,8 +46,10 @@ public class c2ps_opPROX
 	} // encode
 		
 	/* encodeDefaultDir():
-	 * - return a tree containing the default Prox Direction when there is no
-	 *   direction indication in the input query.
+	 * - returns a CommonTree built of out Direction/Measure/Distance value.
+	 * - accepts options in any order.
+	 * - creates CommonTree in that order: Direction .. Distance value .. Measure.
+	 * - sets default direction to BOTH if not set yet.
 	 * 28.11.23/FB
 	 */
 	
