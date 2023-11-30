@@ -11,41 +11,7 @@ public class c2ps_opPROX
 
 {
 
-	/* encode():
-	 * - encodes Distance type, Direction and Distance value
-	 *   which are written in any order.
-	 * 28.11.23/FB
-	 */
-	
-	public static Tree encode(String input, int type)
-	{
-		StringBuffer sb = new StringBuffer("(DIST (DIR MINUS) (RANGE VAL0 0) (MEAS w))");
-		System.err.printf("Debug: encode: input = '%s' output = >>%s<<.\n", input, sb.toString());
-		CommonTree ctree = new CommonTree(new CommonToken(type, sb.toString()));
-		//CommonTree treeType = new CommonTree(new CommonToken(1, ""))
-		//CommonToken ct = ct.
-		System.err.printf("Debug: encode: CommonTree : '%s'.\n", ctree.toStringTree());
-		//return new CommonTree(new CommonToken(type, sb.toString()));
-		return ctree;
-	} // encode
-	
-	/* encodeDefaultDir():
-	 * - return a tree containing the default Prox Direction when there is no
-	 *   direction indication in the input query.
-	 * 28.11.23/FB
-	 */
-	
-	public static Tree encodeDefautDir(String input, int type)
-	{
-		StringBuffer sb = new StringBuffer("BOTH");
-		CommonTree tree = new CommonTree(new CommonToken(type, sb.toString()));
-		
-		System.err.printf("Debug: encodeDefaultDir: CommonTree : '%s'.\n", tree.toStringTree());
-
-		return tree;
-	} // encode
-		
-	/* encodeDefaultDir():
+	/* encodeDIST():
 	 * - returns a CommonTree built of out Direction/Measure/Distance value.
 	 * - accepts options in any order.
 	 * - creates CommonTree in that order: Direction .. Distance value .. Measure.
@@ -53,28 +19,45 @@ public class c2ps_opPROX
 	 * 28.11.23/FB
 	 */
 	
-	public static Object encodeDIST(int type, Object ctDir, Object ctMeas, Object ctVal)
+	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text)
 	{
-		StringBuffer sb = new StringBuffer("BOTH");
 		CommonTree tree1 = (CommonTree)ctDir;
 		CommonTree tree2 = (CommonTree)ctMeas;
 		CommonTree tree3 = (CommonTree)ctVal;
 		
-		System.err.printf("Debug: encodeDIST: ctDir='%s' ctMeas='%s' ctVal='%s'.\n",
-				tree1 != null ? tree1.toStringTree() : "null",
-				tree2 != null ? tree2.toStringTree() : "null",
-				tree3 != null ? tree3.toStringTree() : "null");
 
+		System.err.printf("Debug: encodeDIST: scanned input='%s'.\n", text);
+		
+		System.err.printf("Debug: encodeDIST: ctDir='%s': %d ctMeas='%s': %d ctVal='%s': %d.\n",
+				tree1 != null ? tree1.toStringTree() : "null",
+				tree1 != null ? tree1.getChildCount() : 0,
+				tree2 != null ? tree2.toStringTree() : "null",
+				tree2 != null ? tree2.getChildCount() : 0,
+				tree3 != null ? tree3.toStringTree() : "null",
+				tree3 != null ? tree3.getChildCount() : 0);
+
+		// if direction is not specified, return default = BOTH:
 		if( ctDir == null )
 			{
-				
+			CommonTree treeDIR = new CommonTree(new CommonToken(typeDIR, (String)"DIR"));
+			//CommonToken tok = new CommonToken(typeDIR, "BOTH");
+			CommonTree treeBOTH = new CommonTree(new CommonToken(typeDIR, "BOTH"));
+			treeDIR.addChild(treeBOTH);
+			
+			System.err.printf("Debug: encodeDIST: tree for DIR: '%s'.\n", 
+					treeDIR.toStringTree());
+			tree1 = treeDIR;
 			}
+		
 		CommonTree 
-			tree = new CommonTree(new CommonToken(type, "DIST"));
+			tree = new CommonTree(new CommonToken(typeDIST, "DIST"));
 		
 		tree.addChild(tree1);
-		tree.addChild(tree3); // tree3 before tree2.
+		tree.addChild(tree3); // tree3 before tree2 expected by serialization.
 		tree.addChild(tree2);
+		
+		System.err.printf("Debug: encodeDIST: returning '%s'.\n", 
+				tree.toStringTree());
 		
 		return tree;
 	} // encodeDIST

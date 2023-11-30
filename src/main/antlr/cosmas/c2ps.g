@@ -74,10 +74,25 @@ WS	:	(' '|'\r'|'\n')+ {skip();};
 
 fragment DISTVALUE
 	:	 ('0' .. '9')+ (':' ('0'..'9')+)? ;
-		
+
+fragment DISTTYPE // 30.11.23/FB
+	: 	('w'|'s'|'p'|'t');
+
+fragment DISTDIR // 30.11.23/FB
+	: 	('+'|'-');
+	
+/* old version (before 30.11.23/FB)
 fragment DIST
 	:	('+'|'-')? (DISTVALUE ('w'|'s'|'p'|'t') | ('w'|'s'|'p'|'t') DISTVALUE);
-	
+*/
+
+// accept these 3 options in any order.
+// afterwards, we will have to check if any of them is missing.
+// 30.11.23/FB
+
+fragment DIST // 30.11.23/FB
+	:	(DISTDIR | DISTTYPE | DISTVALUE )+;
+
 fragment GROUP
 	:	('min' | 'max');
 
