@@ -57,7 +57,7 @@ proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=pro
 // but how to handle multiple values for those options?
 // 28.11.23/FB
 
-proxDist:	(m+=proxMeasure|d=proxDirection|v=proxDistValue)+
+proxDist:	(m=proxMeasure|d=proxDirection|v=proxDistValue)+
 		      
 		->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text)};
 
