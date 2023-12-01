@@ -75,7 +75,7 @@ proxDistValue	:	(m1=proxDistMin ) (':' m2=proxDistMax)?
 		->				       ^(RANGE VAL0 $m1);
 
 proxMeasure
-	:	(m='w'|m='s'|m='p'|m='t') -> ^(MEAS $m);
+	:	(meas='w'|meas='s'|meas='p'|meas='t') -> {c2ps_opPROX.checkMeasure($meas)} ;  // {c2ps_opPROX.checkMeasure($meas)} ? ^(MEAS $meas);
 
 proxDistMin
 	:	DISTVALUE;

@@ -88,7 +88,13 @@ public class c2ps_opPROX
         return tree;
     }
 
-
+	public static boolean checkMeasure( Object measure)
+	{
+		System.err.printf("Debug: checkMeasure: measure = %s.\n",
+				measure == null ? "null" : "not null");
+		return true;
+	}
+	
     /*
      * main testprogram:
      */
