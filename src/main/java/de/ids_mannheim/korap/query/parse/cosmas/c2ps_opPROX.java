@@ -2,6 +2,8 @@ package de.ids_mannheim.korap.query.parse.cosmas;
 
 import org.antlr.runtime.*;
 import org.antlr.runtime.tree.*;
+import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
+import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
 /*
  * parses Opts of PROX: /w3:4,s0,min or %w3:4,s0,min.
@@ -19,14 +21,28 @@ public class c2ps_opPROX
 	 * 28.11.23/FB
 	 */
 	
-	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text)
+	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text) throws RecognitionException 
 	{
+		boolean multiple = false;
 		CommonTree tree1 = (CommonTree)ctDir;
 		CommonTree tree2 = (CommonTree)ctMeas;
 		CommonTree tree3 = (CommonTree)ctVal;
 		
-
+		addError(StatusCodes.MALFORMED_QUERY,
+                "Could not parse query. Please make sure it is well-formed.");
+		
 		System.err.printf("Debug: encodeDIST: scanned input='%s'.\n", text);
+		
+		if( multiple == true )
+			{
+			String mess = String.format("line 0:%d '%s' expecting only 1 of 'wsp'!\n",
+									23, text);
+			//de.ids_mannheim.korap.query.serialize.Antlr3AbstractQueryProcessor.reportError(mess);
+			//reportError(mess);
+			RecognitionException re = new RecognitionException();
+			throw re;
+			}
+			
 		
 		System.err.printf("Debug: encodeDIST: ctDir='%s': %d ctMeas='%s': %d ctVal='%s': %d.\n",
 				tree1 != null ? tree1.toStringTree() : "null",
@@ -62,6 +78,12 @@ public class c2ps_opPROX
 		return tree;
 	} // encodeDIST
 	
+	public static boolean checkDIST(String input)
+	
+	{
+		return true;
+	}
+	
 	public static Tree check (String input, int index) {
         ANTLRStringStream ss = new ANTLRStringStream(input);
         c2ps_opPROXLexer lex = new c2ps_opPROXLexer(ss);
@@ -88,6 +110,12 @@ public class c2ps_opPROX
         return tree;
     }
 
+	public static boolean checkFalse()
+	{
+	
+	return false; // testwise	
+	}
+	
 	public static boolean checkMeasure( Object measure)
 	{
 		System.err.printf("Debug: checkMeasure: measure = %s.\n",
