@@ -23,23 +23,28 @@ public class c2ps_opPROX
 	
 	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text) throws RecognitionException 
 	{
-		boolean multiple = false;
+		boolean multiple = true;
 		CommonTree tree1 = (CommonTree)ctDir;
 		CommonTree tree2 = (CommonTree)ctMeas;
 		CommonTree tree3 = (CommonTree)ctVal;
 		
-		addError(StatusCodes.MALFORMED_QUERY,
-                "Could not parse query. Please make sure it is well-formed.");
+		//addError(StatusCodes.MALFORMED_QUERY,
+        //        "Could not parse query. Please make sure it is well-formed.");
 		
 		System.err.printf("Debug: encodeDIST: scanned input='%s'.\n", text);
 		
 		if( multiple == true )
 			{
-			String mess = String.format("line 0:%d '%s' expecting only 1 of 'wsp'!\n",
-									23, text);
+			String mess = String.format("line 0:%d %s expecting only 1 of 'wsp'!\n",
+									2345, text);
 			//de.ids_mannheim.korap.query.serialize.Antlr3AbstractQueryProcessor.reportError(mess);
 			//reportError(mess);
 			RecognitionException re = new RecognitionException();
+			re.c = '/';
+			re.charPositionInLine = 4;
+			re.index = 1;
+			re.line = 123;
+			
 			throw re;
 			}
 			

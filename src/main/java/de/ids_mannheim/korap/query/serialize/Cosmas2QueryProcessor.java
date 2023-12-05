@@ -18,6 +18,7 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.util.StringUtils;
 
 import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.FailedPredicateException;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -1760,8 +1761,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             org.antlr.runtime.CommonTokenStream tokens =
                     new org.antlr.runtime.CommonTokenStream(lex); // v3
             
-           // System.out.printf("parseCosmasQuery: tokens = %d\n",  tokens.size());
-           // System.out.printf("parseCosmasQuery: tokens = %s\n",  tokens.toString());
+           System.out.printf("parseCosmasQuery: tokens = %d\n",  tokens.size());
+           System.out.printf("parseCosmasQuery: tokens = %s\n",  tokens.toString());
+           System.out.printf("parseCosmasQuery: tokens[] = ");
+           for(int i=0; i<tokens.size(); i++)
+           		System.out.printf("%s ", tokens.get(i).toString());
+           		
+           System.out.println();
            
             parser = new c2psParser(tokens);
            
@@ -1776,12 +1782,20 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             tree = (Tree) c2Return.getTree();
             if (DEBUG) log.debug(tree.toStringTree());
             }
+        catch (FailedPredicateException fe)
+	        {
+        	System.out.printf("parseCosmasQuery: FailedPredicateException!\n");
+            addError(StatusCodes.MALFORMED_QUERY,
+                    "failed predicate on prox something.");
+	        }
         catch (RecognitionException e) {
-            log.error(
+            System.out.printf("parseCosmasQuery: RecognitionException!\n");
+        	log.error(
                     "Could not parse query. Please make sure it is well-formed.");
             addError(StatusCodes.MALFORMED_QUERY,
                     "Could not parse query. Please make sure it is well-formed.");
         }
+
         String treestring = tree.toStringTree();
 
         boolean erroneous = false;

@@ -21,6 +21,21 @@ tokens  { PROX_OPTS;
 @header {package de.ids_mannheim.korap.query.parse.cosmas;}
 @lexer::header {package de.ids_mannheim.korap.query.parse.cosmas;}
 
+@members {
+    public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+        System.err.println("Debug: displayRecognitionError: hdr = " + hdr + ".");
+        System.err.println("Debug: displayRecognitionError: msg='" + msg + "'.");
+        System.err.println("Debug: displayRecognitionError: e = " + e.toString() + ".");
+       
+        emitErrorMessage(hdr + " prox options mismatch...");
+       
+        // Now do something with hdr and msg...
+    }
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
 // 						PROX-Lexer
@@ -59,8 +74,16 @@ proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=pro
 
 proxDist
 @init{ int countM=0;}
+@rulecatch 
+	{
+	catch (RecognitionException(re)
+		{
+		reportError(re);
+		}
+	}
 	:
-		((m=proxMeasure {countM++;})|d=proxDirection|v=proxDistValue)+ {countM == 1}? 
+		//((m=proxMeasure {countM++;})|d=proxDirection|v=proxDistValue)+ {countM == 1}? 
+		((m=proxMeasure)|d=proxDirection|v=proxDistValue)+ 
 		      
 	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text)};
 //	->  {c2ps_opPROX.checkDIST($proxDist.text) == true } ? {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text)};
