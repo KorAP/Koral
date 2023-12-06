@@ -18,7 +18,9 @@ tokens  { PROX_OPTS;
 	  DIR; PLUS; MINUS; BOTH;
 	  GRP; MIN; MAX; }
 	  
-@header {package de.ids_mannheim.korap.query.parse.cosmas;}
+@header {package de.ids_mannheim.korap.query.parse.cosmas;
+		 import  de.ids_mannheim.korap.util.C2RecognitionException;}
+		 
 @lexer::header {package de.ids_mannheim.korap.query.parse.cosmas;}
 
 @members {
@@ -29,12 +31,31 @@ tokens  { PROX_OPTS;
         System.err.println("Debug: displayRecognitionError: hdr = " + hdr + ".");
         System.err.println("Debug: displayRecognitionError: msg='" + msg + "'.");
         System.err.println("Debug: displayRecognitionError: e = " + e.toString() + ".");
-       
-        emitErrorMessage(hdr + " prox options mismatch...");
+        
+        if( e instanceof C2RecognitionException )
+        	{
+        	C2RecognitionException c2e = (C2RecognitionException) e;
+        	String c2msg = hdr + ": PROX options mismatch at '" + c2e.getMismatchedToken() + "'...";
+        	
+        	emitErrorMessage(c2msg);
+        	}
+        else
+        	emitErrorMessage(hdr + " prox options mismatch...");
        
         // Now do something with hdr and msg...
     }
 }
+
+@rulecatch {
+  catch (C2RecognitionException c2e) {
+    //Custom handling of an exception. Any java code is allowed.
+    System.err.printf("Debug: overall rulecatch for c2ps_opPROX: c2RecognitionException.\n");
+    //reportError(c2e);
+    //recover(c2e.input, (RecognitionException) c2e);
+    //throw (RecognitionException)c2e;
+    //System.err.printf("Debug: overall rulecatch: back from reportError(c2e).\n");
+  }
+} // rulecatch
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
@@ -76,8 +97,13 @@ proxDist
 @init{ int countM=0;}
 @rulecatch 
 	{
-	catch (RecognitionException(re)
+	catch (RecognitionException re)
 		{
+		if( re instanceOf  C2RecognitionException )
+			System.err.printf("Debug: catched in proxDist: C2RecognitionException!\n");
+		else
+			System.err.printf("Debug: catched in proxDist: RecognitionException!\n");
+		
 		reportError(re);
 		}
 	}
@@ -86,6 +112,7 @@ proxDist
 		((m=proxMeasure)|d=proxDirection|v=proxDistValue)+ 
 		      
 	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text)};
+	
 //	->  {c2ps_opPROX.checkDIST($proxDist.text) == true } ? {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text)};
 
 // new rule accepts only '+' and '-'; default tree for direction is 

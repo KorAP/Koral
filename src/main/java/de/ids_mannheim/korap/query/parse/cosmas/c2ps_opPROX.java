@@ -4,6 +4,7 @@ import org.antlr.runtime.*;
 import org.antlr.runtime.tree.*;
 import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+import de.ids_mannheim.korap.util.*;
 
 /*
  * parses Opts of PROX: /w3:4,s0,min or %w3:4,s0,min.
@@ -21,7 +22,8 @@ public class c2ps_opPROX
 	 * 28.11.23/FB
 	 */
 	
-	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text) throws RecognitionException 
+	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text)  
+			throws C2RecognitionException 
 	{
 		boolean multiple = true;
 		CommonTree tree1 = (CommonTree)ctDir;
@@ -39,11 +41,11 @@ public class c2ps_opPROX
 									2345, text);
 			//de.ids_mannheim.korap.query.serialize.Antlr3AbstractQueryProcessor.reportError(mess);
 			//reportError(mess);
-			RecognitionException re = new RecognitionException();
+			C2RecognitionException re = new C2RecognitionException(text);
 			re.c = '/';
-			re.charPositionInLine = 4;
+			re.charPositionInLine = 15; //tokenPos;
 			re.index = 1;
-			re.line = 123;
+			re.line = 0;
 			
 			throw re;
 			}
