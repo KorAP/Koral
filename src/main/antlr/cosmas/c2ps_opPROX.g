@@ -109,6 +109,7 @@ proxDist
 	}
 	:
 		//((m=proxMeasure {countM++;})|d=proxDirection|v=proxDistValue)+ {countM == 1}? 
+		
 		((m=proxMeasure)|d=proxDirection|v=proxDistValue)+ 
 		      
 	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text)};
