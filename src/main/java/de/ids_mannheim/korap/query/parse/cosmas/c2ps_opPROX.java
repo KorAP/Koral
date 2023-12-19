@@ -25,7 +25,7 @@ public class c2ps_opPROX
 	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text)  
 			throws C2RecognitionException 
 	{
-		boolean multiple = true;
+		boolean multiple = false;
 		CommonTree tree1 = (CommonTree)ctDir;
 		CommonTree tree2 = (CommonTree)ctMeas;
 		CommonTree tree3 = (CommonTree)ctVal;
