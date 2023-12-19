@@ -37,6 +37,24 @@ public class c2ps_opPROX
 		
 		if( multiple == true )
 			{
+			CommonTree 
+				errorTree = new CommonTree(new CommonToken(typeDIST, "DIST")),
+				errorNode = new CommonTree(new CommonToken(1, "ERROR")),
+				errorPos  = new CommonTree(new CommonToken(1, "15")),
+				errorArg  = new CommonTree(new CommonToken(1, text));
+			
+			errorTree.addChild(errorNode);
+			errorNode.addChild(errorPos);
+			errorNode.addChild(errorArg);
+			
+			System.err.printf("Debug: encodeDIST: parse error found, returning error tree: %s.\n", 
+					errorTree.toStringTree());
+			
+			return errorTree;
+			
+			/* throwing an Exception is only part of the solution,
+			 * but how to stop parsing and return the error code properly - 07.12.23/DB
+			 * 
 			String mess = String.format("line 0:%d %s expecting only 1 of 'wsp'!\n",
 									2345, text);
 			//de.ids_mannheim.korap.query.serialize.Antlr3AbstractQueryProcessor.reportError(mess);
@@ -48,6 +66,7 @@ public class c2ps_opPROX
 			re.line = 0;
 			
 			throw re;
+			*/
 			}
 			
 		
