@@ -95,24 +95,12 @@ proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=pro
 
 proxDist
 @init{ int countM=0;}
-@rulecatch 
-	{
-	catch (RecognitionException re)
-		{
-		if( re instanceOf  C2RecognitionException )
-			System.err.printf("Debug: catched in proxDist: C2RecognitionException!\n");
-		else
-			System.err.printf("Debug: catched in proxDist: RecognitionException!\n");
-		
-		reportError(re);
-		}
-	}
 	:
 		//((m=proxMeasure {countM++;})|d=proxDirection|v=proxDistValue)+ {countM == 1}? 
 		
-		((m=proxMeasure)|d=proxDirection|v=proxDistValue)+ 
+		((m=proxMeasure {countM++;})|d=proxDirection|v=proxDistValue)+ 
 		      
-	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text)};
+	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text, countM)};
 	
 //	->  {c2ps_opPROX.checkDIST($proxDist.text) == true } ? {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text)};
 

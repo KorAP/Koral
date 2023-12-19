@@ -131,6 +131,56 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     public static Pattern wildcardPlusPattern = Pattern.compile("([+])");
     public static Pattern wildcardQuestionPattern = Pattern.compile("([?])");
 
+	/**
+	 * searchforError
+	 * - returns true if an error node is found in the tree referenced by 'node'.
+	 * - adds the corresponding error message to the error list.
+	 * @param node
+	 * @return: true: error node was found,
+	 * 			false; no error node found.
+	 * 19.12.23/FB
+	 */
+    
+    private boolean searchforError(Tree node)
+    
+    {
+    	//System.err.printf("Debug: searchforError: '%s' has %d children.\n",
+    	//		node.toStringTree(), node.getChildCount());
+    	
+    	if( node.getType() == 1 && node.getText().compareTo("ERROR") == 0 )
+	    	{
+	    	// error node found:
+    		//System.err.printf("Debug: searchforError: error node found: %s.\n", node.toStringTree());
+    		String
+    			message = String.format("Fehler %s gefunden bei '%s': %s.",
+    					node.getChild(0) != null ? node.getChild(0).getText() : "",
+    	    			node.getChild(1) != null ? node.getChild(1).getText() : "",
+    	    			node.getChild(2) != null ? node.getChild(2).getText() : "");
+    		
+    		addError(345, message);
+    		return true;
+	    	}
+    	
+    	for(int i=0; i<node.getChildCount(); i++)
+	    	{
+    		Tree
+    			son = node.getChild(i);
+    		
+    		/* System.err.printf(" node: text='%s' type=%d start=%d end=%d.\n",
+    				son.getText(), 
+    				son.getType(),
+    				son.getTokenStartIndex(),
+    				son.getTokenStopIndex());
+    		*/
+
+    		if( searchforError(son) )
+    			return true; // error found, stop here.
+	    	}
+    	
+    	// no error node:
+    	return false;
+    }
+
     /**
      * @param tree
      *            The syntax tree as returned by ANTLR
@@ -165,10 +215,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     public void process (String query) {
         Tree tree = null;
         tree = parseCosmasQuery(query);
-        if (DEBUG) { 
+        if (DEBUG) 
+        	{ 
         	System.out.printf("\nProcessing COSMAS II query: %s.\n\n", query);
             log.debug("Processing CosmasII query: " + query);
-        }
+        	}
+        
         if (tree != null) 
         	{
             if (verbose) {
@@ -731,10 +783,19 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     @SuppressWarnings("unchecked")
     private void processOPPROX (Tree node) {
+    	
         // collect info
         Tree prox_opts = node.getChild(0);
         Tree typ = prox_opts.getChild(0);
         Tree dist_list = prox_opts.getChild(1);
+    	
+    	// search for an error and if there is one, add it to the list:
+  	    if( searchforError(prox_opts) )
+			{
+        	return;
+	    	}
+
+        
         // Step I: create group
         Map<String, Object> group =
                 KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
@@ -1762,8 +1823,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                     new org.antlr.runtime.CommonTokenStream(lex); // v3
             
            System.out.printf("parseCosmasQuery: tokens = %d\n",  tokens.size());
-           System.out.printf("parseCosmasQuery: tokens = %s\n",  tokens.toString());
            System.out.printf("parseCosmasQuery: tokens[] = ");
+           
            for(int i=0; i<tokens.size(); i++)
            		System.out.printf("%s ", tokens.get(i).toString());
            		

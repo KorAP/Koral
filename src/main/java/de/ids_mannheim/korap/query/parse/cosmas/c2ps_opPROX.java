@@ -14,38 +14,53 @@ public class c2ps_opPROX
 
 {
 
+	/* duplicateOptions:
+	 * detect if any prox option appears twice or more.
+	 * Return true of false.
+	 * 19.12.23/FB
+	 */
+	
+	private static boolean duplicateOptions(String text)
+	
+	{
+		
+		return false;
+	}
+	
 	/* encodeDIST():
-	 * - returns a CommonTree built of out Direction/Measure/Distance value.
+	 * - returns a CommonTree built from the Direction/Measure/Distance value.
 	 * - accepts options in any order.
 	 * - creates CommonTree in that order: Direction .. Distance value .. Measure.
 	 * - sets default direction to BOTH if not set yet.
 	 * 28.11.23/FB
 	 */
 	
-	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text)  
-			throws C2RecognitionException 
+	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text, int countM)  
+			//throws C2RecognitionException 
 	{
 		boolean multiple = false;
 		CommonTree tree1 = (CommonTree)ctDir;
 		CommonTree tree2 = (CommonTree)ctMeas;
 		CommonTree tree3 = (CommonTree)ctVal;
 		
-		//addError(StatusCodes.MALFORMED_QUERY,
-        //        "Could not parse query. Please make sure it is well-formed.");
+		System.err.printf("Debug: encodeDIST: scanned input='%s' countM=%d.\n", text, countM);
+
 		
-		System.err.printf("Debug: encodeDIST: scanned input='%s'.\n", text);
-		
-		if( multiple == true )
+		if( duplicateOptions(text) == true )
 			{
-			CommonTree 
-				errorTree = new CommonTree(new CommonToken(typeDIST, "DIST")),
-				errorNode = new CommonTree(new CommonToken(1, "ERROR")),
-				errorPos  = new CommonTree(new CommonToken(1, "15")),
-				errorArg  = new CommonTree(new CommonToken(1, text));
+			CommonTree errorTree, errorNode, errorPos, errorArg, errorMes;
 			
+			errorTree = new CommonTree(new CommonToken(typeDIST, "DIST"));
+			errorNode = new CommonTree(new CommonToken(1, "ERROR"));
+			errorPos  = new CommonTree(new CommonToken(1, "15"));
+			errorArg  = new CommonTree(new CommonToken(1, text));
+			errorMes  = new CommonTree(new CommonToken(1, "Operator PROX/Abstand darf nur höchsten 1 Abstandswert, Abstandstyp und" +
+															  " Abstandsrichtung enthalten!"));
+				
 			errorTree.addChild(errorNode);
 			errorNode.addChild(errorPos);
 			errorNode.addChild(errorArg);
+			errorNode.addChild(errorMes);
 			
 			System.err.printf("Debug: encodeDIST: parse error found, returning error tree: %s.\n", 
 					errorTree.toStringTree());
