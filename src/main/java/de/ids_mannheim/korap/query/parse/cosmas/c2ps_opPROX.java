@@ -35,17 +35,19 @@ public class c2ps_opPROX
 	 * 28.11.23/FB
 	 */
 	
-	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text, int countM)  
-			//throws C2RecognitionException 
+	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text, int start,
+									int countD, int countM, int countV)  
+			
 	{
 		boolean multiple = false;
 		CommonTree tree1 = (CommonTree)ctDir;
 		CommonTree tree2 = (CommonTree)ctMeas;
 		CommonTree tree3 = (CommonTree)ctVal;
-		
-		System.err.printf("Debug: encodeDIST: scanned input='%s' countM=%d.\n", text, countM);
+		//String text = "for debugging only";
+		int pos = -1;
+		System.err.printf("Debug: encodeDIST: scanned input='%s' start=%d countM=%d countD=%d countV=%d.\n", 
+					text, start, countM, countD, countV);
 
-		
 		if( duplicateOptions(text) == true )
 			{
 			CommonTree errorTree, errorNode, errorPos, errorArg, errorMes;

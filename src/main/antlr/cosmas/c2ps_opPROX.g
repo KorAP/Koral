@@ -90,19 +90,16 @@ proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=pro
 */
 
 // new rule: accepts options in any order:
-// but how to handle multiple values for those options?
+// count each option type and find out if any one  is missing or occures multiple times.
 // 28.11.23/FB
 
 proxDist
-@init{ int countM=0;}
+@init{ int countM=0; int countD=0; int countV=0;}
 	:
-		//((m=proxMeasure {countM++;})|d=proxDirection|v=proxDistValue)+ {countM == 1}? 
-		
-		((m=proxMeasure {countM++;})|d=proxDirection|v=proxDistValue)+ 
-		      
-	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text, countM)};
+		(m=proxMeasure {countM++;}|d=proxDirection {countD++;}|v=proxDistValue {countV++;} )+
+		 
+	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text, $proxDist.index, countD, countM, countV)};
 	
-//	->  {c2ps_opPROX.checkDIST($proxDist.text) == true } ? {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text)};
 
 // new rule accepts only '+' and '-'; default tree for direction is 
 // set in c2ps_opPROX.encodeDIST() now.
@@ -116,12 +113,6 @@ proxDistValue	:	(m1=proxDistMin ) (':' m2=proxDistMax)?
 	
 		-> {$m2.text != null}? ^(RANGE $m1  $m2)
 		->				       ^(RANGE VAL0 $m1);
-
-/* calling c2ps_opPROX.checkMeasure() as a check will not compile by ANTLR,
-   reason unknown! 01.12.23/FB
-proxMeasure
-	:	(meas='w'|meas='s'|meas='p'|meas='t') -> {c2ps_opPROX.checkMeasure($meas)} ? ^(MEAS $meas) ;  
-*/
 
 // mentioning >1 measures will be checked/rejected in c2ps_opPROX.encodeDIST(). 
 
