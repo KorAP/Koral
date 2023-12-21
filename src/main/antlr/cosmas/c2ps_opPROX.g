@@ -96,9 +96,9 @@ proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=pro
 proxDist
 @init{ int countM=0; int countD=0; int countV=0;}
 	:
-		(m=proxMeasure {countM++;}|d=proxDirection {countD++;}|v=proxDistValue {countV++;} )+
+		((m=proxMeasure {countM++;})|(d=proxDirection {countD++;})|(v=proxDistValue {countV++;}) )+
 		 
-	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text, $proxDist.index, countD, countM, countV)};
+	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text, countD, countM, countV)};
 	
 
 // new rule accepts only '+' and '-'; default tree for direction is 

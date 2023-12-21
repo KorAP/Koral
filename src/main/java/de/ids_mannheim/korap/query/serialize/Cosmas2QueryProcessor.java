@@ -20,6 +20,7 @@ import de.ids_mannheim.korap.util.StringUtils;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.FailedPredicateException;
 import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
@@ -1822,14 +1823,6 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             org.antlr.runtime.CommonTokenStream tokens =
                     new org.antlr.runtime.CommonTokenStream(lex); // v3
             
-           System.out.printf("parseCosmasQuery: tokens = %d\n",  tokens.size());
-           System.out.printf("parseCosmasQuery: tokens[] = ");
-           
-           for(int i=0; i<tokens.size(); i++)
-           		System.out.printf("%s ", tokens.get(i).toString());
-           		
-           System.out.println();
-           
             parser = new c2psParser(tokens);
            
             // Use custom error reporters
