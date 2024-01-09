@@ -1851,19 +1851,29 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
 
         String treestring = tree.toStringTree();
-
+        System.err.printf("Debug: parseCosmasQuery: tree = '%s'.\n",  treestring);
+        
         boolean erroneous = false;
         if (parser.failed() || parser.getNumberOfSyntaxErrors() > 0) {
             erroneous = true;
             tree = null;
         }
 
+        System.err.printf("Debug: parseCosmasQuery: failed=%b no. of synt. err = %d.\n",
+        			parser.failed(), parser.getNumberOfSyntaxErrors());
+        
         if (erroneous || treestring.contains("<mismatched token")
                 || treestring.contains("<error")
-                || treestring.contains("<unexpected")) {
-            log.error(errorListener.generateFullErrorMsg().toString());
+                || treestring.contains("<unexpected")) 
+        {
+        	System.err.printf("Debug: parseCosmasQuery: tree: '%s'.\n", treestring);
+        	System.err.printf("Debug: parseCosmasQuery: FullErrorMsg:  '%s'.\n", errorListener.generateFullErrorMsg().toString());
+        	log.error(errorListener.generateFullErrorMsg().toString());
             addError(errorListener.generateFullErrorMsg());
         }
+        
+        addError(1234, "Test-Message");
+        
         return tree;
     }
 }

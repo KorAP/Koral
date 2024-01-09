@@ -275,7 +275,7 @@ searchLabel
 op2	:	(opPROX | opIN | opOV | opAND | opOR | opNOT) ;
 		
 // AST with Options for opPROX is returned by c2ps_opPROX.check():
-opPROX	:	OP_PROX -> ^(OPPROX {c2ps_opPROX.check($OP_PROX.text, $OP_PROX.index)} );
+opPROX	:	OP_PROX -> ^(OPPROX {c2ps_opPROX.check($OP_PROX.text, $OP_PROX.pos)} );
 
 opIN	: 	OP_IN -> {c2ps_opIN.check($OP_IN.text, $OP_IN.index)};
 

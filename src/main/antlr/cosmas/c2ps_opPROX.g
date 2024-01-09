@@ -73,7 +73,7 @@ DISTVALUE
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 
-opPROX	:	proxTyp proxDist (',' proxDist)* (',' proxGroup)? 
+opPROX[int pos]	:	proxTyp proxDist[$pos] (',' proxDist[$pos])* (',' proxGroup)? 
 		
 		-> ^(PROX_OPTS {$proxTyp.tree} ^(DIST_LIST proxDist+) {$proxGroup.tree});
 	
@@ -93,12 +93,12 @@ proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=pro
 // count each option type and find out if any one  is missing or occures multiple times.
 // 28.11.23/FB
 
-proxDist
+proxDist[int pos]
 @init{ int countM=0; int countD=0; int countV=0;}
 	:
 		((m=proxMeasure {countM++;})|(d=proxDirection {countD++;})|(v=proxDistValue {countV++;}) )+
 		 
-	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text, countD, countM, countV)};
+	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text, countD, countM, countV, $pos)};
 	
 
 // new rule accepts only '+' and '-'; default tree for direction is 

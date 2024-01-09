@@ -2,6 +2,8 @@ package de.ids_mannheim.korap.query.parse.cosmas;
 
 import org.antlr.runtime.*;
 import org.antlr.runtime.tree.*;
+
+import de.ids_mannheim.korap.query.serialize.Antlr3AbstractQueryProcessor;
 import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.util.*;
@@ -10,7 +12,7 @@ import de.ids_mannheim.korap.util.*;
  * parses Opts of PROX: /w3:4,s0,min or %w3:4,s0,min.
  */
 
-public class c2ps_opPROX
+public class c2ps_opPROX 
 
 {
 	final static int typeERROR = 1; // type of an Error CommonToken.
@@ -20,7 +22,7 @@ public class c2ps_opPROX
 	final static int ERR_VAL_TOOGREAT = 303;
 	final static int ERR_DIR_TOOGREAT = 304;
 	
-	private static CommonTree buildErrorTree_Prox(String text, int errCode, int typeDIST)
+	private static CommonTree buildErrorTree(String text, int errCode, int typeDIST, int pos)
 	
 	{
 	CommonTree
@@ -70,6 +72,9 @@ public class c2ps_opPROX
 	errorNode.addChild(errorArg);
 	errorNode.addChild(errorMes);
 
+	// test - 09.01.24/FB
+	//addError("ab");
+	
 	return errorTree;
 	}
 
@@ -91,24 +96,24 @@ public class c2ps_opPROX
 	 */
 	
 	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text,
-									int countD, int countM, int countV)  
+									int countD, int countM, int countV, int pos)  
 			
 	{
 		CommonTree tree1 = (CommonTree)ctDir;
 		CommonTree tree2 = (CommonTree)ctMeas;
 		CommonTree tree3 = (CommonTree)ctVal;
 		
-		//System.err.printf("Debug: encodeDIST: scanned input='%s' countM=%d countD=%d countV=%d.\n", 
-		//			text, countM, countD, countV);
+		System.err.printf("Debug: encodeDIST: scanned input='%s' countM=%d countD=%d countV=%d pos=%d.\n", 
+					text, countM, countD, countV, pos);
 
 		if( countM == 0 )
-			return buildErrorTree_Prox(text, ERR_MEAS_NULL, typeDIST);
+			return buildErrorTree(text, ERR_MEAS_NULL, typeDIST, pos);
 		if( countM > 1 )
-			return buildErrorTree_Prox(text, ERR_MEAS_TOOGREAT, typeDIST);
+			return buildErrorTree(text, ERR_MEAS_TOOGREAT, typeDIST, pos);
 		if( countV == 0 )
-			return buildErrorTree_Prox(text, ERR_VAL_NULL, typeDIST);
+			return buildErrorTree(text, ERR_VAL_NULL, typeDIST, pos);
 		if( countV > 1 )
-			return buildErrorTree_Prox(text, ERR_VAL_TOOGREAT, typeDIST);
+			return buildErrorTree(text, ERR_VAL_TOOGREAT, typeDIST, pos);
 		
 		if( countD == 0 )
 			{
@@ -122,7 +127,7 @@ public class c2ps_opPROX
 			tree1 = treeDIR;
 			}
 		else if( countD > 1 )
-			return buildErrorTree_Prox(text, ERR_DIR_TOOGREAT, typeDIST);
+			return buildErrorTree(text, ERR_DIR_TOOGREAT, typeDIST, pos);
 		
 		// create DIST tree:
 		CommonTree 
@@ -143,21 +148,22 @@ public class c2ps_opPROX
 		return true;
 	}
 	
-	public static Tree check (String input, int index) {
+	public static Tree check (String input, int pos) 
+	{
         ANTLRStringStream ss = new ANTLRStringStream(input);
         c2ps_opPROXLexer lex = new c2ps_opPROXLexer(ss);
         CommonTokenStream tokens = new CommonTokenStream(lex);
         c2ps_opPROXParser g = new c2ps_opPROXParser(tokens);
         c2ps_opPROXParser.opPROX_return c2PQReturn = null;
 
-        /*
-        System.out.println("check opPROX:" + index + ": " + input);
+        /**/
+        System.out.printf("check opPROX: pos=%d input='%s'.\n", pos, input);
         System.out.flush();
-         */
+        /**/
 
         try {
-            c2PQReturn = g.opPROX();
-        }
+            c2PQReturn = g.opPROX(pos);
+        	}
         catch (RecognitionException e) {
             e.printStackTrace();
         }
