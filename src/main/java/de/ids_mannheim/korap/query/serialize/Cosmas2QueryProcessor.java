@@ -177,7 +177,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     		int
     			errPos  = node.getChild(0) != null ? Integer.parseInt(node.getChild(0).getText()) : 0;
     		int
-    			errCode = node.getChild(1) != null ? Integer.parseInt(node.getChild(1).getText()) : c2ps_opPROX.ERR_PROX_UNKNOWN; 
+    			errCode = node.getChild(1) != null ? Integer.parseInt(node.getChild(1).getText()) : StatusCodes.ERR_PROX_UNKNOWN; 
     		String
     			errMess = node.getChild(2) != null ? node.getChild(2).getText() : "Genaue Fehlermeldung nicht auffindbar.";
     		

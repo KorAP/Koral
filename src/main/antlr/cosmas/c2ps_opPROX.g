@@ -49,15 +49,9 @@ proxTyp	:  '/' -> ^(TYP PROX)	// klassischer Abstand.
 
 // proxDist: e.g. +5w or -s0 or /w2:4 etc.
 // kein proxDirection? hier, weil der Default erst innerhalb von Regel proxDirection erzeugt werden kann.
-/* incomplete original version:
-proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=proxDistValue)
-
-		-> {$v1.tree != null}? ^(DIST {$proxDirection.tree} {$v1.tree} {$m1.tree})
-		->		 		       ^(DIST {$proxDirection.tree} {$v2.tree} {$m2.tree});
-*/
 
 // new rule: accepts options in any order:
-// count each option type and find out if any one  is missing or occures multiple times.
+// count each option type and find out if any one is missing or occures multiple times.
 // 28.11.23/FB
 
 proxDist[int pos]

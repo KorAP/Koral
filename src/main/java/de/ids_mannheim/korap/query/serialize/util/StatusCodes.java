@@ -14,4 +14,12 @@ public class StatusCodes {
 	public final static int QUERY_TOO_COMPLEX = 311;
 	public final static int UNKNOWN_QUERY_ERROR = 399;
 	public final static int SERIALIZATION_FAILED = 300;
+	
+	// error codes for PROX syntax errors:
+	final public static int ERR_PROX_UNKNOWN 		= 320;
+	public final static int ERR_PROX_MEAS_NULL 		= 321;
+	public final static int ERR_PROX_MEAS_TOOGREAT 	= 322;
+	public final static int ERR_PROX_VAL_NULL 		= 323;
+	public final static int ERR_PROX_VAL_TOOGREAT 	= 324;
+	public final static int ERR_PROX_DIR_TOOGREAT 	= 325;
 }

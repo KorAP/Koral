@@ -17,15 +17,9 @@ public class c2ps_opPROX
 {
 	// type of an Error CommonToken:
 	final static int typeERROR = 1; 
-	// error codes returned to client:
-	final public static int ERR_PROX_UNKNOWN 	= 300;
-	final static int ERR_MEAS_NULL 		= 301;
-	final static int ERR_MEAS_TOOGREAT 	= 302;
-	final static int ERR_VAL_NULL 		= 303;
-	final static int ERR_VAL_TOOGREAT 	= 304;
-	final static int ERR_DIR_TOOGREAT 	= 305;
+	// Prox error codes defined in StatusCodes.java.
 	
-	private static CommonTree buildErrorTree(String text, int errCode, int typeDIST, int pos) throws RecognitionException
+	private static CommonTree buildErrorTree(String text, int errCode, int typeDIST, int pos) 
 	
 	{
 	CommonTree
@@ -43,24 +37,24 @@ public class c2ps_opPROX
 	
 	switch( errCode )
 		{
-	case ERR_MEAS_NULL:
+	case StatusCodes.ERR_PROX_MEAS_NULL:
 		mess      = String.format("Abstandsoperator an der Stelle '%s' es fehlt eine der folgenden Angaben: w,s,p!", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
-	case ERR_MEAS_TOOGREAT:
+	case StatusCodes.ERR_PROX_MEAS_TOOGREAT:
 		mess      = String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 der folgenden Angaben einsetzen: w,s,p! " +
 							 "Falls Mehrfachangabe erwünscht, müssen diese durch Kommata getrennt werden (z.B.: /+w2,s0).", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
-	case ERR_VAL_NULL:
+	case StatusCodes.ERR_PROX_VAL_NULL:
 		mess      = String.format("Abstandsoperator an der Stelle '%s': Bitte einen numerischen Wert einsetzen (z.B. /+w5)! ", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
-	case ERR_VAL_TOOGREAT:
+	case StatusCodes.ERR_PROX_VAL_TOOGREAT:
 		mess      = String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 numerischen Wert einsetzen (z.B. /+w5)! ", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
-	case ERR_DIR_TOOGREAT:
+	case StatusCodes.ERR_PROX_DIR_TOOGREAT:
 		mess      = String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 Angabe '+' oder '-' oder keine! ", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
@@ -97,7 +91,6 @@ public class c2ps_opPROX
 	
 	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text,
 									int countD, int countM, int countV, int pos)  
-									throws RecognitionException
 			
 	{
 		CommonTree tree1 = (CommonTree)ctDir;
@@ -108,13 +101,13 @@ public class c2ps_opPROX
 					text, countM, countD, countV, pos);
 
 		if( countM == 0 )
-			return buildErrorTree(text, ERR_MEAS_NULL, typeDIST, pos);
+			return buildErrorTree(text, StatusCodes.ERR_PROX_MEAS_NULL, typeDIST, pos);
 		if( countM > 1 )
-			return buildErrorTree(text, ERR_MEAS_TOOGREAT, typeDIST, pos);
+			return buildErrorTree(text, StatusCodes.ERR_PROX_MEAS_TOOGREAT, typeDIST, pos);
 		if( countV == 0 )
-			return buildErrorTree(text, ERR_VAL_NULL, typeDIST, pos);
+			return buildErrorTree(text, StatusCodes.ERR_PROX_VAL_NULL, typeDIST, pos);
 		if( countV > 1 )
-			return buildErrorTree(text, ERR_VAL_TOOGREAT, typeDIST, pos);
+			return buildErrorTree(text, StatusCodes.ERR_PROX_VAL_TOOGREAT, typeDIST, pos);
 		
 		if( countD == 0 )
 			{
@@ -128,7 +121,7 @@ public class c2ps_opPROX
 			tree1 = treeDIR;
 			}
 		else if( countD > 1 )
-			return buildErrorTree(text, ERR_DIR_TOOGREAT, typeDIST, pos);
+			return buildErrorTree(text, StatusCodes.ERR_PROX_DIR_TOOGREAT, typeDIST, pos);
 	
 		// create DIST tree:
 		CommonTree 
