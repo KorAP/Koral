@@ -1,3 +1,7 @@
+0.42 2024-01-11
+    - [feature] Support #REG in C2 (bodmer)
+    - [bugfix] Fix comma in #BED in C2 (bodmer)
+
 0.41 2023-09-13
     - [feature] Finish support for CQP (irimia)
     - [bugfix] Disallow empty regex in PQ+ (diewald)
