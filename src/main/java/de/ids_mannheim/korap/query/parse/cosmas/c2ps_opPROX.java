@@ -15,14 +15,17 @@ import de.ids_mannheim.korap.util.*;
 public class c2ps_opPROX 
 
 {
-	final static int typeERROR = 1; // type of an Error CommonToken.
-	final static int ERR_MEAS_NULL = 300;
-	final static int ERR_MEAS_TOOGREAT = 301;
-	final static int ERR_VAL_NULL = 302;
-	final static int ERR_VAL_TOOGREAT = 303;
-	final static int ERR_DIR_TOOGREAT = 304;
+	// type of an Error CommonToken:
+	final static int typeERROR = 1; 
+	// error codes returned to client:
+	final public static int ERR_PROX_UNKNOWN 	= 300;
+	final static int ERR_MEAS_NULL 		= 301;
+	final static int ERR_MEAS_TOOGREAT 	= 302;
+	final static int ERR_VAL_NULL 		= 303;
+	final static int ERR_VAL_TOOGREAT 	= 304;
+	final static int ERR_DIR_TOOGREAT 	= 305;
 	
-	private static CommonTree buildErrorTree(String text, int errCode, int typeDIST, int pos)
+	private static CommonTree buildErrorTree(String text, int errCode, int typeDIST, int pos) throws RecognitionException
 	
 	{
 	CommonTree
@@ -30,9 +33,9 @@ public class c2ps_opPROX
 	CommonTree
 		errorNode = new CommonTree(new CommonToken(typeERROR, "ERROR"));
 	CommonTree
-		errorPos  = new CommonTree(new CommonToken(typeERROR, Integer.toString(errCode)));
+		errorPos  = new CommonTree(new CommonToken(typeERROR, String.valueOf(pos)));
 	CommonTree
-		errorArg  = new CommonTree(new CommonToken(1, text));
+		errorCode = new CommonTree(new CommonToken(typeERROR, String.valueOf(errCode)));
 	CommonTree
 		errorMes;
 	String
@@ -46,7 +49,7 @@ public class c2ps_opPROX
 		break;
 	case ERR_MEAS_TOOGREAT:
 		mess      = String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 der folgenden Angaben einsetzen: w,s,p! " +
-							 "Falls Mehrfachangabe erwünscht, dann durch Kommata trennen (z.B.: /+w2,s0).", text);
+							 "Falls Mehrfachangabe erwünscht, müssen diese durch Kommata getrennt werden (z.B.: /+w2,s0).", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
 	case ERR_VAL_NULL:
@@ -69,12 +72,9 @@ public class c2ps_opPROX
 	
 	errorTree.addChild(errorNode);
 	errorNode.addChild(errorPos);
-	errorNode.addChild(errorArg);
+	errorNode.addChild(errorCode);
 	errorNode.addChild(errorMes);
 
-	// test - 09.01.24/FB
-	//addError("ab");
-	
 	return errorTree;
 	}
 
@@ -97,6 +97,7 @@ public class c2ps_opPROX
 	
 	public static Object encodeDIST(int typeDIST, int typeDIR, Object ctDir, Object ctMeas, Object ctVal, String text,
 									int countD, int countM, int countV, int pos)  
+									throws RecognitionException
 			
 	{
 		CommonTree tree1 = (CommonTree)ctDir;
@@ -128,7 +129,7 @@ public class c2ps_opPROX
 			}
 		else if( countD > 1 )
 			return buildErrorTree(text, ERR_DIR_TOOGREAT, typeDIST, pos);
-		
+	
 		// create DIST tree:
 		CommonTree 
 			tree = new CommonTree(new CommonToken(typeDIST, "DIST"));
@@ -148,7 +149,7 @@ public class c2ps_opPROX
 		return true;
 	}
 	
-	public static Tree check (String input, int pos) 
+	public static Tree check (String input, int pos) throws RecognitionException
 	{
         ANTLRStringStream ss = new ANTLRStringStream(input);
         c2ps_opPROXLexer lex = new c2ps_opPROXLexer(ss);

@@ -23,39 +23,6 @@ tokens  { PROX_OPTS;
 		 
 @lexer::header {package de.ids_mannheim.korap.query.parse.cosmas;}
 
-@members {
-    public void displayRecognitionError(String[] tokenNames,
-                                        RecognitionException e) {
-        String hdr = getErrorHeader(e);
-        String msg = getErrorMessage(e, tokenNames);
-        System.err.println("Debug: displayRecognitionError: hdr = " + hdr + ".");
-        System.err.println("Debug: displayRecognitionError: msg='" + msg + "'.");
-        System.err.println("Debug: displayRecognitionError: e = " + e.toString() + ".");
-        
-        if( e instanceof C2RecognitionException )
-        	{
-        	C2RecognitionException c2e = (C2RecognitionException) e;
-        	String c2msg = hdr + ": PROX options mismatch at '" + c2e.getMismatchedToken() + "'...";
-        	
-        	emitErrorMessage(c2msg);
-        	}
-        else
-        	emitErrorMessage(hdr + " prox options mismatch...");
-       
-        // Now do something with hdr and msg...
-    }
-}
-
-@rulecatch {
-  catch (C2RecognitionException c2e) {
-    //Custom handling of an exception. Any java code is allowed.
-    System.err.printf("Debug: overall rulecatch for c2ps_opPROX: c2RecognitionException.\n");
-    //reportError(c2e);
-    //recover(c2e.input, (RecognitionException) c2e);
-    //throw (RecognitionException)c2e;
-    //System.err.printf("Debug: overall rulecatch: back from reportError(c2e).\n");
-  }
-} // rulecatch
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
