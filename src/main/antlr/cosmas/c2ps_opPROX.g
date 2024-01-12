@@ -16,7 +16,8 @@ tokens  { PROX_OPTS;
 	  DIST_LIST; DIST; RANGE; VAL0; 
 	  MEAS; // measure
 	  DIR; PLUS; MINUS; BOTH;
-	  GRP; MIN; MAX; }
+	  GRP; MIN; MAX;
+	  }
 	  
 @header {package de.ids_mannheim.korap.query.parse.cosmas;
 		 import  de.ids_mannheim.korap.util.C2RecognitionException;}
@@ -33,6 +34,12 @@ tokens  { PROX_OPTS;
 DISTVALUE
 	:	('0' .. '9')+ ;
 	
+// trying to catch everything (at the end of the option sequence) that should not appear inside the prox. options:
+// e.g. /w5umin -> remain = 'umin'.
+
+PROX_REMAIN
+	: (',')? ('b'..'h'|'j'..'l'|'n'|'o'|'q'|'r'|'u'|'v'|'y'|'z'|'B'..'H'|'J'..'L'|'N'|'O'|'Q'|'R'|'U'|'V'|'Y'|'Z') (~ ' ')* ;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
 // 						PROX-Parser
@@ -40,10 +47,14 @@ DISTVALUE
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 
-opPROX[int pos]	:	proxTyp proxDist[$pos] (',' proxDist[$pos])* (',' proxGroup)? 
+opPROX[int pos]	:	proxTyp proxDist[$pos] (',' proxDist[$pos])* (',' proxGroup)?  (proxRemain[$pos])?
 		
-		-> ^(PROX_OPTS {$proxTyp.tree} ^(DIST_LIST proxDist+) {$proxGroup.tree});
+		-> ^(PROX_OPTS {$proxTyp.tree} ^(DIST_LIST proxDist+) {$proxGroup.tree} {$proxRemain.tree});
 	
+proxRemain[int pos] : PROX_REMAIN
+
+		-> { c2ps_opPROX.checkRemain(DIST, $PROX_REMAIN.text, $pos) };
+
 proxTyp	:  '/' -> ^(TYP PROX)	// klassischer Abstand.
 		|  '%' -> ^(TYP EXCL);	// ausschließender Abstand.
 
@@ -87,6 +98,8 @@ proxDistMax
 	:	DISTVALUE;
 	
 proxGroup
-	:	'min' -> ^(GRP MIN)
-	|	'max' -> ^(GRP MAX);
+	:	('min'|'MIN') -> ^(GRP MIN)
+	|	('max'|'MAX') -> ^(GRP MAX);
+	
+
 	

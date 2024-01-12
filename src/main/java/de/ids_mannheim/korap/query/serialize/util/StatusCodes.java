@@ -22,4 +22,5 @@ public class StatusCodes {
 	public final static int ERR_PROX_VAL_NULL 		= 323;
 	public final static int ERR_PROX_VAL_TOOGREAT 	= 324;
 	public final static int ERR_PROX_DIR_TOOGREAT 	= 325;
+	public final static int ERR_PROX_WRONG_CHARS	= 326;
 }

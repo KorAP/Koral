@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static Logger log =
             LoggerFactory.getLogger(Cosmas2QueryProcessor.class);
@@ -156,8 +156,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     	//		func, node.getText(), node.getChildCount());
     	if( node == null )
     		{
-    		// 
-    		System.err.printf("Warning: %s: node == null: no action requested.\n", func);
+    		// System.err.printf("Warning: %s: node == null: no action requested.\n", func);
     		return false;
     		}
     	
@@ -173,7 +172,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     	    			node.getChild(1) != null ? node.getChild(1).getText() : "???",
     	    			node.getChild(2) != null ? node.getChild(2).getText() : "???");
     		*/
-    		// TODO: StatusCode.MALFORMED_QUERY etc. einsetzen!
+    		
     		int
     			errPos  = node.getChild(0) != null ? Integer.parseInt(node.getChild(0).getText()) : 0;
     		int
@@ -230,7 +229,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 	        	// query from requestMap is unformatted JSON. Make it pretty before displaying:
 	        	ObjectMapper mapper = new ObjectMapper();
 	        	String jsonQuery = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(requestMap.get("query"));
-				System.out.printf("Cosmas2QueryProcessor: JSON output: %s\n\n", jsonQuery);
+				System.out.printf("Cosmas2QueryProcessor: JSON output:\n%s\n\n", jsonQuery);
 				} 
 	        catch (JsonProcessingException e) 
 	        	{
@@ -1864,13 +1863,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             	}
             }
         catch (FailedPredicateException fe)
-	        {
+	        { // unused so far - 11.01.24/FB
         	System.out.printf("parseCosmasQuery: FailedPredicateException!\n");
             addError(StatusCodes.MALFORMED_QUERY,
                     "failed predicate on prox something.");
 	        }
         catch (RecognitionException e) {
-            System.out.printf("Debug: out: parseCosmasQuery: RecognitionException!\n");
+        	// unused so far - 11.01.24/FB
+        	System.out.printf("Debug: out: parseCosmasQuery: RecognitionException!\n");
             log.error(
                     "Could not parse query. Please make sure it is well-formed.");
             addError(StatusCodes.MALFORMED_QUERY,
@@ -1899,11 +1899,15 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // tree might already be null if another error was reported above.
         if( reportErrorsinTree(tree) == true )
         {
-        	System.out.printf("Debug: parseCosmasQuery: reportErrorsinTree at least 1 error message found. Setting tree = null.\n");
+        	if( DEBUG )
+        		System.out.printf("Debug: parseCosmasQuery: reportErrorsinTree at least 1 error message found. Setting tree = null.\n");
             return null;
         }
         else
-        	System.out.printf("Debug: parseCosmasQuery: reportErrorsinTree has found no error messages.\n");
+        	{
+        	if(DEBUG)
+        		System.out.printf("Debug: parseCosmasQuery: reportErrorsinTree has found no error messages.\n");
+        	}
     	
         return tree;
     } // parseCosmasQuery
