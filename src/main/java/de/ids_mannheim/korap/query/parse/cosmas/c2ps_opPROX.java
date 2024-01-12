@@ -15,7 +15,7 @@ import de.ids_mannheim.korap.util.*;
 public class c2ps_opPROX 
 
 {
-	final static boolean bDebug = true;
+	final static boolean bDebug = false;
 	
 	// type of an Error CommonToken:
 	final static int typeERROR = 1; 
