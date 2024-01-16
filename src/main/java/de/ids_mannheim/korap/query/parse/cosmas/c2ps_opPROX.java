@@ -15,14 +15,13 @@ import de.ids_mannheim.korap.util.*;
 public class c2ps_opPROX 
 
 {
-	final static int typeERROR = 1; // type of an Error CommonToken.
-	final static int ERR_MEAS_NULL = 300;
-	final static int ERR_MEAS_TOOGREAT = 301;
-	final static int ERR_VAL_NULL = 302;
-	final static int ERR_VAL_TOOGREAT = 303;
-	final static int ERR_DIR_TOOGREAT = 304;
+	final static boolean bDebug = false;
 	
-	private static CommonTree buildErrorTree(String text, int errCode, int typeDIST, int pos)
+	// type of an Error CommonToken:
+	final static int typeERROR = 1; 
+	// Prox error codes defined in StatusCodes.java.
+	
+	private static CommonTree buildErrorTree(String text, int errCode, int typeDIST, int pos) 
 	
 	{
 	CommonTree
@@ -30,9 +29,9 @@ public class c2ps_opPROX
 	CommonTree
 		errorNode = new CommonTree(new CommonToken(typeERROR, "ERROR"));
 	CommonTree
-		errorPos  = new CommonTree(new CommonToken(typeERROR, Integer.toString(errCode)));
+		errorPos  = new CommonTree(new CommonToken(typeERROR, String.valueOf(pos)));
 	CommonTree
-		errorArg  = new CommonTree(new CommonToken(1, text));
+		errorCode = new CommonTree(new CommonToken(typeERROR, String.valueOf(errCode)));
 	CommonTree
 		errorMes;
 	String
@@ -40,25 +39,29 @@ public class c2ps_opPROX
 	
 	switch( errCode )
 		{
-	case ERR_MEAS_NULL:
+	case StatusCodes.ERR_PROX_MEAS_NULL:
 		mess      = String.format("Abstandsoperator an der Stelle '%s' es fehlt eine der folgenden Angaben: w,s,p!", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
-	case ERR_MEAS_TOOGREAT:
+	case StatusCodes.ERR_PROX_MEAS_TOOGREAT:
 		mess      = String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 der folgenden Angaben einsetzen: w,s,p! " +
-							 "Falls Mehrfachangabe erwünscht, dann durch Kommata trennen (z.B.: /+w2,s0).", text);
+							 "Falls Mehrfachangabe erwünscht, müssen diese durch Kommata getrennt werden (z.B.: /+w2,s0).", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
-	case ERR_VAL_NULL:
+	case StatusCodes.ERR_PROX_VAL_NULL:
 		mess      = String.format("Abstandsoperator an der Stelle '%s': Bitte einen numerischen Wert einsetzen (z.B. /+w5)! ", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
-	case ERR_VAL_TOOGREAT:
+	case StatusCodes.ERR_PROX_VAL_TOOGREAT:
 		mess      = String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 numerischen Wert einsetzen (z.B. /+w5)! ", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
-	case ERR_DIR_TOOGREAT:
+	case StatusCodes.ERR_PROX_DIR_TOOGREAT:
 		mess      = String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 Angabe '+' oder '-' oder keine! ", text);
+		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
+		break;
+	case StatusCodes.ERR_PROX_WRONG_CHARS:
+		mess      = String.format("Abstandsoperator an der Stelle '%s': unbekannte Abstandsoption(en)!", text);
 		errorMes  = new CommonTree(new CommonToken(typeERROR, mess));
 		break;
 	default:
@@ -69,12 +72,9 @@ public class c2ps_opPROX
 	
 	errorTree.addChild(errorNode);
 	errorNode.addChild(errorPos);
-	errorNode.addChild(errorArg);
+	errorNode.addChild(errorCode);
 	errorNode.addChild(errorMes);
 
-	// test - 09.01.24/FB
-	//addError("ab");
-	
 	return errorTree;
 	}
 
@@ -83,7 +83,7 @@ public class c2ps_opPROX
 	 * - accepts options in any order.
 	 * - creates CommonTree in that order: Direction .. Distance value .. Measure.
 	 * - sets default direction to BOTH if not set yet.
-	 * - unfortunatly, in ANTLR3 it seems that there is no way inside the Parser Grammar to get 
+	 * - unfortunately, in ANTLR3 it seems that there is no way inside the Parser Grammar to get 
 	 *   the absolute token position from the beginning of the query. Something like $ProxDist.pos or
 	 *   $start.pos is not available, so we have no info in this function about the position at which
 	 *   an error occurs. 
@@ -103,17 +103,18 @@ public class c2ps_opPROX
 		CommonTree tree2 = (CommonTree)ctMeas;
 		CommonTree tree3 = (CommonTree)ctVal;
 		
-		System.err.printf("Debug: encodeDIST: scanned input='%s' countM=%d countD=%d countV=%d pos=%d.\n", 
+		if( bDebug )
+			System.err.printf("Debug: encodeDIST: scanned input='%s' countM=%d countD=%d countV=%d pos=%d.\n", 
 					text, countM, countD, countV, pos);
 
 		if( countM == 0 )
-			return buildErrorTree(text, ERR_MEAS_NULL, typeDIST, pos);
+			return buildErrorTree(text, StatusCodes.ERR_PROX_MEAS_NULL, typeDIST, pos);
 		if( countM > 1 )
-			return buildErrorTree(text, ERR_MEAS_TOOGREAT, typeDIST, pos);
+			return buildErrorTree(text, StatusCodes.ERR_PROX_MEAS_TOOGREAT, typeDIST, pos);
 		if( countV == 0 )
-			return buildErrorTree(text, ERR_VAL_NULL, typeDIST, pos);
+			return buildErrorTree(text, StatusCodes.ERR_PROX_VAL_NULL, typeDIST, pos);
 		if( countV > 1 )
-			return buildErrorTree(text, ERR_VAL_TOOGREAT, typeDIST, pos);
+			return buildErrorTree(text, StatusCodes.ERR_PROX_VAL_TOOGREAT, typeDIST, pos);
 		
 		if( countD == 0 )
 			{
@@ -122,13 +123,13 @@ public class c2ps_opPROX
 			CommonTree treeBOTH = new CommonTree(new CommonToken(typeDIR, "BOTH"));
 			treeDIR.addChild(treeBOTH);
 			
-			System.err.printf("Debug: encodeDIST: tree for DIR: '%s'.\n", 
-					treeDIR.toStringTree());
+			if( bDebug )
+				System.err.printf("Debug: encodeDIST: tree for DIR: '%s'.\n", treeDIR.toStringTree());
 			tree1 = treeDIR;
 			}
 		else if( countD > 1 )
-			return buildErrorTree(text, ERR_DIR_TOOGREAT, typeDIST, pos);
-		
+			return buildErrorTree(text, StatusCodes.ERR_PROX_DIR_TOOGREAT, typeDIST, pos);
+	
 		// create DIST tree:
 		CommonTree 
 			tree = new CommonTree(new CommonToken(typeDIST, "DIST"));
@@ -137,18 +138,29 @@ public class c2ps_opPROX
 		tree.addChild(tree3); // tree3 before tree2 expected by serialization.
 		tree.addChild(tree2);
 		
-		System.err.printf("Debug: encodeDIST: returning '%s'.\n", tree.toStringTree());
+		if( bDebug )
+			System.err.printf("Debug: encodeDIST: returning '%s'.\n", tree.toStringTree());
 		
 		return tree;
 	} // encodeDIST
 	
-	public static boolean checkDIST(String input)
+	/* checkRemain:
+	 * 
+	 * - the chars in proxRemain are not allowed in prox. options.
+	 * - return an error tree.
+	 * 12.01.24/FB
+	 */
+	
+	public static Object checkRemain(int typeDIST, String proxRemain, int pos)
 	
 	{
-		return true;
+		if( bDebug )
+			System.out.printf("Debug: checkRemain: '%s' at pos %d.\n", proxRemain, pos);
+		
+		return buildErrorTree(proxRemain, StatusCodes.ERR_PROX_WRONG_CHARS, typeDIST, pos);
 	}
 	
-	public static Tree check (String input, int pos) 
+	public static Tree check (String input, int pos) throws RecognitionException
 	{
         ANTLRStringStream ss = new ANTLRStringStream(input);
         c2ps_opPROXLexer lex = new c2ps_opPROXLexer(ss);
@@ -156,10 +168,8 @@ public class c2ps_opPROX
         c2ps_opPROXParser g = new c2ps_opPROXParser(tokens);
         c2ps_opPROXParser.opPROX_return c2PQReturn = null;
 
-        /**/
-        System.out.printf("check opPROX: pos=%d input='%s'.\n", pos, input);
-        System.out.flush();
-        /**/
+        if( bDebug )
+        	System.out.printf("check opPROX: pos=%d input='%s'.\n", pos, input);
 
         try {
             c2PQReturn = g.opPROX(pos);

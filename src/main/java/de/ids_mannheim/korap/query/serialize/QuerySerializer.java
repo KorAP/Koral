@@ -105,7 +105,8 @@ public class QuerySerializer {
         int i = 0;
         String[] queries = null;
         String ql = "poliqarpplus";
-        boolean bDebug = false;
+        boolean 
+        	bDebug = false;
 
         if (args.length < 2) {
             System.err.println("\nUsage: QuerySerializer \"query\" queryLanguage [-show]");

@@ -16,46 +16,14 @@ tokens  { PROX_OPTS;
 	  DIST_LIST; DIST; RANGE; VAL0; 
 	  MEAS; // measure
 	  DIR; PLUS; MINUS; BOTH;
-	  GRP; MIN; MAX; }
+	  GRP; MIN; MAX;
+	  }
 	  
 @header {package de.ids_mannheim.korap.query.parse.cosmas;
 		 import  de.ids_mannheim.korap.util.C2RecognitionException;}
 		 
 @lexer::header {package de.ids_mannheim.korap.query.parse.cosmas;}
 
-@members {
-    public void displayRecognitionError(String[] tokenNames,
-                                        RecognitionException e) {
-        String hdr = getErrorHeader(e);
-        String msg = getErrorMessage(e, tokenNames);
-        System.err.println("Debug: displayRecognitionError: hdr = " + hdr + ".");
-        System.err.println("Debug: displayRecognitionError: msg='" + msg + "'.");
-        System.err.println("Debug: displayRecognitionError: e = " + e.toString() + ".");
-        
-        if( e instanceof C2RecognitionException )
-        	{
-        	C2RecognitionException c2e = (C2RecognitionException) e;
-        	String c2msg = hdr + ": PROX options mismatch at '" + c2e.getMismatchedToken() + "'...";
-        	
-        	emitErrorMessage(c2msg);
-        	}
-        else
-        	emitErrorMessage(hdr + " prox options mismatch...");
-       
-        // Now do something with hdr and msg...
-    }
-}
-
-@rulecatch {
-  catch (C2RecognitionException c2e) {
-    //Custom handling of an exception. Any java code is allowed.
-    System.err.printf("Debug: overall rulecatch for c2ps_opPROX: c2RecognitionException.\n");
-    //reportError(c2e);
-    //recover(c2e.input, (RecognitionException) c2e);
-    //throw (RecognitionException)c2e;
-    //System.err.printf("Debug: overall rulecatch: back from reportError(c2e).\n");
-  }
-} // rulecatch
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
@@ -66,6 +34,12 @@ tokens  { PROX_OPTS;
 DISTVALUE
 	:	('0' .. '9')+ ;
 	
+// trying to catch everything (at the end of the option sequence) that should not appear inside the prox. options:
+// e.g. /w5umin -> remain = 'umin'.
+
+PROX_REMAIN
+	: (',')? ('b'..'h'|'j'..'l'|'n'|'o'|'q'|'r'|'u'|'v'|'y'|'z'|'B'..'H'|'J'..'L'|'N'|'O'|'Q'|'R'|'U'|'V'|'Y'|'Z') (~ ' ')* ;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
 // 						PROX-Parser
@@ -73,24 +47,22 @@ DISTVALUE
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 
-opPROX[int pos]	:	proxTyp proxDist[$pos] (',' proxDist[$pos])* (',' proxGroup)? 
+opPROX[int pos]	:	proxTyp proxDist[$pos] (',' proxDist[$pos])* (',' proxGroup)?  (proxRemain[$pos])?
 		
-		-> ^(PROX_OPTS {$proxTyp.tree} ^(DIST_LIST proxDist+) {$proxGroup.tree});
+		-> ^(PROX_OPTS {$proxTyp.tree} ^(DIST_LIST proxDist+) {$proxGroup.tree} {$proxRemain.tree});
 	
+proxRemain[int pos] : PROX_REMAIN
+
+		-> { c2ps_opPROX.checkRemain(DIST, $PROX_REMAIN.text, $pos) };
+
 proxTyp	:  '/' -> ^(TYP PROX)	// klassischer Abstand.
 		|  '%' -> ^(TYP EXCL);	// ausschließender Abstand.
 
 // proxDist: e.g. +5w or -s0 or /w2:4 etc.
 // kein proxDirection? hier, weil der Default erst innerhalb von Regel proxDirection erzeugt werden kann.
-/* incomplete original version:
-proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=proxDistValue)
-
-		-> {$v1.tree != null}? ^(DIST {$proxDirection.tree} {$v1.tree} {$m1.tree})
-		->		 		       ^(DIST {$proxDirection.tree} {$v2.tree} {$m2.tree});
-*/
 
 // new rule: accepts options in any order:
-// count each option type and find out if any one  is missing or occures multiple times.
+// count each option type and find out if any one is missing or occures multiple times.
 // 28.11.23/FB
 
 proxDist[int pos]
@@ -126,6 +98,8 @@ proxDistMax
 	:	DISTVALUE;
 	
 proxGroup
-	:	'min' -> ^(GRP MIN)
-	|	'max' -> ^(GRP MAX);
+	:	('min'|'MIN') -> ^(GRP MIN)
+	|	('max'|'MAX') -> ^(GRP MAX);
+	
+
 	

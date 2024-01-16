@@ -96,7 +96,15 @@ fragment DIST // 30.11.23/FB
 fragment GROUP
 	:	('min' | 'max');
 
-OP_PROX	:	('/' | '%') DIST (',' DIST)* (',' GROUP)? ;
+// version (12.01.24/FB):
+// accept correct and incorrect chars till the next blank, that way the incorrect chars
+// are submitted to the sub-grammer c2ps_opPROX where they are detected and an appropriate 
+// error message is inserted:
+OP_PROX		:	('/' | '%') DIST (~' ')*; 
+
+// old version: accepts only correctly formulated options, so the incorrect
+// chars/options are hard to detect:
+// OP_PROX	:	('/' | '%') DIST (',' DIST)* (',' GROUP)?  ;
 
 OP_IN	:	'#IN' | '#IN(' OP_IN_OPTS? ')' ; 
 
@@ -310,4 +318,3 @@ opNHIT	:	( '#NHIT(' | '#INKLUSIVE(' ) searchExpr ')' -> ^(OPNHIT searchExpr) ;
 opALL	:	( '#ALL(' | '#EXKLUSIVE(' ) searchExpr ')'  -> ^(OPALL searchExpr) ;
 
 opREG	:	OP_REG -> ^(OPREG {c2ps_opREG.encode($OP_REG.text, OPREG)}) ;
-
