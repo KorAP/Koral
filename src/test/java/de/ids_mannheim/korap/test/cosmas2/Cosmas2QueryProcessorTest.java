@@ -631,35 +631,12 @@ public class Cosmas2QueryProcessorTest {
         assertFalse(res.at("/query/inOrder").asBoolean());
         
         // 15.01.24/FB
-        query = "Sonne /+w2 Mond"; // distence value missing.
+        query = "Sonne /+w Mond"; // distance value missing.
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         
-        System.out.printf("query '%s' produces an error: '%s'.\n", query, res.get("errors") != null ? "true" : "false");
+        assertTrue(res.get("errors") != null);
         
-        assertTrue(res.get("errors") == null);
-        
-        System.out.printf("query '%s' produces: '%s'.\n", query, res.toPrettyString());
-        System.out.printf("query context: '%s'.\n", res.get("@context").asText());
-        
-        System.out.printf("query errors: '%s'.\n", res.get("errors").asText());
-        System.out.printf("query errors: '%s'.\n", res.get("errors").toString());
-        
-        
-        
-        
-        /*
-        assertEquals("cosmas:distance", res.at("/query/distances/0/@type")
-                .asText());
-        assertEquals("w", res.at("/query/distances/0/key").asText());
-        assertEquals(0, res.at("/query/distances/0/boundary/min").asInt());
-        assertEquals(4, res.at("/query/distances/0/boundary/max").asInt());
-        assertEquals("Sonne", res.at("/query/operands/0/operands/0/wrap/key")
-                .asText());
-        assertEquals("Mond", res.at("/query/operands/1/operands/0/wrap/key")
-                .asText());
-        assertFalse(res.at("/query/inOrder").asBoolean());
-        */
     }
 
 
