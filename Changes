@@ -1,3 +1,6 @@
+0.43 2024-06-11
+    - [feature] Support opProx in C2 (bodmer)
+
 0.42 2024-01-11
     - [feature] Support #REG in C2 (bodmer)
     - [bugfix] Fix comma in #BED in C2 (bodmer)
