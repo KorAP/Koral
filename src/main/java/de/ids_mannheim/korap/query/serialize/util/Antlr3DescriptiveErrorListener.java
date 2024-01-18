@@ -31,7 +31,8 @@ public class Antlr3DescriptiveErrorListener implements IErrorReporter {
 
     @Override
     public void reportError (String error) {
-        String charPositionStr = null;
+    	
+    	String charPositionStr = null;
         String offendingSymbol = null;
         String expected = null;
         Pattern p = Pattern
@@ -52,7 +53,8 @@ public class Antlr3DescriptiveErrorListener implements IErrorReporter {
 
 
     public ArrayList<Object> generateFullErrorMsg () {
-        ArrayList<Object> errorSpecs = new ArrayList<Object>();
+    	
+    	ArrayList<Object> errorSpecs = new ArrayList<Object>();
         String msg = getDetailedErrorMessage();
         errorSpecs.add(StatusCodes.MALFORMED_QUERY);
         errorSpecs.add(msg);
@@ -62,7 +64,14 @@ public class Antlr3DescriptiveErrorListener implements IErrorReporter {
 
 
     private String getDetailedErrorMessage () {
-        // default message, in case no detailed info is available;
+
+        /*
+         System.err.printf("Debug: getDetailedErrorMessage: pos=%d expected='%s' offend='%s' query='%s'.\n", 
+                 		charPosition, expected != null ? expected : "null", offendingSymbol != null ? offendingSymbol : "null", 
+        				query != null ? query : "null");
+         */
+
+    	// default message, in case no detailed info is available;
         String msg = "Malformed query. Could not parse.";
         char offendingSymbol = query.charAt(0);
         if (query.length() > charPosition)

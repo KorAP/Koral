@@ -1,9 +1,10 @@
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-//												//
-// 	lokale Grammatik der COSMAS II zeilenorientierten Suchanfragesprache (= c2ps)		//
-//	für den Abstandsoperator /w... und %w...						//
-//	v-1.0 - 07.12.12/FB									//
-//												//
+//												
+// 	lokale Grammatik der COSMAS II zeilenorientierten Suchanfragesprache (= c2ps)		
+//	für den Abstandsoperator /w... und %w...	
+//	v-1.0 - 07.12.12/FB							
+//  v-1.1 - 30.11.23/FB opPROX accepts any order of direction, measure and value.
+//												
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 grammar c2ps_opPROX;
@@ -15,9 +16,14 @@ tokens  { PROX_OPTS;
 	  DIST_LIST; DIST; RANGE; VAL0; 
 	  MEAS; // measure
 	  DIR; PLUS; MINUS; BOTH;
-	  GRP; MIN; MAX; }
-@header {package de.ids_mannheim.korap.query.parse.cosmas;}
+	  GRP; MIN; MAX;
+	  }
+	  
+@header {package de.ids_mannheim.korap.query.parse.cosmas;
+		 import  de.ids_mannheim.korap.util.C2RecognitionException;}
+		 
 @lexer::header {package de.ids_mannheim.korap.query.parse.cosmas;}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
@@ -28,6 +34,12 @@ tokens  { PROX_OPTS;
 DISTVALUE
 	:	('0' .. '9')+ ;
 	
+// trying to catch everything (at the end of the option sequence) that should not appear inside the prox. options:
+// e.g. /w5umin -> remain = 'umin'.
+
+PROX_REMAIN
+	: ~(','|'a'|'i'|'m'|'n'|'p'|'s'|'t'|'w'|'x'|'A'|'I'|'M'|'N'|'P'|'S'|'T'|'W'|'X'|'0'..'9'|'+'|'-'|':'|'/'|'%')  (~ ' ')*  ;
+	
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
 // 						PROX-Parser
@@ -35,36 +47,49 @@ DISTVALUE
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 
-opPROX	:	proxTyp proxDist (',' proxDist)* (',' proxGroup)? 
+opPROX[int pos]	:	proxTyp proxDist[$pos] (',' proxDist[$pos])* (',' proxGroup)?  (proxRemain[$pos])?
 		
-		-> ^(PROX_OPTS {$proxTyp.tree} ^(DIST_LIST proxDist+) {$proxGroup.tree});
+		-> ^(PROX_OPTS {$proxTyp.tree} ^(DIST_LIST proxDist+) {$proxGroup.tree} {$proxRemain.tree});
 	
-proxTyp	:	  '/' -> ^(TYP PROX)	// klassischer Abstand.
-		| '%' -> ^(TYP EXCL);	// ausschließender Abstand.
+proxRemain[int pos] : PROX_REMAIN
+
+		-> { c2ps_opPROX.checkRemain(DIST, $PROX_REMAIN.text, $pos) };
+
+proxTyp	:  '/' -> ^(TYP PROX)	// klassischer Abstand.
+		|  '%' -> ^(TYP EXCL);	// ausschließender Abstand.
 
 // proxDist: e.g. +5w or -s0 or /w2:4 etc.
 // kein proxDirection? hier, weil der Default erst innerhalb von Regel proxDirection erzeugt werden kann.
-proxDist:	proxDirection (v1=proxDistValue m1=proxMeasure | m2=proxMeasure v2=proxDistValue)
 
-		-> {$v1.tree != null}? ^(DIST {$proxDirection.tree} {$v1.tree} {$m1.tree})
-		-> 		       ^(DIST {$proxDirection.tree} {$v2.tree} {$m2.tree});
+// new rule: accepts options in any order:
+// count each option type and find out if any one is missing or occures multiple times.
+// 28.11.23/FB
+
+proxDist[int pos]
+@init{ int countM=0; int countD=0; int countV=0;}
+	:
+		((m=proxMeasure {countM++;})|(d=proxDirection {countD++;})|(v=proxDistValue {countV++;}) )+
+		 
+	->  {c2ps_opPROX.encodeDIST(DIST, DIR, $d.tree, $m.tree, $v.tree, $proxDist.text, countD, countM, countV, $pos)};
+	
+
+// new rule accepts only '+' and '-'; default tree for direction is 
+// set in c2ps_opPROX.encodeDIST() now.
+// 28.11.23/FB
 
 proxDirection
-	:	(p='+'|m='-')?	-> {$p != null}? ^(DIR PLUS)
-				-> {$m != null}? ^(DIR MINUS)
-				->               ^(DIR BOTH) ;
-/*
-proxDistValue	// proxDistMin ( ':' proxDistMax)? ;
-	:	(m1=proxDistMin -> ^(DIST_RANGE VAL0 $m1)) (':' m2=proxDistMax -> ^(DIST_RANGE $m1 $m2))? ;
-*/
-proxDistValue	// proxDistMin ( ':' proxDistMax)? ;
-	:	(m1=proxDistMin ) (':' m2=proxDistMax)? 
+		: '+'	-> ^(DIR PLUS)
+		| '-'	-> ^(DIR MINUS);
+
+proxDistValue	:	(m1=proxDistMin ) (':' m2=proxDistMax)? 
 	
 		-> {$m2.text != null}? ^(RANGE $m1  $m2)
-		->		       ^(RANGE VAL0 $m1);
-		
+		->				       ^(RANGE VAL0 $m1);
+
+// mentioning >1 measures will be checked/rejected in c2ps_opPROX.encodeDIST(). 
+
 proxMeasure
-	:	(m='w'|m='s'|m='p'|m='t') -> ^(MEAS $m);
+	:	(meas='w'|meas='s'|meas='p'|meas='t') -> ^(MEAS $meas) ;  
 
 proxDistMin
 	:	DISTVALUE;
@@ -73,6 +98,8 @@ proxDistMax
 	:	DISTVALUE;
 	
 proxGroup
-	:	'min' -> ^(GRP MIN)
-	|	'max' -> ^(GRP MAX);
+	:	('min'|'MIN') -> ^(GRP MIN)
+	|	('max'|'MAX') -> ^(GRP MAX);
+	
+
 	
