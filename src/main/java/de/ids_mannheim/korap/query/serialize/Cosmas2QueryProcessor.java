@@ -1,5 +1,6 @@
 package de.ids_mannheim.korap.query.serialize;
 
+import de.ids_mannheim.korap.query.parse.cosmas.c2ps_opPROX; // error codes.
 import de.ids_mannheim.korap.query.object.ClassRefCheck;
 import de.ids_mannheim.korap.query.object.ClassRefOp;
 import de.ids_mannheim.korap.query.object.CosmasPosition;
@@ -18,12 +19,16 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import de.ids_mannheim.korap.util.StringUtils;
 
 import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.FailedPredicateException;
 import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
@@ -128,6 +133,83 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     public static Pattern wildcardPlusPattern = Pattern.compile("([+])");
     public static Pattern wildcardQuestionPattern = Pattern.compile("([?])");
 
+	/**
+	 * reportErrorsinTree:
+	 * - traverse the AST tree and search for nodes of type ERROR, they contain
+	 *   the errCode, the error message and the error char position.
+	 * - returns true if an error node is found in the tree referenced by 'node'.
+	 * - adds error code, error position and error message to the error list.
+	 * Arguments:
+	 * node		: might be null if it has been reseted previously by another error handler.
+	 * @param node
+	 * @return: true: error node was found,
+	 * 			false; no error node found.
+	 * 19.12.23/FB
+	 */
+    
+    private boolean reportErrorsinTree(Tree node)
+    
+    {
+    	final String func = "reportErrorsinTree";
+    	
+    	//System.err.printf("Debug: %s: '%s' has %d children.\n",
+    	//		func, node.getText(), node.getChildCount());
+    	if( node == null )
+    		{
+    		// System.err.printf("Warning: %s: node == null: no action requested.\n", func);
+    		return false;
+    		}
+    	
+    	if( node.getType() == 1 && node.getText().compareTo("ERROR") == 0 )
+	    	{
+	    	// error node found:
+    		// child[0] : error pos.
+    		// child[1] : error code. 
+    		// child[2] : error message, containing offending string.
+    		/*
+    		System.err.printf("Debug: %s: child[0]='%s' child[1]='%s' child[2]='%s'.\n", func,
+    					node.getChild(0) != null ? node.getChild(0).getText() : "???",
+    	    			node.getChild(1) != null ? node.getChild(1).getText() : "???",
+    	    			node.getChild(2) != null ? node.getChild(2).getText() : "???");
+    		*/
+    		
+    		int
+    			errPos  = node.getChild(0) != null ? Integer.parseInt(node.getChild(0).getText()) : 0;
+    		int
+    			errCode = node.getChild(1) != null ? Integer.parseInt(node.getChild(1).getText()) : StatusCodes.ERR_PROX_UNKNOWN; 
+    		String
+    			errMess = node.getChild(2) != null ? node.getChild(2).getText() : "Genaue Fehlermeldung nicht auffindbar.";
+    		
+			ArrayList<Object> 
+				errorSpecs = new ArrayList<Object>();
+			
+	        errorSpecs.add(errCode);
+	        errorSpecs.add(errMess);
+	        errorSpecs.add(errPos);
+    		addError(errorSpecs);
+    		return true;
+	    	}
+    	
+    	for(int i=0; i<node.getChildCount(); i++)
+	    	{
+    		Tree
+    			son = node.getChild(i);
+    		
+    		/* System.err.printf(" node: text='%s' type=%d start=%d end=%d.\n",
+    				son.getText(), 
+    				son.getType(),
+    				son.getTokenStartIndex(),
+    				son.getTokenStopIndex());
+    		*/
+    		// return the first error found only:
+    		if( reportErrorsinTree(son) )
+    			return true; // error found, stop here.
+	    	}
+    	
+    	// no error node:
+    	return false;
+    } // reportErrorsinTree
+
     /**
      * @param tree
      *            The syntax tree as returned by ANTLR
@@ -140,28 +222,40 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         KoralObjectGenerator.setQueryProcessor(this);
         this.query = query;
         process(query);
-        if (DEBUG) { 
-            log.debug(">>> " + requestMap.get("query") + " <<<");
-        System.out.printf("Cosmas2QueryProcessor: >>%s<<.\n",  requestMap.get("query"));
-        }
-    }
+        if (verbose) 
+        	{ 
+            //log.debug(">>> " + requestMap.get("query") + " <<<");
+            try {
+	        	// query from requestMap is unformatted JSON. Make it pretty before displaying:
+	        	ObjectMapper mapper = new ObjectMapper();
+	        	String jsonQuery = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(requestMap.get("query"));
+				System.out.printf("Cosmas2QueryProcessor: JSON output:\n%s\n\n", jsonQuery);
+				} 
+	        catch (JsonProcessingException e) 
+	        	{
+	        	System.out.printf("Cosmas2QueryProcessor: >>%s<<.\n",  requestMap.get("query"));
+	            //e.printStackTraObjectMapper mapper = new ObjectMapper();ce();
+				}
+        	}
+    	}
 
 
     @Override
     public void process (String query) {
         Tree tree = null;
         tree = parseCosmasQuery(query);
-        if (DEBUG) { 
+        if (DEBUG) 
+        	{ 
         	System.out.printf("\nProcessing COSMAS II query: %s.\n\n", query);
             log.debug("Processing CosmasII query: " + query);
-        }
+        	}
+        
         if (tree != null) 
         	{
-            
-                if (DEBUG) {
-            	log.debug("ANTLR parse tree: " + tree.toStringTree());
-                System.out.printf("\nANTLR parse tree: %s.\n\n",  tree.toStringTree());
-                }
+            if (verbose) {
+	        	log.debug("ANTLR parse tree: " + tree.toStringTree());
+	            System.out.printf("\nANTLR parse tree: %s.\n\n",  tree.toStringTree());
+	            }
 
             processNode(tree);
         	}
@@ -181,11 +275,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         stackedObjects = 0;
         stackedToWrap = 0;
 
-        if (verbose) {
+        /*
+         if (verbose) {
             System.err.println(" " + objectStack);
             System.out.println(openNodeCats);
         }
-
+        */
+        
         /* ***************************************
          * Processing individual node categories *
          * ***************************************
@@ -716,11 +812,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     @SuppressWarnings("unchecked")
     private void processOPPROX (Tree node) {
+    	
         // collect info
         Tree prox_opts = node.getChild(0);
         Tree typ = prox_opts.getChild(0);
         Tree dist_list = prox_opts.getChild(1);
-        // Step I: create group
+    	
+    	// Step I: create group
         Map<String, Object> group =
                 KoralObjectGenerator.makeGroup(KoralOperation.SEQUENCE);
 
@@ -1746,30 +1844,41 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             org.antlr.runtime.CommonTokenStream tokens =
                     new org.antlr.runtime.CommonTokenStream(lex); // v3
             
-           // System.out.printf("parseCosmasQuery: tokens = %d\n",  tokens.size());
-           // System.out.printf("parseCosmasQuery: tokens = %s\n",  tokens.toString());
-           
             parser = new c2psParser(tokens);
            
             // Use custom error reporters
             lex.setErrorReporter(errorListener);
             ((c2psParser) parser).setErrorReporter(errorListener);
-            
+
             c2psParser.c2ps_query_return c2Return =
                     ((c2psParser) parser).c2ps_query(); // statt t().
 
             // AST Tree anzeigen:
             tree = (Tree) c2Return.getTree();
-            if (DEBUG) log.debug(tree.toStringTree());
+
+            if (DEBUG) 
+            	{
+            	System.out.printf("Debug: parseCosmasQuery: tree = '%s'.\n", tree.toStringTree());
+            	log.debug(tree.toStringTree());
+            	}
             }
+        catch (FailedPredicateException fe)
+	        { // unused so far - 11.01.24/FB
+        	System.out.printf("parseCosmasQuery: FailedPredicateException!\n");
+            addError(StatusCodes.MALFORMED_QUERY,
+                    "failed predicate on prox something.");
+	        }
         catch (RecognitionException e) {
+        	// unused so far - 11.01.24/FB
+        	System.out.printf("Debug: out: parseCosmasQuery: RecognitionException!\n");
             log.error(
                     "Could not parse query. Please make sure it is well-formed.");
             addError(StatusCodes.MALFORMED_QUERY,
                     "Could not parse query. Please make sure it is well-formed.");
         }
-        String treestring = tree.toStringTree();
 
+        String treestring = tree.toStringTree();
+        
         boolean erroneous = false;
         if (parser.failed() || parser.getNumberOfSyntaxErrors() > 0) {
             erroneous = true;
@@ -1778,10 +1887,28 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         if (erroneous || treestring.contains("<mismatched token")
                 || treestring.contains("<error")
-                || treestring.contains("<unexpected")) {
-            log.error(errorListener.generateFullErrorMsg().toString());
+                || treestring.contains("<unexpected")) 
+        {
+        	//System.err.printf("Debug: parseCosmasQuery: tree: '%s'.\n", treestring);
+        	//System.err.printf("Debug: parseCosmasQuery: FullErrorMsg:  '%s'.\n", errorListener.generateFullErrorMsg().toString());
+        	log.error(errorListener.generateFullErrorMsg().toString());
             addError(errorListener.generateFullErrorMsg());
         }
+
+        // collect and report errors found by other functions than the lexer/parser:
+        // tree might already be null if another error was reported above.
+        if( reportErrorsinTree(tree) == true )
+        {
+        	if( DEBUG )
+        		System.out.printf("Debug: parseCosmasQuery: reportErrorsinTree at least 1 error message found. Setting tree = null.\n");
+            return null;
+        }
+        else
+        	{
+        	if(DEBUG)
+        		System.out.printf("Debug: parseCosmasQuery: reportErrorsinTree has found no error messages.\n");
+        	}
+    	
         return tree;
-    }
+    } // parseCosmasQuery
 }

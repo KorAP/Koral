@@ -167,7 +167,7 @@ public class TreeTemplate extends Antlr4AbstractQueryProcessor {
 
         // Some things went wrong ...
         catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("parseQuery: " + e.getMessage());
         }
 
         // Return the generated tree
