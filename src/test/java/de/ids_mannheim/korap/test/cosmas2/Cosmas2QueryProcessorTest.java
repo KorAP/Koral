@@ -629,6 +629,32 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("Mond", res.at("/query/operands/1/operands/0/wrap/key")
                 .asText());
         assertFalse(res.at("/query/inOrder").asBoolean());
+        
+        // 15.01.24/FB: checking syntax error detectiong:
+        
+        query = "Sonne /+w Mond"; // distance value missing.
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertTrue(res.get("errors") != null);
+        
+        query = "Sonne /+2sw Mond"; // 2 distance types instead of 1.
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertTrue(res.get("errors") != null);
+        
+        query = "Sonne /+2s- Mond"; // 2 distance directions instead of 1.
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertTrue(res.get("errors") != null);
+
+        query = "Sonne /+2s7 Mond"; // 2 distance values instead of 1.
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertTrue(res.get("errors") != null);
     }
 
 
