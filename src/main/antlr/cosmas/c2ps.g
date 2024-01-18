@@ -74,14 +74,37 @@ WS	:	(' '|'\r'|'\n')+ {skip();};
 
 fragment DISTVALUE
 	:	 ('0' .. '9')+ (':' ('0'..'9')+)? ;
-		
+
+fragment DISTTYPE // 30.11.23/FB
+	: 	('w'|'s'|'p'|'t');
+
+fragment DISTDIR // 30.11.23/FB
+	: 	('+'|'-');
+	
+/* old version (before 30.11.23/FB)
 fragment DIST
 	:	('+'|'-')? (DISTVALUE ('w'|'s'|'p'|'t') | ('w'|'s'|'p'|'t') DISTVALUE);
-	
+*/
+
+// accept these 3 options in any order.
+// afterwards, we will have to check if any of them is missing.
+// 30.11.23/FB
+
+fragment DIST // 30.11.23/FB
+	:	(DISTDIR | DISTTYPE | DISTVALUE )+;
+
 fragment GROUP
 	:	('min' | 'max');
 
-OP_PROX	:	('/' | '%') DIST (',' DIST)* (',' GROUP)? ;
+// version (12.01.24/FB):
+// accept correct and incorrect chars till the next blank, that way the incorrect chars
+// are submitted to the sub-grammer c2ps_opPROX where they are detected and an appropriate 
+// error message is inserted:
+OP_PROX		:	('/' | '%') DIST (~' ')*; 
+
+// old version: accepts only correctly formulated options, so the incorrect
+// chars/options are hard to detect:
+// OP_PROX	:	('/' | '%') DIST (',' DIST)* (',' GROUP)?  ;
 
 OP_IN	:	'#IN' | '#IN(' OP_IN_OPTS? ')' ; 
 
@@ -260,7 +283,7 @@ searchLabel
 op2	:	(opPROX | opIN | opOV | opAND | opOR | opNOT) ;
 		
 // AST with Options for opPROX is returned by c2ps_opPROX.check():
-opPROX	:	OP_PROX -> ^(OPPROX {c2ps_opPROX.check($OP_PROX.text, $OP_PROX.index)} );
+opPROX	:	OP_PROX -> ^(OPPROX {c2ps_opPROX.check($OP_PROX.text, $OP_PROX.pos)} );
 
 opIN	: 	OP_IN -> {c2ps_opIN.check($OP_IN.text, $OP_IN.index)};
 
@@ -295,4 +318,3 @@ opNHIT	:	( '#NHIT(' | '#INKLUSIVE(' ) searchExpr ')' -> ^(OPNHIT searchExpr) ;
 opALL	:	( '#ALL(' | '#EXKLUSIVE(' ) searchExpr ')'  -> ^(OPALL searchExpr) ;
 
 opREG	:	OP_REG -> ^(OPREG {c2ps_opREG.encode($OP_REG.text, OPREG)}) ;
-
