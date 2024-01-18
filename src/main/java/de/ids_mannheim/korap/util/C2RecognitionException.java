@@ -9,7 +9,6 @@ import org.antlr.runtime.*;
 
 public final class C2RecognitionException extends RecognitionException {
 
-	private static final boolean DEBUG = false;
 	public String mismatchedToken;
 	
 	public C2RecognitionException(String mismatchedToken)

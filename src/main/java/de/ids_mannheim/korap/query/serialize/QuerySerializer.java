@@ -18,8 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
-import com.fasterxml.jackson.core.JsonPointer;
-
 /**
  * Main class for Koral, serializes queries from concrete QLs to KoralQuery
  * 
@@ -116,11 +114,9 @@ public class QuerySerializer {
             queries = new String[] { args[0] };
             ql = args[1];
         }
-        if( args.length >= 3 )
-	        {
-        	if( args[2].compareToIgnoreCase("-show") == 0 )
-	        	bDebug = true;	
-	        }
+
+        if( args.length >= 3 && args[2].compareToIgnoreCase("-show") == 0 )
+        	bDebug = true;	
         
         for (String q : queries) {
             i++;
@@ -153,7 +149,7 @@ public class QuerySerializer {
      *            'poliqarpplus', 'cqp', 'cosmas2', 'annis' or 'cql'.
      * @throws IOException
      */
-    
+
     public void run (String query, String queryLanguage, boolean bDebug) throws IOException {
 
     	ast.verbose = bDebug; // debugging: 01.09.23/FB

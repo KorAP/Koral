@@ -513,6 +513,7 @@ public class Cosmas2QueryProcessorTest {
 
     @Test
     public void testOPPROX () throws JsonProcessingException, IOException {
+    	
         query = "Sonne /+w1:4 Mond";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -630,31 +631,95 @@ public class Cosmas2QueryProcessorTest {
                 .asText());
         assertFalse(res.at("/query/inOrder").asBoolean());
         
-        // 15.01.24/FB: checking syntax error detectiong:
+        // -- check exclude operator -- // 
+        
+        query = "Sonne %-w1:2 Sterne";
+        qs.setQuery(query,  "cosmas2");
+    	res = mapper.readTree(qs.toJSON());
+      	
+    	/*
+    	System.out.printf("Query '%s': returns: '%s'.\n", query, res.toPrettyString()) ;
+    	System.out.printf("[0]: '%s'.\n",  res.at("/query/distances").get(0).get("boundary").toPrettyString());
+    	System.out.printf("@type: '%s'.\n",  res.at("/query/distances").get(0).get("@type").asText());
+    	System.out.printf("exclude: '%s'.\n",  res.at("/query/distances").get(0).get("exclude").asText());
+    	System.out.printf("key: '%s'.\n",  res.at("/query/distances").get(0).get("key").asText());
+    	*/
+    	
+    	assertEquals("cosmas:distance",  res.at("/query/distances").get(0).get("@type").asText());
+    	assertTrue( res.at("/query/distances").get(0).get("exclude").asBoolean());
+    	assertEquals("w", res.at("/query/distances").get(0).get("key").asText());
+    	
+        // 15.01.24/FB: checking syntax error:
         
         query = "Sonne /+w Mond"; // distance value missing.
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         
         assertTrue(res.get("errors") != null);
+        //System.out.printf("Query '%s': errors : '%s'.\n", query, res.get("errors").toPrettyString()) ;
+        assertEquals(StatusCodes.ERR_PROX_VAL_NULL, res.get("errors").get(0).get(0).asInt());
         
         query = "Sonne /+2sw Mond"; // 2 distance types instead of 1.
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        
+          
         assertTrue(res.get("errors") != null);
+        //System.out.printf("Query '%s': errors : '%s'.\n", query, res.get("errors").toPrettyString()) ;
+    	assertEquals(StatusCodes.ERR_PROX_MEAS_TOOGREAT, res.get("errors").get(0).get(0).asInt());
         
         query = "Sonne /+2s- Mond"; // 2 distance directions instead of 1.
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         
         assertTrue(res.get("errors") != null);
-
+        //System.out.printf("Query '%s': errors : '%s'.\n", query, res.get("errors").toPrettyString()) ;
+    	assertEquals(StatusCodes.ERR_PROX_DIR_TOOGREAT, res.get("errors").get(0).get(0).asInt());
+        
         query = "Sonne /+2s7 Mond"; // 2 distance values instead of 1.
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         
         assertTrue(res.get("errors") != null);
+        //System.out.printf("Query '%s': errors : '%s'.\n", query, res.get("errors").toPrettyString()) ;
+    	assertEquals(StatusCodes.ERR_PROX_VAL_TOOGREAT, res.get("errors").get(0).get(0).asInt());
+        
+    	// tests for error messages for unknown proximity options:
+    	// 29.05.24/FB
+    	
+    	query = "ab /+w1:2u,p cd";
+    	qs.setQuery(query,  "cosmas2");
+    	res = mapper.readTree(qs.toJSON());
+    	
+    	assertTrue("Error code expected!",!res.get("errors").isNull());
+    	assertEquals(StatusCodes.ERR_PROX_WRONG_CHARS, res.get("errors").get(0).get(0).asInt());
+    	
+    	query = "ab %-w1:2,2su cd";
+    	qs.setQuery(query,  "cosmas2");
+    	res = mapper.readTree(qs.toJSON());
+
+    	assertTrue("Error code expected!",!res.get("errors").isNull());
+    	assertEquals(StatusCodes.ERR_PROX_WRONG_CHARS, res.get("errors").get(0).get(0).asInt());
+    	
+    	query = "ab /w1:2s cd";
+    	qs.setQuery(query,  "cosmas2");
+    	res = mapper.readTree(qs.toJSON());
+
+      	//System.out.printf("Query '%s': context: '%s'.\n", query, res.get("@context").toPrettyString()) ;
+    	//System.out.printf("Query '%s': errors : '%s'.\n", query, res.get("errors").toPrettyString()) ;
+    	//System.out.printf("Query '%s': errorCode: '%s'.\n", query, res.get("errors").get(0).get(0).toPrettyString()) ;
+    	//System.out.printf("Query '%s': errorText : '%s'.\n", query, res.get("errors").get(0).get(1).toPrettyString()) ;
+    	//System.out.printf("Query '%s': errorPos : '%s'.\n", query, res.get("errors").get(0).get(2).toPrettyString()) ;
+    
+      	assertTrue("Error code expected!", res.get("errors") != null);
+    	assertEquals(StatusCodes.ERR_PROX_MEAS_TOOGREAT, res.get("errors").get(0).get(0).asInt());
+    	
+    	query = "Sonne %-w1:2,+2su Galaxien";
+        qs.setQuery(query,  "cosmas2");
+    	res = mapper.readTree(qs.toJSON());
+
+      	assertTrue("Error code expected!", res.get("errors") != null);
+    	assertEquals(StatusCodes.ERR_PROX_WRONG_CHARS, res.get("errors").get(0).get(0).asInt());
+
     }
 
 

@@ -9,6 +9,7 @@ import de.ids_mannheim.korap.query.object.KoralMatchOperator;
 import de.ids_mannheim.korap.query.object.KoralOperation;
 import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
 import de.ids_mannheim.korap.query.object.KoralType;
+import de.ids_mannheim.korap.query.parse.cosmas.c2ps_opPROX; 
 import de.ids_mannheim.korap.query.parse.cosmas.c2psLexer;
 import de.ids_mannheim.korap.query.parse.cosmas.c2psParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
@@ -150,7 +151,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private boolean reportErrorsinTree(Tree node)
     
     {
-    	final String func = "reportErrorsinTree";
+    	// not used when not debugging: final String func = "reportErrorsinTree";
     	
     	//System.err.printf("Debug: %s: '%s' has %d children.\n",
     	//		func, node.getText(), node.getChildCount());
@@ -178,8 +179,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     		int
     			errCode = node.getChild(1) != null ? Integer.parseInt(node.getChild(1).getText()) : StatusCodes.ERR_PROX_UNKNOWN; 
     		String
-    			errMess = node.getChild(2) != null ? node.getChild(2).getText() : "Genaue Fehlermeldung nicht auffindbar.";
-    		
+    			errMess = node.getChild(2) != null ? node.getChild(2).getText() : c2ps_opPROX.getErrMess(StatusCodes.UNKNOWN_QUERY_ERROR, "");
+    			
 			ArrayList<Object> 
 				errorSpecs = new ArrayList<Object>();
 			
@@ -1844,9 +1845,6 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             org.antlr.runtime.CommonTokenStream tokens =
                     new org.antlr.runtime.CommonTokenStream(lex); // v3
             
-           // System.out.printf("parseCosmasQuery: tokens = %d\n",  tokens.size());
-           // System.out.printf("parseCosmasQuery: tokens = %s\n",  tokens.toString());
-           
             parser = new c2psParser(tokens);
            
             // Use custom error reporters
