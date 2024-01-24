@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "18d976c2_9751d920",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-01-24T08:00:44Z",
+      "side": 1,
+      "message": "Is this already prepared for review? It seems that only the syntax checks are available - so it\u0027s hard to understand, what the feature is planned to do.",
+      "revId": "49b4e36ea1e1dac1eda0da739280d53d7be336a8",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
