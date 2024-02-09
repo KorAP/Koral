@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "779e150d_1fa1d19a",
+        "filename": "src/main/antlr/cosmas/c2ps_opPROX.g",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "Wouldn\u0027t it better to have a complementary class here, so also e.g. Umlauts are catched?",
+      "range": {
+        "startLine": 41,
+        "startChar": 10,
+        "endLine": 41,
+        "endChar": 111
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "59d6b226_b5cb58bf",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opPROX.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "Can these error codes be translated? Maybe %s should also be appended as an optional parameter of the error message to simplify translations.",
+      "range": {
+        "startLine": 68,
+        "startChar": 24,
+        "endLine": 68,
+        "endChar": 41
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "59671238_c4d39872",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "It seems like they are in de.ids_mannheim.korap.query.serialize.util.StatusCodes.",
+      "range": {
+        "startLine": 3,
+        "startChar": 64,
+        "endLine": 3,
+        "endChar": 75
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "172cc91a_f74c37be",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "Not used as far as I see.",
+      "range": {
+        "startLine": 153,
+        "startChar": 10,
+        "endLine": 153,
+        "endChar": 45
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fe760782_c1821dd6",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "I think conventionally that\u0027s \"Unbekannter Fehler\".",
+      "range": {
+        "startLine": 181,
+        "startChar": 74,
+        "endLine": 181,
+        "endChar": 112
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "531f07bd_ec23ad43",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/QuerySerializer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "Seems to be unused.",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 46
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "617403cd_fdc848a9",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/QuerySerializer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "Is the scoping correct? I mean - what you want?",
+      "range": {
+        "startLine": 109,
+        "startChar": 9,
+        "endLine": 109,
+        "endChar": 23
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f8f09208_d43a063e",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/QuerySerializer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "A bit hard to read - maybe better using a conjunction.",
+      "range": {
+        "startLine": 119,
+        "startChar": 25,
+        "endLine": 120,
+        "endChar": 10
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "65e8bc86_c78a13a8",
+        "filename": "src/main/java/de/ids_mannheim/korap/util/C2RecognitionException.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "Not used.",
+      "range": {
+        "startLine": 12,
+        "startChar": 1,
+        "endLine": 12,
+        "endChar": 44
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "de3e7fa6_acbe8bc8",
+        "filename": "src/test/java/de/ids_mannheim/korap/test/cosmas2/Cosmas2QueryProcessorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-02-09T15:41:52Z",
+      "side": 1,
+      "message": "This should have additional tests for e.g. `/w5umin` and different combinations with `%` and `-`. And if you don\u0027t want to check against the error messages, maybe it\u0027s possible to check against the error codes?",
+      "range": {
+        "startLine": 653,
+        "startChar": 23,
+        "endLine": 653,
+        "endChar": 28
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
