@@ -18,8 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 
-import com.fasterxml.jackson.core.JsonPointer;
-
 /**
  * Main class for Koral, serializes queries from concrete QLs to KoralQuery
  * 
@@ -34,7 +32,7 @@ public class QuerySerializer {
     private String version = "Unknown";
     private String name = "Unknown";
     private static Properties info;
-    private boolean bDebug = false;
+
         {
           
             loadInfo();
@@ -116,11 +114,9 @@ public class QuerySerializer {
             queries = new String[] { args[0] };
             ql = args[1];
         }
-        if( args.length >= 3 )
-	        {
-        	if( args[2].compareToIgnoreCase("-show") == 0 )
-	        	bDebug = true;	
-	        }
+
+        if( args.length >= 3 && args[2].compareToIgnoreCase("-show") == 0 )
+        	bDebug = true;	
         
         for (String q : queries) {
             i++;
