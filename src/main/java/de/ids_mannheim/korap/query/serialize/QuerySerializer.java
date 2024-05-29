@@ -153,6 +153,7 @@ public class QuerySerializer {
      *            'poliqarpplus', 'cqp', 'cosmas2', 'annis' or 'cql'.
      * @throws IOException
      */
+    
     public void run (String query, String queryLanguage, boolean bDebug) throws IOException {
 
     	ast.verbose = bDebug; // debugging: 01.09.23/FB

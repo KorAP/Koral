@@ -39,11 +39,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>		
-		<jackson.version>2.16.1</jackson.version>
+		<jackson.version>2.17.0</jackson.version>
 		<antlr4.version>4.9.3</antlr4.version>
 		<antlr3.version>3.5.3</antlr3.version>
 		<java.version>11</java.version>
-		<log4j.version>2.22.1</log4j.version>
+		<log4j.version>2.23.1</log4j.version>
 	</properties>
 	
 	<repositories>
@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>33.0.0-jre</version>
+			<version>33.1.0-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -145,12 +145,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.11</version>
+			<version>2.0.13</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.clarin.sru.fcs</groupId>
 			<artifactId>fcs-simple-endpoint</artifactId>
-			<version>1.6.0</version>
+			<version>1.7.0</version>
 		</dependency>
   </dependencies>
 	<build>
@@ -202,7 +202,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.12.1</version>
+				<version>3.13.0</version>
 				<configuration>
 					<!-- <verbose>true</verbose>
 		          	<fork>true</fork> -->

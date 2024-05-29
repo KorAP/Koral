@@ -1844,12 +1844,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             org.antlr.runtime.CommonTokenStream tokens =
                     new org.antlr.runtime.CommonTokenStream(lex); // v3
             
+           // System.out.printf("parseCosmasQuery: tokens = %d\n",  tokens.size());
+           // System.out.printf("parseCosmasQuery: tokens = %s\n",  tokens.toString());
+           
             parser = new c2psParser(tokens);
            
             // Use custom error reporters
             lex.setErrorReporter(errorListener);
             ((c2psParser) parser).setErrorReporter(errorListener);
-
             c2psParser.c2ps_query_return c2Return =
                     ((c2psParser) parser).c2ps_query(); // statt t().
 
