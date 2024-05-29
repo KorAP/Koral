@@ -513,6 +513,24 @@ public class Cosmas2QueryProcessorTest {
 
     @Test
     public void testOPPROX () throws JsonProcessingException, IOException {
+    	
+    	// test unknown proximity options:
+    	
+    	query = "ab /+w1:2u,p cd";
+    	qs.setQuery(query,  "cosmas2");
+    	res = mapper.readTree(qs.toJSON());
+    	//System.out.printf("Query '%s': returns: '%s'.\n", query, res.toPrettyString()) ;
+    	//System.out.printf("Query '%s': context: '%s'.\n", query, res.get("@context").toPrettyString()) ;
+    	//System.out.printf("Query '%s': errors : '%s'.\n", query, res.get("errors").toPrettyString()) ;
+    	System.out.printf("Query '%s': errorCode: '%s'.\n", query, res.get("errors").get(0).get(0).toPrettyString()) ;
+    	System.out.printf("Query '%s': errorText : '%s'.\n", query, res.get("errors").get(0).get(1).toPrettyString()) ;
+    	System.out.printf("Query '%s': errorPos : '%s'.\n", query, res.get("errors").get(0).get(2).toPrettyString()) ;
+    	
+    	assertTrue("Error code expected!",!res.get("errors").isNull());
+    	assertTrue("Error code expected!", res.get("errors").get(0).get(0).isInt());
+    	assertEquals(StatusCodes.ERR_PROX_WRONG_CHARS, res.get("errors").get(0).get(0).asInt());
+    	
+    	
         query = "Sonne /+w1:4 Mond";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());

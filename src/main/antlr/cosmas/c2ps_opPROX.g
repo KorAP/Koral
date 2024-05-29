@@ -37,15 +37,8 @@ DISTVALUE
 // trying to catch everything (at the end of the option sequence) that should not appear inside the prox. options:
 // e.g. /w5umin -> remain = 'umin'.
 
-//PROX_REMAIN
-//	: (',')? ('b'..'h'|'j'..'l'|'n'|'o'|'q'|'r'|'u'|'v'|'y'|'z'|'B'..'H'|'J'..'L'|'N'|'O'|'Q'|'R'|'U'|'V'|'Y'|'Z') (~ ' ')* ;
-
-//PROX_REMAIN
-//	: (',')? ~('a'|'i'|'m'|'p'|'s'|'t'|'w'|'x'|'A'|'I'|'M'|'P'|'S'|'T'|'W'|'X'|' ')  (~ (' '))*;
-
 PROX_REMAIN
-	: ','  ~('a'|'i'|'m'|'p'|'s'|'t'|'w'|'x'|'A'|'I'|'M'|'P'|'S'|'T'|'W'|'X'|'0'..'9')  (~ ' ')* 
- 	| ~('a'|'i'|'m'|'p'|'s'|'t'|'w'|'x'|'A'|'I'|'M'|'P'|'S'|'T'|'W'|'X'|'0'..'9')  (~ ' ')*;
+	: ~(','|'a'|'i'|'m'|'n'|'p'|'s'|'t'|'w'|'x'|'A'|'I'|'M'|'N'|'P'|'S'|'T'|'W'|'X'|'0'..'9'|'+'|'-'|':'|'/'|'%')  (~ ' ')*  ;
 	
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
