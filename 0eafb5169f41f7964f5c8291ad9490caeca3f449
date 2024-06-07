@@ -16,6 +16,24 @@
       "message": "There is a rebase conflict with master, that needs to be solved.",
       "revId": "0eafb5169f41f7964f5c8291ad9490caeca3f449",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7978fc08_d227ef49",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-06-07T13:25:16Z",
+      "side": 1,
+      "message": "Unsolved.",
+      "parentUuid": "cca5519f_91863b45",
+      "revId": "0eafb5169f41f7964f5c8291ad9490caeca3f449",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
