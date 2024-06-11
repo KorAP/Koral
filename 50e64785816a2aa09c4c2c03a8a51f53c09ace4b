@@ -236,6 +236,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "14e1a29a_3803a9fe",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/Cosmas2QueryProcessor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2024-06-11T07:32:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ede4ad03_b17c0c89",
+      "range": {
+        "startLine": 181,
+        "startChar": 74,
+        "endLine": 181,
+        "endChar": 112
+      },
+      "revId": "50e64785816a2aa09c4c2c03a8a51f53c09ace4b",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "531f07bd_ec23ad43",
