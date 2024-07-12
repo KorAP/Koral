@@ -1,3 +1,6 @@
+0.44 2024-07-12
+    - [security] Dependencies updated
+
 0.43 2024-06-11
     - [feature] Support opProx in C2 (bodmer)
 
