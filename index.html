@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KoralQuery 0.5.6</title>
+    <title>KoralQuery 0.5.7</title>
     <link rel="stylesheet" href="misc/font/koral-fontello.css">
     <!--[if IE 7]><link rel="stylesheet" href="misc/font/koral-fontello-ie7.css"><![endif]-->
     <link rel="stylesheet" href="misc/style.css" type="text/css" />
@@ -33,7 +33,7 @@
           <span class="p-org">IDS</span>,
           <span class="p-locality">Mannheim</span></p>
         <p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-        <p>Last update: <time class="dt-updated" datetime="2022-02-21">2022/02/21</time></p>
+        <p>Last update: <time class="dt-updated" datetime="2022-02-21">2024/09/27</time></p>
       </div>
       
       <summary>
@@ -43,7 +43,7 @@
           Support for a growing number of query languages is granted by the <a href="#sec-implementations">Koral</a> serialization processor.</p>
         <pre>{
   "@context" : "http://korap.ids-mannheim.de/ns/koral/0.5/context.jsonld",
-  "collection" : { ... },
+  "corpus" : { ... },
   "query" : { ... },
   "meta" : { ... }
 }</pre>
@@ -174,7 +174,7 @@
           <p>A KoralQuery can be limited to a subset of documents of a corpus.
             The collection can be defined by criteria, documents have to satisfy.
             The collection has to be defined on the top level object with the attribute
-            <code class="att">collection</code>.
+            <code class="att">corpus</code> or <code class="att">collection</code>.
             A single criterion is defined by a <a href="#koral-doc">koral:doc</a>
             object. Multiple criteria can be further constrained using
             <a href="#koral-docGroup">koral:docGroup</a> objects.</p>
@@ -182,9 +182,11 @@
             that meet the conditions formulated by the collection criteria
             and group constraints.</p>
 
+          <p style="color:red"><code class="att">collection</code> will be renamed to <code class="att">corpus</code> in future versions of this specification. Implementations should support both attributes with <code class="att">corpus</code> being the prefered variant.</p>
+
           <pre>{
   "@context" : "http://korap.ids-mannheim.de/ns/koral/0.5/context.jsonld",
-  "collection" : {
+  "corpus" : {
     "@type":"koral:docGroup",
     "operation":"operation:and",
     "operands":[{
@@ -1484,7 +1486,7 @@ match:leq
           <p>The response to a KoralQuery match request
             (in contrast to, for example, a request for statistic information, currently out of scope of this document)
             is a collection of documents,
-            satisfying the defined document query in the <code>collection</code>,
+            satisfying the defined document query in the <code>corpus</code> or <code>collection</code>,
             the defined span query in <code>query</code>,
             and all supported result modifying constraints in <code>meta</code>.
             In case no <code>query</code> is defined,
@@ -1494,9 +1496,12 @@ match:leq
             In case a span query is defined, at the total number of matches
             per document is returned (see <a href="#appendix-meta"><code>totalResults</code></a>).--></p>
 
+          <p style="color:red"><code class="att">collection</code> will be renamed to <code class="att">corpus</code> in future versions of this specification. Implementations should support both attributes with <code class="att">corpus</code> being the prefered variant.</p>
+
+          
           <pre>{
   "@context" : "http://korap.ids-mannheim.de/ns/koral/0.5/context.jsonld",
-  "collection" : { ... },
+  "corpus" : { ... },
   "query" : { ... },
   "result" : {
     "@type" : "koral:result",
@@ -1863,8 +1868,9 @@ match:leq
           </table>
 
           <p><code>count</code> should be used for requests as well as for responses of query processors. Similar implementations have a different key for requests, using <code>itemsPerPage</code>. We recommend using the rewrite mechanisms of KoralQuery to report on difference between request and response vounts.</p>
-          <p><code>totalResults</code> should reflect occurrences of the <code>query</code> structure in all documents of <code>collection</code>. This is <strong>not necessarily</strong> the base for paging, as the base of paging may be documents, corpora etc. instead. The value <code>0</code> indicates that there was no match. A negative value may indicate that the total number of results is not known, not reportable etc. Further parameters may alter the interpretation of totalResults, e.g. to say the value is only approximated or there are at least these numbers of matches.</p>
+          <p><code>totalResults</code> should reflect occurrences of the <code>query</code> structure in all documents of <code>corpus</code> or <code>collection</code>. This is <strong>not necessarily</strong> the base for paging, as the base of paging may be documents, corpora etc. instead. The value <code>0</code> indicates that there was no match. A negative value may indicate that the total number of results is not known, not reportable etc. Further parameters may alter the interpretation of totalResults, e.g. to say the value is only approximated or there are at least these numbers of matches.</p>
 
+          <p style="color:red"><code class="att">collection</code> will be renamed to <code class="att">corpus</code> in future versions of this specification. Implementations should support both attributes with <code class="att">corpus</code> being the prefered variant.</p>
 
           <h3><a id="appendix-regex" name="appendix-regex">Regular Expressions</a></h3>
           <p>The definition of the supported regular expressions is out of scope of this specification and depends on the implementation.</p>
@@ -1980,6 +1986,9 @@ match:leq
       <div class="changes">
         <pre>
 CHANGES:
+0.5.7 2024-09-27
+- Prefer 'corpus' over 'collection'.
+
 0.5.6 2022-02-21
 - Introduced print stylesheet
 
