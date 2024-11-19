@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KoralQuery 0.5.7</title>
+    <title>KoralQuery 0.5.8</title>
     <link rel="stylesheet" href="misc/font/koral-fontello.css">
     <!--[if IE 7]><link rel="stylesheet" href="misc/font/koral-fontello-ie7.css"><![endif]-->
     <link rel="stylesheet" href="misc/style.css" type="text/css" />
@@ -33,7 +33,7 @@
           <span class="p-org">IDS</span>,
           <span class="p-locality">Mannheim</span></p>
         <p>Published: <time class="dt-published" datetime="2015-03-16">2015/03/16</time></p>
-        <p>Last update: <time class="dt-updated" datetime="2022-02-21">2024/09/27</time></p>
+        <p>Last update: <time class="dt-updated" datetime="2024-11-19">2024/11/19</time></p>
       </div>
       
       <summary>
@@ -1438,7 +1438,7 @@ match:leq
 {
   "@type" : "koral:rewrite",
   "operation" : "operation:injection",
-  "src" : "Kustvakt"
+  "origin" : "Kustvakt"
 }</pre>
           <table class="koral-type">
             <thead>
@@ -1463,7 +1463,7 @@ match:leq
                 <td>Specifies the performed rewrite action.</td>
               </tr>
               <tr>
-                <td>src</td>
+                <td>origin</td>
                 <td>xsd:string</td>
                 <td></td>
                 <td>Specifies the component responsible for the rewrite</td>
@@ -1476,6 +1476,13 @@ match:leq
               </tr>
             </tbody>
           </table>
+
+
+          <p style="color:red"><code class="att">origin</code> was previously named
+            <code class="att">src</code>. For improved compatibility, a
+            KoralQuery consumption service may accept both variants and
+            a KoralQuery generation service may generate both variants.</p>
+
         </section>
 
         
@@ -1986,6 +1993,9 @@ match:leq
       <div class="changes">
         <pre>
 CHANGES:
+0.5.8 2024-11-19
+- Prefer 'origin' over 'src' in rewrites.
+
 0.5.7 2024-09-27
 - Prefer 'corpus' over 'collection'.
 
