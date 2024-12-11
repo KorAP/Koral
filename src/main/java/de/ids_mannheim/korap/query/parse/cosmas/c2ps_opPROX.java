@@ -18,145 +18,6 @@ public class c2ps_opPROX
 	final static boolean 
 		bDebug = false;
 	
-	public static final int MLANG_ENGLISH = 0;
-	public static final int MLANG_GERMAN  = 1;
-	
-	public static int
-		messLang = MLANG_ENGLISH; // default.
-	
-	// type of an Error CommonToken:
-	final static int 
-		typeERROR = 1; 
-	
-	// Prox error codes defined in StatusCodes.java.
-	
-	private static String getErrMessEN(int errCode, String text)
-	
-	{
-	switch( errCode )
-		{
-	case StatusCodes.ERR_PROX_MEAS_NULL:
-		return String.format("Proximity operator at '%s': one of the following prox. types is missing: w,s,p!", text);
-
-	case StatusCodes.ERR_PROX_MEAS_TOOGREAT:
-		return String.format("Proximity operator at '%s': Please, specify only 1 of the following prox. types: w,s,p! " +
-							 "It is possible to specify several at once by separating them with a ','. E.g.: ' /+w2,s2,p0 '.", text);
-		
-	case StatusCodes.ERR_PROX_VAL_NULL:
-		return String.format("Proximity operator at '%s': please specify a numerical value for the distance. E.g. ' /+w5 '.", text);
-		
-	case StatusCodes.ERR_PROX_VAL_TOOGREAT:
-		return String.format("Proximity operator at '%s': please specify only 1 distance value. E.g. ' /+w5 '.", text);
-		
-	case StatusCodes.ERR_PROX_DIR_TOOGREAT:
-		return String.format("Proximity operator at '%s': please specify either '+' or '-' or none of them for the direction.", text);
-		
-	case StatusCodes.ERR_PROX_WRONG_CHARS:
-		return String.format("Proximity operator at '%s': unknown proximity options!", text);
-		
-	case StatusCodes.UNKNOWN_QUERY_ERROR:
-		return String.format("Unknown error!");
-		
-	default:
-		return String.format("Proximity operator at '%s': unknown error. The correct syntax looks like this: E.g. ' /+w2 ' or ' /w10,s0 '.", text);
-		}	
-	}
-	
-	private static String getErrMessGE(int errCode, String text)
-
-	{
-	switch( errCode )
-		{
-	case StatusCodes.ERR_PROX_MEAS_NULL:
-		return String.format("Abstandsoperator an der Stelle '%s': es fehlt eine der folgenden Angaben: w,s,p!", text);
-		
-	case StatusCodes.ERR_PROX_MEAS_TOOGREAT:
-		return String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 der folgenden Angaben einsetzen: w,s,p! " +
-							 "Falls Mehrfachangabe erwünscht, müssen diese durch Kommata getrennt werden (z.B.: ' /+w2,s2,p0 ').", text);
-		
-	case StatusCodes.ERR_PROX_VAL_NULL:
-		return String.format("Abstandsoperator an der Stelle '%s': Bitte einen numerischen Wert einsetzen (z.B. ' /+w5 ')! ", text);
-		
-	case StatusCodes.ERR_PROX_VAL_TOOGREAT:
-		return String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 numerischen Wert einsetzen (z.B. ' /+w5 ')! ", text);
-		
-	case StatusCodes.ERR_PROX_DIR_TOOGREAT:
-		return String.format("Abstandsoperator an der Stelle '%s': Bitte nur 1 Angabe '+' oder '-' oder keine! ", text);
-		
-	case StatusCodes.ERR_PROX_WRONG_CHARS:
-		return String.format("Abstandsoperator an der Stelle '%s': unbekannte Abstandsoption(en)!", text);
-		
-	case StatusCodes.UNKNOWN_QUERY_ERROR:
-		return String.format("Unbekannter Fehler!");
-		
-	default:
-		return String.format("Abstandsoperator an der Stelle '%s': unbekannter Fehler. Korrekte Syntax z.B.: ' /+w2 ' oder ' /w10,s0 '.", text);
-		}
-	}
-	
-	private static String getErrMess(int errCode, int messLang, String text)
-	
-	{
-	if( messLang == c2ps_opPROX.MLANG_GERMAN )
-		return getErrMessGE(errCode, text);
-	else
-		return getErrMessEN(errCode, text);	
-	}
-
-
-	/**
-	 * in this version, the pre-stored message language is used.
-	 * @param errCode
-	 * @param text
-	 * @return
-	 * 10.06.24/FB
-	 */
-	
-	public static String getErrMess(int errCode, String text)
-	
-	{
-	if( messLang == c2ps_opPROX.MLANG_GERMAN )
-		return getErrMessGE(errCode, text);
-	else
-		return getErrMessEN(errCode, text);	
-	}
-
-	/**
-	 * buildErrorTree(): 
-	 * @param text = part of the query that contains an error.
-	 * @param errCode
-	 * @param typeDIST
-	 * @param pos
-	 * @return
-	 */
-	
-	private static CommonTree buildErrorTree(String text, int errCode, int typeDIST, int pos) 
-	
-	{
-	CommonTree
-		errorTree = new CommonTree(new CommonToken(typeDIST, "DIST")); 
-	CommonTree
-		errorNode = new CommonTree(new CommonToken(typeERROR, "ERROR"));
-	CommonTree
-		errorPos  = new CommonTree(new CommonToken(typeERROR, String.valueOf(pos)));
-	CommonTree
-		errorCode = new CommonTree(new CommonToken(typeERROR, String.valueOf(errCode)));
-	CommonTree
-		errorMes;
-	String
-		mess;
-	
-	mess 	 = getErrMess(errCode, messLang, text);
-	errorMes = new CommonTree(new CommonToken(typeERROR, mess));
-	
-	errorTree.addChild(errorNode);
-	errorNode.addChild(errorPos);
-	errorNode.addChild(errorCode);
-	errorNode.addChild(errorMes);
-
-	return errorTree;
-	}
-
 	/* encodeDIST():
 	 * - returns a CommonTree built from the Direction/Measure/Distance value.
 	 * - accepts options in any order.
@@ -183,17 +44,17 @@ public class c2ps_opPROX
 		CommonTree tree3 = (CommonTree)ctVal;
 		
 		if( bDebug )
-			System.err.printf("Debug: encodeDIST: scanned input='%s' countM=%d countD=%d countV=%d pos=%d.\n", 
+			System.out.printf("Debug: encodeDIST: scanned input='%s' countM=%d countD=%d countV=%d pos=%d.\n", 
 					text, countM, countD, countV, pos);
 
 		if( countM == 0 )
-			return buildErrorTree(text, StatusCodes.ERR_PROX_MEAS_NULL, typeDIST, pos);
+			return StatusCodes.buildErrorTree(text, StatusCodes.ERR_PROX_MEAS_NULL, pos);
 		if( countM > 1 )
-			return buildErrorTree(text, StatusCodes.ERR_PROX_MEAS_TOOGREAT, typeDIST, pos);
+			return StatusCodes.buildErrorTree(text, StatusCodes.ERR_PROX_MEAS_TOOGREAT, pos);
 		if( countV == 0 )
-			return buildErrorTree(text, StatusCodes.ERR_PROX_VAL_NULL, typeDIST, pos);
+			return StatusCodes.buildErrorTree(text, StatusCodes.ERR_PROX_VAL_NULL, pos);
 		if( countV > 1 )
-			return buildErrorTree(text, StatusCodes.ERR_PROX_VAL_TOOGREAT, typeDIST, pos);
+			return StatusCodes.buildErrorTree(text, StatusCodes.ERR_PROX_VAL_TOOGREAT, pos);
 		
 		if( countD == 0 )
 			{
@@ -203,11 +64,11 @@ public class c2ps_opPROX
 			treeDIR.addChild(treeBOTH);
 			
 			if( bDebug )
-				System.err.printf("Debug: encodeDIST: tree for DIR: '%s'.\n", treeDIR.toStringTree());
+				System.out.printf("Debug: encodeDIST: tree for DIR: '%s'.\n", treeDIR.toStringTree());
 			tree1 = treeDIR;
 			}
 		else if( countD > 1 )
-			return buildErrorTree(text, StatusCodes.ERR_PROX_DIR_TOOGREAT, typeDIST, pos);
+			return StatusCodes.buildErrorTree(text, StatusCodes.ERR_PROX_DIR_TOOGREAT, pos);
 	
 		// create DIST tree:
 		CommonTree 
@@ -218,7 +79,7 @@ public class c2ps_opPROX
 		tree.addChild(tree2);
 		
 		if( bDebug )
-			System.err.printf("Debug: encodeDIST: returning '%s'.\n", tree.toStringTree());
+			System.out.printf("Debug: encodeDIST: returning '%s'.\n", tree.toStringTree());
 		
 		return tree;
 	} // encodeDIST
@@ -236,7 +97,7 @@ public class c2ps_opPROX
 		if( bDebug )
 			System.out.printf("Debug: checkRemain: '%s' at pos %d.\n", proxRemain, pos);
 		
-		return buildErrorTree(proxRemain, StatusCodes.ERR_PROX_WRONG_CHARS, typeDIST, pos);
+		return StatusCodes.buildErrorTree(proxRemain, StatusCodes.ERR_PROX_WRONG_CHARS, pos);
 	}
 	
 	public static Tree check (String input, int pos) throws RecognitionException

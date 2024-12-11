@@ -47,14 +47,14 @@ WS	:	(' ')+ {skip();};
 //
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  
-searchWFs
-	:	searchWF+;
+searchWFs[int pos]
+	:	searchWF[pos]+;
 	
-searchWF:	optCase? wordform tpos?
+searchWF[int pos] :	optCase? wordform[OPWF,pos] tpos?
 
 		-> ^(OPWF wordform optCase? tpos? ) ;
 
-wordform:	WF -> {c2ps_opWF.encode($WF.text, OPWF)};
+wordform[int type, int pos]:	WF -> {c2ps_opWF.encode($WF.text, $type, $pos)};
 
 // Case Options:
 optCase	:	Case 
@@ -67,8 +67,8 @@ tpos	:	TPos
 		-> ^(TPOS {c2ps_opBED.checkTPos($TPos.text, $TPos.index)});
 
 // analog für Lemmata, kein optCase:
-searchLEM
-	:	wordform tpos?
-	
-		-> ^(OPLEM wordform tpos?);
-		
+// todo: check wordform (=lemma) for wildcards, which are not allowed in the lemma expr.
+
+searchLEM[int pos]
+   : wordform[OPLEM,pos] tpos?
+   -> ^(OPLEM wordform tpos?);

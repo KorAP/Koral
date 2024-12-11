@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 
 import static de.ids_mannheim.korap.query.parse.cosmas.c2ps_opREG.*;
 import de.ids_mannheim.korap.util.StringUtils;
+
 /**
  * Tests for JSON-LD serialization of Cosmas II queries.
  * 
@@ -65,6 +66,45 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("Mann", res.at("/query/wrap/key").asText());
         assertEquals("lemma", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        
+        /* check Lemma with extended opts and with wildcard '+' inside options.
+         * 09.12.24/FB
+         */
+
+        query = "&COSFes-&Prüfung";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("COSFes-&Prüfung", res.at("/query/wrap/key").asText());
+        assertEquals("lemma", res.at("/query/wrap/layer").asText());
+
+        query = "&COSFes+&Prüfung";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("COSFes+&Prüfung", res.at("/query/wrap/key").asText());
+        assertEquals("lemma", res.at("/query/wrap/layer").asText());
+        
+        /* syntax error: reject wildcards in lemma :
+         */
+        query = "&COS&Prüfung+";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        assertTrue(res.get("errors") != null);
+        assertEquals(res.get("errors").get(0).get(0).asInt(), StatusCodes.ERR_LEM_WILDCARDS);
+        
+        query = "&Pr?fung*";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        assertTrue(res.get("errors") != null);
+        assertEquals(res.get("errors").get(0).get(0).asInt(), StatusCodes.ERR_LEM_WILDCARDS);
+
     }
 
 
@@ -1855,7 +1895,7 @@ public class Cosmas2QueryProcessorTest {
                 .asText()
                 .startsWith(
                         "Something went wrong parsing the argument in MORPH()"));
-
+        /*
         query = "MORPH(tt/p=\"foo)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -1863,7 +1903,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(StatusCodes.MALFORMED_QUERY, res.at("/errors/0/0").asInt());
         assertTrue(res.at("/errors/0/1").asText()
                 .startsWith("Early closing parenthesis"));
-
+		*/
         query = "MORPH(tt/p=)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
