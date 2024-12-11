@@ -14,7 +14,11 @@
 //    - more generally: comma at end of searchword, which is not enclosed by "..." is
 //      excluded from searchword now.
 //    - a comma inside a searchword is accepted if enclosed by "...".
-//
+//  10.12.24/FB
+//    - reject wildcards [?*+] in lemma search expression, as regex/wildcards are not allowed
+//      in &opts&lemma, but instead they may appear as options in 'opts'.
+//      E.g. &F+&Prüfung -> lemma with F+ as an option.
+//    - test added for F+.
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 grammar c2ps;
@@ -236,8 +240,8 @@ searchExpr
 		-> $se1+ ;
 
 searchExpr1
-	:	op1 		   -> {$op1.tree}
-	| 	searchWord 	   -> {$searchWord.tree}
+	:	op1 			   -> {$op1.tree}
+	| 	searchWord 		   -> {$searchWord.tree}
 	| 	searchLemma 	   -> {$searchLemma.tree}
 	| 	searchAnnot 	   -> {$searchAnnot.tree}
 	| 	searchLabel        -> {$searchLabel.tree}
@@ -250,13 +254,13 @@ searchWord
 	:	word1
 	|	word2;
 
-word1	:	SEARCHWORD1 -> {c2ps_opWF.check($SEARCHWORD1.text, false, false, $SEARCHWORD1.index)} ; 
+word1	:	SEARCHWORD1 -> {c2ps_opWF.check($SEARCHWORD1.text, false, false, $SEARCHWORD1.pos)} ; 
 
-word2	:	SEARCHWORD2 -> {c2ps_opWF.check($SEARCHWORD2.text, true, false, $SEARCHWORD2.index)} ;
+word2	:	SEARCHWORD2 -> {c2ps_opWF.check($SEARCHWORD2.text, true, false, $SEARCHWORD2.pos)} ;
 	
 // Suchbegriff = Lemma:
 searchLemma
-	:	SEARCHLEMMA -> {c2ps_opWF.check($SEARCHLEMMA.text, false, true, $SEARCHLEMMA.index)} ; 
+	:	SEARCHLEMMA -> {c2ps_opWF.check($SEARCHLEMMA.text, false, true, $SEARCHLEMMA.pos)} ; 
 
 // Suchbegriff = Annotationsoperator:
 // (damit Lexer den richtige Token erzeugt, muss OP_ELEM den gesamten

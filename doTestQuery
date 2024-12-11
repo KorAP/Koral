@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+# Calling Koral to test the tranlation from c2 queries to KoralQueries.
+# 06.12.24/FB
+
+# current Koral lib:
+KJAR=./target/Koral-0.44.0.jar
+# Calling that main class:
+MCL=de.ids_mannheim.korap.query.serialize.QuerySerializer
+# Query Language:
+QL="cosmas2"
+
+Query="&Fes-&Mann"
+#Query="&Mann+"
+#Query="ab /s &Mann"
+#Query="&Manno*"
+
+echo -e "Query = '$Query' in QL='$QL'..."
+
+#java -jar $KJAR $MCL "$Query" $QL -show
+
+java -jar $KJAR "$Query" $QL -show
