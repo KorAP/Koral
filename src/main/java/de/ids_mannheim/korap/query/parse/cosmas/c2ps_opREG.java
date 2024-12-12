@@ -27,7 +27,7 @@ import de.ids_mannheim.korap.util.StringUtils;
 public class c2ps_opREG
 
 {
-	private static boolean DEBUG = false;
+	private static boolean DEBUG = true;
 
 	/* 
 	 * encode():

@@ -47,11 +47,13 @@ import java.util.regex.Pattern;
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static Logger log =
             LoggerFactory.getLogger(Cosmas2QueryProcessor.class);
 
+    private static final int messLang = c2ps_opPROX.MLANG_GERMAN;
+    
     private LinkedList<Map<String, Object>[]> toWrapStack =
             new LinkedList<Map<String, Object>[]>();
     /**
@@ -151,16 +153,15 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private boolean reportErrorsinTree(Tree node)
     
     {
-    	// not used when not debugging: final String func = "reportErrorsinTree";
+    	// not used when not debugging: 
+    	final String func = "reportErrorsinTree";
     	
-    	//System.err.printf("Debug: %s: '%s' has %d children.\n",
-    	//		func, node.getText(), node.getChildCount());
-    	if( node == null )
+     	if( node == null )
     		{
     		// System.err.printf("Warning: %s: node == null: no action requested.\n", func);
     		return false;
     		}
-    	
+ 
     	if( node.getType() == 1 && node.getText().compareTo("ERROR") == 0 )
 	    	{
 	    	// error node found:
@@ -179,7 +180,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     		int
     			errCode = node.getChild(1) != null ? Integer.parseInt(node.getChild(1).getText()) : StatusCodes.ERR_PROX_UNKNOWN; 
     		String
-    			errMess = node.getChild(2) != null ? node.getChild(2).getText() : c2ps_opPROX.getErrMess(StatusCodes.UNKNOWN_QUERY_ERROR, "");
+    			errMess = node.getChild(2) != null ? node.getChild(2).getText() : c2ps_opPROX.getErrMess(StatusCodes.UNKNOWN_QUERY_ERROR, messLang, "");
     			
 			ArrayList<Object> 
 				errorSpecs = new ArrayList<Object>();
@@ -244,12 +245,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     @Override
     public void process (String query) {
         Tree tree = null;
-        tree = parseCosmasQuery(query);
+        
         if (DEBUG) 
-        	{ 
-        	System.out.printf("\nProcessing COSMAS II query: %s.\n\n", query);
-            log.debug("Processing CosmasII query: " + query);
-        	}
+	    	{ 
+	    	System.out.printf("\nProcessing COSMAS II query: %s.\n\n", query);
+	        log.debug("Processing CosmasII query: " + query);
+	    	}
+	        
+        tree = parseCosmasQuery(query);
         
         if (tree != null) 
         	{
@@ -1170,10 +1173,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     /**
      * Nodes introducing tokens. Process all in the same manner,
      * except for the fieldMap entry
-     * 
+     * 09.12.24/FB
+     *  - do not search for wildcards [+*?] in &opts&lemma expressions, as they are not allowed there.
+     *  - but lemma options may contain e.g. '+', e.g. '&Fes+&Prüfung', so do not replace this one.
      * @param node
      */
-    private void processOPWF_OPLEM (Tree node) {
+    
+    private void processOPWF_OPLEM (Tree node) 
+    {
         String nodeCat = getNodeCat(node);
         // Step I: get info
         Map<String, Object> token = KoralObjectGenerator.makeToken();
@@ -1186,37 +1193,42 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         String value = node.getChild(0).toStringTree().replaceAll("\"", "");
         // check for wildcard string
 
-        // http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/platzhalter.html
-        boolean isFound = false;
-        Matcher m = wildcardStarPattern.matcher(value);
-        if (m.find()) {
-            isFound = true;
-            value = m.replaceAll(".$1");
+        // check for wildcards in OPWF only.
+        if( nodeCat.equals("OPWF") )
+        {
+        	// http://www.ids-mannheim.de/cosmas2/web-app/hilfe/suchanfrage/eingabe-zeile/syntax/platzhalter.html
+	        boolean isFound = false;
+	        Matcher m = wildcardStarPattern.matcher(value);
+	        if (m.find()) {
+	            isFound = true;
+	            value = m.replaceAll(".$1");
+	        }
+	        m.reset();
+	        m = wildcardQuestionPattern.matcher(value);
+	        if (m.find()) {
+	            isFound = true;
+	            value = m.replaceAll(".");
+	        }
+	        m.reset();
+	        m = wildcardPlusPattern.matcher(value);
+	        if (m.find()) {
+	            isFound = true;
+	            value = m.replaceAll(".?");
+	        }
+	
+	        if (isFound) {
+	            fieldMap.put("type", "type:regex");
+	        }
+	
+	        if (value.startsWith("$")) {
+	            value = value.substring(1);
+	            ArrayList<String> flags = new ArrayList<String>();
+	            flags.add("flags:caseInsensitive");
+	            fieldMap.put("flags", flags);
+	        }
         }
-        m.reset();
-        m = wildcardQuestionPattern.matcher(value);
-        if (m.find()) {
-            isFound = true;
-            value = m.replaceAll(".");
-        }
-        m.reset();
-        m = wildcardPlusPattern.matcher(value);
-        if (m.find()) {
-            isFound = true;
-            value = m.replaceAll(".?");
-        }
-
-        if (isFound) {
-            fieldMap.put("type", "type:regex");
-        }
-
-        if (value.startsWith("$")) {
-            value = value.substring(1);
-            ArrayList<String> flags = new ArrayList<String>();
-            flags.add("flags:caseInsensitive");
-            fieldMap.put("flags", flags);
-        }
-
+	    
+        // OPWF and OPLEM:
         fieldMap.put("key", value);
         fieldMap.put("layer", attr);
 

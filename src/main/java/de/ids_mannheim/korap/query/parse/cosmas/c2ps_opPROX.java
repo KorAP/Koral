@@ -22,7 +22,7 @@ public class c2ps_opPROX
 	public static final int MLANG_GERMAN  = 1;
 	
 	public static int
-		messLang = MLANG_ENGLISH; // default.
+		messLang = MLANG_GERMAN; // default.
 	
 	// type of an Error CommonToken:
 	final static int 
@@ -53,9 +53,9 @@ public class c2ps_opPROX
 		
 	case StatusCodes.ERR_PROX_WRONG_CHARS:
 		return String.format("Proximity operator at '%s': unknown proximity options!", text);
-		
-	case StatusCodes.UNKNOWN_QUERY_ERROR:
-		return String.format("Unknown error!");
+
+	case StatusCodes.ERR_LEM_WILDCARDS:
+		return String.format("Lemma operator at '%s': wildcards (?*+) are not allowed inside a lemma.", text);
 		
 	default:
 		return String.format("Proximity operator at '%s': unknown error. The correct syntax looks like this: E.g. ' /+w2 ' or ' /w10,s0 '.", text);
@@ -86,33 +86,15 @@ public class c2ps_opPROX
 	case StatusCodes.ERR_PROX_WRONG_CHARS:
 		return String.format("Abstandsoperator an der Stelle '%s': unbekannte Abstandsoption(en)!", text);
 		
-	case StatusCodes.UNKNOWN_QUERY_ERROR:
-		return String.format("Unbekannter Fehler!");
+	case StatusCodes.ERR_LEM_WILDCARDS:
+		return String.format("Lemma-Suchbegriff an der Stelle '%s': Platzhalter (?*+) können im gesuchten Lemma nicht eingesetzt werden.", text);
 		
 	default:
 		return String.format("Abstandsoperator an der Stelle '%s': unbekannter Fehler. Korrekte Syntax z.B.: ' /+w2 ' oder ' /w10,s0 '.", text);
 		}
 	}
 	
-	private static String getErrMess(int errCode, int messLang, String text)
-	
-	{
-	if( messLang == c2ps_opPROX.MLANG_GERMAN )
-		return getErrMessGE(errCode, text);
-	else
-		return getErrMessEN(errCode, text);	
-	}
-
-
-	/**
-	 * in this version, the pre-stored message language is used.
-	 * @param errCode
-	 * @param text
-	 * @return
-	 * 10.06.24/FB
-	 */
-	
-	public static String getErrMess(int errCode, String text)
+	public static String getErrMess(int errCode, int messLang, String text)
 	
 	{
 	if( messLang == c2ps_opPROX.MLANG_GERMAN )
@@ -183,7 +165,7 @@ public class c2ps_opPROX
 		CommonTree tree3 = (CommonTree)ctVal;
 		
 		if( bDebug )
-			System.err.printf("Debug: encodeDIST: scanned input='%s' countM=%d countD=%d countV=%d pos=%d.\n", 
+			System.out.printf("Debug: encodeDIST: scanned input='%s' countM=%d countD=%d countV=%d pos=%d.\n", 
 					text, countM, countD, countV, pos);
 
 		if( countM == 0 )
@@ -203,7 +185,7 @@ public class c2ps_opPROX
 			treeDIR.addChild(treeBOTH);
 			
 			if( bDebug )
-				System.err.printf("Debug: encodeDIST: tree for DIR: '%s'.\n", treeDIR.toStringTree());
+				System.out.printf("Debug: encodeDIST: tree for DIR: '%s'.\n", treeDIR.toStringTree());
 			tree1 = treeDIR;
 			}
 		else if( countD > 1 )
@@ -218,7 +200,7 @@ public class c2ps_opPROX
 		tree.addChild(tree2);
 		
 		if( bDebug )
-			System.err.printf("Debug: encodeDIST: returning '%s'.\n", tree.toStringTree());
+			System.out.printf("Debug: encodeDIST: returning '%s'.\n", tree.toStringTree());
 		
 		return tree;
 	} // encodeDIST

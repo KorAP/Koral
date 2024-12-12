@@ -23,4 +23,7 @@ public class StatusCodes {
 	public final static int ERR_PROX_VAL_TOOGREAT 	= 324;
 	public final static int ERR_PROX_DIR_TOOGREAT 	= 325;
 	public final static int ERR_PROX_WRONG_CHARS	= 326;
+	
+	// error codes for WF and LEM syntax/semantic errors:
+	public final static int ERR_LEM_WILDCARDS		= 350;
 }
