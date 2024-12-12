@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 
 import static de.ids_mannheim.korap.query.parse.cosmas.c2ps_opREG.*;
 import de.ids_mannheim.korap.util.StringUtils;
+
 /**
  * Tests for JSON-LD serialization of Cosmas II queries.
  * 
@@ -87,6 +88,23 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:term", res.at("/query/wrap/@type").asText());
         assertEquals("COSFes+&Prüfung", res.at("/query/wrap/key").asText());
         assertEquals("lemma", res.at("/query/wrap/layer").asText());
+        
+        /* syntax error: reject wildcards in lemma :
+         */
+        query = "&COS&Prüfung+";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        assertTrue(res.get("errors") != null);
+        assertEquals(res.get("errors").get(0).get(0).asInt(), StatusCodes.ERR_LEM_WILDCARDS);
+        
+        query = "&Pr?fung*";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        assertTrue(res.get("errors") != null);
+        assertEquals(res.get("errors").get(0).get(0).asInt(), StatusCodes.ERR_LEM_WILDCARDS);
+
     }
 
 

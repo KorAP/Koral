@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static Logger log =
             LoggerFactory.getLogger(Cosmas2QueryProcessor.class);
