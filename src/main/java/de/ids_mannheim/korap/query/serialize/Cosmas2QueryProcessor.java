@@ -1,6 +1,6 @@
 package de.ids_mannheim.korap.query.serialize;
 
-import de.ids_mannheim.korap.query.parse.cosmas.c2ps_opPROX; // error codes.
+//import de.ids_mannheim.korap.query.parse.cosmas.c2ps_opPROX; // error codes.
 import de.ids_mannheim.korap.query.object.ClassRefCheck;
 import de.ids_mannheim.korap.query.object.ClassRefOp;
 import de.ids_mannheim.korap.query.object.CosmasPosition;
@@ -52,7 +52,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private static Logger log =
             LoggerFactory.getLogger(Cosmas2QueryProcessor.class);
 
-    private static final int messLang = c2ps_opPROX.MLANG_GERMAN;
+    private static final int messLang = StatusCodes.MLANG_GERMAN;
     
     private LinkedList<Map<String, Object>[]> toWrapStack =
             new LinkedList<Map<String, Object>[]>();
@@ -180,7 +180,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     		int
     			errCode = node.getChild(1) != null ? Integer.parseInt(node.getChild(1).getText()) : StatusCodes.ERR_PROX_UNKNOWN; 
     		String
-    			errMess = node.getChild(2) != null ? node.getChild(2).getText() : c2ps_opPROX.getErrMess(StatusCodes.UNKNOWN_QUERY_ERROR, messLang, "");
+    			errMess = node.getChild(2) != null ? node.getChild(2).getText() : StatusCodes.getErrMess(StatusCodes.UNKNOWN_QUERY_ERROR, messLang, "");
     			
 			ArrayList<Object> 
 				errorSpecs = new ArrayList<Object>();

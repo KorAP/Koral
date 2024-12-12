@@ -10,8 +10,8 @@ MCL=de.ids_mannheim.korap.query.serialize.QuerySerializer
 QL="cosmas2"
 
 Query="&Fes-&Mann"
-Query="&Mann+"
-Query="ab /s &Mann"
+#Query="&Mann+"
+#Query="ab /s &Mann"
 #Query="&Manno*"
 
 echo -e "Query = '$Query' in QL='$QL'..."
