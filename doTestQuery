@@ -11,8 +11,9 @@ QL="cosmas2"
 
 Query="&Fes-&Mann"
 Query="&Mann+"
-#Query="ab /s0 &?&+&*&Mann"
-  
+Query="ab /s &Mann"
+#Query="&Manno*"
+
 echo -e "Query = '$Query' in QL='$QL'..."
 
 #java -jar $KJAR $MCL "$Query" $QL -show

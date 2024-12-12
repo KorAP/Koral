@@ -15,7 +15,7 @@
 //      excluded from searchword now.
 //    - a comma inside a searchword is accepted if enclosed by "...".
 //  10.12.24/FB
-//    - skip wildcards [?*+] in lemma search expression, as regex/wildcards are not allowed
+//    - reject wildcards [?*+] in lemma search expression, as regex/wildcards are not allowed
 //      in &opts&lemma, but instead they may appear as options in 'opts'.
 //      E.g. &F+&Prüfung -> lemma with F+ as an option.
 //    - test added for F+.

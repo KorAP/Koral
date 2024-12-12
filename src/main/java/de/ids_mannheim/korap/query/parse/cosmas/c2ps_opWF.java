@@ -14,9 +14,10 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 public class c2ps_opWF
 
 {
-	//static final int OPWF  = 5; // must be same value than OPWF in c2ps_opWF.g
-	//static final int OPLEM = 7; // must be same value than OPLEM in c2ps_opWF.g
-    /* Arguments:
+	static final boolean bDebug = false; 
+
+    /* check:
+     * Arguments:
      * bStrip: true: 'input' contains "wort" -> strip " away -> wort.
      *        false: 'input' contains no " -> nothing to strip.
      * bLem: true: input contains a Lemma; generates tree ^(OPLEM...).
@@ -26,13 +27,6 @@ public class c2ps_opWF
 
     public static Tree check (String input, boolean bStrip, boolean bLem, int pos) 
     {
-    	if( bLem )
-    		{
-    		System.out.printf("c2ps_opWF.check: input='%s' bStrip=%b bLem=%b pos=%d.\n", 
-    				 input, bStrip, bLem, pos);
-    		System.out.flush();
-    		}
-    	
     	if (bStrip)
             input = input.substring(1, input.length() - 1);
 
@@ -66,7 +60,7 @@ public class c2ps_opWF
         // AST Tree anzeigen:
         Tree tree = bLem ? (Tree)c2PQLEMReturn.getTree() : (Tree)c2PQWFReturn.getTree();
         
-        if( bLem )
+        if( bDebug && bLem )
         	 {
         	 System.out.printf("c2ps_opWF.check: %s: '%s'.\n", bLem ? "opLEM" : "opWF", 
         			 tree.toStringTree() );
@@ -104,6 +98,8 @@ public class c2ps_opWF
                 sbWF.deleteCharAt(i);
         	}
         
+        // reject wildcards in lemmata:
+        
         if( tokenType == c2ps_opWFLexer.OPLEM )
         	{
         	boolean hasOpts  = false; // true if a '&' occurs: e.g. "Fes+C&lemma"
@@ -125,65 +121,17 @@ public class c2ps_opWF
         	// error if hasFound==true:
         	if( hasFound )
 	        	{
-        		System.out.printf("c2ps_opWF.encode: Syntax error: '%s' contains wildcards inside lemma expression!\n", wf);
-        		return buildErrorTree(wf, StatusCodes.ERR_LEM_WILDCARDS, pos);
+        		if( bDebug )
+        			System.out.printf("c2ps_opWF.encode: Syntax error: '%s' contains wildcards inside lemma expression!\n", wf);
+        		return StatusCodes.buildErrorTree(wf, StatusCodes.ERR_LEM_WILDCARDS, pos);
         		}
         	}
         
         return new CommonTree(new CommonToken(tokenType, "\"" + sbWF.toString() + "\""));
     }
-
-    /**
-	 * buildErrorTree(): 
-	 * @param text = part of the query that contains an error.
-	 * @param errCode
-	 * @param typeDIST
-	 * @param pos
-	 * @return
-	 */
-	
-	//private static CommonTree buildErrorTree(String text, int errCode, int typeDIST, int pos)
-    
-    private static CommonTree buildErrorTree(String text, int errCode, int pos)
-	{
-	/*
-	 CommonTree
-	//errorTree = new CommonTree(new CommonToken(typeDIST, "DIST"));
-	errorTree = new CommonTree(new CommonToken(c2ps_opPROX.typeERROR, "Fehlercherchen"));
-	*/
-	CommonTree
-		errorNode = new CommonTree(new CommonToken(c2ps_opPROX.typeERROR, "ERROR"));
-	CommonTree
-		errorPos  = new CommonTree(new CommonToken(c2ps_opPROX.typeERROR, String.valueOf(pos)));
-	CommonTree
-		errorCode = new CommonTree(new CommonToken(c2ps_opPROX.typeERROR, String.valueOf(errCode)));
-	CommonTree
-		errorMes;
-	String
-		mess;
-	
-	mess 	 = c2ps_opPROX.getErrMess(errCode, c2ps_opPROX.messLang, text);
-	errorMes = new CommonTree(new CommonToken(c2ps_opPROX.typeERROR, mess));
-	
-	// new:
-	errorNode.addChild(errorPos);
-	errorNode.addChild(errorCode);
-	errorNode.addChild(errorMes);
-	
-	return errorNode;
-	
-	/* old, no need for errorTree(typeXY).
-	errorTree.addChild(errorNode);
-	errorNode.addChild(errorPos);
-	errorNode.addChild(errorCode);
-	errorNode.addChild(errorMes);
-	
-	return errorTree;
-	*/
-	}
     
     /*
-     * main testprogram:
+     *                         main testprogram
      */
 
     public static void main (String args[]) throws Exception {
