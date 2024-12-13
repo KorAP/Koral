@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4211c1ff_0769fc40",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2024-12-13T14:45:50Z",
+      "side": 1,
+      "message": "Later, or immediately later after testing, we should make this part of the parser, but I\u0027d rather test it first like this. It makes no difference performance-wise and is not prone to errors.",
+      "revId": "b5e05d1b3f27f38862558523ed9ae2f6a99d5e77",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
