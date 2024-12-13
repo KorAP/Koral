@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "310b5065_283baa26",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2024-12-13T16:41:04Z",
+      "side": 1,
+      "message": "Requires also a little test change in kustvakt",
+      "revId": "20e8e892535f1bceea7159fcac0f0b15ca735e9f",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
