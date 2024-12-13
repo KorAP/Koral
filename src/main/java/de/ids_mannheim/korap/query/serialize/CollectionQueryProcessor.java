@@ -299,6 +299,9 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
      */
     private boolean checkOperatorValueConformance (
             Map<String, Object> term) {
+        if ((term.get("type") == null) && ((String) term.get("value")).matches("[0-9]+")) {
+            term.put("type", "type:integer");
+        }
         String match = (String) term.get("match");
         String type = (String) term.get("type");
         if (type == null || type.equals("type:regex")) {
