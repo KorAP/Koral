@@ -42,7 +42,7 @@
 		<jackson.version>2.18.2</jackson.version>
 		<antlr4.version>4.9.3</antlr4.version>
 		<antlr3.version>3.5.3</antlr3.version>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<log4j.version>2.24.2</log4j.version>
 	</properties>
 	
