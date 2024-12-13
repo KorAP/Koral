@@ -32,6 +32,7 @@
 /src/main/java/de/ids_mannheim/korap/query/parse/annis/AqlParserBaseListener.java
 
 # /src/main/java/de/ids_mannheim/korap/query/parse/collection/
+/src/main/antlr/collection/CollectionQueryLexer.tokens
 /src/main/java/de/ids_mannheim/korap/query/parse/collection/CollectionQueryBaseListener.java
 /src/main/java/de/ids_mannheim/korap/query/parse/collection/CollectionQuery.tokens
 /src/main/java/de/ids_mannheim/korap/query/parse/collection/CollectionQueryLexer.java
@@ -79,3 +80,4 @@
 /src/main/java/de/ids_mannheim/korap/query/serialize/SerializationSandbox.java
 /lib/
 /bin/
+/gen/
