@@ -672,6 +672,80 @@ public class CollectionQueryProcessorTest {
 
 
     @Test
+    public void testIntegerConstraints() throws IOException {
+        collection = "nTok != 200";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("nTok", res.at("/collection/key").asText());
+        assertEquals("200", res.at("/collection/value").asText());
+        assertEquals("type:integer", res.at("/collection/type").asText());
+        assertEquals("match:ne", res.at("/collection/match").asText());
+
+
+        collection = "nTok > 200";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("nTok", res.at("/collection/key").asText());
+        assertEquals("200", res.at("/collection/value").asText());
+        assertEquals("type:integer", res.at("/collection/type").asText());
+        assertEquals("match:gt", res.at("/collection/match").asText());
+
+        collection = "nTok != 2000";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("nTok", res.at("/collection/key").asText());
+        assertEquals("2000", res.at("/collection/value").asText());
+        assertEquals("type:integer", res.at("/collection/type").asText());
+        assertEquals("match:ne", res.at("/collection/match").asText());
+
+        collection = "nTok < 2000";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("nTok", res.at("/collection/key").asText());
+        assertEquals("2000", res.at("/collection/value").asText());
+        assertEquals("type:integer", res.at("/collection/type").asText());
+        assertEquals("match:lt", res.at("/collection/match").asText());
+
+        collection = "nTok = 2000";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("nTok", res.at("/collection/key").asText());
+        assertEquals("2000", res.at("/collection/value").asText());
+        assertEquals("type:integer", res.at("/collection/type").asText());
+        assertEquals("match:eq", res.at("/collection/match").asText());
+
+        collection = "nTok >= 2000";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("nTok", res.at("/collection/key").asText());
+        assertEquals("2000", res.at("/collection/value").asText());
+        assertEquals("type:integer", res.at("/collection/type").asText());
+        assertEquals("match:geq", res.at("/collection/match").asText());
+
+        collection = "nTok <= 2000";
+        qs.setQuery(query, ql);
+        qs.setCollection(collection);
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:doc", res.at("/collection/@type").asText());
+        assertEquals("nTok", res.at("/collection/key").asText());
+        assertEquals("2000", res.at("/collection/value").asText());
+        assertEquals("type:integer", res.at("/collection/type").asText());
+        assertEquals("match:leq", res.at("/collection/match").asText());
+    }
+
+    @Test
     public void testDateYear () throws JsonProcessingException, IOException {
         collection = "pubDate in 2000";
         qs.setQuery(query, ql);
