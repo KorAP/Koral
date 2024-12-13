@@ -134,7 +134,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             String match = operatorNode.getText();
             term.put("match", "match:" + interpretMatchOperator(match));
 
-            if (!checkOperatorValueConformance(term)) {
+            if (!inferValueTypeAndCheckOperatorConformance(term)) {
                 ArrayList<Object> errors = new ArrayList<>(3);
                 errors.add(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND);
                 errors.add("Operator "+match+" is not acceptable.");
@@ -168,7 +168,7 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
             term.putAll(parseValue(dateNode));
             String match = dateOpNode.getText();
             term.put("match", "match:" + interpretMatchOperator(match));
-            if (!checkOperatorValueConformance(term)) {
+            if (!inferValueTypeAndCheckOperatorConformance(term)) {
                 requestMap = new HashMap<String, Object>();
                 return;
             }
@@ -295,10 +295,13 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
 
     /**
      * Checks whether the combination of operator and value is legal
-     * (inequation operators <,>,<=,>= may only be used with dates).
+     * (inequation operators <,>,<=,>= may only be used with dates and integers).
      */
-    private boolean checkOperatorValueConformance (
+    private boolean inferValueTypeAndCheckOperatorConformance(
             Map<String, Object> term) {
+        if ((term.get("type") == null) && ((String) term.get("value")).matches("[0-9]+")) {
+            term.put("type", "type:integer");
+        }
         String match = (String) term.get("match");
         String type = (String) term.get("type");
         if (type == null || type.equals("type:regex")) {
