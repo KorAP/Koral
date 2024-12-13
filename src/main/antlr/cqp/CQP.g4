@@ -78,7 +78,7 @@ EMPTYREL	: '@'; //take care: two tokens, EMPTYREL and SPANCLAS_ID, matching the 
 BACKSLASH	: '\\';
 SQUOTE      : '\'';
 //in PQ+, DQUOTE was not defined
-DQUOTE: ('"'|'„'|'“'|'“'|'”');
+DQUOTE: ('"'|'„'|'“'|'”');
 
 
 /* Regular expressions and Regex queries */
