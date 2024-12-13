@@ -207,7 +207,6 @@
 					<!-- <verbose>true</verbose>
 		          	<fork>true</fork> -->
 		         	<!-- <executable>${env.JAVA7_HOME}/bin/javac</executable> -->
-					<compilerVersion>2.0</compilerVersion>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 				</configuration>
