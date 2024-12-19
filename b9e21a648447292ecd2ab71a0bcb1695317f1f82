@@ -39,6 +39,30 @@
       },
       "revId": "b9e21a648447292ecd2ab71a0bcb1695317f1f82",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "13d5744c_0a01d2bf",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CollectionQueryProcessor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2024-12-19T17:18:41Z",
+      "side": 1,
+      "message": "\u003e The code and the comment are not coherent. The operators should be used for dates, but the code checks for integer. \n\nDone. The comment is still a bit misleading, but that is not related to my change.\n\n\u003e The fail test is Kustvakt assumes that the operators should not be used for dates, but \"geq\", \"leq\", and \"since\" should be used instead.\n\nYes, but that is unrelated to my changes, I think. My changes allow for integer comparisons, currently needed in instance ked. The small price is that no errors are reported for self constructed URLs like https://korap.ids-mannheim.de/instance/ked?q\u003dTest\u0026cq\u003dpubDate+%3C\u003d+2024",
+      "parentUuid": "243302d7_fed1a28b",
+      "range": {
+        "startLine": 297,
+        "startChar": 5,
+        "endLine": 298,
+        "endChar": 68
+      },
+      "revId": "b9e21a648447292ecd2ab71a0bcb1695317f1f82",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
