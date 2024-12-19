@@ -16,6 +16,29 @@
       "message": "Don´t know if optimal, but works: \nhttps://korap.ids-mannheim.de/instance/ked/api/v1.0/search?q\u003dFreund\u0026cq\u003dKED.nToks%3E%3d%20200%20%26%20KED.nToks%3C%3d%202001\u0026ql\u003dpoliqarp\n\nSubmit together:\nhttps://korap.ids-mannheim.de/gerrit/q/topic:%22integer-cq%22",
       "revId": "b9e21a648447292ecd2ab71a0bcb1695317f1f82",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "243302d7_fed1a28b",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CollectionQueryProcessor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2024-12-19T08:28:54Z",
+      "side": 1,
+      "message": "The code and the comment are not coherent. The operators should be used for dates, but the code checks for integer. \n\nThe fail test is Kustvakt assumes that the operators should not be used for dates, but \"geq\", \"leq\", and \"since\" should be used instead.",
+      "range": {
+        "startLine": 297,
+        "startChar": 5,
+        "endLine": 298,
+        "endChar": 68
+      },
+      "revId": "b9e21a648447292ecd2ab71a0bcb1695317f1f82",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
