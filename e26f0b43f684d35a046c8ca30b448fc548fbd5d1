@@ -33,6 +33,69 @@
       "message": "\"doTestQuery\" should probably be excluded.",
       "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f5154210_5832e9c5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2025-01-08T10:38:20Z",
+      "side": 1,
+      "message": "I have to admit, that I don\u0027t fully understand what\u0027s going on, but it works! Thank you!",
+      "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a2117cbd_35b1ccf4",
+        "filename": "src/main/antlr/cosmas/c2ps.g",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2025-01-08T10:38:20Z",
+      "side": 1,
+      "message": "With \"they\" you mean special characters?",
+      "range": {
+        "startLine": 19,
+        "startChar": 36,
+        "endLine": 19,
+        "endChar": 40
+      },
+      "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "943db879_94bb19bf",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/util/StatusCodes.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2025-01-08T10:38:20Z",
+      "side": 1,
+      "message": "There should probably be a better way to localize that. It would already be helpful to return the parameters in addition to the error code, so a localization can pick the numerical values and create its own translation.",
+      "range": {
+        "startLine": 85,
+        "startChar": 3,
+        "endLine": 85,
+        "endChar": 51
+      },
+      "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
