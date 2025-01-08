@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "49a03e8b_2b873cb0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2025-01-08T11:58:19Z",
+      "side": 1,
+      "message": "I think we need to reformulate the operators for integer support, so that dates require in (not \u003d) and notin (not !\u003d), and also \"since\" and \"till\". This would clarify the type based on the operator. I would also say we need to use these terms in Kalamar then - instead of the KoralQuery operator names.",
+      "revId": "4d66e2eb64f278b64b67343ce475088dd34c7c53",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4b3c1f17_d8287d14",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/CollectionQueryProcessor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2025-01-08T11:58:19Z",
+      "side": 1,
+      "message": "While this is only conventional, I usually assume a method starting with \"check\" doesn\u0027t change state.",
+      "range": {
+        "startLine": 300,
+        "startChar": 20,
+        "endLine": 300,
+        "endChar": 49
+      },
+      "revId": "4d66e2eb64f278b64b67343ce475088dd34c7c53",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    }
+  ]
+}
