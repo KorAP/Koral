@@ -144,6 +144,30 @@
       },
       "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7abb1bf6_c022ebc7",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/util/StatusCodes.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2025-01-10T14:41:36Z",
+      "side": 1,
+      "message": "Consumers like Kalamar would probably just require the error code and the content of the text variable. If I understand the reporting correctly, the text variable wouldn\u0027t be kept intact but interpolated. Doubling the content would simplify translations outside of Koral.",
+      "parentUuid": "5f19c603_28187a8a",
+      "range": {
+        "startLine": 85,
+        "startChar": 3,
+        "endLine": 85,
+        "endChar": 51
+      },
+      "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
