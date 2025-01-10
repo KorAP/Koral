@@ -75,6 +75,30 @@
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b6d99a93_97e43535",
+        "filename": "src/main/antlr/cosmas/c2ps.g",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 28
+      },
+      "writtenOn": "2025-01-10T11:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a2117cbd_35b1ccf4",
+      "range": {
+        "startLine": 19,
+        "startChar": 36,
+        "endLine": 19,
+        "endChar": 40
+      },
+      "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "943db879_94bb19bf",
@@ -88,6 +112,30 @@
       "writtenOn": "2025-01-08T10:38:20Z",
       "side": 1,
       "message": "There should probably be a better way to localize that. It would already be helpful to return the parameters in addition to the error code, so a localization can pick the numerical values and create its own translation.",
+      "range": {
+        "startLine": 85,
+        "startChar": 3,
+        "endLine": 85,
+        "endChar": 51
+      },
+      "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5f19c603_28187a8a",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/util/StatusCodes.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 28
+      },
+      "writtenOn": "2025-01-10T11:29:35Z",
+      "side": 1,
+      "message": "I\u0027m not sure which localization functionality you miss. The localized error message method is getErrMess(int errCode, int messLang, String text) and can be extended for new languages.",
+      "parentUuid": "943db879_94bb19bf",
       "range": {
         "startLine": 85,
         "startChar": 3,
