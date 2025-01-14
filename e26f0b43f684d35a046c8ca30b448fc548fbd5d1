@@ -240,6 +240,30 @@
       },
       "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d9f762a3_0d6e025d",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/util/StatusCodes.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2025-01-14T11:41:00Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "3538d17c_805c3322",
+      "range": {
+        "startLine": 85,
+        "startChar": 3,
+        "endLine": 85,
+        "endChar": 51
+      },
+      "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
