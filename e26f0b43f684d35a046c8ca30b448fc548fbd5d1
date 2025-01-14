@@ -192,6 +192,30 @@
       },
       "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "71cf55cd_0507cdab",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/util/StatusCodes.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2025-01-14T08:58:18Z",
+      "side": 1,
+      "message": "Sorry - I am still a bit confused - where does Glemm come in to play? I thought that\u0027s not directly coupled with Glemm services (though it may not be answerable without).\n\nRegarding the hint helper: Good finding! It failed with the new design. I proposed a fix: https://korap.ids-mannheim.de/gerrit/c/KorAP/Kalamar/+/9143",
+      "parentUuid": "4aba773d_2c93480b",
+      "range": {
+        "startLine": 85,
+        "startChar": 3,
+        "endLine": 85,
+        "endChar": 51
+      },
+      "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
