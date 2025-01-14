@@ -216,6 +216,30 @@
       },
       "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
       "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3538d17c_805c3322",
+        "filename": "src/main/java/de/ids_mannheim/korap/query/serialize/util/StatusCodes.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 28
+      },
+      "writtenOn": "2025-01-14T11:15:41Z",
+      "side": 1,
+      "message": "This error message comes indeed from the GlemmServices via the KoralPipe. So the error code and the error position are returned in the rewritten KoralQuery.\n\nAh, OK! I\u0027m glad to hear that the hint helper is under correction, cause this is a very usefull feature.",
+      "parentUuid": "71cf55cd_0507cdab",
+      "range": {
+        "startLine": 85,
+        "startChar": 3,
+        "endLine": 85,
+        "endChar": 51
+      },
+      "revId": "e26f0b43f684d35a046c8ca30b448fc548fbd5d1",
+      "serverId": "626241b7-b7d0-4197-b843-1ee23887649c"
     }
   ]
 }
