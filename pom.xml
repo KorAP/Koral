@@ -150,7 +150,7 @@
 		<dependency>
 			<groupId>eu.clarin.sru.fcs</groupId>
 			<artifactId>fcs-simple-endpoint</artifactId>
-			<version>1.8.0</version>
+			<version>1.10.0</version>
 		</dependency>
   </dependencies>
 	<build>
