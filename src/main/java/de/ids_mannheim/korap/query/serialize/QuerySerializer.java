@@ -175,13 +175,15 @@ public class QuerySerializer {
         else if (queryLanguage.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
         }
+        else if (queryLanguage.equalsIgnoreCase("cq")) {
+            ast = new CollectionQueryProcessor(query);
+        }
         else {
             throw new IllegalArgumentException(
                     queryLanguage + " is not a supported query language!");
         }
         
-        if( bDebug )
-        	System.out.println(this.toJSON());
+		System.out.println(this.toJSON());
     }
 
     public QuerySerializer setQuery (String query, String ql, String version) {
@@ -218,6 +220,9 @@ public class QuerySerializer {
         }
         else if (ql.equalsIgnoreCase("annis")) {
             ast = new AnnisQueryProcessor(query);
+        }
+        else if (ql.equalsIgnoreCase("cq")) {
+            ast = new CollectionQueryProcessor(query);
         }
         else {
             ast.addError(StatusCodes.UNKNOWN_QUERY_LANGUAGE,
