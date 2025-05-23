@@ -1,3 +1,7 @@
+0.45 2025-05-23
+	- [bugfix] Fix running QuerySerializer via commandline 
+	- [feature] Add serializing corpus query via commandline
+
 0.44 2024-07-12
     - [security] Dependencies updated
 
