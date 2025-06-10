@@ -30,8 +30,8 @@ public class QuerySerializerTest {
 				+ "\"wrap\":{\"@type\":\"koral:term\",\"match\":"
 				+ "\"match:eq\",\"layer\":\"orth\",\"key\":\"Sonne\"}},"
 				+ "\"@context\":\"http://korap.ids-mannheim.de/ns/koral"
-				+ "/0.3/context.jsonld\"}\n" + System.lineSeparator();
-		assertEquals(expectedOutput, outputStream.toString());
+				+ "/0.3/context.jsonld\"}";
+		assertEquals(expectedOutput, outputStream.toString().trim());
 	}
 	
 	@Test
@@ -54,8 +54,8 @@ public class QuerySerializerTest {
 				+ "\"foundry\":\"opennlp\",\"layer\":\"orth\",\"type\":"
 				+ "\"type:regex\",\"match\":\"match:eq\"}},\"@context\":"
 				+ "\"http://korap.ids-mannheim.de/ns/koral/0.3/"
-				+ "context.jsonld\"}\n" + System.lineSeparator();
-		assertEquals(expectedOutput, outputStream.toString());
+				+ "context.jsonld\"}";
+		assertEquals(expectedOutput, outputStream.toString().trim());
 	}
 	
 	@Test
