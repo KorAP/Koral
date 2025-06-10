@@ -76,7 +76,7 @@ public class QuerySerializerTest {
 		String expectedOutput = "{\"collection\":{\"@type\":\"koral:doc\","
 				+ "\"match\":\"match:eq\",\"value\":\"WPD17\",\"key\":"
 				+ "\"corpusSigle\"},\"@context\":\"http://korap.ids-mannheim.de"
-				+ "/ns/koral/0.3/context.jsonld\"}\n" + System.lineSeparator();
-		assertEquals(expectedOutput, outputStream.toString());
+				+ "/ns/koral/0.3/context.jsonld\"}";
+		assertEquals(expectedOutput, outputStream.toString().trim());
 	}
 }
