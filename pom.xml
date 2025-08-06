@@ -4,7 +4,7 @@
 
 	<groupId>de.ids-mannheim.korap.koral</groupId>
 	<artifactId>Koral</artifactId>
-	<version>0.45</version>
+	<version>0.46</version>
 	<packaging>jar</packaging>
 	<name>Koral</name>
 	<url>https://korap.ids-mannheim.de</url>
@@ -107,9 +107,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.18.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.z3950.zing</groupId>
