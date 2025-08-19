@@ -22,7 +22,7 @@ public class CollectionQueryDuplicateTest {
     @Test
     public void testCollectionQueryDuplicateThrowsAssertionException ()
             throws IOException {
-        QuerySerializer serializer = new QuerySerializer();
+        QuerySerializer serializer = new QuerySerializer(1.1);
         serializer.setQuery("[base=Haus]", "poliqarp");
         serializer.setCollection("textClass=politik & corpusID=WPD");
         ObjectMapper m = new ObjectMapper();

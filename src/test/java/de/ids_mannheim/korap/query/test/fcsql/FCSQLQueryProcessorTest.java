@@ -21,7 +21,7 @@ import de.ids_mannheim.korap.query.serialize.QuerySerializer;
  */
 public class FCSQLQueryProcessorTest {
 
-    private static QuerySerializer qs = new QuerySerializer();
+    private static QuerySerializer qs = new QuerySerializer(1.1);
     private static ObjectMapper mapper = new ObjectMapper();
     private static JsonNode node;
     private String query;

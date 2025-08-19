@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 public class AnnisQueryProcessorTest {
     private String query;
 
-    private QuerySerializer qs = new QuerySerializer();
+    private QuerySerializer qs = new QuerySerializer(1.1);
     private ObjectMapper mapper = new ObjectMapper();
     private JsonNode res;
 
