@@ -28,11 +28,11 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
  * @since 0.1.0
  */
 public class QuerySerializer {
-
+	private double apiVersion;
     private String version = "Unknown";
     private String name = "Unknown";
     private static Properties info;
-    private boolean bDebug = false;
+//    private boolean bDebug = false;
         {
           
             loadInfo();
@@ -73,15 +73,15 @@ public class QuerySerializer {
     private List<Object> warnings;
     private List<Object> messages;
     
-    private boolean DEBUG = false;
+//    private boolean DEBUG = false;
     
-    public QuerySerializer () {
+    public QuerySerializer (double apiVersion) {
         this.errors = new ArrayList<>();
         this.warnings = new ArrayList<>();
         this.messages = new ArrayList<>();
+        this.apiVersion = apiVersion;
     }
-
-
+    
     /**
      * Remove all messages from the query serialization.
      */
@@ -99,8 +99,7 @@ public class QuerySerializer {
          * just for testing...
          */
 //        BasicConfigurator.configure();
-        QuerySerializer jg = new QuerySerializer();
-        int i = 0;
+        QuerySerializer jg = new QuerySerializer(1.1);
         String[] queries = null;
         String ql = "poliqarpplus";
         boolean 
@@ -119,7 +118,6 @@ public class QuerySerializer {
         	bDebug = true;	
         
         for (String q : queries) {
-            i++;
             try {
 				if( bDebug ) 
 					System.out.printf("QuerySerialize: query = >>%s<< lang = %s.\n", q, ql);
@@ -152,22 +150,22 @@ public class QuerySerializer {
 
     public void run (String query, String queryLanguage, boolean bDebug) throws IOException {
 
-    	ast.verbose = bDebug; // debugging: 01.09.23/FB
+    	AbstractQueryProcessor.verbose = bDebug; // debugging: 01.09.23/FB
 
         if (queryLanguage.equalsIgnoreCase("poliqarp")) {
-            ast = new PoliqarpPlusQueryProcessor(query);
+            ast = new PoliqarpPlusQueryProcessor(query, apiVersion);
         }
         else if (queryLanguage.equalsIgnoreCase("cosmas2")) {
             ast = new Cosmas2QueryProcessor(query);
         }
         else if (queryLanguage.equalsIgnoreCase("poliqarpplus")) {
-            ast = new PoliqarpPlusQueryProcessor(query);
+            ast = new PoliqarpPlusQueryProcessor(query, apiVersion);
         }
         else if (queryLanguage.equalsIgnoreCase("cql")) {
             ast = new CqlQueryProcessor(query);
         }
         else if (queryLanguage.equalsIgnoreCase("cqp")) {
-            ast = new CQPQueryProcessor(query);
+            ast = new CQPQueryProcessor(query, apiVersion);
         }
         else if (queryLanguage.equalsIgnoreCase("fcsql")) {
             ast = new FCSQLQueryProcessor(query);
@@ -176,7 +174,7 @@ public class QuerySerializer {
             ast = new AnnisQueryProcessor(query);
         }
         else if (queryLanguage.equalsIgnoreCase("cq")) {
-            ast = new CollectionQueryProcessor(query);
+            ast = new CollectionQueryProcessor(query,apiVersion);
         }
         else {
             throw new IllegalArgumentException(
@@ -196,16 +194,16 @@ public class QuerySerializer {
                     "You did not specify any query language!");
         }
         else if (ql.equalsIgnoreCase("poliqarp")) {
-            ast = new PoliqarpPlusQueryProcessor(query);
+            ast = new PoliqarpPlusQueryProcessor(query, apiVersion);
         }
         else if (ql.equalsIgnoreCase("cosmas2")) {
             ast = new Cosmas2QueryProcessor(query);
         }
         else if (ql.equalsIgnoreCase("poliqarpplus")) {
-            ast = new PoliqarpPlusQueryProcessor(query);
+            ast = new PoliqarpPlusQueryProcessor(query, apiVersion);
         }
         else if (ql.equalsIgnoreCase("cqp")) {
-            ast = new CQPQueryProcessor(query);
+            ast = new CQPQueryProcessor(query, apiVersion);
         }
         else if (ql.equalsIgnoreCase("cql")) {
             if (version == null) {
@@ -222,7 +220,7 @@ public class QuerySerializer {
             ast = new AnnisQueryProcessor(query);
         }
         else if (ql.equalsIgnoreCase("cq")) {
-            ast = new CollectionQueryProcessor(query);
+            ast = new CollectionQueryProcessor(query, apiVersion);
         }
         else {
             ast.addError(StatusCodes.UNKNOWN_QUERY_LANGUAGE,
@@ -279,14 +277,15 @@ public class QuerySerializer {
             Map<String, Object> requestMap = new HashMap<>(ast.getRequestMap());
             Map<String, Object> meta =
                     (Map<String, Object>) requestMap.get("meta");
-            Map<String, Object> collection =
-                    (Map<String, Object>) requestMap.get("collection");
+            Map<String, Object> collection;
+            collection = (Map<String, Object>) requestMap.get( apiVersion >= 1.1 ? "corpus" : "collection");
             List<Object> errors = (List<Object>) requestMap.get("errors");
             List<Object> warnings = (List<Object>) requestMap.get("warnings");
             List<Object> messages = (List<Object>) requestMap.get("messages");
             collection = mergeCollection(collection, this.collection);
-            requestMap.put("collection", collection);
-
+            
+            requestMap.put(apiVersion >= 1.1 ? "corpus" : "collection", collection);
+            
             if (meta == null) meta = new HashMap<String, Object>();
             if (errors == null) errors = new ArrayList<Object>();
             if (warnings == null) warnings = new ArrayList<Object>();
@@ -313,7 +312,8 @@ public class QuerySerializer {
         return new HashMap<String, Object>();
     }
 
-    private Map<String, Object> cleanup (Map<String, Object> requestMap) {
+    @SuppressWarnings("rawtypes")
+	private Map<String, Object> cleanup (Map<String, Object> requestMap) {
         Iterator<Map.Entry<String, Object>> set =
                 requestMap.entrySet().iterator();
         while (set.hasNext()) {
@@ -331,7 +331,8 @@ public class QuerySerializer {
         return requestMap;
     }
 
-    private Map<String, Object> mergeCollection (
+    @SuppressWarnings("unchecked")
+	private Map<String, Object> mergeCollection (
             Map<String, Object> collection1, Map<String, Object> collection2) {
         if (collection1 == null || collection1.isEmpty()) {
             return collection2;
@@ -353,7 +354,8 @@ public class QuerySerializer {
         }
     }
 
-    @Deprecated
+    @SuppressWarnings("unchecked")
+	@Deprecated
     public QuerySerializer addMeta (String cli, String cri, int cls, int crs,
             int num, int pageIndex) {
         MetaQueryBuilder meta = new MetaQueryBuilder();
@@ -369,14 +371,15 @@ public class QuerySerializer {
         return this;
     }
 
-    public QuerySerializer setMeta (MetaQueryBuilder meta) {
+    @SuppressWarnings("unchecked")
+	public QuerySerializer setMeta (MetaQueryBuilder meta) {
         this.meta = meta.raw();
         return this;
     }
 
     @SuppressWarnings("unchecked")
     public QuerySerializer setCollection (String collection) {
-        CollectionQueryProcessor tree = new CollectionQueryProcessor();
+        CollectionQueryProcessor tree = new CollectionQueryProcessor(apiVersion);
         tree.process(collection);
         Map<String, Object> collectionRequest = tree.getRequestMap();
         if (collectionRequest.get("errors") != null)
@@ -386,14 +389,15 @@ public class QuerySerializer {
         if (collectionRequest.get("messages") != null) this.messages
                 .addAll((List<Object>) collectionRequest.get("messages"));
         this.collection =
-                (Map<String, Object>) collectionRequest.get("collection");
+            (Map<String, Object>) collectionRequest.get(apiVersion>=1.1 ? "corpus" : "collection");
         return this;
     }
 
+    // EM: appearently unused
     public String convertCollectionToJson ()
             throws JsonProcessingException {
         Map<String, Object> map = new HashMap<>();
-        map.put("collection", collection);
+        map.put(apiVersion>=1.1 ? "corpus" : "collection", collection);
         return mapper.writeValueAsString(map);
     }
     

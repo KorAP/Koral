@@ -45,7 +45,8 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
     private static Logger log = LoggerFactory
             .getLogger(PoliqarpPlusQueryProcessor.class);
     private int classCounter = 1;
-
+    private double apiVersion;
+    
     Map<ParseTree, Integer> classWrapRegistry = new HashMap<ParseTree, Integer>();
 
 
@@ -54,9 +55,17 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
      * 
      * @param query
      *            The syntax tree as returned by ANTLR
+     * @param apiVersion 
      */
-    public PoliqarpPlusQueryProcessor (String query) {
+    public PoliqarpPlusQueryProcessor (String query, double apiVersion) {
+    	this.apiVersion=apiVersion;
         KoralObjectGenerator.setQueryProcessor(this);
+        if (apiVersion >=1.1) {
+        	Object collection = requestMap.get("collection");
+        	requestMap.put("corpus", collection);
+        	requestMap.remove("collection");
+        }
+        
         process(query);
         if (DEBUG) { 
             log.debug(">>> " + requestMap.get("query") + " <<<");
@@ -660,8 +669,13 @@ public class PoliqarpPlusQueryProcessor extends Antlr4AbstractQueryProcessor {
                 + " feature is currently not supported. Please use virtual "
                 + "collections to restrict documents by metadata.");
         CollectionQueryProcessor cq = new CollectionQueryProcessor(
-                node.getChild(1).getText());
-        requestMap.put("collection", cq.getRequestMap().get("collection"));
+                node.getChild(1).getText(),apiVersion);
+        if (apiVersion >=1.1) {
+        	requestMap.put("corpus", cq.getRequestMap().get("corpus"));
+        }
+        else {
+        	requestMap.put("collection", cq.getRequestMap().get("collection"));
+        }
         visited.addAll(getChildren(node));
     }
 

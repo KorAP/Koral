@@ -22,7 +22,7 @@ public class CQPMeetProcessorTest {
 	String query;
     ArrayList<JsonNode> operands;
 
-    QuerySerializer qs = new QuerySerializer();
+    QuerySerializer qs = new QuerySerializer(1.1);
     ObjectMapper mapper = new ObjectMapper();
     JsonNode res;
 

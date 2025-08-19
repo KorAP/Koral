@@ -25,7 +25,7 @@ public class PoliqarpPlusQueryProcessorTest {
     String query;
     ArrayList<JsonNode> operands;
 
-    QuerySerializer qs = new QuerySerializer();
+    QuerySerializer qs = new QuerySerializer(1.1);
     ObjectMapper mapper = new ObjectMapper();
     JsonNode res;
 
@@ -1759,21 +1759,21 @@ public class PoliqarpPlusQueryProcessorTest {
         qs.setQuery(query, "poliqarpplus");
         res = mapper.readTree(qs.toJSON());
         assertEquals("x", res.at("/query/wrap/key").asText());
-        assertEquals("koral:doc", res.at("/collection/@type").asText());
-        assertEquals("textClass", res.at("/collection/key").asText());
-        assertEquals("Sport", res.at("/collection/value").asText());
+        assertEquals("koral:doc", res.at("/corpus/@type").asText());
+        assertEquals("textClass", res.at("/corpus/key").asText());
+        assertEquals("Sport", res.at("/corpus/value").asText());
 
         query = "x meta textClass=Sport";
         qs.setQuery(query, "poliqarpplus");
         qs.setCollection("author=Smith");
         res = mapper.readTree(qs.toJSON());
         assertEquals("x", res.at("/query/wrap/key").asText());
-        assertEquals("koral:docGroup", res.at("/collection/@type").asText());
-        assertEquals("operation:and", res.at("/collection/operation").asText());
-        assertEquals("textClass", res.at("/collection/operands/0/key").asText());
-        assertEquals("Sport", res.at("/collection/operands/0/value").asText());
-        assertEquals("author", res.at("/collection/operands/1/key").asText());
-        assertEquals("Smith", res.at("/collection/operands/1/value").asText());
+        assertEquals("koral:docGroup", res.at("/corpus/@type").asText());
+        assertEquals("operation:and", res.at("/corpus/operation").asText());
+        assertEquals("textClass", res.at("/corpus/operands/0/key").asText());
+        assertEquals("Sport", res.at("/corpus/operands/0/value").asText());
+        assertEquals("author", res.at("/corpus/operands/1/key").asText());
+        assertEquals("Smith", res.at("/corpus/operands/1/value").asText());
 
       
     }
