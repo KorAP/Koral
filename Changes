@@ -1,6 +1,10 @@
+0.47 2025-09-29
+	- [enhancement] Add apiVersion for QuerySerializer, CorpusQuery-, 
+	  Poliqarp- and CQP processors.
+	  
 0.46 2025-08-06
-    - [security] Dependencies updated
-
+    - [security] Dependencies updated	
+	
 0.45 2025-05-23
      - [bugfix] Fix running QuerySerializer via commandline 
      - [feature] Add serializing corpus query via commandline

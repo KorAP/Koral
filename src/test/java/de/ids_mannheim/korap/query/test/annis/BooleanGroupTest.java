@@ -13,7 +13,7 @@ import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 
 public class BooleanGroupTest {
 
-    private QuerySerializer qs = new QuerySerializer();
+    private QuerySerializer qs = new QuerySerializer(1.1);
     private ObjectMapper mapper = new ObjectMapper();
     
     private JsonNode runQuery (String query)

@@ -31,7 +31,7 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
     private String query;
     private ArrayList<JsonNode> operands;
 
-    private QuerySerializer qs = new QuerySerializer();
+    private QuerySerializer qs = new QuerySerializer(1.1);
     private ObjectMapper mapper = new ObjectMapper();
     private JsonNode result;
 
@@ -1099,21 +1099,21 @@ public class CQPQueryProcessorTest extends BaseQueryTest {
         qs.setQuery(query, "CQP");
         result = mapper.readTree(qs.toJSON());
         assertEquals("x", result.at("/query/wrap/key").asText());
-        assertEquals("koral:doc", result.at("/collection/@type").asText());
-        assertEquals("textClass", result.at("/collection/key").asText());
-        assertEquals("Sport", result.at("/collection/value").asText());
+        assertEquals("koral:doc", result.at("/corpus/@type").asText());
+        assertEquals("textClass", result.at("/corpus/key").asText());
+        assertEquals("Sport", result.at("/corpus/value").asText());
 
         query = "\"x\" meta textClass='Sport'";
         qs.setQuery(query, "CQP");
         qs.setCollection("author=Smith");
         result = mapper.readTree(qs.toJSON());
         assertEquals("x", result.at("/query/wrap/key").asText());
-        assertEquals("koral:docGroup", result.at("/collection/@type").asText());
-        assertEquals("operation:and", result.at("/collection/operation").asText());
-        assertEquals("textClass", result.at("/collection/operands/0/key").asText());
-        assertEquals("Sport", result.at("/collection/operands/0/value").asText());
-        assertEquals("author", result.at("/collection/operands/1/key").asText());
-        assertEquals("Smith", result.at("/collection/operands/1/value").asText());
+        assertEquals("koral:docGroup", result.at("/corpus/@type").asText());
+        assertEquals("operation:and", result.at("/corpus/operation").asText());
+        assertEquals("textClass", result.at("/corpus/operands/0/key").asText());
+        assertEquals("Sport", result.at("/corpus/operands/0/value").asText());
+        assertEquals("author", result.at("/corpus/operands/1/key").asText());
+        assertEquals("Smith", result.at("/corpus/operands/1/value").asText());
     }
    
  
