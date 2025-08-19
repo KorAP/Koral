@@ -18,7 +18,7 @@ public abstract class BaseQueryTest {
     protected String query;
     protected ArrayList<JsonNode> operands;
     
-    private QuerySerializer qs = new QuerySerializer();
+    private QuerySerializer qs = new QuerySerializer(1.1);
     private ObjectMapper mapper = new ObjectMapper();
     private String queryLanguage;
 

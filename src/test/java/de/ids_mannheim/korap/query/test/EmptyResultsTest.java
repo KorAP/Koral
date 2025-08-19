@@ -1,16 +1,18 @@
 package de.ids_mannheim.korap.query.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
-
-import org.junit.Assert;
-import org.junit.Test;
-import java.util.List;
-import java.util.ArrayList;
-
-import static org.junit.Assert.*;
 
 /**
  * @author hanl
@@ -23,7 +25,7 @@ public class EmptyResultsTest {
 
     @Test
     public void testEmptyQueryObject () {
-        QuerySerializer s = new QuerySerializer();
+        QuerySerializer s = new QuerySerializer(1.1);
         s.setQuery("prox/unit=word/distance<=5", "cql");
         JsonNode node = mapper.valueToTree(s.build());
         assertFalse(node.has("query"));
@@ -33,7 +35,7 @@ public class EmptyResultsTest {
 
     @Test
     public void testEmptyCollectionObject () {
-        QuerySerializer s = new QuerySerializer();
+        QuerySerializer s = new QuerySerializer(1.1);
         s.setQuery("[base=Wort]", "poliqarp");
 
         JsonNode node = mapper.valueToTree(s.build());
@@ -44,7 +46,7 @@ public class EmptyResultsTest {
 
     @Test
     public void testEmptyMetaObject () {
-        QuerySerializer s = new QuerySerializer();
+        QuerySerializer s = new QuerySerializer(1.1);
         s.setQuery("[base=Wort]", "poliqarp");
 
         JsonNode node = mapper.valueToTree(s.build());
@@ -53,7 +55,7 @@ public class EmptyResultsTest {
 
     @Test
     public void testWarnings () {
-        QuerySerializer s = new QuerySerializer();
+        QuerySerializer s = new QuerySerializer(1.1);
         s.setQuery("[base=Wort]", "poliqarp");
         List<String> l = new ArrayList<String>(1);
         l.add("Hui");
@@ -72,7 +74,7 @@ public class EmptyResultsTest {
 
     @Test
     public void testVersion () {
-        QuerySerializer s = new QuerySerializer();
+        QuerySerializer s = new QuerySerializer(1.1);
         assertTrue(s.getVersion().matches("^\\d+(\\.\\d+)+$"));
         assertFalse(s.getVersion().equals("Unknown"));
         assertTrue(s.getName().length() > 3);

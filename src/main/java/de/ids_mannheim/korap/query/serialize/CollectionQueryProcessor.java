@@ -39,21 +39,28 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
     private static final boolean DEBUG = false;
     private static Logger log = LoggerFactory
             .getLogger(CollectionQueryProcessor.class);
+    private double apiVersion;
 
-
-    public CollectionQueryProcessor () {
+    public CollectionQueryProcessor (double apiVersion) {
         KoralObjectGenerator.setQueryProcessor(this);
+        this.apiVersion=apiVersion;
+        
+        if (apiVersion >=1.1) {
+        	Object collection = requestMap.get("collection");
+        	requestMap.put("corpus", collection);
+        	requestMap.remove("collection");
+        }
     }
 
 
-    public CollectionQueryProcessor (boolean verbose) {
-        KoralObjectGenerator.setQueryProcessor(this);
-        CollectionQueryProcessor.verbose = verbose;
+    public CollectionQueryProcessor (boolean verbose, double apiVersion) {
+    	this(apiVersion);
+    	CollectionQueryProcessor.verbose = verbose;
     }
 
 
-    public CollectionQueryProcessor (String query) {
-        KoralObjectGenerator.setQueryProcessor(this);
+    public CollectionQueryProcessor (String query, double apiVersion) {
+    	this(apiVersion);
         process(query);
     }
 
@@ -466,7 +473,12 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         else {
             //        	requestMap = object;
-            requestMap.put("collection", object);
+        	if (apiVersion >= 1.1) {
+        		requestMap.put("corpus", object);
+        	}
+        	else { 
+        		requestMap.put("collection", object);
+        	}
         }
     }
 
