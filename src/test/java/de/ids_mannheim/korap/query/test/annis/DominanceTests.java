@@ -19,7 +19,7 @@ import de.ids_mannheim.korap.query.serialize.QuerySerializer;
  */
 public class DominanceTests {
     private String query;
-    private QuerySerializer qs = new QuerySerializer();
+    private QuerySerializer qs = new QuerySerializer(1.1);
     private ObjectMapper mapper = new ObjectMapper();
     private JsonNode res;
 

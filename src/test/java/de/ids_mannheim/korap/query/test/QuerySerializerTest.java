@@ -73,7 +73,7 @@ public class QuerySerializerTest {
 		QuerySerializer.main(args);
 
 		System.setOut(originalOut);
-		String expectedOutput = "{\"collection\":{\"@type\":\"koral:doc\","
+		String expectedOutput = "{\"corpus\":{\"@type\":\"koral:doc\","
 				+ "\"match\":\"match:eq\",\"value\":\"WPD17\",\"key\":"
 				+ "\"corpusSigle\"},\"@context\":\"http://korap.ids-mannheim.de"
 				+ "/ns/koral/0.3/context.jsonld\"}";
