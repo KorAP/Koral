@@ -1,3 +1,6 @@
+0.48 2025-11-17
+     - [security] Update to Java 21.
+
 0.47 2025-10-16
 	- [enhancement] Add apiVersion for QuerySerializer, CorpusQuery-, 
 	  Poliqarp- and CQP processors.

@@ -118,7 +118,7 @@ Afterwards, rerun the test suite and package or install the library.
 
 ## Prerequisites
 
-* Java 11 (OpenJDK or Oracle JDK with JCE)
+* Java 21 (OpenJDK or Oracle JDK with JCE)
 * [Git](http://git-scm.com/)
 * At least [Maven 3.2.1](https://maven.apache.org/)
 * Further dependencies are resolved by Maven.
