@@ -284,11 +284,7 @@ public class FCSQLQueryProcessorTest {
                 + " operands:["
                 + "{@type: koral:term, key: sein, foundry: tt, layer: l, type:type:regex, match: match:ne},"
                 + "{@type: koral:term, key: PPOSS, foundry: tt, layer: p, type:type:regex, match: match:ne}]}}";
-        //FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
-        
-        error = getError(new FCSQLQueryProcessor(query));
-        assertEquals(399, error.get(0));
-        assertTrue(error.get(1).toString().startsWith("Query cannot be parsed"));
+        FCSQLQueryProcessorTest.runAndValidate(query, jsonLd);
     }
 
     @Test

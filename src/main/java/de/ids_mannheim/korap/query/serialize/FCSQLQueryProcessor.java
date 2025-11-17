@@ -8,9 +8,9 @@ import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 import eu.clarin.sru.server.SRUQueryBase;
 import eu.clarin.sru.server.fcs.Constants;
-import eu.clarin.sru.server.fcs.parser.QueryNode;
-import eu.clarin.sru.server.fcs.parser.QueryParser;
-import eu.clarin.sru.server.fcs.parser.QueryParserException;
+import eu.clarin.sru.fcs.qlparser.QueryParserException;
+import eu.clarin.sru.fcs.qlparser.fcs.QueryNode;
+import eu.clarin.sru.fcs.qlparser.fcs.QueryParser;
 
 /** FCSQLQueryProcessor is accountable for the serialization of FCSQL 
  *  to KoralQuery. The KoralQuery is structured as a map containing 

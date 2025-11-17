@@ -15,15 +15,15 @@ import de.ids_mannheim.korap.query.object.KoralTermGroupRelation;
 import de.ids_mannheim.korap.query.object.KoralToken;
 import de.ids_mannheim.korap.query.serialize.util.KoralException;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import eu.clarin.sru.server.fcs.parser.Expression;
-import eu.clarin.sru.server.fcs.parser.ExpressionAnd;
-import eu.clarin.sru.server.fcs.parser.ExpressionGroup;
-import eu.clarin.sru.server.fcs.parser.ExpressionNot;
-import eu.clarin.sru.server.fcs.parser.ExpressionOr;
-import eu.clarin.sru.server.fcs.parser.ExpressionWildcard;
-import eu.clarin.sru.server.fcs.parser.Operator;
-import eu.clarin.sru.server.fcs.parser.QueryNode;
-import eu.clarin.sru.server.fcs.parser.RegexFlag;
+import eu.clarin.sru.fcs.qlparser.fcs.Expression;
+import eu.clarin.sru.fcs.qlparser.fcs.ExpressionAnd;
+import eu.clarin.sru.fcs.qlparser.fcs.ExpressionGroup;
+import eu.clarin.sru.fcs.qlparser.fcs.ExpressionNot;
+import eu.clarin.sru.fcs.qlparser.fcs.ExpressionOr;
+import eu.clarin.sru.fcs.qlparser.fcs.ExpressionWildcard;
+import eu.clarin.sru.fcs.qlparser.fcs.Operator;
+import eu.clarin.sru.fcs.qlparser.fcs.QueryNode;
+import eu.clarin.sru.fcs.qlparser.fcs.RegexFlag;
 
 /**
  * This class handles and parses various FCSQL expressions (e.g.
@@ -81,16 +81,15 @@ public class ExpressionParser {
             List<QueryNode> operands = queryNode.getChildren();
             if (isNot) {
                 return parseBooleanExpression(operands,
-                        KoralTermGroupRelation.OR, isToken);
+                        KoralTermGroupRelation.OR, isNot, isToken);
             }
             else {
                 return parseBooleanExpression(operands,
-                        KoralTermGroupRelation.AND, isToken);
+                        KoralTermGroupRelation.AND, isNot, isToken);
             }
         }
         else if (queryNode instanceof ExpressionGroup) {
-            // Ignore the group
-            return parseExpression(queryNode.getFirstChild(), false, isToken);
+            return parseExpression(queryNode.getFirstChild(), isNot, isToken);
         }
         else if (queryNode instanceof ExpressionNot) {
             boolean negation = isNot ? false : true;
@@ -100,11 +99,11 @@ public class ExpressionParser {
             List<QueryNode> operands = queryNode.getChildren();
             if (isNot) {
                 return parseBooleanExpression(operands,
-                        KoralTermGroupRelation.AND, isToken);
+                        KoralTermGroupRelation.AND, isNot, isToken);
             }
             else {
                 return parseBooleanExpression(operands,
-                        KoralTermGroupRelation.OR, isToken);
+                        KoralTermGroupRelation.OR, isNot, isToken);
             }
         }
         else if (queryNode instanceof ExpressionWildcard) {
@@ -129,10 +128,10 @@ public class ExpressionParser {
      * @throws KoralException
      */
     private KoralObject parseBooleanExpression(List<QueryNode> operands,
-            KoralTermGroupRelation relation, boolean isToken) throws KoralException {
+            KoralTermGroupRelation relation, boolean isNot, boolean isToken) throws KoralException {
         List<KoralObject> terms = new ArrayList<>();
         for (QueryNode node : operands) {
-            terms.add(parseExpression(node, false, false));
+            terms.add(parseExpression(node, isNot, false));
         }
         
         KoralTermGroup termGroup = new KoralTermGroup(relation, terms);

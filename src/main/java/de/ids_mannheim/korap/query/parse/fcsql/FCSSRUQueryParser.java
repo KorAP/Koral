@@ -16,15 +16,15 @@ import de.ids_mannheim.korap.query.object.KoralObject;
 import de.ids_mannheim.korap.query.object.KoralOperation;
 import de.ids_mannheim.korap.query.object.KoralSpan;
 import de.ids_mannheim.korap.query.object.KoralTerm;
-import eu.clarin.sru.server.fcs.parser.ExpressionWildcard;
-import eu.clarin.sru.server.fcs.parser.QueryDisjunction;
-import eu.clarin.sru.server.fcs.parser.QueryGroup;
-import eu.clarin.sru.server.fcs.parser.QueryNode;
-import eu.clarin.sru.server.fcs.parser.QuerySegment;
-import eu.clarin.sru.server.fcs.parser.QuerySequence;
-import eu.clarin.sru.server.fcs.parser.QueryWithWithin;
-import eu.clarin.sru.server.fcs.parser.SimpleWithin;
-import eu.clarin.sru.server.fcs.parser.SimpleWithin.Scope;
+import eu.clarin.sru.fcs.qlparser.fcs.ExpressionWildcard;
+import eu.clarin.sru.fcs.qlparser.fcs.QueryDisjunction;
+import eu.clarin.sru.fcs.qlparser.fcs.QueryGroup;
+import eu.clarin.sru.fcs.qlparser.fcs.QueryNode;
+import eu.clarin.sru.fcs.qlparser.fcs.QuerySegment;
+import eu.clarin.sru.fcs.qlparser.fcs.QuerySequence;
+import eu.clarin.sru.fcs.qlparser.fcs.QueryWithWithin;
+import eu.clarin.sru.fcs.qlparser.fcs.SimpleWithin;
+import eu.clarin.sru.fcs.qlparser.fcs.SimpleWithin.Scope;
 
 /** This class handles FCS query nodes from the FCSParser converting FCSQL to Java objects. 
  * 
