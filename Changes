@@ -1,3 +1,19 @@
+0.51 2026-07-29
+     - [feature] C2QL MORPH(v1 v2..): more than 1 value with/without foundry/layer specification works now.
+     - [feature] translating MORPH expressions from C2-style STTS/CONNEXOR to STTS/marmot.
+     - [bugfix] C2QL: correcting #BED() and word:sa/se... (due to MORPH modifications).
+     - [feature] JUnits added.
+
+0.50 2026-07-29
+     - [bugfix] Op. #ELEM() in C2QL: missing default layer 's' is added.
+     - [bugfix] Op. #ELEM(w ana='...'): either 'W' or 'ana' generates layer=p.
+     - [bugfix] Op. #ELEM() serializaton of attributes: layer, key and value corrected.
+     - [bugfix] Op. #ELEM(w ana='...' type='...'): mixed combination of 'ana' with other attr. corrected.
+     - [bugfix] Op. #ELEM(w ana="NOU -PL'): negation for attribute values implemented.
+     - [bugfix] Op. #ELEM(foundry/layer ...): serialization of att=val pairs added.
+     - [bugfix] Op. #ELEM() JUnits added for all theses cases.
+     - [bugfix] Op. #ELEM(): serialization: 'attr' no longer inside 'wrap'.
+
 0.49 2026-05-04
     - [security] Dependencies updated	
     - [cleanup] Silence error listeners in PQ test suite

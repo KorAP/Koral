@@ -19,11 +19,21 @@
 //      in &opts&lemma, but wildcards may appear as options inside 'opts'.
 //      E.g. &F+&Prüfung -> lemma with F+ as an option.
 //    - test added for F+.
+//  28.05.26/FB : 
+//    - parsing MORPH() correctly.
+// 	  - rewritePostionQuery(): deactivated because it blindly replaces parts of a query.
+//  11.06.26/FB
+//	  - #BED(Query, positions) reactivated.
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 grammar c2ps;
 
-options { output=AST; backtrack=true; k=5;}
+// too tolerant: when the parser encounters erronerous characters it skips them and they disappear
+// from the resulting AST without an error message - 10.06.26/FB
+// options { output=AST; backtrack=true; k=5;}
+
+options { output=AST; }
+
 // tokens that will appear as node names in the resulting AST:
 tokens  {C2PQ; OPBED; OPTS; OPBEG; OPEND; OPNHIT; OPALL; OPLEM; OPPROX;
 	 ARG1; ARG2; 
@@ -71,7 +81,7 @@ tokens  {C2PQ; OPBED; OPTS; OPBEG; OPEND; OPNHIT; OPALL; OPLEM; OPPROX;
 //
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-WS	:	(' '|'\r'|'\n')+ {skip();};
+WS	:	(' '|'\r'|'\n')+ {skip();};  // is executed by the parser, not the lexer - 11.06.26/FB
 
 // Suchoperator PROX:
 // ------------------
@@ -100,6 +110,26 @@ fragment DIST // 30.11.23/FB
 fragment GROUP
 	:	('min' | 'max');
 
+//OP_MORPH :  'MORPH(' EAVEXPR  ( '&'?  EAVEXPR )*  ')' | 'MORPH(' ')' ;
+
+// must be declared before EAVEXPR
+
+// simply parse to the end of MORPH(...), the content will be parsed
+// by opMORPH.g:
+OP_MORPH 
+	:  'MORPH(' (~(')'|'('))+ ')' | 'MORPH(' ')' ;
+
+// Annotationsoperator #ELEM( EAVEXPR ).
+// EAVEXPR = Element Attribut Value Expression.
+// alle Spezialzeichen vor dem Blank ausgeschlossen.
+// e.g. #ELEM(ANA='N pl'); #ELEM(HEAD, TYPE='DACHUEBERSCHRIFT');
+// e.g. #ELEM( ANA='N()' LEM='L\'Ã©tÃ©');
+// 29.05.26/FB '&' added for MORPH( a & b ..).
+// 02.06.26/FB must be declared before SEARCHWORD1.
+
+fragment EAVEXPR
+	:	( ~( '&' | '(' | ')' | '\'' | ('\u0000'..'\u001F')) | ('\'' (~('\'' | '\\') | '\\' '\'')* '\'') )+ ;
+	
 // version (12.01.24/FB):
 // accept correct and incorrect chars till the next blank, that way the incorrect chars
 // are submitted to the sub-grammer c2ps_opPROX where they are detected and an appropriate 
@@ -122,6 +152,10 @@ OP_REG	: '#REG(' ' '* '\'' ('\\\''|~'\'')+  '\'' (' ')* ')'
 		  	|
 		  '#REG(' ' '* ~('\''|'"'|' ') (~(')'))* ')';
 
+// OP_ELEM and OP_MORPH must be defined before OP_BED_END - 01.06.26/FB
+// "#ELEM()" nur fuer Fehlerbehandlung, ansonsten sinnlose Anfrage.
+OP_ELEM	 :	'#ELEM(' EAVEXPR ')' | '#ELEM(' ')';
+
 // EAVEXP wird hier eingesetzt fÃ¼r eine beliebige Sequenz von Zeichen bis zu ')'.
 fragment OP_IN_OPTS
 	:	EAVEXPR ;
@@ -130,14 +164,6 @@ fragment OP_IN_OPTS
 fragment OP_OV_OPTS
 	:	EAVEXPR ;
 
-// OP_BED: #BED( searchExp , Bedingung )
-// OP_BED_END = ", Bedingung )" 
-// ungelÃ¶st: #BED(Jimi Hendrix, sa) -> Komma wird "Hendrix," zugeschlagen!
-// Umgehung: Blank vor dem Komma: #BED(Jimi Hendrix , sa) -> OK.
-
-OP_BED_END
-	:	',' ~(')')+ ')' ; 
-	
 // OP1: Operator with single argument:
 // (funktioniert nicht: fragment OP1 : OP1BEG | OP1END ...;)
 
@@ -148,6 +174,23 @@ OP_BED_END
 
 SEARCHLABEL
 	:	('<s>' | '<p>' | '<Ã¼>' | '<Ã¼d>' | '<Ã¼h>' | '<Ã¼u>' | '<Ã¼z>' | '<Ã¼r>');
+
+// OP_BED: #BED( searchExp , Bedingung )
+// OP_BED_END = ", Bedingung )" 
+// ungelÃ¶st: #BED(Jimi Hendrix, sa) -> Komma wird "Hendrix," zugeschlagen!
+// Umgehung: Blank vor dem Komma: #BED(Jimi Hendrix , sa) -> OK.
+// OP_BED_END is greedy and must be defined at least after #ELEM() and MORPH(),
+// but also before SEARCHWORD1 (-> still true? - 02.06.26/FB)
+
+// OP_BED_END
+//	:	',' ~(')')+ ')' ; 
+
+fragment OP_BED_PAE	: ('pa'|'pe'|'PA'|'PE');
+fragment OP_BED_SAE	: ('sa'|'se'|'SA'|'SE');
+fragment OP_BED_TAE : ('ta'|'te'|'TA'|'TE');
+
+OP_BED_END
+	: 	' '* ',' ' '* (('+'|'-')?(OP_BED_SAE | OP_BED_PAE | OP_BED_TAE)(','|'/')?)+ ')';
 
 // Search Word: 
 // spezialzeichen werden in "..." versteckt.
@@ -178,15 +221,6 @@ SEARCHWORD1
 SEARCHWORD2
 	:	'"' (~('"') | '\\"')+ '"' ;
 
-// Annotationsoperator #ELEM( EAVEXPR ).
-// EAVEXPR = Element Attribut Value Expression.
-// alle Spezialzeichen vor dem Blank ausgeschlossen.
-// e.g. #ELEM(ANA='N pl'); #ELEM(HEAD, TYPE='DACHUEBERSCHRIFT');
-// e.g. #ELEM( ANA='N()' LEM='L\'Ã©tÃ©');
-
-fragment EAVEXPR
-	:	( ~( '(' | ')' | '\'' | ('\u0000'..'\u001F')) | ('\'' (~('\'' | '\\') | '\\' '\'')* '\'') )+ ;
-	
 fragment WORD
 	:	~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'
                     | '(' | ')' | '|' | '"' | ',' | ':' | '\'' | '\\' | '!' | '=' | '~' | '&' | '^' | '<' | '>' )+;
@@ -202,9 +236,7 @@ fragment RE_chars    : (RE_char | RE_chgroup | ( '(' RE_expr ')')) (('+'|'*'|FOC
 fragment RE_expr   : (RE_alter | RE_chars)+;
 fragment REGEX       : '"'  (RE_expr | '\'' | ':' )* '"';
 
-// "#ELEM()" nur fuer Fehlerbehandlung, ansonsten sinnlose Anfrage.
-OP_ELEM	:	'#ELEM(' EAVEXPR ')' | '#ELEM(' ')';
-
+/*
 fragment MORPHEXPR
 	: (WORD|REGEX)
 	| WORD ':' (WORD|REGEX)
@@ -213,10 +245,14 @@ fragment MORPHEXPR
 	| WORD '/' WORD '!'? '=' (WORD|REGEX)
 	| WORD '/' WORD '!'? '=' WORD ':' (WORD|REGEX)
 	;
-
+*/
+/*
 OP_MORPH:	'MORPH(' 
 				MORPHEXPR (' '* '&' ' '* MORPHEXPR)* ' '* 
 			')' ;
+*/
+
+// OP_MORPH:	'MORPH(' MORPHEXPR ( '&' MORPHEXPR)*  ')' ;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //
@@ -241,9 +277,9 @@ searchExpr
 
 searchExpr1
 	:	op1 			   -> {$op1.tree}
-	| 	searchWord 		   -> {$searchWord.tree}
 	| 	searchLemma 	   -> {$searchLemma.tree}
 	| 	searchAnnot 	   -> {$searchAnnot.tree}
+	| 	searchWord 		   -> {$searchWord.tree}
 	| 	searchLabel        -> {$searchLabel.tree}
 	| 	'(' searchExpr ')' -> {$searchExpr.tree};
 
@@ -265,11 +301,12 @@ searchLemma
 // Suchbegriff = Annotationsoperator:
 // (damit Lexer den richtige Token erzeugt, muss OP_ELEM den gesamten
 // Annot-Ausdruck als 1 Token erkennen).
+
 searchAnnot
 	:	OP_ELEM  
 		-> ^({c2ps_opELEM.check($OP_ELEM.text,$OP_ELEM.index)})
 	| 	OP_MORPH 
-		-> ^(OPMORPH ^({new CommonTree(new CommonToken(OPMORPH, c2ps_opAnnot.strip($OP_MORPH.text)))}));
+		-> ^( {c2ps_opMORPH.check($OP_MORPH.text, $OP_MORPH.index)} );
 
 // searchLabel: <s>, <p>, <Ã¼> etc.
 

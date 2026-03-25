@@ -2,13 +2,16 @@ package de.ids_mannheim.korap.query.parse.cosmas;
 
 import org.antlr.runtime.*;
 import org.antlr.runtime.tree.*;
+import de.ids_mannheim.korap.util.*;
 
 // parses Search Expression inside #ELEM(...):
 
 public class c2ps_opELEM
 
 {
-
+	final static boolean bShow  	 = false;
+	final static boolean bShowTokens = false;
+	
     /* Method check():
      * input: e.g. #ELEM(S), #ELEM(W ANA='DET ADJ'),
      *             #ELEM(ANA <> 'V sg' TYP !=VP), etc.
@@ -20,10 +23,13 @@ public class c2ps_opELEM
         c2ps_opELEMParser g = new c2ps_opELEMParser(tokens);
         c2ps_opELEMParser.opELEM_return c2PQReturn = null;
 
-        /*
-        System.out.println("check opELEM: " + index + ": " + "'" + input + "'");
-        System.out.flush();
-         */
+        if( bShow )
+        	{
+        	System.out.println("check opELEM: index=" + index + ", input='" + input + "'");
+        	System.out.flush();
+        	if( bShowTokens )
+        		TokenUtils.printLexerTokens(tokens, "opELEM");
+        	}
 
         try {
             c2PQReturn = g.opELEM();
@@ -34,7 +40,9 @@ public class c2ps_opELEM
 
         // AST Tree anzeigen:
         Tree tree = (Tree) c2PQReturn.getTree();
-        //System.out.println("#ELEM Opts: " + tree.toStringTree() );
+        
+        if( bShow )
+        	System.out.println("check opELEM: #ELEM Opts: " + tree.toStringTree() );
 
         return tree;
     }

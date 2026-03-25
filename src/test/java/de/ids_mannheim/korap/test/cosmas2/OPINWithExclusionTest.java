@@ -25,6 +25,7 @@ public class OPINWithExclusionTest {
     @Test
     public void testOPINWithExclusion ()
             throws JsonProcessingException, IOException {
+
         query = "wegen #IN(%) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -336,6 +337,7 @@ public class OPINWithExclusionTest {
         
         assertEquals("operation:class", seqOperand.at("/1/operation").asText());
         assertEquals(129, seqOperand.at("/1/classOut").asInt());
+
     }
-    
+
 }

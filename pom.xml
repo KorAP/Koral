@@ -33,6 +33,10 @@
 			<email>margaretha@ids-mannheim.de</email>
 		</developer>
 		<developer>
+			<name>Franck Bodmer</name>
+			<email>bodmer@ids-mannheim.de</email>
+		</developer>
+		<developer>
 			<name>Elena Irimia</name>
 		</developer>
 	</developers>
@@ -176,6 +180,7 @@
 		          	<exclude>**/c2ps_opBED.java</exclude>
 		          	<exclude>**/c2ps_opELEM.java</exclude>
 		          	<exclude>**/c2ps_opIN.java</exclude>
+		          	<exclude>**/c2ps_opMORPH.java</exclude>
 		          	<exclude>**/c2ps_opOV.java</exclude>
 		          	<exclude>**/c2ps_opPROX.java</exclude>
 		          	<exclude>**/c2ps_opREG.java</exclude>

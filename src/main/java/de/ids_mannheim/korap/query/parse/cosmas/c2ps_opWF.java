@@ -5,6 +5,7 @@ import org.antlr.runtime.tree.*;
 import de.ids_mannheim.korap.query.parse.cosmas.c2ps_opPROXLexer;
 import de.ids_mannheim.korap.query.parse.cosmas.c2ps_opPROX;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
+import de.ids_mannheim.korap.util.TokenUtils;
 
 /*
  * parses prefixed and suffixed options of a search wordform.
@@ -14,8 +15,9 @@ import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
 public class c2ps_opWF
 
 {
-	static final boolean bDebug = false; 
-
+	static final boolean bDebug 	= false; 
+	static final boolean showTokens	= false;
+	
     /* check:
      * Arguments:
      * bStrip: true: 'input' contains "wort" -> strip " away -> wort.
@@ -27,7 +29,10 @@ public class c2ps_opWF
 
     public static Tree check (String input, boolean bStrip, boolean bLem, int pos) 
     {
-    	if (bStrip)
+        if( bDebug )
+        	System.out.printf("Debug: opWF.check: input='%s' pos=%d.\n", input, pos);
+                
+        if (bStrip)
             input = input.substring(1, input.length() - 1);
 
         if (bLem && input.charAt(0) == '&') {
@@ -38,14 +43,13 @@ public class c2ps_opWF
         ANTLRStringStream ss = new ANTLRStringStream(input);
         c2ps_opWFLexer lex = new c2ps_opWFLexer(ss);
         CommonTokenStream tokens = new CommonTokenStream(lex);
+        
+        if( bDebug && showTokens )
+        	TokenUtils.printLexerTokens(tokens, "opWF");
+        
         c2ps_opWFParser g = new c2ps_opWFParser(tokens);
         c2ps_opWFParser.searchWFs_return c2PQWFReturn = null;
         c2ps_opWFParser.searchLEM_return c2PQLEMReturn = null;
-
-        /*
-        System.out.println("check opWF:" + index + ": " + input);
-        System.out.flush();
-        */
 
         try {
             if (bLem)
@@ -57,6 +61,11 @@ public class c2ps_opWF
             e.printStackTrace();
         }
 
+        // convert OPWF(Haus (TPOS sa)) -> OPBED( (OPWF(Haus )(TPOS ..sa)).
+        // reason: the serializer can handle (TPOS...) inside OPBEG, but not inside OPWF(...).
+        // to avoid double implementation of TPOS serialization, insert (OPWF TPOS) into (OPBED...).
+        // 11.06.26/FB
+        
         // AST Tree anzeigen:
         Tree tree = bLem ? (Tree)c2PQLEMReturn.getTree() : (Tree)c2PQWFReturn.getTree();
         
@@ -66,6 +75,9 @@ public class c2ps_opWF
         			 tree.toStringTree() );
         	 System.out.flush();
         	 }
+
+       if( bDebug )
+        	System.out.printf("Debug: opWF.check: returning tree='%s'.\n", tree.toStringTree());
 
         return tree;
     }

@@ -15,14 +15,17 @@ import de.ids_mannheim.korap.query.parse.cosmas.c2psParser;
 import de.ids_mannheim.korap.query.serialize.util.Antlr3DescriptiveErrorListener;
 import de.ids_mannheim.korap.query.serialize.util.Converter;
 import de.ids_mannheim.korap.query.serialize.util.KoralObjectGenerator;
+import de.ids_mannheim.korap.query.serialize.util.MORPH_Mapper;
 import de.ids_mannheim.korap.query.serialize.util.ResourceMapper;
 import de.ids_mannheim.korap.query.serialize.util.StatusCodes;
-import de.ids_mannheim.korap.util.StringUtils;
+import de.ids_mannheim.korap.util.*;
 
 import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.FailedPredicateException;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
+import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
@@ -43,12 +46,15 @@ import java.util.regex.Pattern;
  * @author Joachim Bingel (bingel@ids-mannheim.de)
  * @author Nils Diewald (diewald@ids-mannheim.de)
  * @author Eliza Margaretha (margaretha@ids-mannheim.de)
- * @version 0.3
+ * @author Franck Bodmer (bodmer@ids-mannheim.de)
+ * @version 0.4 -- 09.06.26/FB
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
-    private static final boolean DEBUG = false;
-
+	private static final boolean DEBUG 		 	= false;
+	private static final boolean bShowTokens 	= false;
+	private static final boolean showRegGroups	= false;
+	
     private static Logger log =
             LoggerFactory.getLogger(Cosmas2QueryProcessor.class);
 
@@ -56,6 +62,15 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     
     private LinkedList<Map<String, Object>[]> toWrapStack =
             new LinkedList<Map<String, Object>[]>();
+    
+    // default layer for part of speech: 'p'; 'pos' is for Poliqarp.
+    private static final String LAYER_POS   = "p"; 
+    private static final String LAYER_S	 	= "s"; // structure layer for span: e.g. <s>, <p>, <head>, etc. 
+
+    // types for handling of #ELEM() and MORPH()
+    private static final int opELEM			= 1;
+    private static final int opMORPH		= 2;
+    
     /**
      * Field for repetition query (Kleene + or * operations, or
      * min/max queries: {2,4}
@@ -85,8 +100,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     private boolean inOPALL = false;
     private boolean inOPNHIT = false;
     /**
-             *
-             */
+     *
+     */
     private int classCounter = 1;
     private boolean negate = false;
 
@@ -135,6 +150,30 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     public static Pattern wildcardStarPattern = Pattern.compile("([*])");
     public static Pattern wildcardPlusPattern = Pattern.compile("([+])");
     public static Pattern wildcardQuestionPattern = Pattern.compile("([?])");
+
+	static void printLexerTokens(CommonTokenStream tokens )
+		
+	{
+		if( tokens == null )
+			{
+			System.out.printf("Debug: Tokens: empty!\n");
+			return;
+			}
+		
+		tokens.fill();
+		
+		if( tokens.size() == 0 )
+			{
+			System.out.printf("Debug: Tokens: empty!\n");
+			return;
+			}
+		
+		for( Token token : tokens.getTokens())
+			{
+			//System.out.printf("Debug: Token: '%s'.\n",  token.toString());
+			System.out.printf("Debug: Token: '%s'.\n",  token.toString());
+			}
+	}
 
 	/**
 	 * reportErrorsinTree:
@@ -483,7 +522,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // See C-II QL documentation for more detail:
         // http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/textpositionen.html
 
-        // Step I: create group
+    	if( DEBUG )
+    		System.out.printf("Debug: processOPBED: '%s'.\n",  node.toStringTree());
+    	
+    	// Step I: create group
         int optsChild = node.getChildCount() - 1;
         Tree begConditions =
                 getFirstChildWithCat(node.getChild(optsChild), "TPBEG");
@@ -503,13 +545,13 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
                 new ArrayList<Map<String, Object>>();
         if (begConditions != null) {
             for (Tree condition : getChildren(begConditions)) {
-                conditionGroups.add(processPositionCondition(condition,
+            	conditionGroups.add(processPositionCondition(condition,
                         distributedOperands, "beg"));
             }
         }
         if (endConditions != null) {
             for (Tree condition : getChildren(endConditions)) {
-                conditionGroups.add(processPositionCondition(condition,
+            	conditionGroups.add(processPositionCondition(condition,
                         distributedOperands, "end"));
             }
         }
@@ -1003,167 +1045,794 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     }
 
 
-    // TODO: The handling of attributes vs. element names is somehow disputable ...
+    private void printOPELEM(Tree node)
+    {
+    	int nChilds = node.getChildCount();
+    	
+		System.out.printf("Debug: processOPELEM: Tree node'%s'.\n", node.toStringTree());
+		System.out.printf("Debug: processOPELEM: #childs: %d.\n", nChilds);
+		
+		for(int i=0; i<nChilds; i++)
+		{
+			Tree child = node.getChild(i);
+			System.out.printf("Debug: processOPELEM: child[%d]='%s' #=%d.\n", i, child.toStringTree(),
+					child.getChildCount());
+		}
+    }
+   
+    /*
+     * isLayerForPOS()
+     * 
+     * returns true if layer applies to a POS query, i.e. a token Query.
+     *         false in all other cases, i.e. they apply to a span query.
+     * - foundries are not handled in Koral, so they cannot be used to determine
+     *   if a query relates to token or span.
+     * - "ne" = named entities: span or token?
+     * 13.05.26/FB
+     */
+    
+    private boolean isLayerForPOS(String layer)
+    
+    {
+    	if( layer.equals("p") || layer.equals("l") || layer.equals("m") || layer.equals("ne") )
+    		return true;
+    	
+    	return false; // not for POS
+    }
+    	
+    /* addSubVal()
+     * 
+     * sets fields "key" and "value" from attVal.
+     * if attVal == "v1:v2" -> key : "v1", value : "v2"
+     * else -> value : "attVal".
+     * return: 
+     * 		true if a negative value is stored in field 'value'. E.g. Attval = "number:-PL",
+     * 		false if not. 
+     * 05.05.26/FB
+     */
+    private boolean addSubVal(Map<String, Object> term, String attVal)
+    
+    {
+    	boolean
+    		isNeg;
+    	String[]
+    		splitted = attVal.split(":");
+    	/*
+    	System.out.printf("Debug: addSubVal: attVal='%s' splitted.size=%d.\n", attVal, splitted.length);
+    	if( splitted.length > 1)
+    		System.out.printf("Debug: addSubVal: splitted[0]='%s' %d, splitted[1]='%s' %d.\n", splitted[0], splitted[0].length(), splitted[1], splitted[1].length());
+		*/
+    	
+    	// avoid special case: attVal=":abc" -> splitted.length = 2 & splitted[0] = '', or splitted.length > 2, e.g. attVal="abc:def:ghi" with multiple ':'.
+    	if( splitted.length == 2 && splitted[0].length() > 0 && splitted[1].length() > 0 )
+    		{ // attVal = "key:value", e.g. "gender:fem".
+    		term.put("key", splitted[0]);
+    		isNeg = addNegVal(term, "value", splitted[1]);
+    		}
+    	else
+    		{ // not splitted: store key : attVal.
+    		isNeg = addNegVal(term, "key", attVal);
+    		}
+    	
+    	return isNeg;
+    }
+    
+    /* addNegVal:
+     * - add AttVal to field 'field' of 'term'.
+     * - if attVal ='-SG' : add 'SG' to the field and return isNeg=true.
+     *      else: add AttVal as is and return isNeg=false.
+     * 20.04.26/FB
+     */
+    
+    private boolean addNegVal(Map<String, Object> term, String field, String attVal)
+    
+    {
+    if( DEBUG )
+    	System.out.printf("Debug: addNegVal: attVal = '%s'.\n", attVal);
+   
+   	if( attVal.charAt(0) == '-' )
+		{
+		term.put(field, attVal.substring(1)); // skip '-'.
+		return true;
+		}
+	else
+		{
+		term.put(field, attVal);
+		return false;
+		}
+	} // addNegValue
+
+    /* addAttVal:
+     * 
+     * - normal case: adds key=attName and value=AttVal to 'term'.
+     * - POS (part of speech) case: iPOS=true or attName='ana':
+     *   adds key=attVal.
+     *   attName is not added, but it switches to layer=LAYER_POS, so 'value' is unused.
+     *   attVal: '-Val' is converted to key=Val (without '-') and match=NOT_EQUALS.
+     * - returns true if layer is specified and it applies to a part of speech query (isLayerPOS = true). 
+     *           e.g. layer=p
+     * 17.04.26/FB
+     * 11.05.26/FB all layers added which apply to a POS query -> this is dereko specific!
+     */
+    
+    private boolean addAttVal(Map<String, Object> term, boolean isPOS, String nodeCat, String attName, String attVal)
+    
+    {
+    boolean 
+    	isNeg 		= false,
+    	isLayerPOS 	= false;
+    String[] 
+        	splitted = attName.split("/");
+        
+    if( DEBUG )
+    	System.out.printf("Debug: addAttVal: isPOS=%b attName='%s' attVal='%s'.\n",
+    			isPOS, attName, attVal);
+    
+    if (splitted.length > 1) 
+    	{ // foundry+layer specified: #ELEM(dereko/s=val).
+    	if(DEBUG)
+    		System.out.printf("Debug: processOPELEM: splitted[0]='%s' splitted[1]='%s'.\n",
+    				splitted[0], splitted[1]);
+    	
+        term.put("foundry", splitted[0]);
+        term.put("layer",   splitted[1]);
+        isNeg = addSubVal(term, attVal);
+       
+        if( isLayerForPOS(splitted[1]) )
+        	isLayerPOS = true;
+        }
+    else if( isPOS || attName.equals("ana") )
+    	{ // case for part of speech POS: isPOS: #ELEM(W ana='N'), or att='ana': #ELEM(ana='N').
+    	  // if attVal == -value : set NOT_EQUAL and remove negation mark.
+    	if( attName.equals("ana") == true )
+    		{ // 'ana' is not stored. a. attVal="NOU" -> store "key" = attVal (no "value");
+    		  // b. attVal="gender:fem" -> store "key" = "gender" and "value" = "fem":
+    		isNeg = addSubVal(term, attVal);
+            }
+    	else
+    		{
+    		// still layer=p (isPOS==true), but key == value should be searched as this is not a POS att-value-pair.
+    		// no attVal = "x:y" expected.
+    		term.put("key", attName);
+            isNeg = addNegVal(term, "value", attVal);
+    		}
+    		    		
+    	term.put("layer", LAYER_POS);
+    	}
+    else
+    	{ // normal case: layer = s, not a POS:
+    	  // no attVal = "x:y" expected.
+		term.put("key", attName);
+        term.put("layer", "s"); // "s" is default for #ELEM().
+        isNeg = addNegVal(term, "value", attVal);
+    	}
+    
+    // consider the negation mark in front of the key, too:
+    KoralMatchOperator match =
+            isNeg == true || nodeCat.equals("NOTEQ")
+                    ? KoralMatchOperator.NOT_EQUALS
+                    : KoralMatchOperator.EQUALS;
+    
+    term.put("match", match.toString());
+    return isLayerPOS;
+	} // addAttVal
+
+    /* hasPOS()
+     * - returns true if tree 'node' has a 'W' element name or, if there is not element name specified,
+     *   any of its attribute is 'ana'.
+     * - returns false else.
+     * - E.g. #ELEM(W ana=NOU), #ELEM(ana=NOU), #ELEM(W): return true.
+     *        #ELEM(Head), #ELEM(head ana=top): return false.
+     * 24.04.26/FB
+     * 
+     */
+    private boolean hasPOS(Tree node)
+    
+    {
+    	Tree
+    		elNode = getFirstChildWithCat(node, "ELNAME");
+    	
+        if( elNode != null )
+        	{ // if element has a name, it must be "W".
+            if( elNode.getChild(0).toString().toLowerCase().equals("w") )
+	        	return true;
+	        else
+            	return false;
+	    	}
+        	
+        // if element has no name, see if it has an attribute name = "ana":
+    	for (int i = 0; i < node.getChildCount(); i++) 
+        	{
+    		Tree 
+    			child = node.getChild(i);
+    		if( child.getChildCount() > 0)
+    			{
+	    		String
+	    			attName = child.getChild(0).toStringTree().toLowerCase(); // attr. name lowered.
+	    		if( attName.equals("ana") )
+	            	return true;
+	        	}
+        	}
+        return false;
+    }
+    
+    /* TODO: The handling of attributes vs. element names is somehow disputable ...
+     * E.g. Tree node'(OPELEM (ELNAME BoBo) (EQ type TOP) (EQ ana N SG))'
+     * -> 3 children: (ELNAME Bobo), (EQ type TOP), (EQ ana N SG).
+     *    child[0]='(ELNAME BoBo)' #subChildren=1.
+		  child[1]='(EQ type TOP)' #subChildren=2.
+	 	  child[2]='(EQ ana N SG)' #subChildren=3.
+	 *
+     * - Element name expected by the grammar should be a single name without foundry/layer:
+     *   e.g. "HEAD"          : (ELNAME head) : OK; 
+     *        "dereko/s=HEAD" : (EQ dereko/s head) : node ELNAME is lost!
+     * Corrections: 
+     * 24.03.26/FB missing default layer 's' added.
+     * 26.03.26/FB correct field names to attributes.
+     * 27.03.26/FB attribute name to lowercase, attribute value not: corrected.
+     *             element with several attributes and attributes with several values: corrected.
+     * 23.04.26/FB spec. case: #ELEM(w ana=..) is a Koral:term, not a Koral:span.
+     */
+    
     @SuppressWarnings("unchecked")
-    private void processOPELEM (Tree node) {
-        // Step I: create element
-        Map<String, Object> span = KoralObjectGenerator.makeSpan();
+    private void processOPELEM (Tree node) 
+    {
+    	if( DEBUG )
+    		printOPELEM(node);
+    
+        // Step I: create element: 'span' = a span or a term (spec. case: #ELEM(w).
+        Map<String, Object> 
+        	span; // = KoralObjectGenerator.makeSpan();
+        boolean
+        	isLayerPOS = false;
+        
+        if( hasPOS(node))
+        	span = KoralObjectGenerator.makeToken(); // not makeTerm().
+        else
+        	span = KoralObjectGenerator.makeSpan();
+        
         if (node.getChild(0).toStringTree().equals("EMPTY")) {
             addError(StatusCodes.MALFORMED_QUERY, "Empty #ELEM() operator."
-                    + " Please specify a valid element key (like 's' for sentence).");
+                    + " Please specify a valid element name (like 's' for sentence).");
             return;
         }
-        else {
-            int elname = 0;
-            Tree elnameNode = getFirstChildWithCat(node, "ELNAME");
+       
+        int elname = 0;
+        boolean 
+        	isPOS = false,	// wordpos = part of speech, if #ELEM(w ana=...).
+        	isW   = false;	// #ELEM(W)
+        
+        Tree elnameNode = getFirstChildWithCat(node, "ELNAME");
+        /*
+        // TODO: This is identical to processOPMORPH
+        String wordOrRegex = "\\w+|\".+?\"";
+        Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(" + wordOrRegex
+        							+ ")(:(" + wordOrRegex + "))?");
+        */
+
+        if (elnameNode != null) 
+        {
+        	if( DEBUG )
+        		System.out.printf("Debug: processOPELEM: elnameNode='%s'.\n", elnameNode.toStringTree());
+
+        	String
+        		elName = elnameNode.getChild(0).toString().toLowerCase();
+
+        	Map<String, Object> 
+            	fm = termToFieldMap(elName); // key=elName.
+
+            if (fm == null) 
+            	return;
+
+            // special keys -> special layers:
+            if( elName.equals("w"))
+            	{
+            	// default layer for word pos. = LAYER_POS.
+            	fm.put("layer", LAYER_POS); 
+            	fm.remove("key"); // remove 'w' as a key as it is not stored in KorAP.
+            	isPOS = true;
+            	isW   = true;
+            	}
+            else
+            	fm.put("layer", LAYER_S); // default layer for span.
+
+        	// add 'wrap' only if not #ELEM(W), i.e. element 'W' withou children:
+            if( !isW || node.getChildCount() > 1 ) 
+            	span.put("wrap", fm);
+	            
+            elname = 1;                
+        }
+        else
+        	{
+        	// for #ELEM( att=val ) without an element name, also add a "wrap" with an empty key;
+        	// otherwise the att/val pair(s) will be inserted outside a "wrap".
+        	Map<String, Object> 
+        		wrap = KoralObjectGenerator.makeTerm();
+            
+            span.put("wrap", wrap); // adds an empty "wrap".
+        	}
+        
+        if (node.getChildCount() > elname) {
             /*
-            // TODO: This is identical to processOPMORPH
-            String wordOrRegex = "\\w+|\".+?\"";
-            Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(" + wordOrRegex
-            							+ ")(:(" + wordOrRegex + "))?");
-            */
-
-            if (elnameNode != null) {
-                /*
-                span.put("key", elnameNode.getChild(0).toStringTree()
-                        .toLowerCase());
-                */
-                Map<String, Object> fm =
-                        termToFieldMap(elnameNode.getChild(0).toStringTree());
-
-                if (fm == null) return;
-
-                // Workaround for things like #ELEM(S) to become #ELEM(s)
-                if (fm.get("foundry") == null && fm.get("layer") == null
-                        && fm.get("key") != null) {
-                    fm.put("key", fm.get("key").toString().toLowerCase());
-                };
-                span.put("wrap", fm);
-                elname = 1;
-
-            }
-
-            if (node.getChildCount() > elname) {
-                /*
-                 * Attributes can carry several values, like #ELEM(W
-                 * ANA != 'N V'), denoting a word whose POS is neither
-                 * N nor V. When seeing this, create a sub-termGroup
-                 * and put it into the top-level term group, but only
-                 * if there are other attributes in that group. If
-                 * not, put the several values as distinct
-                 * attr-val-pairs into the top-level group (in order
-                 * to avoid a top-level group that only contains a
-                 * sub-group).
-                 */
-                Map<String, Object> termGroup = KoralObjectGenerator
-                        .makeTermGroup(KoralTermGroupRelation.AND);
-                ArrayList<Object> termGroupOperands =
-                        (ArrayList<Object>) termGroup.get("operands");
-                for (int i = elname; i < node.getChildCount(); i++) {
-                    Tree attrNode = node.getChild(i);
-                    if (attrNode.getChildCount() == 2) {
+             * Attributes can carry several values, like #ELEM(W
+             * ANA != 'N V'), denoting a word whose POS is neither
+             * N nor V. When seeing this, create a sub-termGroup
+             * and put it into the top-level term group, but only
+             * if there are other attributes in that group. If
+             * not, put the several values as distinct
+             * attr-val-pairs into the top-level group (in order
+             * to avoid a top-level group that only contains a
+             * sub-group).
+             */
+            Map<String, Object> termGroup = KoralObjectGenerator
+                    .makeTermGroup(KoralTermGroupRelation.AND);
+            ArrayList<Object> termGroupOperands =
+                    (ArrayList<Object>) termGroup.get("operands");
+            
+            // 1 child = attribute; foundry/layer not expected for attributes,
+            // they are the same for all attributes:
+            for (int i = elname; i < node.getChildCount(); i++) 
+            {
+                Tree attrNode = node.getChild(i);
+                if( DEBUG ) 
+                	System.out.printf("Debug: processOPELEM: attrNode='%s #=%d'.\n", attrNode.toStringTree(), attrNode.getChildCount());
+                if (attrNode.getChildCount() == 2) 
+                	{
+                    Map<String, Object> term =
+                            KoralObjectGenerator.makeTerm();
+                    termGroupOperands.add(term);
+                    
+                    // String layer = attrNode.getChild(0).toStringTree();
+                    if( DEBUG ) System.out.printf("Debug: processOPELEM: child[0]='%s' child[1]='%s'.\n", 
+                    		attrNode.getChild(0).toStringTree(),
+                    		attrNode.getChild(1).toStringTree());
+                    
+                    String 
+                    	nodeCat = getNodeCat(attrNode),
+                    	attName = attrNode.getChild(0).toStringTree().toLowerCase(), // attr. name lowered.
+                    	attVal  = attrNode.getChild(1).toStringTree();
+                    
+                    if( addAttVal(term, isPOS, nodeCat, attName, attVal) )
+                        isLayerPOS = true;
+                	}
+                else 
+                	{ // childCount != 2:
+                    Map<String, Object> subTermGroup = KoralObjectGenerator
+                            .makeTermGroup(KoralTermGroupRelation.AND);
+                    ArrayList<Object> subTermGroupOperands =
+                            (ArrayList<Object>) subTermGroup.get("operands");
+                    if( DEBUG )
+                    	System.out.printf("Debug: att='%s', #values = %d.\n", 
+                    			attrNode.getChild(0).toStringTree(),
+                    			attrNode.getChildCount());
+                    
+                    if( attrNode.getChild(0).toStringTree().toLowerCase().equals("ana") )
+                    	isPOS = true; // for the case 'W' is not specified.
+                    
+                    int j;
+                    for (j = 1; j < attrNode.getChildCount(); j++) {
                         Map<String, Object> term =
                                 KoralObjectGenerator.makeTerm();
-                        termGroupOperands.add(term);
-                        String layer = attrNode.getChild(0).toStringTree();
-                        String[] splitted = layer.split("/");
-                        if (splitted.length > 1) {
-                            term.put("foundry", splitted[0]);
-                            layer = splitted[1];
+                        if( DEBUG )
+                        	System.out.printf("Debug: att='%s' val[%d]='%s' isPOS=%b.\n", 
+                        			attrNode.getChild(0).toStringTree(), j,
+                        			attrNode.getChild(j).toStringTree(), isPOS);
+                        String 
+                        	nodeCat = getNodeCat(attrNode),
+                        	attName = attrNode.getChild(0).toStringTree().toLowerCase(), // attr. name lowered.
+                        	attVal  = attrNode.getChild(j).toStringTree();
+                        
+                        if( addAttVal(term, isPOS, nodeCat, attName, attVal) )
+                            isLayerPOS = true;
+                        
+                    	if (node.getChildCount() == elname + 1) {
+                            termGroupOperands.add(term);
                         }
-                        term.put("layer", translateMorph(layer));
-                        term.put("key", attrNode.getChild(1).toStringTree());
-                        KoralMatchOperator match =
-                                getNodeCat(attrNode).equals("EQ")
-                                        ? KoralMatchOperator.EQUALS
-                                        : KoralMatchOperator.NOT_EQUALS;
-                        term.put("match", match.toString());
-                    }
-                    else {
-                        Map<String, Object> subTermGroup = KoralObjectGenerator
-                                .makeTermGroup(KoralTermGroupRelation.AND);
-                        ArrayList<Object> subTermGroupOperands =
-                                (ArrayList<Object>) subTermGroup
-                                        .get("operands");
-                        int j;
-                        for (j = 1; j < attrNode.getChildCount(); j++) {
-                            Map<String, Object> term =
-                                    KoralObjectGenerator.makeTerm();
-                            String layer = attrNode.getChild(0).toStringTree();
-                            String[] splitted = layer.split("/");
-                            if (splitted.length > 1) {
-                                term.put("foundry", splitted[0]);
-                                layer = splitted[1];
-                            }
-                            term.put("layer", translateMorph(layer));
-                            term.put("key",
-                                    attrNode.getChild(j).toStringTree());
-                            KoralMatchOperator match =
-                                    getNodeCat(attrNode).equals("EQ")
-                                            ? KoralMatchOperator.EQUALS
-                                            : KoralMatchOperator.NOT_EQUALS;
-                            term.put("match", match.toString());
-                            if (node.getChildCount() == elname + 1) {
-                                termGroupOperands.add(term);
-                            }
-                            else {
-                                subTermGroupOperands.add(term);
-                            }
-                        }
-                        if (node.getChildCount() > elname + 1) {
-                            termGroupOperands.add(subTermGroup);
+                        else {
+                            subTermGroupOperands.add(term);
                         }
                     }
-                    if (getNodeCat(attrNode).equals("NOTEQ")) negate = true;
+                    if (node.getChildCount() > elname + 1) {
+                        termGroupOperands.add(subTermGroup);
+                    }
                 }
-                // possibly only one term was present throughout all
-                // nodes: extract it from the group
-                if (termGroupOperands.size() == 1) {
-                    termGroup = (Map<String, Object>) termGroupOperands.get(0);
-                }
-
-                // TODO: This should be improved ...
-                if (elname == 0) {
-                    span.put("wrap", termGroup);
-                }
-                else {
-                    span.put("attr", termGroup);
-                }
+                if (getNodeCat(attrNode).equals("NOTEQ")) negate = true;
             }
+            // possibly only one term was present throughout all
+            // nodes: extract it from the group
+            if (termGroupOperands.size() == 1) 
+                termGroup = (Map<String, Object>) termGroupOperands.get(0);
+
+            // if 'wrap' exists, add termGroup as 'attr' to 'wrap',
+            // else add termGroup as 'attr'.
+        	Object
+        		wrap = span.get("wrap");
+            
+            if ( wrap != null ) 
+            	{
+            	Map<String, Object> 
+            		fmWrap = (Map <String, Object>)wrap;
+            	fmWrap.put("attr", termGroup);
+            	if( DEBUG )
+            		System.out.printf("Debug: processELEM: adding termGroup to 'attr' to 'wrap'.\n");
+            	}
+            else 
+            	{
+            	if( DEBUG )
+            		System.out.printf("Debug: processElem: no 'wrap': adding termGroup into 'attr'.\n");
+                span.put("attr", termGroup);
+            	}
         }
+        
+        // replace 'span' by 'token' if layer has specified a part of speech:
+        if( isLayerPOS )
+        	span.put("@type",  "koral:token");
+        
         // Step II: decide where to put
         putIntoSuperObject(span);
     }
 
+    /* combineAnnot
+     * - return the first 2 children of node as 1 combination,
+     *   if at least 2 children exist.
+     * 20.06.26/DB
+     */
+    
+    private String combineAnnot(Tree node, int n)
+    
+    {
+    if( node.getChildCount() < n )
+    	return null; // no combination possible.
+    
+    String
+    	combi = "";
 
-    private void processOPMORPH (Tree node) {
+    for(int i=0; i<n; i++)
+	    {
+    	if( i == 0 )
+    		combi = combi.concat(node.getChild(i).toString().toUpperCase());
+    	else
+    		combi = combi.concat(" " + node.getChild(i).toString().toLowerCase());
+	    }
+    
+    if( DEBUG )
+    	System.out.printf("Debug: combineAnnot: combi='%s'.\n", combi);
+    
+    return combi;
+    }
+    
+    /* combineAnnots:
+     * tries combinations of the first 3 or 2 values and looks up for a match in MORPH_Mapper for CONNEXOR tags.
+     * 19.06.26/FB
+     */
+    
+    private int combineAnnots(Tree node, List<String>newAnnots)
+    
+    {
+    final String 
+    	func = "Debug: combineAnnots";
+    String
+    	annotCombi = null,
+    	newAnnot;
+    
+    for(int n=3; n>1; n--)
+    	{
+	    if( node.getChildCount() >= n && (annotCombi = combineAnnot(node, n)) != null )
+		    {
+	    	newAnnot = MORPH_Mapper.translate_CONNEXOR(annotCombi); 
+	        if( newAnnot != null )
+		    	{
+		    	if( DEBUG )
+		    		System.out.printf("%s: combi='%s' -> '%s'-> returns %d.\n",  func, annotCombi, newAnnot, n);
+		    	newAnnots.add(newAnnot);
+		    	return n; // the first n values have been consumed.
+		    	}
+	        else
+		        {
+		        if( DEBUG ) System.out.printf("%s: combi='%s' -> null.\n", func, annotCombi);
+			    }
+		    }
+    	}
+
+    if( DEBUG ) 
+    	System.out.printf("%s: returns 0.\n", func);
+    
+    return 0; // no combination matches, so no. values comsumed.
+    }
+
+    /* rearrangeChildren:
+     * - rearrange order of children of node: POS children first, morph children last,
+     * - keep sort order inside POS and morph values.
+     * - E.g. MORPH(V imp -inf past -pcp) -> MORPH(V -inf -pcp imp past).
+     * - Reason: "V -inf -pcp" must be kept together, because they translate together to a STTS POS;
+     *         "imp", "past" are single morph annotations that translate one by one.
+     * 22.06.26/FB 
+     */
+    
+    private void rearrangeChildren(Tree node, int nChildren)
+    
+    {	final String 
+    		func = "Debug: rearrangeChildren";
+    	ArrayList<String>
+    		children,				// POS and morph children.
+    		morphChildren = null;	// morph children only.
+    	
+    	if( nChildren == 0 )
+    		return; 
+    	
+    	if( DEBUG )
+    		System.out.printf("%s: input: '%s'.\n", func, node.toStringTree());
+    	
+    	children 	  = new ArrayList<String>();
+    	morphChildren = new ArrayList<String>();
+    	
+    	for(int i=0; i<nChildren; i++)
+    		{
+    		String child = node.getChild(i).toString();
+    		
+    		if( MORPH_Mapper.isMorphAnnot(child) == false )
+    			children.add(child);
+    		else
+    			morphChildren.add(child);
+    		}
+    	
+    	// add morph children after POS children:
+    	for(int i=0; i<morphChildren.size(); i++)
+    		children.add( morphChildren.get(i) );
+    	
+    	// overwrite children values in Tree node using order in children list.
+    	for(int i=0; i<nChildren; i++)
+    		{
+    		Tree child 				= node.getChild(i);
+    		CommonTree commonChild  = (CommonTree) child;
+    		commonChild.getToken().setText(children.get(i));
+    		}
+ 
+       	if( DEBUG )
+    		System.out.printf("%s: return node as '%s'.\n", func, node.toStringTree());
+    }
+    
+    /* translate_MORPH_STTS:
+     * 
+     * - translates a MORPH/STTS expression to a STTS annotation,
+     *   i.e. translates from C2-style to STTS-style.
+     * - e.g. "VRB fin a"  -> VAFIN.
+     * - e.g. "VRB fin -a" -> V.FIN -VAFIN.
+     * - e.g. "VRB -fin a" -> V.* - F.FIN.
+     * - e.g. "-VRB fin a" -> -V.*.
+     * - 1st annot expected to be in upper case, the following annots to be in lower case.
+     * Returns: STTS annotation if found, null else.
+     * 16.05.26/FB
+     */
+    
+    private List<String> translate_MORPH_STTS(Tree node)
+    
+    {
+    final String 
+    	func = "Debug: translate_MORPH_STTS";
+    int
+    	nChildren = node.getChildCount();
+    List<String>
+    	annots = new ArrayList<String>();
+    List<String>
+    	annots_STTS = null;
+    int 
+    	iFirst = -1;
+   	String
+		annotSTTS = null; 
+    
+   	for(int i=0; i<nChildren; i++)
+   		{
+   		String child = node.getChild(i).toString();
+   		if( child.startsWith("-") )
+   			{
+   			child = child.substring(1);
+   			if( iFirst == -1 )
+   				iFirst = i;
+   			}
+
+   		if( i==0 )
+   			annots.add(child.toUpperCase());
+   		else
+   			annots.add(child.toLowerCase());
+   		}
+   	
+   	if( iFirst == -1 )
+   		{ // simple translation when no annot. is negative:
+   		annotSTTS = MORPH_Mapper.translate_STTS(annots);
+   		if( annotSTTS != null )
+   			{
+   			annots_STTS = new ArrayList<String>(1);
+   			annots_STTS.add(annotSTTS);
+   	   	   	//System.out.printf("%s: %s translates to: '%s'.\n", func, annots.toString(), annotSTTS == null ? "null" : annotSTTS);
+   	 		}
+   		}
+   	else if( iFirst == 0 )
+	   	{ // "-VRB..." -> "-V.*" 
+   		annotSTTS = MORPH_Mapper.translate_STTS(annots.subList(0, 1));
+   		if( annotSTTS != null )
+   			{
+   			annots_STTS = new ArrayList<String>(1);
+   			annots_STTS.add("-" + annotSTTS);
+   	   	   	//System.out.printf("%s: %s translates to: '%s'.\n", func, annots.toString(), annotSTTS == null ? "null" : annotSTTS);
+   	 		}	
+	   	}
+   	else
+   		{ // this returns a list of 2 STTS annotations.
+   		annots_STTS = MORPH_Mapper.translate_STTS_withNeg(annots, iFirst);
+   		// System.out.printf("%s: %s translates to: '%s'.\n", func, annots.toString(), annots_STTS == null ? "null" : annots_STTS);
+   	   	}
+
+   	if( DEBUG )
+   		System.out.printf("%s: %s translates to: '%s'.\n", func, annots.toString(), annots_STTS == null ? "null" : annots_STTS);
+	   	
+   	return annots_STTS;
+    }
+    
+    /* translate_MORPH_CONNEXOR:
+     * 
+     * - translates a MORPH expression to a STTS annotation,
+     *   i.e. translates vom C2-style to STTS-style.
+     * - e.g. "VRB fin a"  -> VAFIN.
+     * - e.g. "VRB fin -a" -> V.FIN -VAFIN.
+     * - e.g. "VRB -fin a" -> V.* - F.FIN.
+     * - e.g. "-VRB fin a" -> -V.*.
+     * - tag combinations:
+     *   e.g. "N prop" -> "NE"
+     *   e.g. "N -prop" -> "NN"
+     *   
+     * Returns: STTS annotation if all values could be translated, null else.
+     * 16.05.26/FB
+     */
+    
+    private List<String> translate_MORPH_CONNEXOR(Tree node)
+    
+    {
+    	final String 
+    		func = "translate_MORPH_CONNEXOR";
+    	int
+     		nChildren = node.getChildCount();
+	    List<String>
+	     	newAnnots = new ArrayList<String>();
+	    String 
+	     	newAnnot;
+	    int
+	    	iSkip = 0; // default: skip no children.
+	    boolean
+	    	hasUnknownValues = false;
+	    
+	    // 0. rearrange order of children inside node: 
+	    rearrangeChildren(node, nChildren);
+	    
+	    // 1. try combinations of the first 2 or 3 values including negative prefix.
+	    //    iSkip returns the no. of consumed values, may be 0 if none matches.
+	    //    the translated combination is added to newAnnots:
+	    iSkip = combineAnnots(node, newAnnots);
+	    
+	    // 2. try to translate single values and/or the remaining values after combination has been found (iSkip>0):
+	    //    break at the first value that cannot be translated.
+    	for(int i=iSkip; i<nChildren; i++)
+    		{
+    		String 
+    			child = node.getChild(i).toString();
+    		boolean
+    			isNeg = false;
+    		
+    		if( child.startsWith("-") )
+				{
+    			isNeg = true;
+    			child = child.substring(1);
+				}
+    		
+    		if( i==0 )
+    			newAnnot = MORPH_Mapper.translate_CONNEXOR(child.toUpperCase());
+    		else
+    			newAnnot = MORPH_Mapper.translate_CONNEXOR(child.toLowerCase());
+    		
+    		// add translated annotation if found, else break.
+    		if( newAnnot == null )
+    			{
+    			hasUnknownValues = true;
+    			break; // cannot convert CONNEXOR annotation(s) fully.
+    			}
+    		
+    		// convert to negative value
+    		if( isNeg )
+    			newAnnot = newAnnot.replace("=", "!=");
+    		
+    		newAnnots.add(newAnnot);	
+    		}
+    	
+    	if( DEBUG )
+    		System.out.printf("%s: node='%s' translates to '%s' unknown=%b.\n", func, node.toStringTree(), 
+    							newAnnots != null ? newAnnots.toString() : "null", hasUnknownValues);
+    	
+    	return newAnnots == null || newAnnots.size() == 0 || hasUnknownValues ? null : newAnnots;
+    }
+    
+    /* processOPMORPH: 
+     * - STTS annotation in C2 style are translated to STTS style.
+     * - e.g. "N ne" -> "NE". 
+     * 27.03.26/FB
+     */
+
+    private void processOPMORPH (Tree node) 
+    {
         // Step I: get info
-        String[] morphterms =
-                node.getChild(0).toStringTree().replace(" ", "").split("&");
-        Map<String, Object> token = KoralObjectGenerator.makeToken();
-        ArrayList<Object> terms = new ArrayList<Object>();
-        Map<String, Object> fieldMap = null;
+    	final String
+    		func = "Debug: processOPMORPH";
+        Map<String, Object> 
+        	token = KoralObjectGenerator.makeToken();
+        ArrayList<Object> 
+        	terms = new ArrayList<Object>(); 
+        Map<String, Object> 
+        	fieldMap = null;
+        int	
+        	nChildren = node.getChildCount();
+	    
+        // MORPH empty:
+	    if( nChildren == 1 && node.getChild(0).toString().equals("EMPTY") )
+		    {
+		    addError(StatusCodes.MALFORMED_QUERY, "Empty MORPH() operator."
+                    + " Please specify a valid part of speech (like 'MORPH(NOU)' or 'MORPH(tt/p=NOU)' for searching nouns).");
+            return;
+            }
 
-        for (String morphterm : morphterms) {
-
-            fieldMap = termToFieldMap(morphterm);
-            if (fieldMap == null) {
-                return;
-            };
-
-            terms.add(fieldMap);
-        }
-
-        if (morphterms.length == 1) {
+	    // MORPH with STTS annotations in C2-style:
+	    List <String>
+	    	annots_STTS = null;  
+	    List<String>
+	    	annots_CONNEX = null;
+	    
+	    if( (annots_STTS = translate_MORPH_STTS(node)) != null )
+		    { // translates MORPH expression to STTS expression, considering negative values.
+	    	if( DEBUG )
+	    		System.out.printf("Debug: processOPMORPH: annots_STTS='%s'.\n", annots_STTS == null ? "null" : annots_STTS);
+		    for( String annot : annots_STTS)
+	    		{
+			    fieldMap = termToFieldMap(annot, opMORPH);	
+			    terms.add(fieldMap);
+	    		}
+		    }
+	    else if( (annots_CONNEX=translate_MORPH_CONNEXOR(node)) != null )
+	    	{ // translates MORPH expression of CONNEXOR tagset to marmot pos and morphological expressions, considering negative values.
+	    	if( DEBUG )
+	    		System.out.printf("Debug: processOPMORPH: annots_CONNEX='%s'.\n", annots_CONNEX == null ? "null" : annots_CONNEX);
+		    for( String annot : annots_CONNEX )
+	    		{
+			    fieldMap = termToFieldMap(annot, opMORPH);	
+			    terms.add(fieldMap);
+	    		}
+	    	}
+		else
+		    { // neither STTS nor CONNEXOR:
+			if( DEBUG ) System.out.printf("%s: processing other tags.\n", func);
+		    
+			for(int i=0; i<nChildren; i++)
+		    	{
+		    	String morphterm = node.getChild(i).toString();
+		    	if( DEBUG )
+		    		System.out.printf("Debug: processOPMORPH: morphterm = '%s'.\n", morphterm);
+		    	
+		        fieldMap = termToFieldMap(morphterm, opMORPH);
+		        if (fieldMap == null)
+		        	return;
+			        
+		        terms.add(fieldMap);
+		    	}
+		    }
+	    
+        if (nChildren == 1) 
+        	{
             token.put("wrap", fieldMap);
-        }
-
+        	}
         else {
             Map<String, Object> termGroup = KoralObjectGenerator
                     .makeTermGroup(KoralTermGroupRelation.AND);
             termGroup.put("operands", terms);
             token.put("wrap", termGroup);
         }
+
         // Step II: decide where to put
         putIntoSuperObject(token, 0);
         visited.add(node.getChild(0));
@@ -1246,6 +1915,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         else {
             // TODO
+        	if( DEBUG )
+        		System.out.printf("Error: processOPWF_OPLEM: TPOS not implemented: '%s'!\n", node.toStringTree());
         }
     }
 
@@ -1352,10 +2023,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
         elem = nodeString.substring(0, 1);
         nodeString = nodeString.substring(1);
+        
+        //System.out.printf("Debug: processPositionCondition: mode='%s' node=='%s' elem='%s'.\n", mode, nodeString, elem);
+
         // in cases where the end of X shall match the beginning of
         // the span, or vice versa,
         // we need to define spanRefs
         if (mode.equals("beg")) {
+        	//System.out.printf("Debug: processPositionCondition: 'beg' nodeString='%s'.\n", nodeString);
             if (nodeString.equals("a")) {
                 position = KoralFrame.STARTS_WITH;
             }
@@ -1365,7 +2040,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             }
         }
         else if (mode.equals("end")) {
-            if (nodeString.equals("e")) {
+        	//System.out.printf("Debug: processPositionCondition: 'end' nodeString='%s'.\n", nodeString);
+        	if (nodeString.equals("e")) {
                 position = KoralFrame.ENDS_WITH;
             }
             else if (nodeString.equals("a")) {
@@ -1765,11 +2441,17 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
     /**
      * Normalises position operators to equivalents using #BED
+     * 02.06.26/FB
+     * - deactivated as it interacts with other operators.
+     * - e.g. MORPH(temp:past) -> MORPH(#BEG(temp , pa)st) !
+     * 
      */
     private String rewritePositionQuery (String q) {
         Pattern p = Pattern.compile("(\\w+):(([+\\-])?(sa|se|pa|pe|ta|te),?)+");
         Matcher m = p.matcher(q);
 
+        System.out.printf("rewritePositionQuery: enter query='%s'.\n", q);
+        
         String rewrittenQuery = q;
         while (m.find()) {
             String match = m.group();
@@ -1786,35 +2468,50 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             replacement = new StringBuilder(replacement.substring(0, replacement.length() - 1) + ")");
             rewrittenQuery = rewrittenQuery.replace(match, replacement.toString());
         }
+        
+        System.out.printf("rewritePositionQuery: leave query='%s'.\n", rewrittenQuery);
         return rewrittenQuery;
     }
 
-
+    // may be replaced by termToFieldMap(term, type).
+    
     private Map<String, Object> termToFieldMap (String term) {
 
         // regex group #2 is foundry, #4 layer, #5 operator,
         // #6 key, #8 value
-        String wordOrRegex = "\\w+|\".+?\"";
+        String wordOrRegex = "\\w+|\".+?\"|'.+?'";
         // TODO: Should be initialized globally
-        Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=))?(" + wordOrRegex
+        Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=|<>))?(" + wordOrRegex
                 + ")(:(" + wordOrRegex + "))?");
         Matcher m;
-
+        boolean negate = false;
+        
         m = p.matcher(term);
         if (!m.matches()) {
             addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
                     "Something went wrong parsing the argument in MORPH() or #ELEM().");
             requestMap.put("query", new HashMap<String, Object>());
+            System.out.printf("Debug: termToFieldMap: term='%s' m.matches() = null!\n", term);
             return null;
         };
 
         Map<String, Object> fieldMap = null;
         fieldMap = KoralObjectGenerator.makeTerm();
 
+        if( showRegGroups )	
+        	{
+            for(int j=0; j<= m.groupCount(); j++)
+	        	{
+	        	System.out.printf("Debug: group(%d) = '%s'.\n",  j, 
+	        			m.group(j) != null ? m.group(j) : "null");
+	        	}
+        	}
+        
         if (m.group(2) != null) fieldMap.put("foundry", m.group(2));
         if (m.group(4) != null) fieldMap.put("layer", m.group(4));
         if (m.group(5) != null) {
-            if ("!=".equals(m.group(5))) negate = !negate;
+            if ("!=".equals(m.group(5)) || "<>".equals(m.group(5))) 
+            	negate = !negate;
         }
         if (m.group(6) != null) {
             String key = m.group(6);
@@ -1844,10 +2541,254 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         return fieldMap;
     };
 
+    /* isRegExpr():
+     * returns true if str is a regular expression containing
+     * 				'*', *?*, '+' or '.' not being excaped.
+     * 09.06.26/FB
+     */
+    
+    public boolean isRegExpr(String str)
+    
+    {
+    	char c;
+    	
+    	for(int i=0; i<str.length(); i++)
+	    	{
+	    	c = str.charAt(i);
+	    	if( c == '*' || c == '+' || c == '?' || c == '.' || c == '(' || c == ')' || c == '|' )
+	    		{
+	    		if( i == 0 || str.charAt(i-1) != '\\' )
+	    			return true; // wildcard not being escaped.
+	    		}
+    		}
+    	
+    	return false; // not found.
+    }
+   
+   	private void printRegGroups(Matcher m)
+   	
+   	{
+        for(int j=0; j<= m.groupCount(); j++)
+        	{
+        	System.out.printf("Debug: group(%d) = '%s'.\n",  j, 
+        			m.group(j) != null ? m.group(j) : "null");
+        	}
+    }
+   	
+    /* groupToFieldMap:
+     * Args:
+     *   negate: is set in cases like pos!="val val..." or pos<>='val val ..'.
+     * - builds a list of operands out of values[].
+     * - accepts >= 1 value(s) in values[].
+     * Returns 1 termGroup if > 1 values, or 1 term if there is 1 single value in values[].
+     * 09.06.26/FB
+     */
+    
+    private Map<String, Object> groupToFieldMap(Map<String, Object> termMap, String[] values, boolean negate)
+    
+    {
+    	final String func = "Debug: groupToFieldMap";
+    	
+    	if( values == null ) // || values.length == 1 )
+    		return termMap;
+    	
+    	String[]
+    		subValues = null;
+    	Map<String, Object> 
+			termGroup = KoralObjectGenerator.makeTermGroup(KoralTermGroupRelation.AND);
+    	ArrayList<Object> 
+    		terms = new ArrayList<Object>();
+    	boolean
+    		isNeg, isNeg1, isNeg2;
+    	
+    	// clear 'type:regex' and 'value' (if set):
+    	termMap.remove("type");	 // must be set individually.
+    	termMap.remove("value"); // must be set individually.
+    	
+    	for(String term : values)
+    		{
+    		if( DEBUG )
+    			System.out.printf("%s: term='%s'.\n", func, term);
+    		
+    		Map<String, Object>
+    			termMap2 = new HashMap<>(termMap);
+    		
+    		isNeg1 = isNeg2 = false;
+    		
+    		if( isRegExpr(term) )
+    			termMap2.put("type", "type:regex");
+    			
+    		subValues = term.trim().split(":");
+    		if( subValues.length > 1 )
+    			{
+    			isNeg1 = addNegVal(termMap2, "key",   subValues[0]);    			
+    			isNeg2 = addNegVal(termMap2, "value", subValues[1]);
+    			}
+    		else
+    			isNeg1 = addNegVal(termMap2, "key",   term);    			
+			
+    		isNeg = negate;
+    		if( isNeg1 || isNeg2 )
+    			isNeg = !negate;
+    		
+    		if( isNeg )
+    			termMap2.put("match", KoralMatchOperator.NOT_EQUALS.toString());
+    		else
+    			termMap2.put("match", KoralMatchOperator.EQUALS.toString());
+    		 
+    		if( DEBUG )
+    			System.out.printf("%s: termMap2='%s'.\n", func, termMap2.toString());
+    		
+    		terms.add(termMap2);
+        	}
+
+    	if( values.length == 1 )
+    		{
+    		// return a single term.
+    		return (Map<String, Object>) terms.get(0);
+    		}
+    	else
+    		{
+    		// return a group:
+    		termGroup.put("operands", terms);
+        	
+        	return termGroup;	
+    		}
+    }
+    
+    /* termToFieldMap(term, type)
+     * type: opMORPH or opELEM
+     * term: may also contain a list of values:
+     *       e.g. foundry/layer="a b c...", foundry/layer='a b c...'.
+     * shall replace termToFieldMap(term).
+     * - wordOrRegex: also accept regexpr when no '...' nor "..." are used.
+     * - in an older version, layer="a b c" the values inside "..." were automatically
+     *   interpreted as reg. expr.
+     * notes:
+     * - pos=numb:sg -> group6 = numb & group8 = sg
+     * - pos='numb:sg' or pos="numb:sg" -> group6 = numb:sg & group8 = null.
+     * - this is due to the reg. expr of pattern p.
+     * 10.06.26/FB
+     */
+ 
+    private Map<String, Object> termToFieldMap (String term, int type)
+    {
+        // regex group #2 is foundry, #4 layer, #5 operator,
+        // #6 key, #8 value
+    	final String func = "Debug: termToFieldMap";
+    	
+        String wordOrRegex = "-?[\\w][\\w|\\*|\\+|\\.|\\?|\\\\|(|)|\\|]*|\".+?\"|'.+?'";
+        // TODO: Should be initialized globally
+        Pattern p = Pattern.compile("((\\w+)/)?((\\w*)(!?=|<>))?(" + wordOrRegex
+                + ")(:(" + wordOrRegex + "))?");
+        Matcher m;
+        boolean negate = false;
+        
+        m = p.matcher(term);
+        
+        if (!m.matches()) {
+            addError(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
+                    "Something went wrong parsing the argument in MORPH() or #ELEM().");
+            requestMap.put("query", new HashMap<String, Object>());
+            System.out.printf("%s: term='%s' m.matches() = null!\n", func, term);
+            return null;
+        };
+
+        Map<String, Object> fieldMap = KoralObjectGenerator.makeTerm();
+
+        if( showRegGroups )
+        	printRegGroups(m);
+        	
+        if (m.group(2) != null) fieldMap.put("foundry", m.group(2));
+        if (m.group(4) != null) 
+        	fieldMap.put("layer", m.group(4));
+        else
+	        { // MORPH(NOU) -> add default layer = LAYER_POS.
+	        if( type == opMORPH )
+	        	fieldMap.put("layer", LAYER_POS);
+	        }
+        
+        if (m.group(5) != null) {
+            if ("!=".equals(m.group(5)) || "<>".equals(m.group(5))) 
+            	negate = !negate;
+        }
+        
+        // group 6: key or -key or 'key' or 'key key...' or "key" or "key key...":
+       
+        String[] 
+        	values = null;
+        
+        if (m.group(6) != null) 
+	     	{
+	        String key = m.group(6);
+	        boolean isNeg1 = false, isNeg2 = false;
+	        
+	        if ( (key.startsWith("\"") && key.endsWith("\"")) || (key.startsWith("'") && key.endsWith("'")) ) 
+	        	{
+	        	// a list of 1 or more expressions/values is handled by groupToFieldMap().
+	        	key 	 = key.substring(1, key.length() - 1);
+	        	// is this a list with one or more values?
+		        values   = key.trim().split("\\s+"); // split by sequences of white spaces.
+		
+		        if( DEBUG )
+		        	System.out.printf("%s: group6 key '%s' : # of values = %d.\n", func, key, values.length);
+		        
+		        return groupToFieldMap(fieldMap, values, negate);  
+		        }
+	        
+        	// treat here an unquoted single expression/value: Either a single key (e.g. pos=key), or
+        	// a key:value pair (e.g. pos=key:value). In the later case 'value' will be handled with group 8.
+        
+	        if( key.startsWith("-") )
+	        	{
+	        	key    = key.substring(1); // remove '-'.
+	        	negate = true;
+	        	}
+	        if( isRegExpr(key) ) 
+	        	fieldMap.put("type", "type:regex");
+		        
+	        isNeg1 = addNegVal(fieldMap, "key", key);
+	        
+	    	if( isNeg1 )
+    			negate = !negate;
+    		}
+	        
+        // m.group(8) is checked if it is a single value, not written between '..' nor "..":
+        if (m.group(8) != null) 
+        	{
+        	String value = m.group(8);
+        	boolean isNeg = false;
+        	
+            if( DEBUG )
+            	System.out.printf("%s: group 8 = '%s'.\n", func, value);
+            
+	        if ( (value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'")) ) 
+	        	value = value.substring(1, value.length()-1); 
+
+	        isNeg = addNegVal(fieldMap, "value", value);
+            
+	        if( isNeg )
+	        	negate = !negate;
+	        
+	        if ( isRegExpr(value)) 
+	        	fieldMap.put("type", "type:regex");
+            }
+
+        // negate field (see above)
+        if (negate) 
+            fieldMap.put("match", KoralMatchOperator.NOT_EQUALS.toString());
+        else
+            fieldMap.put("match", KoralMatchOperator.EQUALS.toString());
+
+        return fieldMap;        			
+    };
 
     private Tree parseCosmasQuery (String query) {
         
-    	query = rewritePositionQuery(query);
+    	// deactivate rewrite...() as it blindly interacts with every part of a query
+    	// which contains e.g. temp:past like in MORPH(temp:past) - 02.06.26/FB
+    	// query = rewritePositionQuery(query);
+    	
         Tree tree = null;
         Antlr3DescriptiveErrorListener errorListener =
                 new Antlr3DescriptiveErrorListener(query);
@@ -1857,17 +2798,22 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             org.antlr.runtime.CommonTokenStream tokens =
                     new org.antlr.runtime.CommonTokenStream(lex); // v3
             
-            parser = new c2psParser(tokens);
-           
             // Use custom error reporters
             lex.setErrorReporter(errorListener);
+            
+            if( DEBUG && bShowTokens )
+	        	TokenUtils.printLexerTokens(tokens, "parseCosmasQuery");
+	        	
+            parser = new c2psParser(tokens);
+           
             ((c2psParser) parser).setErrorReporter(errorListener);
+            
             c2psParser.c2ps_query_return c2Return =
                     ((c2psParser) parser).c2ps_query(); // statt t().
 
             // AST Tree anzeigen:
             tree = (Tree) c2Return.getTree();
-
+          
             if (DEBUG) 
             	{
             	System.out.printf("Debug: parseCosmasQuery: tree = '%s'.\n", tree.toStringTree());
@@ -1890,8 +2836,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         }
 
         String treestring = tree.toStringTree();
-        
         boolean erroneous = false;
+        
         if (parser.failed() || parser.getNumberOfSyntaxErrors() > 0) {
             erroneous = true;
             tree = null;
@@ -1904,7 +2850,27 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         	//System.err.printf("Debug: parseCosmasQuery: tree: '%s'.\n", treestring);
         	//System.err.printf("Debug: parseCosmasQuery: FullErrorMsg:  '%s'.\n", errorListener.generateFullErrorMsg().toString());
         	log.error(errorListener.generateFullErrorMsg().toString());
-            addError(errorListener.generateFullErrorMsg());
+        	if( treestring.contains("<unexpected: [") )
+				{
+	         	Pattern p = Pattern.compile("\\[@\\d+,(\\d+):(\\d+)=");
+	         	Matcher m = p.matcher(treestring);
+	
+	         	if (m.find()) 
+	         		{
+	         	    int start = Integer.parseInt(m.group(1));
+	         	    int end   = Integer.parseInt(m.group(2));
+	
+	         	    if( DEBUG )
+	         	    	System.out.printf("parseCosmasQuery: unexpected input [%d-%d]!\n", start, end);
+	         	    addError(StatusCodes.MALFORMED_QUERY,
+	                         "unexpected input at position " + start + "-" + end + "!");
+	 				}
+	         	else
+	         		addError(errorListener.generateFullErrorMsg());
+				}
+        	else
+        		addError(errorListener.generateFullErrorMsg());
+            return null;
         }
 
         // collect and report errors found by other functions than the lexer/parser:

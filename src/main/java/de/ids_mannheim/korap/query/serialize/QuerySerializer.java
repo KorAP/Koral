@@ -184,6 +184,7 @@ public class QuerySerializer {
         }
         
 		System.out.println(this.toJSON());
+		
     }
 
     public QuerySerializer setQuery (String query, String ql, String version) {
