@@ -5,7 +5,7 @@ import org.junit.Ignore;
 
 import de.ids_mannheim.korap.query.parse.poliqarpplus.PoliqarpPlusLexer;
 import de.ids_mannheim.korap.query.parse.poliqarpplus.PoliqarpPlusParser;
-
+import de.ids_mannheim.korap.query.serialize.util.Antlr4DescriptiveErrorListener;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
@@ -92,8 +92,14 @@ public class PQGrammarTest {
         try {
             Method startRule = PoliqarpPlusParser.class.getMethod("request");
             ANTLRInputStream input = new ANTLRInputStream(query);
+            Antlr4DescriptiveErrorListener errorListener = new Antlr4DescriptiveErrorListener(
+                query);
             lexer.setInputStream(input);
+            lexer.removeErrorListeners();
+            lexer.addErrorListener(errorListener);
             PoliqarpPlusParser parser = new PoliqarpPlusParser(new CommonTokenStream(lexer));
+            parser.removeErrorListeners();
+            parser.addErrorListener(errorListener);
 
             // Get starting rule from parser
             tree = (ParserRuleContext) startRule.invoke(parser, (Object[]) null);

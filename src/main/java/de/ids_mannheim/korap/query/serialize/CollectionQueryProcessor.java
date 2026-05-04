@@ -645,9 +645,8 @@ public class CollectionQueryProcessor extends Antlr4AbstractQueryProcessor {
         }
         // Some things went wrong ...
         catch (Exception e) {
-            System.err
-                    .println("ERROR: " + errorListener.generateFullErrorMsg());
-            System.err.println("Parsing exception message: " + e);
+            log.error("ERROR: {}", errorListener.generateFullErrorMsg());
+            log.error("Parsing exception message: {}", e.getMessage());
         }
         // Return the generated tree
         return tree;
