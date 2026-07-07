@@ -47,7 +47,10 @@ import java.util.regex.Pattern;
  * @author Nils Diewald (diewald@ids-mannheim.de)
  * @author Eliza Margaretha (margaretha@ids-mannheim.de)
  * @author Franck Bodmer (bodmer@ids-mannheim.de)
- * @version 0.4 -- 09.06.26/FB
+ * @version 0.4 -- 07.07.26/FB
+ *  - Korrektur: Doppelte Vergabe einer KlassenID.
+ *  - Korrektur: fehlerhafte Serialisierung von "Der:sa /+w1 Betrieb" (derweil "Der:sa" korrekt behandelt wurde)
+ *               infolge falscher Verwaltung des objectStacks.
  */
 public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
@@ -306,7 +309,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
 
     private void processNode (Tree node) {
-        // Top-down processing
+    	
+    	final String func = "Debug: processNode";
+        
+    	// Top-down processing
         if (visited.contains(node))
             return;
         else
@@ -522,8 +528,10 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         // See C-II QL documentation for more detail:
         // http://www.ids-mannheim.de/cosmas2/win-app/hilfe/suchanfrage/eingabe-grafisch/syntax/textpositionen.html
 
+    	final String func = "Debug: processOPBED";
+    	
     	if( DEBUG )
-    		System.out.printf("Debug: processOPBED: '%s'.\n",  node.toStringTree());
+    		System.out.printf("%s: '%s'.\n", func, node.toStringTree());
     	
     	// Step I: create group
         int optsChild = node.getChildCount() - 1;
@@ -534,6 +542,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
 
         Map<String, Object> submatchgroup =
                 KoralObjectGenerator.makeReference(classCounter + 128);
+        
         ArrayList<Object> submatchOperands = new ArrayList<Object>();
         submatchgroup.put("operands", submatchOperands);
         putIntoSuperObject(submatchgroup);
@@ -947,12 +956,12 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         if (!(openNodeCats.get(1).equals("OPBEG")
                 || openNodeCats.get(1).equals("OPEND") || inOPALL
                 || openNodeCats.get(1).equals("OPNHIT"))) {
-            wrapOperandInClass(node, 1, 128 + classCounter);
-            wrapOperandInClass(node, 2, 128 + classCounter);
+            wrapOperandInClass(node, 1, 128 + classCounter++);  // 07.07.26/FB
+            wrapOperandInClass(node, 2, 128 + classCounter++); // 07.07.26/FB
             // Deactivated, uncomment to wrap sequence in reference.
             //            group = KoralObjectGenerator.wrapInReference(group,
             //                    classCounter++);
-            classCounter++;
+            // classCounter++; 07.07.26/FB
         }
         else if (openNodeCats.get(1).equals("OPNHIT")) {
             Map<String, Object> repetition =
@@ -1850,6 +1859,8 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
     
     private void processOPWF_OPLEM (Tree node) 
     {
+    	final String func = "Debug: processOPWF_OPLEM";
+    	
         String nodeCat = getNodeCat(node);
         // Step I: get info
         Map<String, Object> token = KoralObjectGenerator.makeToken();
@@ -1914,6 +1925,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             visited.add(node.getChild(0));
         }
         else {
+            
             // TODO
         	if( DEBUG )
         		System.out.printf("Error: processOPWF_OPLEM: TPOS not implemented: '%s'!\n", node.toStringTree());
@@ -2063,6 +2075,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         positionGroup.put("operands", posOperands);
         Map<String, Object> span = KoralObjectGenerator.makeSpan(elem);
         objectStack.push(classGroup);
+        stackedObjects++; // 07.07.26/FB
         if (hitSpanRef != null) {
             Map<String, Object> spanRefAroundHit = KoralObjectGenerator
                     .makeSpanReference(hitSpanRef, KoralOperation.FOCUS);

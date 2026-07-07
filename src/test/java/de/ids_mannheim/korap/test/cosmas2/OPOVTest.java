@@ -17,6 +17,8 @@ import de.ids_mannheim.korap.query.object.ClassRefOp;
 import de.ids_mannheim.korap.query.object.KoralOperation;
 import de.ids_mannheim.korap.query.serialize.QuerySerializer;
 
+// Anpassung der inkorrekten JUnits nach der Korrektur vom 07.07.26/FB an Cosmas2QueryProcessor.java.
+
 public class OPOVTest {
 
     String query;
@@ -237,6 +239,6 @@ public class OPOVTest {
                 res.at("/operation").asText());
         // class
         assertEquals(130, res.at("/operands/0/classOut").asInt());
-        assertEquals(130, res.at("/operands/1/classOut").asInt());
+        assertEquals(131, res.at("/operands/1/classOut").asInt()); // due to correction 07.07.26/FB
     }
 }

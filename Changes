@@ -1,3 +1,10 @@
+0.52 2026-07-29
+     - [bugfix] C2QL: Correcting serialization of "Der:sa" combined with e.g. "/+w1 Betrieb".
+     - [bugfix] in case above: corrected: same ClassId for different spans.
+     - [bugfix] in case above: corrected: object stack worked wrongly for prox and position together
+     - [bugfix] JUnits adapted, as classIds have modified values now.
+     - [bugfix] JUnit added to check the correctness of the query above .
+
 0.51 2026-07-29
      - [feature] C2QL MORPH(v1 v2..): more than 1 value with/without foundry/layer specification works now.
      - [feature] translating MORPH expressions from C2-style STTS/CONNEXOR to STTS/marmot.
