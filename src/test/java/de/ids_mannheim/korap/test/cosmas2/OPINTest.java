@@ -70,6 +70,7 @@ public class OPINTest {
     
     @Test
     public void testOPIN () throws JsonProcessingException, IOException {
+    	
         query = "wegen #IN <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -343,7 +344,8 @@ public class OPINTest {
     @Ignore
     public void testOPINWithOptionN_MAX ()
             throws JsonProcessingException, IOException {
-        // EM: Fix operation:merge
+ 	
+    	// EM: Fix operation:merge
         query = "wegen #IN(N, MAX) <s>";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -356,6 +358,7 @@ public class OPINTest {
                 res.at("/query/operands/0/operation").asText());
         assertEquals("frames:isAround",
                 res.at("/query/operands/0/frames/0").asText());
+
     }
     
 }

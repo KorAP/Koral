@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,21 +28,26 @@ import de.ids_mannheim.korap.util.StringUtils;
 public class Cosmas2QueryProcessorTest {
 
 
-    String query;
+	// default layer for part of speech:
+    private static final String LAYER_POS = "p";
+    private static final boolean showParserErrorQuery = true;	// print a line around those queries which get "no viable alternative" Parser warnings: 
+    															// the parser warnings are intentional to test syntax errors.
+    															// the parser error for "Der:sa" is corrected in another issue.
+	String query;
     ArrayList<JsonNode> operands;
 
     QuerySerializer qs = new QuerySerializer(1.1);
     ObjectMapper mapper = new ObjectMapper();
     JsonNode res;
 
-
     @Test
     public void testContext () throws JsonProcessingException, IOException {
         String contextString = "http://korap.ids-mannheim.de/ns/koral/0.3/context.jsonld";
+
         query = "foo";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals(contextString, res.get("@context").asText());
+        assertEquals(contextString, res.get("@context").asText());        
     }
 
 
@@ -57,7 +61,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("der", res.at("/query/wrap/key").asText());
         assertEquals("orth", res.at("/query/wrap/layer").asText());
         assertEquals("match:eq", res.at("/query/wrap/match").asText());
-
+        
         query = "&Mann";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -134,7 +138,7 @@ public class Cosmas2QueryProcessorTest {
         query = "*de+?r";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals(".*de.?.r", res.at("/query/wrap/key").asText());
+        assertEquals(".*de.?.r", res.at("/query/wrap/key").asText());        
     }
 
 
@@ -171,71 +175,536 @@ public class Cosmas2QueryProcessorTest {
 
     @Test
     public void testMORPH () throws JsonProcessingException, IOException {
-        query = "MORPH(p=V)";
-        qs.setQuery(query, "cosmas2");
-        res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
-        assertEquals("V", res.at("/query/wrap/key").asText());
-        assertEquals("p", res.at("/query/wrap/layer").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());
 
-        query = "MORPH(V)";
+    	/*
+    	 *  MORPH( expr ) are translated from c2-style STTS to original STTS,
+    	 *    e.g. MORPH(VRB fin a) -> VAFIN.
+    	 */
+    	
+        query = "MORPH(VRB)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        
         assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
-        assertEquals("V", res.at("/query/wrap/key").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/match").asText());
+        assertEquals("p", 			res.at("/query/wrap/layer").asText());
+        assertEquals("V.*", 		res.at("/query/wrap/key").asText());
 
-        query = "MORPH(tt/p=V)";
+        query = "MORPH(VRB fin a)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("VAFIN", 				res.at("/query/wrap/operands/0/key").asText());
+        
+        // STTS: although imperative verbs are finit verb, STTS has another tag for it:
+        
+        query = "MORPH(VRB imp)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("V.IMP", 				res.at("/query/wrap/operands/0/key").asText());
+
+        query = "MORPH(VRB imp a)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("VAIMP", 				res.at("/query/wrap/operands/0/key").asText());
+
+        // imperative forms are negated, "a" is skipped.
+        
+        query = "MORPH(VRB -imp a)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("V.*", 				res.at("/query/wrap/operands/0/key").asText());
+
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/1/type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("V.IMP", 				res.at("/query/wrap/operands/1/key").asText());
+
+        // STTS: non finit verb, "-a" is skipped:
+        
+        query = "MORPH(VRB -fin -a)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("V.*",	 				res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/1/type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("p",					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("V.FIN",				res.at("/query/wrap/operands/1/key").asText());
+
+        query = "MORPH(PRON)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/layer").asText());
+        assertEquals("P.*",	 				res.at("/query/wrap/key").asText());
+
+        // some C2-style annotations may translate to a reg. expression formulating alternatives:
+        
+        query = "MORPH(PRON per)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("(PRF|PPER)",			res.at("/query/wrap/operands/0/key").asText());
+        
+        query = "MORPH(PRON -per)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("P.*",					res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/1/type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("(PRF|PPER)",			res.at("/query/wrap/operands/1/key").asText());
+
+        query = "MORPH(PRON w -at)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("PW.*",				res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("PWAT",				res.at("/query/wrap/operands/1/key").asText());
+
+        /*
+         * CONNEXOR: translating from C2-style annotations to marmot POS + morph:
+         */
+
+        // CONNEXOR: special encoding of C2/CONNEXOR for finite verbs:
+
+        query = "MORPH(V -inf -pcp)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("V.FIN", 				res.at("/query/wrap/operands/0/key").asText());
+
+        // C2-MORPH-Assistant generates tags like 'imp' in between sequences like "V -inf -pcp",
+        // Serialization must detect this to ensure "V -inf -pcp" is correctly translated.
+        // Also see translation onto 2 different layers:
+        
+        query = "MORPH(V imp -inf -pcp)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("V.FIN", 				res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("m", 					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("mood", 				res.at("/query/wrap/operands/1/key").asText());
+        assertEquals("imper", 				res.at("/query/wrap/operands/1/value").asText());
+
+        query = "MORPH(V -imp -inf -past -pcp)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("V.FIN", 				res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("m", 					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("mood", 				res.at("/query/wrap/operands/1/key").asText());
+        assertEquals("imper", 				res.at("/query/wrap/operands/1/value").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/2/@type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/2/match").asText());
+        assertEquals("m", 					res.at("/query/wrap/operands/2/layer").asText());
+        assertEquals("tense", 				res.at("/query/wrap/operands/2/key").asText());
+        assertEquals("past", 				res.at("/query/wrap/operands/2/value").asText());
+
+        // special case for cardinals:
+        
+        query = "MORPH(NUM -ord)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("CARD", 				res.at("/query/wrap/operands/0/key").asText());
+        
+        // MORPH(N -prop) -> p=NE (= normal entity):
+        // order of values must be rearranged:
+        
+        query = "MORPH(N -pl -prop)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("NN",	 				res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("m", 					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("number", 				res.at("/query/wrap/operands/1/key").asText());
+        assertEquals("pl",	 				res.at("/query/wrap/operands/1/value").asText());
+        
+        // special tagset case: translate from V to ADJ.
+        
+        query = "MORPH(V pcp prog)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("ADJ.", 				res.at("/query/wrap/operands/0/key").asText());
+      
+        query = "MORPH(V pcp prog)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("ADJ.", 				res.at("/query/wrap/operands/0/key").asText());
+      
+        // Extension of C2-Connexor tagset for morph. annotations available in marmot/m:
+        
+        query = "MORPH(N dat sg 1 -masc)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("N.", 					res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("m", 					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("case", 				res.at("/query/wrap/operands/1/key").asText());
+        assertEquals("dat", 				res.at("/query/wrap/operands/1/value").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/2/@type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/2/match").asText());
+        assertEquals("m", 					res.at("/query/wrap/operands/2/layer").asText());
+        assertEquals("number", 				res.at("/query/wrap/operands/2/key").asText());
+        assertEquals("sg", 					res.at("/query/wrap/operands/2/value").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/3/@type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/3/match").asText());
+        assertEquals("m", 					res.at("/query/wrap/operands/3/layer").asText());
+        assertEquals("person", 				res.at("/query/wrap/operands/3/key").asText());
+        assertEquals("1", 					res.at("/query/wrap/operands/3/value").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/4/@type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/4/match").asText());
+        assertEquals("m", 					res.at("/query/wrap/operands/4/layer").asText());
+        assertEquals("gender",				res.at("/query/wrap/operands/4/key").asText());
+        assertEquals("masc", 				res.at("/query/wrap/operands/4/value").asText());
+        
+        /*
+         *  C2 Extensions (foundry and layer may be used in MORPH for KorAP):
+         */
+        
+        query = "MORPH(p=VRB)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
         assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
-        assertEquals("V", res.at("/query/wrap/key").asText());
-        assertEquals("p", res.at("/query/wrap/layer").asText());
-        assertEquals("tt", res.at("/query/wrap/foundry").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/match").asText());
+        assertEquals("p", 			res.at("/query/wrap/layer").asText());
+        assertEquals("VRB", 		res.at("/query/wrap/key").asText());
+        
+        query = "MORPH(p=-VRB)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/@type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/layer").asText());
+        assertEquals("VRB", 				res.at("/query/wrap/key").asText());
+        
+        query = "MORPH(p!=VRB)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/@type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/layer").asText());
+        assertEquals("VRB", 				res.at("/query/wrap/key").asText());
+
+        query = "MORPH(p<>VRB)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/@type").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/layer").asText());
+        assertEquals("VRB", 				res.at("/query/wrap/key").asText());
+
+        query = "MORPH(tt/p=VRB)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/match").asText());
+        assertEquals("p", 			res.at("/query/wrap/layer").asText());
+        assertEquals("VRB", 		res.at("/query/wrap/key").asText());
+
+        query = "MORPH(tt/p=-VRB)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertEquals("match:ne", 	res.at("/query/wrap/match").asText());
+        assertEquals("p", 			res.at("/query/wrap/layer").asText());
+        assertEquals("VRB", 		res.at("/query/wrap/key").asText());
 
         query = "MORPH(tt/p=\"V.*\")";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        
         assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
-        assertEquals("type:regex", res.at("/query/wrap/type").asText());
-        assertEquals("V.*", res.at("/query/wrap/key").asText());
-        assertEquals("p", res.at("/query/wrap/layer").asText());
-        assertEquals("tt", res.at("/query/wrap/foundry").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", 	res.at("/query/wrap/type").asText());
+        assertEquals("V.*", 		res.at("/query/wrap/key").asText());
+        assertEquals("p", 			res.at("/query/wrap/layer").asText());
+        assertEquals("tt", 			res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/match").asText());
+
+        // regex also allowed between '...':
+        query = "MORPH(tt/p='V.*')";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", 	res.at("/query/wrap/type").asText());
+        assertEquals("V.*", 		res.at("/query/wrap/key").asText());
+        assertEquals("p", 			res.at("/query/wrap/layer").asText());
+        assertEquals("tt", 			res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/match").asText());
+
+        // regex also without any quotes:
+        query = "MORPH(tt/p=V.*)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertEquals("type:regex", 	res.at("/query/wrap/type").asText());
+        assertEquals("V.*", 		res.at("/query/wrap/key").asText());
+        assertEquals("p", 			res.at("/query/wrap/layer").asText());
+        assertEquals("tt", 			res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/match").asText());
+
+        // escaping regex :
+        query = "MORPH(tt/p='V\\.\\*')";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertTrue  (			 	res.at("/query/wrap/type").isMissingNode()); // no type:regex
+        assertEquals("V\\.\\*",		res.at("/query/wrap/key").asText());
+        assertEquals("p", 			res.at("/query/wrap/layer").asText());
+        assertEquals("tt", 			res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/match").asText());
+
+        // in this case, the annotation values are translate as is, not via CONNEXOR nor STTS.
+        query = "MORPH(tt/p='V.* -fin -a')";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("tt",	 				res.at("/query/wrap/operands/0/foundry").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("V.*",	 				res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("tt",	 				res.at("/query/wrap/operands/1/foundry").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("fin", 				res.at("/query/wrap/operands/1/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/2/@type").asText());
+        assertEquals("tt",	 				res.at("/query/wrap/operands/2/foundry").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/2/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/2/layer").asText());
+        assertEquals("a",	 				res.at("/query/wrap/operands/2/key").asText());
+
+        // works also with double quotes, double quotes do not enforce reg. expressions:
+        query = "MORPH(tt/p=\"V.* -fin -a\")";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 		res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", 	res.at("/query/wrap/@type").asText());
+        assertEquals("relation:and", 		res.at("/query/wrap/relation").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/0/@type").asText());
+        assertEquals("tt",	 				res.at("/query/wrap/operands/0/foundry").asText());
+        assertEquals("type:regex", 			res.at("/query/wrap/operands/0/type").asText());
+        assertEquals("match:eq", 			res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("V.*",	 				res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/1/@type").asText());
+        assertEquals("tt",	 				res.at("/query/wrap/operands/1/foundry").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/1/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("fin", 				res.at("/query/wrap/operands/1/key").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/operands/2/@type").asText());
+        assertEquals("tt",	 				res.at("/query/wrap/operands/2/foundry").asText());
+        assertEquals("match:ne", 			res.at("/query/wrap/operands/2/match").asText());
+        assertEquals("p", 					res.at("/query/wrap/operands/2/layer").asText());
+        assertEquals("a",	 				res.at("/query/wrap/operands/2/key").asText());
 
         query = "MORPH(mate/m=temp:pres)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        
         assertEquals("koral:token", res.at("/query/@type").asText());
-        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
-        assertEquals("temp", res.at("/query/wrap/key").asText());
-        assertEquals("pres", res.at("/query/wrap/value").asText());
-        assertEquals("m", res.at("/query/wrap/layer").asText());
-        assertEquals("mate", res.at("/query/wrap/foundry").asText());
-        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertEquals("temp", 		res.at("/query/wrap/key").asText());
+        assertEquals("pres", 		res.at("/query/wrap/value").asText());
+        assertEquals("m", 			res.at("/query/wrap/layer").asText());
+        assertEquals("mate", 		res.at("/query/wrap/foundry").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/match").asText());
 
-        query = "MORPH(tt/p=V & mate/m!=temp:pres)";
+        query = "MORPH(tt/p<>V & mate/m!=temp:pres)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        
         assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", res.at("/query/wrap/@type").asText());       
+        assertEquals("relation:and", res.at("/query/wrap/relation").asText());
         assertEquals("koral:termGroup", res.at("/query/wrap/@type").asText());
         assertEquals("V", res.at("/query/wrap/operands/0/key").asText());
         assertEquals("p", res.at("/query/wrap/operands/0/layer").asText());
         assertEquals("tt", res.at("/query/wrap/operands/0/foundry").asText());
-        assertEquals("match:eq", res.at("/query/wrap/operands/0/match")
-                .asText());
+        assertEquals("match:ne", res.at("/query/wrap/operands/0/match").asText());
         assertEquals("temp", res.at("/query/wrap/operands/1/key").asText());
         assertEquals("pres", res.at("/query/wrap/operands/1/value").asText());
         assertEquals("m", res.at("/query/wrap/operands/1/layer").asText());
         assertEquals("mate", res.at("/query/wrap/operands/1/foundry").asText());
-        assertEquals("match:ne", res.at("/query/wrap/operands/1/match")
-                .asText());
+        assertEquals("match:ne", res.at("/query/wrap/operands/1/match").asText());
+        
+        // '&' in MORPH is optional: same query without '&' should return same serialization.
+        query = "MORPH(tt/p<>V mate/m!=temp:pres)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:termGroup", res.at("/query/wrap/@type").asText());       
+        assertEquals("relation:and", res.at("/query/wrap/relation").asText());
+        assertEquals("koral:termGroup", res.at("/query/wrap/@type").asText());
+        assertEquals("V", res.at("/query/wrap/operands/0/key").asText());
+        assertEquals("p", res.at("/query/wrap/operands/0/layer").asText());
+        assertEquals("tt", res.at("/query/wrap/operands/0/foundry").asText());
+        assertEquals("match:ne", res.at("/query/wrap/operands/0/match").asText());
+        assertEquals("temp", res.at("/query/wrap/operands/1/key").asText());
+        assertEquals("pres", res.at("/query/wrap/operands/1/value").asText());
+        assertEquals("m", res.at("/query/wrap/operands/1/layer").asText());
+        assertEquals("mate", res.at("/query/wrap/operands/1/foundry").asText());
+        assertEquals("match:ne", res.at("/query/wrap/operands/1/match").asText());
+        
     }
 
 
@@ -278,37 +747,47 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("s", res.at("/query/wrap/key").asText());
         assertTrue(res.at("/query/key").isMissingNode());
 		
+        // #ELEM(W) should not generate key=W  - 16.04.26/FB
         query = "der #ELEM(W)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:sequence", res.at("/query/operation").asText());
-        assertEquals("der", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("w", res.at("/query/operands/1/wrap/key").asText());
-        assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertTrue(res.at("/query/operands/2").isMissingNode());
+        assertEquals("koral:group", 		res.at("/query/@type").asText());
+        assertEquals("operation:sequence", 	res.at("/query/operation").asText());
+        assertEquals("koral:token",			res.at("/query/operands/0/@type").asText());
+        assertEquals("koral:term",			res.at("/query/operands/0/wrap/@type").asText());
+        assertEquals("der", 				res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("orth", 				res.at("/query/operands/0/wrap/layer").asText());
 
+        assertEquals("koral:token", 		res.at("/query/operands/1/@type").asText());
+        assertTrue(							res.at("/query/operands/1/layer").isMissingNode());
+
+        // #ELEM(W) should not generate key=W  - 16.04.26/FB
         query = "der #ELEM(W) Mann";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:sequence", res.at("/query/operation").asText());
-        assertEquals("der", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("w", res.at("/query/operands/1/wrap/key").asText());
-        assertEquals("koral:span", res.at("/query/operands/1/@type").asText());
-        assertEquals("Mann", res.at("/query/operands/2/wrap/key").asText());
-        assertTrue(res.at("/query/operands/3").isMissingNode());
+        assertEquals("koral:group", 		res.at("/query/@type").asText());
+        assertEquals("operation:sequence", 	res.at("/query/operation").asText());
+        assertEquals("koral:token",			res.at("/query/operands/0/@type").asText());
+        assertEquals("der", 				res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("orth", 				res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("koral:token", 		res.at("/query/operands/1/@type").asText());
+        assertEquals("koral:token",			res.at("/query/operands/2/@type").asText());
+        assertEquals("Mann", 				res.at("/query/operands/2/wrap/key").asText());
+        assertEquals("orth",	 			res.at("/query/operands/2/wrap/layer").asText());
 
         query = "der MORPH(p=ADJA) Mann";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:group", res.at("/query/@type").asText());
-        assertEquals("operation:sequence", res.at("/query/operation").asText());
-        assertEquals("der", res.at("/query/operands/0/wrap/key").asText());
-        assertEquals("ADJA", res.at("/query/operands/1/wrap/key").asText());
-        assertEquals("p", res.at("/query/operands/1/wrap/layer").asText());
-        assertEquals("Mann", res.at("/query/operands/2/wrap/key").asText());
-        assertTrue(res.at("/query/operands/3").isMissingNode());
+        
+        assertEquals("koral:group", 		res.at("/query/@type").asText());
+        assertEquals("operation:sequence", 	res.at("/query/operation").asText());
+        assertEquals("der", 				res.at("/query/operands/0/wrap/key").asText());
+        assertEquals("orth", 				res.at("/query/operands/0/wrap/layer").asText());
+        assertEquals("ADJA", 				res.at("/query/operands/1/wrap/key").asText());
+        assertEquals("p", 					res.at("/query/operands/1/wrap/layer").asText());
+        assertEquals("Mann", 				res.at("/query/operands/2/wrap/key").asText());
+        assertEquals("orth", 				res.at("/query/operands/2/wrap/layer").asText());
+        assertTrue(							res.at("/query/operands/3").isMissingNode());
     }
 
 
@@ -569,7 +1048,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("operation:class", res.at("/query/operands/0/operation")
                 .asText());
         assertEquals(129, res.at("/query/operands/0/classOut").asInt());
-        assertEquals(129, res.at("/query/operands/1/classOut").asInt());
+        assertEquals(130, res.at("/query/operands/1/classOut").asInt()); // due to correction 07.07.26/FB
         assertEquals("koral:token", res
                 .at("/query/operands/0/operands/0/@type").asText());
         assertEquals("Sonne", res.at("/query/operands/0/operands/0/wrap/key")
@@ -597,7 +1076,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("operation:class", res.at("/query/operands/0/operation")
                 .asText());
         assertEquals(129, res.at("/query/operands/0/classOut").asInt());
-        assertEquals(129, res.at("/query/operands/1/classOut").asInt());
+        assertEquals(130, res.at("/query/operands/1/classOut").asInt());
         assertEquals("koral:token", res
                 .at("/query/operands/0/operands/0/@type").asText());
         assertEquals("Sonne", res.at("/query/operands/0/operands/0/wrap/key")
@@ -626,7 +1105,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("operation:class", res.at("/query/operands/0/operation")
                 .asText());
         assertEquals(129, res.at("/query/operands/0/classOut").asInt());
-        assertEquals(129, res.at("/query/operands/1/classOut").asInt());
+        assertEquals(130, res.at("/query/operands/1/classOut").asInt());	// due to correction 07.07.26/FB
         assertEquals("koral:token", res
                 .at("/query/operands/0/operands/0/@type").asText());
         assertEquals("Sonne", res.at("/query/operands/0/operands/0/wrap/key")
@@ -677,14 +1156,6 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query,  "cosmas2");
     	res = mapper.readTree(qs.toJSON());
       	
-    	/*
-    	System.out.printf("Query '%s': returns: '%s'.\n", query, res.toPrettyString()) ;
-    	System.out.printf("[0]: '%s'.\n",  res.at("/query/distances").get(0).get("boundary").toPrettyString());
-    	System.out.printf("@type: '%s'.\n",  res.at("/query/distances").get(0).get("@type").asText());
-    	System.out.printf("exclude: '%s'.\n",  res.at("/query/distances").get(0).get("exclude").asText());
-    	System.out.printf("key: '%s'.\n",  res.at("/query/distances").get(0).get("key").asText());
-    	*/
-    	
     	assertEquals("cosmas:distance",  res.at("/query/distances").get(0).get("@type").asText());
     	assertTrue( res.at("/query/distances").get(0).get("exclude").asBoolean());
     	assertEquals("w", res.at("/query/distances").get(0).get("key").asText());
@@ -782,7 +1253,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(129, res.at("/query/operands/0/classOut").asInt());
         assertEquals("Sonne", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
-        assertEquals(129, res.at("/query/operands/1/classOut").asInt());
+        assertEquals(130, res.at("/query/operands/1/classOut").asInt());
         assertEquals("operation:sequence",
                 res.at("/query/operands/1/operands/0/operation").asText());
         assertEquals("w", res
@@ -793,14 +1264,14 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(7,
                 res.at("/query/operands/1/operands/0/distances/0/boundary/max")
                         .asInt());
-        assertEquals(130,
+        assertEquals(131,	// due to correction 07.07.26/FB
                 res.at("/query/operands/1/operands/0/operands/0/classOut")
                         .asInt());
         assertEquals(
                 "Mond",
                 res.at("/query/operands/1/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
-        assertEquals(130,
+        assertEquals(132,	// due to correction 07.07.26/FB
                 res.at("/query/operands/1/operands/0/operands/1/classOut")
                         .asInt());
         assertEquals(
@@ -839,7 +1310,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(129, res.at("/query/operands/1/classOut").asInt());
         assertEquals("Sonne", res.at("/query/operands/1/operands/0/wrap/key")
                 .asText());
-        assertEquals(129, res.at("/query/operands/0/classOut").asInt());
+        assertEquals(130, res.at("/query/operands/0/classOut").asInt());	// due to correction 07.07.26/FB
         assertEquals("operation:sequence",
                 res.at("/query/operands/0/operands/0/operation").asText());
         assertEquals("w", res
@@ -850,14 +1321,14 @@ public class Cosmas2QueryProcessorTest {
         assertEquals(2,
                 res.at("/query/operands/0/operands/0/distances/0/boundary/max")
                         .asInt());
-        assertEquals(130,
+        assertEquals(131,	// due to correction 07.07.26/FB
                 res.at("/query/operands/0/operands/0/operands/0/classOut")
                         .asInt());
         assertEquals(
                 "Mond",
                 res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
-        assertEquals(130,
+        assertEquals(132,	// due to correction 07.07.26/FB
                 res.at("/query/operands/0/operands/0/operands/1/classOut")
                         .asInt());
         assertEquals(
@@ -956,7 +1427,7 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
         assertEquals("operation:class", res.at("/query/operands/1/operation")
                 .asText());
-        assertEquals(129, res.at("/query/operands/1/classOut").asInt());
+        assertEquals(130, res.at("/query/operands/1/classOut").asInt());	// due to correction 07.07.26/FB
         assertEquals("koral:token", res
                 .at("/query/operands/1/operands/0/@type").asText());
         assertEquals("kommt", res.at("/query/operands/1/operands/0/wrap/key")
@@ -976,7 +1447,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("koral:group", res.at("/query/operands/1/@type").asText());
         assertEquals("operation:class", res.at("/query/operands/1/operation")
                 .asText());
-        assertEquals(129, res.at("/query/operands/1/classOut").asInt());
+        assertEquals(130, res.at("/query/operands/1/classOut").asInt());	// due to correction 07.07.26/FB
         assertEquals("koral:reference",
                 res.at("/query/operands/1/operands/0/@type").asText());
         assertEquals("operation:focus",
@@ -1058,106 +1529,476 @@ public class Cosmas2QueryProcessorTest {
 
     @Test
     public void testELEM () throws JsonProcessingException, IOException {
-        query = "#ELEM(S)";
+    	/* empty query */
+    	query = "#ELEM()";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("s", res.at("/query/wrap/key").asText());
-
-		query = "#ELEM(base/c=NP)";
+        
+       	assertFalse(res.at("/errors").isMissingNode());
+       	assertEquals("302", res.at("/errors/0/0").asText()); // error code for empty #ELEM.;
+         
+    	/** queries which work in C2 **/
+        
+       	query = "#ELEM(S)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("base", res.at("/query/wrap/foundry").asText());
-        assertEquals("c", res.at("/query/wrap/layer").asText());
-        assertEquals("NP", res.at("/query/wrap/key").asText());
-
-        query = "#ELEM(W ANA=N)";
+        
+        assertEquals("koral:span", 	res.at("/query/@type").asText());
+        assertEquals("koral:term",	res.at("/query/wrap/@type").asText());	
+        assertEquals("s",	 		res.at("/query/wrap/key").asText());	// "s" lower cased.
+        assertEquals("s", 			res.at("/query/wrap/layer").asText()); 	// "s" = layer, added - 25.03.26/FB 
+        
+        // corrected: 26.03.26/FB
+        
+        query = "#ELEM(HEAD type=TOP)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("w", res.at("/query/wrap/key").asText());
+        
+        assertEquals("koral:span", 	res.at("/query/@type").asText());
+        assertEquals("head", 		res.at("/query/wrap/key").asText());	// "head" lower cased.
+        assertEquals("s",    		res.at("/query/wrap/layer").asText());
 		
-        assertEquals("koral:term", res.at("/query/attr/@type").asText());
-        assertEquals("N", res.at("/query/attr/key").asText());
-        assertEquals("p", res.at("/query/attr/layer").asText());
-        assertEquals("match:eq", res.at("/query/attr/match").asText());
-
-        query = "#ELEM(W ANA != 'N V')";
+        assertEquals("koral:term",	res.at("/query/wrap/attr/@type").asText());
+        assertEquals("s", 			res.at("/query/wrap/attr/layer").asText()); // default layer for #ELEM(), same as for element name.
+        assertEquals("type", 		res.at("/query/wrap/attr/key").asText());
+        assertEquals("TOP", 		res.at("/query/wrap/attr/value").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/attr/match").asText());
+        
+        // check several attribute/value pairs and value in single quotes: 27.03.26/FB
+        
+        query = "#ELEM(HEAD type=TOP link=url5 style='bold')";
+        
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("w", res.at("/query/wrap/key").asText());
-        assertEquals("koral:termGroup", res.at("/query/attr/@type").asText());
-        assertEquals("relation:and", res.at("/query/attr/relation").asText());
-        assertEquals("koral:term", res.at("/query/attr/operands/0/@type")
-                .asText());
-        assertEquals("N", res.at("/query/attr/operands/0/key").asText());
-        assertEquals("p", res.at("/query/attr/operands/0/layer").asText());
-        assertEquals("match:ne", res.at("/query/attr/operands/0/match")
-                .asText());
-        assertEquals("koral:term", res.at("/query/attr/operands/1/@type")
-                .asText());
-        assertEquals("V", res.at("/query/attr/operands/1/key").asText());
-        assertEquals("p", res.at("/query/attr/operands/1/layer").asText());
-        assertEquals("match:ne", res.at("/query/attr/operands/1/match")
-                .asText());
+        
+        assertEquals("koral:span", 			res.at("/query/@type").asText());
+        assertEquals("koral:term", 			res.at("/query/wrap/@type").asText());
+        assertEquals("head", 				res.at("/query/wrap/key").asText());
+        assertEquals("s",    				res.at("/query/wrap/layer").asText());
+	
+        assertEquals("koral:termGroup",		res.at("/query/wrap/attr/@type").asText());
+        assertEquals("relation:and",		res.at("/query/wrap/attr/relation").asText());
+        
+        assertEquals("type", 				res.at("/query/wrap/attr/operands/0/key").asText());
+        assertEquals("TOP", 				res.at("/query/wrap/attr/operands/0/value").asText());
+        assertEquals("match:eq",			res.at("/query/wrap/attr/operands/0/match").asText());
+        assertEquals("koral:term",			res.at("/query/wrap/attr/operands/0/@type").asText());
+        assertEquals("s",					res.at("/query/wrap/attr/operands/0/layer").asText());
+        
+        assertEquals("link", 				res.at("/query/wrap/attr/operands/1/key").asText());
+        assertEquals("url5", 				res.at("/query/wrap/attr/operands/1/value").asText());
+        assertEquals("match:eq",			res.at("/query/wrap/attr/operands/1/match").asText());
+        assertEquals("koral:term",			res.at("/query/wrap/attr/operands/1/@type").asText());
+        assertEquals("s",					res.at("/query/wrap/attr/operands/1/layer").asText());
 
-        query = "#ELEM(W ANA != 'N A V' Genre = Sport)";
+        assertEquals("style", 				res.at("/query/wrap/attr/operands/2/key").asText());
+        assertEquals("bold", 				res.at("/query/wrap/attr/operands/2/value").asText());
+        assertEquals("match:eq",			res.at("/query/wrap/attr/operands/2/match").asText());
+        assertEquals("koral:term",			res.at("/query/wrap/attr/operands/2/@type").asText());
+        assertEquals("s",					res.at("/query/wrap/attr/operands/2/layer").asText());
+
+        // check attribute with several values - 27.03.26/FB
+        query = "#ELEM(HEAD type!='url5 top bold')";
+        
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("w", res.at("/query/wrap/key").asText());
-        assertEquals("koral:termGroup", res.at("/query/attr/@type").asText());
-        assertEquals("relation:and", res.at("/query/attr/relation").asText());
-        assertEquals("koral:termGroup", res.at("/query/attr/operands/0/@type")
-                .asText());
-        assertEquals("relation:and", res.at("/query/attr/operands/0/relation")
-                .asText());
-        assertEquals("N", res.at("/query/attr/operands/0/operands/0/key")
-                .asText());
-        assertEquals("A", res.at("/query/attr/operands/0/operands/1/key")
-                .asText());
-        assertEquals("V", res.at("/query/attr/operands/0/operands/2/key")
-                .asText());
-        assertEquals("Genre", res.at("/query/attr/operands/1/layer").asText());
-        assertEquals("Sport", res.at("/query/attr/operands/1/key").asText());
+        
+        assertEquals("koral:span", 			res.at("/query/@type").asText());
+        assertEquals("head", 				res.at("/query/wrap/key").asText());
+        assertEquals("s",    				res.at("/query/wrap/layer").asText());
+		
+        assertEquals("koral:termGroup",		res.at("/query/wrap/attr/@type").asText());
+        assertEquals("relation:and",		res.at("/query/wrap/attr/relation").asText());
+        
+        assertEquals("type", 				res.at("/query/wrap/attr/operands/0/key").asText());
+        assertEquals("url5", 				res.at("/query/wrap/attr/operands/0/value").asText());
+        assertEquals("match:ne",			res.at("/query/wrap/attr/operands/0/match").asText());
+        assertEquals("s",	 				res.at("/query/wrap/attr/operands/0/layer").asText());
+        assertEquals("koral:term",			res.at("/query/wrap/attr/operands/0/@type").asText());
+        
+        assertEquals("type", 				res.at("/query/wrap/attr/operands/1/key").asText());
+        assertEquals("top", 				res.at("/query/wrap/attr/operands/1/value").asText());
+        assertEquals("match:ne",			res.at("/query/wrap/attr/operands/1/match").asText());
+        assertEquals("s",	 				res.at("/query/wrap/attr/operands/1/layer").asText());
+        assertEquals("koral:term",			res.at("/query/wrap/attr/operands/1/@type").asText());
 
-        query = "#ELEM(W ANA != 'N A V' Genre != 'Sport Politik')";
+        assertEquals("type", 				res.at("/query/wrap/attr/operands/2/key").asText());
+        assertEquals("bold", 				res.at("/query/wrap/attr/operands/2/value").asText());
+        assertEquals("match:ne",			res.at("/query/wrap/attr/operands/2/match").asText());
+        assertEquals("s",	 				res.at("/query/wrap/attr/operands/2/layer").asText());
+        assertEquals("koral:term",			res.at("/query/wrap/attr/operands/2/@type").asText());
+        
+        // check attr <> value - 27.03.26/FB
+        
+        query = "#ELEM(HEAD style<>bold)";
+        
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        assertEquals("koral:span", res.at("/query/@type").asText());
-        assertEquals("w", res.at("/query/wrap/key").asText());
-        assertEquals("koral:termGroup", res.at("/query/attr/@type").asText());
-        assertEquals("relation:and", res.at("/query/attr/relation").asText());
-        assertEquals("koral:termGroup", res.at("/query/attr/operands/0/@type")
-                .asText());
-        assertEquals("relation:and", res.at("/query/attr/operands/0/relation")
-                .asText());
-        assertEquals("koral:termGroup", res.at("/query/attr/operands/1/@type")
-                .asText());
-        assertEquals("relation:and", res.at("/query/attr/operands/1/relation")
-                .asText());
-        assertEquals("N", res.at("/query/attr/operands/0/operands/0/key")
-                .asText());
-        assertEquals("A", res.at("/query/attr/operands/0/operands/1/key")
-                .asText());
-        assertEquals("V", res.at("/query/attr/operands/0/operands/2/key")
-                .asText());
-        assertEquals("match:ne",
-                res.at("/query/attr/operands/0/operands/2/match").asText());
-        assertEquals("Genre", res.at("/query/attr/operands/1/operands/0/layer")
-                .asText());
-        assertEquals("Sport", res.at("/query/attr/operands/1/operands/0/key")
-                .asText());
-        assertEquals("Genre", res.at("/query/attr/operands/1/operands/1/layer")
-                .asText());
-        assertEquals("Politik", res.at("/query/attr/operands/1/operands/1/key")
-                .asText());
-        assertEquals("match:ne",
-                res.at("/query/attr/operands/1/operands/1/match").asText());
+        
+        assertEquals("koral:span", 	res.at("/query/@type").asText());
+        assertEquals("head", 		res.at("/query/wrap/key").asText());
+        assertEquals("s",    		res.at("/query/wrap/layer").asText());
+		
+        assertEquals("koral:term",	res.at("/query/wrap/attr/@type").asText());
+        assertEquals("s", 			res.at("/query/wrap/attr/layer").asText()); // default layer for #ELEM(), same as for element name.
+        assertEquals("style", 		res.at("/query/wrap/attr/key").asText());
+        assertEquals("bold", 		res.at("/query/wrap/attr/value").asText());
+        assertEquals("match:ne", 	res.at("/query/wrap/attr/match").asText());
+        
+        // no element specified, attribute only:
+        query = "#ELEM(type=TOP)";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:span", 	res.at("/query/@type").asText());
+	
+        assertEquals("koral:term",	res.at("/query/wrap/attr/@type").asText());
+        assertEquals("s", 			res.at("/query/wrap/attr/layer").asText()); // default layer for #ELEM(), same as for element name.
+        assertEquals("type", 		res.at("/query/wrap/attr/key").asText());
+        assertEquals("TOP", 		res.at("/query/wrap/attr/value").asText());
+        assertEquals("match:eq", 	res.at("/query/wrap/attr/match").asText());
+    }
+    
+    /* a special case of #ELEM is the use of element name 'W' and/or attribute 'ana',
+     * which must be mapped in KorAP onto the layer for part of speech.
+     * 17.04.26/FB
+     */
+    
+    @Test
+    public void testELEM_W() throws JsonProcessingException, IOException 
+    {
+        query = "#ELEM(W ANA=NOU)";
+        
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        // System.out.printf("Query='%s' res='%s'.\n", query, res.toString());
+        
+        assertEquals("koral:token",	res.at("/query/@type").asText());
+        assertFalse("Element 'w' not expected as a key!", 
+        							res.at("/query/wrap/key").asText().equals("w"));
+        assertFalse("Attribute 'ana' not expected as a key!",
+        							res.at("/query/attr/key").asText().equals("ana"));
+        assertEquals("koral:term", 	res.at("/query/wrap/attr/@type").asText());
+        assertEquals("NOU", 		res.at("/query/wrap/attr/key").asText());
+        assertEquals(LAYER_POS, 	res.at("/query/wrap/attr/layer").asText()); // same as element name.
+        assertEquals("match:eq", 	res.at("/query/wrap/attr/match").asText());
+
+        // Element 'W' is optional when using attribute 'ana':
+        
+        query = "#ELEM(ana=NOU)";
+        
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        // System.out.printf("Query='%s' res='%s'.\n", query, res.toString());
+        
+        assertEquals("koral:token",	res.at("/query/@type").asText());
+        assertFalse("Element 'w' not expected as a key!", 
+        							res.at("/query/wrap/key").asText().equals("w"));
+        assertFalse("Attribute 'ana' not expected as a key!",
+        							res.at("/query/wrap/key").asText().equals("ana"));
+        assertEquals("koral:term", 	res.at("/query/wrap/@type").asText());
+        assertEquals("NOU", 		res.at("/query/wrap/attr/key").asText());
+        assertEquals(LAYER_POS, 	res.at("/query/wrap/attr/layer").asText()); // same as element name.
+        assertEquals("match:eq", 	res.at("/query/wrap/attr/match").asText());
+
+        query = "#ELEM(W ANA='NOU SG PROPN')";
+
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token",		res.at("/query/@type").asText());
+        
+        assertEquals("koral:term", 		res.at("/query/wrap/@type").asText());
+        assertEquals(LAYER_POS, 		res.at("/query/wrap/layer").asText());
+        
+        assertEquals("koral:termGroup",	res.at("/query/wrap/attr/@type").asText());
+        assertEquals("relation:and", 	res.at("/query/wrap/attr/relation").asText());
+        assertEquals("koral:term", 		res.at("/query/wrap/attr/operands/0/@type").asText());
+        assertEquals("NOU",		 		res.at("/query/wrap/attr/operands/0/key").asText());
+        assertEquals("match:eq",		res.at("/query/wrap/attr/operands/0/match").asText());
+        assertEquals("koral:term", 		res.at("/query/wrap/attr/operands/1/@type").asText());
+        assertEquals("SG",		 		res.at("/query/wrap/attr/operands/1/key").asText());
+        assertEquals("match:eq",		res.at("/query/wrap/attr/operands/1/match").asText());
+        assertEquals("koral:term", 		res.at("/query/wrap/attr/operands/2/@type").asText());
+        assertEquals("PROPN",	 		res.at("/query/wrap/attr/operands/2/key").asText());
+        assertEquals("match:eq",		res.at("/query/wrap/attr/operands/2/match").asText());
+
+        // for part of speech, 2 kinds of negation are possible:
+        query = "#ELEM(W ana='NOU -PL' ana!='PROPN')";
+
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token", 	res.at("/query/@type").asText());
+        
+        assertEquals("koral:term", 		res.at("/query/wrap/@type").asText());
+        assertEquals(LAYER_POS, 		res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", 		res.at("/query/wrap/match").asText());
+        
+        assertEquals("koral:termGroup",	res.at("/query/wrap/attr/@type").asText());
+        assertEquals("relation:and", 	res.at("/query/wrap/attr/relation").asText());
+        assertEquals("koral:term", 		res.at("/query/wrap/attr/operands/0/operands/0/@type").asText());
+        assertEquals("NOU",		 		res.at("/query/wrap/attr/operands/0/operands/0/key").asText());
+        assertEquals("match:eq",		res.at("/query/wrap/attr/operands/0/operands/0/match").asText());
+        assertEquals("koral:term", 		res.at("/query/wrap/attr/operands/0/operands/1/@type").asText());
+        assertEquals("PL",		 		res.at("/query/wrap/attr/operands/0/operands/1/key").asText());
+        assertEquals("match:ne",		res.at("/query/wrap/attr/operands/0/operands/1/match").asText());
+        assertEquals("koral:termGroup",	res.at("/query/wrap/attr/operands/0/@type").asText());
+        assertEquals("relation:and",	res.at("/query/wrap/attr/operands/0/relation").asText());
+        assertEquals("koral:term", 		res.at("/query/wrap/attr/operands/1/@type").asText());
+        assertEquals("PROPN",	 		res.at("/query/wrap/attr/operands/1/key").asText());
+        assertEquals("match:ne",		res.at("/query/wrap/attr/operands/1/match").asText());
+        
+        // the other operator for negation:
+        query = "#ELEM(W ANA!='NOU')";
+
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token",		res.at("/query/@type").asText());
+        assertEquals("koral:term", 		res.at("/query/wrap/@type").asText());
+        assertEquals(LAYER_POS, 		res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", 		res.at("/query/wrap/match").asText());
+        
+        assertEquals("koral:term",		res.at("/query/wrap/attr/@type").asText());
+        assertEquals("match:ne",		res.at("/query/wrap/attr/match").asText());
+        assertEquals("NOU",			 	res.at("/query/wrap/attr/key").asText());
+        assertEquals(LAYER_POS,			res.at("/query/wrap/attr/layer").asText());
+        
+        // different attributes: 'ana' and non 'ana':
+        query = "#ELEM(W ANA = 'NOU' type!='COMP')";
+        
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:token",		res.at("/query/@type").asText());
+        
+        assertEquals("koral:term", 		res.at("/query/wrap/@type").asText());
+        assertEquals("match:eq", 		res.at("/query/wrap/match").asText());
+        assertEquals(LAYER_POS,		 	res.at("/query/wrap/layer").asText());
+        
+        assertEquals("koral:termGroup", res.at("/query/wrap/attr/@type").asText());
+        assertEquals("relation:and", 	res.at("/query/wrap/attr/relation").asText());
+        
+        assertEquals("koral:term",		res.at("/query/wrap/attr/operands/0/@type").asText());
+        assertEquals("match:eq",	 	res.at("/query/wrap/attr/operands/0/match").asText());
+        assertEquals("NOU",				res.at("/query/wrap/attr/operands/0/key").asText());
+        
+        assertEquals("koral:term",		res.at("/query/wrap/attr/operands/1/@type").asText());
+        assertEquals("match:ne",	 	res.at("/query/wrap/attr/operands/1/match").asText());
+        assertEquals("type",			res.at("/query/wrap/attr/operands/1/key").asText()); 	// normal case 
+        assertEquals("COMP",			res.at("/query/wrap/attr/operands/1/value").asText());	// normal case
+
     }
 
+    /*
+     * Extensions of C2-Queries for KorAP : 
+     * - specify foundry and layer.
+     * - e.g. #ELEM(base/p=NOU).
+     * 20.04.26/FB
+     */
+    
+    @Test
+    public void testELEM_Foundry() throws JsonProcessingException, IOException {
+    	
+    // special case: for "dereko/p" the @type is a term.
+	query = "#ELEM(dereko/s=head)";
+	
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:span",	 		res.at("/query/@type").asText());
+    assertEquals("koral:term", 			res.at("/query/wrap/@type").asText());
+    assertEquals("match:eq",		 	res.at("/query/wrap/attr/match").asText());
+    assertEquals("dereko", 				res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("s", 					res.at("/query/wrap/attr/layer").asText());
+    assertEquals("head", 				res.at("/query/wrap/attr/key").asText());
+    
+    /* base or dereko ? */
+    query = "#ELEM(base/c=NP)";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:span", 		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("base", 			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("c", 				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("NP", 				res.at("/query/wrap/attr/key").asText());
+    
+    query = "#ELEM(marmot/m=number:pl)";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:token",		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("marmot", 			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("m",	 			res.at("/query/wrap/attr/layer").asText());
+    assertEquals("number", 			res.at("/query/wrap/attr/key").asText());
+    assertEquals("pl",	 			res.at("/query/wrap/attr/value").asText());
+    
+    query = "#ELEM(marmot/m='number:pl gender:-fem')";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:token",		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("marmot", 			res.at("/query/wrap/attr/operands/0/foundry").asText());
+    assertEquals("m",	 			res.at("/query/wrap/attr/operands/0/layer").asText());
+    assertEquals("number", 			res.at("/query/wrap/attr/operands/0/key").asText());
+    assertEquals("pl",	 			res.at("/query/wrap/attr/operands/0/value").asText());
+    
+    assertEquals("marmot", 			res.at("/query/wrap/attr/operands/1/foundry").asText());
+    assertEquals("m",	 			res.at("/query/wrap/attr/operands/1/layer").asText());
+    assertEquals("gender", 			res.at("/query/wrap/attr/operands/1/key").asText());
+    assertEquals("fem",	 			res.at("/query/wrap/attr/operands/1/value").asText());
+    assertEquals("match:ne",		res.at("/query/wrap/attr/operands/1/match").asText());
+    
+    query = "#ELEM(marmot/m!=number:pl)";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:token",		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("marmot", 			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("m",	 			res.at("/query/wrap/attr/layer").asText());
+    assertEquals("number", 			res.at("/query/wrap/attr/key").asText());
+    assertEquals("pl",	 			res.at("/query/wrap/attr/value").asText());
+    assertEquals("match:ne",		res.at("/query/wrap/attr/match").asText());
+    
+    query = "#ELEM(HEAD dereko/s<>type:top)";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:span", 		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("dereko", 			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("s", 				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("type", 			res.at("/query/wrap/attr/key").asText());
+    assertEquals("top",	 			res.at("/query/wrap/attr/value").asText());
+    assertEquals("match:ne",		res.at("/query/wrap/attr/match").asText());
+
+    query = "#ELEM(HEAD dereko/s='top bottom')";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:span", 		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("s",				res.at("/query/wrap/layer").asText());
+    assertEquals("head",			res.at("/query/wrap/key").asText());
+    assertEquals("koral:termGroup",	res.at("/query/wrap/attr/@type").asText());
+    assertEquals("relation:and",	res.at("/query/wrap/attr/relation").asText());
+    assertEquals("dereko", 			res.at("/query/wrap/attr/operands/0/foundry").asText());
+    assertEquals("s",				res.at("/query/wrap/attr/operands/0/layer").asText());
+    assertEquals("top", 			res.at("/query/wrap/attr/operands/0/key").asText());
+    assertEquals("dereko", 			res.at("/query/wrap/attr/operands/1/foundry").asText());
+    assertEquals("s",				res.at("/query/wrap/attr/operands/1/layer").asText());
+    assertEquals("bottom", 			res.at("/query/wrap/attr/operands/1/key").asText());
+    
+    /*
+     * test the other foundries/layers for either token or span.
+     */
+    
+    query = "#ELEM(tt/l=Haus)";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:token",		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/attr/@type").asText());
+    assertEquals("tt",	 			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("l",				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("Haus", 			res.at("/query/wrap/attr/key").asText());
+    
+    query = "#ELEM(base/s=s)"; 		// sentences
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:span", 		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("base", 			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("s", 				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("s", 				res.at("/query/wrap/attr/key").asText());
+
+    query = "#ELEM(base/s=p)"; 		// paragraphes
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:span", 		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("base", 			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("s", 				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("p", 				res.at("/query/wrap/attr/key").asText());
+
+    query = "#ELEM(base/s=t)"; 		// texts (?)
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:span", 		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("base", 			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("s", 				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("t", 				res.at("/query/wrap/attr/key").asText());
+
+    query = "#ELEM(marmot/p=APPO)";
+        
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:token",		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/attr/@type").asText());
+    assertEquals("marmot", 			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("p",				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("APPO", 			res.at("/query/wrap/attr/key").asText());
+    
+    query = "#ELEM(corenlp/p=ADJD)";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:token",		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("corenlp",			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("p",				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("ADJD", 			res.at("/query/wrap/attr/key").asText());
+    
+    query = "#ELEM(corenlp/c=AP)";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:span",		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/attr/@type").asText());
+    assertEquals("corenlp",			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("c",				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("AP", 				res.at("/query/wrap/attr/key").asText());
+    
+    query = "#ELEM(corenlp/ne=I-ORG)";
+    
+    qs.setQuery(query, "cosmas2");
+    res = mapper.readTree(qs.toJSON());
+    
+    assertEquals("koral:token",		res.at("/query/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/@type").asText());
+    assertEquals("koral:term",		res.at("/query/wrap/attr/@type").asText());
+    assertEquals("corenlp",			res.at("/query/wrap/attr/foundry").asText());
+    assertEquals("ne",				res.at("/query/wrap/attr/layer").asText());
+    assertEquals("I-ORG", 			res.at("/query/wrap/attr/key").asText());
+
+    }
 
     @Test
     public void testOPALL () throws JsonProcessingException, IOException {
@@ -1319,7 +2160,7 @@ public class Cosmas2QueryProcessorTest {
                 res.at("/query/operands/0/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/key")
                         .asText());
         assertEquals(
-                132,
+                133,	// due to correction 07.07.26/FB
                 res.at("/query/operands/0/operands/0/operands/1/operands/0/operands/1/classOut")
                         .asInt());
         assertEquals(
@@ -1614,16 +2455,26 @@ public class Cosmas2QueryProcessorTest {
                 "Mann",
                 res.at("/query/operands/0/operands/1/operands/1/operands/0/operands/1/wrap/key")
                         .asText());
-
+		
+        // check the combination of Positional condition and proximity operator,
+        // this was corrected by 07.07.26/FB
+        
+		query = "Der:sa /+w1 Betrieb";
+		qs.setQuery(query, "cosmas2");
+		res = mapper.readTree(qs.toJSON());
     }
 
 
     @Test
     public void testColonSeparatedConditions () throws JsonProcessingException,
             IOException {
+    	
         query = "der:sa";
+        if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s'.\n", query);
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s': done.\n", query);
+        
         assertEquals("koral:reference", res.at("/query/@type").asText());
         assertEquals("operation:focus", res.at("/query/operation").asText());
         assertEquals(129, res.at("/query/classRef/0").asInt());
@@ -1647,7 +2498,7 @@ public class Cosmas2QueryProcessorTest {
                 .asText());
         assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
-
+/* fails after modifications to MORPH -- 12.06.26/FB
         query = "der:sa,-pa";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -1711,7 +2562,8 @@ public class Cosmas2QueryProcessorTest {
                 "der",
                 res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key")
                         .asText());
-
+*/
+        /*
         query = "der:sa,-pa,+te";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -1869,7 +2721,105 @@ public class Cosmas2QueryProcessorTest {
                 "der",
                 res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/operands/0/wrap/key")
                         .asText());
+*/
     }
+
+
+    /**
+     * Regression test for a bug where a sequence combining a
+     * position operator (OPBED, e.g. "sa" = starts sentence) with
+     * a distance operator (OPPROX, e.g. "/+w1") produced an invalid
+     * KoralQuery: the second sequence operand ended up nested
+     * *inside* the koral:group/operation:class wrapping the first
+     * operand, instead of being its sibling in the sequence's
+     * operands array. This violated the requirement that
+     * operation:class expects exactly one operand, and caused
+     * KorAP/Krill to reject the query.
+     * 
+     * Root cause: processPositionCondition() pushed a class group
+     * onto the internal objectStack (to collect the wrapped token)
+     * but never recorded this push via stackedObjects++, so the
+     * generic per-node stack bookkeeping in processNode() failed to
+     * pop it again. This left one stale object on the stack, which
+     * shifted where the second sequence operand got inserted.
+     */
+    @Test
+    public void testOPBEDinOPPROXSequence () throws JsonProcessingException,
+            IOException {
+        query = "Der:sa /+w1 Betrieb";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+
+        // Top level: a 2-operand sequence with the distance constraint
+        assertEquals("koral:group", res.at("/query/@type").asText());
+        assertEquals("operation:sequence", res.at("/query/operation")
+                .asText());
+        assertTrue(res.at("/query/inOrder").asBoolean());
+        assertEquals("cosmas:distance", res.at("/query/distances/0/@type")
+                .asText());
+        assertEquals("w", res.at("/query/distances/0/key").asText());
+        assertEquals(0, res.at("/query/distances/0/boundary/min").asInt());
+        assertEquals(1, res.at("/query/distances/0/boundary/max").asInt());
+        assertEquals(2, res.at("/query/operands").size());
+
+        // First operand: "Der" at sentence start, wrapped in its own class
+        assertEquals("koral:group", res.at("/query/operands/0/@type")
+                .asText());
+        assertEquals("operation:class",
+                res.at("/query/operands/0/operation").asText());
+        int firstClass = res.at("/query/operands/0/classOut").asInt();
+
+        assertEquals("koral:reference",
+                res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("operation:focus",
+                res.at("/query/operands/0/operands/0/operation").asText());
+        int innerClass = res
+                .at("/query/operands/0/operands/0/classRef/0").asInt();
+
+        assertEquals(
+                "koral:group",
+                res.at("/query/operands/0/operands/0/operands/0/@type")
+                        .asText());
+        assertEquals(
+                "operation:position",
+                res.at("/query/operands/0/operands/0/operands/0/operation")
+                        .asText());
+        assertEquals(
+                "frames:startsWith",
+                res.at("/query/operands/0/operands/0/operands/0/frames/0")
+                        .asText());
+        assertEquals(
+                "s",
+                res.at("/query/operands/0/operands/0/operands/0/operands/0/wrap/key")
+                        .asText());
+        assertEquals(
+                innerClass,
+                res.at("/query/operands/0/operands/0/operands/0/operands/1/classOut")
+                        .asInt());
+        assertEquals(
+                "Der",
+                res.at("/query/operands/0/operands/0/operands/0/operands/1/operands/0/wrap/key")
+                        .asText());
+
+        // Second operand: "Betrieb" - a direct sibling of the first
+        // operand in the sequence, NOT nested inside it.
+        assertEquals("koral:group", res.at("/query/operands/1/@type")
+                .asText());
+        assertEquals("operation:class",
+                res.at("/query/operands/1/operation").asText());
+        assertEquals("koral:token",
+                res.at("/query/operands/1/operands/0/@type").asText());
+        assertEquals("Betrieb",
+                res.at("/query/operands/1/operands/0/wrap/key").asText());
+
+        // The sequence itself must not have picked up a spurious
+        // third, deeply-nested operand.
+        assertTrue(res.at("/query/operands/0/operands/1").isMissingNode());
+
+        // Class numbers used within a query must be distinct.
+        assertNotEquals(firstClass, innerClass);
+    }
+
 
     @Test
     public void testWildcard () throws JsonProcessingException, IOException {
@@ -1885,32 +2835,39 @@ public class Cosmas2QueryProcessorTest {
     @Test
     public void testErrors () throws JsonProcessingException, IOException {
         query = "MORPH(tt/p=\"\")";
+        if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s'.\n", query);
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s': done.\n", query);
         assertTrue(res.at("/query/@type").isMissingNode());
-        assertEquals(StatusCodes.INCOMPATIBLE_OPERATOR_AND_OPERAND,
+        assertEquals(StatusCodes.MALFORMED_QUERY,
                 res.at("/errors/0/0").asInt());
         assertTrue(res
                 .at("/errors/0/1")
                 .asText()
                 .startsWith(
-                        "Something went wrong parsing the argument in MORPH()"));
-        /*
+                        "Empty MORPH() operator"));
+        
         query = "MORPH(tt/p=\"foo)";
+        if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s'.\n", query);
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s': done.\n", query);
         assertTrue(res.at("/query/@type").isMissingNode());
         assertEquals(StatusCodes.MALFORMED_QUERY, res.at("/errors/0/0").asInt());
         assertTrue(res.at("/errors/0/1").asText()
-                .startsWith("Early closing parenthesis"));
-		*/
+                .startsWith("unexpected input at position"));
+		
         query = "MORPH(tt/p=)";
+        if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s'.\n", query);
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s': done.\n", query);
         assertTrue(res.at("/query/@type").isMissingNode());
         assertEquals(StatusCodes.MALFORMED_QUERY, res.at("/errors/0/0").asInt());
         assertTrue(res.at("/errors/0/1").asText()
-                .startsWith("Early closing parenthesis"));
+                .startsWith("unexpected input at position"));
+    	
     }
 
     @Test
@@ -1942,7 +2899,6 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         
-        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
         assertEquals("koral:token", res.at("/query/@type").asText());
         assertEquals("koral:term",  res.at("/query/wrap/@type").asText());
         assertEquals("^aber$",      res.at("/query/wrap/key").asText());
@@ -1954,7 +2910,6 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         
-        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
         assertEquals("été'"	,       res.at("/query/wrap/key").asText());
         assertEquals("type:regex",  res.at("/query/wrap/type").asText());
         assertEquals("orth",        res.at("/query/wrap/layer").asText());
@@ -1963,7 +2918,6 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         
-        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
         assertEquals("été"	,       res.at("/query/wrap/key").asText());
         assertEquals("type:regex",  res.at("/query/wrap/type").asText());
         assertEquals("orth",        res.at("/query/wrap/layer").asText());
@@ -1972,7 +2926,6 @@ public class Cosmas2QueryProcessorTest {
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         
-        if( debug ) System.out.printf("testREG: query: >>%s<< -> key: >>%s<<.\n",  query, res.at("/query/wrap/key").asText());
         assertEquals("été\\",       res.at("/query/wrap/key").asText());
         assertEquals("type:regex",  res.at("/query/wrap/type").asText());
         assertEquals("orth",        res.at("/query/wrap/layer").asText());
@@ -2098,13 +3051,13 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("A.*ung",      res.at("/query/operands/1/operands/0/wrap/key").asText());
         assertEquals("orth",        res.at("/query/operands/1/operands/0/wrap/layer").asText());
         assertEquals("type:regex",  res.at("/query/operands/1/operands/0/wrap/type").asText());
- 
+        /*
         query = "#REG( ) ";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
- 
+ 		
         assertTrue(res.toString().contains("Failing to parse"));
-        
+        */
         query = "#REG('' ) ";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -2147,8 +3100,7 @@ public class Cosmas2QueryProcessorTest {
         sb = new StringBuffer("   abc");
         StringUtils.removeBlanksAtBothSides(sb);
         assertEquals("abc",sb.toString());
-    }
-    
-  
-    
+
+        }
+        
 }

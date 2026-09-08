@@ -1,16 +1,44 @@
+0.52 2026-07-29
+     - [bugfix] C2QL: Correcting serialization of "Der:sa" combined with e.g. "/+w1 Betrieb".
+     - [bugfix] in case above: corrected: same ClassId for different spans.
+     - [bugfix] in case above: corrected: object stack worked wrongly for prox and position together
+     - [bugfix] JUnits adapted, as classIds have modified values now.
+     - [bugfix] JUnit added to check the correctness of the query above .
+
+0.51 2026-07-29
+     - [feature] C2QL MORPH(v1 v2..): more than 1 value with/without foundry/layer specification works now.
+     - [feature] translating MORPH expressions from C2-style STTS/CONNEXOR to STTS/marmot.
+     - [bugfix] C2QL: correcting #BED() and word:sa/se... (due to MORPH modifications).
+     - [feature] JUnits added.
+
+0.50 2026-07-29
+     - [bugfix] Op. #ELEM() in C2QL: missing default layer 's' is added.
+     - [bugfix] Op. #ELEM(w ana='...'): either 'W' or 'ana' generates layer=p.
+     - [bugfix] Op. #ELEM() serializaton of attributes: layer, key and value corrected.
+     - [bugfix] Op. #ELEM(w ana='...' type='...'): mixed combination of 'ana' with other attr. corrected.
+     - [bugfix] Op. #ELEM(w ana="NOU -PL'): negation for attribute values implemented.
+     - [bugfix] Op. #ELEM(foundry/layer ...): serialization of att=val pairs added.
+     - [bugfix] Op. #ELEM() JUnits added for all theses cases.
+     - [bugfix] Op. #ELEM(): serialization: 'attr' no longer inside 'wrap'.
+
+0.49 2026-05-04
+    - [security] Dependencies updated	
+    - [cleanup] Silence error listeners in PQ test suite
+      (diewald; AI-assisted Claude Opus 4.6)
+
 0.48 2025-11-17
-     - [security] Update to Java 21.
+    - [security] Update to Java 21.
 
 0.47 2025-10-16
-	- [enhancement] Add apiVersion for QuerySerializer, CorpusQuery-, 
-	  Poliqarp- and CQP processors.
+  	- [enhancement] Add apiVersion for QuerySerializer, CorpusQuery-, 
+	    Poliqarp- and CQP processors.
 	  
 0.46 2025-08-06
     - [security] Dependencies updated	
 	
 0.45 2025-05-23
-     - [bugfix] Fix running QuerySerializer via commandline 
-     - [feature] Add serializing corpus query via commandline
+    - [bugfix] Fix running QuerySerializer via commandline 
+    - [feature] Add serializing corpus query via commandline
 
 0.44 2024-07-12
     - [security] Dependencies updated

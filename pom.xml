@@ -4,7 +4,7 @@
 
 	<groupId>de.ids-mannheim.korap.koral</groupId>
 	<artifactId>Koral</artifactId>
-	<version>0.48</version>
+	<version>0.49</version>
 	<packaging>jar</packaging>
 	<name>Koral</name>
 	<url>https://korap.ids-mannheim.de</url>
@@ -33,18 +33,23 @@
 			<email>margaretha@ids-mannheim.de</email>
 		</developer>
 		<developer>
+			<name>Franck Bodmer</name>
+			<email>bodmer@ids-mannheim.de</email>
+		</developer>
+		<developer>
 			<name>Elena Irimia</name>
 		</developer>
 	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>		
-		<jackson.version>2.21.4</jackson.version>
+
+		<jackson.version>2.22.1</jackson.version>
 		<jackson.annotations.version>2.22</jackson.annotations.version>
 		<antlr4.version>4.13.2</antlr4.version>
 		<antlr3.version>3.5.3</antlr3.version>
 		<java.version>21</java.version>
-		<log4j.version>2.26.0</log4j.version>
+		<log4j.version>2.26.1</log4j.version>
 	</properties>
 	
 	<repositories>
@@ -176,6 +181,7 @@
 		          	<exclude>**/c2ps_opBED.java</exclude>
 		          	<exclude>**/c2ps_opELEM.java</exclude>
 		          	<exclude>**/c2ps_opIN.java</exclude>
+		          	<exclude>**/c2ps_opMORPH.java</exclude>
 		          	<exclude>**/c2ps_opOV.java</exclude>
 		          	<exclude>**/c2ps_opPROX.java</exclude>
 		          	<exclude>**/c2ps_opREG.java</exclude>

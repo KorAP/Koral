@@ -20,7 +20,8 @@ grammar c2ps_opWF;
 
 options {output=AST;}
 
-tokens  { OPWF; OPLEM; OPTCASE; TPOS; }
+//tokens  { OPWF; OPLEM; OPTCASE; TPOS; }
+tokens  { OPWF; OPLEM; OPTCASE; TPOS; OPTS; OPBED; }
 @header {package de.ids_mannheim.korap.query.parse.cosmas;}
 @lexer::header {package de.ids_mannheim.korap.query.parse.cosmas;}
 
@@ -49,10 +50,19 @@ WS	:	(' ')+ {skip();};
  
 searchWFs[int pos]
 	:	searchWF[pos]+;
-	
+/*
 searchWF[int pos] :	optCase? wordform[OPWF,pos] tpos?
 
 		-> ^(OPWF wordform optCase? tpos? ) ;
+*/
+
+// insert OPWF into OPBEG if TPOS is present - 11.06.26/FB
+
+searchWF[int pos] 
+		:	optCase? wordform[OPWF,pos] tpos
+		-> ^(OPBED ^(OPWF wordform optCase?) tpos )
+		|	optCase? wordform[OPWF,pos]
+		-> ^(OPWF wordform optCase? ) ;
 
 wordform[int type, int pos]:	WF -> {c2ps_opWF.encode($WF.text, $type, $pos)};
 
@@ -64,7 +74,8 @@ optCase	:	Case
 // textposition Options:
 tpos	:	TPos 
 
-		-> ^(TPOS {c2ps_opBED.checkTPos($TPos.text, $TPos.index)});
+		// -> ^(TPOS {c2ps_opBED.checkTPos($TPos.text, $TPos.index)});
+		-> ^(OPTS {c2ps_opBED.checkTPos($TPos.text, $TPos.index)});
 
 // analog für Lemmata, kein optCase:
 // todo: check wordform (=lemma) for wildcards, which are not allowed in the lemma expr.
