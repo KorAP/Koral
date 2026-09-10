@@ -33,7 +33,10 @@ WS	:	(' ')+ {skip();};
 opBEDOpts
 	:	',' textpos ')' -> textpos ;
 	
-textpos	:	( tpBeg ('/' tpEnd)? | '/' tpEnd ) -> tpBeg? tpEnd?;
+//textpos	:	( tpBeg ('/' tpEnd)? | '/' tpEnd ) -> tpBeg? tpEnd?
+
+textpos		:	'/' tpEnd           -> tpEnd 
+			|    tpBeg ('/' tpEnd)? -> tpBeg tpEnd? ;
 
 tpBeg	:	tpExpr -> ^(TPBEG tpExpr);
 

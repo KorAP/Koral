@@ -38,7 +38,7 @@ Case	:	':' STRING ':';
 
 TPos	:	':' STRING;
 
-WF	:	STRING;
+WF	:	STRING | ':';
 
 WS	:	(' ')+ {skip();};
 
@@ -64,7 +64,8 @@ searchWF[int pos]
 		|	optCase? wordform[OPWF,pos]
 		-> ^(OPWF wordform optCase? ) ;
 
-wordform[int type, int pos]:	WF -> {c2ps_opWF.encode($WF.text, $type, $pos)};
+wordform[int type, int pos]:
+		WF -> {c2ps_opWF.encode($WF.text, $type, $pos)};
 
 // Case Options:
 optCase	:	Case 
@@ -73,8 +74,6 @@ optCase	:	Case
 
 // textposition Options:
 tpos	:	TPos 
-
-		// -> ^(TPOS {c2ps_opBED.checkTPos($TPos.text, $TPos.index)});
 		-> ^(OPTS {c2ps_opBED.checkTPos($TPos.text, $TPos.index)});
 
 // analog für Lemmata, kein optCase:

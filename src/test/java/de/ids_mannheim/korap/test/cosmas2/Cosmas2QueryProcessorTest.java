@@ -30,7 +30,7 @@ public class Cosmas2QueryProcessorTest {
 
 	// default layer for part of speech:
     private static final String LAYER_POS = "p";
-    private static final boolean showParserErrorQuery = true;	// print a line around those queries which get "no viable alternative" Parser warnings: 
+    private static final boolean showParserErrorQuery = false;	// print a line around those queries which get "no viable alternative" Parser warnings: 
     															// the parser warnings are intentional to test syntax errors.
     															// the parser error for "Der:sa" is corrected in another issue.
 	String query;
@@ -2175,6 +2175,7 @@ public class Cosmas2QueryProcessorTest {
     
     @Test
     public void testOPBED () throws JsonProcessingException, IOException {
+    	
         query = "#BED(der , sa)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -2260,9 +2261,11 @@ public class Cosmas2QueryProcessorTest {
                 .asText());
         assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
-        
+        assertEquals("s", res.at("/query/operands/0/operands/0/wrap/layer")
+                .asText());
+
         // 08.11.23/FB
-        // treats now "der,s0," as "der,s0" unchanged while written inside "...":
+        // treats now "der,so," as "der,so" unchanged while written inside "...":
         query = "#BED(\"der,so\", sa)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
@@ -2291,7 +2294,7 @@ public class Cosmas2QueryProcessorTest {
         assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
         
-        query = "#COND(der , sa)";
+        query = "#COND(der , pa)";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:reference", res.at("/query/@type").asText());
@@ -2315,7 +2318,9 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
         assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type")
                 .asText());
-        assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
+        assertEquals("p", res.at("/query/operands/0/operands/0/wrap/key")
+                .asText());
+        assertEquals("s", res.at("/query/operands/0/operands/0/wrap/layer")
                 .asText());
 
         
@@ -2375,6 +2380,7 @@ public class Cosmas2QueryProcessorTest {
                         .asText());
 
         query = "#BED(der Mann , sa,-pa)";
+        
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
         assertEquals("koral:reference", res.at("/query/@type").asText());
@@ -2455,13 +2461,133 @@ public class Cosmas2QueryProcessorTest {
                 "Mann",
                 res.at("/query/operands/0/operands/1/operands/1/operands/0/operands/1/wrap/key")
                         .asText());
-		
-        // check the combination of Positional condition and proximity operator,
-        // this was corrected by 07.07.26/FB
+
+        // -sa/pe generate startsWith and endsWith.
+        // 10.09.26/FB
         
-		query = "Der:sa /+w1 Betrieb";
-		qs.setQuery(query, "cosmas2");
-		res = mapper.readTree(qs.toJSON());
+        query = "#BED(der, -sa/pe)";
+        
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/0/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/0/operands/0/wrap/layer").asText());
+        assertEquals("s",		 		res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
+
+        assertEquals("frames:startsWith",	res.at("/query/operands/0/operands/0/frames/0").asText());
+        assertEquals("koral:group",			res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("true",				res.at("/query/operands/0/operands/0/exclude").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operands/0/operation").asText());
+
+        assertEquals("frames:endsWith", 	res.at("/query/operands/0/operands/1/frames/0").asText());
+        assertEquals("koral:group", 		res.at("/query/operands/0/operands/1/@type").asText());
+        assertEquals("operation:position", 	res.at("/query/operands/0/operands/1/operation").asText());
+
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("p",		 		res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
+        
+        // test end-conditions starting with a '/':
+        // 11.09.26/FB
+        
+        query = "#BED(der, /se)";
+        
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/0/wrap/layer").asText());
+        assertEquals("s",		 		res.at("/query/operands/0/operands/0/wrap/key").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/frames/0").asText());
+        assertEquals("koral:group",			res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operation").asText());
+
+        assertEquals("koral:token",	 	res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("orth",		 	res.at("/query/operands/0/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("der",		 		res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
+     
+        // conditions on end position only:
+        query = "#BED(der, /se,pe,te)";
+        
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+    
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/0/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/0/operands/0/wrap/layer").asText());
+        assertEquals("s",		 		res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
+
+        assertEquals("koral:token",	 	res.at("/query/operands/0/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("orth",		 	res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("der",		 		res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
+        assertEquals("operation:class",	res.at("/query/operands/0/operands/0/operands/1/operation").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/operands/0/frames/0").asText());
+        assertEquals("koral:group",			res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operands/0/operation").asText());
+
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/layer").asText());
+        assertEquals("p",		 		res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/key").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/operands/1/operands/0/operands/0/frames/0").asText());
+        assertEquals("koral:group",			res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operands/1/operands/0/operation").asText());
+
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("t",		 		res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/wrap/key").asText());
+
+        assertEquals("koral:token",	 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("orth",			res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("der",		 		res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/operands/1/operands/0/operands/1/frames/0").asText());
+        assertEquals("koral:group",	 		res.at("/query/operands/0/operands/1/operands/0/operands/1/@type").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operands/1/operands/0/operands/1/operation").asText());
+
+        // test end-conditions for special case ':' starting with a '/':
+        // 15.09.26/FB
+        
+        query = "#BED(:, /se)";
+        
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/0/wrap/layer").asText());
+        assertEquals("s",		 		res.at("/query/operands/0/operands/0/wrap/key").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/frames/0").asText());
+        assertEquals("koral:group",			res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operation").asText());
+
+        assertEquals("koral:token",	 	res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("orth",		 	res.at("/query/operands/0/operands/1/operands/0/wrap/layer").asText());
+        assertEquals(":",		 		res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
     }
 
 
@@ -2473,7 +2599,6 @@ public class Cosmas2QueryProcessorTest {
         if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s'.\n", query);
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
-        if( showParserErrorQuery ) System.err.printf("Debug: intentional warning: query='%s': done.\n", query);
         
         assertEquals("koral:reference", res.at("/query/@type").asText());
         assertEquals("operation:focus", res.at("/query/operation").asText());
@@ -2498,10 +2623,86 @@ public class Cosmas2QueryProcessorTest {
                 .asText());
         assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
                 .asText());
-/* fails after modifications to MORPH -- 12.06.26/FB
+        
+        // same test for end-conditions than #BED(der, /se) starting with a '/':
+        // 11.09.26/FB
+        
+        query = "der:/se";
+        
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/0/wrap/layer").asText());
+        assertEquals("s",		 		res.at("/query/operands/0/operands/0/wrap/key").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/frames/0").asText());
+        assertEquals("koral:group",			res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operation").asText());
+
+        assertEquals("koral:token",	 	res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("orth",		 	res.at("/query/operands/0/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("der",		 		res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
+     
+        // end-conditions as a sequence:
+        query = "der:/se,pe,te";
+        
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+    
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/0/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/0/operands/0/wrap/layer").asText());
+        assertEquals("s",		 		res.at("/query/operands/0/operands/0/operands/0/wrap/key").asText());
+
+        assertEquals("koral:token",	 	res.at("/query/operands/0/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("orth",		 	res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("der",		 		res.at("/query/operands/0/operands/0/operands/1/operands/0/wrap/key").asText());
+        assertEquals("operation:class",	res.at("/query/operands/0/operands/0/operands/1/operation").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/operands/0/frames/0").asText());
+        assertEquals("koral:group",			res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operands/0/operation").asText());
+
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/layer").asText());
+        assertEquals("p",		 		res.at("/query/operands/0/operands/1/operands/0/operands/0/operands/0/wrap/key").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/operands/1/operands/0/operands/0/frames/0").asText());
+        assertEquals("koral:group",			res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operands/1/operands/0/operation").asText());
+
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("t",		 		res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/0/wrap/key").asText());
+
+        assertEquals("koral:token",	 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("orth",			res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/wrap/layer").asText());
+        assertEquals("der",		 		res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/wrap/key").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/operands/1/operands/0/operands/1/frames/0").asText());
+        assertEquals("koral:group",	 		res.at("/query/operands/0/operands/1/operands/0/operands/1/@type").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operands/1/operands/0/operands/1/operation").asText());
+
+
+        // sequence of conditions:
+        
         query = "der:sa,-pa";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+        
         assertEquals("koral:reference", res.at("/query/@type").asText());
         assertEquals("operation:focus", res.at("/query/operation").asText());
         assertEquals(129, res.at("/query/classRef/0").asInt());
@@ -2562,11 +2763,13 @@ public class Cosmas2QueryProcessorTest {
                 "der",
                 res.at("/query/operands/0/operands/1/operands/1/operands/0/wrap/key")
                         .asText());
-*/
-        /*
+
+        // sequence of conditions with plus and minus:
+        
         query = "der:sa,-pa,+te";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());
+
         assertEquals("koral:reference", res.at("/query/@type").asText());
         assertEquals("operation:focus", res.at("/query/operation").asText());
         assertEquals(129, res.at("/query/classRef/0").asInt());
@@ -2721,7 +2924,63 @@ public class Cosmas2QueryProcessorTest {
                 "der",
                 res.at("/query/operands/0/operands/1/operands/0/operands/1/operands/1/operands/0/operands/0/wrap/key")
                         .asText());
-*/
+
+        // special case: searching ':' which is also a delimiter,
+        // so ':' must be written between double quotes.
+        // 14.09.26/FB
+        
+        query = "\":\":sa";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        assertEquals(129, res.at("/query/classRef/0").asInt());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:position", res
+                .at("/query/operands/0/operation").asText());
+        assertEquals("frames:startsWith", res.at("/query/operands/0/frames/0")
+                .asText());
+        assertEquals("koral:group", res.at("/query/operands/0/@type").asText());
+        assertEquals("operation:class",
+                res.at("/query/operands/0/operands/1/operation").asText());
+        assertEquals(129, res.at("/query/operands/0/operands/1/classOut")
+                .asInt());
+        assertEquals("koral:token",
+                res.at("/query/operands/0/operands/1/operands/0/@type")
+                        .asText());
+        assertEquals(":",
+                res.at("/query/operands/0/operands/1/operands/0/wrap/key")
+                        .asText());
+        assertEquals("koral:span", res.at("/query/operands/0/operands/0/@type")
+                .asText());
+        assertEquals("s", res.at("/query/operands/0/operands/0/wrap/key")
+                .asText());
+        
+        // condition starting of end-conditions: ":":/-se
+        // 14.09.26/FB
+        query = "\":\":/-se";
+        qs.setQuery(query, "cosmas2");
+        res = mapper.readTree(qs.toJSON());
+        
+        assertEquals("koral:reference", res.at("/query/@type").asText());
+        assertEquals("operation:focus", res.at("/query/operation").asText());
+        
+        assertEquals("koral:span",	 	res.at("/query/operands/0/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/0/wrap/@type").asText());
+        assertEquals("s",			 	res.at("/query/operands/0/operands/0/wrap/layer").asText());
+        assertEquals("s",		 		res.at("/query/operands/0/operands/0/wrap/key").asText());
+
+        assertEquals("frames:endsWith",		res.at("/query/operands/0/frames/0").asText());
+        assertEquals("koral:group",			res.at("/query/operands/0/@type").asText());
+        assertEquals("true",				res.at("/query/operands/0/exclude").asText());
+        assertEquals("operation:position",	res.at("/query/operands/0/operation").asText());
+
+        assertEquals("koral:token",	 	res.at("/query/operands/0/operands/1/operands/0/@type").asText());
+        assertEquals("koral:term",	 	res.at("/query/operands/0/operands/1/operands/0/wrap/@type").asText());
+        assertEquals("orth",		 	res.at("/query/operands/0/operands/1/operands/0/wrap/layer").asText());
+        assertEquals(":",		 		res.at("/query/operands/0/operands/1/operands/0/wrap/key").asText());
+     
     }
 
 
@@ -2746,6 +3005,10 @@ public class Cosmas2QueryProcessorTest {
     @Test
     public void testOPBEDinOPPROXSequence () throws JsonProcessingException,
             IOException {
+ 
+    	// check the combination of Positional condition and proximity operator,
+        // this was corrected by 07.07.26/FB
+         
         query = "Der:sa /+w1 Betrieb";
         qs.setQuery(query, "cosmas2");
         res = mapper.readTree(qs.toJSON());

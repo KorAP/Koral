@@ -182,15 +182,16 @@ SEARCHLABEL
 // OP_BED_END is greedy and must be defined at least after #ELEM() and MORPH(),
 // but also before SEARCHWORD1 (-> still true? - 02.06.26/FB)
 
-// OP_BED_END
-//	:	',' ~(')')+ ')' ; 
-
 fragment OP_BED_PAE	: ('pa'|'pe'|'PA'|'PE');
 fragment OP_BED_SAE	: ('sa'|'se'|'SA'|'SE');
 fragment OP_BED_TAE : ('ta'|'te'|'TA'|'TE');
 
 OP_BED_END
-	: 	' '* ',' ' '* (('+'|'-')?(OP_BED_SAE | OP_BED_PAE | OP_BED_TAE)(','|'/')?)+ ')';
+	: 	' '* ',' ' '* ('/'? ('+'|'-')?(OP_BED_SAE | OP_BED_PAE | OP_BED_TAE)(','|'/')?)+ ')';
+
+// positional conditions attached to a wordform and starting with a ':':
+fragment OP_WF_BED
+	: 	':' ('/'? ('+'|'-')?(OP_BED_SAE | OP_BED_PAE | OP_BED_TAE)(','|'/')?)+ ;
 
 // Search Word: 
 // spezialzeichen werden in "..." versteckt.
@@ -212,14 +213,22 @@ SEARCHLEMMA
 // E.g. Haus, -> searchword1=Haus.
 // For a ',' inside a search word, see searchword2. 
 // exclude trailing "," from searchword1.
+
+// version until 11.09.26:
+//SEARCHWORD1
+//	:	(',' | ~('"' | ' ' | '#' | ')' | '(' | ',')+)  ;
+
+// corrected version - 11.09.26/FB
+// ':' is either a single wf or a delimiter to OP_WF_BED.
 SEARCHWORD1
-	:	(',' | ~('"' | ' ' | '#' | ')' | '(' | ',')+)  ;
+	:	((',' | ':' ) | ~('"' | ' ' | '#' | ')' | '(' | ',' | ':')+) OP_WF_BED? ;
+
 
 // searchword2 accepts a ',' inside a searchword enclosed by "...".
 // E.g. "Haus,tür": OK.
 
 SEARCHWORD2
-	:	'"' (~('"') | '\\"')+ '"' ;
+	:	'"' (~('"') | '\\"')+ '"' OP_WF_BED? ;
 
 fragment WORD
 	:	~('\t' | ' ' | '/' | '*' | '?' | '+' | '{' | '}' | '[' | ']'

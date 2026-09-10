@@ -39,17 +39,31 @@ public class c2ps_opBED
 
     /*
      * check Text Position starting at rule textpos.
+     * 2 cases:
+     * a. BED(der, sa/pe) -> input = "sa/pe"
+     * b. der:sa/pe       -> input = ":sa/pe"
+     * As the grammar of opBED does not expect a leading ':', remove it before parsing.
+     * 15.09.26/FB
      */
 
     public static Tree checkTPos (String input, int index) {
-        ANTLRStringStream ss = new ANTLRStringStream(input);
+    	
+    	String cleanInput;
+    	
+    	// leading ':' must be removed before parsing:
+    	if( input.charAt(0) == ':' )
+    		cleanInput = input.substring(1);
+    	else
+    		cleanInput = input;
+    	
+        ANTLRStringStream ss = new ANTLRStringStream(cleanInput);
         c2ps_opBEDLexer lex = new c2ps_opBEDLexer(ss);
         CommonTokenStream tokens = new CommonTokenStream(lex);
         c2ps_opBEDParser g = new c2ps_opBEDParser(tokens);
         c2ps_opBEDParser.textpos_return c2PQReturn = null;
 
         /*
-        System.out.println("check opBED: " + index + ": " + input);
+        System.out.println("checkTPos: " + index + ": " + cleanInput);
         System.out.flush();
         */
 

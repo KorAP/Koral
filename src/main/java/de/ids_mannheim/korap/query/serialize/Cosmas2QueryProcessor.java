@@ -540,6 +540,14 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
         Tree endConditions =
                 getFirstChildWithCat(node.getChild(optsChild), "TPEND");
 
+       if( DEBUG )
+    	   {
+    	   if( begConditions != null  )
+   	       	   	System.out.printf("%s: begCond='%s'.\n",  func, begConditions.toStringTree());
+    	   if( endConditions != null )
+    		   System.out.printf("%s: endCond='%s'.\n",  func, endConditions.toStringTree());
+    	   }
+
         Map<String, Object> submatchgroup =
                 KoralObjectGenerator.makeReference(classCounter + 128);
         
@@ -1345,7 +1353,7 @@ public class Cosmas2QueryProcessor extends Antlr3AbstractQueryProcessor {
             else
             	fm.put("layer", LAYER_S); // default layer for span.
 
-        	// add 'wrap' only if not #ELEM(W), i.e. element 'W' withou children:
+        	// add 'wrap' only if not #ELEM(W), i.e. element 'W' without children:
             if( !isW || node.getChildCount() > 1 ) 
             	span.put("wrap", fm);
 	            

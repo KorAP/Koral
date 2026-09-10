@@ -31,11 +31,17 @@ public class KoralObjectGenerator {
     }
 
 
+    /*
+     * cor: add also layer 's' for key == 'p' and 't' - 09.09.26/FB
+     */
+    
     public static Map<String, Object> makeSpan (String key) {
+    	
         Map<String, Object> span = new HashMap<String, Object>();
         span.put("@type", KoralType.SPAN.toString());
         Map<String, Object> term = makeTerm();
-        if (key.equals("s")){
+        if (key.equals("s") || key.equals("p") || key.equals("t"))
+        {
             term.put("layer", "s");
         }
         term.put("key", key);

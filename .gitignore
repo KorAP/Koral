@@ -67,6 +67,8 @@
 /src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opIN.tokens
 /src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opOVParser.java
 /src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_optCase.tokens
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opMORPHLexer.java
+/src/main/java/de/ids_mannheim/korap/query/parse/cosmas/c2ps_opMORPHParser.java
 
 # /src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/
 /src/main/java/de/ids_mannheim/korap/query/parse/poliqarpplus/PoliqarpPlusLexer.tokens

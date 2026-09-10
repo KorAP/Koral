@@ -18,6 +18,33 @@ public class c2ps_opWF
 	static final boolean bDebug 	= false; 
 	static final boolean showTokens	= false;
 	
+	/* stripDoubleQuotes:
+	 * a. "Haus" -> Haus;
+	 * b. "Haus":sa/pe -> Haus:sa/pe
+	 */
+	
+	private static String stripDoubleQuotes(String input)
+	
+	{
+		int i;
+		
+		// a. "Haus" -> Haus :
+		if( input.charAt(0) == '"' && input.endsWith("\""))
+			{
+			return input.substring(1, input.length()-1);
+			}
+		
+		// b. "Haus":sa/pe -> Haus:sa/pe :
+		if( input.charAt(0) == '"' && (i=input.lastIndexOf('"')) > 0 )
+			{
+			return input.substring(1, i) + input.substring(i+1);
+			}
+		
+		// nothing to strip.
+		return input;
+	}
+	
+    //input = input.substring(1, input.length() - 1);
     /* check:
      * Arguments:
      * bStrip: true: 'input' contains "wort" -> strip " away -> wort.
@@ -33,7 +60,10 @@ public class c2ps_opWF
         	System.out.printf("Debug: opWF.check: input='%s' pos=%d.\n", input, pos);
                 
         if (bStrip)
-            input = input.substring(1, input.length() - 1);
+        	{	
+        	input = stripDoubleQuotes(input);
+            //input = input.substring(1, input.length() - 1);
+        	}
 
         if (bLem && input.charAt(0) == '&') {
             input = input.substring(1, input.length());
