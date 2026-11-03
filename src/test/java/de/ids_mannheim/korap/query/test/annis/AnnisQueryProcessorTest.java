@@ -142,6 +142,47 @@ public class AnnisQueryProcessorTest {
         assertEquals("tt", res.at("/query/wrap/foundry").asText());
     }
 
+    // Issue #285: SpaCy uses the token layer "u" for the universal POS
+    @Test
+    public void testUniversalPosLayerIsToken () throws JsonProcessingException,
+            IOException {
+        query = "u=\"NOUN\"";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("koral:term", res.at("/query/wrap/@type").asText());
+        assertEquals("NOUN", res.at("/query/wrap/key").asText());
+        assertEquals("u", res.at("/query/wrap/layer").asText());
+        assertEquals("match:eq", res.at("/query/wrap/match").asText());
+        assertTrue(res.at("/errors").isMissingNode());
+
+        query = "spacy/u=\"NOUN\"";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("NOUN", res.at("/query/wrap/key").asText());
+        assertEquals("u", res.at("/query/wrap/layer").asText());
+        assertEquals("spacy", res.at("/query/wrap/foundry").asText());
+        assertTrue(res.at("/errors").isMissingNode());
+
+        query = "spacy/u!=\"NOUN\"";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:token", res.at("/query/@type").asText());
+        assertEquals("match:ne", res.at("/query/wrap/match").asText());
+        assertEquals("u", res.at("/query/wrap/layer").asText());
+    }
+
+    @Test
+    public void testUnknownLayerStaysSpan () throws JsonProcessingException,
+            IOException {
+        query = "x=\"NOUN\"";
+        qs.setQuery(query, "annis");
+        res = mapper.readTree(qs.toJSON());
+        assertEquals("koral:span", res.at("/query/@type").asText());
+        assertEquals("x", res.at("/query/wrap/layer").asText());
+    }
+
     @Test
     public void testLeftMostChild () throws JsonProcessingException,
             IOException {
